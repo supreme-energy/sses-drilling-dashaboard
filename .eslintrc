@@ -20,9 +20,16 @@
   },
   "rules": {
     "key-spacing"          : "off",
-    "jsx-quotes"           : [2, "prefer-single"],
+    "brace-style"          : [2, "stroustrup", {"allowSingleLine": true}],
+    "semi"                 : [2, "always"],
+    "quotes"               : "off",
+    "no-return-await"      : 2,
+    "jsx-quotes"           : [2, "prefer-double"],
     "max-len"              : [2, 120, 2],
     "object-curly-spacing" : [2, "always"],
-    "comma-dangle"         : "off"
+    "comma-dangle"         : "off",
+
+    "react/jsx-space-before-closing"     : 0,
+    "react/self-closing-comp"            : 0
   }
 }
