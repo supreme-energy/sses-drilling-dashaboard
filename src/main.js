@@ -2,21 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import createStore from './store/createStore';
 import './styles/main.scss';
+import AppModule from 'modules/App';
+import createBrowserHistory from 'history/createBrowserHistory';
 
 // Store Initialization
 // ------------------------------------
-const store = createStore(window.__INITIAL_STATE__);
+const history = createBrowserHistory();
+const store = createStore(window.__INITIAL_STATE__, history);
 
 // Render Setup
 // ------------------------------------
 const MOUNT_NODE = document.getElementById('root');
 
-let render = () => {
-  const App = require('./components/App').default;
-  const routes = require('./routes/index').default(store);
-
+let render = (AppModule) => {
+  const App = AppModule(store);
   ReactDOM.render(
-    <App store={store} routes={routes} />,
+    <App store={store} history={history} />,
     MOUNT_NODE
   );
 };
@@ -32,9 +33,9 @@ if (__DEV__) {
       ReactDOM.render(<RedBox error={error} />, MOUNT_NODE);
     };
 
-    render = () => {
+    render = (AppModule) => {
       try {
-        renderApp();
+        renderApp(AppModule);
       }
       catch (e) {
         console.error(e);
@@ -43,13 +44,10 @@ if (__DEV__) {
     };
 
     // Setup hot module replacement
-    module.hot.accept([
-      './components/App',
-      './routes/index',
-    ], () =>
+    module.hot.accept('./modules/App', () =>
       setImmediate(() => {
         ReactDOM.unmountComponentAtNode(MOUNT_NODE);
-        render();
+        render(require('./modules/App').default);
       })
     );
   }
@@ -57,4 +55,4 @@ if (__DEV__) {
 
 // Let's Go!
 // ------------------------------------
-if (!__TEST__) render();
+if (!__TEST__) render(AppModule);

@@ -1,8 +1,15 @@
+/** name of this redux module */
+const MODULE = "counter";
+
+export function getCounter (state) { return state[MODULE]; }
+
 // ------------------------------------
 // Constants
 // ------------------------------------
-export const COUNTER_INCREMENT = 'COUNTER_INCREMENT';
-export const COUNTER_DOUBLE_ASYNC = 'COUNTER_DOUBLE_ASYNC';
+function actionPrefix (type) { return `${MODULE}/${type}`; }
+
+export const COUNTER_INCREMENT = actionPrefix('INCREMENT');
+export const COUNTER_DOUBLE_ASYNC = actionPrefix('DOUBLE_ASYNC');
 
 // ------------------------------------
 // Actions
@@ -24,7 +31,7 @@ export const doubleAsync = () => {
       setTimeout(() => {
         dispatch({
           type    : COUNTER_DOUBLE_ASYNC,
-          payload : getState().counter
+          payload : getCounter(getState()),
         });
         resolve();
       }, 200);
@@ -49,8 +56,11 @@ const ACTION_HANDLERS = {
 // Reducer
 // ------------------------------------
 const initialState = 0;
-export default function counterReducer (state = initialState, action) {
-  const handler = ACTION_HANDLERS[action.type];
+export default {
+  key: MODULE,
+  reducer (state = initialState, action) {
+    const handler = ACTION_HANDLERS[ action.type ];
 
-  return handler ? handler(state, action) : state;
-}
+    return handler ? handler(state, action) : state;
+  },
+};

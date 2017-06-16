@@ -119,3 +119,15 @@ config.module.rules.push({
 +          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hase:base64]",
 +          importLoaders: 1,
 ```
+
+## Switch to React Router 4.x
+
+At this point we start to deviate from the original starter in ways that make it hard to merge.
+
+```bash
+yarn remove react-router
+yarn add react-router-dom react-router history
+```
+
+make a bunch of code changes
+commit!
