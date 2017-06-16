@@ -90,7 +90,7 @@ config.module.rules.push({
 const extractStyles = new ExtractTextPlugin({
   filename: 'styles/[name].[contenthash].css',
   allChunks: true,
-  disable: __DEV__,
+  disable: false,
 });
 
 config.module.rules.push({
@@ -102,6 +102,9 @@ config.module.rules.push({
         loader: 'css-loader',
         options: {
           sourceMap: project.sourcemaps,
+          modules: project.scssModules,
+          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hase:base64]",
+          importLoaders: 1,
           minimize: {
             autoprefixer: {
               add: true,

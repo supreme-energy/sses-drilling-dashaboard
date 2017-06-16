@@ -15,6 +15,8 @@ module.exports = {
   publicPath: '/',
   /** Whether to generate sourcemaps */
   sourcemaps: true,
+  /** Whether to use CSS Modules in your scss files */
+  scssModules: false,
   /** A hash map of keys that the compiler should treat as external to the project */
   externals: {},
   /** A hash map of variables and their values to expose globally */

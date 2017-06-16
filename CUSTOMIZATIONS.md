@@ -84,3 +84,38 @@ Now modify the babel-presets section in `build/webpack.config.js`
         }],
       ]
 ```
+
+## Expose CSS Modules option in project.config.js to make it easier to enable/disable
+
+Add this to `project.config.js`:
+
+```
+ /** Whether to use CSS Modules in your scss files */
+ scssModules: false,
+```
+
+And modify the sass loader section of `build/webpack.config.js`
+
+```diff
+ 
+// Styles
+// ------------------------------------
+const extractStyles = new ExtractTextPlugin({
+  filename: 'styles/[name].[contenthash].css',
+  allChunks: true,
++  disable: false,
+});
+
+config.module.rules.push({
+ test: /\.(sass|scss)$/,
+  loader: extractStyles.extract({
+    fallback: 'style-loader',
+    use: [
+      {
+        loader: 'css-loader',
+        options: {
+          sourceMap: project.sourcemaps,
++          modules: project.scssModules,
++          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hase:base64]",
++          importLoaders: 1,
+```
