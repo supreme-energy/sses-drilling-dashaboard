@@ -3,5 +3,7 @@
 node_modules
 dist
 coverage
-.idea/
+.idea/**
+.idea/**/
+!.idea/codeStyleSettings.xml
 .yarn-cache
