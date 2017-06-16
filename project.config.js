@@ -19,6 +19,13 @@ module.exports = {
   externals: {},
   /** A hash map of variables and their values to expose globally */
   globals: {},
+  /** hashmap of target environments the code must run in (see https://github.com/babel/babel-preset-env#targets */
+  targetEnvironments: {
+    chrome: "57",
+    firefox: "50",
+    edge: "14",
+    safari: "10",
+  },
   /** Whether to enable verbose logging */
   verbose: false,
   /** The list of modules to bundle separately from the core application code */

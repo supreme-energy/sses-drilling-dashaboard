@@ -50,3 +50,37 @@ Now commit:
 git add .gitignore
 git add .idea/
 ```
+
+## Enable browser target configuration from `project.config.js`
+
+Note: I've submitted a PR to the original project for these changes so hopefully we won't have to do them ourselves going forward.
+
+First need to update babel-preset-env to 1.5.2:
+
+```bash
+yarn upgrade babel-preset-env --dev
+```
+
+Now add this section to `project.config.js`:
+
+```
+  /** hashmap of target environments the code must run in (see https://github.com/babel/babel-preset-env#targets */
+  targetEnvironments: {
+    chrome: "57",
+    firefox: "50",
+    edge: "14",
+    safari: "10",
+  },
+```
+
+Now modify the babel-presets section in `build/webpack.config.js`
+
+```
+      presets: [
+        'babel-preset-react',
+        ['babel-preset-env', {
+          modules: false,
+          targets: Object.assign({}, project.targetEnvironments, { uglify: true }),
+        }],
+      ]
+```
