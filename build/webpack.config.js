@@ -103,7 +103,7 @@ config.module.rules.push({
         options: {
           sourceMap: project.sourcemaps,
           modules: project.scssModules,
-          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hase:base64]",
+          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hash:base64]",
           importLoaders: 1,
           minimize: {
             autoprefixer: {
