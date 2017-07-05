@@ -24,7 +24,7 @@ class App extends React.Component {
       <Provider store={store}>
         <Router history={history}>
           <div style={{ height: '100%' }}>
-            <PageLayout>
+            <PageLayout history={history}>
               <Switch>
                 <Route path="/" exact component={Home} />
                 <Route path="/counter" component={Counter} />

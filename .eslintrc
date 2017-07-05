@@ -26,7 +26,8 @@
     "no-return-await"      : 2,
     "jsx-quotes"           : [2, "prefer-double"],
     "max-len"              : [2, 120, 2],
-    "object-curly-spacing" : [2, "always"],
+    "object-curly-spacing" : "off",
+    "space-before-function-paren": "off",
     "comma-dangle"         : "off",
 
     "react/jsx-space-before-closing"     : 0,
