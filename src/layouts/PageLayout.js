@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import './PageLayout.scss';
-import Auth0Lock from 'expero-react-labs/components/Auth0Lock';
+import Auth0Lock from 'expero-react-labs/auth0/Auth0Lock';
 
 function onLogin({profile, idToken, accessToken, state}) {
   console.log(`login: ${JSON.stringify(profile)}`);

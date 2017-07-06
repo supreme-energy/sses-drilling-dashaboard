@@ -4,7 +4,7 @@ import createStore from './store/createStore';
 import './styles/main.scss';
 import AppModule from 'modules/App';
 import createBrowserHistory from 'history/createBrowserHistory';
-import {processAuthRedirectResult} from 'expero-react-labs/components/Auth0Lock';
+import {processAuthRedirectResult} from 'expero-react-labs/auth0/Auth0Lock';
 
 const history = createBrowserHistory();
 
