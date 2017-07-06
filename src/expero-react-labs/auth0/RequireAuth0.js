@@ -16,7 +16,6 @@ function renderAuth0Lock({login, loginError, ...props}) {
 }
 
 export const RequireAuth0 = ({children, renderLogin, isAuthenticated, ...props}) => {
-  console.log(`REQUIRE AUTH0 ${isAuthenticated}`);
   if (isAuthenticated) {
     return children;
   }

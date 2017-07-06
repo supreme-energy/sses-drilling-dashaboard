@@ -5,6 +5,12 @@ import { Router, Route, Switch } from 'react-router-dom';
 import CounterModule from 'modules/Counter';
 import HomeModule from 'modules/Home';
 import PageLayout from 'layouts/PageLayout';
+import RequireAuth0 from 'expero-react-labs/auth0/RequireAuth0';
+
+const loginStyle = {
+  border: "solid 1px black",
+  display: "inline-block"
+};
 
 class App extends React.Component {
   static propTypes = {
@@ -25,10 +31,12 @@ class App extends React.Component {
         <Router history={history}>
           <div style={{ height: '100%' }}>
             <PageLayout history={history}>
-              <Switch>
-                <Route path="/" exact component={Home} />
-                <Route path="/counter" component={Counter} />
-              </Switch>
+              <RequireAuth0 redirectMode history={history} inline style={loginStyle}>
+                <Switch>
+                  <Route path="/" exact component={Home} />
+                  <Route path="/counter" component={Counter} />
+                </Switch>
+              </RequireAuth0>
             </PageLayout>
           </div>
         </Router>

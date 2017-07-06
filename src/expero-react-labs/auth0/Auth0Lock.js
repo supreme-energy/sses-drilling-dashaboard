@@ -37,7 +37,8 @@ function decodeState(state) {
  *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
  *     use this object to rehydrate application state that you saved before the authentication redirect
  * If authentication failed, then the promise resolves to an object with these properties:
- *  - error - the details of the authentication error.  Pass this as the "error" prop to Auth0Lock to display the error to the user
+ *  - error - the details of the authentication error.  Pass this as the "error" prop to Auth0Lock to display the error
+ *  to the user
  *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
  *     use this object to rehydrate application state that you saved before the authentication redirect
  * @param clientId
@@ -146,6 +147,10 @@ export default class Auth0Lock extends React.Component {
      */
     className: PropTypes.string,
     /**
+     * When inline = true, optional style to add to the containing div element
+     */
+    style: PropTypes.object,
+    /**
      * Called when the user has successfully logged in
      * Passed an object with these properties:
      *  idToken - the id token for the user
@@ -174,12 +179,12 @@ export default class Auth0Lock extends React.Component {
   id = uniqueId("lock");
 
   render() {
-    const {inline, className} = this.props;
+    const {inline, className, style} = this.props;
     if (!inline) {
       return false;
     }
 
-    return <div id={this.id} className={className}></div>;
+    return <div id={this.id} className={className} style={style}></div>;
   }
 
   componentDidMount() {
