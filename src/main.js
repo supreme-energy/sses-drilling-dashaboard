@@ -17,6 +17,7 @@ processAuthRedirectResult(AUTH0.clientId, AUTH0.domain, history).then(({profile,
   // process auth results
   if (e) {
     console.error(e);
+    AUTH0.error = e;
   }
   if (profile) {
     console.log(`login: ${JSON.stringify(profile)}`);

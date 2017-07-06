@@ -13,6 +13,7 @@ class App extends React.Component {
     auth0: PropTypes.shape({
       clientId: PropTypes.string.isRequired,
       domain: PropTypes.string.isRequired,
+      error: PropTypes.object,
     }).isRequired,
   }
 

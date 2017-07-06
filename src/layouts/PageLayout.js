@@ -19,7 +19,10 @@ export const PageLayout = ({ children, history, auth0 }) => (
     {' · '}
     <NavLink to="/counter" activeClassName="page-layout__nav-item--active">Counter</NavLink>
     <Auth0Lock clientId={auth0.clientId} domain={auth0.domain} onLogin={onLogin} ui={{ closable: false }}
-      redirectMode history={history} redirectUrl={REDIRECT_URL}/>
+      redirectMode history={history} redirectUrl={REDIRECT_URL} error={auth0.error} />
+    {/*
+    <Auth0Lock clientId={auth0.clientId} domain={auth0.domain} onLogin={onLogin} ui={{ closable: false }} />
+     */}
     <div className="page-layout__viewport">
       {children}
     </div>
@@ -31,6 +34,7 @@ PageLayout.propTypes = {
   auth0: PropTypes.shape({
     clientId: PropTypes.string.isRequired,
     domain: PropTypes.string.isRequired,
+    error: PropTypes.object,
   }).isRequired,
 };
 

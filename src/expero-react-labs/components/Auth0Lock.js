@@ -37,7 +37,7 @@ function decodeState(state) {
  *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
  *     use this object to rehydrate application state that you saved before the authentication redirect
  * If authentication failed, then the promise resolves to an object with these properties:
- *  - error - the details of the authentication error
+ *  - error - the details of the authentication error.  Pass this as the "error" prop to Auth0Lock to display the error to the user
  *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
  *     use this object to rehydrate application state that you saved before the authentication redirect
  * @param clientId
@@ -134,6 +134,11 @@ export default class Auth0Lock extends React.Component {
      * (e.g. you should do it yourself in onAuthenticated)
      */
     history: PropTypes.object,
+    /**
+     * If supplied, then will be shown to the user.  Primarily useful if you are using Redirect Mode.
+     * Capture the error from your call to processAuthRedirectResult and pass it back through to the Lock
+     */
+    error: PropTypes.object,
 
     /**
      * When inline = true, optional class to add to the containing div element
@@ -211,7 +216,22 @@ export default class Auth0Lock extends React.Component {
   }
 
   showLock = () => {
-    this._lock && this._lock.show();
+    if (this._lock) {
+      // Add the error message to the lock
+      let flashMessage;
+      const {error} = this.props;
+      if (error) {
+        const msg = error.error_description || error.message || error.error;
+        if (typeof msg === "string") {
+          flashMessage = {
+            type: "error",
+            text: msg
+          };
+        }
+      }
+
+      this._lock.show({flashMessage});
+    }
   }
 
   onAuthenticated = ({idToken, accessToken, state}) => {
