@@ -3,7 +3,18 @@ import {processAuthRedirectResult} from './Auth0Lock';
 /** name of this redux module */
 export const MODULE = "auth0";
 
-export function getAuth0 (state) { return state[MODULE]; }
+export function getAuth0 (state) {
+  const auth0 = state[MODULE];
+
+  if (__DEV__) {
+    if (!auth0) {
+      throw new Error("Did you forget to add the reducer from auth0/store to your store?");
+    }
+  }
+
+  return auth0;
+}
+
 export function getIsAuthenticated (state) { return !!getAuth0(state).idToken; }
 
 // ------------------------------------
