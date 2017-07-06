@@ -114,7 +114,8 @@ export default class Auth0Lock extends React.Component {
     redirectMode: PropTypes.bool,
     /**
      * In redirect mode, where should auth0 send the user after authentication so that your app
-     * can process the result.  Usually http://localhost:3000/
+     * can process the result.  Usually http://localhost:3000/.  Defaults to the server
+     * URL that served this page
      */
     redirectUrl: PropTypes.string,
     /**
@@ -152,7 +153,7 @@ export default class Auth0Lock extends React.Component {
      *  profile - the user's profile (decoded from the idToken)
      *  state - state from the auth result (e.g. the state you originally passed in as auth.params.state
      * */
-    onLogin: PropTypes.func.isRequired,
+    onLogin: PropTypes.func,
     /** called when the user fails to login */
     onAuthorizationError: PropTypes.func,
     /** called when there is an unknown login error */
@@ -165,6 +166,7 @@ export default class Auth0Lock extends React.Component {
     authScope: 'openid profile email',
     authState: 'nostateprovided',
     className: "",
+    redirectUrl: `${window.location.protocol}//${window.location.host}/`,
     ui: {},
     theme: {},
   };
@@ -212,7 +214,10 @@ export default class Auth0Lock extends React.Component {
   }
 
   componentWillUnmount() {
-    this._lock = null;
+    if (this._lock) {
+      this._lock.hide();
+      this._lock = null;
+    }
   }
 
   showLock = () => {
@@ -235,9 +240,11 @@ export default class Auth0Lock extends React.Component {
   }
 
   onAuthenticated = ({idToken, accessToken, state}) => {
-    const authState = this.props.redirectMode ? decodeState(state).authState : state;
-    const profile = idToken && jwtDecode(idToken);
-    this.props.onLogin({idToken, accessToken, profile, state: authState});
+    if (this.props.onLogin) {
+      const authState = this.props.redirectMode ? decodeState(state).authState : state;
+      const profile = idToken && jwtDecode(idToken);
+      this.props.onLogin({ idToken, accessToken, profile, state: authState });
+    }
   };
 
   onUnrecoverableError = (error) => {

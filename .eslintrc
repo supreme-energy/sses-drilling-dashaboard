@@ -31,6 +31,7 @@
     "comma-dangle"         : "off",
 
     "react/jsx-space-before-closing"     : 0,
-    "react/self-closing-comp"            : 0
+    "react/self-closing-comp"            : 0,
+    "react/prop-types": [2, { "skipUndeclared": true }]
   }
 }

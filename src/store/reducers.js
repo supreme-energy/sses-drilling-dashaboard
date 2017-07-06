@@ -1,9 +1,11 @@
 import { combineReducers } from 'redux';
 import locationReducer from './location';
+import auth0 from 'expero-react-labs/auth0/store';
 
 export const makeRootReducer = (asyncReducers) => {
   return combineReducers({
     location: locationReducer,
+    ...auth0,
     ...asyncReducers
   });
 };

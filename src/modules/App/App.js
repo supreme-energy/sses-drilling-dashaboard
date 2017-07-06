@@ -10,11 +10,6 @@ class App extends React.Component {
   static propTypes = {
     store: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
-    auth0: PropTypes.shape({
-      clientId: PropTypes.string.isRequired,
-      domain: PropTypes.string.isRequired,
-      error: PropTypes.object,
-    }).isRequired,
   }
 
   shouldComponentUpdate () {
@@ -22,14 +17,14 @@ class App extends React.Component {
   }
 
   render () {
-    const { store, history, auth0 } = this.props;
+    const { store, history } = this.props;
     const Home = HomeModule(store);
     const Counter = CounterModule(store);
     return (
       <Provider store={store}>
         <Router history={history}>
           <div style={{ height: '100%' }}>
-            <PageLayout history={history} auth0={auth0}>
+            <PageLayout history={history}>
               <Switch>
                 <Route path="/" exact component={Home} />
                 <Route path="/counter" component={Counter} />
