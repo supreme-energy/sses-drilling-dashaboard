@@ -15,7 +15,6 @@ function encodeState(history, authState) {
 
 function decodeState(state) {
   try {
-    console.log("DECODING STATE", state);
     return JSON.parse(state);
   }
   catch (e) {
@@ -25,43 +24,78 @@ function decodeState(state) {
   }
 }
 
-export function checkForRedirectAuthResult(clientId, domain, history) {
-  const options = {
-    auth: {
-      redirect: true,
-      responseType: 'token',
-      autoParseHash: false,
-    },
-  };
+/**
+ * Checks the URL hash for the results of a redirect-based authentication.
+ * If authentication results are available, then it does the following:
+ *   - decodes the authentication results
+ *   - changes the URL back to the URL captured at the start of the authentication operation
+ *   - resolves the promise with the results of the authentication
+ * If the authentication was successful, the promise will resolve to an object with these properties:
+ *  - idToken - the id token for the user
+ *  - accessToken - access token for the user
+ *  - profile - the user's profile (decoded from the idToken)
+ *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
+ *     use this object to rehydrate application state that you saved before the authentication redirect
+ * If authentication failed, then the promise resolves to an object with these properties:
+ *  - error - the details of the authentication error
+ *  - state - state from the auth result (e.g. the state you originally passed in as auth.params.state.  You can
+ *     use this object to rehydrate application state that you saved before the authentication redirect
+ * @param clientId
+ * @param domain
+ * @param history
+ * @returns {Promise}
+ */
+export function processAuthRedirectResult(clientId, domain, history) {
+  return new Promise((resolve) => {
+    try {
+      const options = {
+        auth: {
+          redirect: true,
+          responseType: 'token',
+          autoParseHash: false,
+        },
+      };
 
-  let result = {};
+      if (history && history.location.hash) {
+        // clientid and domain isn't needed for this call to decode the auth token from the hash
+        const lock = new Lock(clientId, domain, options);
+        lock.resumeAuth(history.location.hash, (error, authResult) => {
+          try {
+            if (error) {
+              const { authState, location } = decodeState(error.state || "");
+              if (location) {
+                history.replace(location);
+              }
 
-  if (history.location.hash) {
-    console.log("CHECKING ", history.location.hash);
-    const lock = new Lock(clientId, domain, options);
-    lock.resumeAuth(history.location.hash, (error, authResult) => {
-      if (error) {
-        const {authState} = decodeState(error.state || "");
-        result = {error, state: authState};
+              resolve({ error, state: authState });
+            }
+            else if (authResult) {
+              const state = decodeState(authResult.state);
+              if (state.location) {
+                history.replace(state.location);
+              }
+
+              const profile = authResult.idToken && jwtDecode(authResult.idToken);
+              resolve({
+                profile,
+                idToken: authResult.idToken,
+                accessToken: authResult.accessToken,
+                state: state.authState
+              });
+            }
+          }
+          catch (e) {
+            resolve({error: e, state: ""});
+          }
+        });
       }
-      else if (authResult) {
-        const state = decodeState(authResult.state);
-        if (state.location) {
-          history.replace(state.location);
-        }
 
-        const profile = authResult.idToken && jwtDecode(authResult.idToken);
-        result = {
-          profile,
-          idToken: authResult.idToken,
-          accessToken: authResult.accessToken,
-          state: state.authState
-        };
-      }
-    });
-  }
-
-  return result;
+      resolve({});
+    }
+    catch (e) {
+      resolve({error: e, state: ""});
+    }
+  });
 }
 
 export default class Auth0Lock extends React.Component {
@@ -96,10 +130,14 @@ export default class Auth0Lock extends React.Component {
     /**
      * If in redirect mode, supply history object so that the lock
      * can capture the current route information and restore it after
-     * redirect
+     * redirect.  If not supplied, then the lock will not redirect the user after authentication
+     * (e.g. you should do it yourself in onAuthenticated)
      */
     history: PropTypes.object,
 
+    /**
+     * When inline = true, optional class to add to the containing div element
+     */
     className: PropTypes.string,
     /**
      * Called when the user has successfully logged in
@@ -139,7 +177,7 @@ export default class Auth0Lock extends React.Component {
 
   componentDidMount() {
     // create the lock
-    const { clientId, domain, ui, theme, inline, redirectMode, authScope, authState, redirectUrl, history } = this.props;
+    const {clientId, domain, ui, theme, inline, redirectMode, authScope, authState, redirectUrl, history} = this.props;
     const options = {
       autofocus: true,
       autoclose: false,
@@ -153,7 +191,7 @@ export default class Auth0Lock extends React.Component {
         autoParseHash: true,
         params: {
           scope: authScope,
-          state: encodeState(history, authState),
+          state: redirectMode ? encodeState(history, authState) : authState,
         }
       },
     };
@@ -163,9 +201,6 @@ export default class Auth0Lock extends React.Component {
     lock.on("authenticated", this.onAuthenticated);
     lock.on("unrecoverable_error", this.onUnrecoverableError);
     lock.on("authorization_error", this.onAuthorizationError);
-    lock.on("federated login", this.onFederatedLogin);
-
-    console.log("CONSTRUCTOR LOCK", window.location.href);
 
     // wait for React to finish rendering then show the lock
     setTimeout(this.showLock, 0);
@@ -176,13 +211,13 @@ export default class Auth0Lock extends React.Component {
   }
 
   showLock = () => {
-    console.log("SHOWING LOCK", window.location.href);
     this._lock && this._lock.show();
   }
 
   onAuthenticated = ({idToken, accessToken, state}) => {
+    const authState = this.props.redirectMode ? decodeState(state).authState : state;
     const profile = idToken && jwtDecode(idToken);
-    this.props.onLogin({idToken, accessToken, profile, state});
+    this.props.onLogin({idToken, accessToken, profile, state: authState});
   };
 
   onUnrecoverableError = (error) => {
@@ -194,12 +229,6 @@ export default class Auth0Lock extends React.Component {
   onAuthorizationError = (error) => {
     if (this.props.onAuthorizationError) {
       this.props.onAuthorizationError(error);
-    }
-  };
-
-  onFederatedLogin = () => {
-    if (this.props.redirectMode) {
-      console.log("leaving page");
     }
   };
 }
