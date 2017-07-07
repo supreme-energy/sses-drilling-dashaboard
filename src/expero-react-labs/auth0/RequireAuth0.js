@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {loginError, login, getAuth0, getIsAuthenticated} from './store';
+import {loginError, login, getAuth0, getIsAuthenticated, connectOptions} from './store';
 import Auth0Lock from './Auth0Lock';
 
 function renderAuth0Lock({login, loginError, ...props}) {
@@ -62,12 +62,7 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = { loginError, login };
 
-const options = {
-  pure: true,
-  areStatesEqual: (next, prev) => getAuth0(next) === getAuth0(prev),
-};
-
-const RequireAuth0Container = connect(mapStateToProps, mapDispatchToProps, undefined, options)(RequireAuth0);
+const RequireAuth0Container = connect(mapStateToProps, mapDispatchToProps, undefined, connectOptions)(RequireAuth0);
 
 RequireAuth0Container.propTypes = {
   /**

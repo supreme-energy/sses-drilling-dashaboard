@@ -26,6 +26,8 @@ export const SET_CLIENT_DETAILS = actionPrefix("SET_CLIENT_DETAILS");
 export const LOGIN = actionPrefix("LOGIN");
 export const LOGIN_ERROR = actionPrefix("LOGIN_ERROR");
 export const LOGOUT = actionPrefix("LOGOUT");
+export const INITIALIZING = actionPrefix("INITIALIZING");
+export const INITIALIZED = actionPrefix("INITIALIZED");
 
 // ------------------------------------
 // Actions
@@ -58,21 +60,23 @@ export function loginError(error) {
 export function handleAuthRedirectResult(authResult) {
   return (dispatch) => {
     if (authResult.error) {
-      return dispatch(loginError(authResult.error));
+      dispatch(loginError(authResult.error));
     }
-
-    if (authResult.idToken) {
-      return dispatch(login(authResult));
+    else if (authResult.idToken) {
+      dispatch(login(authResult));
     }
   };
 }
 
 export function initializeAuth(clientId, domain, history) {
-  return async (dispatch) => {
+  return (dispatch) => {
+    dispatch({type: INITIALIZING});
     dispatch(setClientDetails(clientId, domain));
-    const authResult = await processAuthRedirectResult(clientId, domain, history);
-    dispatch(handleAuthRedirectResult(authResult));
-    return authResult;
+    return processAuthRedirectResult(clientId, domain, history).then(authResult => {
+      dispatch(handleAuthRedirectResult(authResult));
+      dispatch({type: INITIALIZED});
+      return authResult;
+    });
   };
 }
 
@@ -91,6 +95,14 @@ const initialState = {
 
   // after failed login
   error: undefined,
+
+  // "initializing" then "initialized"
+  status: "uninitialized",
+};
+
+export const connectOptions = {
+  pure: true,
+  areStatesEqual: (next, prev) => getAuth0(next) === getAuth0(prev),
 };
 
 // ------------------------------------
@@ -98,10 +110,12 @@ const initialState = {
 // ------------------------------------
 const ACTION_HANDLERS = {
   // wipes out existing login results
-  [SET_CLIENT_DETAILS]: (state, {payload}) => payload,
-  [LOGIN]: ({clientId, domain}, {payload}) => ({clientId, domain, ...payload}),
-  [LOGOUT]: ({clientId, domain}) => ({clientId, domain}),
-  [LOGIN_ERROR]: ({clientId, domain}, {payload}) => ({clientId, domain, ...payload}),
+  [SET_CLIENT_DETAILS]: ({status}, {payload}) => ({status, ...payload}),
+  [LOGIN]: ({clientId, domain, status}, {payload}) => ({clientId, domain, status, ...payload}),
+  [LOGOUT]: ({clientId, domain, status}) => ({clientId, domain, status}),
+  [LOGIN_ERROR]: ({clientId, domain, status}, {payload}) => ({clientId, domain, status, ...payload}),
+  [INITIALIZING]: state => ({...state, status: "initializing"}),
+  [INITIALIZED]: state => ({...state, status: "initialized"}),
 };
 
 // ------------------------------------

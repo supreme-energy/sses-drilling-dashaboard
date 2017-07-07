@@ -6,6 +6,7 @@ import CounterModule from 'modules/Counter';
 import HomeModule from 'modules/Home';
 import PageLayout from 'layouts/PageLayout';
 import RequireAuth0 from 'expero-react-labs/auth0/RequireAuth0';
+import Auth0RedirectHandler from 'expero-react-labs/auth0/Auth0RedirectHandler';
 
 const loginStyle = {
   border: "solid 1px black",
@@ -16,6 +17,10 @@ class App extends React.Component {
   static propTypes = {
     store: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
+    auth0: PropTypes.shape({
+      clientId: PropTypes.string.isRequired,
+      domain: PropTypes.string.isRequired,
+    }).isRequired,
   }
 
   shouldComponentUpdate () {
@@ -23,22 +28,24 @@ class App extends React.Component {
   }
 
   render () {
-    const { store, history } = this.props;
+    const { store, history, auth0 } = this.props;
     const Home = HomeModule(store);
     const Counter = CounterModule(store);
     return (
       <Provider store={store}>
         <Router history={history}>
-          <div style={{ height: '100%' }}>
-            <PageLayout history={history}>
-              <RequireAuth0 redirectMode history={history} inline style={loginStyle}>
-                <Switch>
-                  <Route path="/" exact component={Home} />
-                  <Route path="/counter" component={Counter} />
-                </Switch>
-              </RequireAuth0>
-            </PageLayout>
-          </div>
+          <Auth0RedirectHandler clientId={auth0.clientId} domain={auth0.domain} history={history}>
+            <div style={{ height: '100%' }}>
+              <PageLayout history={history}>
+                <RequireAuth0 redirectMode history={history} inline style={loginStyle}>
+                  <Switch>
+                    <Route path="/" exact component={Home} />
+                    <Route path="/counter" component={Counter} />
+                  </Switch>
+                </RequireAuth0>
+              </PageLayout>
+            </div>
+            </Auth0RedirectHandler>
         </Router>
       </Provider>
     );

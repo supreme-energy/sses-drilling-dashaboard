@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import {getIsAuthenticated} from './store';
+import {getIsAuthenticated, connectOptions} from './store';
 import connect from 'react-redux';
 
 /**
@@ -18,4 +18,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(Unauthenticated);
+export default connect(mapStateToProps, undefined, undefined, connectOptions)(Unauthenticated);
