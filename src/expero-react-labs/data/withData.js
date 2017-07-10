@@ -55,13 +55,18 @@ import shallowEqual from 'react-redux/lib/utils/shallowEqual';
  *
  *       Default: "data"
  *
+ *    * args: Object
+ *      If defined, represents a default Args object.  The Arg object returned from propsToArgs
+ *      will be shallow-merged with this default args object (propsToArgs result will override values in this object)
+ *
+ *
  * @returns function(Component):WrappedComponent
  *
  * returns a function decorator which can be used to wrap components that need this data.
  * e.g. const MyComponentWithData = withData(...)(MyComponent)
  */
 export default function withData(propsToArgs, argsToPromise, options = {}) {
-  const {keepExistingWhilePending = true, isEqual = shallowEqual, pollInterval, propName = "data"} = options;
+  const {keepExistingWhilePending = true, isEqual = shallowEqual, pollInterval, propName = "data", args} = options;
   let getPollInterval;
   if (typeof pollInterval === "number") {
     // they gave us a number, presumably mills between polls
@@ -82,6 +87,9 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
     };
   }
 
+  // call propsToArgs and possibly merge with args
+  let getArgs = args ? (props, context) => ({...args, ...propsToArgs(props, context)}) : propsToArgs;
+
   return Component => {
     class DataComponent extends React.Component {
       constructor (props, context) {
@@ -90,7 +98,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         this._mounted = true;
         this._requestId = undefined;
         this.state = {
-          args: propsToArgs(props, context),
+          args: getArgs(props, context),
           requestId: uniqueId(),
           data: {
             loading: true,
@@ -100,7 +108,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
 
       componentWillReceiveProps (nextProps, nextContext) {
         // get the data args from the props
-        const nextArgs = propsToArgs(nextProps, nextContext);
+        const nextArgs = getArgs(nextProps, nextContext);
         // see if they are different than the previous args
         if (!isEqual(nextArgs, this.state.args)) {
           // update state to set us back to "loading"
