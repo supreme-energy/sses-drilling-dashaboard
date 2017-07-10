@@ -14,10 +14,13 @@ import shallowEqual from 'react-redux/lib/utils/shallowEqual';
  *   result: PropTypes.any, // if the fetch succeeds, this will be the result of the fetch, otherwise undefined
  * }).isRequired,
  *
- * @param propsToArgs : function (props : Object) : Object
+ * @param propsToArgs : function (props : Object, context: Object) : Object
  *      Called each time the props passed into your component change.  Returns an object of the arguments
  *      that are required to fetch the data.  These arguments will be passed to the argsToPromise function
- *      whenever they change
+ *      whenever they change.
+ *
+ *      If your component receives React context, then this context will be passed as a second argument
+ *      to propsToArgs
  *
  * @param argsToPromise : function (args : Object, isPolling : Boolean ) : Promise
  *      Called whenever data needs to be fetched.  Args are the arguments derived from props via propsToArgs
@@ -81,13 +84,13 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
 
   return Component => {
     class DataComponent extends React.Component {
-      constructor (props) {
-        super(props);
+      constructor (props, context) {
+        super(props, context);
 
         this._mounted = true;
         this._requestId = undefined;
         this.state = {
-          args: propsToArgs(props),
+          args: propsToArgs(props, context),
           requestId: uniqueId(),
           data: {
             loading: true,
@@ -95,9 +98,9 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         };
       }
 
-      componentWillReceiveProps (nextProps) {
+      componentWillReceiveProps (nextProps, nextContext) {
         // get the data args from the props
-        const nextArgs = propsToArgs(nextProps);
+        const nextArgs = propsToArgs(nextProps, nextContext);
         // see if they are different than the previous args
         if (!isEqual(nextArgs, this.state.args)) {
           // update state to set us back to "loading"
@@ -186,6 +189,17 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
     }
 
     DataComponent.displayName = `WithData(${Component.displayName || Component.name || 'Component'})`;
+
+    // Capture any context the child declares so that we can pass it to propsToArgs
+    if (Component.contextTypes) {
+      DataComponent.contextTypes = Component.contextTypes;
+    }
+
+    // Copy the propTypes from the child, stripping out the data prop we will inject
+    if (Component.propTypes) {
+      const {[propName]: data, ...remainingPropTypes} = Component.propTypes;
+      DataComponent.propTypes = remainingPropTypes;
+    }
 
     return DataComponent;
   };
