@@ -16,6 +16,7 @@ export default class FetchClientProvider extends React.Component {
   static propTypes = {
     client: PropTypes.function.isRequired,
     id: PropTypes.string,
+    children: PropTypes.node,
   };
 
   static defaultProps = {
@@ -44,6 +45,10 @@ export default class FetchClientProvider extends React.Component {
       (nextProps.id !== this.props.id)) {
       this.setState({ fetchClients: mergeFetchClients(nextProps.client, nextProps.id, nextContext.fetchClients) });
     }
+  }
+
+  render() {
+    return this.props.children;
   }
 
   getChildContext() { return this.state.fetchClients; }
