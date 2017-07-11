@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { increment, doubleAsync, getCounter } from '../store';
+import withFetchClient from 'expero-react-labs/data/withFetchClient';
 
 /*  This is a container component. Notice it does not contain any JSX,
     nor does it import React. This component is **only** responsible for
@@ -35,4 +36,8 @@ const mapStateToProps = (state) => ({
     Selectors are composable. They can be used as input to other selectors.
     https://github.com/reactjs/reselect    */
 
-export default connect(mapStateToProps, mapDispatchToProps)(Counter);
+const CounterWithSquare = withFetchClient(
+  "/auth/square/:counter",
+  ({counter}) => ({counter}),
+  {keepExistingWhilePending: false, propName: "square"})(Counter);
+export default connect(mapStateToProps, mapDispatchToProps)(CounterWithSquare);

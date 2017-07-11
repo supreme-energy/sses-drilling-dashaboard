@@ -6,6 +6,8 @@ function getPattern(path) {
   return patternCache[ path ] || (patternCache[ path ] = new UrlPattern(path));
 }
 
+const hasOwn = Object.prototype.hasOwnProperty;
+
 /**
  * fetch plus middleware that will perform variable substitution on the "path" arguments.
  * It will use values supplied in the "query" object to populate the variables.
@@ -24,6 +26,20 @@ export default () => (request) => {
       request.options.query = {...request.options.query};
       for (const name of pattern.names) {
         delete request.options.query[name];
+      }
+
+      let hasAnyProperties = false;
+      for (let key in request.options.query) {
+        if (hasOwn.call(request.options.query, key)) {
+          if (request.options.query[key] !== undefined) {
+            hasAnyProperties = true;
+            break;
+          }
+        }
+      }
+
+      if (!hasAnyProperties) {
+        request.options.query = undefined;
       }
     }
   }
