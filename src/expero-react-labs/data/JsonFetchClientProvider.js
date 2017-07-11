@@ -11,7 +11,7 @@ function createFetchClient(url, options, additionalMiddleware = []) {
   const fpClient = createClient(url, options, middleware);
 
   // return a single function because that is what withFetchClient wants
-  return fpClient.request;
+  return fpClient.get;
 }
 
 /**
@@ -52,7 +52,7 @@ export default class JsonFetchClientProvider extends React.Component {
     if ((nextProps.url !== this.props.url) ||
       !shallowequal(nextProps.options, this.props.options) ||
       !shallowequal(nextProps.middlewares, this.props.middlewares)) {
-      this.setState({ client: createFetchClient(nextProps.url, nextProps.options, nextProps.middleware) });
+      this.setState({ client: createFetchClient(nextProps.url, nextProps.options, nextProps.middlewares) });
     }
   }
 

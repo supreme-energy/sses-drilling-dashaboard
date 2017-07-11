@@ -2468,10 +2468,6 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fetch-plus-bearerauth@^3.10.4:
-  version "3.10.4"
-  resolved "https://registry.yarnpkg.com/fetch-plus-bearerauth/-/fetch-plus-bearerauth-3.10.4.tgz#b775efc99bbd14e0a11b1e9f95feb73bf5596e3b"
-
 fetch-plus-json@^3.10.4:
   version "3.10.4"
   resolved "https://registry.yarnpkg.com/fetch-plus-json/-/fetch-plus-json-3.10.4.tgz#254834cf30ac264a1bf3bcbef5968b5e73296eb7"
