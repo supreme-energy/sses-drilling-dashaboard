@@ -101,7 +101,7 @@ const initialState = {
 };
 
 export const connectOptions = {
-  pure: true,
+  pure: false, // so that these components do not block router updates
   areStatesEqual: (next, prev) => getAuth0(next) === getAuth0(prev),
 };
 
