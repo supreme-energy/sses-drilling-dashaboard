@@ -1,10 +1,7 @@
 import PropTypes from 'prop-types';
 import withData from './withData';
 import isEqual from 'lodash/isEqual';
-
-function fetchClientContextProperty(fetchClientId) {
-  return `fetchClient${fetchClientId}`;
-}
+import {getFetchClientFromContext} from './FetchClientProvider';
 
 // We need a custom isEqual function
 function argsEqual(a, b) {
@@ -30,7 +27,7 @@ function argsEqual(a, b) {
  *        example1: args: { method: "POST", headers: { "X-FOO": "Bar" }, cache: "no-store" }
  *        example2: args: { query: { param1: "32" } }
  *
- *     * fetchClientId: String
+ *     * id: String
  *         Usually not necessary.  But if your app needs multiple different fetch clients,
  *         you will render multiple FetchClientProviders, each with a different id.
  *         Use this option to indicate which client you need to use for this component.
@@ -40,7 +37,7 @@ function argsEqual(a, b) {
 export default function withFetchClient(path, propsToQuery, options = {}) {
   const {
     args : { query: defaultQuery = {}, ...defaultFetchArgs } = {},
-    fetchClientId = "",
+    id = "",
     ...withDataOptions
   } = options;
 
@@ -63,11 +60,9 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
     }
 
     // Get the fetch client from context
-    const fetchClient = context[fetchClientContextProperty(fetchClientId)];
+    const fetchClient = getFetchClientFromContext(context, id);
     if (!fetchClient) {
-      throw new Error(
-        `Could not find fetch client ${fetchClientId} in context.` +
-        `Did you forget to render a FetchClientProvider component?`);
+      throw new Error(`Could not find FetchClientProvider with id=${id}.`);
     }
 
     return {fetchClient, fetchArgs};
@@ -95,7 +90,7 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
   // Add fetchClientId to the context type
   DataComponent.contextTypes = {
     ...DataComponent.contextTypes,
-    [fetchClientContextProperty(fetchClientId)]: PropTypes.object,
+    fetchClients: PropTypes.object,
   };
 
   return DataComponent;
