@@ -32,12 +32,18 @@ function argsEqual(a, b) {
  *         you will render multiple FetchClientProviders, each with a different id.
  *         Use this option to indicate which client you need to use for this component.
  *
+ *     * transform: Function(fetchResult: any, queyr: object):any
+ *         If supplied, will be run on the result of a successful fetch response
+ *         and the return value will be used as data.result.
+ *         Second argument will be the query returned by propsToQuery
+ *
  * @returns {function(Component): WrappedComponent}
  */
 export default function withFetchClient(path, propsToQuery, options = {}) {
   const {
     args : { query: defaultQuery = {}, ...defaultFetchArgs } = {},
     id = "",
+    transform,
     ...withDataOptions
   } = options;
 
@@ -65,10 +71,10 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
       throw new Error(`Could not find FetchClientProvider with id=${id}.`);
     }
 
-    return {fetchClient, fetchArgs};
+    return {fetchClient, query, fetchArgs};
   }
 
-  function argsToPromise({fetchClient, fetchArgs}, isPolling) {
+  function argsToPromise({fetchClient, query, fetchArgs}, isPolling) {
     let fa = fetchArgs;
     if (isPolling) {
       // if isPolling, then adjust the cache option to force a call to the server
@@ -82,7 +88,9 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
       }
     }
 
-    return fetchClient(fa);
+    const promise = fetchClient(fa);
+
+    return transform ? promise.then(result => transform(result, query)) : promise;
   }
 
   const DataComponent = withData(propsToArgs, argsToPromise, withDataOptions);
