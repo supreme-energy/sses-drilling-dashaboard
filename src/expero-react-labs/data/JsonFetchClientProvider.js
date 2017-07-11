@@ -16,7 +16,7 @@ function createFetchClient(url, options, additionalMiddleware = []) {
 
 /**
  * Provides a fetch client pre-configured to convert the server response to JSON
- * as well as perform variable substitution (via https://github.com/snd/url-pattern) on the request url
+ * as well as perform variable substitution (via https://github.com/snd/url-pattern) on the request path
  */
 export default class JsonFetchClientProvider extends React.Component {
   static propTypes = {

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import './PageLayout.scss';
 import {connect} from 'react-redux';
 import {getAuth0, getIsAuthenticated, logout} from 'expero-react-labs/auth0/store';
+import withFetchClient from 'expero-react-labs/data/withFetchClient';
 
 const userInfoStyles = {
   root: {
@@ -36,7 +37,7 @@ const UserInfo = ({isAuthenticated, profile, logout}) => {
       <a href="#" onClick={logout}>Logout</a>
     </div>
   );
-}
+};
 
 function getUserInfo(state) {
   return {
@@ -54,9 +55,47 @@ const userInfoActions = {
 
 const UserInfoContainer = connect(getUserInfo, userInfoActions)(UserInfo);
 
+const serverStatusStyles = {
+  root: {
+    position: "absolute",
+    top: "5px",
+    left: "5px",
+    display: "inline-block",
+  },
+};
+
+const ServerStatus = ({data}) => {
+  const {error, loading, polling, result} = data;
+
+  let msg = "Server Status: ";
+  if (result) {
+    msg += `${result.status} Last Check: ${result.time.toISOString()}`;
+  }
+
+  if (loading) {
+    msg += " (Loading)";
+  }
+
+  if (polling) {
+    msg += " (Checking)";
+  }
+
+  if (error) {
+    msg += ` [Error: ${error.message}]`;
+  }
+
+  return <div style={serverStatusStyles.root}>{msg}</div>;
+};
+
+const ServerStatusContainer = withFetchClient("/health-check", null, {
+  pollInterval: 2000,
+  transform: result => ({status: result.status, time: new Date(result.time)})
+})(ServerStatus);
+
 export const PageLayout = ({ children, history }) => (
   <div className="container text-center">
     <UserInfoContainer />
+    <ServerStatusContainer />
     <h1>React Redux Starter Kit</h1>
     <NavLink to="/" exact activeClassName="page-layout__nav-item--active">Home</NavLink>
     {' · '}

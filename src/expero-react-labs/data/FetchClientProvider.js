@@ -14,7 +14,7 @@ function mergeFetchClients(fetchClient, fetchClientId, parentFetchClients = {}) 
 
 export default class FetchClientProvider extends React.Component {
   static propTypes = {
-    client: PropTypes.function.isRequired,
+    client: PropTypes.func.isRequired,
     id: PropTypes.string,
     children: PropTypes.node,
   };
@@ -51,5 +51,5 @@ export default class FetchClientProvider extends React.Component {
     return this.props.children;
   }
 
-  getChildContext() { return this.state.fetchClients; }
+  getChildContext() { return {fetchClients: this.state.fetchClients}; }
 }

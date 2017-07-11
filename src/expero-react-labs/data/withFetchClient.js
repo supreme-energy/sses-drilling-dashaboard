@@ -41,7 +41,7 @@ function argsEqual(a, b) {
  */
 export default function withFetchClient(path, propsToQuery, options = {}) {
   const {
-    args : { query: defaultQuery = {}, ...defaultFetchArgs } = {},
+    args : { query: defaultQuery, ...defaultFetchArgs } = {},
     id = "",
     transform,
     ...withDataOptions
@@ -50,19 +50,26 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
   withDataOptions.isEqual = argsEqual;
 
   function propsToArgs(props, context) {
-    const query = propsToQuery(props, context);
+    const query = propsToQuery && propsToQuery(props, context);
     const fetchArgs = {path, method: "GET", cache: "default", ...defaultFetchArgs};
 
-    if (query.query) {
-      // they gave us a full fetch args object, not just a query
-      // copy the object over onto our fetchArgs (overriding the defaults)
-      Object.assign(fetchArgs, query);
+    if (query) {
+      if (query.query) {
+        // they gave us a full fetch args object, not just a query
+        // copy the object over onto our fetchArgs (overriding the defaults)
+        Object.assign(fetchArgs, query);
+      }
+      else {
+        fetchArgs.query = query;
+      }
 
       // now merge the defaultQuery with the query returned by propsToQuery
-      fetchArgs.query = {...defaultQuery, ...query.query};
+      if (defaultQuery) {
+        fetchArgs.query = { ...defaultQuery, ...fetchArgs.query };
+      }
     }
-    else {
-      fetchArgs.query = {...defaultQuery};
+    else if (defaultQuery) {
+      fetchArgs.query = defaultQuery;
     }
 
     // Get the fetch client from context
@@ -88,18 +95,22 @@ export default function withFetchClient(path, propsToQuery, options = {}) {
       }
     }
 
-    const promise = fetchClient(fa);
+    const promise = fetchClient(fa.path, fa);
 
     return transform ? promise.then(result => transform(result, query)) : promise;
   }
 
-  const DataComponent = withData(propsToArgs, argsToPromise, withDataOptions);
+  const withDataConnector = withData(propsToArgs, argsToPromise, withDataOptions);
 
-  // Add fetchClientId to the context type
-  DataComponent.contextTypes = {
-    ...DataComponent.contextTypes,
-    fetchClients: PropTypes.object,
+  return Component => {
+    const DataComponent = withDataConnector(Component);
+
+    // Add fetchClients to the context type
+    DataComponent.contextTypes = {
+      ...DataComponent.contextTypes,
+      fetchClients: PropTypes.object,
+    };
+
+    return DataComponent;
   };
-
-  return DataComponent;
 }

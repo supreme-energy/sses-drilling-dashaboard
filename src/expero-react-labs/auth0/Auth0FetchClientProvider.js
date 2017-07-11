@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import plusAuth0 from './fetch-plus-auth0';
-import JsonFetchClientProvider from '../data/FetchClientProvider';
+import JsonFetchClientProvider from '../data/JsonFetchClientProvider';
 
 export default class Auth0FetchClientProvider extends React.Component {
   static propTypes = {
     /**
      * The underlying provider to use.  Defaults to JsonFetchClientProvider
      */
-    Provider: PropTypes.element,
+    Provider: PropTypes.func,
     /**
      * The Redux store
      */
