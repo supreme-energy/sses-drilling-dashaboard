@@ -1,7 +1,7 @@
 import React from 'react';
 import uniqueId from 'lodash/uniqueId';
 import delay from '../delay';
-import shallowEqual from 'react-redux/lib/utils/shallowEqual';
+import shallowequal from 'shallowequal';
 
 /**
  *
@@ -66,7 +66,7 @@ import shallowEqual from 'react-redux/lib/utils/shallowEqual';
  * e.g. const MyComponentWithData = withData(...)(MyComponent)
  */
 export default function withData(propsToArgs, argsToPromise, options = {}) {
-  const {keepExistingWhilePending = true, isEqual = shallowEqual, pollInterval, propName = "data", args} = options;
+  const {keepExistingWhilePending = true, isEqual = shallowequal, pollInterval, propName = "data", args} = options;
   let getPollInterval;
   if (typeof pollInterval === "number") {
     // they gave us a number, presumably mills between polls
