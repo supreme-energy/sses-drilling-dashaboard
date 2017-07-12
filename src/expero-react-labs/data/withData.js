@@ -3,6 +3,7 @@ import uniqueId from 'lodash/uniqueId';
 import debounce from 'lodash/debounce';
 import delay from '../delay';
 import shallowequal from 'shallowequal';
+import memoize from '../memoize';
 
 /**
  *
@@ -73,6 +74,13 @@ import shallowequal from 'shallowequal';
  *
  *       Default: "data"
  *
+ *    * mapData: Function(data: Object) : any
+ *       By default, withData injects a prop with the data shape described above.  If you supply a method here,
+ *       then it will be called to transform the shape of the prop any way you see fit.
+ *
+ *       For example, to throw away the loading/polling/error flags and just get the result as your prop, use:
+ *          mapData: data => data.result
+ *
  *    * args: Object
  *      If defined, represents a default Args object.  The Arg object returned from propsToArgs
  *      will be shallow-merged with this default args object (propsToArgs result will override values in this object)
@@ -90,6 +98,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
     pollInterval,
     debounce: debounceOptions,
     propName = "data",
+    mapData,
     args
   } = options;
   let getPollInterval;
@@ -111,6 +120,8 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
       }
     };
   }
+
+  const memoizedMapData = mapData && memoize(mapData);
 
   // call propsToArgs and possibly merge with args
   let getArgs = args ? (props, context) => ({...args, ...propsToArgs(props, context)}) : propsToArgs;
@@ -186,7 +197,8 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
 
       render () {
         const props = this.props;
-        const injectedProp = {[propName]: this.state.data};
+        const data = memoizedMapData ? memoizedMapData(this.state.data) : this.state.data;
+        const injectedProp = {[propName]: data};
 
         return (
           <Component {...props} {...injectedProp} />
