@@ -27,20 +27,6 @@ export default () => (request) => {
       for (const name of pattern.names) {
         delete request.options.query[name];
       }
-
-      let hasAnyProperties = false;
-      for (let key in request.options.query) {
-        if (hasOwn.call(request.options.query, key)) {
-          if (request.options.query[key] !== undefined) {
-            hasAnyProperties = true;
-            break;
-          }
-        }
-      }
-
-      if (!hasAnyProperties) {
-        request.options.query = undefined;
-      }
     }
   }
 };

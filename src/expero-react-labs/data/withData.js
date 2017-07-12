@@ -180,7 +180,6 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
           };
         }
         catch (e) {
-          console.error(e);
           newState = {
             data: {
               error: e

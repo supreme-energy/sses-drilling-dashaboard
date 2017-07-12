@@ -6,9 +6,22 @@ import plusUrlPattern from './fetch-plus-url-pattern';
 import FetchClientProvider from "expero-react-labs/data/FetchClientProvider";
 import shallowequal from 'shallowequal';
 
+function fetchRemoveEmptyQuery(path, ...args) {
+  // if (path) to work around bug in fetch-plus where it accidentally calls the function with no arguments
+  // during initialization
+  if (path) {
+    const p = /\?$/.test(path) ? path.substr(0, path.length - 1) : path;
+    return fetch(p, ...args);
+  }
+}
+
 function createFetchClient(url, options, additionalMiddleware = []) {
   const middleware = [plusJson(), plusUrlPattern(), ...additionalMiddleware];
-  const fpClient = createClient(url, options, middleware);
+
+  // supply a fetch wrapper which will strip the trailing "?" from the path
+  // if the query object is empty.
+  const fpOptions = {...options, fetch: fetchRemoveEmptyQuery};
+  const fpClient = createClient(url, fpOptions, middleware);
 
   // return a single function because that is what withFetchClient wants
   return fpClient.get;
