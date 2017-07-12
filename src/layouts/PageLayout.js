@@ -89,7 +89,7 @@ const ServerStatus = ({data}) => {
 
 const ServerStatusContainer = withFetchClient("/health-check", null, {
   pollInterval: 2000,
-  transform: result => ({status: result.status, time: new Date(result.time)})
+  mapResult: result => ({status: result.status, time: new Date(result.time)})
 })(ServerStatus);
 
 export const PageLayout = ({ children, history }) => (

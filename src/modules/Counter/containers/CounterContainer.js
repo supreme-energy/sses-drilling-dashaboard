@@ -38,6 +38,6 @@ const mapStateToProps = (state) => ({
 
 const CounterWithSquare = withFetchClient(
   "/auth/square/:counter",
-  ({counter}) => ({counter}),
+  ({counter}) => (counter > 5 && {counter}),
   {keepExistingWhilePending: false, propName: "square"})(Counter);
 export default connect(mapStateToProps, mapDispatchToProps)(CounterWithSquare);
