@@ -1,5 +1,6 @@
 import React from 'react';
 import uniqueId from 'lodash/uniqueId';
+import debounce from 'lodash/debounce';
 import delay from '../delay';
 import shallowequal from 'shallowequal';
 
@@ -50,6 +51,23 @@ import shallowequal from 'shallowequal';
  *         - the number of milliseconds until the data should be refreshed.
  *         - a Promise which will resolve when it is time to refresh the data
  *
+ *    * debounce: Number | { wait: Number = 0, leading: Boolean = false, trailing: Boolean = true, maxWait: Number }
+ *       If a number is given, then calls to argsToPromise will be debounced until the props stop changing for that
+ *       number of milliseconds.
+ *
+ *       If an object is given, then you can provide more fine-grained control over how the debouncing will function:
+ *       - wait - the number of ms to delay
+ *       - leading - specify whether the call should be made at the beginning of the timeout
+ *       - trailing - specify whether the call should be made at the end of the timeout.
+ *       - maxWait - The maximum time the call can be delayed
+ *
+ *       If trailing and leading are true, then the call will only be made on the trailing edge of the timeout
+ *       if props changed more than once during the timeout.
+ *
+ *       Examples:
+ *         Traditional debounce can be made using: { wait: 200, leading: false, trailing: true }
+ *         Traditional throttle can be made using: { wait: 200, maxWait: 200, leading: true, trailing: true }
+ *
  *    * propName: String
  *       The name of the prop to inject into your component.
  *
@@ -66,7 +84,14 @@ import shallowequal from 'shallowequal';
  * e.g. const MyComponentWithData = withData(...)(MyComponent)
  */
 export default function withData(propsToArgs, argsToPromise, options = {}) {
-  const {keepExistingWhilePending = true, isEqual = shallowequal, pollInterval, propName = "data", args} = options;
+  const {
+    keepExistingWhilePending = true,
+    isEqual = shallowequal,
+    pollInterval,
+    debounce: debounceOptions,
+    propName = "data",
+    args
+  } = options;
   let getPollInterval;
   if (typeof pollInterval === "number") {
     // they gave us a number, presumably mills between polls
@@ -104,6 +129,23 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
             loading: true,
           },
         };
+
+        if (debounceOptions) {
+          const callLoadDataAsync = (state) => this.loadDataAsync(state);
+          if (typeof debounceOptions === "number") {
+            // they just gave us a debounce time
+            this.loadDataAsyncDebounced = debounce(callLoadDataAsync, debounceOptions);
+          }
+          else {
+            // they gave us an options object
+            const {wait = 0, ...remainingOptions} = debounceOptions;
+            this.loadDataAsyncDebounced = debounce(callLoadDataAsync, wait, remainingOptions);
+          }
+        }
+        else {
+          this.loadDataAsyncDebounced = this.loadDataAsync;
+          this.loadDataAsyncDebounced.cancel = () => {};
+        }
       }
 
       componentWillReceiveProps (nextProps, nextContext) {
@@ -126,7 +168,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
       componentDidUpdate (prevProps) {
         if (this._requestId !== this.state.requestId) {
           this._requestId = this.state.requestId;
-          this.loadDataAsync(this.state);
+          this.doNextLoadData(this.state);
         }
       }
 
@@ -137,6 +179,9 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
 
       componentWillUnmount () {
         this._mounted = false;
+
+        // cancel any pending debounced calls to load data
+        this.loadDataAsyncDebounced.cancel();
       }
 
       render () {
@@ -166,6 +211,17 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
               }
             });
           }
+        }
+      }
+
+      doNextLoadData(state) {
+        if (state.data && state.data.polling) {
+          // we are polling.  Make the call immediately
+          this.loadDataAsync(state);
+        }
+        else {
+          // we are querying new data.  Debounce the call
+          this.loadDataAsyncDebounced(state);
         }
       }
 
