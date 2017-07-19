@@ -43,7 +43,12 @@ function mapStateToProps(state) {
   return {status};
 }
 
-const Auth0RedirectHandlerContainer = connect(mapStateToProps, {initializeAuth}, undefined, connectOptions)(Auth0RedirectHandler);
+const Auth0RedirectHandlerContainer = connect(
+  mapStateToProps,
+  {initializeAuth},
+  undefined,
+  connectOptions
+)(Auth0RedirectHandler);
 
 Auth0RedirectHandlerContainer.propTypes = {
   /**

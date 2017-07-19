@@ -6,8 +6,6 @@ function getPattern(path) {
   return patternCache[ path ] || (patternCache[ path ] = new UrlPattern(path));
 }
 
-const hasOwn = Object.prototype.hasOwnProperty;
-
 /**
  * fetch plus middleware that will perform variable substitution on the "path" arguments.
  * It will use values supplied in the "query" object to populate the variables.
