@@ -1,26 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import createFetchClient from './createFetchClient';
+import memoize from '../memoize';
 
 export function getFetchClientFromContext(context, fetchClientId) {
   return context.fetchClients && context.fetchClients["fc" + fetchClientId];
 }
 
-function mergeFetchClients(fetchClient, fetchClientId, parentFetchClients = {}) {
+export const mergeFetchClients = memoize((fetchClient, fetchClientId, parentFetchClients = {}) => {
   return !fetchClient ? parentFetchClients : {
     ...parentFetchClients,
     ["fc" + fetchClientId]: fetchClient,
   };
-}
+});
 
+/**
+ * Makes the supplied fetch client available to all child components of this component
+ */
 export default class FetchClientProvider extends React.Component {
   static propTypes = {
-    client: PropTypes.func.isRequired,
     id: PropTypes.string,
     children: PropTypes.node,
+    url: PropTypes.string.isRequired,
+    options: PropTypes.object,
+    middleware: PropTypes.array,
   };
 
   static defaultProps = {
     id: "",
+    url: "",
+    options: {},
+    middleware: [],
   };
 
   static childContextTypes = {
@@ -34,22 +44,17 @@ export default class FetchClientProvider extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      fetchClients: mergeFetchClients(props.client, props.id, context.fetchClients),
-    };
-  }
-
-  componentWillReceiveProps(nextProps, nextContext) {
-    if ((nextContext.fetchClients !== this.context.fetchClients) ||
-      (nextProps.client !== this.props.client) ||
-      (nextProps.id !== this.props.id)) {
-      this.setState({ fetchClients: mergeFetchClients(nextProps.client, nextProps.id, nextContext.fetchClients) });
-    }
+    const {url, options, middleware} = props;
+    this._client = createFetchClient(url, options, middleware);
   }
 
   render() {
     return this.props.children;
   }
 
-  getChildContext() { return {fetchClients: this.state.fetchClients}; }
+  getChildContext() {
+    return {
+      fetchClients: mergeFetchClients(this._client, this.props.id, this.context.fetchClients),
+    };
+  }
 }

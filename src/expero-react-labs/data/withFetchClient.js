@@ -11,9 +11,14 @@ function argsEqual(a, b) {
     return true;
   }
 
-  // if one is EMPTY and the other is not, then they are not equal
-  if ((a === EMPTY) !== (b === EMPTY)) {
+  // if one fetches and one doesnt return false
+  if (a.noFetch !== b.noFetch) {
     return false;
+  }
+
+  // if they are not fetching then return true
+  if (a.noFetch) {
+    return true;
   }
 
   const aa = a.fetchArgs;
@@ -31,14 +36,47 @@ function argsEqual(a, b) {
 }
 
 /**
+ * Injects the following prop into your component:
+ *
+ * data: PropTypes.shape({
+ *   loading: PropTypes.bool, // true when data is being fetched after the props change
+ *   polling: PropTypes.bool, // true when data is being re-fetched due to pollInterval expiring
+ *   fetchingMore: PropTypes.bool // true when more data is being fetched to append to existing data
+ *   error: PropTypes.any, // if the fetch fails, this will be the error from the fetch, otherwise undefined
+ *   result: PropTypes.any, // if the fetch succeeds, this will be the result of the fetch, otherwise undefined
+ *   refresh: PropTypes.func.isRequired, // can be called with no arguments to force a refresh of the data
+ *      (e.g. a forced poll call)
+ *   fetchMore: PropTypes.func.isRequired, // can be called to fetch more data and merge it with existing data
+ *      called like: fetchMore(options, (existingData, newData) => mergedData)
+ *      See return value of propsToQuery for what the options can look like.
+ *      e.g. post({ body: { ... }, query: { ... }})
+ *   post: PropTypes.func.isRequired // can be called with fetch options to post to the server.
+ *      See return value of propsToQuery for what the options can look like.
+ *      e.g. post({ body: { ... }, query: { ... }})
+ *   put: PropTypes.func.isRequired // same as post, but does a PUT
+ *   get: PropTypes.func.isRequired // same as post, but does a GET
+ *   delete: PropTypes.func.isRequired // same as post, but does a DELETE
+ *   patch: PropTypes.func.isRequired // same as post, but does a PATCH
+ *   patch: PropTypes.func.isRequired // same as post, but does a PATCH
+ * }).isRequired,
+ *
  * @param path : String
  *   The API subpath to call.  Can contain variables denoted with a colon.  Variable values will be pulled
  *   from the query object returned by propsToQuery.
  *
  *   Example: "/foo/bar", "/foo/:companyId/:pageNum"
  *
- * @param propsToQuery : function(props: Object, context: Object) : QueryObject | FetchOptionsObject
- *   Called whenever the component props change.  Should return the query parameters to use for the fetch call.
+ * @param propsToQuery :
+ *       function(props: Object, context: Object, currentResult: object) : QueryObject | FetchOptionsObject
+ *   Called whenever the component props change or whenever it is time to poll for new result.
+ *   Should return the query parameters to use for the fetch call.
+ *
+ *   * props - the current props
+ *   * context - the current React context of the component
+ *   * currentResult - If polling, then the current results.  Can be used to help configure the new query.
+ *        If not being called due to polling (e.g. being called due to props change), then this parameter will be
+ *        undefined.
+ *
  *   If the path included variables, then their values will come from this query object.
  *   Any remaining properties of the query object will be passed as URL query parameters in the call.
  *   The returned query object will be merged with the options.args.query object supplied to
@@ -71,31 +109,38 @@ function argsEqual(a, b) {
  *         you will render multiple FetchClientProviders, each with a different id.
  *         Use this option to indicate which client you need to use for this component.
  *
- *     * mapResult: Function(fetchResult: any, queyr: object):any
+ *     * mapResult: Function(fetchResult: any, query: object, currentResult):any
  *         If supplied, will be run on the result of a successful fetch response
  *         and the return value will be used as data.result.
  *         Second argument will be the query returned by propsToQuery
+ *         If polling, the third argument will contain the current result.  This gives you an opportunity
+ *         to merge the polling result with the current result if you wish.
+ *         If not polling, the third argument will be undefined.
  *
  * @returns {function(Component): WrappedComponent}
  */
 export default function withFetchClient(path, propsToQuery, options = EMPTY) {
   const {
-    args : { query: defaultQuery, ...defaultFetchArgs } = EMPTY,
+    args: { query: defaultQuery, ...defaultFetchArgs } = EMPTY,
     id = "",
     mapResult,
+    mapData,
     ...withDataOptions
   } = options;
 
-  withDataOptions.isEqual = argsEqual;
+  function processResult(prevResult, result, query, isPolling) {
+    return mapResult ? mapResult(result, query, isPolling ? prevResult : undefined) : result;
+  }
 
-  function propsToArgs(props, context) {
-    const query = propsToQuery && propsToQuery(props, context);
-    if (propsToQuery && !query) {
-      // propsToQuery returned a falsy value.  This means there is no fetch this time.
-      return EMPTY;
-    }
+  let currentFetchClient;
 
-    const fetchArgs = {path, method: "GET", cache: "default", ...defaultFetchArgs};
+  function constructFetchArgs(query, defaultQuery) {
+    const fetchArgs = {
+      path,
+      method: "GET",
+      cache: "default",
+      ...defaultFetchArgs,
+    };
 
     if (query) {
       if (query.query) {
@@ -116,19 +161,62 @@ export default function withFetchClient(path, propsToQuery, options = EMPTY) {
       fetchArgs.query = defaultQuery;
     }
 
+    return fetchArgs;
+  }
+
+  function runMethod (method, query = {}) {
+    const fetchArgs = constructFetchArgs(query, undefined);
+    fetchArgs.method = method;
+    fetchArgs.cache = "no-cache";
+    return currentFetchClient(fetchArgs.path, fetchArgs);
+  }
+
+  function fetchMore (wdFetchMore, options, mergeFunc) {
+    const fetchArgs = constructFetchArgs(options, undefined);
+    const promise = currentFetchClient(fetchArgs.path, fetchArgs);
+    wdFetchMore(promise, mergeFunc);
+  }
+
+  withDataOptions.isEqual = argsEqual;
+  withDataOptions.mapData = data => {
+    const d = {
+      ...data,
+      fetchMore: fetchMore.bind(this, data.fetchMore),
+      get: runMethod.bind(null, "GET"),
+      post: runMethod.bind(null, "POST"),
+      put: runMethod.bind(null, "PUT"),
+      delete: runMethod.bind(null, "DELETE"),
+      patch: runMethod.bind(null, "PATCH"),
+    };
+    return mapData ? mapData(d) : d;
+  };
+
+  function propsToArgs(props, context, prevResult) {
     // Get the fetch client from context
     const fetchClient = getFetchClientFromContext(context, id);
     if (!fetchClient) {
       throw new Error(`Could not find FetchClientProvider with id=${id}.`);
     }
 
+    const query = propsToQuery && propsToQuery(props, context, prevResult);
+    if (propsToQuery && !query) {
+      // propsToQuery returned a falsy value.  This means there is no fetch this time.
+      return { fetchClient, noFetch: true };
+    }
+
+    const fetchArgs = constructFetchArgs(query, defaultQuery);
+
     return {fetchClient, query, fetchArgs};
   }
 
-  function argsToPromise({fetchClient, query, fetchArgs}, isPolling) {
-    if (!fetchClient) {
+  function argsToPromise(args, isPolling, prevResult, props, context) {
+    const args2 = isPolling ? propsToArgs(props, context, prevResult) : args;
+    const { fetchClient, noFetch, query, fetchArgs } = args2;
+    currentFetchClient = fetchClient;
+
+    if (noFetch) {
       // no fetch this time.
-      return Promise.resolve(mapResult && mapResult());
+      return Promise.resolve(processResult(prevResult, undefined, undefined, isPolling));
     }
 
     let fa = fetchArgs;
@@ -141,15 +229,20 @@ export default function withFetchClient(path, propsToQuery, options = EMPTY) {
           // TODO: provide option to use "reload" instead of "no-cache"
           fa = {...fa, cache: "no-cache"};
           break;
+        default:
+          break;
       }
     }
 
     const promise = fetchClient(fa.path, fa);
-
-    return mapResult ? promise.then(result => mapResult(result, query)) : promise;
+    return promise.then(r => processResult(prevResult, r, query, isPolling));
   }
 
-  const withDataConnector = withData(propsToArgs, argsToPromise, withDataOptions);
+  const withDataConnector = withData(
+    (props, context) => propsToArgs(props, context, undefined),
+    argsToPromise,
+    withDataOptions
+  );
 
   return Component => {
     const DataComponent = withDataConnector(Component);

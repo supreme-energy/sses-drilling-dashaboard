@@ -4,16 +4,21 @@ import debounce from 'lodash/debounce';
 import delay from '../delay';
 import shallowequal from 'shallowequal';
 import memoize from '../memoize';
+import hoistStatics from 'hoist-non-react-statics';
 
 /**
  *
  * Injects the following prop into your component:
  *
  * data: PropTypes.shape({
- *   loading: PropTypes.bool.isRequired, // true when data is being fetched after the props change
- *   polling: PropTypes.bool.isRequired, // true when data is being re-fetched due to pollInterval expiring
+ *   loading: PropTypes.bool, // true when data is being fetched after the props change
+ *   polling: PropTypes.bool, // true when data is being re-fetched due to pollInterval expiring
+ *   fetchingMore: PropTypes.bool // true when more data is being fetched to append to existing data
  *   error: PropTypes.any, // if the fetch fails, this will be the error from the fetch, otherwise undefined
  *   result: PropTypes.any, // if the fetch succeeds, this will be the result of the fetch, otherwise undefined
+ *   refresh: PropTypes.func.isRequired, // can be called to force a refresh of the data (e.g. a forced poll call)
+ *   fetchMore: PropTypes.func.isRequired, // can be called to fetch more data and merge it with existing data
+ *      called like: fetchMore(promiseWhichReturnsData, (existingData, resultFromPromise) => mergedData)
  * }).isRequired,
  *
  * @param propsToArgs : function (props : Object, context: Object) : Object
@@ -24,10 +29,11 @@ import memoize from '../memoize';
  *      If your component receives React context, then this context will be passed as a second argument
  *      to propsToArgs
  *
- * @param argsToPromise : function (args : Object, isPolling : Boolean ) : Promise
+ * @param argsToPromise : function (args : Object, isPolling : Boolean, prevResult : any, props, context ) : Promise
  *      Called whenever data needs to be fetched.  Args are the arguments derived from props via propsToArgs
  *      isPolling will be false on the initial fetch when the args change.  It will be true if the data is being
- *      refreshed due to pollInterval expiring
+ *      refreshed due to pollInterval expiring.
+ *      The 3rd argument to the function is the existing data result (if any)
  *
  * @param options - optional options object:
  *   * keepExistingWhilePending : boolean
@@ -99,7 +105,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
     debounce: debounceOptions,
     propName = "data",
     mapData,
-    args
+    args,
   } = options;
   let getPollInterval;
   if (typeof pollInterval === "number") {
@@ -114,17 +120,16 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         // function returned a ms delay
         return delay(p);
       }
-      if (p && p.then) {
-        // function returned a promise
-        return p;
-      }
+
+      // function returned a promise
+      return p;
     };
   }
 
   const memoizedMapData = mapData && memoize(mapData);
 
   // call propsToArgs and possibly merge with args
-  let getArgs = args ? (props, context) => ({...args, ...propsToArgs(props, context)}) : propsToArgs;
+  const getArgs = args ? (props, context) => ({...args, ...propsToArgs(props, context)}) : propsToArgs;
 
   return Component => {
     class DataComponent extends React.Component {
@@ -138,11 +143,13 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
           requestId: uniqueId(),
           data: {
             loading: true,
+            refresh: this.performRefresh,
+            fetchMore: this.fetchMore,
           },
         };
 
         if (debounceOptions) {
-          const callLoadDataAsync = (state) => this.loadDataAsync(state);
+          const callLoadDataAsync = state => this.loadDataAsync(state);
           if (typeof debounceOptions === "number") {
             // they just gave us a debounce time
             this.loadDataAsyncDebounced = debounce(callLoadDataAsync, debounceOptions);
@@ -159,7 +166,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         }
       }
 
-      componentWillReceiveProps (nextProps, nextContext) {
+      componentWillReceiveProps(nextProps, nextContext) {
         // get the data args from the props
         const nextArgs = getArgs(nextProps, nextContext);
         // see if they are different than the previous args
@@ -169,8 +176,12 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
             args: nextArgs,
             data: {
               loading: true,
+              refresh: this.performRefresh,
+              fetchMore: this.fetchMore,
               result: keepExistingWhilePending ? this.state.data.result : undefined,
             },
+            fetchMorePromise: null,
+            mergeMore: null,
             requestId: uniqueId(),
           });
         }
@@ -205,6 +216,41 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         );
       }
 
+      performRefresh = () => {
+        if (this._mounted) {
+          this.setState(prevState => ({
+            data: {
+              ...prevState.data,
+              polling: true,
+              fetchingMore: false,
+            },
+            requestId: uniqueId(),
+            args: prevState.args,
+            fetchMorePromise: null,
+            mergeMore: null,
+          }));
+        }
+      };
+
+      fetchMore = (newDataPromise, mergeFunc) => {
+        if (this._mounted) {
+          this.setState(prevState => {
+            if (!prevState.loading) {
+              return {
+                data: {
+                  ...prevState.data,
+                  polling: false,
+                  fetchingMore: true,
+                },
+                requestId: uniqueId(),
+                fetchMorePromise: newDataPromise,
+                mergeMore: mergeFunc,
+              };
+            }
+          });
+        }
+      };
+
       async performPoll (requestId) {
         if (getPollInterval && this._mounted) {
           await getPollInterval(this.state.data);
@@ -216,9 +262,12 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
                     ...prevState.data,
                     loading: false,
                     polling: true,
+                    fetchingMore: false,
                   },
                   requestId: uniqueId(),
                   args: prevState.args,
+                  fetchMorePromise: null,
+                  mergeMore: null,
                 };
               }
             });
@@ -227,8 +276,8 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
       }
 
       doNextLoadData(state) {
-        if (state.data && state.data.polling) {
-          // we are polling.  Make the call immediately
+        if (state.data && (state.data.polling || state.data.fetchingMore)) {
+          // we are polling or fetching more.  Make the call immediately
           this.loadDataAsync(state);
         }
         else {
@@ -237,23 +286,55 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         }
       }
 
-      async loadDataAsync ({ requestId, args, data }) {
+      async loadDataAsync({ requestId, args, data, fetchMorePromise, mergeMore }) {
         let newState;
         const isPolling = data && data.polling;
+        const isFetching = data && data.fetchingMore;
+
         try {
-          newState = {
-            data: {
-              result: await argsToPromise(args, !!isPolling)
-            },
-          };
+          if (isFetching) {
+            newState = {
+              data: {
+                result: mergeMore(data && data.result, await fetchMorePromise),
+                refresh: this.performRefresh,
+                fetchMore: this.fetchMore,
+              },
+              fetchMorePromise: null,
+              mergeMore: null,
+            };
+          }
+          else {
+            newState = {
+              data: {
+                result: await argsToPromise(
+                  args,
+                  !!isPolling,
+                  data && data.result,
+                  this.props,
+                  this.context
+                ),
+                refresh: this.performRefresh,
+                fetchMore: this.fetchMore,
+              },
+              fetchMorePromise: null,
+              mergeMore: null,
+            };
+          }
         }
         catch (e) {
-          console.dir(e);
+          // console.log(e);
           newState = {
             data: {
-              error: e
-            }
+              error: e,
+              refresh: this.performRefresh,
+              fetchMore: this.fetchMore,
+            },
+            fetchMorePromise: null,
+            mergeMore: null,
           };
+          if (isFetching || isPolling) {
+            newState.data.result = data.result;
+          }
         }
 
         // update the state if we are still mounted and the request is not stale
@@ -264,6 +345,8 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
         }
       }
     }
+
+    hoistStatics(DataComponent, Component);
 
     DataComponent.displayName = `WithData(${Component.displayName || Component.name || 'Component'})`;
 

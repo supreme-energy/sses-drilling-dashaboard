@@ -25,16 +25,31 @@ function getCacheKey(url, {query, method = "GET", body, headers}) {
   return JSON.stringify({url, query, method, body, headers});
 }
 
-export default function cachedFetchClient(fetchClient, options = {}) {
+/**
+ * Wraps the provided fetchClient in a new fetchClient that implements an LRU cache
+ * The cache honors the "cache" fetch option: https://developer.mozilla.org/en-US/docs/Web/API/Request/cache
+ * @param fetchClient
+ * @param options
+ * @returns {newClient}
+ */
+export function createFetchCache(options = {}) {
   const {
     maxSize : max = 1000,
     maxAge,
     entrySize : length,
+    log = false,
+    logFunc = console.log.bind(console),
+    cachePredicate,
   } = options;
 
   const lruCache = new LRUCache({max, maxAge, length, stale: true});
 
-  function newClient(url, options = {}) {
+  function callFetch(fetchClient, url, options = {}) {
+    if (cachePredicate && !cachePredicate(url, options)) {
+      // this request is not subject to caching by this cache
+      return fetchClient(url, options);
+    }
+
     const {cache, maxAge} = getCacheOption(options);
     const settings = cacheSettings[cache] || cacheSettings["default"];
     let cacheKey;
@@ -50,13 +65,23 @@ export default function cachedFetchClient(fetchClient, options = {}) {
           if (settings.stale) {
             // put it back into the cache still marked as stale (by setting maxAge to -1)
             lruCache.set(cacheKey, cachedPromise, -1);
+            if (log) {
+              logFunc(`${cacheKey} (cache hit)`);
+            }
             return cachedPromise;
           }
         }
         else {
           // the value in the cache is not stale.
+          if (log) {
+            logFunc(`${cacheKey} (cache hit)`);
+          }
           return cachedPromise;
         }
+      }
+
+      if (log) {
+        logFunc(`${cacheKey} (cache miss)`);
       }
     }
 
@@ -85,8 +110,13 @@ export default function cachedFetchClient(fetchClient, options = {}) {
     return promise;
   }
 
-  newClient.clearCache = () => lruCache.reset();
-  newClient.pruneCache = () => lruCache.prune();
+  callFetch.clearCache = () => lruCache.reset();
+  callFetch.pruneCache = () => lruCache.prune();
 
-  return newClient;
+  return callFetch;
+}
+
+export default function cachedFetchClient(fetchClient, options) {
+  const cache = createFetchCache(options);
+  return cache.bind(null, fetchClient);
 }
