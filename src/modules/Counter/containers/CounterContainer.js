@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { increment, doubleAsync, getCounter } from '../store';
-import withFetchClient from 'expero-react-labs/data/withFetchClient';
+import withFetchClient from 'react-powertools/data/withFetchClient';
 
 /*  This is a container component. Notice it does not contain any JSX,
     nor does it import React. This component is **only** responsible for

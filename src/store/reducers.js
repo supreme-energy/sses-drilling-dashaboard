@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import locationReducer from './location';
-import auth0 from 'expero-react-labs/auth0/store';
+import auth0 from 'react-powertools/auth0/store';
 
 export const makeRootReducer = (asyncReducers) => {
   return combineReducers({

@@ -5,13 +5,13 @@ import { Router, Route, Switch } from 'react-router-dom';
 import CounterModule from 'modules/Counter';
 import HomeModule from 'modules/Home';
 import PageLayout from 'layouts/PageLayout';
-import RequireAuth0 from 'expero-react-labs/auth0/RequireAuth0';
-import FetchClientProvider from 'expero-react-labs/data/FetchClientProvider';
-import FetchCache from 'expero-react-labs/data/FetchCache';
+import RequireAuth0 from 'react-powertools/auth0/RequireAuth0';
+import FetchClientProvider from 'react-powertools/data/FetchClientProvider';
+import FetchCache from 'react-powertools/data/FetchCache';
 import plusJson from 'fetch-plus-json';
-import plusUrlPattern from 'expero-react-labs/data/fetch-plus-url-pattern';
-import plusAuth0 from 'expero-react-labs/auth0/fetch-plus-auth0';
-import Auth0RedirectHandler from 'expero-react-labs/auth0/Auth0RedirectHandler';
+import plusUrlPattern from 'react-powertools/data/fetch-plus-url-pattern';
+import plusAuth0 from 'react-powertools/auth0/fetch-plus-auth0';
+import Auth0RedirectHandler from 'react-powertools/auth0/Auth0RedirectHandler';
 
 const loginStyle = {
   border: "solid 1px black",

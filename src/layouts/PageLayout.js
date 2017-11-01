@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import './PageLayout.scss';
 import {connect} from 'react-redux';
-import {getAuth0, getIsAuthenticated, logout} from 'expero-react-labs/auth0/store';
-import withFetchClient from 'expero-react-labs/data/withFetchClient';
+import {getAuth0, getIsAuthenticated, logout} from 'react-powertools/auth0/store';
+import withFetchClient from 'react-powertools/data/withFetchClient';
 
 const userInfoStyles = {
   root: {
