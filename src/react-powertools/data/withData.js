@@ -4,7 +4,7 @@ import debounce from 'lodash/debounce';
 import delay from '../delay';
 import shallowequal from 'shallowequal';
 import memoize from '../memoize';
-import hoistStatics from 'hoist-non-react-statics';
+import hoc from '../hoc';
 
 /**
  *
@@ -131,7 +131,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
   // call propsToArgs and possibly merge with args
   const getArgs = args ? (props, context) => ({...args, ...propsToArgs(props, context)}) : propsToArgs;
 
-  return Component => {
+  return hoc(Component => {
     class DataComponent extends React.Component {
       constructor (props, context) {
         super(props, context);
@@ -346,21 +346,11 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
       }
     }
 
-    hoistStatics(DataComponent, Component);
-
-    DataComponent.displayName = `WithData(${Component.displayName || Component.name || 'Component'})`;
-
     // Capture any context the child declares so that we can pass it to propsToArgs
     if (Component.contextTypes) {
       DataComponent.contextTypes = Component.contextTypes;
     }
 
-    // Copy the propTypes from the child, stripping out the data prop we will inject
-    if (Component.propTypes) {
-      const {[propName]: data, ...remainingPropTypes} = Component.propTypes;
-      DataComponent.propTypes = remainingPropTypes;
-    }
-
     return DataComponent;
-  };
+  }, "WithData");
 }

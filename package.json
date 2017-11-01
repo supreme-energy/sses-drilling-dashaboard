@@ -25,6 +25,7 @@
     "fetch-plus": "^3.10.6",
     "fetch-plus-json": "^3.10.4",
     "history": "^4.7.2",
+    "hoist-non-react-statics": "^2.3.1",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.4",
     "object-assign": "^4.1.1",
