@@ -174,6 +174,7 @@ config.module.rules.push({
 // ------------------------------------
 config.plugins.push(new HtmlWebpackPlugin({
   template: inProjectSrc('index.html'),
+  defaultAttribute: 'defer',
   inject: true,
   minify: {
     collapseWhitespace: true,
@@ -212,6 +213,7 @@ if (__PROD__) {
       minimize: true,
       debug: false,
     }),
+    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: !!config.devtool,
       comments: false,
@@ -227,7 +229,8 @@ if (__PROD__) {
         if_return: true,
         join_vars: true,
       },
-    })
+    }),
+    new webpack.HashedModuleIdsPlugin()
   );
 }
 
