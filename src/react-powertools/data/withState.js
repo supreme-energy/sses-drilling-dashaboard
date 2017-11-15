@@ -1,11 +1,6 @@
 import React from 'react';
 import upperFirst from 'lodash/upperFirst';
 import mapValues from 'lodash/mapValues';
-import uniqueId from 'lodash/uniqueId';
-import debounce from 'lodash/debounce';
-import delay from '../delay';
-import shallowequal from 'shallowequal';
-import memoize from '../memoize';
 import hoc from '../hoc';
 
 function createInitialStateFactory(initialState) {
