@@ -17,6 +17,10 @@ import hoc from '../hoc';
  *   error: PropTypes.any, // if the fetch fails, this will be the error from the fetch, otherwise undefined
  *   result: PropTypes.any, // if the fetch succeeds, this will be the result of the fetch, otherwise undefined
  *   refresh: PropTypes.func.isRequired, // can be called to force a refresh of the data (e.g. a forced poll call)
+ *   replaceResult: PropTypes.func.isRequired, // can be called to replace the result data with new data
+ *      as if it had been returned by argsToPromise.  The data.error will be cleared/replaced
+ *      with the new value as well.
+ *      replaceResult(newResult, newError, newLoadingFlag)
  *   fetchMore: PropTypes.func.isRequired, // can be called to fetch more data and merge it with existing data
  *      called like: fetchMore(promiseWhichReturnsData, (existingData, resultFromPromise) => mergedData)
  * }).isRequired,
@@ -144,6 +148,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
           data: {
             loading: true,
             refresh: this.performRefresh,
+            replaceResult: this.replace,
             fetchMore: this.fetchMore,
           },
         };
@@ -177,6 +182,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
             data: {
               loading: true,
               refresh: this.performRefresh,
+              replaceResult: this.replace,
               fetchMore: this.fetchMore,
               result: keepExistingWhilePending ? this.state.data.result : undefined,
             },
@@ -229,6 +235,21 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
             fetchMorePromise: null,
             mergeMore: null,
           }));
+        }
+      };
+
+      replace = (result, error, loading) => {
+        if (this._mounted) {
+          this.setState(prevState => {
+            return {
+              data: {
+                ...prevState.data,
+                result,
+                error,
+                loading: !!loading,
+              }
+            };
+          });
         }
       };
 
@@ -297,6 +318,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
               data: {
                 result: mergeMore(data && data.result, await fetchMorePromise),
                 refresh: this.performRefresh,
+                replaceResult: this.replace,
                 fetchMore: this.fetchMore,
               },
               fetchMorePromise: null,
@@ -314,6 +336,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
                   this.context
                 ),
                 refresh: this.performRefresh,
+                replaceResult: this.replace,
                 fetchMore: this.fetchMore,
               },
               fetchMorePromise: null,
@@ -327,6 +350,7 @@ export default function withData(propsToArgs, argsToPromise, options = {}) {
             data: {
               error: e,
               refresh: this.performRefresh,
+              replaceResult: this.replace,
               fetchMore: this.fetchMore,
             },
             fetchMorePromise: null,

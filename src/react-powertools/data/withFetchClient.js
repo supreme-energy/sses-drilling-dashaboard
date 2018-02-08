@@ -46,6 +46,10 @@ function argsEqual(a, b) {
  *   result: PropTypes.any, // if the fetch succeeds, this will be the result of the fetch, otherwise undefined
  *   refresh: PropTypes.func.isRequired, // can be called with no arguments to force a refresh of the data
  *      (e.g. a forced poll call)
+ *   replaceResult: PropTypes.func.isRequired, // can be called to replace the result data with new data
+ *      as if it had been returned by the fetch call.  The data.error will be cleared/replaced
+ *      with the new value as well.
+ *      replaceResult(newResult, newError, newLoadingFlag)
  *   fetchMore: PropTypes.func.isRequired, // can be called to fetch more data and merge it with existing data
  *      called like: fetchMore(options, (existingData, newData) => mergedData)
  *      See return value of propsToQuery for what the options can look like.
