@@ -87,7 +87,7 @@ const ServerStatus = ({data}) => {
   return <div style={serverStatusStyles.root}>{msg}</div>;
 };
 
-const ServerStatusContainer = withFetchClient("/health-check", null, {
+const ServerStatusContainer = withFetchClient("health-check", null, {
   pollInterval: 2000,
   mapResult: result => ({status: result.status, time: new Date(result.time)})
 })(ServerStatus);
