@@ -10,6 +10,7 @@ import FetchClientProvider from 'react-powertools/data/FetchClientProvider';
 import FetchCache from 'react-powertools/data/FetchCache';
 import FakeFetch from 'react-powertools/data/FakeFetch';
 import plusJson from 'fetch-plus-json';
+import plusErrorJson from 'react-powertools/data/fetch-plus-error-json';
 import plusUrlPattern from 'react-powertools/data/fetch-plus-url-pattern';
 import plusAuth0 from 'react-powertools/auth0/fetch-plus-auth0';
 import Auth0RedirectHandler from 'react-powertools/auth0/Auth0RedirectHandler';
@@ -41,6 +42,7 @@ class App extends React.Component {
     const {store} = props;
     this.fetchMW = [
       plusJson(),
+      plusErrorJson(),
       plusUrlPattern(),
       plusAuth0(store, ({path}) => this.isAuthRoute(path)),
     ];
