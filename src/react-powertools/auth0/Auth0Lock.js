@@ -90,8 +90,9 @@ export function processAuthRedirectResult(clientId, domain, history) {
           }
         });
       }
-
-      resolve({});
+      else {
+        resolve({});
+      }
     }
     catch (e) {
       resolve({error: e, state: ""});
