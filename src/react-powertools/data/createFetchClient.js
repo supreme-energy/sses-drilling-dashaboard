@@ -24,6 +24,10 @@ function fetchRemoveEmptyQuery (path, options) {
 export default function createFetchClient(url, options, middleware = []) {
   // supply a fetch wrapper which will strip the trailing "?" from the path
   // if the query object is empty.
-  const fpOptions = { ...options, fetch: fetchRemoveEmptyQuery };
+  const fpOptions = {
+    ...options,
+    fetch: fetchRemoveEmptyQuery,
+    normalizeUrl: s => s && s.toString().replace(/(\/+$)/g, "")
+  };
   return createClient(url, fpOptions, middleware).get;
 }
