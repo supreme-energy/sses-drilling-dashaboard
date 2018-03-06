@@ -20,7 +20,7 @@
   "author": "David Zukowski <david@zuko.me> (http://zuko.me)",
   "license": "MIT",
   "dependencies": {
-    "auth0-lock": "^10.23.1",
+    "auth0-lock": "^11.3.1",
     "bootstrap": "^4.0.0-alpha",
     "fetch-plus": "^3.10.6",
     "fetch-plus-json": "^3.10.4",
