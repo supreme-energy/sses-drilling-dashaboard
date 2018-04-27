@@ -24,7 +24,7 @@ const fakeStatusCall = {
   "health-check": {
     GET: () => ({status: "FAKE", time: Date.now()})
   }
-}
+};
 
 class App extends React.Component {
   static propTypes = {
@@ -70,7 +70,7 @@ class App extends React.Component {
             <FetchCache predicate={this.isNotAuthRoute}>
               <Auth0RedirectHandler clientId={auth0.clientId} domain={auth0.domain} history={history}>
                 <div style={{ height: '100%' }}>
-                  {/* place FakeFetch at any level to intercept calls within its children*/}
+                  {/* place FakeFetch at any level to intercept calls within its children */}
                   <FakeFetch routes={fakeData}>
                     <PageLayout history={history}>
                       <RequireAuth0 redirectMode history={history} inline style={loginStyle}>
@@ -82,10 +82,10 @@ class App extends React.Component {
                           * not get any cached results from the first user
                           * */}
                         <FetchCache predicate={this.isAuthRoute}>
-                            <Switch>
-                              <Route path="/" exact component={Home} />
-                              <Route path="/counter" component={Counter} />
-                            </Switch>
+                          <Switch>
+                            <Route path="/" exact component={Home} />
+                            <Route path="/counter" component={Counter} />
+                          </Switch>
                         </FetchCache>
                       </RequireAuth0>
                     </PageLayout>
