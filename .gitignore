@@ -7,3 +7,4 @@ coverage
 .idea/**/
 !.idea/codeStyleSettings.xml
 .yarn-cache
+src/react-powertools/
