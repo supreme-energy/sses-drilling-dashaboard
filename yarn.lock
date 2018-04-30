@@ -5280,9 +5280,9 @@ react-element-to-jsx-string@^5.0.0:
     stringify-object "2.4.0"
     traverse "^0.6.6"
 
-react-powertools@./react-powertools-v1.0.0.tgz:
-  version "1.0.0"
-  resolved "./react-powertools-v1.0.0.tgz#bffcebc19a9b41efb6f809fca3b3a8add2cf5d46"
+react-powertools@./react-powertools-v1.0.1.tgz:
+  version "1.0.1"
+  resolved "./react-powertools-v1.0.1.tgz#cca12682b1b2041f91097e6648f68f8f492ba959"
 
 react-redux@^5.0.6:
   version "5.0.6"
