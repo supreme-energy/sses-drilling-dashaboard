@@ -1,5 +1,14 @@
 # React Redux Starter Kit
 
+## Uprading React-Powertools
+ - get the latest powertools build from https://build-artefacts.experolabs.com/react-powertools/index.html#
+ - add the latest .tgz file to the repo
+ - run `yarn remove react-powertools` to remove the old dependency
+ - run `yarn add ./react-powertools-v1.x.x.tgz` to add the new
+ - `git rm` to remove the old .tgz file
+ - open a PR
+
+
 [![Build Status](https://travis-ci.org/davezuko/react-redux-starter-kit.svg?branch=master)](https://travis-ci.org/davezuko/react-redux-starter-kit?branch=master)
 [![dependencies](https://david-dm.org/davezuko/react-redux-starter-kit.svg)](https://david-dm.org/davezuko/react-redux-starter-kit)
 [![devDependency Status](https://david-dm.org/davezuko/react-redux-starter-kit/dev-status.svg)](https://david-dm.org/davezuko/react-redux-starter-kit#info=devDependencies)
