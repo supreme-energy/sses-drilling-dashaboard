@@ -9,7 +9,7 @@ import RequireAuth0 from 'react-powertools/auth0/RequireAuth0';
 import FetchClientProvider from 'react-powertools/data/FetchClientProvider';
 import FetchCache from 'react-powertools/data/FetchCache';
 import FakeFetch from 'react-powertools/data/FakeFetch';
-import plusJson from 'fetch-plus-json';
+import plusJsonStrict from 'react-powertools/data/fetch-plus-strict';
 import plusErrorJson from 'react-powertools/data/fetch-plus-error-json';
 import plusUrlPattern from 'react-powertools/data/fetch-plus-url-pattern';
 import plusAuth0 from 'react-powertools/auth0/fetch-plus-auth0';
@@ -41,7 +41,7 @@ class App extends React.Component {
     // Construct the Fetch middleware
     const {store} = props;
     this.fetchMW = [
-      plusJson(),
+      plusJsonStrict(),
       plusErrorJson(),
       plusUrlPattern(),
       plusAuth0(store, ({path}) => this.isAuthRoute(path)),
