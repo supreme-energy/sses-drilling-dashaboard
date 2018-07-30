@@ -1,17 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const project = require('../project.config');
 
 const inProject = path.resolve.bind(path, project.basePath);
-const inProjectSrc = (file) => inProject(project.srcDir, file);
+const inProjectSrc = file => inProject(project.srcDir, file);
 
 const __DEV__ = project.env === 'development';
 const __TEST__ = project.env === 'test';
 const __PROD__ = project.env === 'production';
 
 const config = {
+  mode: __DEV__ ? 'development' : 'production',
   entry: {
     normalize: [
       inProjectSrc('normalize'),
@@ -87,64 +89,62 @@ config.module.rules.push({
 
 // Styles
 // ------------------------------------
-const extractStyles = new ExtractTextPlugin({
-  filename: 'styles/[name].[contenthash].css',
+const extractStyles = new MiniCssExtractPlugin({
+  filename: __DEV__ ? 'styles/[name].css' : 'styles/[name].[contenthash].css',
   allChunks: true,
   disable: false,
 });
 
 config.module.rules.push({
   test: /\.(sass|scss)$/,
-  loader: extractStyles.extract({
-    fallback: 'style-loader',
-    use: [
-      {
-        loader: 'css-loader',
-        options: {
-          sourceMap: project.sourcemaps,
-          modules: project.scssModules,
-          localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hash:base64]",
-          importLoaders: 1,
-          minimize: {
-            autoprefixer: {
-              add: true,
-              remove: true,
-              browsers: ['last 2 versions'],
-            },
-            discardComments: {
-              removeAll : true,
-            },
-            discardUnused: false,
-            mergeIdents: false,
-            reduceIdents: false,
-            safe: true,
-            sourcemap: project.sourcemaps,
+  use: [
+    __DEV__ ? 'style-loader' : MiniCssExtractPlugin.loader,
+    {
+      loader: 'css-loader',
+      options: {
+        sourceMap: project.sourcemaps,
+        modules: project.scssModules,
+        localIdentName: __DEV__ ? "[name]__[local]___[hash:base64:5]" : "[hash:base64]",
+        importLoaders: 1,
+        minimize: {
+          autoprefixer: {
+            add: true,
+            remove: true,
+            browsers: ['last 2 versions'],
           },
+          discardComments: {
+            removeAll: true,
+          },
+          discardUnused: false,
+          mergeIdents: false,
+          reduceIdents: false,
+          safe: true,
+          sourcemap: project.sourcemaps,
         },
       },
-      {
-        loader: 'sass-loader',
-        options: {
-          sourceMap: project.sourcemaps,
-          includePaths: [
-            inProjectSrc('styles'),
-          ],
-        },
-      }
-    ],
-  })
+    },
+    {
+      loader: 'sass-loader',
+      options: {
+        sourceMap: project.sourcemaps,
+        includePaths: [
+          inProjectSrc('styles'),
+        ],
+      },
+    },
+  ],
 });
 config.plugins.push(extractStyles);
 
 // Images
 // ------------------------------------
 config.module.rules.push({
-  test    : /\.(png|jpg|gif)$/,
-  loader  : 'url-loader',
-  options : {
-    limit : 8192,
+  test: /\.(png|jpg|gif)$/,
+  loader: 'url-loader',
+  options: {
+    limit: 8192,
   },
-})
+});
 
 // Fonts
 // ------------------------------------
@@ -155,7 +155,7 @@ config.module.rules.push({
   ['ttf', 'application/octet-stream'],
   ['eot', 'application/vnd.ms-fontobject'],
   ['svg', 'image/svg+xml'],
-].forEach((font) => {
+].forEach(font => {
   const extension = font[0];
   const mimetype = font[1];
 
@@ -196,13 +196,32 @@ if (__DEV__) {
 // Bundle Splitting
 // ------------------------------------
 if (!__TEST__) {
-  const bundles = ['normalize', 'manifest'];
+  const cacheGroups = {
+    normalize: {
+      name: 'normalize',
+      chunks: 'all',
+      minChunks: 2,
+      priority: -10,
+    },
+  };
 
   if (project.vendors && project.vendors.length) {
-    bundles.unshift('vendor');
     config.entry.vendor = project.vendors;
+    cacheGroups.vendor = {
+      name: 'vendor',
+      chunks: 'all',
+      minChunks: 2,
+    };
   }
-  config.plugins.push(new webpack.optimize.CommonsChunkPlugin({ names: bundles }));
+
+  config.optimization = {
+    splitChunks: {
+      cacheGroups: cacheGroups,
+    },
+    runtimeChunk: {
+      name: 'manifest',
+    },
+  };
 }
 
 // Production Optimizations
@@ -214,10 +233,14 @@ if (__PROD__) {
       debug: false,
     }),
     new webpack.optimize.ModuleConcatenationPlugin(),
-    new webpack.optimize.UglifyJsPlugin({
+    new webpack.HashedModuleIdsPlugin()
+  );
+
+  config.optimization.minimizer = [
+    new UglifyJsPlugin({
       sourceMap: !!config.devtool,
-      comments: false,
-      compress: {
+      extractComments: false,
+      uglifyOptions: {
         warnings: false,
         screw_ie8: true,
         conditionals: true,
@@ -230,8 +253,7 @@ if (__PROD__) {
         join_vars: true,
       },
     }),
-    new webpack.HashedModuleIdsPlugin()
-  );
+  ];
 }
 
 module.exports = config;
