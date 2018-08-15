@@ -96,7 +96,7 @@ const extractStyles = new MiniCssExtractPlugin({
 });
 
 config.module.rules.push({
-  test: /\.(sass|scss)$/,
+  test: /\.(sass|scss|css)$/,
   use: [
     __DEV__ ? 'style-loader' : MiniCssExtractPlugin.loader,
     {
