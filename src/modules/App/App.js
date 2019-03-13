@@ -65,7 +65,7 @@ class App extends React.Component {
     return (
       <Provider store={store}>
         <Router history={history}>
-          <FetchClientProvider url={"http://localhost:4040/api"} options={{mode: "cors"}} middleware={this.fetchMW}>
+          <FetchClientProvider url={"/api"} options={{mode: "cors"}} middleware={this.fetchMW}>
             {/* cache the api methods that do not require authentication */}
             <FetchCache predicate={this.isNotAuthRoute}>
               <Auth0RedirectHandler clientId={auth0.clientId} domain={auth0.domain} history={history}>

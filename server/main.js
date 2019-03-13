@@ -35,6 +35,17 @@ if (project.env === 'development') {
   // when the application is compiled.
   app.use(express.static(path.resolve(project.basePath, 'public')));
 
+  // some API endpoints for testing the UI fetching
+  const API = express.Router();
+  API
+    .get("/auth/square/:counter", (req, res) => {
+      setTimeout(() => {
+        res.send({ num: req.params.counter * req.params.counter });
+      }, 500);
+    })
+    .get("/health-check", (req, res) => res.send({ status: "healthy", time: new Date() }))
+  app.use("/api", API);
+
   // This rewrites all routes requests to the root /index.html file
   // (ignoring file requests). If you want to implement universal
   // rendering, you'll want to remove this middleware.
