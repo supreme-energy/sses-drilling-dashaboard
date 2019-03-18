@@ -1,4 +1,4 @@
-# React Redux Starter Kit
+# SSES Drilling Dashboard
 
 ## Uprading React-Powertools
  - get the latest powertools build from https://build-artefacts.experolabs.com/react-powertools/index.html#
@@ -9,16 +9,7 @@
  - open a PR
 
 
-[![Build Status](https://travis-ci.org/davezuko/react-redux-starter-kit.svg?branch=master)](https://travis-ci.org/davezuko/react-redux-starter-kit?branch=master)
-[![dependencies](https://david-dm.org/davezuko/react-redux-starter-kit.svg)](https://david-dm.org/davezuko/react-redux-starter-kit)
-[![devDependency Status](https://david-dm.org/davezuko/react-redux-starter-kit/dev-status.svg)](https://david-dm.org/davezuko/react-redux-starter-kit#info=devDependencies)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
-
-This starter kit is designed to get you up and running with a bunch of awesome front-end technologies.
-
-The primary goal of this project is to provide a stable foundation upon which to build modern web appliications. Its purpose is not to dictate your project structure or to demonstrate a complete real-world application, but to provide a set of tools intended to make front-end development robust, easy, and, most importantly, fun. Check out the full feature list below!
-
-Finally, This project wouldn't be possible without the help of our many contributors. What you see today is the product of hundreds changes made to keep up with an ever-evolving ecosystem. [Thank you](#thank-you) for all of your help.
+##
 
 ## Table of Contents
 1. [Requirements](#requirements)
@@ -41,14 +32,7 @@ Finally, This project wouldn't be possible without the help of our many contribu
 
 ## Installation
 
-After confirming that your environment meets the above [requirements](#requirements), you can create a new project based on `react-redux-starter-kit` by doing the following:
-
-```bash
-$ git clone https://github.com/davezuko/react-redux-starter-kit.git <my-project-name>
-$ cd <my-project-name>
-```
-
-When that's done, install the project dependencies. It is recommended that you use [Yarn](https://yarnpkg.com/) for deterministic dependency management, but `npm install` will suffice.
+Next install the project dependencies. It is recommended that you use [Yarn](https://yarnpkg.com/) for deterministic dependency management, but `npm install` will suffice.
 
 ```bash
 $ yarn  # Install project dependencies (or `npm install`)
@@ -169,14 +153,3 @@ Out of the box, this starter kit is deployable by serving the `./dist` folder ge
 ### Static Deployments
 
 Serve the application with a web server such as nginx by pointing it at your `./dist` folder. Make sure to direct incoming route requests to the root `./dist/index.html` file so that the client application will be loaded; react-router will take care of the rest. If you are unsure of how to do this, you might find [this documentation](https://github.com/reactjs/react-router/blob/master/docs/guides/Histories.md#configuring-your-server) helpful. The Express server that comes with the starter kit is able to be extended to serve as an API and more, but is not required for a static deployment.
-
-## Thank You
-
-This project wouldn't be possible without help from the community, so I'd like to highlight some of its biggest contributors. Thank you all for your hard work, you've made my life a lot easier and taught me a lot in the process.
-
-* [Justin Greenberg](https://github.com/justingreenberg) - For all of your PR's, getting us to Babel 6, and constant work improving our patterns.
-* [Roman Pearah](https://github.com/neverfox) - For your bug reports, help in triaging issues, and PR contributions.
-* [Spencer Dixon](https://github.com/SpencerCDixon) - For your creation of [redux-cli](https://github.com/SpencerCDixon/redux-cli).
-* [Jonas Matser](https://github.com/mtsr) - For your help in triaging issues and unending support in our Gitter channel.
-
-And to everyone else who has contributed, even if you are not listed here your work is appreciated.
