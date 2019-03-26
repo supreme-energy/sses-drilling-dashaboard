@@ -10,14 +10,6 @@ import createBrowserHistory from 'history/createBrowserHistory';
 const history = createBrowserHistory();
 const store = createStore(window.__INITIAL_STATE__, history);
 
-// TODO: get injected from server
-const auth0 = {
-  clientId: "4bleMmUdPo1KoNeXNo71hwRBZgfHAej7",
-  domain: "experoinc.auth0.com",
-};
-
-// Handle Auth0
-// ------------------------------------
 // Render Setup
 // ------------------------------------
 const MOUNT_NODE = document.getElementById('root');
@@ -25,7 +17,7 @@ const MOUNT_NODE = document.getElementById('root');
 let render = (AppModule) => {
   const App = AppModule(store);
   ReactDOM.render(
-    <App store={store} history={history} auth0={auth0} />,
+    <App store={store} history={history} />,
     MOUNT_NODE
   );
 };
