@@ -38,11 +38,6 @@ if (project.env === 'development') {
   // some API endpoints for testing the UI fetching
   const API = express.Router();
   API
-    .get("/auth/square/:counter", (req, res) => {
-      setTimeout(() => {
-        res.send({ num: req.params.counter * req.params.counter });
-      }, 500);
-    })
     .get("/health-check", (req, res) => res.send({ status: "healthy", time: new Date() }))
   app.use("/api", API);
 
