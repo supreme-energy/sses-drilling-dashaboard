@@ -16,15 +16,10 @@ import DrillingAnalyticsModule from 'modules/DrillingAnalytics';
 import StructuralGuidanceModule from 'modules/StructuralGuidance';
 import WellExplorerModule from 'modules/WellExplorer';
 import WellImporterModule from 'modules/WellImporter';
+import crossFilterStore from '../../store/crossFilterStore';
 
 // Lazy load header
 const PageLayout = React.lazy(() => import('layouts/PageLayout'));
-
-const fakeStatusCall = {
-  "health-check": {
-    GET: () => ({status: "FAKE", time: Date.now()})
-  }
-};
 
 class App extends React.Component {
   static propTypes = {
@@ -55,8 +50,6 @@ class App extends React.Component {
     const StructuralGuidance = StructuralGuidanceModule(store);
     const WellExplorer = WellExplorerModule(store);
     const WellImporter = WellImporterModule(store);
-
-    const fakeData = { ...fakeStatusCall };
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>
@@ -66,7 +59,7 @@ class App extends React.Component {
               <FetchCache predicate={() => {}}>
                   <div style={{ height: '100%' }}>
                     {/* place FakeFetch at any level to intercept calls within its children */}
-                    <FakeFetch routes={fakeData}>
+                    <FakeFetch routes={crossFilterStore}>
                       <PageLayout history={history}>
                             <Switch>
                               <Route path="/" exact component={WellExplorer} />
