@@ -1,5 +1,5 @@
-import { lazy } from 'react'
+import { lazy } from "react";
 
-const ComboDashboard = lazy(() => import(/* webpackChunkName: 'ComboDashboard' */'../components/ComboDashboard'));
+const ComboDashboard = lazy(() => import(/* webpackChunkName: 'ComboDashboard' */ "../components/ComboDashboard"));
 
 export default ComboDashboard;

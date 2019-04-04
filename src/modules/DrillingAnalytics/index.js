@@ -1,5 +1,5 @@
-import DrillingAnalytics from './containers/DrillingAnalyticsContainer';
+import DrillingAnalytics from "./containers/DrillingAnalyticsContainer";
 
-export default function (store) {
+export default function(store) {
   return DrillingAnalytics;
 }

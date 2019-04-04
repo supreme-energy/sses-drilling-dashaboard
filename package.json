@@ -32,22 +32,24 @@
     "object-assign": "^4.1.1",
     "promise": "^8.0.1",
     "prop-types": "^15.6.2",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
-    "react-powertools": "./react-powertools-v1.0.3.tgz",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-powertools": "./react-powertools-v2.0.0.tgz",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "redbox-react": "^1.6.0",
     "redux": "^4.0.0",
+    "redux-react-hook": "^3.2.1",
     "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
     "shallowequal": "1.1.0",
     "url-pattern": "^1.0.3",
     "whatwg-fetch": "2.0.4"
   },
   "resolutions": {
-    "react": "16.8.4",
-    "react-dom": "16.8.4"
+    "react": "16.8.6",
+    "react-dom": "16.8.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
