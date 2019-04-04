@@ -12,7 +12,12 @@ class CrossSection extends Component {
     this.worldWidth = 1000;
 
     this.canvas = React.createRef();
-    this.app = new PIXI.Application(this.screenWidth, this.screenHeight);
+    this.app = new PIXI.Application({
+      width: this.screenWidth,
+      height: this.screenHeight,
+      antialias: true,
+      backgroundColor: 0xffffff
+    });
 
     this.viewport = new Viewport({
       screenWidth: this.screenWidth,
@@ -55,6 +60,7 @@ class CrossSection extends Component {
       this.props.setY(pos.y - dragP.y);
     });
     this.viewport.addChild(this.rectangle);
+    window.viewport = this.viewport;
   }
 
   componentWillMount() {}
@@ -145,10 +151,10 @@ class CrossSection extends Component {
     if (!xHide) {
       for (let i = 0; i < w; i += xInterval) {
         let label = new PIXI.Text(i, {
-          fill: "#fff",
+          fill: "#aaa",
           fontSize: 20
         });
-        label.anchor.set(0.5, 0.5);
+        label.anchor.set(0.5, 0);
         label.x = i;
         label.y = h;
         container.addChild(label);
@@ -165,10 +171,10 @@ class CrossSection extends Component {
     if (!yHide) {
       for (let i = 0; i < h; i += yInterval) {
         let label = new PIXI.Text(i, {
-          fill: "#fff",
+          fill: "#aaa",
           fontSize: 20
         });
-        label.anchor.set(0, 0.5);
+        label.anchor.set(1, 0.5);
         label.x = 0;
         label.y = i;
         container.addChild(label);
@@ -222,10 +228,7 @@ class CrossSection extends Component {
 
   onDragMove() {
     if (this.dragging) {
-      event.stopPropagation();
       var newPosition = this.data.getLocalPosition(this.parent);
-      // this.x = newPosition.x - this.dragPoint.x;
-      // this.y = newPosition.y - this.dragPoint.y;
       this.cb(newPosition, this.dragPoint);
     }
   }
