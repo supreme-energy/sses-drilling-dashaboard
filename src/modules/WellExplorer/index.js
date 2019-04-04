@@ -1,5 +1,5 @@
-import WellExplorer from './containers/WellExplorerContainer';
+import WellExplorer from "./containers/WellExplorerContainer";
 
-export default function () {
+export default function() {
   return WellExplorer;
 }

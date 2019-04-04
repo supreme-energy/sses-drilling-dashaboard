@@ -1,5 +1,5 @@
-import App from './App';
+import App from "./App";
 
-export default function () {
+export default function() {
   return App;
 }
