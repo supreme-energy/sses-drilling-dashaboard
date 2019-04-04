@@ -1,16 +1,16 @@
-import crossfilter from 'crossfilter2';
-import crossSectionData from '../data/crossSection.json';
+import crossfilter from "crossfilter2";
+import crossSectionData from "../data/crossSection.json";
 
 const csFiltered = crossfilter(crossSectionData);
 
-const getLatestCrossSection= () => {
-    return csFiltered;
+const getLatestCrossSection = () => {
+  return csFiltered;
 };
 
 export default {
-    'cross-section': {
-        GET: (path, { query }) => {
-            return getLatestCrossSection;
-        }
+  "cross-section": {
+    GET: (path, { query }) => {
+      return getLatestCrossSection;
     }
+  }
 };
