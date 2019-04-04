@@ -1,7 +1,7 @@
-import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
-import thunk from 'redux-thunk';
-import makeRootReducer from './reducers';
-import { updateLocation } from './location';
+import { applyMiddleware, compose, createStore as createReduxStore } from "redux";
+import thunk from "redux-thunk";
+import makeRootReducer from "./reducers";
+import { updateLocation } from "./location";
 
 const createStore = (initialState, history) => {
   const iState = initialState || { location: history.location };
@@ -18,7 +18,7 @@ const createStore = (initialState, history) => {
   let composeEnhancers = compose;
 
   if (__DEV__) {
-    if (typeof window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ === 'function') {
+    if (typeof window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ === "function") {
       composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
     }
   }
@@ -29,10 +29,7 @@ const createStore = (initialState, history) => {
   const store = createReduxStore(
     makeRootReducer(),
     iState,
-    composeEnhancers(
-      applyMiddleware(...middleware),
-      ...enhancers
-    )
+    composeEnhancers(applyMiddleware(...middleware), ...enhancers)
   );
   store.asyncReducers = {};
 

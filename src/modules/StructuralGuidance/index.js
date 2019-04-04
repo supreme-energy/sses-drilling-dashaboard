@@ -1,5 +1,5 @@
-import StructualGuidance from './containers/StructualGuidanceContainer';
+import StructualGuidance from "./containers/StructualGuidanceContainer";
 
-export default function () {
+export default function() {
   return StructualGuidance;
 }

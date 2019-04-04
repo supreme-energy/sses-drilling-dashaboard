@@ -38,6 +38,7 @@ if (project.env === 'development') {
   // some API endpoints for testing the UI fetching
   const API = express.Router();
   API
+    .get("/cross-section", (req, res) => res.send({ value: 1 }))
     .get("/health-check", (req, res) => res.send({ status: "healthy", time: new Date() }))
   app.use("/api", API);
 

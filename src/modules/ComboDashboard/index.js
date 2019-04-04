@@ -1,5 +1,5 @@
-import ComboDashboard from './containers/ComboDashboardContainer';
+import ComboDashboard from "./containers/ComboDashboardContainer";
 
-export default function () {
+export default function() {
   return ComboDashboard;
 }
