@@ -43,6 +43,18 @@ class CrossSection extends Component {
       yInterval: 100,
       xInterval: 100
     });
+
+    this.rectangle = new PIXI.Graphics();
+    this.rectangle.lineStyle(0);
+    this.rectangle.position = new PIXI.Point(300, 300);
+    this.rectangle.beginFill(0xffff0b, 0.5);
+    this.rectangle.drawRect(0, 0, 200, 200);
+    this.rectangle.endFill();
+    this.subscribe(this.rectangle, pos => {
+      this.props.setX(pos.x);
+      this.props.setY(pos.y);
+    });
+    this.viewport.addChild(this.rectangle);
   }
 
   componentWillMount() {}
@@ -59,7 +71,9 @@ class CrossSection extends Component {
 
   componentWillReceiveProps(nextProps) {}
 
-  shouldComponentUpdate(nextProps, nextState) {}
+  shouldComponentUpdate(nextProps, nextState) {
+    return true;
+  }
 
   componentWillUpdate(nextProps, nextState) {}
 
@@ -70,7 +84,9 @@ class CrossSection extends Component {
   }
 
   render() {
+    const { x, y } = this.props;
     this.message.text = this.props.message;
+    this.rectangle.position = new PIXI.Point(x, y);
 
     return <div ref={this.canvas} />;
   }
@@ -163,6 +179,54 @@ class CrossSection extends Component {
         line.lineTo(w, i);
         container.addChild(line);
       }
+    }
+  }
+  subscribe(obj, cb) {
+    obj.interactive = true;
+    obj.cb = cb || (_ => {});
+    obj
+      .on("mousedown", this.onDragStart)
+      .on("touchstart", this.onDragStart)
+      .on("mouseup", this.onDragEnd)
+      .on("mouseupoutside", this.onDragEnd)
+      .on("touchend", this.onDragEnd)
+      .on("touchendoutside", this.onDragEnd)
+      .on("mousemove", this.onDragMove)
+      .on("touchmove", this.onDragMove);
+  }
+
+  onDragStart(event) {
+    if (!this.dragging) {
+      event.stopPropagation();
+      this.data = event.data;
+      this.dragging = true;
+
+      this.scale.x *= 1.1;
+      this.scale.y *= 1.1;
+      // Point relative to the center of the object
+      this.dragPoint = event.data.getLocalPosition(this.parent);
+      this.dragPoint.x -= this.x;
+      this.dragPoint.y -= this.y;
+    }
+  }
+
+  onDragEnd() {
+    if (this.dragging) {
+      this.dragging = false;
+      this.scale.x /= 1.1;
+      this.scale.y /= 1.1;
+      // set the interaction data to null
+      this.data = null;
+    }
+  }
+
+  onDragMove() {
+    if (this.dragging) {
+      event.stopPropagation();
+      var newPosition = this.data.getLocalPosition(this.parent);
+      // this.x = newPosition.x - this.dragPoint.x;
+      // this.y = newPosition.y - this.dragPoint.y;
+      this.cb(newPosition);
     }
   }
 }
