@@ -45,14 +45,14 @@ class CrossSection extends Component {
     });
 
     this.rectangle = new PIXI.Graphics();
-    this.rectangle.lineStyle(0);
     this.rectangle.position = new PIXI.Point(300, 300);
     this.rectangle.beginFill(0xffff0b, 0.5);
     this.rectangle.drawRect(0, 0, 200, 200);
+    this.rectangle.pivot = new PIXI.Point(100, 100);
     this.rectangle.endFill();
-    this.subscribe(this.rectangle, pos => {
-      this.props.setX(pos.x);
-      this.props.setY(pos.y);
+    this.subscribe(this.rectangle, (pos, dragP) => {
+      this.props.setX(pos.x - dragP.x);
+      this.props.setY(pos.y - dragP.y);
     });
     this.viewport.addChild(this.rectangle);
   }
@@ -226,7 +226,7 @@ class CrossSection extends Component {
       var newPosition = this.data.getLocalPosition(this.parent);
       // this.x = newPosition.x - this.dragPoint.x;
       // this.y = newPosition.y - this.dragPoint.y;
-      this.cb(newPosition);
+      this.cb(newPosition, this.dragPoint);
     }
   }
 }

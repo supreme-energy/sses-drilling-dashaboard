@@ -4,8 +4,8 @@ import Progress from "@material-ui/core/CircularProgress";
 import CrossSection from "./CrossSection";
 
 export const ComboDashboard = () => {
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
+  const [x, setX] = useState(50);
+  const [y, setY] = useState(50);
   return (
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
