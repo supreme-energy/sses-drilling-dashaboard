@@ -39,6 +39,10 @@ class CrossSection extends Component {
     });
 
     this.addDemoFormations(this.viewport);
+    this.addGridlines(this.viewport, {
+      yInterval: 100,
+      xInterval: 100
+    });
   }
 
   componentWillMount() {}
@@ -105,6 +109,60 @@ class CrossSection extends Component {
       container.addChild(poly);
 
       prevPath = nextPath;
+    }
+  }
+
+  /**
+   * Add grid lines to a PIXI.Container
+   * @param container The PIXI container to add gridlines to
+   * @param options   Options for grid intervals, labels, etc
+   */
+  addGridlines(container, options = {}) {
+    let w = container.width;
+    let h = container.height;
+    let xHide = options.xHide || false;
+    let xInterval = options.xInterval || 50;
+    let yHide = options.yHide || false;
+    let yInterval = options.yInterval || 50;
+
+    // Generate lines for x axis
+    if (!xHide) {
+      for (let i = 0; i < w; i += xInterval) {
+        let label = new PIXI.Text(i, {
+          fill: "#fff",
+          fontSize: 20
+        });
+        label.anchor.set(0.5, 0.5);
+        label.x = i;
+        label.y = h;
+        container.addChild(label);
+
+        let line = new PIXI.Graphics();
+        line.lineStyle(2, 0xaaaaaa, 0.3);
+        line.moveTo(i, 0);
+        line.lineTo(i, h);
+        container.addChild(line);
+      }
+    }
+
+    // Generate lines for y axis
+    if (!yHide) {
+      for (let i = 0; i < h; i += yInterval) {
+        let label = new PIXI.Text(i, {
+          fill: "#fff",
+          fontSize: 20
+        });
+        label.anchor.set(0, 0.5);
+        label.x = 0;
+        label.y = i;
+        container.addChild(label);
+
+        let line = new PIXI.Graphics();
+        line.lineStyle(2, 0xaaaaaa, 0.3);
+        line.moveTo(0, i);
+        line.lineTo(w, i);
+        container.addChild(line);
+      }
     }
   }
 }
