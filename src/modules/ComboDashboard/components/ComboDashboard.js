@@ -10,9 +10,17 @@ export const ComboDashboard = () => {
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
         <h2>ComboDashboard</h2>
-        <p>
-          x: {x} y: {y}
-        </p>
+        <div>
+          <label>
+            X value
+            <input type="number" value={x} onChange={e => setX(e.target.value)} />
+          </label>
+          <br />
+          <label>
+            Y value
+            <input type="number" value={y} onChange={e => setY(e.target.value)} />
+          </label>
+        </div>
         <CrossSection message={"Hello from React"} x={x} y={y} setX={setX} setY={setY} />
       </div>
     </Suspense>
