@@ -1,5 +1,5 @@
-import { lazy } from 'react' 
+import { lazy } from "react";
 
-const WellExplorer = lazy(() => import(/* webpackChunkName: 'WellExplorer' */'../components/WellExplorer'));
+const WellExplorer = lazy(() => import(/* webpackChunkName: 'WellExplorer' */ "../components/WellExplorer"));
 
 export default WellExplorer;
