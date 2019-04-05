@@ -30,7 +30,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     // Construct the Fetch middleware
-    const { store } = props;
+
     this.fetchMW = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
   }
 
