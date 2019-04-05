@@ -60,8 +60,7 @@ if (project.env === "development") {
       res.end();
     });
   });
-}
-else {
+} else {
   logger.warn(
     "Server is being run outside of live development mode, meaning it will " +
       "only serve the compiled application bundle in ~/dist. Generally you " +

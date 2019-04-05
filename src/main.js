@@ -33,8 +33,7 @@ if (__DEV__) {
     render = AppModule => {
       try {
         renderApp(AppModule);
-      }
-      catch (e) {
+      } catch (e) {
         console.error(e);
         renderError(e);
       }
