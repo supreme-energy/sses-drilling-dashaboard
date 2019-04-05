@@ -1,12 +1,13 @@
 image: experoinc/ci-frontend-node8
 
 pipelines:
-  default:
-    - step:
-        name: Build and test
-        caches:
-          - node
-        script:
-          - yarn
-          - yarn run lint
-          - yarn run build
+  branches:
+    '{master,develop}':
+      - step:
+          name: Build and test
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
+            - yarn run build
