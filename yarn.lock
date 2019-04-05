@@ -3263,6 +3263,10 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
+fetch-plus-basicauth@^3.10.4:
+  version "3.10.4"
+  resolved "https://registry.yarnpkg.com/fetch-plus-basicauth/-/fetch-plus-basicauth-3.10.4.tgz#ca89ff92bb73cabb7c735caad685bc3b58ca2686"
+
 fetch-plus-json@^3.10.4:
   version "3.10.4"
   resolved "https://registry.yarnpkg.com/fetch-plus-json/-/fetch-plus-json-3.10.4.tgz#254834cf30ac264a1bf3bcbef5968b5e73296eb7"
@@ -4781,7 +4785,6 @@ lcid@^1.0.0:
 leaflet@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.4.0.tgz#d5f56eeb2aa32787c24011e8be4c77e362ae171b"
-  integrity sha512-x9j9tGY1+PDLN9pcWTx9/y6C5nezoTMB8BLK5jTakx+H7bPlnbCHfi9Hjg+Qt36sgDz/cb9lrSpNQXmk45Tvhw==
 
 levn@^0.3.0, levn@~0.3.0:
   version "0.3.0"
@@ -6082,7 +6085,6 @@ prelude-ls@~1.1.2:
 prettier@^1.16.4:
   version "1.16.4"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.16.4.tgz#73e37e73e018ad2db9c76742e2647e21790c9717"
-  integrity sha512-ZzWuos7TI5CKUeQAtFd6Zhm2s6EpAD/ZLApIhsF9pRvRtM1RFo61dM/4MSRUA0SuLugA/zgrZD8m0BaY46Og7g==
 
 pretty-error@^2.0.2:
   version "2.1.0"
@@ -6372,7 +6374,6 @@ react-is@^16.6.3, react-is@^16.7.0, react-is@^16.8.1:
 react-leaflet@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-leaflet/-/react-leaflet-2.2.1.tgz#c33974f518ffc8b3b7221f72e00c28963b95314d"
-  integrity sha512-q95486MsoKYmHFRDJyKRY/wdlKbaiTBfq23rfcG9WwsGNxaQuHLcIhxj3m9s4PiG3DImhz3Qfov6UUrsf+yMpw==
   dependencies:
     "@babel/runtime" "^7.3.1"
     fast-deep-equal "^2.0.1"
@@ -6635,7 +6636,6 @@ regenerator-runtime@^0.12.0:
 regenerator-runtime@^0.13.2:
   version "0.13.2"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.2.tgz#32e59c9a6fb9b1a4aff09b4930ca2d4477343447"
-  integrity sha512-S/TQAZJO+D3m9xeN1WTI8dLKBBiRgXBlTJvbWjCThHWZj9EvHK70Ff50/tYj2J/fvBY6JtFVwRuazHN2E7M9BA==
 
 regenerator-transform@0.9.11:
   version "0.9.11"
@@ -8070,7 +8070,6 @@ warning@^4.0.1:
 warning@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
-  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
 
