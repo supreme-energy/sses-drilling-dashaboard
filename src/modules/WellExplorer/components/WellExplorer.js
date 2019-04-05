@@ -1,5 +1,4 @@
 import React, { lazy, Suspense } from "react";
-import PropTypes from "prop-types";
 
 import Progress from "@material-ui/core/CircularProgress";
 
