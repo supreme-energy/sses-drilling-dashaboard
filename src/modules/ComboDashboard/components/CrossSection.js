@@ -86,6 +86,7 @@ class CrossSection extends Component {
   componentDidUpdate(prevProps, prevState) {}
 
   componentWillUnmount() {
+    // TODO: Clean up and remove other objects to improve performance
     this.app.stop();
   }
 
