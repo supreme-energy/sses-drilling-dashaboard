@@ -11,16 +11,18 @@ class CrossSection extends Component {
     this.worldWidth = 1000;
 
     this.canvas = React.createRef();
-    this.app = new PIXI.Application({
+    this.renderer = PIXI.autoDetectRenderer({
       width: this.screenWidth,
       height: this.screenHeight,
       antialias: true,
       backgroundColor: 0xffffff
     });
+    this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
+
+    this.ticker = PIXI.ticker.shared;
+    this.ticker.add(() => this.renderer.render(this.viewport), PIXI.UPDATE_PRIORITY.LOW);
 
     this.viewport = new PIXI.Container();
-
-    this.app.stage.addChild(this.viewport);
 
     this.message = new PIXI.Text("", {
       fontFamily: "Arial",
@@ -48,19 +50,33 @@ class CrossSection extends Component {
       this.props.setY(pos.y - dragP.y);
     });
     this.viewport.addChild(this.rectangle);
+
+    this.renderer.view["addEventListener"](
+      "wheel",
+      e => {
+        let point = new PIXI.Point();
+        this.interactionManager.mapPositionToPoint(point, e.clientX, e.clientY);
+        this.props.setView({
+          x: point.x,
+          y: point.y
+        });
+      },
+      false
+    );
+
     window.viewport = this.viewport;
   }
 
   componentWillMount() {}
 
   componentDidMount() {
-    this.canvas.current.appendChild(this.app.view);
+    this.canvas.current.appendChild(this.renderer.view);
 
     this.message.x = 30;
     this.message.y = 30;
 
     this.viewport.addChild(this.message);
-    this.app.start();
+    this.ticker.start();
   }
 
   componentWillReceiveProps(nextProps) {}
@@ -75,13 +91,14 @@ class CrossSection extends Component {
 
   componentWillUnmount() {
     // TODO: Clean up and remove other objects to improve performance
-    this.app.stop();
+    this.ticker.stop();
   }
 
   render() {
-    const { x, y } = this.props;
+    const { x, y, view } = this.props;
     this.message.text = this.props.message;
     this.rectangle.position = new PIXI.Point(x, y);
+    this.viewport.position = new PIXI.Point(view.x, view.y);
 
     return <div ref={this.canvas} />;
   }
