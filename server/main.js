@@ -5,6 +5,7 @@ const logger = require("../build/lib/logger");
 const webpackConfig = require("../build/webpack.config");
 const project = require("../project.config");
 const compress = require("compression");
+const proxy = require("http-proxy-middleware");
 
 const app = express();
 app.use(compress());
@@ -38,6 +39,8 @@ if (project.env === "development") {
   // of development since this directory will be copied into ~/dist
   // when the application is compiled.
   app.use(express.static(path.resolve(project.basePath, "public")));
+  const config = JSON.parse(project.globals.__CONFIG__);
+  app.use("/api/**", proxy({ target: config.serverUrl, changeOrigin: true }));
 
   // some API endpoints for testing the UI fetching
   const API = express.Router();
