@@ -19,10 +19,49 @@ class CrossSection extends Component {
     });
     this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
 
-    this.ticker = PIXI.ticker.shared;
-    this.ticker.add(() => this.renderer.render(this.viewport), PIXI.UPDATE_PRIORITY.LOW);
-
     this.viewport = new PIXI.Container();
+    let stage = new PIXI.Container();
+    stage.addChild(this.viewport);
+
+    stage.interactive = true;
+    stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
+    let isDragging = false,
+      prevX,
+      prevY;
+
+    stage.mousedown = function(moveData) {
+      const pos = moveData.data.global;
+      prevX = pos.x;
+      prevY = pos.y;
+      isDragging = true;
+    };
+
+    stage.mousemove = moveData => {
+      if (!isDragging) {
+        return;
+      }
+      const pos = moveData.data.global;
+      const dx = pos.x - prevX;
+      const dy = pos.y - prevY;
+
+      this.props.setView(prev => {
+        return {
+          ...prev,
+          x: Number(prev.x) + dx,
+          y: Number(prev.y) + dy
+        };
+      });
+
+      prevX = pos.x;
+      prevY = pos.y;
+    };
+
+    stage.mouseup = function(moveDate) {
+      isDragging = false;
+    };
+
+    this.ticker = PIXI.ticker.shared;
+    this.ticker.add(() => this.renderer.render(stage));
 
     this.message = new PIXI.Text("", {
       fontFamily: "Arial",
@@ -232,8 +271,9 @@ class CrossSection extends Component {
     }
   }
 
-  onDragMove() {
+  onDragMove(event) {
     if (this.dragging) {
+      event.stopPropagation();
       var newPosition = this.data.getLocalPosition(this.parent);
       this.cb(newPosition, this.dragPoint);
     }
