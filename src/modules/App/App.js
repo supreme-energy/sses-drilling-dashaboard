@@ -19,6 +19,7 @@ import WellImporterModule from "modules/WellImporter";
 import plusBasicAuth from "fetch-plus-basicauth";
 // Lazy load header
 const PageLayout = React.lazy(() => import("layouts/PageLayout"));
+const fetchClientOptions = { mode: "cors", credentials: "include" };
 
 class App extends React.Component {
   static propTypes = {
@@ -54,7 +55,7 @@ class App extends React.Component {
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>
           <Router history={history}>
-            <FetchClientProvider url={`${__CONFIG__.serverUrl}/api`} options={{ mode: "cors", credentials: "include" }}>
+            <FetchClientProvider url={`${__CONFIG__.serverUrl}/api`} options={fetchClientOptions}>
               {/* cache the api methods that do not require authentication */}
               <FetchCache predicate={() => {}}>
                 <div style={{ height: "100%" }}>
