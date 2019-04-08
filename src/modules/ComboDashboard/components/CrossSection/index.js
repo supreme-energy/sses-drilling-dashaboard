@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
-import Viewport from "pixi-viewport";
 
 class CrossSection extends Component {
   constructor(props) {
@@ -19,20 +18,9 @@ class CrossSection extends Component {
       backgroundColor: 0xffffff
     });
 
-    this.viewport = new Viewport({
-      screenWidth: this.screenWidth,
-      screenHeight: this.screenHeight,
-      worldWidth: this.worldWidth,
-      worldHeight: this.worldHeight,
-      interaction: this.app.renderer.plugins.interaction
-    });
+    this.viewport = new PIXI.Container();
 
     this.app.stage.addChild(this.viewport);
-
-    this.viewport
-      .drag()
-      .pinch()
-      .wheel();
 
     this.message = new PIXI.Text("", {
       fontFamily: "Arial",

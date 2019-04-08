@@ -1,7 +1,7 @@
 import React, { Component, Suspense, useState } from "react";
 import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
-import CrossSection from "./CrossSection";
+import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
   const [x, setX] = useState(50);
