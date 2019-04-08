@@ -27,16 +27,12 @@ class App extends React.Component {
     history: PropTypes.object.isRequired
   };
 
-  constructor(props) {
-    super(props);
-    // Construct the Fetch middleware
-    this.fetchMW = [
-      plusJsonStrict(),
-      plusErrorJson(),
-      plusUrlPattern(),
-      plusBasicAuth(__CONFIG__.username, __CONFIG__.password)
-    ];
-  }
+  fetchMW = [
+    plusJsonStrict(),
+    plusErrorJson(),
+    plusUrlPattern(),
+    plusBasicAuth(__CONFIG__.username, __CONFIG__.password)
+  ];
 
   shouldComponentUpdate() {
     return false;
@@ -55,7 +51,7 @@ class App extends React.Component {
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>
           <Router history={history}>
-            <FetchClientProvider url={`${__CONFIG__.serverUrl}/api`} options={fetchClientOptions}>
+            <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
               {/* cache the api methods that do not require authentication */}
               <FetchCache predicate={() => {}}>
                 <div style={{ height: "100%" }}>

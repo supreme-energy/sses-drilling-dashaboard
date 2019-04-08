@@ -15,7 +15,9 @@ const mapStyles = {
 
 export const WellMap = ({ mapCenter, handleClickWell, markers, ...props }) => {
   useFetch({
-    path: "/joblist.php"
+    path: "/joblist.php",
+    credentials: "include",
+    mode: "cors"
   });
 
   return (

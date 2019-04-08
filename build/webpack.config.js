@@ -24,11 +24,6 @@ const config = {
     filename: __DEV__ ? "[name].js" : "[name].[chunkhash].js",
     publicPath: project.publicPath
   },
-  devServer: {
-    proxy: {
-      "**": { target: "http://localhost:3000" }
-    }
-  },
   resolve: {
     modules: [inProject(project.srcDir), "node_modules"],
     extensions: ["*", ".js", ".jsx", ".json"]
