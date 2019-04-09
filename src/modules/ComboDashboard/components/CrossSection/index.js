@@ -26,6 +26,7 @@ class CrossSection extends Component {
     stage.interactive = true;
     stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
     let isDragging = false,
+      isOutside = false,
       prevX,
       prevY;
 
@@ -37,7 +38,7 @@ class CrossSection extends Component {
     };
 
     stage.mousemove = moveData => {
-      if (!isDragging) {
+      if (!isDragging || isOutside) {
         return;
       }
       const pos = moveData.data.global;
@@ -56,7 +57,14 @@ class CrossSection extends Component {
       prevY = pos.y;
     };
 
-    stage.mouseup = function(moveDate) {
+    stage.mouseout = function() {
+      isOutside = true;
+    };
+    stage.mouseover = function() {
+      isOutside = false;
+    };
+
+    stage.mouseup = stage.mouseupoutside = function() {
       isDragging = false;
     };
 
@@ -74,8 +82,8 @@ class CrossSection extends Component {
 
     this.addDemoFormations(this.viewport);
     this.addGridlines(this.viewport, {
-      yInterval: 100,
-      xInterval: 100
+      yInterval: 50,
+      xInterval: 50
     });
 
     this.rectangle = new PIXI.Graphics();
@@ -84,7 +92,7 @@ class CrossSection extends Component {
     this.rectangle.drawRect(0, 0, 200, 200);
     this.rectangle.pivot = new PIXI.Point(100, 100);
     this.rectangle.endFill();
-    this.subscribe(this.rectangle, (pos, dragP) => {
+    this.subscribeToMoveEvents(this.rectangle, (pos, dragP) => {
       this.props.setX(pos.x - dragP.x);
       this.props.setY(pos.y - dragP.y);
     });
@@ -232,7 +240,7 @@ class CrossSection extends Component {
       }
     }
   }
-  subscribe(obj, cb) {
+  subscribeToMoveEvents(obj, cb) {
     obj.interactive = true;
     obj.cb = cb || (_ => {});
     obj
