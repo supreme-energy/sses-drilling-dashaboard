@@ -101,11 +101,16 @@ class CrossSection extends Component {
     this.renderer.view["addEventListener"](
       "wheel",
       e => {
+        const direction = Math.sign(e.deltaY);
         let point = new PIXI.Point();
         this.interactionManager.mapPositionToPoint(point, e.clientX, e.clientY);
-        this.props.setView({
-          x: point.x,
-          y: point.y
+
+        this.props.setView(prev => {
+          return {
+            ...prev,
+            xScale: prev.xScale * (1 + direction * 0.05),
+            yScale: prev.yScale * (1 + direction * 0.05)
+          };
         });
       },
       false
@@ -146,6 +151,8 @@ class CrossSection extends Component {
     this.message.text = this.props.message;
     this.rectangle.position = new PIXI.Point(x, y);
     this.viewport.position = new PIXI.Point(view.x, view.y);
+    this.viewport.scale.x = view.xScale;
+    this.viewport.scale.y = view.yScale;
 
     return <div ref={this.canvas} />;
   }

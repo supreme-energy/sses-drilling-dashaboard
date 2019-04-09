@@ -7,17 +7,30 @@ export const ComboDashboard = () => {
   const [x, setX] = useState(50);
   const [y, setY] = useState(50);
 
-  const [view, setView] = useState({
+  const [view, _setView] = useState({
     x: 0,
     y: 0,
-    w: 600,
-    h: 400
+    w: 1000,
+    h: 1000,
+    xScale: 1,
+    yScale: 1
   });
+  const setView = function(value) {
+    _setView(prev => {
+      if (typeof value === "function") {
+        return value(prev);
+      }
+      return {
+        ...prev,
+        ...value
+      };
+    });
+  };
 
   return (
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
-        <h2>ComboDashboard</h2>
+        <h2>Dev debugging data</h2>
         <div>
           <label>
             X value
@@ -30,8 +43,9 @@ export const ComboDashboard = () => {
           </label>
         </div>
         <div>
+          <h4>viewport</h4>
           <label>
-            viewport X value
+            X value
             <input
               type="number"
               value={view.x}
@@ -43,9 +57,8 @@ export const ComboDashboard = () => {
               }}
             />
           </label>
-          <br />
           <label>
-            viewport Y value
+            Y value
             <input
               type="number"
               value={view.y}
@@ -53,6 +66,62 @@ export const ComboDashboard = () => {
                 let newY = e.target.value;
                 return setView(prev => {
                   return { ...prev, y: newY };
+                });
+              }}
+            />
+          </label>
+          <br />
+          <label>
+            xScale
+            <input
+              type="number"
+              step="0.1"
+              value={view.xScale}
+              onChange={e => {
+                let value = e.target.value;
+                return setView(prev => {
+                  return { ...prev, xScale: value };
+                });
+              }}
+            />
+          </label>
+          <label>
+            yScale
+            <input
+              type="number"
+              step="0.1"
+              value={view.yScale}
+              onChange={e => {
+                let value = e.target.value;
+                return setView(prev => {
+                  return { ...prev, yScale: value };
+                });
+              }}
+            />
+          </label>
+          <br />
+          <label>
+            width
+            <input
+              type="number"
+              value={view.w}
+              onChange={e => {
+                let value = e.target.value;
+                return setView(prev => {
+                  return { ...prev, w: value };
+                });
+              }}
+            />
+          </label>
+          <label>
+            height
+            <input
+              type="number"
+              value={view.h}
+              onChange={e => {
+                let value = e.target.value;
+                return setView(prev => {
+                  return { ...prev, h: value };
                 });
               }}
             />
