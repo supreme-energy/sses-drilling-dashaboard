@@ -50,10 +50,8 @@ export const ComboDashboard = () => {
               type="number"
               value={view.x}
               onChange={e => {
-                let newX = e.target.value;
-                return setView(prev => {
-                  return { ...prev, x: newX };
-                });
+                const value = e.target.value;
+                return setView({ x: value });
               }}
             />
           </label>
@@ -63,10 +61,8 @@ export const ComboDashboard = () => {
               type="number"
               value={view.y}
               onChange={e => {
-                let newY = e.target.value;
-                return setView(prev => {
-                  return { ...prev, y: newY };
-                });
+                const value = e.target.value;
+                return setView({ y: value });
               }}
             />
           </label>
@@ -78,10 +74,8 @@ export const ComboDashboard = () => {
               step="0.1"
               value={view.xScale}
               onChange={e => {
-                let value = e.target.value;
-                return setView(prev => {
-                  return { ...prev, xScale: value };
-                });
+                const value = e.target.value;
+                return setView({ xScale: value });
               }}
             />
           </label>
@@ -92,10 +86,8 @@ export const ComboDashboard = () => {
               step="0.1"
               value={view.yScale}
               onChange={e => {
-                let value = e.target.value;
-                return setView(prev => {
-                  return { ...prev, yScale: value };
-                });
+                const value = e.target.value;
+                return setView({ yScale: value });
               }}
             />
           </label>
@@ -106,10 +98,8 @@ export const ComboDashboard = () => {
               type="number"
               value={view.w}
               onChange={e => {
-                let value = e.target.value;
-                return setView(prev => {
-                  return { ...prev, w: value };
-                });
+                const value = e.target.value;
+                return setView({ w: value });
               }}
             />
           </label>
@@ -119,10 +109,8 @@ export const ComboDashboard = () => {
               type="number"
               value={view.h}
               onChange={e => {
-                let value = e.target.value;
-                return setView(prev => {
-                  return { ...prev, h: value };
-                });
+                const value = e.target.value;
+                return setView({ h: value });
               }}
             />
           </label>
