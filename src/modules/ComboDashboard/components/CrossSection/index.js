@@ -11,6 +11,7 @@ class CrossSection extends Component {
     this.worldHeight = 1000;
     this.worldWidth = 1000;
 
+    // Set up PIXI classes for rendering and draw layers
     this.canvas = React.createRef();
     this.renderer = PIXI.autoDetectRenderer({
       width: this.screenWidth,
@@ -20,22 +21,25 @@ class CrossSection extends Component {
     });
     this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
 
+    // Viewport will contain our formations, well bore line, and other graphics
+    // TODO: Add UI container
     this.viewport = new PIXI.Container();
+    // Stage contains the draw layers and never moves. Some events are registered here.
     let stage = new PIXI.Container();
     stage.addChild(this.viewport);
 
-    stage.interactive = true;
-    stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
+    // Set up events to enable panning of the viewport through stage
     let isDragging = false,
       isOutside = false;
     const prevMouse = {};
+    stage.interactive = true;
+    stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
 
     stage.mousedown = function(moveData) {
       const pos = moveData.data.global;
       Object.assign(prevMouse, pos);
       isDragging = true;
     };
-
     stage.mousemove = moveData => {
       if (!isDragging || isOutside) {
         return;
@@ -49,14 +53,35 @@ class CrossSection extends Component {
 
       Object.assign(prevMouse, currMouse);
     };
-
     stage.mouseout = () => (isOutside = true);
     stage.mouseover = () => (isOutside = false);
     stage.mouseup = stage.mouseupoutside = () => (isDragging = false);
 
+    // Set up zooming on the viewport.  Viewport positioning and scale is controlled via props.setView()
+    const globalMouse = { x: 0, y: 0 };
+    this.renderer.view["addEventListener"](
+      "wheel",
+      e => {
+        this.interactionManager.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
+
+        // sign of deltaY (-1,0,1) determines zoom in or out
+        const factor = 1 - Math.sign(e.deltaY) * 0.03;
+        const prev = this.props.view;
+        this.props.setView({
+          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
+          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
+          xScale: prev.xScale * factor,
+          yScale: prev.yScale * factor
+        });
+      },
+      false
+    );
+
+    // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => this.renderer.render(stage));
 
+    // Begin adding content to the viewport
     this.message = new PIXI.Text("", {
       fontFamily: "Arial",
       fontStyle: "italic",
@@ -80,25 +105,6 @@ class CrossSection extends Component {
       this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
-
-    const globalMouse = { x: 0, y: 0 };
-    this.renderer.view["addEventListener"](
-      "wheel",
-      e => {
-        this.interactionManager.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
-
-        // sign of deltaY (-1,0,1) determines zoom in or out
-        const factor = 1 - Math.sign(e.deltaY) * 0.03;
-        const prev = this.props.view;
-        this.props.setView({
-          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
-          xScale: prev.xScale * factor,
-          yScale: prev.yScale * factor
-        });
-      },
-      false
-    );
   }
 
   componentWillMount() {}
@@ -130,6 +136,7 @@ class CrossSection extends Component {
   }
 
   render() {
+    // Update all the PIXI object positions & scale controlled from react
     const { x, y, view } = this.props;
     this.message.text = this.props.message;
     this.rectangle.position = new PIXI.Point(x, y);
@@ -142,7 +149,13 @@ class CrossSection extends Component {
 }
 
 CrossSection.propTypes = {
-  message: PropTypes.string
+  message: PropTypes.string,
+  x: PropTypes.number,
+  y: PropTypes.number,
+  setX: PropTypes.func,
+  setY: PropTypes.func,
+  view: PropTypes.object,
+  setView: PropTypes.func
 };
 
 export default CrossSection;
