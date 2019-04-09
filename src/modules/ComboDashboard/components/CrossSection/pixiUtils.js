@@ -46,7 +46,9 @@ function subscribeToMoveEvents(obj, cb) {
     if (this.dragging) {
       event.stopPropagation();
       const newPosition = this.data.getLocalPosition(this.parent);
-      this.cb(newPosition, this.dragPoint);
+      newPosition.x = newPosition.x - this.dragPoint.x;
+      newPosition.y = newPosition.y - this.dragPoint.y;
+      this.cb(newPosition);
     }
   }
 }

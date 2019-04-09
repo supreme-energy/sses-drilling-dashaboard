@@ -75,9 +75,9 @@ class CrossSection extends Component {
     this.rectangle.drawRect(0, 0, 200, 200);
     this.rectangle.pivot = new PIXI.Point(100, 100);
     this.rectangle.endFill();
-    subscribeToMoveEvents(this.rectangle, (pos, dragP) => {
-      this.props.setX(pos.x - dragP.x);
-      this.props.setY(pos.y - dragP.y);
+    subscribeToMoveEvents(this.rectangle, pos => {
+      this.props.setX(pos.x);
+      this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
 
