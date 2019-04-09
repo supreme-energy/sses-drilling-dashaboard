@@ -98,19 +98,20 @@ class CrossSection extends Component {
     });
     this.viewport.addChild(this.rectangle);
 
+    const globalMouse = { x: 0, y: 0 };
     this.renderer.view["addEventListener"](
       "wheel",
       e => {
-        const direction = Math.sign(e.deltaY);
-        let point = new PIXI.Point();
-        this.interactionManager.mapPositionToPoint(point, e.clientX, e.clientY);
+        this.interactionManager.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
 
-        this.props.setView(prev => {
-          return {
-            ...prev,
-            xScale: prev.xScale * (1 + direction * 0.05),
-            yScale: prev.yScale * (1 + direction * 0.05)
-          };
+        // sign of deltaY (-1,0,1) determines zoom in or out
+        const factor = 1 - Math.sign(e.deltaY) * 0.03;
+        const prev = this.props.view;
+        this.props.setView({
+          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
+          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
+          xScale: prev.xScale * factor,
+          yScale: prev.yScale * factor
         });
       },
       false
