@@ -95,14 +95,14 @@ class CrossSection extends Component {
     addGridlines(this.viewport, {});
 
     this.rectangle = new PIXI.Graphics();
-    this.rectangle.position = new PIXI.Point(300, 300);
-    this.rectangle.beginFill(0xffff0b, 0.5);
-    this.rectangle.drawRect(0, 0, 200, 200);
-    this.rectangle.pivot = new PIXI.Point(100, 100);
+    this.rectangle.beginFill(0x888888, 0.5);
+    this.rectangle.drawRect(0, 0, 200, this.worldHeight);
+    this.rectangle.pivot = new PIXI.Point(100, this.worldHeight / 2);
     this.rectangle.endFill();
     subscribeToMoveEvents(this.rectangle, pos => {
       this.props.setX(pos.x);
-      this.props.setY(pos.y);
+      // Lock y movement for demo
+      //this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
   }

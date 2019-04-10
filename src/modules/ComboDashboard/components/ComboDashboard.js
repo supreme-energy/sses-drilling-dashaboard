@@ -4,12 +4,12 @@ import Progress from "@material-ui/core/CircularProgress";
 import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
-  const [x, setX] = useState(50);
-  const [y, setY] = useState(50);
+  const [x, setX] = useState(400);
+  const [y, setY] = useState(500);
 
   const [view, _setView] = useState({
-    x: 0,
-    y: 0,
+    x: 50,
+    y: 20,
     xScale: 1,
     yScale: 1
   });
@@ -27,7 +27,7 @@ export const ComboDashboard = () => {
 
   return (
     <Suspense fallback={<Progress />}>
-      <div style={{ margin: "0 auto" }}>
+      <div style={{ margin: "0 auto", display: "none" }}>
         <h2>Dev debugging data</h2>
         <div>
           <label>
@@ -90,8 +90,8 @@ export const ComboDashboard = () => {
             />
           </label>
         </div>
-        <CrossSection message={"Hello from React"} x={x} y={y} setX={setX} setY={setY} view={view} setView={setView} />
       </div>
+      <CrossSection message={"Cross-section"} x={x} y={y} setX={setX} setY={setY} view={view} setView={setView} />
     </Suspense>
   );
 };

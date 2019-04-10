@@ -24,8 +24,6 @@ function subscribeToMoveEvents(obj, cb) {
       this.data = event.data;
       this.dragging = true;
 
-      this.scale.x *= 1.1;
-      this.scale.y *= 1.1;
       // Point relative to the center of the object
       this.dragPoint = event.data.getLocalPosition(this.parent);
       this.dragPoint.x -= this.x;
@@ -36,8 +34,6 @@ function subscribeToMoveEvents(obj, cb) {
   function onDragEnd() {
     if (this.dragging) {
       this.dragging = false;
-      this.scale.x /= 1.1;
-      this.scale.y /= 1.1;
       this.data = null;
     }
   }
