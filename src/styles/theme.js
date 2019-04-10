@@ -1,7 +1,12 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme } from "@material-ui/core/styles";
 
 export const theme = createMuiTheme({
   typography: {
-    useNextVariants: true
-  }
+    useNextVariants: true,
+    body2: {
+      color: "rgba(0, 0, 0, 0.6)"
+    }
+  },
+  drillingStatusColor: "#4B921B",
+  trippingStatusColor: "#B00020"
 });
