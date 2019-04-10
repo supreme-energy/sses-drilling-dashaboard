@@ -62,7 +62,6 @@ const WellItem = ({ name, theme, lat, lng, status }) => {
 };
 
 function WellList({ items, theme, ...props }) {
-  console.log("theme", theme);
   return (
     <List className={classes.list} {...props}>
       {items.map(well => (
