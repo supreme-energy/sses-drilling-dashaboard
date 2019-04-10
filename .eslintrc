@@ -16,11 +16,12 @@
     "__DEV__"      : false,
     "__TEST__"     : false,
     "__PROD__"     : false,
-    "__COVERAGE__" : false
+    "__COVERAGE__" : false,
+    "__CONFIG__" : false
   },
   "rules": {
     "key-spacing"          : "off",
-    "brace-style"          : [2, "stroustrup", {"allowSingleLine": true}],
+    "brace-style"          : [2, "1tbs", {"allowSingleLine": true}],
     "semi"                 : [2, "always"],
     "quotes"               : "off",
     "no-return-await"      : 2,
