@@ -10,7 +10,7 @@ import { DRILLING } from "../../../../constants/drillingStatus";
 
 const EMPTY_ARRAY = [];
 export default function SearchCard(props) {
-  const [wells] = useFetch(
+  const [wells, , , , , actions] = useFetch(
     {
       path: GET_WELL_LIST
     },
@@ -19,7 +19,8 @@ export default function SearchCard(props) {
         return wells.map(w => ({
           id: w.jobname,
           name: w.realjobname,
-          status: DRILLING
+          status: DRILLING,
+          fav: Boolean(Number(w.favorite))
         }));
       }
     }
@@ -28,7 +29,7 @@ export default function SearchCard(props) {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <WellList items={wells || EMPTY_ARRAY} theme={props.theme} />
+        <WellList items={wells || EMPTY_ARRAY} theme={props.theme} refresh={actions.refresh} />
       </CardContent>
       <CardActions>Actions</CardActions>
     </Card>
