@@ -34,6 +34,7 @@
     "leaflet": "^1.4.0",
     "lodash": "4.17.10",
     "object-assign": "^4.1.1",
+    "pixi.js": "^4.8.7",
     "prettier": "^1.16.4",
     "promise": "^8.0.1",
     "prop-types": "^15.6.2",
