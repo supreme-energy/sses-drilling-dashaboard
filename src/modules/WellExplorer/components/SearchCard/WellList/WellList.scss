@@ -1,0 +1,48 @@
+.list {
+    height: 400px;
+    overflow: auto;
+
+    .wellItem {
+        display: flex;
+        flex-direction: row;
+        border-bottom: solid 1px #E4E4E4;
+        height: 100px;
+
+        .minichart {
+            width: 98px;
+        }
+
+        .arrowBg {
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrowIcon {
+            width: 20px;
+            height: 20px;   
+            fill: #ffffff;
+        }
+
+        .icon {
+            width: 22px;
+            height: 22px;  
+            fill: #757575; 
+        }
+
+        .itemContent {
+            flex: 1;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            align-items: flex-end;
+        }
+    }
+}

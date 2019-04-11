@@ -1,8 +1,20 @@
-.page-layout__viewport {
-  padding-top: 4rem;
-}
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
 
-.page-layout__nav-item--active {
-  font-weight: bold;
-  text-decoration: underline;
+  .header {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .viewport {
+    flex: 1;
+  }
+  
+  .navItemActive {
+    font-weight: bold;
+    text-decoration: underline;
+  }  
 }

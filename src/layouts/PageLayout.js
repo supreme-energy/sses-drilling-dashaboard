@@ -3,33 +3,34 @@ import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { MuiThemeProvider } from "@material-ui/core";
-
 import { theme } from "../styles/theme";
-import "./PageLayout.scss";
+import classes from "./PageLayout.scss";
 
 export const PageLayout = ({ children, history }) => (
   <MuiThemeProvider theme={theme}>
-    <div className="container text-center">
-      <div>
-        <img src="/logo_sses.svg" />
+    <div className={classes.container}>
+      <div className={classes.header}>
+        <div>
+          <img src="/logo_sses.svg" />
+        </div>
+        <NavLink to="/" exact activeClassName={classes.navItemActive}>
+          Well Explorer
+        </NavLink>
+        <NavLink to="/combo" exact activeClassName={classes.navItemActive}>
+          Combo Dashboard
+        </NavLink>
+        <NavLink to="/drilling" exact activeClassName={classes.navItemActive}>
+          Drilling Analytics
+        </NavLink>
+        <NavLink to="/structural" exact activeClassName={classes.navItemActive}>
+          Structural Guidance
+        </NavLink>
+        <NavLink to="/directional" exact activeClassName={classes.navItemActive}>
+          Directional Guidance
+        </NavLink>
       </div>
-      <NavLink to="/" exact activeClassName="page-layout__nav-item--active">
-        Well Explorer
-      </NavLink>
-      <NavLink to="/combo" exact activeClassName="page-layout__nav-item--active">
-        Combo Dashboard
-      </NavLink>
-      <NavLink to="/drilling" exact activeClassName="page-layout__nav-item--active">
-        Drilling Analytics
-      </NavLink>
-      <NavLink to="/structural" exact activeClassName="page-layout__nav-item--active">
-        Structural Guidance
-      </NavLink>
-      <NavLink to="/directional" exact activeClassName="page-layout__nav-item--active">
-        Directional Guidance
-      </NavLink>
 
-      <div className="page-layout__viewport">{children}</div>
+      <div className={classes.viewport}>{children}</div>
     </div>
   </MuiThemeProvider>
 );
