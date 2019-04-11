@@ -4,11 +4,13 @@ import createStore from "./store/createStore";
 import "./styles/main.scss";
 import AppModule from "modules/App";
 import createBrowserHistory from "history/createBrowserHistory";
+import { persistStore } from "redux-persist";
 
 // Store Initialization
 // ------------------------------------
 const history = createBrowserHistory();
 const store = createStore(window.__INITIAL_STATE__, history);
+persistStore(store);
 
 // Render Setup
 // ------------------------------------

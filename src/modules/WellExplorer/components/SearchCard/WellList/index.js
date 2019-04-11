@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
@@ -13,6 +13,8 @@ import { DRILLING, UNKNOWN, TRIPPING } from "../../../../../constants/drillingSt
 import useFetch from "react-powertools/data/useFetch";
 import { SET_FAV_WELL } from "../../../../../constants/api";
 import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
+import { Link } from "react-router-dom";
 
 const styles = theme => ({
   [DRILLING]: {
@@ -45,10 +47,10 @@ const iconsByStatus = {
   )
 };
 
-const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav }) => {
+const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
   return (
-    <ListItem button className={classes.wellItem}>
+    <ListItem {...props} button className={classes.wellItem}>
       <div className={classes.itemContent}>
         <div>{name}</div>
         <Typography variant="body2" gutterBottom>
@@ -59,9 +61,17 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav }) => {
         </Typography>
       </div>
       <div className={classes.buttons}>
-        <IconButton onClick={() => changeFav(id, !fav)}>
-          <FavIcon className={classes.icon} />
-        </IconButton>
+        {props.selected ? (
+          <Link to={`combo/${id}`}>
+            <Button color="primary" className={classes.button}>
+              Open
+            </Button>
+          </Link>
+        ) : (
+          <IconButton onClick={() => changeFav(id, !fav)}>
+            <FavIcon className={classes.icon} />
+          </IconButton>
+        )}
 
         {iconsByStatus[status]}
       </div>
@@ -71,6 +81,7 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav }) => {
 
 function WellList({ items, theme, refresh, ...props }) {
   const [, , , , , actions] = useFetch(false);
+  const [selectedItem, updateSelectedItem] = useState(null);
 
   const changeFav = useCallback((seldbname, fav) =>
     actions
@@ -89,6 +100,8 @@ function WellList({ items, theme, refresh, ...props }) {
       {items.map(well => (
         <WellItem
           key={well.id}
+          selected={selectedItem === well.id}
+          onClick={() => updateSelectedItem(well.id)}
           id={well.id}
           name={well.name}
           lat={33.634269}
