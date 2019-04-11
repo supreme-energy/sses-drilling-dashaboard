@@ -3,27 +3,12 @@ import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import classes from "./SearchCard.scss";
-import useFetch from "react-powertools/data/useFetch";
-import { GET_WELL_LIST } from "../../../../constants/api";
 import WellList from "./WellList";
-import { DRILLING } from "../../../../constants/drillingStatus";
+import { useWells } from "../../../../api";
 
 const EMPTY_ARRAY = [];
 export default function SearchCard(props) {
-  const [wells] = useFetch(
-    {
-      path: GET_WELL_LIST
-    },
-    {
-      transform: wells => {
-        return wells.map(w => ({
-          id: w.jobname,
-          name: w.realjobname,
-          status: DRILLING
-        }));
-      }
-    }
-  );
+  const [wells] = useWells();
 
   return (
     <Card className={classes.card}>

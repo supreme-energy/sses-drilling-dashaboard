@@ -1,7 +1,6 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy } from "react";
 import PropTypes from "prop-types";
 import classes from "./WellExplorer.scss";
-import Progress from "@material-ui/core/CircularProgress";
 import SearchCard from "./SearchCard";
 import { withTheme } from "@material-ui/core/styles";
 
@@ -16,22 +15,20 @@ const mapCenter = {
 
 export const WellExplorer = props => {
   return (
-    <Suspense fallback={<Progress />}>
-      <div className={classes.container}>
-        <WellMap
-          className={classes.map}
-          markers={markers}
-          mapCenter={mapCenter}
-          handleClickWell={() => {}}
-          zoomControl={false}
-          scrollWheelZoom={false}
-        />
-        <div className={classes.topRow}>
-          <SearchCard theme={props.theme} />
-          <div />
-        </div>
+    <div className={classes.container}>
+      <WellMap
+        className={classes.map}
+        markers={markers}
+        mapCenter={mapCenter}
+        handleClickWell={() => {}}
+        zoomControl={false}
+        scrollWheelZoom={false}
+      />
+      <div className={classes.topRow}>
+        <SearchCard theme={props.theme} />
+        <div />
       </div>
-    </Suspense>
+    </div>
   );
 };
 
