@@ -107,8 +107,6 @@ class CrossSection extends Component {
     this.viewport.addChild(this.rectangle);
   }
 
-  componentWillMount() {}
-
   componentDidMount() {
     this.canvas.current.appendChild(this.renderer.view);
 
@@ -119,15 +117,9 @@ class CrossSection extends Component {
     this.ticker.start();
   }
 
-  componentWillReceiveProps(nextProps) {}
-
   shouldComponentUpdate(nextProps, nextState) {
     return true;
   }
-
-  componentWillUpdate(nextProps, nextState) {}
-
-  componentDidUpdate(prevProps, prevState) {}
 
   componentWillUnmount() {
     // TODO: Clean up and remove other objects to improve performance
