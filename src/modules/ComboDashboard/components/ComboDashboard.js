@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useState } from "react";
+import React, { Suspense, useState } from "react";
 import Progress from "@material-ui/core/CircularProgress";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
@@ -105,7 +105,9 @@ export const ComboDashboard = () => {
         updateY={setY}
         view={view}
         updateView={setView}
-        {...{ wellPlan, surveys, formations }}
+        wellPlan={wellPlan}
+        surveys={surveys}
+        formations={formations}
       />
     </Suspense>
   );

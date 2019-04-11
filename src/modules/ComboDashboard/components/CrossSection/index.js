@@ -29,8 +29,8 @@ class CrossSection extends Component {
     stage.addChild(this.viewport);
 
     // Set up events to enable panning of the viewport through stage
-    let isDragging = false,
-      isOutside = false;
+    let isDragging = false;
+    let isOutside = false;
     const prevMouse = {};
     stage.interactive = true;
     stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
@@ -126,7 +126,7 @@ class CrossSection extends Component {
     subscribeToMoveEvents(this.rectangle, pos => {
       this.props.updateX(pos.x);
       // Lock y movement for demo
-      //this.props.setY(pos.y);
+      // this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
   }
