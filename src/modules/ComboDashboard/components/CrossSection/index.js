@@ -140,11 +140,16 @@ class CrossSection extends Component {
     this.message.y = 30;
 
     this.viewport.addChild(this.message);
+    this.updateWebGL();
     this.ticker.start();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    this.updateWebGL();
   }
 
   componentWillUnmount() {
@@ -154,6 +159,10 @@ class CrossSection extends Component {
   }
 
   render() {
+    return <div ref={this.canvas} />;
+  }
+
+  updateWebGL() {
     // Update all the PIXI object positions & scale controlled from react
     const { x, y, view } = this.props;
     this.message.text = this.props.message;
@@ -161,8 +170,6 @@ class CrossSection extends Component {
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-
-    return <div ref={this.canvas} />;
   }
 }
 
