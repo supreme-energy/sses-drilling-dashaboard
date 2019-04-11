@@ -101,10 +101,10 @@ export const ComboDashboard = () => {
         message={"Cross-section"}
         x={x}
         y={y}
-        setX={setX}
-        setY={setY}
+        updateX={setX}
+        updateY={setY}
         view={view}
-        setView={setView}
+        updateView={setView}
         {...{ wellPlan, surveys, formations }}
       />
     </Suspense>

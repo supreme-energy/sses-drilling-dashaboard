@@ -46,7 +46,7 @@ class CrossSection extends Component {
       }
       const prev = this.props.view;
       const currMouse = moveData.data.global;
-      this.props.setView({
+      this.props.updateView({
         x: Number(prev.x) + (currMouse.x - prevMouse.x),
         y: Number(prev.y) + (currMouse.y - prevMouse.y)
       });
@@ -67,7 +67,7 @@ class CrossSection extends Component {
         // sign of deltaY (-1,0,1) determines zoom in or out
         const factor = 1 - Math.sign(e.deltaY) * 0.03;
         const prev = this.props.view;
-        this.props.setView({
+        this.props.updateView({
           x: globalMouse.x - (globalMouse.x - prev.x) * factor,
           y: globalMouse.y - (globalMouse.y - prev.y) * factor,
           xScale: prev.xScale * factor,
@@ -124,7 +124,7 @@ class CrossSection extends Component {
     this.rectangle.pivot = new PIXI.Point(100, this.worldHeight / 2);
     this.rectangle.endFill();
     subscribeToMoveEvents(this.rectangle, pos => {
-      this.props.setX(pos.x);
+      this.props.updateX(pos.x);
       // Lock y movement for demo
       //this.props.setY(pos.y);
     });
@@ -168,10 +168,10 @@ CrossSection.propTypes = {
   message: PropTypes.string,
   x: PropTypes.number,
   y: PropTypes.number,
-  setX: PropTypes.func,
-  setY: PropTypes.func,
+  updateX: PropTypes.func,
+  updateY: PropTypes.func,
   view: PropTypes.object,
-  setView: PropTypes.func
+  updateView: PropTypes.func
 };
 
 export default CrossSection;
