@@ -3,6 +3,8 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { addDemoFormations, addGridlines, subscribeToMoveEvents } from "./pixiUtils.js";
 
+// PIXI has some lowercase constructors
+/* eslint new-cap: 0 */
 class CrossSection extends Component {
   constructor(props) {
     super(props);
@@ -169,9 +171,11 @@ CrossSection.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   updateX: PropTypes.func,
-  updateY: PropTypes.func,
+  // updateY: PropTypes.func,
   view: PropTypes.object,
-  updateView: PropTypes.func
+  updateView: PropTypes.func,
+  wellPlan: PropTypes.array,
+  surveys: PropTypes.array
 };
 
 export default CrossSection;
