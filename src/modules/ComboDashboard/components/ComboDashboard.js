@@ -1,8 +1,15 @@
 import React, { Component, Suspense, useState } from "react";
 import Progress from "@material-ui/core/CircularProgress";
+import surveyData from "../../../data/survey.json";
+import wellPlanData from "../../../data/wellplan";
+import formationData from "../../../data/formationList";
 import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
+  // Replace with useFetch
+  const surveys = surveyData;
+  const wellPlan = wellPlanData;
+  const formations = formationData;
   const [x, setX] = useState(400);
   const [y, setY] = useState(500);
 
@@ -90,7 +97,16 @@ export const ComboDashboard = () => {
           </label>
         </div>
       </div>
-      <CrossSection message={"Cross-section"} x={x} y={y} setX={setX} setY={setY} view={view} setView={setView} />
+      <CrossSection
+        message={"Cross-section"}
+        x={x}
+        y={y}
+        setX={setX}
+        setY={setY}
+        view={view}
+        setView={setView}
+        {...{ wellPlan, surveys, formations }}
+      />
     </Suspense>
   );
 };

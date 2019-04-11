@@ -91,7 +91,31 @@ class CrossSection extends Component {
       wordWrapWidth: 440
     });
 
+    // Create the formation layers
     addDemoFormations(this.viewport, this.worldWidth, this.worldHeight);
+
+    // Draw the well plan line
+    let wpData = this.props.wellPlan.map(x => [Number(x.md), Number(x.tvd)]);
+    let wellplan = new PIXI.Graphics();
+    wellplan.lineStyle(3, 0x44ff44, 1);
+    wellplan.moveTo(...wpData[0]);
+    for (let i = 1; i < wpData.length; i++) {
+      wellplan.lineTo(...wpData[i]);
+    }
+    this.viewport.addChild(wellplan);
+
+    let iconTexture = new PIXI.Texture.fromImage("./Survey.svg");
+
+    let sData = this.props.surveys.map(x => [Number(x.md), Number(x.tvd)]);
+    for (let i = 0; i < sData.length; i++) {
+      let icon = new PIXI.Sprite(iconTexture);
+      icon.position = new PIXI.Point(...sData[i]);
+      icon.scale.set(0.25);
+      icon.anchor.set(0.5, 0.5);
+      this.viewport.addChild(icon);
+    }
+
+    // Gridlines go last
     addGridlines(this.viewport, {});
 
     this.rectangle = new PIXI.Graphics();
