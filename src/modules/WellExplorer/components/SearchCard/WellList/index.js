@@ -50,7 +50,7 @@ const iconsByStatus = {
 const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
   return (
-    <ListItem {...props} button className={classes.wellItem}>
+    <ListItem {...props} button disableRipple className={classes.wellItem}>
       <div className={classes.itemContent}>
         <div>{name}</div>
         <Typography variant="body2" gutterBottom>
@@ -68,7 +68,12 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
             </Button>
           </Link>
         ) : (
-          <IconButton onClick={() => changeFav(id, !fav)}>
+          <IconButton
+            onClickCapture={e => {
+              changeFav(id, !fav);
+              e.stopPropagation();
+            }}
+          >
             <FavIcon className={classes.icon} />
           </IconButton>
         )}
@@ -79,38 +84,53 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
   );
 };
 
-function WellList({ items, theme, refresh, ...props }) {
-  const [, , , , , actions] = useFetch(false);
+function WellList({ items, theme, fetchWellList, ...props }) {
+  // const [, , , , , actions] = useFetch(false);
   const [selectedItem, updateSelectedItem] = useState(null);
 
   const changeFav = useCallback((seldbname, fav) =>
-    actions
-      .fetch({
+    fetchWellList(
+      {
         path: SET_FAV_WELL,
         query: {
           seldbname,
           favorite: Number(fav)
         }
-      })
-      .then(refresh)
+      },
+      (currentVal, newVal) => {
+        return currentVal.map(v => {
+          if (v.id === seldbname) {
+            return {
+              ...v,
+              fav
+            };
+          }
+
+          return v;
+        });
+      }
+    )
   );
 
   return (
     <List className={classes.list} {...props}>
-      {items.map(well => (
-        <WellItem
-          key={well.id}
-          selected={selectedItem === well.id}
-          onClick={() => updateSelectedItem(well.id)}
-          id={well.id}
-          name={well.name}
-          lat={33.634269}
-          lng={-97.3711399}
-          status={well.status}
-          fav={well.fav}
-          changeFav={changeFav}
-        />
-      ))}
+      {items.map(well => {
+        const selected = selectedItem === well.id;
+        return (
+          <WellItem
+            key={well.id}
+            selected={selected}
+            onClick={() => updateSelectedItem(selected ? null : well.id)}
+            id={well.id}
+            name={well.name}
+            lat={33.634269}
+            lng={-97.3711399}
+            status={well.status}
+            fav={well.fav}
+            changeFav={changeFav}
+          />
+        );
+      })}
     </List>
   );
 }

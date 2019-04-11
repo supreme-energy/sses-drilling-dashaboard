@@ -29,7 +29,7 @@ export default function SearchCard(props) {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <WellList items={wells || EMPTY_ARRAY} theme={props.theme} refresh={actions.refresh} />
+        <WellList items={wells || EMPTY_ARRAY} theme={props.theme} fetchWellList={actions.fetch} />
       </CardContent>
       <CardActions>Actions</CardActions>
     </Card>
