@@ -61,7 +61,7 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
       </div>
       <div className={classes.buttons}>
         {props.selected ? (
-          <Link to={`combo/${id}`}>
+          <Link to={`${id}/combo`}>
             <Button color="primary" className={classes.button}>
               Open
             </Button>

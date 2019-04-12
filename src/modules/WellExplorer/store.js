@@ -15,7 +15,7 @@ function actionPrefix(type) {
   return `${MODULE}/${type}`;
 }
 
-export const CHANGE_WELL_ACCESS_TIMESTAMP = actionPrefix("CHANGE_WELL_ACCESS_TIMESTAMPCREMENT");
+export const CHANGE_WELL_ACCESS_TIMESTAMP = actionPrefix("CHANGE_WELL_ACCESS_TIMESTAMP");
 
 // ------------------------------------
 // Actions
