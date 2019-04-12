@@ -104,57 +104,36 @@ function addGridlines(container, options = {}) {
 }
 
 /**
- * Add randomly generated formation layers
+ * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
- * @param worldWidth The width of the formations generated
- * @param worldHeight the height of the formations generated
+ * @param formations The formation data from the API
  */
 function addDemoFormations(container, formations) {
-  let worldWidth = 6000;
-  let worldHeight = 8000;
-  const layerColors = formations.map(f => `0x${f.bg_color}`);
-  // const min = formations[0].data[0].md;
-  // const max = formations[0].data[81].md;
-  // const topPolyLine = [0, 0, worldWidth, 0].reverse();
-  // const bottomPolyLIne = [worldWidth, worldHeight, 0, worldHeight];
-  // let prevPath = topPolyLine;
-  // for (let layer = 0; layer < layerColors.length; layer++) {
-  //   let nextPath = [];
-  //   let anchor = ((layer + 1) * worldHeight) / layerColors.length;
-  //
-  //   let horizontalPoints = 81;
-  //   for (let i = horizontalPoints; i >= 0; i--) {
-  //     let p = [(i * worldWidth) / horizontalPoints, anchor + Math.random() * (worldHeight / (layerColors.length * 3))];
-  //     nextPath.push(p);
-  //   }
-  //
-  //   if (layer === layerColors.length - 1) nextPath = bottomPolyLIne;
-  //
-  //   let poly = new PIXI.Graphics();
-  //   poly.lineStyle(0);
-  //   poly.beginFill(layerColors[layer], 1);
-  //   poly.drawPolygon(
-  //     prevPath
-  //       .reverse()
-  //       .flat()
-  //       .concat(nextPath.flat())
-  //   );
-  //
-  //   poly.closePath();
-  //   container.addChild(poly);
-  //
-  //   prevPath = nextPath;
-  // }
   const calcXY = p => [Number(p.vs), Number(p.tot) + Number(p.thickness)];
-  for (let i = 0; i < formations.length; i++) {
-    let points = formations[i].data;
+  for (let f of formations) {
+    f.xyCoords = f.data.map(point => calcXY(point));
+  }
+  for (let i = 0; i < formations.length - 1; i++) {
+    const { xyCoords, bg_color, bg_percent } = formations[i];
     let line = new PIXI.Graphics();
-    line.lineStyle(10, Number(`0x${formations[i].bg_color}`), 1); //Number(formations[i].bg_percent));
-    line.moveTo(...calcXY(points[0]));
-    for (let j = 1; j < points.length; j++) {
-      line.lineTo(...calcXY(points[j]));
+    let poly = new PIXI.Graphics();
+    poly.lineStyle(0);
+    line.lineStyle(4, Number(`0x${bg_color}`), 1); //Number(formations[i].bg_percent));
+    line.moveTo(...xyCoords[0]);
+    for (let i = 1; i < xyCoords.length; i++) {
+      line.lineTo(...xyCoords[i]);
     }
     container.addChild(line);
+    poly.beginFill(Number(`0x${bg_color}`), Number(bg_percent));
+    poly.drawPolygon(
+      xyCoords
+        .reverse()
+        .flat()
+        .concat(formations[i + 1].xyCoords)
+        .flat()
+    );
+    poly.closePath();
+    container.addChild(poly);
   }
 }
 

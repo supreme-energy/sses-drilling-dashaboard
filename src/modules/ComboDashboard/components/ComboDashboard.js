@@ -15,7 +15,7 @@ export const ComboDashboard = () => {
 
   const [view, _setView] = useState({
     x: 200,
-    y: -2000,
+    y: -2500,
     xScale: 0.25,
     yScale: 0.25
   });
