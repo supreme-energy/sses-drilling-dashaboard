@@ -109,37 +109,51 @@ function addGridlines(container, options = {}) {
  * @param worldWidth The width of the formations generated
  * @param worldHeight the height of the formations generated
  */
-function addDemoFormations(container, worldWidth, worldHeight) {
-  const layerColors = [0xd8d8d8, 0xcac297, 0xb3b59a, 0xd8d8b3, 0xb3b59a, 0xcdd8d8];
-  const topPolyLine = [0, 0, worldWidth, 0].reverse();
-  const bottomPolyLIne = [worldWidth, worldHeight, 0, worldHeight];
-  let prevPath = topPolyLine;
-  for (let layer = 0; layer < layerColors.length; layer++) {
-    let nextPath = [];
-    let anchor = ((layer + 1) * worldHeight) / layerColors.length;
-
-    let horizontalPoints = worldWidth / 100;
-    for (let i = horizontalPoints; i >= 0; i--) {
-      let p = [(i * worldWidth) / horizontalPoints, anchor + Math.random() * (worldHeight / (layerColors.length * 3))];
-      nextPath.push(p);
+function addDemoFormations(container, formations) {
+  let worldWidth = 6000;
+  let worldHeight = 8000;
+  const layerColors = formations.map(f => `0x${f.bg_color}`);
+  // const min = formations[0].data[0].md;
+  // const max = formations[0].data[81].md;
+  // const topPolyLine = [0, 0, worldWidth, 0].reverse();
+  // const bottomPolyLIne = [worldWidth, worldHeight, 0, worldHeight];
+  // let prevPath = topPolyLine;
+  // for (let layer = 0; layer < layerColors.length; layer++) {
+  //   let nextPath = [];
+  //   let anchor = ((layer + 1) * worldHeight) / layerColors.length;
+  //
+  //   let horizontalPoints = 81;
+  //   for (let i = horizontalPoints; i >= 0; i--) {
+  //     let p = [(i * worldWidth) / horizontalPoints, anchor + Math.random() * (worldHeight / (layerColors.length * 3))];
+  //     nextPath.push(p);
+  //   }
+  //
+  //   if (layer === layerColors.length - 1) nextPath = bottomPolyLIne;
+  //
+  //   let poly = new PIXI.Graphics();
+  //   poly.lineStyle(0);
+  //   poly.beginFill(layerColors[layer], 1);
+  //   poly.drawPolygon(
+  //     prevPath
+  //       .reverse()
+  //       .flat()
+  //       .concat(nextPath.flat())
+  //   );
+  //
+  //   poly.closePath();
+  //   container.addChild(poly);
+  //
+  //   prevPath = nextPath;
+  // }
+  for (let i = 0; i < formations.length; i++) {
+    let points = formations[i].data;
+    let line = new PIXI.Graphics();
+    line.lineStyle(100, Number(`0x${formations[i].bg_color}`), 1);
+    line.moveTo(Number(points[0].vs), Number(points[0].tvd) + Number(points[0].thickness));
+    for (let j = 1; j < points.length; j++) {
+      line.lineTo(Number(points[j].vs), Number(points[j].tvd) + Number(points[j].thickness));
     }
-
-    if (layer === layerColors.length - 1) nextPath = bottomPolyLIne;
-
-    let poly = new PIXI.Graphics();
-    poly.lineStyle(0);
-    poly.beginFill(layerColors[layer], 1);
-    poly.drawPolygon(
-      prevPath
-        .reverse()
-        .flat()
-        .concat(nextPath.flat())
-    );
-
-    poly.closePath();
-    container.addChild(poly);
-
-    prevPath = nextPath;
+    container.addChild(line);
   }
 }
 

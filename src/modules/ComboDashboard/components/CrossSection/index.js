@@ -92,10 +92,10 @@ class CrossSection extends Component {
     });
 
     // Create the formation layers
-    addDemoFormations(this.viewport, this.worldWidth, this.worldHeight);
+    addDemoFormations(this.viewport, this.props.formations);
 
     // Draw the well plan line
-    let wpData = this.props.wellPlan.map(x => [Number(x.md), Number(x.tvd)]);
+    let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
     let wellplan = new PIXI.Graphics();
     wellplan.lineStyle(3, 0x44ff44, 1);
     wellplan.moveTo(...wpData[0]);
@@ -106,7 +106,7 @@ class CrossSection extends Component {
 
     let iconTexture = new PIXI.Texture.fromImage("./Survey.svg");
 
-    let sData = this.props.surveys.map(x => [Number(x.md), Number(x.tvd)]);
+    let sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
     for (let i = 0; i < sData.length; i++) {
       let icon = new PIXI.Sprite(iconTexture);
       icon.position = new PIXI.Point(...sData[i]);
@@ -149,6 +149,7 @@ class CrossSection extends Component {
     // TODO: Clean up and remove other objects to improve performance
     this.ticker.stop();
     this.canvas.current.removeChild(this.renderer.view);
+    this.viewport.destroy({ children: true });
   }
 
   render() {
@@ -171,7 +172,8 @@ CrossSection.propTypes = {
   updateX: PropTypes.func,
   updateY: PropTypes.func,
   view: PropTypes.object,
-  updateView: PropTypes.func
+  updateView: PropTypes.func,
+  formations: PropTypes.array
 };
 
 export default CrossSection;

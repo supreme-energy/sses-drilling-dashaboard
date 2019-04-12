@@ -16,8 +16,8 @@ export const ComboDashboard = () => {
   const [view, _setView] = useState({
     x: 50,
     y: 20,
-    xScale: 1,
-    yScale: 1
+    xScale: 0.04,
+    yScale: 0.04
   });
   const setView = function(value) {
     _setView(prev => {
