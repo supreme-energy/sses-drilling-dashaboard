@@ -58,9 +58,9 @@ function addGridlines(container, options = {}) {
   let w = container.width;
   let h = container.height;
   let xHide = options.xHide || false;
-  let xInterval = options.xInterval || 50;
+  let xInterval = options.xInterval || 100;
   let yHide = options.yHide || false;
-  let yInterval = options.yInterval || 50;
+  let yInterval = options.yInterval || 100;
 
   // Generate lines for x axis
   if (!xHide) {
