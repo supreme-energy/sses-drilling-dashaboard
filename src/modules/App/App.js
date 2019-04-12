@@ -15,8 +15,9 @@ import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
 import WellImporterModule from "modules/WellImporter";
-
 import plusBasicAuth from "fetch-plus-basicauth";
+import WellUpdate from "./WellUpdate";
+
 // Lazy load header
 const PageLayout = React.lazy(() => import("layouts/PageLayout"));
 const fetchClientOptions = { mode: "cors", credentials: "include" };
@@ -58,13 +59,14 @@ class App extends React.Component {
                   {/* place FakeFetch at any level to intercept calls within its children */}
                   {/* <FakeFetch routes={crossFilterStore}> */}
                   <PageLayout history={history}>
+                    <Route path="/:wellId" component={WellUpdate} />
                     <Switch>
-                      <Route path="/" exact component={WellExplorer} />
-                      <Route path="/importer" exact component={WellImporter} />
-                      <Route path="/combo" exact component={ComboDashboard} />
-                      <Route path="/drilling" exact component={DrillingAnalytics} />
-                      <Route path="/structural" exact component={StructuralGuidance} />
-                      <Route path="/directional" exact component={DirectionalGuidance} />
+                      <Route path="/:wellId/importer" exact component={WellImporter} />
+                      <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                      <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                      <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                      <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                      <Route path="/(:wellId)?" component={WellExplorer} />
                     </Switch>
                   </PageLayout>
                   {/* </FakeFetch> */}

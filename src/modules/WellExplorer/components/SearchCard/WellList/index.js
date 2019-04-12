@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import Favorite from "@material-ui/icons/Favorite";
+import FavoriteBorder from "@material-ui/icons/FavoriteBorder";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import classNames from "classnames";
 import { DRILLING, UNKNOWN, TRIPPING } from "../../../../../constants/drillingStatus";
+import { SET_FAV_WELL } from "../../../../../api";
+import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
+import { Link } from "react-router-dom";
 
 const styles = theme => ({
   [DRILLING]: {
@@ -41,9 +46,10 @@ const iconsByStatus = {
   )
 };
 
-const WellItem = ({ name, theme, lat, lng, status }) => {
+const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props }) => {
+  const FavIcon = fav ? Favorite : FavoriteBorder;
   return (
-    <ListItem button className={classes.wellItem}>
+    <ListItem {...props} button disableRipple className={classes.wellItem}>
       <div className={classes.itemContent}>
         <div>{name}</div>
         <Typography variant="body2" gutterBottom>
@@ -54,19 +60,51 @@ const WellItem = ({ name, theme, lat, lng, status }) => {
         </Typography>
       </div>
       <div className={classes.buttons}>
-        <Favorite className={classes.icon} />
+        {props.selected ? (
+          <Link to={`${id}/combo`}>
+            <Button color="primary" className={classes.button}>
+              Open
+            </Button>
+          </Link>
+        ) : (
+          <IconButton
+            onClick={e => {
+              changeFav(id, !fav);
+              e.stopPropagation();
+            }}
+          >
+            <FavIcon className={classes.icon} />
+          </IconButton>
+        )}
+
         {iconsByStatus[status]}
       </div>
     </ListItem>
   );
 };
 
-function WellList({ items, theme, ...props }) {
+function WellList({ wells, theme, onFavoriteChanged, ...props }) {
+  const [selectedItem, updateSelectedItem] = useState(null);
+
   return (
     <List className={classes.list} {...props}>
-      {items.map(well => (
-        <WellItem key={well.id} name={well.name} lat={33.634269} lng={-97.3711399} status={well.status} />
-      ))}
+      {wells.map(well => {
+        const selected = selectedItem === well.id;
+        return (
+          <WellItem
+            key={well.id}
+            selected={selected}
+            onClick={() => updateSelectedItem(selected ? null : well.id)}
+            id={well.id}
+            name={well.name}
+            lat={33.634269}
+            lng={-97.3711399}
+            status={well.status}
+            fav={well.fav}
+            changeFav={onFavoriteChanged}
+          />
+        );
+      })}
     </List>
   );
 }

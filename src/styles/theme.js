@@ -7,6 +7,11 @@ export const theme = createMuiTheme({
       color: "rgba(0, 0, 0, 0.6)"
     }
   },
+  palette: {
+    primary: {
+      main: "#207003"
+    }
+  },
   drillingStatusColor: "#4B921B",
   trippingStatusColor: "#B00020"
 });

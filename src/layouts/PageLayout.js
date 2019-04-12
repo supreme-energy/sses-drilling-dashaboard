@@ -13,7 +13,7 @@ export const PageLayout = ({ children, history }) => (
         <div>
           <img src="/logo_sses.svg" />
         </div>
-        <NavLink to="/" exact activeClassName={classes.navItemActive}>
+        {/* <NavLink to="/" exact activeClassName={classes.navItemActive}>
           Well Explorer
         </NavLink>
         <NavLink to="/combo" exact activeClassName={classes.navItemActive}>
@@ -27,7 +27,7 @@ export const PageLayout = ({ children, history }) => (
         </NavLink>
         <NavLink to="/directional" exact activeClassName={classes.navItemActive}>
           Directional Guidance
-        </NavLink>
+        </NavLink> */}
       </div>
 
       <div className={classes.viewport}>{children}</div>
