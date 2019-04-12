@@ -145,13 +145,14 @@ function addDemoFormations(container, formations) {
   //
   //   prevPath = nextPath;
   // }
+  const calcXY = p => [Number(p.vs), Number(p.tot) + Number(p.thickness)];
   for (let i = 0; i < formations.length; i++) {
     let points = formations[i].data;
     let line = new PIXI.Graphics();
-    line.lineStyle(100, Number(`0x${formations[i].bg_color}`), 1);
-    line.moveTo(Number(points[0].vs), Number(points[0].tvd) + Number(points[0].thickness));
+    line.lineStyle(10, Number(`0x${formations[i].bg_color}`), 1); //Number(formations[i].bg_percent));
+    line.moveTo(...calcXY(points[0]));
     for (let j = 1; j < points.length; j++) {
-      line.lineTo(Number(points[j].vs), Number(points[j].tvd) + Number(points[j].thickness));
+      line.lineTo(...calcXY(points[j]));
     }
     container.addChild(line);
   }
