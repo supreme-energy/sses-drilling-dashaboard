@@ -42,7 +42,7 @@ const ACTION_HANDLERS = {
       ...state,
       wellTimestamps: {
         ...state.wellTimestamps,
-        [action.payload.wellId]: new Date().getTime()
+        [action.payload.wellId]: Date.now()
       }
     };
   }

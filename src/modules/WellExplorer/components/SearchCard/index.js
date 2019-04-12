@@ -8,12 +8,12 @@ import { useWells } from "../../../../api";
 
 const EMPTY_ARRAY = [];
 export default function SearchCard(props) {
-  const [wells, , , , , actions] = useWells();
+  const [wells, updateFavorite] = useWells();
 
   return (
     <Card className={classes.card}>
       <CardContent>
-        <WellList items={wells || EMPTY_ARRAY} theme={props.theme} fetchWellList={actions.fetch} />
+        <WellList wells={wells || EMPTY_ARRAY} theme={props.theme} onFavoriteChanged={updateFavorite} />
       </CardContent>
       <CardActions>Actions</CardActions>
     </Card>

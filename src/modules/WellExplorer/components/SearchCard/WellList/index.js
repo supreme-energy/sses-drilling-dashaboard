@@ -68,7 +68,7 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
           </Link>
         ) : (
           <IconButton
-            onClickCapture={e => {
+            onClick={e => {
               changeFav(id, !fav);
               e.stopPropagation();
             }}
@@ -83,37 +83,12 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
   );
 };
 
-function WellList({ items, theme, fetchWellList, ...props }) {
-  // const [, , , , , actions] = useFetch(false);
+function WellList({ wells, theme, onFavoriteChanged, ...props }) {
   const [selectedItem, updateSelectedItem] = useState(null);
-
-  const changeFav = useCallback((seldbname, fav) =>
-    fetchWellList(
-      {
-        path: SET_FAV_WELL,
-        query: {
-          seldbname,
-          favorite: Number(fav)
-        }
-      },
-      (currentVal, newVal) => {
-        return currentVal.map(v => {
-          if (v.id === seldbname) {
-            return {
-              ...v,
-              fav
-            };
-          }
-
-          return v;
-        });
-      }
-    )
-  );
 
   return (
     <List className={classes.list} {...props}>
-      {items.map(well => {
+      {wells.map(well => {
         const selected = selectedItem === well.id;
         return (
           <WellItem
@@ -126,7 +101,7 @@ function WellList({ items, theme, fetchWellList, ...props }) {
             lng={-97.3711399}
             status={well.status}
             fav={well.fav}
-            changeFav={changeFav}
+            changeFav={onFavoriteChanged}
           />
         );
       })}
