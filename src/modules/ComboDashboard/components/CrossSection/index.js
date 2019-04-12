@@ -6,8 +6,8 @@ import { addDemoFormations, addGridlines, subscribeToMoveEvents } from "./pixiUt
 class CrossSection extends Component {
   constructor(props) {
     super(props);
-    this.screenWidth = 800;
-    this.screenHeight = 600;
+    this.screenWidth = window.innerWidth;
+    this.screenHeight = window.innerHeight - 300;
     this.worldHeight = 1000;
     this.worldWidth = 1000;
 
