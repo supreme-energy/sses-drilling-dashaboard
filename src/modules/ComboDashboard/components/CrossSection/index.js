@@ -62,6 +62,7 @@ class CrossSection extends Component {
     this.renderer.view["addEventListener"](
       "wheel",
       e => {
+        e.preventDefault();
         this.interactionManager.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
 
         // sign of deltaY (-1,0,1) determines zoom in or out
