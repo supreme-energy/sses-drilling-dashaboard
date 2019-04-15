@@ -3,6 +3,8 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { addDemoFormations, addGridlines, subscribeToMoveEvents } from "./pixiUtils.js";
 
+// PIXI has some lowercase constructors
+/* eslint new-cap: 0 */
 class CrossSection extends Component {
   constructor(props) {
     super(props);
@@ -29,8 +31,8 @@ class CrossSection extends Component {
     stage.addChild(this.viewport);
 
     // Set up events to enable panning of the viewport through stage
-    let isDragging = false,
-      isOutside = false;
+    let isDragging = false;
+    let isOutside = false;
     const prevMouse = {};
     stage.interactive = true;
     stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
@@ -126,7 +128,7 @@ class CrossSection extends Component {
     subscribeToMoveEvents(this.rectangle, pos => {
       this.props.updateX(pos.x);
       // Lock y movement for demo
-      //this.props.setY(pos.y);
+      // this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
   }
@@ -138,11 +140,16 @@ class CrossSection extends Component {
     this.message.y = 30;
 
     this.viewport.addChild(this.message);
+    this.updateWebGL();
     this.ticker.start();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    this.updateWebGL();
   }
 
   componentWillUnmount() {
@@ -152,6 +159,10 @@ class CrossSection extends Component {
   }
 
   render() {
+    return <div ref={this.canvas} />;
+  }
+
+  updateWebGL() {
     // Update all the PIXI object positions & scale controlled from react
     const { x, y, view } = this.props;
     this.message.text = this.props.message;
@@ -159,8 +170,6 @@ class CrossSection extends Component {
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-
-    return <div ref={this.canvas} />;
   }
 }
 
@@ -169,9 +178,11 @@ CrossSection.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   updateX: PropTypes.func,
-  updateY: PropTypes.func,
+  // updateY: PropTypes.func,
   view: PropTypes.object,
-  updateView: PropTypes.func
+  updateView: PropTypes.func,
+  wellPlan: PropTypes.array,
+  surveys: PropTypes.array
 };
 
 export default CrossSection;

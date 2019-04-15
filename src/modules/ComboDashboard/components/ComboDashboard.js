@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useState } from "react";
+import React, { Suspense, useState, useCallback } from "react";
 import Progress from "@material-ui/core/CircularProgress";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
@@ -13,23 +13,21 @@ export const ComboDashboard = () => {
   const [x, setX] = useState(400);
   const [y, setY] = useState(500);
 
-  const [view, _setView] = useState({
+  const [view, setView] = useState({
     x: 50,
     y: 20,
     xScale: 1,
     yScale: 1
   });
-  const setView = function(value) {
-    _setView(prev => {
-      if (typeof value === "function") {
-        return value(prev);
-      }
+  // Implement merging here so we don't have to everywhere
+  const mergeView = useCallback(function(value) {
+    setView(prev => {
       return {
         ...prev,
         ...value
       };
     });
-  };
+  }, []);
 
   return (
     <Suspense fallback={<Progress />}>
@@ -55,7 +53,7 @@ export const ComboDashboard = () => {
               value={view.x}
               onChange={e => {
                 const value = e.target.value;
-                return setView({ x: value });
+                return mergeView({ x: value });
               }}
             />
           </label>
@@ -66,7 +64,7 @@ export const ComboDashboard = () => {
               value={view.y}
               onChange={e => {
                 const value = e.target.value;
-                return setView({ y: value });
+                return mergeView({ y: value });
               }}
             />
           </label>
@@ -79,7 +77,7 @@ export const ComboDashboard = () => {
               value={view.xScale}
               onChange={e => {
                 const value = e.target.value;
-                return setView({ xScale: value });
+                return mergeView({ xScale: value });
               }}
             />
           </label>
@@ -91,7 +89,7 @@ export const ComboDashboard = () => {
               value={view.yScale}
               onChange={e => {
                 const value = e.target.value;
-                return setView({ yScale: value });
+                return mergeView({ yScale: value });
               }}
             />
           </label>
@@ -104,8 +102,10 @@ export const ComboDashboard = () => {
         updateX={setX}
         updateY={setY}
         view={view}
-        updateView={setView}
-        {...{ wellPlan, surveys, formations }}
+        updateView={mergeView}
+        wellPlan={wellPlan}
+        surveys={surveys}
+        formations={formations}
       />
     </Suspense>
   );
