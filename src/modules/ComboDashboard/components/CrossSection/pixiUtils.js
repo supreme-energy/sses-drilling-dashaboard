@@ -58,9 +58,9 @@ function addGridlines(container, options = {}) {
   let w = container.width;
   let h = container.height;
   let xHide = options.xHide || false;
-  let xInterval = options.xInterval || 50;
+  let xInterval = options.xInterval || 100;
   let yHide = options.yHide || false;
-  let yInterval = options.yInterval || 50;
+  let yInterval = options.yInterval || 100;
 
   // Generate lines for x axis
   if (!xHide) {
@@ -104,42 +104,36 @@ function addGridlines(container, options = {}) {
 }
 
 /**
- * Add randomly generated formation layers
+ * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
- * @param worldWidth The width of the formations generated
- * @param worldHeight the height of the formations generated
+ * @param formations The formation data from the API
  */
-function addDemoFormations(container, worldWidth, worldHeight) {
-  const layerColors = [0xd8d8d8, 0xcac297, 0xb3b59a, 0xd8d8b3, 0xb3b59a, 0xcdd8d8];
-  const topPolyLine = [0, 0, worldWidth, 0].reverse();
-  const bottomPolyLIne = [worldWidth, worldHeight, 0, worldHeight];
-  let prevPath = topPolyLine;
-  for (let layer = 0; layer < layerColors.length; layer++) {
-    let nextPath = [];
-    let anchor = ((layer + 1) * worldHeight) / layerColors.length;
-
-    let horizontalPoints = worldWidth / 100;
-    for (let i = horizontalPoints; i >= 0; i--) {
-      let p = [(i * worldWidth) / horizontalPoints, anchor + Math.random() * (worldHeight / (layerColors.length * 3))];
-      nextPath.push(p);
-    }
-
-    if (layer === layerColors.length - 1) nextPath = bottomPolyLIne;
-
+function addDemoFormations(container, formations) {
+  const calcXY = p => [Number(p.vs), Number(p.tot) + Number(p.thickness)];
+  for (let f of formations) {
+    f.xyCoords = f.data.map(point => calcXY(point));
+  }
+  for (let i = 0; i < formations.length - 1; i++) {
+    const { xyCoords, bg_color, bg_percent } = formations[i];
+    let line = new PIXI.Graphics();
     let poly = new PIXI.Graphics();
     poly.lineStyle(0);
-    poly.beginFill(layerColors[layer], 1);
+    line.lineStyle(4, Number(`0x${bg_color}`), 1); //Number(formations[i].bg_percent));
+    line.moveTo(...xyCoords[0]);
+    for (let i = 1; i < xyCoords.length; i++) {
+      line.lineTo(...xyCoords[i]);
+    }
+    container.addChild(line);
+    poly.beginFill(Number(`0x${bg_color}`), Number(bg_percent));
     poly.drawPolygon(
-      prevPath
+      xyCoords
         .reverse()
         .flat()
-        .concat(nextPath.flat())
+        .concat(formations[i + 1].xyCoords)
+        .flat()
     );
-
     poly.closePath();
     container.addChild(poly);
-
-    prevPath = nextPath;
   }
 }
 

@@ -14,10 +14,10 @@ export const ComboDashboard = () => {
   const [y, setY] = useState(500);
 
   const [view, setView] = useState({
-    x: 50,
-    y: 20,
-    xScale: 1,
-    yScale: 1
+    x: 200,
+    y: -2200,
+    xScale: 0.2,
+    yScale: 0.2
   });
   // Implement merging here so we don't have to everywhere
   const mergeView = useCallback(function(value) {
@@ -31,21 +31,19 @@ export const ComboDashboard = () => {
 
   return (
     <Suspense fallback={<Progress />}>
-      <div style={{ margin: "0 auto", display: "none" }}>
+      <div style={{ margin: "0 auto" }}>
         <h2>Dev debugging data</h2>
-        <div>
+        <div style={{ display: "none" }}>
           <label>
             X value
             <input type="number" value={x} onChange={e => setX(e.target.value)} />
           </label>
-          <br />
           <label>
             Y value
             <input type="number" value={y} onChange={e => setY(e.target.value)} />
           </label>
         </div>
         <div>
-          <h4>viewport</h4>
           <label>
             X value
             <input
@@ -68,12 +66,11 @@ export const ComboDashboard = () => {
               }}
             />
           </label>
-          <br />
           <label>
             xScale
             <input
               type="number"
-              step="0.01"
+              step="0.001"
               value={view.xScale}
               onChange={e => {
                 const value = e.target.value;
@@ -85,7 +82,7 @@ export const ComboDashboard = () => {
             yScale
             <input
               type="number"
-              step="0.01"
+              step="0.001"
               value={view.yScale}
               onChange={e => {
                 const value = e.target.value;
