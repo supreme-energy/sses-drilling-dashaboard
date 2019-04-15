@@ -50,7 +50,6 @@
     "redux-persist": "^5.10.0",
     "redux-react-hook": "^3.2.1",
     "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0",
     "shallowequal": "1.1.0",
     "url-pattern": "^1.0.3",
     "whatwg-fetch": "2.0.4"

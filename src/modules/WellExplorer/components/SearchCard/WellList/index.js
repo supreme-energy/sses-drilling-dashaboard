@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
@@ -10,7 +10,7 @@ import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import classNames from "classnames";
 import { DRILLING, UNKNOWN, TRIPPING } from "../../../../../constants/drillingStatus";
-import { SET_FAV_WELL } from "../../../../../api";
+
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";

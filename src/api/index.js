@@ -17,7 +17,8 @@ export function useWells() {
         return wells.map(w => ({
           id: w.jobname,
           name: w.realjobname,
-          status: DRILLING
+          status: DRILLING,
+          fav: Boolean(w.favorite)
         }));
       }
     }
