@@ -66,7 +66,7 @@ class App extends React.Component {
                       <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
                       <Route path="/:wellId/structural" exact component={StructuralGuidance} />
                       <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                      <Route path="/(:wellId)?" component={WellExplorer} />
+                      <Route path="/:wellId?" component={WellExplorer} />
                     </Switch>
                   </PageLayout>
                   {/* </FakeFetch> */}

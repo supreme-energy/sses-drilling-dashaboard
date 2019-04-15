@@ -10,7 +10,7 @@ import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import classNames from "classnames";
 import { DRILLING, UNKNOWN, TRIPPING } from "../../../../../constants/drillingStatus";
-
+import { withRouter } from "react-router";
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
@@ -46,7 +46,7 @@ const iconsByStatus = {
   )
 };
 
-const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props }) => {
+const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, ...props }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
   return (
     <ListItem {...props} button disableRipple className={classes.wellItem}>
@@ -60,10 +60,10 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
         </Typography>
       </div>
       <div className={classes.buttons}>
-        {props.selected ? (
-          <Link to={`${id}/combo`}>
+        {props.selected || opened ? (
+          <Link to={opened ? `/` : `/${id}/combo`}>
             <Button color="primary" className={classes.button}>
-              Open
+              {opened ? "Close" : "Open"}
             </Button>
           </Link>
         ) : (
@@ -83,7 +83,15 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, ...props 
   );
 };
 
-function WellList({ wells, theme, onFavoriteChanged, ...props }) {
+function WellList({
+  wells,
+  theme,
+  onFavoriteChanged,
+  match: {
+    params: { wellId }
+  },
+  ...props
+}) {
   const [selectedItem, updateSelectedItem] = useState(null);
 
   return (
@@ -94,6 +102,7 @@ function WellList({ wells, theme, onFavoriteChanged, ...props }) {
           <WellItem
             key={well.id}
             selected={selected}
+            opened={wellId === well.id}
             onClick={() => updateSelectedItem(selected ? null : well.id)}
             id={well.id}
             name={well.name}
@@ -109,4 +118,4 @@ function WellList({ wells, theme, onFavoriteChanged, ...props }) {
   );
 }
 
-export default WellList;
+export default withRouter(WellList);
