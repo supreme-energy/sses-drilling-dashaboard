@@ -15,9 +15,9 @@ export const ComboDashboard = () => {
 
   const [view, _setView] = useState({
     x: 200,
-    y: -2500,
-    xScale: 0.25,
-    yScale: 0.25
+    y: -2200,
+    xScale: 0.2,
+    yScale: 0.2
   });
   const setView = function(value) {
     _setView(prev => {
@@ -72,7 +72,7 @@ export const ComboDashboard = () => {
             xScale
             <input
               type="number"
-              step="0.01"
+              step="0.001"
               value={view.xScale}
               onChange={e => {
                 const value = e.target.value;
@@ -84,7 +84,7 @@ export const ComboDashboard = () => {
             yScale
             <input
               type="number"
-              step="0.01"
+              step="0.001"
               value={view.yScale}
               onChange={e => {
                 const value = e.target.value;
