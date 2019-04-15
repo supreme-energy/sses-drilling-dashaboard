@@ -105,7 +105,7 @@ class CrossSection extends Component {
     }
     this.viewport.addChild(wellplan);
 
-    let iconTexture = new PIXI.Texture.fromImage("./Survey.svg");
+    let iconTexture = new PIXI.Texture.fromImage("/survey.svg");
 
     let sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
     for (let i = 0; i < sData.length; i++) {
