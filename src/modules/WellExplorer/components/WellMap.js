@@ -5,8 +5,7 @@ import CenterControl from "./CenterControl";
 
 const mapStyles = {
   width: "100%",
-  minHeight: "60%",
-  maxHeight: "60%",
+  height: "100%",
   position: "absolute",
   left: 0,
   margin: "0 auto"

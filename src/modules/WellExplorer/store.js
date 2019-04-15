@@ -1,5 +1,10 @@
-import { persistStore, persistReducer } from "redux-persist";
+import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+
+// tabs
+export const FAVORITES = "FAVORITES";
+export const ALL_WELLS = "ALL WELLS";
+export const RECENT_WELLS = "RECENT WELLS";
 
 /** name of this redux module */
 const MODULE = "wellExplorer";
@@ -16,6 +21,7 @@ function actionPrefix(type) {
 }
 
 export const CHANGE_WELL_ACCESS_TIMESTAMP = actionPrefix("CHANGE_WELL_ACCESS_TIMESTAMP");
+export const CHANGE_ACTIVE_TAB = actionPrefix("CHANGE_ACTIVE_TAB");
 
 // ------------------------------------
 // Actions
@@ -28,8 +34,16 @@ export function changeWellAccessTimestamp(wellId) {
   };
 }
 
+export function changeActiveTab(tab) {
+  return {
+    type: CHANGE_ACTIVE_TAB,
+    payload: { tab }
+  };
+}
+
 export const actions = {
-  changeWellAccessTimestamp
+  changeWellAccessTimestamp,
+  changeActiveTab
 };
 
 // ------------------------------------
@@ -45,6 +59,12 @@ const ACTION_HANDLERS = {
         [action.payload.wellId]: Date.now()
       }
     };
+  },
+  [CHANGE_ACTIVE_TAB]: (state, action) => {
+    return {
+      ...state,
+      activeTab: action.payload.tab
+    };
   }
 };
 
@@ -53,7 +73,8 @@ const ACTION_HANDLERS = {
 // ------------------------------------
 
 const initialState = {
-  wellTimestamps: {}
+  wellTimestamps: {},
+  activeTab: ALL_WELLS
 };
 
 const persistConfig = {

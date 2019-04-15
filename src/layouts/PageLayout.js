@@ -10,7 +10,7 @@ export const PageLayout = ({ children, history }) => (
   <MuiThemeProvider theme={theme}>
     <div className={classes.container}>
       <div className={classes.header}>
-        <div>
+        <div className={classes.logo}>
           <img src="/logo_sses.svg" />
         </div>
         {/* <NavLink to="/" exact activeClassName={classes.navItemActive}>
