@@ -8,6 +8,7 @@ import mapValues from "lodash/mapValues";
 import classes from "./styles.scss";
 import classNames from "classnames";
 import { withRouter } from "react-router";
+import MapLegend from "./MapLegend";
 
 const mapStyles = {
   width: "100%",
@@ -32,12 +33,12 @@ export const WellMap = ({
 }) => {
   return (
     <Map
+      {...props}
       center={mapCenter}
       length={4}
       onClick={handleClickWell}
       style={mapStyles}
       zoom={6}
-      {...props}
       className={classNames(classes.map, props.className)}
     >
       <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
@@ -50,7 +51,9 @@ export const WellMap = ({
             className={classes.marker}
           />
         ))}
-      <CenterControl />
+      <CenterControl>
+        <MapLegend className={classes.legend} />
+      </CenterControl>
     </Map>
   );
 };

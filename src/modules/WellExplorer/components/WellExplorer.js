@@ -44,7 +44,6 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
         mapCenter={mapCenter}
         handleClickWell={() => {}}
         zoomControl={false}
-        scrollWheelZoom
       />
       <div className={classes.topRow}>
         <SearchCard
