@@ -1,0 +1,10 @@
+.map {
+    :global {
+        .leaflet-marker-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-style: none;
+        }
+    }
+}

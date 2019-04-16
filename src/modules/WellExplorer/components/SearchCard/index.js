@@ -13,7 +13,7 @@ import { connect } from "react-redux";
 
 const EMPTY_ARRAY = [];
 
-function SearchCard({ activeTab, theme, changeActiveTab, wellTimestamps, updateFavorite, wells }) {
+function SearchCard({ activeTab, theme, changeActiveTab, updateFavorite, wells }) {
   return (
     <Card className={classes.card}>
       <CardContent>
