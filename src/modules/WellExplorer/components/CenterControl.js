@@ -8,22 +8,21 @@ class LegendControl extends MapControl {
     children: PropTypes.object
   };
 
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+    this._container = L.DomUtil.create("div", "");
     const { position } = this.props;
     const legend = L.control({ position });
-    legend.onAdd = function(map) {
-      let div = L.DomUtil.create("div");
 
-      return div;
+    legend.onAdd = map => {
+      return this._container;
     };
 
     this.leafletElement = legend;
   }
 
   render() {
-    return this.leafletElement._container
-      ? ReactDOM.createPortal(this.props.children, this.leafletElement._container)
-      : null;
+    return ReactDOM.createPortal(this.props.children, this._container);
   }
 
   // Used by withLeaflet HOC to create element, otherwise component fails
