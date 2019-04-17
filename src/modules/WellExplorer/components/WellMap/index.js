@@ -42,7 +42,6 @@ export const WellMap = ({
   ...props
 }) => {
   const toggleFullScreen = () => {
-    console.log("mapRef.current.leafletElement", mapRef.current.leafletElement);
     mapRef.current.leafletElement.toggleFullscreen();
   };
 
