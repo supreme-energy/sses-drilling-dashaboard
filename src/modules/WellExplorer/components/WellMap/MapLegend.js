@@ -8,16 +8,14 @@ import classNames from "classnames";
 const Status = ({ status }) => (
   <div className={classes.status}>
     <img src={listIcons[status]} className={classes.statusIcon} />
-    <Typography variant="body1" gutterBottom>
-      {status}
-    </Typography>
+    <Typography variant="body1">{status}</Typography>
   </div>
 );
 
 export default ({ className }) => {
   return (
     <div className={classNames(classes.legend, className)}>
-      <Typography variant="subheading" gutterBottom>
+      <Typography variant="subtitle1" gutterBottom>
         Legend
       </Typography>
       <Status status={DRILLING} />
