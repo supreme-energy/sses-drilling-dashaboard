@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Map, TileLayer, Marker, ZoomControl } from "react-leaflet";
 import CenterControl from "../CenterControl";
@@ -25,11 +25,11 @@ const mapStyles = {
   margin: "0 auto"
 };
 
-const leafletIconsByStats = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
+const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
 const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
 
 const MAP = "Map";
-const SATELITE = "Satelite";
+const SATELLITE = "Satellite";
 
 export const WellMap = ({
   mapCenter,
@@ -41,14 +41,17 @@ export const WellMap = ({
   },
   ...props
 }) => {
-  const toggleFullScreen = () => {
-    mapRef.current.leafletElement.toggleFullscreen();
-  };
-
   const mapRef = useRef(null);
+  const toggleFullScreen = useCallback(() => {
+    mapRef.current.leafletElement.toggleFullscreen();
+  }, [mapRef.current]);
+
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
-  const [isFullscreen, onFullScreenChanged] = useState(false);
+  const [isFullscreen, updateIsFullScreen] = useState(false);
   const FullScreenIcon = isFullscreen ? FullscreenExit : Fullscreen;
+  const handleMapFullscreenChange = useCallback((e, data) => updateIsFullScreen(e.target.isFullscreen()), [
+    updateIsFullScreen
+  ]);
 
   return (
     <Map
@@ -57,7 +60,7 @@ export const WellMap = ({
       length={4}
       onClick={handleClickWell}
       style={mapStyles}
-      onfullscreenchange={(e, data) => onFullScreenChanged(e.target.isFullscreen())}
+      onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
       ref={mapRef}
       className={classNames(classes.map, props.className)}
@@ -73,7 +76,7 @@ export const WellMap = ({
           <Marker
             key={well.id}
             position={well.position}
-            icon={wellId === well.id ? leafletIconsSelected[well.status] : leafletIconsByStats[well.status]}
+            icon={wellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
             className={classes.marker}
           />
         ))}
@@ -88,8 +91,8 @@ export const WellMap = ({
             <Button disableRipple onClick={() => changeSelectedTiles(MAP)}>
               <Typography variant={selectedTiles === MAP ? "body1" : "body2"}>Map</Typography>
             </Button>
-            <Button disableRipple onClick={() => changeSelectedTiles(SATELITE)}>
-              <Typography variant={selectedTiles === SATELITE ? "body1" : "body2"}>Satelite</Typography>
+            <Button disableRipple onClick={() => changeSelectedTiles(SATELLITE)}>
+              <Typography variant={selectedTiles === SATELLITE ? "body1" : "body2"}>Satellite</Typography>
             </Button>
           </Paper>
 
