@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="19px" height="23px" viewBox="0 0 19 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 53.2 (72643) - https://sketchapp.com -->
+    <title>57E8CC3B-4F05-4482-BE57-37B2D30E5574</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <polygon id="path-1" points="12.5 7.5 11.61875 6.61875 8.125 10.10625 8.125 2.5 6.875 2.5 6.875 10.10625 3.3875 6.6125 2.5 7.5 7.5 12.5"></polygon>
+    </defs>
+    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-112.000000, -142.000000)" id="Map-Marker/Well/Drilling-Selected">
+            <g transform="translate(109.000000, 142.000000)">
+                <rect id="Container" x="0" y="0" width="24" height="24"></rect>
+                <path d="M12.5,22.5125132 C14.2784649,17.8257795 21,14.1944204 21,9.5 C21,4.80557963 17.1944204,1 12.5,1 C7.80557963,1 4,4.80557963 4,9.5 C4,14.1944204 10.6849926,17.7367036 12.5,22.5125132 Z" id="Oval-Copy-11" stroke="#FFFFFF" fill="#FF00FF"></path>
+                <g id="icon/navigation/arrow_upward_24px-copy-7" transform="translate(5.000000, 2.000000)">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <g id="icon/navigation/arrow_downward_24px" fill-rule="nonzero"></g>
+                    <g id="↳-Color" mask="url(#mask-2)" fill="#FFFFFF">
+                        <rect id="Rectangle-3" x="0" y="0" width="15" height="15"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

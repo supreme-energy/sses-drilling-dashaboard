@@ -14,12 +14,16 @@ export function useWells() {
     },
     {
       transform: wells => {
-        return wells.map(w => ({
-          id: w.jobname,
-          name: w.realjobname,
-          status: DRILLING,
-          fav: Boolean(w.favorite)
-        }));
+        return wells.map(w => {
+          const pos = [Math.random() * 5 + 28, -95 - Math.random() * 5];
+          return {
+            id: w.jobname,
+            name: w.realjobname,
+            status: DRILLING,
+            fav: Boolean(w.favorite),
+            position: pos
+          };
+        });
       }
     }
   );

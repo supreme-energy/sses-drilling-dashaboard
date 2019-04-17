@@ -3,53 +3,20 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
 import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
 import Favorite from "@material-ui/icons/Favorite";
 import FavoriteBorder from "@material-ui/icons/FavoriteBorder";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import classNames from "classnames";
-import { DRILLING, UNKNOWN, TRIPPING } from "../../../../../constants/drillingStatus";
 import { withRouter } from "react-router";
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
+import { listIcons } from "../../IconsByStatus";
 
-const styles = theme => ({
-  [DRILLING]: {
-    backgroundColor: theme.drillingStatusColor
-  },
-
-  [TRIPPING]: {
-    backgroundColor: theme.trippingStatusColor
-  }
-});
-
-const ArrowWithBackground = ({ children, classes: withStylesClasses, status }) => {
-  return <div className={classNames(classes.arrowBg, withStylesClasses[status])}>{children}</div>;
-};
-
-const TrippingArrowBg = withStyles(styles)(ArrowWithBackground);
-const DrillingArrowBg = withStyles(styles)(ArrowWithBackground);
-
-const iconsByStatus = {
-  [DRILLING]: (
-    <DrillingArrowBg status={DRILLING}>
-      <ArrowDownward className={classes.arrowIcon} />
-    </DrillingArrowBg>
-  ),
-  [UNKNOWN]: null, // to be provided
-  [TRIPPING]: (
-    <TrippingArrowBg status={TRIPPING}>
-      <ArrowUpward className={classes.arrowIcon} />
-    </TrippingArrowBg>
-  )
-};
-
-const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, ...props }) => {
+const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
+  const icon = listIcons[status];
+
   return (
-    <ListItem {...props} button disableRipple className={classes.wellItem}>
+    <ListItem button disableRipple className={classes.wellItem} onClick={onClick}>
       <div className={classes.itemContent}>
         <div>{name}</div>
         <Typography variant="body2" gutterBottom>
@@ -60,7 +27,7 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, .
         </Typography>
       </div>
       <div className={classes.buttons}>
-        {props.selected || opened ? (
+        {selected || opened ? (
           <Link to={opened ? `/` : `/${id}/combo`}>
             <Button color="primary" className={classes.button}>
               {opened ? "Close" : "Open"}
@@ -76,8 +43,7 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, .
             <FavIcon className={classes.icon} />
           </IconButton>
         )}
-
-        {iconsByStatus[status]}
+        <img src={icon} />
       </div>
     </ListItem>
   );
@@ -95,11 +61,12 @@ function WellList({
   const [selectedItem, updateSelectedItem] = useState(null);
 
   return (
-    <List className={classes.list} {...props}>
+    <List className={classes.list}>
       {wells.map(well => {
         const selected = selectedItem === well.id;
         return (
           <WellItem
+            theme={theme}
             key={well.id}
             selected={selected}
             opened={wellId === well.id}

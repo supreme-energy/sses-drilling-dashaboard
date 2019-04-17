@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom";
 import { PropTypes } from "prop-types";
 import L from "leaflet";
@@ -9,19 +8,21 @@ class LegendControl extends MapControl {
     children: PropTypes.object
   };
 
-  componentWillMount() {
-    const legend = L.control({ position: "bottomright" });
+  constructor(props) {
+    super(props);
+    this._container = L.DomUtil.create("div", "");
+    const { position } = this.props;
+    const legend = L.control({ position });
 
-    //  TO-DO: Add legend here
-    const jsx = <div {...this.props}>{this.props.children}</div>;
-
-    legend.onAdd = function(map) {
-      let div = L.DomUtil.create("div", "");
-      ReactDOM.render(jsx, div);
-      return div;
+    legend.onAdd = map => {
+      return this._container;
     };
 
     this.leafletElement = legend;
+  }
+
+  render() {
+    return ReactDOM.createPortal(this.props.children, this._container);
   }
 
   // Used by withLeaflet HOC to create element, otherwise component fails

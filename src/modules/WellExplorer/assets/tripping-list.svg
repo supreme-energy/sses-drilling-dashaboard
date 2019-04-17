@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="19px" height="19px" viewBox="0 0 19 19" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 53.2 (72643) - https://sketchapp.com -->
+    <title>BC8EA7DF-C58D-4A58-A938-84E1F2CA0B11</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <polygon id="path-1" points="2.5 7.5 3.38125 8.38125 6.875 4.89375 6.875 12.5 8.125 12.5 8.125 4.89375 11.6125 8.3875 12.5 7.5 7.5 2.5"></polygon>
+    </defs>
+    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-35.000000, -174.000000)" id="Map-Legend/Well/Tripping">
+            <g transform="translate(36.000000, 175.000000)">
+                <path d="M8.5,17 C12.75,17 17,13.1944204 17,8.5 C17,3.80557963 13.1944204,0 8.5,0 C3.80557963,0 0,3.80557963 0,8.5 C0,13.1944204 4.25,17 8.5,17 Z" id="Oval" stroke="#FFFFFF" fill="#B00020"></path>
+                <g id="icon/navigation/arrow_upward_24px" transform="translate(1.000000, 1.000000)">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <g fill-rule="nonzero"></g>
+                    <g id="↳-Color" mask="url(#mask-2)" fill="#FFFFFF">
+                        <rect id="Rectangle-3" x="0" y="0" width="15" height="15"></rect>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
