@@ -6,5 +6,45 @@
             align-items: center;
             border-style: none;
         }
+
+        .leaflet-control-zoom {
+            border-style: none;
+            box-shadow: 0 1px 1px 0 rgba(0,0,0,0.14), 0 2px 1px -1px rgba(0,0,0,0.12), 0 1px 3px 0 rgba(0,0,0,0.2);
+            & > a {
+                border-top-style: none;
+                border-bottom-style: none;
+                width: 40px;
+                height: 40px;
+                font-size: 32px;
+                color: #666666;
+            }
+
+            .leaflet-control-zoom-in {
+                border-bottom: solid 1px #E7E7E7;
+            }
+        }
+    }
+
+    .fullScreen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        > button {
+            padding: 0px;
+        }
+    }
+
+    .horizontalLayout {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .leftMapControls {
+        @extend .horizontalLayout;
+        width: 300px;
+    }
+
+    .hSpace {
+        width: 10px;
     }
 }

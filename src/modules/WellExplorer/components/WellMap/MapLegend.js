@@ -17,7 +17,7 @@ const Status = ({ status }) => (
 export default ({ className }) => {
   return (
     <div className={classNames(classes.legend, className)}>
-      <Typography variant="subheading" gutterBottom>
+      <Typography variant="subtitle1" gutterBottom>
         Legend
       </Typography>
       <Status status={DRILLING} />
