@@ -96,12 +96,12 @@ export const WellMap = ({
             </Button>
           </Paper>
 
-          <span className={classes.hSpace} />
+          {/* <span className={classes.hSpace} />
           <Paper className={classes.fullScreen}>
             <IconButton disableRipple onClick={toggleFullScreen}>
               <FullScreenIcon style={{ fontSize: 32 }} />
             </IconButton>
-          </Paper>
+          </Paper> */}
         </div>
       </CenterControl>
     </Map>
