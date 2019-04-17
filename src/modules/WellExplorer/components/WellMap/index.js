@@ -10,10 +10,10 @@ import classNames from "classnames";
 import { withRouter } from "react-router";
 import MapLegend from "./MapLegend";
 import "leaflet-fullscreen";
-import Fullscreen from "@material-ui/icons/Fullscreen";
-import FullscreenExit from "@material-ui/icons/FullscreenExit";
+// import Fullscreen from "@material-ui/icons/Fullscreen";
+// import FullscreenExit from "@material-ui/icons/FullscreenExit";
 import Paper from "@material-ui/core/Paper";
-import IconButton from "@material-ui/core/IconButton";
+// import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
@@ -42,16 +42,16 @@ export const WellMap = ({
   ...props
 }) => {
   const mapRef = useRef(null);
-  const toggleFullScreen = useCallback(() => {
-    mapRef.current.leafletElement.toggleFullscreen();
-  }, [mapRef.current]);
+  // const toggleFullScreen = useCallback(() => {
+  //   mapRef.current.leafletElement.toggleFullscreen();
+  // }, [mapRef]);
 
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
-  const [isFullscreen, updateIsFullScreen] = useState(false);
-  const FullScreenIcon = isFullscreen ? FullscreenExit : Fullscreen;
-  const handleMapFullscreenChange = useCallback((e, data) => updateIsFullScreen(e.target.isFullscreen()), [
-    updateIsFullScreen
-  ]);
+  // const [isFullscreen, updateIsFullScreen] = useState(false);
+  // const FullScreenIcon = isFullscreen ? FullscreenExit : Fullscreen;
+  // const handleMapFullscreenChange = useCallback((e, data) => updateIsFullScreen(e.target.isFullscreen()), [
+  //   updateIsFullScreen
+  // ]);
 
   return (
     <Map
@@ -60,7 +60,7 @@ export const WellMap = ({
       length={4}
       onClick={handleClickWell}
       style={mapStyles}
-      onfullscreenchange={handleMapFullscreenChange}
+      // onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
       ref={mapRef}
       className={classNames(classes.map, props.className)}
