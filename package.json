@@ -33,7 +33,6 @@
     "jwt-decode": "^2.2.0",
     "leaflet": "^1.4.0",
     "leaflet-fullscreen": "^1.0.2",
-    "leaflet.fullscreen": "^1.4.5",
     "lodash": "4.17.10",
     "object-assign": "^4.1.1",
     "pixi.js": "^4.8.7",
