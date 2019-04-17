@@ -1,0 +1,17 @@
+.legend {
+    border: solid 2px #000000;
+    padding: 10px;
+    background: #ffffff;
+    .status {
+        padding: 10px 0px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        
+        .statusIcon {
+            margin-right: 10px;
+        }
+    }
+
+    
+}
