@@ -170,13 +170,14 @@ function customTransform(parentTransform) {
 
   if (this._parentID !== parentTransform._worldID) {
     // concat the parent matrix with the objects transform.
-    var pt = parentTransform.worldTransform;
-    var wt = this.worldTransform;
+    const pt = parentTransform.worldTransform;
+    const ps = parentTransform.scale;
+    const wt = this.worldTransform;
 
-    wt.a = lt.a * pt.a + lt.b * pt.c;
-    wt.b = lt.a * pt.b + lt.b * pt.d;
-    wt.c = lt.c * pt.a + lt.d * pt.c;
-    wt.d = lt.c * pt.b + lt.d * pt.d;
+    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
+    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
+    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
+    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
     wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
     wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
 
