@@ -4,8 +4,6 @@ import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
 import { listIcons } from "../IconsByStatus";
-import useFetch from "react-powertools/data/useFetch";
-import { GET_WELL_INFO } from "../../../../api";
 import { Link } from "react-router-dom";
 import classNames from "classnames";
 
@@ -45,8 +43,6 @@ const DrillingStatus = ({ status, className }) => {
 };
 
 function WelcomeCard({ theme, lastEditedWell, selectedWell }) {
-  const wellInfo = useFetch(lastEditedWell && { path: GET_WELL_INFO, query: { seldbname: lastEditedWell.id } });
-  console.log("wellInfo", wellInfo);
   return (
     <Card className={classes.card}>
       <CardContent>
