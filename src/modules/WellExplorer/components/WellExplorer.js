@@ -1,4 +1,4 @@
-import React, { lazy } from "react";
+import React, { lazy, useState } from "react";
 import PropTypes from "prop-types";
 import classes from "./WellExplorer.scss";
 import SearchCard from "./SearchCard";
@@ -6,7 +6,7 @@ import { withTheme } from "@material-ui/core/styles";
 import flowRight from "lodash/flowRight";
 import { connect } from "react-redux";
 import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../store";
-import { useWells } from "../../../api";
+import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
 
@@ -30,17 +30,22 @@ function getFilteredWells(activeTab, wells, wellTimestamps) {
 
 export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme }) => {
   const [wells, updateFavorite] = useWells();
+
+  const [searchTerm, onSearchTermChanged] = useState("");
   const fileterdWells = useMemo(() => getFilteredWells(activeTab, wells, wellTimestamps), [
     activeTab,
     wells,
     wellTimestamps
   ]);
 
+  const search = useWellsSearch(fileterdWells);
+  const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
+
   return (
     <div className={classes.container}>
       <WellMap
         theme={theme}
-        wells={fileterdWells}
+        wells={searchResults}
         className={classes.map}
         mapCenter={mapCenter}
         handleClickWell={() => {}}
@@ -48,8 +53,10 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
       />
       <div className={classes.topRow}>
         <SearchCard
+          searchTerm={searchTerm}
+          onSearchTermChanged={onSearchTermChanged}
           theme={theme}
-          wells={fileterdWells}
+          wells={searchResults}
           updateFavorite={updateFavorite}
           changeActiveTab={changeActiveTab}
         />
