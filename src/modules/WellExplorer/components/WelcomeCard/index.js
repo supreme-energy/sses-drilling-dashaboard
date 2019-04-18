@@ -1,40 +1,50 @@
 import React from "react";
-import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIcon } from "@material-ui/core";
+import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIcon, Button } from "@material-ui/core";
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
 import { listIcons } from "../IconsByStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { GET_WELL_INFO } from "../../../../api";
+import { Link } from "react-router-dom";
+import classNames from "classnames";
 
-function LastEditedWell({ well }) {
+const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
+  const well = selectedWell || lastEditedWell;
+
   return (
     <div>
       <Typography variant="subtitle1" gutterBottom>
-        Last time you were editing the well
+        Last time you were opened the well
       </Typography>
-      <div>{name}</div>
+      <div>{well.name}</div>
       <Typography variant="body2" gutterBottom>
         {`${well.position[0]}  |  ${well.position[1]}`}
       </Typography>
 
       <div className={classes.row}>
-        <DrillingStatus status={well.status} />
+        <DrillingStatus status={well.status} className={classes.status} />
+
+        <Link to={`/${well.id}/combo`}>
+          <Button variant="contained" color="primary">
+            {selectedWell ? "Continue" : "Reopen"}
+          </Button>
+        </Link>
       </div>
     </div>
   );
-}
+};
 
-function DrillingStatus({ status }) {
+const DrillingStatus = ({ status, className }) => {
   return (
-    <div className={classes.row}>
+    <div className={classNames(className, classes.status)}>
       <img className={classes.statusIcon} src={listIcons[status]} />
       <span>{status}</span>
     </div>
   );
-}
+};
 
-export default function WelcomeCard({ theme, lastEditedWell }) {
+function WelcomeCard({ theme, lastEditedWell, selectedWell }) {
   const wellInfo = useFetch(lastEditedWell && { path: GET_WELL_INFO, query: { seldbname: lastEditedWell.id } });
   console.log("wellInfo", wellInfo);
   return (
@@ -66,9 +76,13 @@ export default function WelcomeCard({ theme, lastEditedWell }) {
             </List>
           </div>
           <span className={classes.hSpacer} />
-          {lastEditedWell ? <LastEditedWell well={lastEditedWell} /> : null}
+          {lastEditedWell || selectedWell ? (
+            <LastEditedWell lastEditedWell={lastEditedWell} selectedWell={selectedWell} />
+          ) : null}
         </div>
       </CardContent>
     </Card>
   );
 }
+
+export default WelcomeCard;

@@ -10,6 +10,7 @@ import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
 import memoizeOne from "memoize-one";
+import keyBy from "lodash/keyBy";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -33,7 +34,17 @@ function getFilteredWells(activeTab, wells, wellTimestamps) {
   }
 }
 
-export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme }) => {
+const getWellsById = wells => keyBy(wells, "id");
+
+export const WellExplorer = ({
+  wellTimestamps,
+  changeActiveTab,
+  activeTab,
+  theme,
+  match: {
+    params: { wellId: selectedWellId }
+  }
+}) => {
   const [wells, updateFavorite] = useWells();
 
   const [searchTerm, onSearchTermChanged] = useState("");
@@ -47,6 +58,8 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
   const mostRecentWell = recentWells[0];
   const search = useWellsSearch(fileterdWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
+  const wellsById = useMemo(() => getWellsById(wells), [wells]);
+  const selectedWell = wellsById[selectedWellId];
 
   return (
     <div className={classes.container}>
@@ -67,7 +80,7 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
           updateFavorite={updateFavorite}
           changeActiveTab={changeActiveTab}
         />
-        <WelcomeCard theme={theme} lastEditedWell={mostRecentWell} />
+        <WelcomeCard theme={theme} lastEditedWell={mostRecentWell} selectedWell={selectedWell} />
       </div>
     </div>
   );
@@ -77,7 +90,10 @@ WellExplorer.propTypes = {
   theme: PropTypes.object,
   wellTimestamps: PropTypes.object,
   changeActiveTab: PropTypes.func,
-  activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES])
+  activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES]),
+  match: PropTypes.shape({
+    params: PropTypes.object
+  })
 };
 
 const mapStateToProps = state => {

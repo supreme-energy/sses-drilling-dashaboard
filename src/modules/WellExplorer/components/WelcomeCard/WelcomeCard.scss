@@ -14,8 +14,6 @@
         margin-right: 25px;
         .listItem {
             border-bottom: solid 1px #E4E4E4;
-            
-        
             .iconBg {
                 width: 20px;
                 height: 20px;
@@ -30,6 +28,10 @@
                 }
             }
         }
+    }
+
+    .status {
+        margin-right: 20px;
     }
 
     .row {
