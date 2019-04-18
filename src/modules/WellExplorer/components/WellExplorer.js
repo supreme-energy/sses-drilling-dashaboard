@@ -9,6 +9,7 @@ import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../store";
 import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
+import memoizeOne from "memoize-one";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -17,10 +18,14 @@ const mapCenter = {
   lng: -95.7129
 };
 
+const getRecentWells = memoizeOne((wells, wellTimestamps) => {
+  return wells.filter(w => wellTimestamps[w.id]).sort((a, b) => wellTimestamps[b.id] - wellTimestamps[a.id]);
+});
+
 function getFilteredWells(activeTab, wells, wellTimestamps) {
   switch (activeTab) {
     case RECENT_WELLS:
-      return wells.filter(w => wellTimestamps[w.id]).sort((a, b) => wellTimestamps[b.id] - wellTimestamps[a.id]);
+      return getRecentWells(wells, wellTimestamps);
     case FAVORITES:
       return wells.filter(w => w.fav);
     default:
@@ -38,6 +43,8 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
     wellTimestamps
   ]);
 
+  const recentWells = getRecentWells(wells, wellTimestamps);
+  const mostRecentWell = recentWells[0];
   const search = useWellsSearch(fileterdWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
 
@@ -60,7 +67,7 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
           updateFavorite={updateFavorite}
           changeActiveTab={changeActiveTab}
         />
-        <WelcomeCard theme={theme} />
+        <WelcomeCard theme={theme} lastEditedWell={mostRecentWell} />
       </div>
     </div>
   );

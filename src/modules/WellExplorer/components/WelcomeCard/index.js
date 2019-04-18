@@ -3,8 +3,40 @@ import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIc
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
+import { listIcons } from "../IconsByStatus";
+import useFetch from "react-powertools/data/useFetch";
+import { GET_WELL_INFO } from "../../../../api";
+
+function LastEditedWell({ well }) {
+  return (
+    <div>
+      <Typography variant="subtitle1" gutterBottom>
+        Last time you were editing the well
+      </Typography>
+      <div>{name}</div>
+      <Typography variant="body2" gutterBottom>
+        {`${well.position[0]}  |  ${well.position[1]}`}
+      </Typography>
+
+      <div className={classes.row}>
+        <DrillingStatus status={well.status} />
+      </div>
+    </div>
+  );
+}
+
+function DrillingStatus({ status }) {
+  return (
+    <div className={classes.row}>
+      <img className={classes.statusIcon} src={listIcons[status]} />
+      <span>{status}</span>
+    </div>
+  );
+}
 
 export default function WelcomeCard({ theme, lastEditedWell }) {
+  const wellInfo = useFetch(lastEditedWell && { path: GET_WELL_INFO, query: { seldbname: lastEditedWell.id } });
+  console.log("wellInfo", wellInfo);
   return (
     <Card className={classes.card}>
       <CardContent>
@@ -33,11 +65,8 @@ export default function WelcomeCard({ theme, lastEditedWell }) {
               </ListItem>
             </List>
           </div>
-          <div>
-            <Typography variant="subtitle1" gutterBottom>
-              Last time you were editing the well
-            </Typography>
-          </div>
+          <span className={classes.hSpacer} />
+          {lastEditedWell ? <LastEditedWell well={lastEditedWell} /> : null}
         </div>
       </CardContent>
     </Card>
