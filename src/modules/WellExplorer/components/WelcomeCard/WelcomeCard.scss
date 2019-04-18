@@ -1,0 +1,27 @@
+.card {
+    .cardContent {
+        display: flex;
+        flex-direction: row;
+    }
+    .list {
+        width: 380px;
+        .listItem {
+            border-bottom: solid 1px #E4E4E4;
+            
+        
+            .iconBg {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                
+                > svg {
+                    font-size: 18px;
+                    color: white;
+                }
+            }
+        }
+    }
+}

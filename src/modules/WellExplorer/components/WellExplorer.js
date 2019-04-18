@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../store";
 import { useWells } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
+import WelcomeCard from "./WelcomeCard";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -52,7 +53,7 @@ export const WellExplorer = ({ wellTimestamps, changeActiveTab, activeTab, theme
           updateFavorite={updateFavorite}
           changeActiveTab={changeActiveTab}
         />
-        <div />
+        <WelcomeCard theme={theme} />
       </div>
     </div>
   );
