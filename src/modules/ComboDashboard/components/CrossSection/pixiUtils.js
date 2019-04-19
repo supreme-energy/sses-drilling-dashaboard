@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { frozenScaleTransform, frozenYTransform, frozenXYTransform, frozenXTransform } from "./customPixiTransforms";
 
 /**
  * Add mouse and touch events to a PIXI displayObject to enable dragging
@@ -137,158 +138,85 @@ function addDemoFormations(container, formations) {
   }
 }
 
-/**
- * Transform function that does not affect an object's scale when transformed by
- * the parent object.  Allows for an object to track position with other objects,
- * but remain the same size.
- * Updates the values of the object and applies the parent's transform.
- *
- * @param {PIXI.Transform} parentTransform - The transform of the parent of this object
- */
-function frozenScaleTransform(parentTransform) {
-  const lt = this.localTransform;
-  if (this._localID !== this._currentLocalID) {
-    // get the matrix values of the displayobject based on its transform properties..
-    lt.a = this._cx * this.scale._x;
-    lt.b = this._sx * this.scale._x;
-    lt.c = this._cy * this.scale._y;
-    lt.d = this._sy * this.scale._y;
-    lt.tx = this.position._x - (this.pivot._x * lt.a + this.pivot._y * lt.c);
-    lt.ty = this.position._y - (this.pivot._x * lt.b + this.pivot._y * lt.d);
-    this._currentLocalID = this._localID;
-    // force an update..
-    this._parentID = -1;
-  }
-  if (this._parentID !== parentTransform._worldID) {
-    // concat the parent matrix with the objects transform.
-    const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
-    const wt = this.worldTransform;
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
-    wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
-    wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
-    this._parentID = parentTransform._worldID;
-    // update the id of the transform..
-    this._worldID++;
-  }
-}
-
-function frozenYTransform(parentTransform) {
-  const lt = this.localTransform;
-  if (this._localID !== this._currentLocalID) {
-    // get the matrix values of the displayobject based on its transform properties..
-    lt.a = this._cx * this.scale._x;
-    lt.b = this._sx * this.scale._x;
-    lt.c = this._cy * this.scale._y;
-    lt.d = this._sy * this.scale._y;
-    lt.tx = this.position._x - (this.pivot._x * lt.a + this.pivot._y * lt.c);
-    lt.ty = this.position._y - (this.pivot._x * lt.b + this.pivot._y * lt.d);
-    this._currentLocalID = this._localID;
-    // force an update..
-    this._parentID = -1;
-  }
-  if (this._parentID !== parentTransform._worldID) {
-    // concat the parent matrix with the objects transform.
-    const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
-    const wt = this.worldTransform;
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
-    // wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
-    wt.tx = lt.tx;
-    wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
-    this._parentID = parentTransform._worldID;
-    // update the id of the transform..
-    this._worldID++;
-  }
-}
-function frozenXTransform(parentTransform) {
-  const lt = this.localTransform;
-  if (this._localID !== this._currentLocalID) {
-    // get the matrix values of the displayobject based on its transform properties..
-    lt.a = this._cx * this.scale._x;
-    lt.b = this._sx * this.scale._x;
-    lt.c = this._cy * this.scale._y;
-    lt.d = this._sy * this.scale._y;
-    lt.tx = this.position._x - (this.pivot._x * lt.a + this.pivot._y * lt.c);
-    lt.ty = this.position._y - (this.pivot._x * lt.b + this.pivot._y * lt.d);
-    this._currentLocalID = this._localID;
-    // force an update..
-    this._parentID = -1;
-  }
-  if (this._parentID !== parentTransform._worldID) {
-    // concat the parent matrix with the objects transform.
-    const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
-    const wt = this.worldTransform;
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
-    wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
-    // wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
-    wt.ty = lt.ty;
-    this._parentID = parentTransform._worldID;
-    // update the id of the transform..
-    this._worldID++;
-  }
-}
-
-function enableGrid(container, width, height) {
+function buildAutoScalingGrid(container, width, height) {
   const maxXLines = 45;
   const maxYLines = 12;
   const tickLabelFontSize = 15;
+  const gutter = 50;
   let lastStep = 0;
   let lastMinX = 0;
   let lastMinY = 0;
 
-  const xLabels = Array.from(Array(maxXLines), () => {
-    let l = new PIXI.Text("", {
-      fill: "#000",
+  const xLabels = [];
+  const xLines = [];
+  for (let i = 0; i < maxXLines; i++) {
+    let label = new PIXI.Text("", {
+      fill: "#999",
       fontSize: tickLabelFontSize
     });
-    l.anchor.set(1, 0.5);
-    l.rotation = Math.PI / 2;
-    l.y = height;
-    l.transform.updateTransform = frozenXTransform;
-    container.addChild(l);
-    return l;
-  });
-  const xLines = Array.from(Array(maxXLines), () => {
-    let l = new PIXI.Graphics();
-    l.lineStyle(1, 0xaaaaaa, 0.25);
-    l.moveTo(0, 0);
-    l.lineTo(0, height);
-    l.transform.updateTransform = frozenXTransform;
-    container.addChild(l);
-    return l;
-  });
+    label.anchor.set(1, 0.5);
+    label.rotation = Math.PI / 2;
+    label.y = height;
+    label.transform.updateTransform = frozenXTransform;
+    xLabels.push(label);
 
-  const yLabels = Array.from(Array(maxYLines), () => {
-    let l = new PIXI.Text("", {
-      fill: "#000",
+    // Using GraphicsGeometry may offer performance boost here
+    let line = new PIXI.Graphics();
+    line.lineStyle(1, 0xaaaaaa, 0.25);
+    line.moveTo(0, 0);
+    line.lineTo(0, height);
+    line.transform.updateTransform = frozenXTransform;
+    xLines.push(line);
+  }
+
+  const yLabels = [];
+  const yLines = [];
+  for (let i = 0; i < maxYLines; i++) {
+    let label = new PIXI.Text("", {
+      fill: "#999",
       fontSize: tickLabelFontSize
     });
-    l.anchor.set(0, 0.5);
-    l.x = 5;
-    l.transform.updateTransform = frozenYTransform;
-    container.addChild(l);
-    return l;
-  });
-  const yLines = Array.from(Array(maxYLines), () => {
-    let l = new PIXI.Graphics();
-    l.lineStyle(1, 0xaaaaaa, 0.25);
-    l.moveTo(0, 0);
-    l.lineTo(width, 0);
-    l.transform.updateTransform = frozenYTransform;
-    container.addChild(l);
-    return l;
-  });
+    label.anchor.set(0, 0.5);
+    label.x = 5;
+    label.transform.updateTransform = frozenYTransform;
+    yLabels.push(label);
+
+    let line = new PIXI.Graphics();
+    line.lineStyle(1, 0xaaaaaa, 0.25);
+    line.moveTo(0, 0);
+    line.lineTo(width, 0);
+    line.transform.updateTransform = frozenYTransform;
+    yLines.push(line);
+  }
+  // Add the elements of the grid in the correct order
+  // Lines are first
+  xLines.forEach(l => container.addChild(l));
+  yLines.forEach(l => container.addChild(l));
+
+  // White background behind tick labels
+  let bgx = new PIXI.Graphics();
+  bgx.beginFill(0xffffff);
+  bgx.lineStyle(0);
+  bgx.drawRect(0, 0, gutter, height);
+  bgx.transform.updateTransform = frozenXYTransform;
+  container.addChild(bgx);
+
+  let bgy = new PIXI.Graphics();
+  bgy.beginFill(0xffffff);
+  bgy.lineStyle(0);
+  bgy.drawRect(0, height - gutter, width, gutter);
+  bgy.transform.updateTransform = frozenXYTransform;
+  container.addChild(bgy);
+
+  // Tick labels
+  xLabels.forEach(l => container.addChild(l));
+  yLabels.forEach(l => container.addChild(l));
+  // Corner to hide overlapping tick labels
+  let corner = new PIXI.Graphics();
+  corner.beginFill(0xffffff);
+  corner.drawRect(0, height - gutter, gutter, gutter);
+  corner.transform.updateTransform = frozenXYTransform;
+  container.addChild(corner);
 
   function calcSteps(xMin, xMax, yMin, yMax, tickCount) {
     const xRange = xMax - xMin;
@@ -338,4 +266,4 @@ function enableGrid(container, width, height) {
   };
 }
 
-export { subscribeToMoveEvents, addGridlines, addDemoFormations, frozenScaleTransform, enableGrid };
+export { subscribeToMoveEvents, addGridlines, addDemoFormations, buildAutoScalingGrid };

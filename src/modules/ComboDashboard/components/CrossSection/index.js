@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
-import { addDemoFormations, addGridlines, subscribeToMoveEvents, enableGrid } from "./pixiUtils.js";
+import { addDemoFormations, addGridlines, subscribeToMoveEvents, buildAutoScalingGrid } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -80,13 +80,8 @@ class CrossSection extends Component {
       false
     );
 
-    const gridUpdate = enableGrid(this.viewport, this.screenWidth, this.screenHeight);
-    // The ticker is used for render timing, what's done on each frame, etc
-    this.ticker = PIXI.ticker.shared;
-    this.ticker.add(() => {
-      gridUpdate();
-      this.renderer.render(stage);
-    });
+    // Create the formation layers
+    addDemoFormations(this.viewport, this.props.formations);
 
     // Begin adding content to the viewport
     this.message = new PIXI.Text("", {
@@ -97,9 +92,6 @@ class CrossSection extends Component {
       wordWrap: true,
       wordWrapWidth: 440
     });
-
-    // Create the formation layers
-    addDemoFormations(this.viewport, this.props.formations);
 
     // Draw the well plan line
     let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
@@ -133,6 +125,14 @@ class CrossSection extends Component {
       // this.props.setY(pos.y);
     });
     this.viewport.addChild(this.rectangle);
+
+    const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
+    // The ticker is used for render timing, what's done on each frame, etc
+    this.ticker = PIXI.ticker.shared;
+    this.ticker.add(() => {
+      gridUpdate();
+      this.renderer.render(stage);
+    });
   }
 
   componentDidMount() {
