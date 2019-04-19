@@ -1,0 +1,24 @@
+.statusIcon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+}
+
+.horizontalCenter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.serverStatus {
+    @extend .vertical;
+}
+
+.spacer {
+    width: 10px;
+}

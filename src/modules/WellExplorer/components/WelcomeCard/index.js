@@ -3,9 +3,10 @@ import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIc
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
-import { listIcons } from "../IconsByStatus";
+
 import { Link } from "react-router-dom";
-import classNames from "classnames";
+import WellStatus from "../../../Kpi/WellStatus";
+import ServerStatus from "../../../Kpi/ServerStatus";
 
 const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
   const well = selectedWell || lastEditedWell;
@@ -21,7 +22,7 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
       </Typography>
 
       <div className={classes.row}>
-        <DrillingStatus status={well.status} className={classes.status} />
+        <WellStatus status={well.status} className={classes.status} />
 
         <Link to={`/${well.id}/combo`}>
           <Button variant="contained" color="primary">
@@ -29,15 +30,9 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
           </Button>
         </Link>
       </div>
-    </div>
-  );
-};
-
-const DrillingStatus = ({ status, className }) => {
-  return (
-    <div className={classNames(className, classes.status)}>
-      <img className={classes.statusIcon} src={listIcons[status]} />
-      <span>{status}</span>
+      <div className={classes.row}>
+        <ServerStatus />
+      </div>
     </div>
   );
 };

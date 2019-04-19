@@ -2,6 +2,7 @@ import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo } from "react";
 import Fuse from "fuse.js";
+import { ONLINE, OFFLINE } from "../constants/serverStatus";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -26,6 +27,21 @@ export function useWellsSearch(wells) {
 }
 
 const EMPTY_ARRAY = [];
+
+export function useWellInfo(wellId) {
+  const [data] = useFetch({
+    path: GET_WELL_INFO,
+    query: {
+      seldbname: wellId
+    }
+  });
+
+  const online = data && data.host && data.username && data.password;
+
+  return {
+    serverStatus: online ? ONLINE : OFFLINE
+  };
+}
 
 export function useWells() {
   const [wells, , , , , { fetch }] = useFetch(
