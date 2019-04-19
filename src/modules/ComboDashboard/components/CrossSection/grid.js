@@ -6,9 +6,7 @@ function buildAutoScalingGrid(container, width, height) {
   const maxYLines = 12;
   const tickLabelFontSize = 15;
   const gutter = 50;
-  let lastStep = 0;
-  let lastMinX = 0;
-  let lastMinY = 0;
+  let lastBounds = {};
 
   const xLabels = [];
   const xLines = [];
@@ -81,7 +79,7 @@ function buildAutoScalingGrid(container, width, height) {
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
-  function calcSteps(xMin, xMax, yMin, yMax, tickCount) {
+  function calcBounds(xMin, xMax, yMin, yMax, tickCount) {
     const yRange = yMax - yMin;
 
     const roughStep = yRange / (tickCount - 1);
@@ -101,29 +99,26 @@ function buildAutoScalingGrid(container, width, height) {
   return function updateGrid() {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
+    // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
     const minVisibleX = Math.floor((-1 * container.position._x) / container.scale._x);
     const maxVisibleX = minVisibleX + Math.floor(width / container.scale._x);
     const minVisibleY = Math.floor((-1 * container.position._y) / container.scale._y);
     const maxVisibleY = minVisibleY + Math.floor(height / container.scale._y);
 
-    let { xMax, xMin, yMax, yMin, step } = calcSteps(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
-    if (xMin !== lastMinX || step !== lastStep) {
+    let b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
+    if (b.xMin !== lastBounds.xMin || b.step !== lastBounds.step || b.yMin !== lastBounds.yMin) {
       for (let i = 0; i < xLines.length; i++) {
-        xLines[i].x = xMin + step * i;
-        xLabels[i].text = `${xMin + i * step}`;
-        xLabels[i].x = xMin + step * i;
+        xLines[i].x = b.xMin + b.step * i;
+        xLabels[i].text = `${b.xMin + i * b.step}`;
+        xLabels[i].x = b.xMin + b.step * i;
       }
-      lastMinX = xMin;
-    }
 
-    if (yMin !== lastMinY || step !== lastStep) {
       for (let i = 0; i < yLines.length; i++) {
-        yLines[i].y = yMin + step * i;
-        yLabels[i].text = `${yMin + i * step}`;
-        yLabels[i].y = yMin + step * i;
+        yLines[i].y = b.yMin + b.step * i;
+        yLabels[i].text = `${b.yMin + i * b.step}`;
+        yLabels[i].y = b.yMin + b.step * i;
       }
-      lastStep = step;
-      lastMinY = yMin;
+      lastBounds = b;
     }
   };
 }
