@@ -36,7 +36,7 @@ export function useWellInfo(wellId) {
     }
   });
 
-  const online = data && data.host && data.username && data.password;
+  const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
 
   return {
     serverStatus: online ? ONLINE : OFFLINE
