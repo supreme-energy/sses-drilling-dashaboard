@@ -31,7 +31,7 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
         </Link>
       </div>
       <div className={classes.row}>
-        <ServerStatus />
+        <ServerStatus wellId={well.id} />
       </div>
     </div>
   );
