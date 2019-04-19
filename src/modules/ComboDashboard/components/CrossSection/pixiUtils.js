@@ -236,15 +236,15 @@ function buildAutoScalingGrid(container, width, height) {
     };
   }
 
-  return function gridUpdate() {
+  return function updateGrid() {
+    // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
-    // TODO Rename this garbage
-    const minX = Math.floor((-1 * container.position._x) / container.scale._x);
-    const rangeX = Math.floor(width / container.scale._x);
-    const minY = Math.floor((-1 * container.position._y) / container.scale._y);
-    const rangeY = Math.floor(height / container.scale._y);
+    const minVisibleX = Math.floor((-1 * container.position._x) / container.scale._x);
+    const maxVisibleX = minVisibleX + Math.floor(width / container.scale._x);
+    const minVisibleY = Math.floor((-1 * container.position._y) / container.scale._y);
+    const maxVisibleY = minVisibleY + Math.floor(height / container.scale._y);
 
-    let { xMax, xMin, yMax, yMin, step } = calcSteps(minX, minX + rangeX, minY, minY + rangeY, maxYLines);
+    let { xMax, xMin, yMax, yMin, step } = calcSteps(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
     if (xMin !== lastMinX || step !== lastStep) {
       for (let i = 0; i < xLines.length; i++) {
         xLines[i].x = xMin + step * i;
