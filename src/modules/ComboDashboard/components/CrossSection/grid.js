@@ -1,53 +1,64 @@
 import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
+function makeXTickAndLine(fontSize, height) {
+  let label = new PIXI.Text("", {
+    fill: "#999",
+    fontSize: fontSize
+  });
+  label.anchor.set(1, 0.5);
+  label.rotation = Math.PI / 2;
+  label.y = height;
+  label.transform.updateTransform = frozenXTransform;
+
+  // Using GraphicsGeometry may offer performance boost here
+  let line = new PIXI.Graphics();
+  line.lineStyle(1, 0xaaaaaa, 0.25);
+  line.moveTo(0, 0);
+  line.lineTo(0, height);
+  line.transform.updateTransform = frozenXTransform;
+
+  return [line, label];
+}
+function makeYTickAndLine(fontSize, width) {
+  let label = new PIXI.Text("", {
+    fill: "#999",
+    fontSize: fontSize
+  });
+  label.anchor.set(0, 0.5);
+  label.x = 5;
+  label.transform.updateTransform = frozenYTransform;
+
+  let line = new PIXI.Graphics();
+  line.lineStyle(1, 0xaaaaaa, 0.25);
+  line.moveTo(0, 0);
+  line.lineTo(width, 0);
+  line.transform.updateTransform = frozenYTransform;
+
+  return [line, label];
+}
+
 function buildAutoScalingGrid(container, width, height) {
   const maxXLines = 45;
   const maxYLines = 12;
-  const tickLabelFontSize = 15;
+  const fontSize = 15;
   const gutter = 50;
   let lastBounds = {};
 
   const xLabels = [];
   const xLines = [];
   for (let i = 0; i < maxXLines; i++) {
-    let label = new PIXI.Text("", {
-      fill: "#999",
-      fontSize: tickLabelFontSize
-    });
-    label.anchor.set(1, 0.5);
-    label.rotation = Math.PI / 2;
-    label.y = height;
-    label.transform.updateTransform = frozenXTransform;
-    xLabels.push(label);
-
-    // Using GraphicsGeometry may offer performance boost here
-    let line = new PIXI.Graphics();
-    line.lineStyle(1, 0xaaaaaa, 0.25);
-    line.moveTo(0, 0);
-    line.lineTo(0, height);
-    line.transform.updateTransform = frozenXTransform;
+    let [line, label] = makeXTickAndLine(fontSize, height);
     xLines.push(line);
+    xLabels.push(label);
   }
 
   const yLabels = [];
   const yLines = [];
   for (let i = 0; i < maxYLines; i++) {
-    let label = new PIXI.Text("", {
-      fill: "#999",
-      fontSize: tickLabelFontSize
-    });
-    label.anchor.set(0, 0.5);
-    label.x = 5;
-    label.transform.updateTransform = frozenYTransform;
-    yLabels.push(label);
-
-    let line = new PIXI.Graphics();
-    line.lineStyle(1, 0xaaaaaa, 0.25);
-    line.moveTo(0, 0);
-    line.lineTo(width, 0);
-    line.transform.updateTransform = frozenYTransform;
+    let [line, label] = makeYTickAndLine(fontSize, width);
     yLines.push(line);
+    yLabels.push(label);
   }
   // Add the elements of the grid in the correct order
   // Lines are first
@@ -72,6 +83,7 @@ function buildAutoScalingGrid(container, width, height) {
   // Tick labels
   xLabels.forEach(l => container.addChild(l));
   yLabels.forEach(l => container.addChild(l));
+
   // Corner to hide overlapping tick labels
   let corner = new PIXI.Graphics();
   corner.beginFill(0xffffff);
