@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { buildAutoScalingGrid } from "./grid.js";
-import { addDemoFormations, subscribeToMoveEvents } from "./pixiUtils.js";
+import { addDemoFormations } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -11,8 +11,6 @@ class CrossSection extends Component {
     super(props);
     this.screenWidth = window.innerWidth;
     this.screenHeight = window.innerHeight - 300;
-    this.worldHeight = 1000;
-    this.worldWidth = 1000;
 
     // Set up PIXI classes for rendering and draw layers
     this.canvas = React.createRef();
@@ -84,16 +82,6 @@ class CrossSection extends Component {
     // Create the formation layers
     addDemoFormations(this.viewport, this.props.formations);
 
-    // Begin adding content to the viewport
-    this.message = new PIXI.Text("", {
-      fontFamily: "Arial",
-      fontStyle: "italic",
-      fontWeight: "bold",
-      fill: "#fff",
-      wordWrap: true,
-      wordWrapWidth: 440
-    });
-
     // Draw the well plan line
     let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
     let wellplan = new PIXI.Graphics();
@@ -104,28 +92,16 @@ class CrossSection extends Component {
     }
     this.viewport.addChild(wellplan);
 
-    let iconTexture = new PIXI.Texture.fromImage("/survey.svg");
+    let surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
 
     let sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
     for (let i = 0; i < sData.length; i++) {
-      let icon = new PIXI.Sprite(iconTexture);
+      let icon = new PIXI.Sprite(surveyMarker);
       icon.position = new PIXI.Point(...sData[i]);
       icon.scale.set(0.25);
       icon.anchor.set(0.5, 0.5);
       this.viewport.addChild(icon);
     }
-
-    this.rectangle = new PIXI.Graphics();
-    this.rectangle.beginFill(0x888888, 0.5);
-    this.rectangle.drawRect(0, 0, 200, this.worldHeight);
-    this.rectangle.pivot = new PIXI.Point(100, this.worldHeight / 2);
-    this.rectangle.endFill();
-    subscribeToMoveEvents(this.rectangle, pos => {
-      this.props.updateX(pos.x);
-      // Lock y movement for demo
-      // this.props.setY(pos.y);
-    });
-    this.viewport.addChild(this.rectangle);
 
     const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
@@ -139,10 +115,6 @@ class CrossSection extends Component {
   componentDidMount() {
     this.canvas.current.appendChild(this.renderer.view);
 
-    this.message.x = 30;
-    this.message.y = 30;
-
-    this.viewport.addChild(this.message);
     this.updateWebGL();
     this.ticker.start();
   }
@@ -168,9 +140,7 @@ class CrossSection extends Component {
 
   updateWebGL() {
     // Update all the PIXI object positions & scale controlled from react
-    const { x, y, view } = this.props;
-    // this.message.text = this.props.message;
-    this.rectangle.position = new PIXI.Point(x, y);
+    const { view } = this.props;
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
@@ -178,10 +148,6 @@ class CrossSection extends Component {
 }
 
 CrossSection.propTypes = {
-  x: PropTypes.number,
-  y: PropTypes.number,
-  updateX: PropTypes.func,
-  // updateY: PropTypes.func,
   view: PropTypes.object,
   updateView: PropTypes.func,
   formations: PropTypes.array,

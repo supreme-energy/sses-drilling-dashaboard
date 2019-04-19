@@ -10,8 +10,6 @@ export const ComboDashboard = () => {
   const surveys = surveyData;
   const wellPlan = wellPlanData;
   const formations = formationData;
-  const [x, setX] = useState(400);
-  const [y, setY] = useState(500);
 
   const [view, setView] = useState({
     x: 200,
@@ -33,16 +31,6 @@ export const ComboDashboard = () => {
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
         <h2>Dev debugging data</h2>
-        <div style={{ display: "none" }}>
-          <label>
-            X value
-            <input type="number" value={x} onChange={e => setX(e.target.value)} />
-          </label>
-          <label>
-            Y value
-            <input type="number" value={y} onChange={e => setY(e.target.value)} />
-          </label>
-        </div>
         <div>
           <label>
             X value
@@ -92,18 +80,7 @@ export const ComboDashboard = () => {
           </label>
         </div>
       </div>
-      <CrossSection
-        message={"Cross-section"}
-        x={x}
-        y={y}
-        updateX={setX}
-        updateY={setY}
-        view={view}
-        updateView={mergeView}
-        wellPlan={wellPlan}
-        surveys={surveys}
-        formations={formations}
-      />
+      <CrossSection view={view} updateView={mergeView} wellPlan={wellPlan} surveys={surveys} formations={formations} />
     </Suspense>
   );
 };
