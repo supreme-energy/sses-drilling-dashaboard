@@ -19,6 +19,8 @@ const options = {
   keys: ["name", "status"]
 };
 
+const EMPTY_ARRAY = [];
+
 export function useWellsSearch(wells) {
   const fuse = useMemo(() => new Fuse(wells, options), [wells]);
   const search = useCallback(term => (term !== "" ? fuse.search(term) : wells), [fuse, wells]);
@@ -26,7 +28,12 @@ export function useWellsSearch(wells) {
   return search;
 }
 
-const EMPTY_ARRAY = [];
+export function useKpi(wellId) {
+  return {
+    bitDepth: 9712.39,
+    rateOfPenetration: 9.74
+  };
+}
 
 export function useWellInfo(wellId) {
   const [data] = useFetch({
