@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
-import { addDemoFormations, addGridlines, subscribeToMoveEvents } from "./pixiUtils.js";
+import { addDemoFormations, addGridlines, subscribeToMoveEvents, enableGrid } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -80,9 +80,13 @@ class CrossSection extends Component {
       false
     );
 
+    const gridUpdate = enableGrid(this.viewport, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
-    this.ticker.add(() => this.renderer.render(stage));
+    this.ticker.add(() => {
+      gridUpdate();
+      this.renderer.render(stage);
+    });
 
     // Begin adding content to the viewport
     this.message = new PIXI.Text("", {
@@ -117,9 +121,6 @@ class CrossSection extends Component {
       icon.anchor.set(0.5, 0.5);
       this.viewport.addChild(icon);
     }
-
-    // Gridlines go last
-    addGridlines(this.viewport, {});
 
     this.rectangle = new PIXI.Graphics();
     this.rectangle.beginFill(0x888888, 0.5);
@@ -167,7 +168,7 @@ class CrossSection extends Component {
   updateWebGL() {
     // Update all the PIXI object positions & scale controlled from react
     const { x, y, view } = this.props;
-    this.message.text = this.props.message;
+    // this.message.text = this.props.message;
     this.rectangle.position = new PIXI.Point(x, y);
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
