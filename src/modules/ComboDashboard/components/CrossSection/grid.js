@@ -11,7 +11,7 @@ function makeXTickAndLine(fontSize, height) {
   label.y = height;
   label.transform.updateTransform = frozenXTransform;
 
-  // Using GraphicsGeometry may offer performance boost here
+  // Using GraphicsGeometry may offer better performance here?
   let line = new PIXI.Graphics();
   line.lineStyle(1, 0xaaaaaa, 0.25);
   line.moveTo(0, 0);
@@ -38,6 +38,18 @@ function makeYTickAndLine(fontSize, width) {
   return [line, label];
 }
 
+/**
+ * Creates gridlines and labels on the given container and returns a function
+ * for updating the grid during each PIXI tick.  Provided the update is called
+ * during a tick, the grid will automatically scale as the user zooms in and out.
+ * Additionally, gridlines are not drawn for the entire container but only about
+ * as many as are visible.
+ *
+ * @param container  The PIXI Container to which the grid should be added
+ * @param width  The canvas width
+ * @param height  The canvas height
+ * @returns {updateGrid}  The function to update the gridlines
+ */
 function buildAutoScalingGrid(container, width, height) {
   const maxXLines = 45;
   const maxYLines = 12;
@@ -80,7 +92,7 @@ function buildAutoScalingGrid(container, width, height) {
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
-  // Tick labels
+  // Tick labels go on top of the white backgrounds
   xLabels.forEach(l => container.addChild(l));
   yLabels.forEach(l => container.addChild(l));
 
@@ -117,18 +129,21 @@ function buildAutoScalingGrid(container, width, height) {
     const minVisibleY = Math.floor((-1 * container.position._y) / container.scale._y);
     const maxVisibleY = minVisibleY + Math.floor(height / container.scale._y);
 
+    // Possible improvement: only recalculate step if the x or y range has changed
     let b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
     if (b.xMin !== lastBounds.xMin || b.step !== lastBounds.step || b.yMin !== lastBounds.yMin) {
       for (let i = 0; i < xLines.length; i++) {
-        xLines[i].x = b.xMin + b.step * i;
-        xLabels[i].text = `${b.xMin + i * b.step}`;
-        xLabels[i].x = b.xMin + b.step * i;
+        let pos = b.xMin + b.step * i;
+        xLines[i].x = pos;
+        xLabels[i].x = pos;
+        xLabels[i].text = `${pos}`;
       }
 
       for (let i = 0; i < yLines.length; i++) {
-        yLines[i].y = b.yMin + b.step * i;
-        yLabels[i].text = `${b.yMin + i * b.step}`;
-        yLabels[i].y = b.yMin + b.step * i;
+        let pos = b.yMin + b.step * i;
+        yLines[i].y = pos;
+        yLabels[i].y = pos;
+        yLabels[i].text = `${pos}`;
       }
       lastBounds = b;
     }

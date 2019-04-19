@@ -64,7 +64,7 @@ function addDemoFormations(container, formations) {
     let line = new PIXI.Graphics();
     let poly = new PIXI.Graphics();
     poly.lineStyle(0);
-    line.lineStyle(4, Number(`0x${bgColor}`), 1); // Number(formations[i].bgPercent));
+    line.lineStyle(4, Number(`0x${bgColor}`), 1);
     line.moveTo(...xyCoords[0]);
     for (let i = 1; i < xyCoords.length; i++) {
       line.lineTo(...xyCoords[i]);
