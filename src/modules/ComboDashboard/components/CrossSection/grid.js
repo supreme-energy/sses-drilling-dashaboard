@@ -1,11 +1,7 @@
 import * as PIXI from "pixi.js";
-import {
-  frozenXTransform,
-  frozenXYTransform,
-  frozenYTransform,
-} from "src/modules/ComboDashboard/components/CrossSection/customPixiTransforms";
+import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
-function buildAutoScalingGrid (container, width, height) {
+function buildAutoScalingGrid(container, width, height) {
   const maxXLines = 45;
   const maxYLines = 12;
   const tickLabelFontSize = 15;
@@ -19,7 +15,7 @@ function buildAutoScalingGrid (container, width, height) {
   for (let i = 0; i < maxXLines; i++) {
     let label = new PIXI.Text("", {
       fill: "#999",
-      fontSize: tickLabelFontSize,
+      fontSize: tickLabelFontSize
     });
     label.anchor.set(1, 0.5);
     label.rotation = Math.PI / 2;
@@ -41,7 +37,7 @@ function buildAutoScalingGrid (container, width, height) {
   for (let i = 0; i < maxYLines; i++) {
     let label = new PIXI.Text("", {
       fill: "#999",
-      fontSize: tickLabelFontSize,
+      fontSize: tickLabelFontSize
     });
     label.anchor.set(0, 0.5);
     label.x = 5;
@@ -85,13 +81,12 @@ function buildAutoScalingGrid (container, width, height) {
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
-  function calcSteps (xMin, xMax, yMin, yMax, tickCount) {
-    const xRange = xMax - xMin;
+  function calcSteps(xMin, xMax, yMin, yMax, tickCount) {
     const yRange = yMax - yMin;
 
     const roughStep = yRange / (tickCount - 1);
 
-    const goodSteps = [ 10, 20, 50, 100, 200, 500, 1000, 2000, 5000 ];
+    const goodSteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
     const step = goodSteps.find(s => s >= roughStep);
 
     return {
@@ -99,11 +94,11 @@ function buildAutoScalingGrid (container, width, height) {
       xMax: Math.ceil(xMax / step) * step,
       step: step,
       yMin: Math.floor(yMin / step) * step,
-      yMax: Math.ceil(yMax / step) * step,
+      yMax: Math.ceil(yMax / step) * step
     };
   }
 
-  return function updateGrid () {
+  return function updateGrid() {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const minVisibleX = Math.floor((-1 * container.position._x) / container.scale._x);
@@ -114,18 +109,18 @@ function buildAutoScalingGrid (container, width, height) {
     let { xMax, xMin, yMax, yMin, step } = calcSteps(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
     if (xMin !== lastMinX || step !== lastStep) {
       for (let i = 0; i < xLines.length; i++) {
-        xLines[ i ].x = xMin + step * i;
-        xLabels[ i ].text = `${xMin + i * step}`;
-        xLabels[ i ].x = xMin + step * i;
+        xLines[i].x = xMin + step * i;
+        xLabels[i].text = `${xMin + i * step}`;
+        xLabels[i].x = xMin + step * i;
       }
       lastMinX = xMin;
     }
 
     if (yMin !== lastMinY || step !== lastStep) {
       for (let i = 0; i < yLines.length; i++) {
-        yLines[ i ].y = yMin + step * i;
-        yLabels[ i ].text = `${yMin + i * step}`;
-        yLabels[ i ].y = yMin + step * i;
+        yLines[i].y = yMin + step * i;
+        yLabels[i].text = `${yMin + i * step}`;
+        yLabels[i].y = yMin + step * i;
       }
       lastStep = step;
       lastMinY = yMin;

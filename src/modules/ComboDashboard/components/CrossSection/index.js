@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
-import { addDemoFormations, addGridlines, subscribeToMoveEvents, buildAutoScalingGrid } from "./pixiUtils.js";
+import { buildAutoScalingGrid } from "./grid.js";
+import { addDemoFormations, subscribeToMoveEvents } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -177,7 +178,6 @@ class CrossSection extends Component {
 }
 
 CrossSection.propTypes = {
-  message: PropTypes.string,
   x: PropTypes.number,
   y: PropTypes.number,
   updateX: PropTypes.func,
