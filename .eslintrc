@@ -7,7 +7,8 @@
   "plugins": [
     "babel",
     "react",
-    "promise"
+    "promise",
+    "react-hooks"
   ],
   "env": {
     "browser" : true
@@ -33,6 +34,8 @@
 
     "react/jsx-space-before-closing"     : 0,
     "react/self-closing-comp"            : 0,
-    "react/prop-types": [2, { "skipUndeclared": true }]
+    "react/prop-types": [2, { "skipUndeclared": true }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
