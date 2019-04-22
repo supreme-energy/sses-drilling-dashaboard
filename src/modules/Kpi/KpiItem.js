@@ -1,16 +1,16 @@
 import React from "react";
+import PropTypes from "prop-types";
 import classes from "./styles.scss";
 import { Typography } from "@material-ui/core";
 import { useKpi } from "../../api";
 import { format } from "d3-format";
+import classNames from "classnames";
 
-const kpiFormat = format(",.2f");
-
-function KpiItem({ value, measureUnit, label }) {
+function KpiItem({ value, measureUnit, label, format, className, renderValue }) {
   return (
-    <div className={classes.vertical}>
+    <div className={classNames(className, classes.vertical)}>
       <div className={classes.horizontalTop}>
-        <Typography variant="h5">{kpiFormat(value)}</Typography>
+        {renderValue({ value, format })}
         <Typography variant="caption">{measureUnit}</Typography>
       </div>
       <Typography variant="caption" gutterBottom style={{ fontStyle: "italic" }}>
@@ -19,6 +19,20 @@ function KpiItem({ value, measureUnit, label }) {
     </div>
   );
 }
+
+KpiItem.propTypes = {
+  format: PropTypes.func,
+  value: PropTypes.number,
+  measureUnit: PropTypes.string,
+  label: PropTypes.string,
+  className: PropTypes.string,
+  renderValue: PropTypes.func
+};
+
+KpiItem.defaultProps = {
+  format: format(",.2f"),
+  renderValue: ({ value, format }) => <Typography variant="h5">{format(value)}</Typography>
+};
 
 export function BitDepth() {
   const { bitDepth } = useKpi();

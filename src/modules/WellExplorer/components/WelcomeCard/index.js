@@ -7,6 +7,7 @@ import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import { Link } from "react-router-dom";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
+import WellPathStatus from "../../../Kpi/WellPathStatus";
 
 const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
   const well = selectedWell || lastEditedWell;
@@ -23,7 +24,8 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
 
       <div className={classes.row}>
         <WellStatus status={well.status} className={classes.status} />
-
+        <span className={classes.hBigSpacer} />
+        <WellPathStatus wellId={well.id} />
         <Link to={`/${well.id}/combo`}>
           <Button variant="contained" color="primary">
             {selectedWell ? "Continue" : "Reopen"}
