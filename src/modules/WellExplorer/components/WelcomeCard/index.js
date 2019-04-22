@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIc
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
-
+import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import { Link } from "react-router-dom";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
@@ -31,7 +31,11 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
         </Link>
       </div>
       <div className={classes.row}>
+        <Rop wellId={well.id} />
+        <span className={classes.hBigSpacer} />
         <ServerStatus wellId={well.id} />
+        <span className={classes.hBigSpacer} />
+        <BitDepth wellId={well.id} />
       </div>
     </div>
   );

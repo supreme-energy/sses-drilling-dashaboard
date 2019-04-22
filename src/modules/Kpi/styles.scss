@@ -4,10 +4,19 @@
     margin-right: 10px;
 }
 
-.horizontalCenter {
+.horizontal {
     display: flex;
     flex-direction: row;
+}
+
+.horizontalCenter {
+    @extend .horizontal;
     align-items: center;
+}
+
+.horizontalTop {
+    @extend .horizontal;
+    align-content: flex-start;
 }
 
 .vertical {
