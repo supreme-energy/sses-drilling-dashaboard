@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { buildAutoScalingGrid } from "./grid.js";
-import { addDemoFormations } from "./pixiUtils.js";
+import { drawProjections, addDemoFormations } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -102,6 +102,8 @@ class CrossSection extends Component {
       icon.anchor.set(0.5, 0.5);
       this.viewport.addChild(icon);
     }
+
+    drawProjections(this.viewport);
 
     const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
