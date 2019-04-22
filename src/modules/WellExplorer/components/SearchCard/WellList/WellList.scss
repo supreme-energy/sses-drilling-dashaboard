@@ -12,22 +12,6 @@
             width: 98px;
         }
 
-        .arrowBg {
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 12px;
-        }
-
-        .arrowIcon {
-            width: 20px;
-            height: 20px;   
-            fill: #ffffff;
-        }
-
         .icon {
             width: 22px;
             height: 22px;  
@@ -39,11 +23,15 @@
         }
 
         .buttons {
+            .button {
+                padding: 11px;
+            }
+            width: 70px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
-            align-items: flex-end;
+            align-items: center;
         }
     }
 }
