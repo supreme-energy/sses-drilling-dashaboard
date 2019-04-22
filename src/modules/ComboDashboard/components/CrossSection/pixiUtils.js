@@ -57,22 +57,23 @@ function subscribeToMoveEvents(obj, cb) {
 function addDemoFormations(container, formations) {
   const calcXY = p => [Number(p.vs), Number(p.tot) + Number(p.thickness)];
   for (let f of formations) {
-    f.xyCoords = f.data.map(point => calcXY(point));
+    f.points = f.data.map(point => calcXY(point));
   }
   for (let i = 0; i < formations.length - 1; i++) {
-    const { xyCoords, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
-    let poly = new PIXI.Graphics();
-    poly.lineStyle(0);
-    poly.beginFill(Number(`0x${bgColor}`), Number(bgPercent));
-    poly.drawPolygon(
-      xyCoords
-        .reverse()
-        .flat()
-        .concat(formations[i + 1].xyCoords)
-        .flat()
-    );
-    poly.closePath();
-    container.addChild(poly);
+    const { points, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
+    const { points: nextPoints } = formations[i + 1];
+    for (let j = 0; j < points.length - 1; j++) {
+      let p = new PIXI.Graphics();
+      p.lineStyle(0).beginFill(Number(`0x${bgColor}`), Number(bgPercent));
+      p.drawPolygon(
+        points[j]
+          .concat(points[j + 1])
+          .concat(nextPoints[j + 1])
+          .concat(nextPoints[j])
+      );
+      p.closePath();
+      container.addChild(p);
+    }
   }
 }
 
