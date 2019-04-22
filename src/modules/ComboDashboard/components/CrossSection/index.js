@@ -22,11 +22,14 @@ class CrossSection extends Component {
     });
     this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
 
+    // Stage contains the draw layers and never moves. Some events are registered here.
+    let stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
     // TODO: Add UI container
     this.viewport = new PIXI.Container();
-    // Stage contains the draw layers and never moves. Some events are registered here.
-    let stage = new PIXI.Container();
+    this.formationsLayer = this.viewport.addChild(new PIXI.Container());
+    this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
+    this.UILayer = this.viewport.addChild(new PIXI.Container());
     stage.addChild(this.viewport);
 
     // Set up events to enable panning of the viewport through stage
@@ -80,7 +83,7 @@ class CrossSection extends Component {
     );
 
     // Create the formation layers
-    addDemoFormations(this.viewport, this.props.formations);
+    addDemoFormations(this.formationsLayer, this.props.formations);
 
     // Draw the well plan line
     let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
@@ -90,7 +93,7 @@ class CrossSection extends Component {
     for (let i = 1; i < wpData.length; i++) {
       wellplan.lineTo(...wpData[i]);
     }
-    this.viewport.addChild(wellplan);
+    this.wellPathLayer.addChild(wellplan);
 
     let surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
 
@@ -100,7 +103,7 @@ class CrossSection extends Component {
       icon.position = new PIXI.Point(...sData[i]);
       icon.scale.set(0.25);
       icon.anchor.set(0.5, 0.5);
-      this.viewport.addChild(icon);
+      this.wellPathLayer.addChild(icon);
     }
 
     drawProjections(this.viewport, this.props.formations, this.props.projections);
