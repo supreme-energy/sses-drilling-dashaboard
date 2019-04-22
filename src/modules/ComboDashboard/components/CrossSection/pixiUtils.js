@@ -49,6 +49,14 @@ function subscribeToMoveEvents(obj, cb) {
   }
 }
 
+function drawFormationSegment(color, alpha, points, container) {
+  let p = new PIXI.Graphics();
+  p.lineStyle(0).beginFill(Number(`0x${color}`), Number(alpha));
+  p.drawPolygon(points);
+  p.closePath();
+  container.addChild(p);
+}
+
 /**
  * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
@@ -63,21 +71,26 @@ function addDemoFormations(container, formations) {
     const { points, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
     const { points: nextPoints } = formations[i + 1];
     for (let j = 0; j < points.length - 1; j++) {
-      let p = new PIXI.Graphics();
-      p.lineStyle(0).beginFill(Number(`0x${bgColor}`), Number(bgPercent));
-      p.drawPolygon(
-        points[j]
-          .concat(points[j + 1])
-          .concat(nextPoints[j + 1])
-          .concat(nextPoints[j])
-      );
-      p.closePath();
-      container.addChild(p);
+      // Draw a polygon with four points having the height of this layer
+      let p = [...points[j], ...points[j + 1], ...nextPoints[j + 1], ...nextPoints[j]];
+      drawFormationSegment(bgColor, bgPercent, p, container);
     }
   }
 }
 
 function drawProjections(container, formations, projections) {
+  let lastFormationPoints = formations.map(f => f.data[f.data.length - 1]);
+
+  // -------------------------------------- Trace formations
+  let wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
+  let projectedPath = new PIXI.Graphics();
+  projectedPath.lineStyle(3, 0xee3322, 1);
+  projectedPath.moveTo(...wpData[0]);
+  for (let i = 1; i < wpData.length; i++) {
+    projectedPath.lineTo(...wpData[i]);
+  }
+  container.addChild(projectedPath);
+
   const red = 0xee2211;
   const white = 0xffffff;
   let left = {

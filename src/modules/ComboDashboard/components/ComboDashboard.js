@@ -3,6 +3,7 @@ import Progress from "@material-ui/core/CircularProgress";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
+import projections from "../../../data/projections";
 import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
@@ -80,7 +81,14 @@ export const ComboDashboard = () => {
           </label>
         </div>
       </div>
-      <CrossSection view={view} updateView={mergeView} wellPlan={wellPlan} surveys={surveys} formations={formations} />
+      <CrossSection
+        view={view}
+        updateView={mergeView}
+        wellPlan={wellPlan}
+        surveys={surveys}
+        formations={formations}
+        projections={projections}
+      />
     </Suspense>
   );
 };

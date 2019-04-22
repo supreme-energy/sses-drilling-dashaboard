@@ -103,7 +103,7 @@ class CrossSection extends Component {
       this.viewport.addChild(icon);
     }
 
-    drawProjections(this.viewport);
+    drawProjections(this.viewport, this.props.formations, this.props.projections);
 
     const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
@@ -153,6 +153,7 @@ CrossSection.propTypes = {
   view: PropTypes.object,
   updateView: PropTypes.func,
   formations: PropTypes.array,
+  projections: PropTypes.array,
   wellPlan: PropTypes.array,
   surveys: PropTypes.array
 };
