@@ -61,15 +61,8 @@ function addDemoFormations(container, formations) {
   }
   for (let i = 0; i < formations.length - 1; i++) {
     const { xyCoords, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
-    let line = new PIXI.Graphics();
     let poly = new PIXI.Graphics();
     poly.lineStyle(0);
-    line.lineStyle(4, Number(`0x${bgColor}`), 1);
-    line.moveTo(...xyCoords[0]);
-    for (let i = 1; i < xyCoords.length; i++) {
-      line.lineTo(...xyCoords[i]);
-    }
-    container.addChild(line);
     poly.beginFill(Number(`0x${bgColor}`), Number(bgPercent));
     poly.drawPolygon(
       xyCoords
