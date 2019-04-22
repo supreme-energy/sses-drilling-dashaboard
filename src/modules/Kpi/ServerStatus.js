@@ -15,7 +15,7 @@ const icons = {
 function ServerStatus({ wellId, theme }) {
   const { serverStatus } = useWellInfo(wellId);
   const Icon = icons[serverStatus];
-  const color = serverStatus === ONLINE ? theme.palette.good.main : theme.palette.bad.main;
+  const color = serverStatus === ONLINE ? theme.palette.success.main : theme.palette.warning.main;
 
   return (
     <div className={classes.serverStatus}>

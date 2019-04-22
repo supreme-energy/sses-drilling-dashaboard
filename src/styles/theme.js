@@ -17,10 +17,10 @@ export const theme = createMuiTheme({
     primary: {
       main: "#207003"
     },
-    good: {
+    success: {
       main: "#75BA2F"
     },
-    bad: {
+    warning: {
       main: "#EE2211"
     }
   },
