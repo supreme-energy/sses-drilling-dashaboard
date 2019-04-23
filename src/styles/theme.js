@@ -25,5 +25,12 @@ export const theme = createMuiTheme({
     }
   },
   drillingStatusColor: "#4B921B",
-  trippingStatusColor: "#B00020"
+  trippingStatusColor: "#B00020",
+  overrides: {
+    MuiTab: {
+      root: {
+        outline: "none !important"
+      }
+    }
+  }
 });

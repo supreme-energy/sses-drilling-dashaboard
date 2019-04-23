@@ -1,16 +1,17 @@
 .container {
-  display: flex;
-  flex-direction: column;
   width: 100vw;
   height: 100vh;
 
   .header {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
   }
 
   .viewport {
-    flex: 1;
+    height: calc(100% - 56px);
+    top: 56px;
+    position: relative;
   }
   
   .navItemActive {
@@ -19,6 +20,6 @@
   }  
 
   .logo img {
-    height: 100px;
+    height: 56px;
   }
 }
