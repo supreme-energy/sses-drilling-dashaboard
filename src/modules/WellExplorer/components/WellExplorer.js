@@ -80,6 +80,7 @@ export const WellExplorer = ({
           updateFavorite={updateFavorite}
           changeActiveTab={changeActiveTab}
         />
+        <span className={classes.hSpacer} />
         <WelcomeCard theme={theme} lastEditedWell={mostRecentWell} selectedWell={selectedWell} />
       </div>
     </div>
