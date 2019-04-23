@@ -2,6 +2,7 @@ import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo } from "react";
 import Fuse from "fuse.js";
+import { ONLINE, OFFLINE } from "../constants/serverStatus";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -18,6 +19,8 @@ const options = {
   keys: ["name", "status"]
 };
 
+const EMPTY_ARRAY = [];
+
 export function useWellsSearch(wells) {
   const fuse = useMemo(() => new Fuse(wells, options), [wells]);
   const search = useCallback(term => (term !== "" ? fuse.search(term) : wells), [fuse, wells]);
@@ -25,7 +28,27 @@ export function useWellsSearch(wells) {
   return search;
 }
 
-const EMPTY_ARRAY = [];
+export function useKpi(wellId) {
+  return {
+    bitDepth: 9712.39,
+    rateOfPenetration: 9.74
+  };
+}
+
+export function useWellInfo(wellId) {
+  const [data] = useFetch({
+    path: GET_WELL_INFO,
+    query: {
+      seldbname: wellId
+    }
+  });
+
+  const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
+
+  return {
+    serverStatus: online ? ONLINE : OFFLINE
+  };
+}
 
 export function useWells() {
   const [wells, , , , , { fetch }] = useFetch(
