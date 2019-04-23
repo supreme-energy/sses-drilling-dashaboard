@@ -23,7 +23,7 @@ class CrossSection extends Component {
     this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
 
     // Stage contains the draw layers and never moves. Some events are registered here.
-    let stage = new PIXI.Container();
+    const stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
     // TODO: Add UI container
     this.viewport = new PIXI.Container();
@@ -86,8 +86,8 @@ class CrossSection extends Component {
     addDemoFormations(this.formationsLayer, this.props.formations);
 
     // Draw the well plan line
-    let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
-    let wellplan = new PIXI.Graphics();
+    const wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
+    const wellplan = new PIXI.Graphics();
     wellplan.lineStyle(3, 0x44ff44, 1);
     wellplan.moveTo(...wpData[0]);
     for (let i = 1; i < wpData.length; i++) {
@@ -95,9 +95,9 @@ class CrossSection extends Component {
     }
     this.wellPathLayer.addChild(wellplan);
 
-    let surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
+    const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
 
-    let sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
+    const sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
     for (let i = 0; i < sData.length; i++) {
       let icon = new PIXI.Sprite(surveyMarker);
       icon.position = new PIXI.Point(...sData[i]);

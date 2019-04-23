@@ -50,7 +50,7 @@ function subscribeToMoveEvents(obj, cb) {
 }
 
 function drawFormationSegment(color, alpha, points, container) {
-  let p = new PIXI.Graphics();
+  const p = new PIXI.Graphics();
   p.lineStyle(0).beginFill(Number(`0x${color}`), Number(alpha));
   p.drawPolygon(points);
   p.closePath();
@@ -72,18 +72,18 @@ function addDemoFormations(container, formations) {
     const { points: nextPoints } = formations[i + 1];
     for (let j = 0; j < points.length - 1; j++) {
       // Draw a polygon with four points having the height of this layer
-      let p = [...points[j], ...points[j + 1], ...nextPoints[j + 1], ...nextPoints[j]];
+      const p = [...points[j], ...points[j + 1], ...nextPoints[j + 1], ...nextPoints[j]];
       drawFormationSegment(bgColor, bgPercent, p, container);
     }
   }
 }
 
 function drawProjections(container, formations, projections) {
-  let lastFormationPoints = formations.map(f => f.data[f.data.length - 1]);
+  const lastFormationPoints = formations.map(f => f.data[f.data.length - 1]);
 
   // -------------------------------------- Trace formations
-  let wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
-  let projectedPath = new PIXI.Graphics();
+  const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
+  const projectedPath = new PIXI.Graphics();
   projectedPath.lineStyle(3, 0xee3322, 1);
   projectedPath.moveTo(...wpData[0]);
   for (let i = 1; i < wpData.length; i++) {
@@ -93,46 +93,46 @@ function drawProjections(container, formations, projections) {
 
   const red = 0xee2211;
   const white = 0xffffff;
-  let left = {
+  const left = {
     vs: 5908,
     tcl: 13328,
     tot: 13270,
     bot: 13386
   };
-  let right = {
+  const right = {
     vs: 6100,
     tot: 13290,
     tcl: 13348,
     bot: 13406
   };
   // -------------------------------------- Line segments
-  let totLine = new PIXI.Graphics();
+  const totLine = new PIXI.Graphics();
   totLine.lineStyle(2, red, 1);
   totLine.moveTo(left.vs, left.tot).lineTo(right.vs, right.tot);
   container.addChild(totLine);
 
-  let tclLine = new PIXI.Graphics();
+  const tclLine = new PIXI.Graphics();
   tclLine.lineStyle(2, red, 1);
   tclLine.moveTo(left.vs, left.tcl).lineTo(right.vs, right.tcl);
   container.addChild(tclLine);
 
-  let botLine = new PIXI.Graphics();
+  const botLine = new PIXI.Graphics();
   botLine.lineStyle(2, red, 1);
   botLine.moveTo(left.vs, left.bot).lineTo(right.vs, right.bot);
   container.addChild(botLine);
 
   // -------------------------------------- Left nodes
-  let totCircle = new PIXI.Graphics();
+  const totCircle = new PIXI.Graphics();
   totCircle.lineStyle(2, red).beginFill(red, 0.4);
   totCircle.drawCircle(left.vs, left.tot, 10);
   totCircle.endFill();
   container.addChild(totCircle);
-  let botCircle = new PIXI.Graphics();
+  const botCircle = new PIXI.Graphics();
   botCircle.lineStyle(2, red).beginFill(red, 0.4);
   botCircle.drawCircle(left.vs, left.bot, 10);
   botCircle.endFill();
   container.addChild(botCircle);
-  let faultBox = new PIXI.Graphics();
+  const faultBox = new PIXI.Graphics();
   faultBox.lineStyle(2, red);
   faultBox.beginFill(0xffffff, 0);
   faultBox.drawRoundedRect(left.vs, left.tcl, 20, 20, 4);
@@ -141,13 +141,13 @@ function drawProjections(container, formations, projections) {
   container.addChild(faultBox);
 
   // -------------------------------------- Right nodes
-  let totCircleRight = new PIXI.Graphics();
+  const totCircleRight = new PIXI.Graphics();
   totCircleRight.lineStyle(2, white - 1, 1);
   totCircleRight.beginFill(red);
   totCircleRight.drawCircle(right.vs, right.tot, 10);
   totCircleRight.endFill();
   // container.addChild(totCircleRight);
-  let botCircleRight = new PIXI.Graphics();
+  const botCircleRight = new PIXI.Graphics();
   botCircleRight.lineStyle(2, white, 1);
   botCircleRight.beginFill(red);
   botCircleRight.drawCircle(right.vs, right.bot, 10);
@@ -157,7 +157,7 @@ function drawProjections(container, formations, projections) {
     this.y = pos.y;
   });
   // container.addChild(botCircleRight);
-  let dipBox = new PIXI.Graphics();
+  const dipBox = new PIXI.Graphics();
   dipBox.lineStyle(2, red);
   dipBox.beginFill(white, 0);
   dipBox.drawRoundedRect(right.vs - 10, right.tcl - 10, 20, 20, 4);
