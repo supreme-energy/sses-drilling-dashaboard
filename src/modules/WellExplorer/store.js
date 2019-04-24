@@ -22,6 +22,7 @@ function actionPrefix(type) {
 
 export const CHANGE_WELL_ACCESS_TIMESTAMP = actionPrefix("CHANGE_WELL_ACCESS_TIMESTAMP");
 export const CHANGE_ACTIVE_TAB = actionPrefix("CHANGE_ACTIVE_TAB");
+export const CHANGE_SELECTED_WELL = actionPrefix("CHANGE_SELECTED_WELL");
 
 // ------------------------------------
 // Actions
@@ -41,9 +42,17 @@ export function changeActiveTab(tab) {
   };
 }
 
+export function changeSelectedWell(wellId) {
+  return {
+    type: CHANGE_SELECTED_WELL,
+    payload: wellId
+  };
+}
+
 export const actions = {
   changeWellAccessTimestamp,
-  changeActiveTab
+  changeActiveTab,
+  changeSelectedWell
 };
 
 // ------------------------------------
@@ -65,6 +74,12 @@ const ACTION_HANDLERS = {
       ...state,
       activeTab: action.payload.tab
     };
+  },
+  [CHANGE_SELECTED_WELL]: (state, action) => {
+    return {
+      ...state,
+      selectedWellId: action.payload
+    };
   }
 };
 
@@ -74,7 +89,8 @@ const ACTION_HANDLERS = {
 
 const initialState = {
   wellTimestamps: {},
-  activeTab: ALL_WELLS
+  activeTab: ALL_WELLS,
+  selectedWellId: null
 };
 
 const persistConfig = {

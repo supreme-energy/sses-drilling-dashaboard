@@ -11,6 +11,8 @@ import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
 import memoizeOne from "memoize-one";
 import keyBy from "lodash/keyBy";
+import WellOverview from "./WellOverview";
+import classNames from "classNames";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -41,8 +43,9 @@ export const WellExplorer = ({
   changeActiveTab,
   activeTab,
   theme,
+  selectedWellId,
   match: {
-    params: { wellId: selectedWellId }
+    params: { wellId: openedWellId }
   }
 }) => {
   const [wells, updateFavorite] = useWells();
@@ -59,29 +62,56 @@ export const WellExplorer = ({
   const search = useWellsSearch(fileterdWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
-  const selectedWell = wellsById[selectedWellId];
+  const openedWell = wellsById[openedWellId];
 
   return (
-    <div className={classes.container}>
+    <div
+      className={classNames({
+        [classes.container]: true,
+        [classes.overview]: !!openedWellId
+      })}
+    >
       <WellMap
         theme={theme}
+        showLegend
         wells={searchResults}
-        className={classes.map}
+        className={classes.fullMap}
         mapCenter={mapCenter}
-        handleClickWell={() => {}}
         zoomControl={false}
       />
-      <div className={classes.topRow}>
-        <SearchCard
-          searchTerm={searchTerm}
-          onSearchTermChanged={onSearchTermChanged}
-          theme={theme}
-          wells={searchResults}
-          updateFavorite={updateFavorite}
-          changeActiveTab={changeActiveTab}
-        />
+      <div className={classes.row}>
+        <div className={classes.column}>
+          <SearchCard
+            className={classes.searchCard}
+            searchTerm={searchTerm}
+            onSearchTermChanged={onSearchTermChanged}
+            theme={theme}
+            wells={searchResults}
+            updateFavorite={updateFavorite}
+            changeActiveTab={changeActiveTab}
+          />
+          <span className={classes.vSpacer} />
+          {selectedWellId && (
+            <WellMap
+              theme={theme}
+              wells={searchResults}
+              className={classes.miniMap}
+              mapCenter={mapCenter}
+              zoomControl={false}
+            />
+          )}
+        </div>
         <span className={classes.hSpacer} />
-        <WelcomeCard theme={theme} lastEditedWell={mostRecentWell} selectedWell={selectedWell} />
+        {selectedWellId ? (
+          <WellOverview className={classes.wellOverview} />
+        ) : (
+          <WelcomeCard
+            className={classes.welcome}
+            theme={theme}
+            openedWell={openedWell}
+            lastEditedWell={mostRecentWell}
+          />
+        )}
       </div>
     </div>
   );
@@ -91,6 +121,7 @@ WellExplorer.propTypes = {
   theme: PropTypes.object,
   wellTimestamps: PropTypes.object,
   changeActiveTab: PropTypes.func,
+  selectedWellId: PropTypes.string,
   activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES]),
   match: PropTypes.shape({
     params: PropTypes.object
@@ -100,7 +131,8 @@ WellExplorer.propTypes = {
 const mapStateToProps = state => {
   return {
     activeTab: state.wellExplorer.activeTab,
-    wellTimestamps: state.wellExplorer.wellTimestamps
+    wellTimestamps: state.wellExplorer.wellTimestamps,
+    selectedWellId: state.wellExplorer.selectedWellId
   };
 };
 

@@ -14,14 +14,6 @@ import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
-const mapStyles = {
-  width: "100%",
-  height: "100%",
-  position: "absolute",
-  left: 0,
-  margin: "0 auto"
-};
-
 const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
 const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
 
@@ -36,6 +28,7 @@ export const WellMap = ({
   match: {
     params: { wellId }
   },
+  showLegend,
   ...props
 }) => {
   const mapRef = useRef(null);
@@ -47,7 +40,6 @@ export const WellMap = ({
       center={mapCenter}
       length={4}
       onClick={handleClickWell}
-      style={mapStyles}
       // onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
       ref={mapRef}
@@ -70,9 +62,11 @@ export const WellMap = ({
         ))}
 
       <ZoomControl position="bottomright" className={classes.zoom} />
-      <CenterControl position={"bottomright"}>
-        <MapLegend className={classes.legend} />
-      </CenterControl>
+      {showLegend && (
+        <CenterControl position={"bottomright"}>
+          <MapLegend className={classes.legend} />
+        </CenterControl>
+      )}
       <CenterControl position={"bottomleft"}>
         <div className={classes.leftMapControls}>
           <Paper className={classes.horizontalLayout}>
@@ -97,11 +91,13 @@ WellMap.propTypes = {
   className: PropTypes.string,
   match: PropTypes.shape({
     params: PropTypes.object
-  })
+  }),
+  showLegend: PropTypes.bool
 };
 
 WellMap.defaultProps = {
-  wells: []
+  wells: [],
+  handleClickWell: () => {}
 };
 
 export default withRouter(WellMap);
