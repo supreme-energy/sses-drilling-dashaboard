@@ -31,6 +31,11 @@ export const theme = createMuiTheme({
       root: {
         outline: "none !important"
       }
+    },
+    MuiButton: {
+      root: {
+        minWidth: "136px"
+      }
     }
   }
 });

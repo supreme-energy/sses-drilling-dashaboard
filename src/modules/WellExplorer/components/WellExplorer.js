@@ -10,9 +10,9 @@ import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
 import memoizeOne from "memoize-one";
-import keyBy from "lodash/keyBy";
+
 import WellOverview from "./WellOverview";
-import classNames from "classNames";
+import classNames from "classnames";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -36,8 +36,6 @@ function getFilteredWells(activeTab, wells, wellTimestamps) {
   }
 }
 
-const getWellsById = wells => keyBy(wells, "id");
-
 export const WellExplorer = ({
   wellTimestamps,
   changeActiveTab,
@@ -48,7 +46,7 @@ export const WellExplorer = ({
     params: { wellId: openedWellId }
   }
 }) => {
-  const [wells, updateFavorite] = useWells();
+  const [wells, wellsById, updateFavorite] = useWells();
 
   const [searchTerm, onSearchTermChanged] = useState("");
   const fileterdWells = useMemo(() => getFilteredWells(activeTab, wells, wellTimestamps), [
@@ -61,8 +59,9 @@ export const WellExplorer = ({
   const mostRecentWell = recentWells[0];
   const search = useWellsSearch(fileterdWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
-  const wellsById = useMemo(() => getWellsById(wells), [wells]);
+
   const openedWell = wellsById[openedWellId];
+  const selectedWell = wellsById[selectedWellId];
 
   return (
     <div
@@ -103,7 +102,7 @@ export const WellExplorer = ({
         </div>
         <span className={classes.hSpacer} />
         {selectedWellId ? (
-          <WellOverview className={classes.wellOverview} />
+          <WellOverview className={classes.wellOverview} well={selectedWell} />
         ) : (
           <WelcomeCard
             className={classes.welcome}

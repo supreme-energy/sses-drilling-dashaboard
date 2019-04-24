@@ -11,7 +11,7 @@ import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../../store
 import { connect } from "react-redux";
 import { Paper, InputBase, IconButton } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
-import classNames from "classNames";
+import classNames from "classnames";
 
 const EMPTY_ARRAY = [];
 
