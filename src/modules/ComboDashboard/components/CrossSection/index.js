@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { buildAutoScalingGrid } from "./grid.js";
 import { drawProjections, addDemoFormations } from "./pixiUtils.js";
+import _ from "lodash";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -83,7 +84,7 @@ class CrossSection extends Component {
     );
 
     // Create the formation layers
-    addDemoFormations(this.formationsLayer, this.props.formations);
+    addDemoFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
     // Draw the well plan line
     const wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
