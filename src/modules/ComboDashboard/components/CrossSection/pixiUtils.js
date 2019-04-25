@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { frozenScaleTransform, frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 
 /**
  * Add mouse and touch events to a PIXI displayObject to enable dragging
@@ -121,6 +122,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   totCircle.drawCircle(0, 0, 10);
   totCircle.position = new PIXI.Point(leftVs, leftTot);
   totCircle.endFill();
+  totCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircle);
   subscribeToMoveEvents(totCircle, function(pos) {
     pointUpdate({
@@ -133,6 +135,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   botCircle.drawCircle(0, 0, 10);
   botCircle.position = new PIXI.Point(leftVs, leftBot);
   botCircle.endFill();
+  botCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircle);
   subscribeToMoveEvents(botCircle, function(pos) {
     pointUpdate({
@@ -148,6 +151,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   totCircleRight.drawCircle(0, 0, 10);
   totCircleRight.position = new PIXI.Point(rightVs, rightTot);
   totCircleRight.endFill();
+  totCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircleRight);
   subscribeToMoveEvents(totCircleRight, function(pos) {
     pointUpdate({
@@ -162,6 +166,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   botCircleRight.drawCircle(0, 0, 10);
   botCircleRight.position = new PIXI.Point(rightVs, rightBot);
   botCircleRight.endFill();
+  botCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircleRight);
   subscribeToMoveEvents(botCircleRight, function(pos) {
     pointUpdate({
@@ -176,6 +181,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   dipBox.drawRoundedRect(-10, -10, 20, 20, 4);
   dipBox.position = new PIXI.Point(paVs, paTcl);
   dipBox.endFill();
+  dipBox.transform.updateTransform = frozenScaleTransform;
   container.addChild(dipBox);
   subscribeToMoveEvents(dipBox, function(pos) {
     pointUpdate({
@@ -201,11 +207,11 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     botCircleRight.position = new PIXI.Point(rightVs, rightBot);
     dipBox.position = new PIXI.Point(paVs, paTcl);
 
-    totLine.clear().lineStyle(...lineStyle);
+    totLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
     totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
-    tclLine.clear().lineStyle(...lineStyle);
+    tclLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
     tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
-    botLine.clear().lineStyle(...lineStyle);
+    botLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
     botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
   };
 }
