@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { buildAutoScalingGrid } from "./grid.js";
 import { drawProjections, addDemoFormations } from "./pixiUtils.js";
+import { interactiveProjection } from "./pixiUtils";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -106,12 +107,8 @@ class CrossSection extends Component {
       this.wellPathLayer.addChild(icon);
     }
 
-    const projectionUpdate = drawProjections(
-      this.viewport,
-      this.props.projections,
-      this.props.view,
-      this.props.updateView
-    );
+    drawProjections(this.viewport, this.props.projections);
+    const projectionUpdate = interactiveProjection(this.viewport, this.props.view, this.props.updateView);
 
     const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc

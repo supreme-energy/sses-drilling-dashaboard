@@ -81,7 +81,7 @@ function addDemoFormations(container, formations, bitProjection) {
   }
 }
 
-function drawProjections(container, projections, viewProps, pointUpdate) {
+function drawProjections(container, projections) {
   // -------------------------------------- Trace projection
   const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
@@ -91,7 +91,9 @@ function drawProjections(container, projections, viewProps, pointUpdate) {
     projectedPath.lineTo(...wpData[i]);
   }
   container.addChild(projectedPath);
+}
 
+function interactiveProjection(container, viewProps, pointUpdate) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
   const white = 0xffffff;
@@ -208,4 +210,4 @@ function drawProjections(container, projections, viewProps, pointUpdate) {
   };
 }
 
-export { subscribeToMoveEvents, addDemoFormations, drawProjections };
+export { subscribeToMoveEvents, addDemoFormations, drawProjections, interactiveProjection };
