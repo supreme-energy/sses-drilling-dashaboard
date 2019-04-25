@@ -1,7 +1,6 @@
 .list {
-    height: 400px;
     overflow: auto;
-
+     flex: 1;
     .wellItem {
         display: flex;
         flex-direction: row;

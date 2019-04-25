@@ -62,17 +62,19 @@ export const WellExplorer = ({
 
   const openedWell = wellsById[openedWellId];
   const selectedWell = wellsById[selectedWellId];
-
+  const overviewMode = !!selectedWellId;
   return (
     <div
       className={classNames({
         [classes.container]: true,
-        [classes.overview]: !!openedWellId
+        [classes.overview]: overviewMode
       })}
     >
       <WellMap
         theme={theme}
         showLegend
+        selectedWellId={openedWellId || selectedWellId}
+        showMapTypeControls={!overviewMode}
         wells={searchResults}
         className={classes.fullMap}
         mapCenter={mapCenter}
@@ -90,8 +92,11 @@ export const WellExplorer = ({
             changeActiveTab={changeActiveTab}
           />
           <span className={classes.vSpacer} />
-          {selectedWellId && (
+          {overviewMode && (
             <WellMap
+              selectedWellId={selectedWellId}
+              showToggleLegend
+              defaultShowLegend={false}
               theme={theme}
               wells={searchResults}
               className={classes.miniMap}
@@ -101,7 +106,7 @@ export const WellExplorer = ({
           )}
         </div>
         <span className={classes.hSpacer} />
-        {selectedWellId ? (
+        {overviewMode ? (
           <WellOverview className={classes.wellOverview} well={selectedWell} />
         ) : (
           <WelcomeCard

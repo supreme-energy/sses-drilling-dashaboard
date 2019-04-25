@@ -7,7 +7,6 @@ import L from "leaflet";
 import mapValues from "lodash/mapValues";
 import classes from "./styles.scss";
 import classNames from "classnames";
-import { withRouter } from "react-router";
 import MapLegend from "./MapLegend";
 import "leaflet-fullscreen";
 import Paper from "@material-ui/core/Paper";
@@ -25,19 +24,20 @@ export const WellMap = ({
   handleClickWell,
   wells,
   theme,
-  match: {
-    params: { wellId }
-  },
-  showLegend,
+  selectedWellId,
+  showToggleLegend,
+  showMapTypeControls,
+  defaultShowLegend,
   ...props
 }) => {
   const mapRef = useRef(null);
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
-
+  const [showLegend, changeShowLegend] = useState(defaultShowLegend);
   return (
     <Map
       {...props}
       center={mapCenter}
+      attributionControl={false}
       length={4}
       onClick={handleClickWell}
       // onfullscreenchange={handleMapFullscreenChange}
@@ -56,10 +56,20 @@ export const WellMap = ({
           <Marker
             key={well.id}
             position={well.position}
-            icon={wellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
+            icon={selectedWellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
             className={classes.marker}
           />
         ))}
+
+      {showToggleLegend && (
+        <CenterControl position={"bottomright"} defaultClassName={classes.legendButtonControl}>
+          <Paper className={classes.horizontalLayout}>
+            <Button className={classes.legendButton} disableRipple onClick={() => changeShowLegend(!showLegend)}>
+              <Typography variant="body2">Legend</Typography>
+            </Button>
+          </Paper>
+        </CenterControl>
+      )}
 
       <ZoomControl position="bottomright" className={classes.zoom} />
       {showLegend && (
@@ -67,18 +77,21 @@ export const WellMap = ({
           <MapLegend className={classes.legend} />
         </CenterControl>
       )}
-      <CenterControl position={"bottomleft"}>
-        <div className={classes.leftMapControls}>
-          <Paper className={classes.horizontalLayout}>
-            <Button disableRipple onClick={() => changeSelectedTiles(MAP)}>
-              <Typography variant={selectedTiles === MAP ? "body1" : "body2"}>Map</Typography>
-            </Button>
-            <Button disableRipple onClick={() => changeSelectedTiles(SATELLITE)}>
-              <Typography variant={selectedTiles === SATELLITE ? "body1" : "body2"}>Satellite</Typography>
-            </Button>
-          </Paper>
-        </div>
-      </CenterControl>
+
+      {showMapTypeControls && (
+        <CenterControl position={"bottomleft"}>
+          <div className={classes.leftMapControls}>
+            <Paper className={classes.horizontalLayout}>
+              <Button disableRipple onClick={() => changeSelectedTiles(MAP)}>
+                <Typography variant={selectedTiles === MAP ? "body1" : "body2"}>Map</Typography>
+              </Button>
+              <Button disableRipple onClick={() => changeSelectedTiles(SATELLITE)}>
+                <Typography variant={selectedTiles === SATELLITE ? "body1" : "body2"}>Satellite</Typography>
+              </Button>
+            </Paper>
+          </div>
+        </CenterControl>
+      )}
     </Map>
   );
 };
@@ -88,16 +101,18 @@ WellMap.propTypes = {
   handleClickWell: PropTypes.func,
   wells: PropTypes.array,
   theme: PropTypes.object,
+  selectedWellId: PropTypes.string,
   className: PropTypes.string,
-  match: PropTypes.shape({
-    params: PropTypes.object
-  }),
-  showLegend: PropTypes.bool
+  defaultShowLegend: PropTypes.bool,
+  showToggleLegend: PropTypes.bool,
+  showMapTypeControls: PropTypes.bool
 };
 
 WellMap.defaultProps = {
   wells: [],
-  handleClickWell: () => {}
+  handleClickWell: () => {},
+  defaultShowLegend: true,
+  showMapTypeControls: true
 };
 
-export default withRouter(WellMap);
+export default WellMap;
