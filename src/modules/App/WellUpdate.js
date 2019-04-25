@@ -15,7 +15,7 @@ function WellUpdate({
         changeWellAccessTimestamp(wellId);
       }
     },
-    [wellId]
+    [wellId, changeWellAccessTimestamp]
   );
 
   return null;
