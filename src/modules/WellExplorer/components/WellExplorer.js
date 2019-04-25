@@ -10,16 +10,11 @@ import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
 import memoizeOne from "memoize-one";
-
 import WellOverview from "./WellOverview";
 import classNames from "classnames";
+import L from "leaflet";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
-
-const mapCenter = {
-  lat: 30.0902,
-  lng: -95.7129
-};
 
 const getRecentWells = memoizeOne((wells, wellTimestamps) => {
   return wells.filter(w => wellTimestamps[w.id]).sort((a, b) => wellTimestamps[b.id] - wellTimestamps[a.id]);
@@ -33,6 +28,41 @@ function getFilteredWells(activeTab, wells, wellTimestamps) {
       return wells.filter(w => w.fav);
     default:
       return wells;
+  }
+}
+
+function getWellZoomBounds(well) {
+  return well
+    ? L.latLngBounds(
+        L.latLng(well.position[0] - 0.4, well.position[1] - 0.4),
+        L.latLng(well.position[0] + 0.4, well.position[1] + 0.4)
+      )
+    : null;
+}
+
+function getWellsZoomBounds(wells) {
+  if (wells.length === 0) {
+    return null;
+  } else if (wells.length === 1) {
+    return getWellZoomBounds(wells[0]);
+  } else {
+    const { minLat, minLng, maxLat, maxLng } = wells.reduce(
+      (acc, next) => {
+        return {
+          minLat: Math.min(next.position[0], acc.minLat),
+          minLng: Math.min(next.position[1], acc.minLng),
+          maxLat: Math.max(next.position[0], acc.maxLat),
+          maxLng: Math.max(next.position[1], acc.maxLng)
+        };
+      },
+      {
+        minLat: wells[0].position[0],
+        minLng: wells[0].position[1],
+        maxLat: wells[0].position[0],
+        maxLng: wells[0].position[1]
+      }
+    );
+    return L.latLngBounds(L.latLng(minLat - 1, minLng - 1), L.latLng(maxLat + 1, maxLng + 1));
   }
 }
 
@@ -59,10 +89,11 @@ export const WellExplorer = ({
   const mostRecentWell = recentWells[0];
   const search = useWellsSearch(fileterdWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
-
   const openedWell = wellsById[openedWellId];
   const selectedWell = wellsById[selectedWellId];
   const overviewMode = !!selectedWellId;
+  const wellsBounds = useMemo(() => getWellsZoomBounds(wells), [wells]);
+  const selectedWellMapBounds = useMemo(() => getWellZoomBounds(selectedWell), [selectedWell]);
   return (
     <div
       className={classNames({
@@ -73,11 +104,11 @@ export const WellExplorer = ({
       <WellMap
         theme={theme}
         showLegend
+        bounds={wellsBounds}
         selectedWellId={openedWellId || selectedWellId}
         showMapTypeControls={!overviewMode}
         wells={searchResults}
         className={classes.fullMap}
-        mapCenter={mapCenter}
         zoomControl={false}
       />
       <div className={classes.row}>
@@ -98,9 +129,9 @@ export const WellExplorer = ({
               showToggleLegend
               defaultShowLegend={false}
               theme={theme}
+              bounds={selectedWellMapBounds}
               wells={searchResults}
               className={classes.miniMap}
-              mapCenter={mapCenter}
               zoomControl={false}
             />
           )}
