@@ -123,11 +123,12 @@ function buildAutoScalingGrid(container, width, height) {
   return function updateGrid() {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
+    const cwt = container.transform.worldTransform;
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
-    const minVisibleX = Math.floor((-1 * container.position._x) / container.scale._x);
-    const maxVisibleX = minVisibleX + Math.floor(width / container.scale._x);
-    const minVisibleY = Math.floor((-1 * container.position._y) / container.scale._y);
-    const maxVisibleY = minVisibleY + Math.floor(height / container.scale._y);
+    const minVisibleX = Math.floor((-1 * cwt.tx) / cwt.a);
+    const maxVisibleX = minVisibleX + Math.floor(width / cwt.a);
+    const minVisibleY = Math.floor((-1 * cwt.ty) / cwt.d);
+    const maxVisibleY = minVisibleY + Math.floor(height / cwt.d);
 
     // Possible improvement: only recalculate step if the x or y range has changed
     const b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
