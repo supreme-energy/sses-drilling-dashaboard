@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform, frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
+import { frozenScaleTransform } from "./customPixiTransforms";
 
 /**
  * Add mouse and touch events to a PIXI displayObject to enable dragging

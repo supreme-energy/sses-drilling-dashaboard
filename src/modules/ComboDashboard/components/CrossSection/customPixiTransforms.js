@@ -26,7 +26,6 @@ function frozenScaleTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
     wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
@@ -60,7 +59,6 @@ function frozenYTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
     wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
@@ -94,7 +92,6 @@ function frozenXTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
     wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
@@ -129,7 +126,6 @@ function frozenXYTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
     wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
