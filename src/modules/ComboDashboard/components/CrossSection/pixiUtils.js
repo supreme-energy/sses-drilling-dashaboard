@@ -82,7 +82,6 @@ function addDemoFormations(container, formations, bitProjection) {
 }
 
 function drawProjections(container, projections, viewProps, pointUpdate) {
-  const { leftVs, leftTot, leftBot, leftTcl, rightVs, rightTot, rightBot, rightTcl, paVs, paTcl } = viewProps;
   // -------------------------------------- Trace projection
   const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
@@ -93,36 +92,52 @@ function drawProjections(container, projections, viewProps, pointUpdate) {
   }
   container.addChild(projectedPath);
 
+  const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
   const white = 0xffffff;
+  const lineStyle = [2, red, 1];
 
   // -------------------------------------- Line segments
   const totLine = new PIXI.Graphics();
-  totLine.lineStyle(2, red, 1);
+  totLine.lineStyle(...lineStyle);
   totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
   container.addChild(totLine);
 
   const tclLine = new PIXI.Graphics();
-  tclLine.lineStyle(2, red, 1);
-  tclLine.moveTo(leftVs, leftTcl).lineTo(rightVs, rightTcl);
+  tclLine.lineStyle(...lineStyle);
+  tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
   container.addChild(tclLine);
 
   const botLine = new PIXI.Graphics();
-  botLine.lineStyle(2, red, 1);
+  botLine.lineStyle(...lineStyle);
   botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
   container.addChild(botLine);
 
   // -------------------------------------- Left nodes
   const totCircle = new PIXI.Graphics();
   totCircle.lineStyle(2, red).beginFill(red, 0.4);
-  totCircle.drawCircle(leftVs, leftTot, 10);
+  totCircle.drawCircle(0, 0, 10);
+  totCircle.position = new PIXI.Point(leftVs, leftTot);
   totCircle.endFill();
   container.addChild(totCircle);
+  subscribeToMoveEvents(totCircle, function(pos) {
+    pointUpdate({
+      leftVs: pos.x,
+      leftTot: pos.y
+    });
+  });
   const botCircle = new PIXI.Graphics();
   botCircle.lineStyle(2, red).beginFill(red, 0.4);
-  botCircle.drawCircle(leftVs, leftBot, 10);
+  botCircle.drawCircle(0, 0, 10);
+  botCircle.position = new PIXI.Point(leftVs, leftBot);
   botCircle.endFill();
   container.addChild(botCircle);
+  subscribeToMoveEvents(botCircle, function(pos) {
+    pointUpdate({
+      leftVs: pos.x,
+      leftBot: pos.y
+    });
+  });
 
   // -------------------------------------- Right nodes
   const totCircleRight = new PIXI.Graphics();
@@ -156,8 +171,8 @@ function drawProjections(container, projections, viewProps, pointUpdate) {
   const dipBox = new PIXI.Graphics();
   dipBox.lineStyle(2, red);
   dipBox.beginFill(white, 0);
-  dipBox.drawRoundedRect(0, 0, 20, 20, 4);
-  dipBox.position = new PIXI.Point(paVs - 10, paTcl - 10);
+  dipBox.drawRoundedRect(-10, -10, 20, 20, 4);
+  dipBox.position = new PIXI.Point(paVs, paTcl);
   dipBox.endFill();
   container.addChild(dipBox);
   subscribeToMoveEvents(dipBox, function(pos) {
@@ -168,11 +183,28 @@ function drawProjections(container, projections, viewProps, pointUpdate) {
   });
 
   return viewProps => {
-    const { rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
-    if (!totCircleRight.transform || !botCircleRight.transform || !dipBox.transform) return;
+    const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
+    if (
+      !totCircleRight.transform ||
+      !botCircleRight.transform ||
+      !dipBox.transform ||
+      !totCircle.transform ||
+      !botCircle.transform
+    ) {
+      return;
+    }
+    totCircle.position = new PIXI.Point(leftVs, leftTot);
+    botCircle.position = new PIXI.Point(leftVs, leftBot);
     totCircleRight.position = new PIXI.Point(rightVs, rightTot);
     botCircleRight.position = new PIXI.Point(rightVs, rightBot);
-    dipBox.position = new PIXI.Point(paVs - 10, paTcl - 10);
+    dipBox.position = new PIXI.Point(paVs, paTcl);
+
+    totLine.clear().lineStyle(...lineStyle);
+    totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
+    tclLine.clear().lineStyle(...lineStyle);
+    tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
+    botLine.clear().lineStyle(...lineStyle);
+    botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
   };
 }
 

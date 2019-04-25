@@ -19,11 +19,9 @@ export const ComboDashboard = () => {
     yScale: 1.4,
     leftVs: 660,
     leftTot: 8050,
-    leftTcl: 8100,
     leftBot: 8150,
     rightVs: 790,
     rightTot: 8050,
-    rightTcl: 8100,
     rightBot: 8150,
     paVs: 790,
     paTcl: 8100
