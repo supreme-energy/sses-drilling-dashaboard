@@ -108,7 +108,7 @@ function buildAutoScalingGrid(container, width, height) {
 
     const roughStep = yRange / (tickCount - 1);
 
-    const goodSteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
     const step = goodSteps.find(s => s >= roughStep);
 
     return {
