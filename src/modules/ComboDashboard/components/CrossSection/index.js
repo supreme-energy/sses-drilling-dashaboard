@@ -108,9 +108,9 @@ class CrossSection extends Component {
     }
 
     drawProjections(this.viewport, this.props.projections);
-    const projectionUpdate = interactiveProjection(this.viewport, this.props.view, this.props.updateView);
+    const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
 
-    const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
+    const gridUpdate = buildAutoScalingGrid(this.UILayer, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
