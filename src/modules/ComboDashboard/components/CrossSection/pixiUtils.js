@@ -81,7 +81,8 @@ function addDemoFormations(container, formations, bitProjection) {
   }
 }
 
-function drawProjections(container, formations, projections) {
+function drawProjections(container, projections, viewProps, pointUpdate) {
+  const { leftVs, leftTot, leftBot, leftTcl, rightVs, rightTot, rightBot, rightTcl, paVs, paTcl } = viewProps;
   // -------------------------------------- Trace projection
   const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
@@ -94,83 +95,85 @@ function drawProjections(container, formations, projections) {
 
   const red = 0xee2211;
   const white = 0xffffff;
-  const left = {
-    vs: 5908,
-    tcl: 13328,
-    tot: 13270,
-    bot: 13386
-  };
-  const right = {
-    vs: 6100,
-    tot: 13290,
-    tcl: 13348,
-    bot: 13406
-  };
+
   // -------------------------------------- Line segments
   const totLine = new PIXI.Graphics();
   totLine.lineStyle(2, red, 1);
-  totLine.moveTo(left.vs, left.tot).lineTo(right.vs, right.tot);
+  totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
   container.addChild(totLine);
 
   const tclLine = new PIXI.Graphics();
   tclLine.lineStyle(2, red, 1);
-  tclLine.moveTo(left.vs, left.tcl).lineTo(right.vs, right.tcl);
+  tclLine.moveTo(leftVs, leftTcl).lineTo(rightVs, rightTcl);
   container.addChild(tclLine);
 
   const botLine = new PIXI.Graphics();
   botLine.lineStyle(2, red, 1);
-  botLine.moveTo(left.vs, left.bot).lineTo(right.vs, right.bot);
+  botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
   container.addChild(botLine);
 
   // -------------------------------------- Left nodes
   const totCircle = new PIXI.Graphics();
   totCircle.lineStyle(2, red).beginFill(red, 0.4);
-  totCircle.drawCircle(left.vs, left.tot, 10);
+  totCircle.drawCircle(leftVs, leftTot, 10);
   totCircle.endFill();
   container.addChild(totCircle);
   const botCircle = new PIXI.Graphics();
   botCircle.lineStyle(2, red).beginFill(red, 0.4);
-  botCircle.drawCircle(left.vs, left.bot, 10);
+  botCircle.drawCircle(leftVs, leftBot, 10);
   botCircle.endFill();
   container.addChild(botCircle);
-  const faultBox = new PIXI.Graphics();
-  faultBox.lineStyle(2, red);
-  faultBox.beginFill(0xffffff, 0);
-  faultBox.drawRoundedRect(left.vs, left.tcl, 20, 20, 4);
-  faultBox.pivot = new PIXI.Point(10, 10);
-  faultBox.endFill();
-  container.addChild(faultBox);
 
   // -------------------------------------- Right nodes
   const totCircleRight = new PIXI.Graphics();
-  totCircleRight.lineStyle(2, white - 1, 1);
+  totCircleRight.lineStyle(2, white, 1);
   totCircleRight.beginFill(red);
-  totCircleRight.drawCircle(right.vs, right.tot, 10);
+  totCircleRight.drawCircle(0, 0, 10);
+  totCircleRight.position = new PIXI.Point(rightVs, rightTot);
   totCircleRight.endFill();
-  // container.addChild(totCircleRight);
+  container.addChild(totCircleRight);
+  subscribeToMoveEvents(totCircleRight, function(pos) {
+    pointUpdate({
+      rightVs: pos.x,
+      rightTot: pos.y
+    });
+  });
+
   const botCircleRight = new PIXI.Graphics();
   botCircleRight.lineStyle(2, white, 1);
   botCircleRight.beginFill(red);
-  botCircleRight.drawCircle(right.vs, right.bot, 10);
+  botCircleRight.drawCircle(0, 0, 10);
+  botCircleRight.position = new PIXI.Point(rightVs, rightBot);
   botCircleRight.endFill();
+  container.addChild(botCircleRight);
   subscribeToMoveEvents(botCircleRight, function(pos) {
-    this.x = pos.x;
-    this.y = pos.y;
+    pointUpdate({
+      rightVs: pos.x,
+      rightBot: pos.y
+    });
   });
-  // container.addChild(botCircleRight);
+
   const dipBox = new PIXI.Graphics();
   dipBox.lineStyle(2, red);
   dipBox.beginFill(white, 0);
-  dipBox.drawRoundedRect(right.vs - 10, right.tcl - 10, 20, 20, 4);
-  // dipBox.pivot = new PIXI.Point(10, 10);
+  dipBox.drawRoundedRect(0, 0, 20, 20, 4);
+  dipBox.position = new PIXI.Point(paVs - 10, paTcl - 10);
   dipBox.endFill();
   container.addChild(dipBox);
-  dipBox.addChild(totCircleRight);
-  dipBox.addChild(botCircleRight);
   subscribeToMoveEvents(dipBox, function(pos) {
-    this.x = pos.x;
-    this.y = pos.y;
+    pointUpdate({
+      paVs: pos.x,
+      paTcl: pos.y
+    });
   });
+
+  return viewProps => {
+    const { rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
+    if (!totCircleRight.transform || !botCircleRight.transform || !dipBox.transform) return;
+    totCircleRight.position = new PIXI.Point(rightVs, rightTot);
+    botCircleRight.position = new PIXI.Point(rightVs, rightBot);
+    dipBox.position = new PIXI.Point(paVs - 10, paTcl - 10);
+  };
 }
 
 export { subscribeToMoveEvents, addDemoFormations, drawProjections };
