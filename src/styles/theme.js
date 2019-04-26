@@ -29,12 +29,13 @@ export const theme = createMuiTheme({
   overrides: {
     MuiTab: {
       root: {
-        outline: "none !important"
+        outline: "none !important",
+        minWidth: "auto !important"
       }
     },
     MuiButton: {
       root: {
-        minWidth: "136px"
+        padding: "8px 16px"
       }
     }
   }
