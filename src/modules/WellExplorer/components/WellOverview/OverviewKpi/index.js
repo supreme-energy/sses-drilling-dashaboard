@@ -24,7 +24,7 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
         </Typography>
         <span className={classes.hSpacer} />
         <div className={classes.row}>
-          <IconButton onClick={() => updateFavorite(well.id, !well.fav)}>
+          <IconButton className={classes.favoriteButton} onClick={() => updateFavorite(well.id, !well.fav)}>
             <FavIcon color="primary" className={classes.favorite} />
           </IconButton>
           <span className={classes.hSpacer} />
