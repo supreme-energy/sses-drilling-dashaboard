@@ -31,7 +31,11 @@ KpiItem.propTypes = {
 
 KpiItem.defaultProps = {
   format: format(",.2f"),
-  renderValue: ({ value, format }) => <Typography variant="h5">{format(value)}</Typography>
+  renderValue: ({ value, format }) => (
+    <Typography className={classes.kpiValue} variant="h5">
+      {format(value)}
+    </Typography>
+  )
 };
 
 export function BitDepth() {
