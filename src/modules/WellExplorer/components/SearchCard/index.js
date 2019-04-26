@@ -35,7 +35,7 @@ function SearchCard({
         <InputBase className={classes.input} placeholder="Search by Well attributes" onChange={onInputChanged} />
       </Paper>
 
-      <div>
+      <div className={classes.listContainer}>
         <Tabs value={activeTab} indicatorColor="primary" centered onChange={(_, tab) => changeActiveTab(tab)}>
           <Tab label={ALL_WELLS} value={ALL_WELLS} className={classes.tab} />
           <Tab label={RECENT_WELLS} value={RECENT_WELLS} className={classes.tab} icon={<Alarm />} />

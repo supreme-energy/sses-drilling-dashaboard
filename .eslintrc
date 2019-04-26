@@ -22,6 +22,7 @@
   },
   "rules": {
     "key-spacing"          : "off",
+    "indent"               : "off",
     "brace-style"          : [2, "1tbs", {"allowSingleLine": true}],
     "semi"                 : [2, "always"],
     "quotes"               : "off",
