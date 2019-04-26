@@ -1,8 +1,9 @@
-import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { drawWellPlan } from "./drawWellPlan";
 import { buildAutoScalingGrid } from "./grid.js";
-import { drawProjections, addDemoFormations, interactiveProjection } from "./pixiUtils.js";
+import { addDemoFormations, drawProjections, interactiveProjection } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -86,15 +87,7 @@ class CrossSection extends Component {
     // Create the formation layers
     addDemoFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
-    // Draw the well plan line
-    const wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
-    const wellplan = new PIXI.Graphics();
-    wellplan.lineStyle(3, 0x44ff44, 1);
-    wellplan.moveTo(...wpData[0]);
-    for (let i = 1; i < wpData.length; i++) {
-      wellplan.lineTo(...wpData[i]);
-    }
-    this.wellPathLayer.addChild(wellplan);
+    const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
 
     const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
 
@@ -116,6 +109,7 @@ class CrossSection extends Component {
     this.ticker.add(() => {
       gridUpdate();
       projectionUpdate(this.props.view);
+      wellPlanUpdate();
       this.renderer.render(stage);
     });
   }
