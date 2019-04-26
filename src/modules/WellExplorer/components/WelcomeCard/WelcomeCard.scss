@@ -4,7 +4,7 @@
     .cardContent {
         display: flex;
         flex-direction: row;
-        @media (max-width: 1373px) {
+        @media (max-width: 1384px) {
             flex-direction: column;
         }
     }

@@ -29,7 +29,14 @@ export const theme = createMuiTheme({
   overrides: {
     MuiTab: {
       root: {
-        outline: "none !important"
+        "&:focus": {
+          outline: "none"
+        }
+      }
+    },
+    MuiButton: {
+      root: {
+        padding: "8px 16px"
       }
     }
   }

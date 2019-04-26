@@ -43,7 +43,7 @@ const colorByStatus = {
 };
 
 const renderValue = ({ value, format }) => (
-  <Typography style={{ color: red }} variant="h5">
+  <Typography style={{ color: red, fontWeight: "bold" }} variant="h5">
     {format(value)}
   </Typography>
 );

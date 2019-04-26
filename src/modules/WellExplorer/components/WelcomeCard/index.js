@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
-import classNames from "classNames";
+import classNames from "classnames";
 
 const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   const well = openedWell || lastEditedWell;
