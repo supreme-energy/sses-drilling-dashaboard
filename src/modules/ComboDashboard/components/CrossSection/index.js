@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { buildAutoScalingGrid } from "./grid.js";
 import { addDemoFormations, drawProjections, interactiveProjection } from "./pixiUtils.js";
@@ -89,16 +90,7 @@ class CrossSection extends Component {
 
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
 
-    const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
-
-    const sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
-    for (let i = 0; i < sData.length; i++) {
-      let icon = new PIXI.Sprite(surveyMarker);
-      icon.position = new PIXI.Point(...sData[i]);
-      icon.scale.set(0.25);
-      icon.anchor.set(0.5, 0.5);
-      this.wellPathLayer.addChild(icon);
-    }
+    drawSurveys(this.wellPathLayer, this.props.surveys);
 
     drawProjections(this.viewport, this.props.projections);
     const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
@@ -107,9 +99,9 @@ class CrossSection extends Component {
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
-      gridUpdate();
-      projectionUpdate(this.props.view);
       wellPlanUpdate();
+      projectionUpdate(this.props.view);
+      gridUpdate();
       this.renderer.render(stage);
     });
   }
