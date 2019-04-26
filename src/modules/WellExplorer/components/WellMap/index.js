@@ -7,20 +7,11 @@ import L from "leaflet";
 import mapValues from "lodash/mapValues";
 import classes from "./styles.scss";
 import classNames from "classnames";
-import { withRouter } from "react-router";
 import MapLegend from "./MapLegend";
 import "leaflet-fullscreen";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-
-const mapStyles = {
-  width: "100%",
-  height: "100%",
-  position: "absolute",
-  left: 0,
-  margin: "0 auto"
-};
 
 const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
 const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
@@ -33,21 +24,23 @@ export const WellMap = ({
   handleClickWell,
   wells,
   theme,
-  match: {
-    params: { wellId }
-  },
+  selectedWellId,
+  showToggleLegend,
+  showMapTypeControls,
+  defaultShowLegend,
+  onMarkerClick,
   ...props
 }) => {
   const mapRef = useRef(null);
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
-
+  const [showLegend, changeShowLegend] = useState(defaultShowLegend);
   return (
     <Map
       {...props}
       center={mapCenter}
+      attributionControl={false}
       length={4}
       onClick={handleClickWell}
-      style={mapStyles}
       // onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
       ref={mapRef}
@@ -63,45 +56,66 @@ export const WellMap = ({
         wells.map(well => (
           <Marker
             key={well.id}
+            onClick={() => onMarkerClick(well)}
             position={well.position}
-            icon={wellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
+            icon={selectedWellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
             className={classes.marker}
           />
         ))}
 
-      <ZoomControl position="bottomright" className={classes.zoom} />
-      <CenterControl position={"bottomright"}>
-        <MapLegend className={classes.legend} />
-      </CenterControl>
-      <CenterControl position={"bottomleft"}>
-        <div className={classes.leftMapControls}>
+      {showToggleLegend && (
+        <CenterControl position={"bottomright"} defaultClassName={classes.legendButtonControl}>
           <Paper className={classes.horizontalLayout}>
-            <Button disableRipple onClick={() => changeSelectedTiles(MAP)}>
-              <Typography variant={selectedTiles === MAP ? "body1" : "body2"}>Map</Typography>
-            </Button>
-            <Button disableRipple onClick={() => changeSelectedTiles(SATELLITE)}>
-              <Typography variant={selectedTiles === SATELLITE ? "body1" : "body2"}>Satellite</Typography>
+            <Button className={classes.legendButton} disableRipple onClick={() => changeShowLegend(!showLegend)}>
+              <Typography variant="body2">Legend</Typography>
             </Button>
           </Paper>
-        </div>
-      </CenterControl>
+        </CenterControl>
+      )}
+
+      <ZoomControl position="bottomright" className={classes.zoom} />
+      {showLegend && (
+        <CenterControl position={"bottomright"}>
+          <MapLegend className={classes.legend} />
+        </CenterControl>
+      )}
+
+      {showMapTypeControls && (
+        <CenterControl position={"bottomleft"}>
+          <div className={classes.leftMapControls}>
+            <Paper className={classes.horizontalLayout}>
+              <Button disableRipple onClick={() => changeSelectedTiles(MAP)}>
+                <Typography variant={selectedTiles === MAP ? "body1" : "body2"}>Map</Typography>
+              </Button>
+              <Button disableRipple onClick={() => changeSelectedTiles(SATELLITE)}>
+                <Typography variant={selectedTiles === SATELLITE ? "body1" : "body2"}>Satellite</Typography>
+              </Button>
+            </Paper>
+          </div>
+        </CenterControl>
+      )}
     </Map>
   );
 };
 
 WellMap.propTypes = {
-  mapCenter: PropTypes.object.isRequired,
+  mapCenter: PropTypes.object,
   handleClickWell: PropTypes.func,
   wells: PropTypes.array,
   theme: PropTypes.object,
+  selectedWellId: PropTypes.string,
   className: PropTypes.string,
-  match: PropTypes.shape({
-    params: PropTypes.object
-  })
+  defaultShowLegend: PropTypes.bool,
+  showToggleLegend: PropTypes.bool,
+  showMapTypeControls: PropTypes.bool,
+  onMarkerClick: PropTypes.func
 };
 
 WellMap.defaultProps = {
-  wells: []
+  wells: [],
+  handleClickWell: () => {},
+  defaultShowLegend: true,
+  showMapTypeControls: true
 };
 
-export default withRouter(WellMap);
+export default WellMap;

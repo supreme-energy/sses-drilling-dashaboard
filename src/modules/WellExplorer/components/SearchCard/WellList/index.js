@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
@@ -10,13 +10,16 @@ import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
 import { listIcons } from "../../IconsByStatus";
+import { connect } from "react-redux";
+import { actions } from "../../../store";
+import flowRight from "lodash/flowRight";
 
 const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
   const icon = listIcons[status];
 
   return (
-    <ListItem button disableRipple className={classes.wellItem} onClick={onClick}>
+    <ListItem button disableRipple selected={selected} className={classes.wellItem} onClick={onClick}>
       <div className={classes.itemContent}>
         <div>{name}</div>
         <Typography variant="body2" gutterBottom>
@@ -56,21 +59,21 @@ function WellList({
   match: {
     params: { wellId }
   },
+  selectedWellId,
+  changeSelectedWell,
   ...props
 }) {
-  const [selectedItem, updateSelectedItem] = useState(null);
-
   return (
     <List className={classes.list}>
       {wells.map(well => {
-        const selected = selectedItem === well.id;
+        const selected = selectedWellId === well.id;
         return (
           <WellItem
             theme={theme}
             key={well.id}
             selected={selected}
             opened={wellId === well.id}
-            onClick={() => updateSelectedItem(selected ? null : well.id)}
+            onClick={() => changeSelectedWell(selected ? null : well.id)}
             id={well.id}
             name={well.name}
             lat={33.634269}
@@ -85,4 +88,22 @@ function WellList({
   );
 }
 
-export default withRouter(WellList);
+const mapDispatchToPops = {
+  changeSelectedWell: actions.changeSelectedWell
+};
+
+const mapStateToProps = state => {
+  return {
+    selectedWellId: state.wellExplorer.selectedWellId
+  };
+};
+
+const bindData = flowRight([
+  connect(
+    mapStateToProps,
+    mapDispatchToPops
+  ),
+  withRouter
+]);
+
+export default bindData(WellList);
