@@ -7,12 +7,15 @@ import { connect } from "react-redux";
 import { changeSelectedWell } from "../../../store";
 import { Link } from "react-router-dom";
 import Favorite from "@material-ui/icons/Favorite";
+import FavoriteBorder from "@material-ui/icons/FavoriteBorder";
 import WellStatus from "../../../../Kpi/WellStatus";
 import WellPathStatus from "../../../../Kpi/WellPathStatus";
 import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
 
-function OverviewKpi({ well, changeSelectedWell }) {
+function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
+  const FavIcon = well.fav ? Favorite : FavoriteBorder;
+
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>
@@ -21,7 +24,9 @@ function OverviewKpi({ well, changeSelectedWell }) {
         </Typography>
         <span className={classes.hSpacer} />
         <div className={classes.row}>
-          {well.fav && <Favorite color="primary" className={classes.favorite} />}
+          <IconButton onClick={() => updateFavorite(well.id, !well.fav)}>
+            <FavIcon color="primary" className={classes.favorite} />
+          </IconButton>
           <span className={classes.hSpacer} />
           <Link to={`/${well.id}/combo`}>
             <Button variant="contained" color="primary">
