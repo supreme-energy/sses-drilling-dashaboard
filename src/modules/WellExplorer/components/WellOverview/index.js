@@ -7,7 +7,7 @@ import { withRouter } from "react-router-dom";
 import Overview from "./Overview";
 import WellInfo from "./WellInfo";
 
-function WellOverivew({ className, well, match, history }) {
+function WellOverivew({ className, well, match, history, updateFavorite }) {
   const [currentTab, changeCurrentTab] = useState("overview");
   const onTabChange = (_, value) => {
     changeCurrentTab(value);
@@ -15,7 +15,7 @@ function WellOverivew({ className, well, match, history }) {
 
   return (
     <Card className={className}>
-      {well && <OverivewKpi well={well} />}
+      {well && <OverivewKpi well={well} updateFavorite={updateFavorite} />}
       <Tabs value={currentTab} indicatorColor="primary" onChange={onTabChange}>
         <Tab value="overview" label="Well Overview" />
         <Tab value="info" label="Well Info" />

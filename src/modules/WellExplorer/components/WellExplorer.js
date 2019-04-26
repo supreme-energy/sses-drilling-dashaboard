@@ -140,8 +140,8 @@ export const WellExplorer = ({
           )}
         </div>
         <span className={classes.hSpacer} />
-        {overviewMode ? (
-          <WellOverview className={classes.wellOverview} well={selectedWell} />
+        {selectedWellId ? (
+          <WellOverview className={classes.wellOverview} well={selectedWell} updateFavorite={updateFavorite} />
         ) : (
           <WelcomeCard
             className={classes.welcome}
