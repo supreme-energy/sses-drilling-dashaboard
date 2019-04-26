@@ -72,6 +72,7 @@ export const WellExplorer = ({
   activeTab,
   theme,
   selectedWellId,
+  history,
   match: {
     params: { wellId: openedWellId }
   }
@@ -104,6 +105,7 @@ export const WellExplorer = ({
       <WellMap
         theme={theme}
         showLegend
+        onMarkerClick={well => history.push(`/${well.id}/combo`)}
         bounds={wellsBounds}
         selectedWellId={openedWellId || selectedWellId}
         showMapTypeControls={!overviewMode}
@@ -129,6 +131,7 @@ export const WellExplorer = ({
               showToggleLegend
               defaultShowLegend={false}
               theme={theme}
+              onMarkerClick={well => history.push(`/${well.id}/combo`)}
               bounds={selectedWellMapBounds}
               wells={searchResults}
               className={classes.miniMap}

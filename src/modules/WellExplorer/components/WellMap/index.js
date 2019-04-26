@@ -28,6 +28,7 @@ export const WellMap = ({
   showToggleLegend,
   showMapTypeControls,
   defaultShowLegend,
+  onMarkerClick,
   ...props
 }) => {
   const mapRef = useRef(null);
@@ -55,6 +56,7 @@ export const WellMap = ({
         wells.map(well => (
           <Marker
             key={well.id}
+            onClick={() => onMarkerClick(well)}
             position={well.position}
             icon={selectedWellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
             className={classes.marker}
@@ -97,7 +99,7 @@ export const WellMap = ({
 };
 
 WellMap.propTypes = {
-  mapCenter: PropTypes.object.isRequired,
+  mapCenter: PropTypes.object,
   handleClickWell: PropTypes.func,
   wells: PropTypes.array,
   theme: PropTypes.object,
@@ -105,7 +107,8 @@ WellMap.propTypes = {
   className: PropTypes.string,
   defaultShowLegend: PropTypes.bool,
   showToggleLegend: PropTypes.bool,
-  showMapTypeControls: PropTypes.bool
+  showMapTypeControls: PropTypes.bool,
+  onMarkerClick: PropTypes.func
 };
 
 WellMap.defaultProps = {
