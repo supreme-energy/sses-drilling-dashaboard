@@ -1,9 +1,12 @@
 .card {
-    height: 300px;
+    align-self: flex-start;
 
     .cardContent {
         display: flex;
         flex-direction: row;
+        @media (max-width: 1384px) {
+            flex-direction: column;
+        }
     }
     .hSpacer {
         width: 10px;

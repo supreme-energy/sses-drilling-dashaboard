@@ -7,9 +7,11 @@ import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import { Link } from "react-router-dom";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
+import WellPathStatus from "../../../Kpi/WellPathStatus";
+import classNames from "classnames";
 
-const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
-  const well = selectedWell || lastEditedWell;
+const LastEditedWell = ({ lastEditedWell, openedWell }) => {
+  const well = openedWell || lastEditedWell;
 
   return (
     <div>
@@ -23,10 +25,11 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
 
       <div className={classes.row}>
         <WellStatus status={well.status} className={classes.status} />
-
+        <span className={classes.hBigSpacer} />
+        <WellPathStatus wellId={well.id} />
         <Link to={`/${well.id}/combo`}>
           <Button variant="contained" color="primary">
-            {selectedWell ? "Continue" : "Reopen"}
+            {openedWell ? "Continue" : "Reopen"}
           </Button>
         </Link>
       </div>
@@ -41,9 +44,9 @@ const LastEditedWell = ({ lastEditedWell, selectedWell }) => {
   );
 };
 
-function WelcomeCard({ theme, lastEditedWell, selectedWell }) {
+function WelcomeCard({ theme, lastEditedWell, openedWell, className }) {
   return (
-    <Card className={classes.card}>
+    <Card className={classNames(classes.card, className)}>
       <CardContent>
         <Typography variant="h4" gutterBottom color="primary">
           Welcome to Subsurface Geological Tracking Analysis
@@ -71,8 +74,8 @@ function WelcomeCard({ theme, lastEditedWell, selectedWell }) {
             </List>
           </div>
           <span className={classes.hSpacer} />
-          {lastEditedWell || selectedWell ? (
-            <LastEditedWell lastEditedWell={lastEditedWell} selectedWell={selectedWell} />
+          {lastEditedWell || openedWell ? (
+            <LastEditedWell lastEditedWell={lastEditedWell} openedWell={openedWell} />
           ) : null}
         </div>
       </CardContent>

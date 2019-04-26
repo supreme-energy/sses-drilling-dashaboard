@@ -10,7 +10,7 @@ class LegendControl extends MapControl {
 
   constructor(props) {
     super(props);
-    this._container = L.DomUtil.create("div", "");
+    this._container = L.DomUtil.create("div", props.defaultClassName);
     const { position } = this.props;
     const legend = L.control({ position });
 

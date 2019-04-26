@@ -1,7 +1,15 @@
 .card {
-    width: 520px;
+    width: 450px;
     padding: 8px;
+    display: flex;
+    flex-direction: column;
+    
+    .listContainer {
+        display: flex;
+        flex-direction: column;
+    }
+
     .tab {
-        outline: none;
+        min-width: auto;
     }
 }

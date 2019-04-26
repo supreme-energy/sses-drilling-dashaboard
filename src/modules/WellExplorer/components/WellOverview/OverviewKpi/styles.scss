@@ -1,0 +1,30 @@
+.container {
+    padding: 8px;
+    .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .topRow {
+        @extend .row;
+        justify-content: space-between;
+    }
+
+    .kpiRow {
+        @extend .row;
+        flex-wrap: wrap;
+    }
+
+    .hSpacer {
+        width: 20px;
+    }
+
+    .favorite {
+        font-size: 28px;  
+    }
+
+    .favoriteButton{
+        outline: none !important;
+    }
+}
