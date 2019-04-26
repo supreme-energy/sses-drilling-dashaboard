@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import { buildAutoScalingGrid } from "./grid.js";
-import { drawProjections, addDemoFormations } from "./pixiUtils.js";
-import { interactiveProjection } from "./pixiUtils";
+import { drawProjections, addDemoFormations, interactiveProjection } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -31,6 +30,7 @@ class CrossSection extends Component {
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
+    this.gridLayer = this.viewport.addChild(new PIXI.Container());
     stage.addChild(this.viewport);
 
     // Set up events to enable panning of the viewport through stage
@@ -110,7 +110,7 @@ class CrossSection extends Component {
     drawProjections(this.viewport, this.props.projections);
     const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
 
-    const gridUpdate = buildAutoScalingGrid(this.UILayer, this.screenWidth, this.screenHeight);
+    const gridUpdate = buildAutoScalingGrid(this.gridLayer, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
