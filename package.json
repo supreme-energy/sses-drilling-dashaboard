@@ -113,7 +113,6 @@
     "mini-css-extract-plugin": "^0.4.1",
     "mocha": "^5.2.0",
     "node-sass": "^4.9.2",
-    "os": "^0.1.1",
     "phantomjs-prebuilt": "^2.1.16",
     "react-addons-test-utils": "^15.6.2",
     "react-test-renderer": "^16.4.1",
