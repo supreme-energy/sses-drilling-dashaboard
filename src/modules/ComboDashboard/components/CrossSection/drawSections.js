@@ -8,20 +8,27 @@ function drawSections(container, width, height, surveys, projections, gutter) {
   let points = surveys.slice(0, surveys.length - 1).concat(projections);
   const buttonHeight = 10;
   const y = height - gutter - buttonHeight;
+  const pixiList = [];
 
   for (let i = 0; i < points.length - 1; i++) {
-    let p1 = points[i];
-    let p2 = points[i + 1];
     const section = new PIXI.Graphics();
-    const color = i >= surveys.length - 2 ? projection : survey;
-    section.beginFill(...color);
-    section.drawRoundedRect(Number(p1.vs) + 2, y, Number(p2.vs - p1.vs) - 2, buttonHeight, buttonHeight / 2);
-    section.endFill();
     section.transform.updateTransform = frozenXTransform;
+    pixiList.push(section);
     container.addChild(section);
   }
 
-  return function update() {};
+  return function update() {
+    if (!container.transform) return;
+    const scale = container.transform.worldTransform.a;
+    for (let i = 0; i < points.length - 1; i++) {
+      let pixi = pixiList[i];
+      let p1 = Number(points[i].vs);
+      let p2 = Number(points[i + 1].vs);
+      const color = i >= surveys.length - 2 ? projection : survey;
+      pixi.clear().beginFill(...color);
+      pixi.drawRoundedRect(p1 * scale + 2, y, (p2 - p1) * scale - 2, buttonHeight, buttonHeight / 2);
+    }
+  };
 }
 
 export { drawSections };
