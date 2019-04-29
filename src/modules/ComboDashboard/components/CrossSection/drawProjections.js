@@ -11,15 +11,20 @@ function drawProjections(container, projections) {
   // -------------------------------------- Trace projection
   const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
-  projectedPath.lineStyle(3, 0xee3322, 1);
-  projectedPath.moveTo(...wpData[0]);
-  for (let i = 1; i < wpData.length; i++) {
-    projectedPath.lineTo(...wpData[i]);
-  }
+  update();
   container.addChild(projectedPath);
-}
 
-export { drawProjections };
+  return update;
+
+  function update() {
+    if (!projectedPath.transform) return;
+    projectedPath.clear().lineStyle(3 / container.transform.worldTransform.a, 0xee3322, 1);
+    projectedPath.moveTo(...wpData[0]);
+    for (let i = 1; i < wpData.length; i++) {
+      projectedPath.lineTo(...wpData[i]);
+    }
+  }
+}
 
 function interactiveProjection(container, viewProps, pointUpdate) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
@@ -143,4 +148,4 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   };
 }
 
-export { interactiveProjection };
+export { interactiveProjection, drawProjections };

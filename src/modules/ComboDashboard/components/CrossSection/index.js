@@ -92,7 +92,7 @@ class CrossSection extends Component {
 
     drawSurveys(this.wellPathLayer, this.props.surveys);
 
-    drawProjections(this.viewport, this.props.projections);
+    const projectionLineUpdate = drawProjections(this.viewport, this.props.projections);
     const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
 
     const gridUpdate = buildAutoScalingGrid(this.gridLayer, this.screenWidth, this.screenHeight);
@@ -100,6 +100,7 @@ class CrossSection extends Component {
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
       wellPlanUpdate();
+      projectionLineUpdate();
       projectionUpdate(this.props.view);
       gridUpdate();
       this.renderer.render(stage);
