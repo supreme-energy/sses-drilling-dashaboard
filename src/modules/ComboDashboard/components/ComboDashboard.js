@@ -13,18 +13,18 @@ export const ComboDashboard = () => {
   const formations = formationData;
 
   const [view, setView] = useState({
-    x: 0,
-    y: -7100,
-    xScale: 1,
-    yScale: 1,
-    leftVs: 660,
-    leftTot: 8050,
-    leftBot: 8150,
-    rightVs: 790,
-    rightTot: 8050,
-    rightBot: 8150,
-    paVs: 790,
-    paTcl: 8100
+    x: -844,
+    y: -16700,
+    xScale: 2.14,
+    yScale: 2.14,
+    leftVs: 663.1,
+    leftTot: 7930.8,
+    leftBot: 7956.8,
+    rightVs: 911.4,
+    rightTot: 7930,
+    rightBot: 7956,
+    paVs: 900,
+    paTcl: 7950
   });
   // Implement merging here so we don't have to everywhere
   const mergeView = useCallback(function(value) {
