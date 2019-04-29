@@ -4,7 +4,8 @@ import React, { Component } from "react";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { buildAutoScalingGrid } from "./grid.js";
-import { drawFormations, drawProjections, interactiveProjection } from "./pixiUtils.js";
+import { drawFormations } from "./pixiUtils.js";
+import { drawProjections, interactiveProjection } from "./drawProjections";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -27,7 +28,6 @@ class CrossSection extends Component {
     // Stage contains the draw layers and never moves. Some events are registered here.
     const stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
-    // TODO: Add UI container
     this.viewport = new PIXI.Container();
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
