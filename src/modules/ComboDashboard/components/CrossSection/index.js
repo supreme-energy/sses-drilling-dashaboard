@@ -4,7 +4,7 @@ import React, { Component } from "react";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { buildAutoScalingGrid } from "./grid.js";
-import { addDemoFormations, drawProjections, interactiveProjection } from "./pixiUtils.js";
+import { drawFormations, drawProjections, interactiveProjection } from "./pixiUtils.js";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -86,7 +86,7 @@ class CrossSection extends Component {
     );
 
     // Create the formation layers
-    addDemoFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
+    drawFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
 

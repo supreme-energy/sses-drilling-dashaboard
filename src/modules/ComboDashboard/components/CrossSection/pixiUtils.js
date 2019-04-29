@@ -63,7 +63,7 @@ function drawFormationSegment(color, alpha, points, container) {
  * @param container The PIXI container that will get the formations
  * @param formations The formation data from the API
  */
-function addDemoFormations(container, formations, bitProjection) {
+function drawFormations(container, formations, bitProjection) {
   for (let f of formations) {
     f.points = f.data.map(point => [Number(point.vs), Number(point.tot)]);
   }
@@ -216,4 +216,4 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   };
 }
 
-export { subscribeToMoveEvents, addDemoFormations, drawProjections, interactiveProjection };
+export { subscribeToMoveEvents, drawFormations, drawProjections, interactiveProjection };
