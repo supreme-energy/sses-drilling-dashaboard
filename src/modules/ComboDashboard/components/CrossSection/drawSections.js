@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
+import { frozenXTransform } from "./customPixiTransforms";
 
 const survey = [0xa6a6a6, 0.5];
 const projection = [0xee2211, 0.5];

@@ -6,7 +6,6 @@ import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
 import { drawFormations } from "./pixiUtils.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
-import { subscribeToMoveEvents } from "./pixiUtils";
 import { drawSections } from "./drawSections";
 
 // PIXI has some lowercase constructors
