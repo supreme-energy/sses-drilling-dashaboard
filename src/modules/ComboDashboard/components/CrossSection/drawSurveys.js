@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "./customPixiTransforms";
 
+/* eslint new-cap: 0 */
 export function drawSurveys(container, surveys) {
   const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
 
