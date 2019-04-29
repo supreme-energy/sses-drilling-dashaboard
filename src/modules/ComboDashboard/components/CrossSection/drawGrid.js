@@ -50,11 +50,10 @@ function makeYTickAndLine(fontSize, width) {
  * @param height  The canvas height
  * @returns {updateGrid}  The function to update the gridlines
  */
-function drawGrid(container, width, height) {
+function drawGrid(container, width, height, gutter = 50) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
-  const gutter = 50;
   let lastBounds = {};
 
   const xLabels = [];
