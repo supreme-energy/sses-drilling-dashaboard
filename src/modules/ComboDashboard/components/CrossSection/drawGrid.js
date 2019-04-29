@@ -50,7 +50,7 @@ function makeYTickAndLine(fontSize, width) {
  * @param height  The canvas height
  * @returns {updateGrid}  The function to update the gridlines
  */
-function buildAutoScalingGrid(container, width, height) {
+function drawGrid(container, width, height) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
@@ -151,4 +151,4 @@ function buildAutoScalingGrid(container, width, height) {
   };
 }
 
-export { buildAutoScalingGrid };
+export { drawGrid };

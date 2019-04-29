@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
-import { buildAutoScalingGrid } from "./grid.js";
+import { drawGrid } from "./drawGrid.js";
 import { drawFormations } from "./pixiUtils.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 
@@ -95,7 +95,7 @@ class CrossSection extends Component {
     const projectionLineUpdate = drawProjections(this.viewport, this.props.projections);
     const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
 
-    const gridUpdate = buildAutoScalingGrid(this.gridLayer, this.screenWidth, this.screenHeight);
+    const gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
