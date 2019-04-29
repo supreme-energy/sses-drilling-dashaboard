@@ -6,6 +6,8 @@ import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
 import { drawFormations } from "./pixiUtils.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
+import { subscribeToMoveEvents } from "./pixiUtils";
+import { drawSections } from "./drawSections";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -89,12 +91,16 @@ class CrossSection extends Component {
     drawFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
-
     drawSurveys(this.wellPathLayer, this.props.surveys);
-
-    const projectionLineUpdate = drawProjections(this.viewport, this.props.projections);
+    const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
     const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
-
+    const sectionUpdate = drawSections(
+      this.viewport,
+      this.screenWidth,
+      this.screenHeight,
+      this.props.surveys,
+      this.props.projections
+    );
     const gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
@@ -102,6 +108,7 @@ class CrossSection extends Component {
       wellPlanUpdate();
       projectionLineUpdate();
       projectionUpdate(this.props.view);
+      sectionUpdate();
       gridUpdate();
       this.renderer.render(stage);
     });

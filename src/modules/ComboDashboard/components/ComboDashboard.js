@@ -13,10 +13,10 @@ export const ComboDashboard = () => {
   const formations = formationData;
 
   const [view, setView] = useState({
-    x: -500,
-    y: -11000,
-    xScale: 1.4,
-    yScale: 1.4,
+    x: 0,
+    y: -7100,
+    xScale: 1,
+    yScale: 1,
     leftVs: 660,
     leftTot: 8050,
     leftBot: 8150,
