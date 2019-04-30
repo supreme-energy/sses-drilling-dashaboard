@@ -29,6 +29,12 @@ export const ComboDashboard = () => {
   // Implement merging here so we don't have to everywhere
   const mergeView = useCallback(function(value) {
     setView(prev => {
+      if (typeof value === "function") {
+        return {
+          ...prev,
+          ...value(prev)
+        };
+      }
       return {
         ...prev,
         ...value
