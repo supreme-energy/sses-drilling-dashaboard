@@ -93,7 +93,13 @@ class CrossSection extends Component {
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
     drawSurveys(this.wellPathLayer, this.props.surveys);
     const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
-    const projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
+    const projectionUpdate = interactiveProjection(
+      this.UILayer,
+      this.props.view,
+      this.props.updateView,
+      this.screenWidth,
+      this.screenHeight
+    );
     const sectionUpdate = drawSections(
       this.UILayer,
       this.screenWidth,
@@ -108,7 +114,7 @@ class CrossSection extends Component {
     this.ticker.add(() => {
       wellPlanUpdate();
       projectionLineUpdate();
-      projectionUpdate(this.props.view);
+      projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
       sectionUpdate();
       gridUpdate();
       this.renderer.render(stage);

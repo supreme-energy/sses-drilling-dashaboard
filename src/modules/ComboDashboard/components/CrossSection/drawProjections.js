@@ -26,7 +26,7 @@ function drawProjections(container, projections) {
   }
 }
 
-function interactiveProjection(container, viewProps, pointUpdate) {
+function interactiveProjection(container, viewProps, pointUpdate, width, height) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
   const white = 0xffffff;
@@ -123,6 +123,16 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     });
   });
 
+  const faultLine = new PIXI.Graphics();
+  faultLine.lineStyle(...lineStyle);
+  faultLine.moveTo(leftVs, 0).lineTo(leftVs, 10000);
+  container.addChild(faultLine);
+
+  const dipLine = new PIXI.Graphics();
+  dipLine.lineStyle(...lineStyle);
+  dipLine.moveTo(rightVs, 0).lineTo(rightVs, 10000);
+  container.addChild(dipLine);
+
   const dipBox = new PIXI.Graphics();
   dipBox.lineStyle(2, red);
   dipBox.beginFill(white, 0);
@@ -138,7 +148,7 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     });
   });
 
-  return viewProps => {
+  return (viewProps, width, height) => {
     const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
     if (
       !totCircleRight.transform ||
@@ -161,6 +171,10 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
     botLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
     botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
+    dipLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
+    dipLine.moveTo(rightVs, 0).lineTo(rightVs, 10000);
+    faultLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
+    faultLine.moveTo(leftVs, 0).lineTo(leftVs, 10000);
   };
 }
 
