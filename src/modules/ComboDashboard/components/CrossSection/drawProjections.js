@@ -57,9 +57,13 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   totCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircle);
   subscribeToMoveEvents(totCircle, function(pos) {
-    pointUpdate({
-      leftVs: pos.x,
-      leftTot: pos.y
+    pointUpdate(prev => {
+      const diff = prev.leftTot - prev.leftBot;
+      return {
+        leftVs: pos.x,
+        leftTot: pos.y,
+        leftBot: pos.y - diff
+      };
     });
   });
   const botCircle = new PIXI.Graphics();
@@ -70,9 +74,13 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   botCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircle);
   subscribeToMoveEvents(botCircle, function(pos) {
-    pointUpdate({
-      leftVs: pos.x,
-      leftBot: pos.y
+    pointUpdate(prev => {
+      const diff = prev.leftTot - prev.leftBot;
+      return {
+        leftVs: pos.x,
+        leftBot: pos.y,
+        leftTot: pos.y + diff
+      };
     });
   });
 
@@ -86,9 +94,13 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   totCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircleRight);
   subscribeToMoveEvents(totCircleRight, function(pos) {
-    pointUpdate({
-      rightVs: pos.x,
-      rightTot: pos.y
+    pointUpdate(prev => {
+      const diff = prev.rightTot - prev.rightBot;
+      return {
+        rightVs: pos.x,
+        rightTot: pos.y,
+        rightBot: pos.y - diff
+      };
     });
   });
 
@@ -101,9 +113,13 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   botCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircleRight);
   subscribeToMoveEvents(botCircleRight, function(pos) {
-    pointUpdate({
-      rightVs: pos.x,
-      rightBot: pos.y
+    pointUpdate(prev => {
+      const diff = prev.rightTot - prev.rightBot;
+      return {
+        rightVs: pos.x,
+        rightBot: pos.y,
+        rightTot: pos.y + diff
+      };
     });
   });
 
