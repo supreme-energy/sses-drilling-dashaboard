@@ -48,6 +48,16 @@ function interactiveProjection(container, viewProps, pointUpdate, width, height)
   botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
   container.addChild(botLine);
 
+  const faultLine = new PIXI.Graphics();
+  faultLine.lineStyle(...lineStyle);
+  faultLine.moveTo(leftVs, 0).lineTo(leftVs, 10000);
+  container.addChild(faultLine);
+
+  const dipLine = new PIXI.Graphics();
+  dipLine.lineStyle(...lineStyle);
+  dipLine.moveTo(rightVs, 0).lineTo(rightVs, 10000);
+  container.addChild(dipLine);
+
   // -------------------------------------- Left nodes
   const totCircle = new PIXI.Graphics();
   totCircle.lineStyle(2, red).beginFill(red, 0.4);
@@ -122,16 +132,6 @@ function interactiveProjection(container, viewProps, pointUpdate, width, height)
       };
     });
   });
-
-  const faultLine = new PIXI.Graphics();
-  faultLine.lineStyle(...lineStyle);
-  faultLine.moveTo(leftVs, 0).lineTo(leftVs, 10000);
-  container.addChild(faultLine);
-
-  const dipLine = new PIXI.Graphics();
-  dipLine.lineStyle(...lineStyle);
-  dipLine.moveTo(rightVs, 0).lineTo(rightVs, 10000);
-  container.addChild(dipLine);
 
   const dipBox = new PIXI.Graphics();
   dipBox.lineStyle(2, red);
