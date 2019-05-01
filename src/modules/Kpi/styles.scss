@@ -1,0 +1,41 @@
+.statusIcon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+.horizontalCenter {
+    @extend .horizontal;
+    align-items: center;
+}
+
+.horizontalTop {
+    @extend .horizontal;
+    align-content: flex-start;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.serverStatus {
+    @extend .vertical;
+}
+
+.spacer {
+    width: 10px;
+}
+.kpiValue {
+    font-weight: bold;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+}
