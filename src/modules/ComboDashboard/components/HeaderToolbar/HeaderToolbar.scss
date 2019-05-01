@@ -1,5 +1,6 @@
 .card {
     align-self: flex-start;
+    display: flex;
 
     .cardContent {
         display: flex;
@@ -13,41 +14,22 @@
     }
 
     .hBigSpacer {
-        width: 20px;
+        width: 60px;
     }
 
-    .list {
-        width: 380px;
-        margin-right: 25px;
-        .listItem {
-            border-bottom: solid 1px #E4E4E4;
-            .iconBg {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                
-                > svg {
-                    font-size: 18px;
-                    color: white;
-                }
-            }
-        }
+    .hExtraLargeSpacer {
+        width: 20%;
+    }
+
+    .row {
+        display: flex;
+        float: right;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
     }
 
     .status {
         margin-right: 20px;
     }
-
-    .row {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-    }
-
-    
-
-    
 }
