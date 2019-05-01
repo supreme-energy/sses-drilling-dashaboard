@@ -1,11 +1,17 @@
 import React, { Suspense, useState, useCallback } from "react";
 import Progress from "@material-ui/core/CircularProgress";
+import { useWells, useWellsSearch } from "../../../api";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
 import CrossSection from "./CrossSection/index";
+import HeaderToolbar from "./HeaderToolbar";
 
-export const ComboDashboard = () => {
+export const ComboDashboard = ({ 
+  match: {
+    params: { wellId: openedWellId }
+  }
+}) => {
   // Replace with useFetch
   const surveys = surveyData;
   const wellPlan = wellPlanData;
@@ -27,9 +33,14 @@ export const ComboDashboard = () => {
     });
   }, []);
 
+  // Get currently opened well
+  const [, wellsById ,] = useWells();
+  const well = wellsById[openedWellId] || {}
+  
   return (
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
+        <HeaderToolbar well={well} />
         <h2>Dev debugging data</h2>
         <div>
           <label>
