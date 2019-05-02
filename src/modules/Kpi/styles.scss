@@ -24,7 +24,7 @@
     flex-direction: column;
 }
 
-.serverStatus {
+.serverStatus, .zoneStatus {
     @extend .vertical;
 }
 
