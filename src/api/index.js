@@ -5,6 +5,7 @@ import Fuse from "fuse.js";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
+import _ from "lodash";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -111,7 +112,7 @@ export function useWells() {
 }
 
 export function useWellPath(wellId) {
-  const results = useFetch(
+  const [data] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -139,5 +140,45 @@ export function useWellPath(wellId) {
       }
     }
   );
-  return results[0] || EMPTY_ARRAY;
+  return data || EMPTY_ARRAY;
+}
+export function useSurveys(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_SURVEYS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: surveys => {
+        return surveys.map(s => {
+          return _.mapValues(s, Number);
+        });
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+export function useFormations(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_FORMATIONS,
+      query: {
+        seldbname: wellId,
+        data: 1
+      }
+    },
+    {
+      transform: formationList => {
+        return formationList.map(f => {
+          return {
+            ...f,
+            data: f.data.map(d => _.mapValues(d, Number))
+          };
+        });
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
 }

@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import { drawFormations } from "./drawFormations";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
-import { drawFormations } from "./pixiUtils.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
 
@@ -91,7 +91,7 @@ class CrossSection extends Component {
     drawFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
-    drawSurveys(this.wellPathLayer, this.props.surveys);
+    const surveyUpdate = drawSurveys(this.wellPathLayer, this.props.surveys);
     const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
     const projectionUpdate = interactiveProjection(
       this.UILayer,
@@ -113,6 +113,7 @@ class CrossSection extends Component {
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
       wellPlanUpdate(this.props.wellPlan);
+      surveyUpdate(this.props.surveys);
       projectionLineUpdate();
       projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
       sectionUpdate();
