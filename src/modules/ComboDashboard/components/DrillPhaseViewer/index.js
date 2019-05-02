@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent, Menu, MenuItem, Button, Typography, ClickAwayListener } from "@material-ui/core";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import CheckCircle from "@material-ui/icons/CheckCircle";
+import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 
 import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "../../../../constants/wellPathStatus";
 import DrillPhaseLateralIcon from "./assets/drill-phase-lateral.svg";
