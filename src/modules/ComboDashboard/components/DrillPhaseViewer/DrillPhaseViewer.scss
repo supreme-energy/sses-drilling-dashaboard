@@ -1,12 +1,9 @@
+$gold: #817618;
+
 .card {
-    align-self: flex-start;
 
     .cardContent {
-        display: flex;
-        flex-direction: row;
-        @media (max-width: 1384px) {
-            flex-direction: column;
-        }
+        padding: 0px;
     }
 
     .drillPhaseButton {
@@ -15,22 +12,22 @@
         padding: 10px 5px 20px;
         border: 1px solid #EBEAEA;
         min-width: 140px;
+        border-radius: 0px;
 
         &:focus {
             outline:0;
         }
+
+        img {
+            margin-bottom: 15px;
+        }
+
+        .drillPhaseButtonText {
+            color: $gold;
+        }
     }
 
-    .phaseMenuItem {
-        background-color: gray;
-        min-width: 200px;
+    .drillPhaseCode {
+        margin-left: 12px;
     }
-
-    .phaseIcon {
-        margin-right: 10px;
-    }
-
-    
-
-    
 }
