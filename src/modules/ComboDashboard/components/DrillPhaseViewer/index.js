@@ -11,7 +11,6 @@ import classes from "./DrillPhaseViewer.scss";
 import classNames from "classnames";
 
 const gray = "#757575";
-const green = "#09C501";
 
 const iconForPhaseViewer = {
     [ON_SURFACE]: {
@@ -30,67 +29,67 @@ const iconForPhaseViewer = {
     [ON_LATERAL]: {
         icon: DrillPhaseLateralIcon
     }
-}
+};
 
 function DrillPhaseViewer({ className }) {
     const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
     const [anchorEl, setAnchorEl] = useState(null);
     const drillPhaseEnum = Object.keys(iconForPhaseViewer);
     const currStatus = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
-    const drillPhaseCode =  currStatus.split(" ")[1];
+    const drillPhaseCode = currStatus.split(" ")[1];
 
     return (
-        <Card className={classNames(classes.card, className)}>
-            <CardContent className={classes.cardContent}>
-                <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
-                    <Button
-                        aria-owns={drillPhase ? 'simple-menu' : undefined}
-                        aria-haspopup="true"
-                        onClick={(e) => setAnchorEl(e.currentTarget)}
-                        className={classes.drillPhaseButton}
+      <Card className={classNames(classes.card, className)}>
+        <CardContent className={classes.cardContent}>
+          <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
+            <Button
+              aria-owns={drillPhase ? 'simple-menu' : undefined}
+              aria-haspopup="true"
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              className={classes.drillPhaseButton}
                     >
-                        <Typography className={classes.drillPhaseButtonText} variant="subtitle1" gutterBottom>
+              <Typography className={classes.drillPhaseButtonText} variant="subtitle1" gutterBottom>
                             View
-                        </Typography>
-                        <img src={iconForPhaseViewer[currStatus].icon} />
-                        <div>
-                            <span className={classes.drillPhaseCode}>{drillPhaseCode}</span>
-                            <ArrowDropDown />
-                        </div>
-                    </Button>
-                    <Menu
-                        id="drill-phase-menu"
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={() => setDrillPhase(currStatus)}
-                        disableAutoFocusItem
+              </Typography>
+              <img src={iconForPhaseViewer[currStatus].icon} />
+              <div>
+                <span className={classes.drillPhaseCode}>{drillPhaseCode}</span>
+                <ArrowDropDown />
+              </div>
+            </Button>
+            <Menu
+              id="drill-phase-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={() => setDrillPhase(currStatus)}
+              disableAutoFocusItem
                     >
-                        {drillPhaseEnum.map((phase, index) => {
-                            if (currStatus == phase) {
+              {drillPhaseEnum.map((phase, index) => {
+                            if (currStatus === phase) {
                                 return (
-                                    <MenuItem
-                                        key={index}
-                                        onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}
-                                        style={{ minWidth: 185, backgroundColor: 'rgba(0, 0, 0, 0.15)' }}
+                                  <MenuItem
+                                    key={index}
+                                    onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}
+                                    style={{ minWidth: 185, backgroundColor: 'rgba(0, 0, 0, 0.15)' }}
                                     >
-                                        <img src={iconForPhaseViewer[phase].icon} />
-                                        <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
-                                        <CheckCircle style={{ position: 'absolute', right: 12, color: gray }} />
-                                    </MenuItem>
-                                )
+                                    <img src={iconForPhaseViewer[phase].icon} />
+                                    <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
+                                    <CheckCircle style={{ position: 'absolute', right: 12, color: gray }} />
+                                  </MenuItem>
+                                );
                             } else {
                                 return (
-                                    <MenuItem key={index} onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}>
-                                        <img src={iconForPhaseViewer[phase].icon} />
-                                        <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
-                                    </MenuItem>
-                                )
+                                  <MenuItem key={index} onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}>
+                                    <img src={iconForPhaseViewer[phase].icon} />
+                                    <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
+                                  </MenuItem>
+                                );
                             }
                         })}
-                    </Menu>
-                </ClickAwayListener>
-            </CardContent>
-        </Card>
+            </Menu>
+          </ClickAwayListener>
+        </CardContent>
+      </Card>
     );
 }
 
