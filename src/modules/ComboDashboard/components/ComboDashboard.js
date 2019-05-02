@@ -1,13 +1,13 @@
 import React, { Suspense, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
-import { useWells, useWellsSearch } from "../../../api";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
 import CrossSection from "./CrossSection/index";
 import HeaderToolbar from "./HeaderToolbar";
 
-export const ComboDashboard = ({ 
+export const ComboDashboard = ({
   match: {
     params: { wellId: openedWellId }
   }
@@ -33,14 +33,10 @@ export const ComboDashboard = ({
     });
   }, []);
 
-  // Get currently opened well
-  const [, wellsById ,] = useWells();
-  const well = wellsById[openedWellId] || {}
-  
   return (
     <Suspense fallback={<Progress />}>
       <div style={{ margin: "0 auto" }}>
-        <HeaderToolbar well={well} />
+        <HeaderToolbar wellId={openedWellId} />
         <h2>Dev debugging data</h2>
         <div>
           <label>
@@ -95,6 +91,12 @@ export const ComboDashboard = ({
     </Suspense>
   );
 };
-ComboDashboard.propTypes = {};
+ComboDashboard.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      wellId: PropTypes.string
+    })
+  })
+};
 
 export default ComboDashboard;
