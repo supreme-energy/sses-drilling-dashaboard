@@ -50,8 +50,6 @@ export function useWellInfo(wellId) {
     }
   });
 
-  console.log(data, 'data');
-
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
 
   return {
