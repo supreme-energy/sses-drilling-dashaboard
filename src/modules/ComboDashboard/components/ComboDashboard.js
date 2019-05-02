@@ -1,15 +1,16 @@
 import React, { Suspense, useState, useCallback } from "react";
 import Progress from "@material-ui/core/CircularProgress";
+import { useWellPath } from "../../../api";
 import surveyData from "../../../data/survey.json";
-import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
 import projections from "../../../data/projections";
 import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
+  const wellId = "sgta_1563";
   // Replace with useFetch
   const surveys = surveyData;
-  const wellPlan = wellPlanData;
+  const wellPlan = useWellPath(wellId);
   const formations = formationData;
 
   const [view, setView] = useState({

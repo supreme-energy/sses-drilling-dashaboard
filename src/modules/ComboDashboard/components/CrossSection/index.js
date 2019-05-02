@@ -112,7 +112,7 @@ class CrossSection extends Component {
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
-      wellPlanUpdate();
+      wellPlanUpdate(this.props.wellPlan);
       projectionLineUpdate();
       projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
       sectionUpdate();

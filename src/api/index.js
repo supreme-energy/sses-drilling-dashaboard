@@ -109,3 +109,35 @@ export function useWells() {
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
   return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
 }
+
+export function useWellPath(wellId) {
+  const results = useFetch(
+    {
+      path: GET_WELL_PLAN,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: plan => {
+        return plan.map(p => {
+          return {
+            num: p.num,
+            "dip-c": p["dip-c"],
+            md: Number(p.md),
+            inc: Number(p.inc),
+            azm: Number(p.azm),
+            tvd: Number(p.tvd),
+            vs: Number(p.vs),
+            ns: Number(p.ns),
+            ew: Number(p.ew),
+            cd: Number(p.cd),
+            ca: Number(p.ca),
+            dl: Number(p.dl)
+          };
+        });
+      }
+    }
+  );
+  return results[0] || EMPTY_ARRAY;
+}
