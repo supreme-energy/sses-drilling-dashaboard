@@ -18,7 +18,6 @@ const iconForPhaseViewer = {
     },
     [ON_INTERMEDIATE]: {
         icon: DrillPhaseVerticalIcon
-
     },
     [ON_DRILLOUT]: {
         icon: DrillPhaseVerticalIcon
