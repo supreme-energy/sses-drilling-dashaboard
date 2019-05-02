@@ -44,7 +44,7 @@ export const PageLayout = ({ children, history }) => {
         <AppBar color="inherit">
           <div className={classes.header}>
             <div className={classes.logo}>
-              <img src="/logo_sses.svg" />
+              <img src="/mockup-logo.svg" />
             </div>
             <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
             <span />
