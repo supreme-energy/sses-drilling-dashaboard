@@ -8,7 +8,6 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  * @param projections An array of projected points
  */
 function drawProjections(container, projections) {
-  // -------------------------------------- Trace projection
   const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
   update();
@@ -26,6 +25,17 @@ function drawProjections(container, projections) {
   }
 }
 
+/**
+ * Function to draw the interactive project ahead UI for a selected projection. Currently
+ * only displays the UI and is not tied to real data.  Projections cannot be selected yet.
+ *
+ * @param container     The PIXI layer to draw on
+ * @param viewProps     Object holding the position data for individual UI elements
+ * @param pointUpdate   Function for updating the props (can take a function)
+ * @param width         Current canvas width
+ * @param height        Current canvas height
+ * @returns {Function}  The update function to be called each tick
+ */
 function interactiveProjection(container, viewProps, pointUpdate, width, height) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
@@ -133,15 +143,16 @@ function interactiveProjection(container, viewProps, pointUpdate, width, height)
     });
   });
 
-  const dipBox = new PIXI.Graphics();
-  dipBox.lineStyle(2, red);
-  dipBox.beginFill(white, 0);
-  dipBox.drawRoundedRect(-10, -10, 20, 20, 4);
-  dipBox.position = new PIXI.Point(paVs, paTcl);
-  dipBox.endFill();
-  dipBox.transform.updateTransform = frozenScaleTransform;
-  container.addChild(dipBox);
-  subscribeToMoveEvents(dipBox, function(pos) {
+  // -------------------------------------- Project ahead point
+  const projectionPoint = new PIXI.Graphics();
+  projectionPoint.lineStyle(2, red);
+  projectionPoint.beginFill(white, 0);
+  projectionPoint.drawRoundedRect(-10, -10, 20, 20, 4);
+  projectionPoint.position = new PIXI.Point(paVs, paTcl);
+  projectionPoint.endFill();
+  projectionPoint.transform.updateTransform = frozenScaleTransform;
+  container.addChild(projectionPoint);
+  subscribeToMoveEvents(projectionPoint, function(pos) {
     pointUpdate({
       paVs: pos.x,
       paTcl: pos.y
@@ -153,17 +164,22 @@ function interactiveProjection(container, viewProps, pointUpdate, width, height)
     if (
       !totCircleRight.transform ||
       !botCircleRight.transform ||
-      !dipBox.transform ||
+      !projectionPoint.transform ||
       !totCircle.transform ||
       !botCircle.transform
     ) {
       return;
     }
-    totCircle.position = new PIXI.Point(leftVs, leftTot);
-    botCircle.position = new PIXI.Point(leftVs, leftBot);
-    totCircleRight.position = new PIXI.Point(rightVs, rightTot);
-    botCircleRight.position = new PIXI.Point(rightVs, rightBot);
-    dipBox.position = new PIXI.Point(paVs, paTcl);
+    totCircle.position.x = leftVs;
+    totCircle.position.y = leftTot;
+    botCircle.position.x = leftVs;
+    botCircle.position.y = leftBot;
+    totCircleRight.position.x = rightVs;
+    totCircleRight.position.y = rightTot;
+    botCircleRight.position.x = rightVs;
+    botCircleRight.position.y = rightBot;
+    projectionPoint.position.x = paVs;
+    projectionPoint.position.y = paTcl;
 
     totLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
     totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
