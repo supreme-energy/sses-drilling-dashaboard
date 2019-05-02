@@ -45,9 +45,9 @@ function DrillPhaseViewer({ className }) {
               aria-haspopup="true"
               onClick={(e) => setAnchorEl(e.currentTarget)}
               className={classes.drillPhaseButton}
-                    >
+            >
               <Typography className={classes.drillPhaseButtonText} variant="subtitle1" gutterBottom>
-                            View
+                View
               </Typography>
               <img src={iconForPhaseViewer[currStatus].icon} />
               <div>
@@ -61,29 +61,29 @@ function DrillPhaseViewer({ className }) {
               open={Boolean(anchorEl)}
               onClose={() => setDrillPhase(currStatus)}
               disableAutoFocusItem
-                    >
+            >
               {drillPhaseEnum.map((phase, index) => {
-                            if (currStatus === phase) {
-                                return (
-                                  <MenuItem
-                                    key={index}
-                                    onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}
-                                    style={{ minWidth: 185, backgroundColor: 'rgba(0, 0, 0, 0.15)' }}
-                                    >
-                                    <img src={iconForPhaseViewer[phase].icon} />
-                                    <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
-                                    <CheckCircle style={{ position: 'absolute', right: 12, color: gray }} />
-                                  </MenuItem>
-                                );
-                            } else {
-                                return (
-                                  <MenuItem key={index} onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}>
-                                    <img src={iconForPhaseViewer[phase].icon} />
-                                    <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
-                                  </MenuItem>
-                                );
-                            }
-                        })}
+                if (currStatus === phase) {
+                    return (
+                      <MenuItem
+                        key={index}
+                        onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}
+                        style={{ minWidth: 185, backgroundColor: 'rgba(0, 0, 0, 0.15)' }}
+                      >
+                        <img src={iconForPhaseViewer[phase].icon} />
+                        <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
+                        <CheckCircle style={{ position: 'absolute', right: 12, color: gray }} />
+                      </MenuItem>
+                    );
+                } else {
+                    return (
+                      <MenuItem key={index} onClick={() => { setDrillPhase(phase); setAnchorEl(null); }}>
+                        <img src={iconForPhaseViewer[phase].icon} />
+                        <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
+                      </MenuItem>
+                    );
+                }
+            })}
             </Menu>
           </ClickAwayListener>
         </CardContent>
