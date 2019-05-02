@@ -4,6 +4,7 @@ import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
 import CrossSection from "./CrossSection/index";
+import DrillPhaseViewer from "./DrillPhaseViewer";
 
 export const ComboDashboard = () => {
   // Replace with useFetch
@@ -29,6 +30,7 @@ export const ComboDashboard = () => {
 
   return (
     <Suspense fallback={<Progress />}>
+      <DrillPhaseViewer />
       <div style={{ margin: "0 auto" }}>
         <h2>Dev debugging data</h2>
         <div>

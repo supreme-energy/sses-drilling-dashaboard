@@ -48,7 +48,8 @@ const renderValue = ({ value, format }) => (
   </Typography>
 );
 
-const WellPathStatus = ({ status }) => {
+export const WellPathStatus = ({ status }) => {
+  console.log('status', status)
   return (
     <svg width={250} height={55}>
       <path d={topLine} stroke={colorByStatus[status].top} strokeWidth="5" />
