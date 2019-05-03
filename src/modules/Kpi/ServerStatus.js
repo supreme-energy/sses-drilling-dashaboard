@@ -26,7 +26,7 @@ function ServerStatus({ wellId, theme }) {
           {serverStatus || ""}
         </Typography>
       </div>
-      <Typography style={{ fontStyle: "italic" }} variant="caption" gutterBottom>
+      <Typography className={classes.italicLabel} variant="caption" gutterBottom>
         Data Server
       </Typography>
     </div>

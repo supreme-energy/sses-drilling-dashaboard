@@ -13,7 +13,7 @@ function KpiItem({ value, measureUnit, label, format, className, renderValue }) 
         {renderValue({ value, format })}
         <Typography variant="caption">{measureUnit}</Typography>
       </div>
-      <Typography variant="caption" gutterBottom style={{ fontStyle: "italic" }}>
+      <Typography variant="caption" gutterBottom className={classes.italicLabel}>
         {label}
       </Typography>
     </div>

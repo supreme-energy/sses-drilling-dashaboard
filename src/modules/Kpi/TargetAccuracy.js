@@ -19,7 +19,7 @@ function TargetAccuracy({ wellId, theme }) {
             {zoneStatus || "In Zone"}
           </Typography>
         </div>
-        <Typography style={{ fontStyle: "italic" }} variant="caption" gutterBottom>
+        <Typography className={classes.italicLabel} variant="caption" gutterBottom>
             Target Accuracy
         </Typography>
       </div>
