@@ -5,7 +5,7 @@ const survey = [0xa6a6a6, 0.5];
 const projection = [0xee2211, 0.5];
 
 function drawSections(container, width, height, surveys, projections, gutter) {
-  let points = surveys.slice(0, surveys.length - 1).concat(projections);
+  const points = surveys.slice(0, surveys.length - 1).concat(projections);
   const buttonHeight = 10;
   const y = height - gutter - buttonHeight;
   const pixiList = [];
