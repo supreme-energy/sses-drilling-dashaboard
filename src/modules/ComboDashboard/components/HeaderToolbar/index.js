@@ -37,7 +37,10 @@ function HeaderToolbar({ wellId }) {
                 <BitDepth wellId={well.id} />
               </div>
             </Collapse>
-            <IconButton className={classes.expandButton} onClick={() => setExpanded(!expanded)}>
+            <IconButton
+              className={expanded ? classes.expandButton : classes.collapseButton}
+              onClick={() => setExpanded(!expanded)}
+            >
               <MoreVertIcon />
             </IconButton>
           </div>

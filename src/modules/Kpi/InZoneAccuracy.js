@@ -1,9 +1,13 @@
 import React from "react";
-import classes from "./styles.scss";
-import { useWellInfo } from "../../api/index";
 import { Typography } from "@material-ui/core";
 import { withTheme } from "@material-ui/core/styles";
 
+import { useWellInfo } from "../../api/index";
+import classes from "./styles.scss";
+
+// TODO: GET data from ASTRA to populate InZoneAccuracy
+// Once data type is known, this component MAY use the form
+// of KpiItem in KpiItem.js
 function InZoneAccuracy({ wellId, theme }) {
     const { zoneStatus } = useWellInfo(wellId);
     const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
@@ -15,8 +19,8 @@ function InZoneAccuracy({ wellId, theme }) {
             {zoneStatus || "In Zone"}
           </Typography>
         </div>
-        <Typography variant="caption" gutterBottom>
-            In-Zone Accuracy
+        <Typography style={{ fontStyle: "italic" }} variant="caption" gutterBottom>
+            Target Accuracy
         </Typography>
       </div>
     );

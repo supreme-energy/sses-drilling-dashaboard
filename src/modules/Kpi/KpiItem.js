@@ -45,7 +45,7 @@ export function BitDepth() {
 
 export function Rop() {
   const { rateOfPenetration } = useKpi();
-  return <KpiItem label={"Rate of Penetration"} value={rateOfPenetration} measureUnit={"fph"} />;
+  return <KpiItem label={"Rate of Penetration (ROP)"} value={rateOfPenetration} measureUnit={"fph"} />;
 }
 
 export default KpiItem;
