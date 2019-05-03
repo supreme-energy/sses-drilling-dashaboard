@@ -1,17 +1,8 @@
 .card {
-    align-self: flex-start;
     display: flex;
 
-    .cardContent {
-        display: flex;
-        flex-direction: row;
-        @media (max-width: 1384px) {
-            flex-direction: column;
-        }
-    }
-
     .hBigSpacer {
-        width: 60px;
+        width: 40px;
     }
 
     .hExtraLargeSpacer {
@@ -20,10 +11,13 @@
 
     .row {
         display: flex;
-        float: right;
-        flex-direction: row;
         align-items: center;
-        width: 100%;
+    }
+
+    .expandButton {
+        &:focus {
+            outline: 0;
+        }
     }
 
     .status {
