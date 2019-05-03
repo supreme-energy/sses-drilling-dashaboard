@@ -4,19 +4,26 @@ import { frozenScaleTransform } from "./customPixiTransforms";
 /* eslint new-cap: 0 */
 export function drawSurveys(container, surveyData) {
   const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
-  update(surveyData);
+  const surveyGraphics = [];
+  let prevDataLength = surveyData.length;
 
-  return update;
+  const addSurvey = function() {
+    let icon = new PIXI.Sprite(surveyMarker);
+    icon.scale.set(0.4);
+    icon.anchor.set(0.5, 0.5);
+    icon.transform.updateTransform = frozenScaleTransform;
+    surveyGraphics.push(icon);
+    container.addChild(icon);
+    return icon;
+  };
 
-  function update(surveys) {
-    if (surveys.length === 0) return;
+  return function(surveys) {
+    if (surveys.length === 0 || surveys.length === prevDataLength) return;
+    prevDataLength = surveys.length;
     for (let i = 0; i < surveys.length; i++) {
-      let icon = new PIXI.Sprite(surveyMarker);
-      icon.position = new PIXI.Point(surveys[i].vs, surveys[i].tvd);
-      icon.scale.set(0.4);
-      icon.anchor.set(0.5, 0.5);
-      icon.transform.updateTransform = frozenScaleTransform;
-      container.addChild(icon);
+      if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
+      surveyGraphics[i].position.x = surveys[i].vs;
+      surveyGraphics[i].position.y = surveys[i].tvd;
     }
-  }
+  };
 }
