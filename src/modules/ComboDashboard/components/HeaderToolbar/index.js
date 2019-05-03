@@ -9,7 +9,7 @@ import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
-import InZoneAccuracy from "../../../Kpi/InZoneAccuracy";
+import TargetAccuracy from "../../../Kpi/TargetAccuracy";
 
 function HeaderToolbar({ wellId }) {
     // Get currently opened well
@@ -27,7 +27,7 @@ function HeaderToolbar({ wellId }) {
               <span className={classes.hBigSpacer} />
               <WellPathStatus wellId={well.id} />
               <span className={classes.hBigSpacer} />
-              <InZoneAccuracy wellId={wellId} />
+              <TargetAccuracy wellId={wellId} />
               <span className={classes.hBigSpacer} />
               <Rop wellId={well.id} />
               <span className={classes.hBigSpacer} />

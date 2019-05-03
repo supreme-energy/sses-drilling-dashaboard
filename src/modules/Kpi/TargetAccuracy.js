@@ -5,10 +5,10 @@ import { withTheme } from "@material-ui/core/styles";
 import { useWellInfo } from "../../api/index";
 import classes from "./styles.scss";
 
-// TODO: GET data from ASTRA to populate InZoneAccuracy
+// TODO: GET data from ASTRA to populate TargetAccuracy
 // Once data type is known, this component MAY use the form
 // of KpiItem in KpiItem.js
-function InZoneAccuracy({ wellId, theme }) {
+function TargetAccuracy({ wellId, theme }) {
     const { zoneStatus } = useWellInfo(wellId);
     const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
 
@@ -26,4 +26,4 @@ function InZoneAccuracy({ wellId, theme }) {
     );
 }
 
-export default withTheme()(InZoneAccuracy);
+export default withTheme()(TargetAccuracy);
