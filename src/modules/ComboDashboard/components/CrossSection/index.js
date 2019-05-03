@@ -14,7 +14,7 @@ class CrossSection extends Component {
   constructor(props) {
     super(props);
     this.screenWidth = window.innerWidth;
-    this.screenHeight = window.innerHeight - 300;
+    this.screenHeight = window.innerHeight - 200;
 
     // Set up PIXI classes for rendering and draw layers
     this.canvas = React.createRef();
@@ -114,7 +114,7 @@ class CrossSection extends Component {
     this.ticker.add(() => {
       wellPlanUpdate(this.props.wellPlan);
       surveyUpdate(this.props.surveys);
-      projectionLineUpdate();
+      projectionLineUpdate(this.props.projections);
       projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
       sectionUpdate();
       gridUpdate();

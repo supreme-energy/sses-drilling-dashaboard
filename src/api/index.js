@@ -167,3 +167,20 @@ export function useFormations(wellId) {
   );
   return data || EMPTY_ARRAY;
 }
+
+export function useProjections(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_PROJECTIONS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: projections => {
+        return projections.map(p => _.mapValues(p, Number));
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}

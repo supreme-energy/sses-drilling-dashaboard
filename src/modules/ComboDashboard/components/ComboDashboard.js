@@ -1,7 +1,6 @@
 import React, { Suspense, useState, useCallback } from "react";
 import Progress from "@material-ui/core/CircularProgress";
-import { useFormations, useSurveys, useWellPath } from "../../../api";
-import projections from "../../../data/projections";
+import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
 
 export const ComboDashboard = () => {
@@ -10,6 +9,7 @@ export const ComboDashboard = () => {
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
   const formations = useFormations(wellId);
+  const projections = useProjections(wellId);
 
   const [view, setView] = useState({
     x: -844,

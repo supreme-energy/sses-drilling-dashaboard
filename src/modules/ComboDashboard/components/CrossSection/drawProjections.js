@@ -8,19 +8,17 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  * @param projections An array of projected points
  */
 function drawProjections(container, projections) {
-  const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
   const projectedPath = new PIXI.Graphics();
-  update();
   container.addChild(projectedPath);
 
   return update;
 
-  function update() {
-    if (!projectedPath.transform) return;
+  function update(projections) {
+    if (!projectedPath.transform || !projections.length) return;
     projectedPath.clear().lineStyle(3 / container.transform.worldTransform.a, 0xee3322, 1);
-    projectedPath.moveTo(...wpData[0]);
-    for (let i = 1; i < wpData.length; i++) {
-      projectedPath.lineTo(...wpData[i]);
+    projectedPath.moveTo(projections[0].vs, projections[0].tvd);
+    for (let i = 1; i < projections.length; i++) {
+      projectedPath.lineTo(projections[i].vs, projections[i].tvd);
     }
   }
 }
