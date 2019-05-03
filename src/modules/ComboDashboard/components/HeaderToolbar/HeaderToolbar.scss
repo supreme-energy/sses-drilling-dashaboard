@@ -14,20 +14,10 @@
         align-items: center;
     }
 
-    .expandButton {
+    .optionsButton {
         &:focus {
             outline: 0;
         }
-    }
-
-    .collapseButton {
-        position: absolute;
-        right: 25px;
-        &:focus {
-            outline: 0;
-        }
-        padding: 0;
-        background-color: white;
     }
 
     .status {

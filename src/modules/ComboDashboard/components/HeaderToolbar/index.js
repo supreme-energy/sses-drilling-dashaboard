@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Card, CardContent, IconButton, Collapse, Typography } from "@material-ui/core";
+import React from "react";
+import PropTypes from "prop-types";
+import { Card, CardContent, IconButton, Typography } from "@material-ui/core";
 import classes from "./HeaderToolbar.scss";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
@@ -14,32 +15,29 @@ function HeaderToolbar({ wellId }) {
     // Get currently opened well
     const [ , wellsById, ] = useWells();
     const well = wellsById[wellId] || {};
-    const [expanded, setExpanded] = useState(true);
 
     return (
       <Card className={classes.card}>
         <CardContent style={{ padding: 7, width: '100%' }}>
           <div className={classes.row}>
-            <Collapse in={expanded} unmountOnExit className={classes.collapseContainer} style={{ width: '100%' }}>
-              <div className={classes.row}>
-                <Typography variant="h5" color="primary">{well.name}</Typography>
-                <span className={classes.hExtraLargeSpacer} />
-                <WellStatus status={well.status} className={classes.status} />
-                <span className={classes.hBigSpacer} />
-                <WellPathStatus wellId={well.id} />
-                <span className={classes.hBigSpacer} />
-                <InZoneAccuracy wellId={wellId} />
-                <span className={classes.hBigSpacer} />
-                <Rop wellId={well.id} />
-                <span className={classes.hBigSpacer} />
-                <ServerStatus wellId={well.id} />
-                <span className={classes.hBigSpacer} />
-                <BitDepth wellId={well.id} />
-              </div>
-            </Collapse>
+            <div className={classes.row} style={{ width: '100%' }}>
+              <Typography variant="h5" color="primary">{well.name}</Typography>
+              <span className={classes.hExtraLargeSpacer} />
+              <WellStatus status={well.status} className={classes.status} />
+              <span className={classes.hBigSpacer} />
+              <WellPathStatus wellId={well.id} />
+              <span className={classes.hBigSpacer} />
+              <InZoneAccuracy wellId={wellId} />
+              <span className={classes.hBigSpacer} />
+              <Rop wellId={well.id} />
+              <span className={classes.hBigSpacer} />
+              <ServerStatus wellId={well.id} />
+              <span className={classes.hBigSpacer} />
+              <BitDepth wellId={well.id} />
+            </div>
             <IconButton
-              className={expanded ? classes.expandButton : classes.collapseButton}
-              onClick={() => setExpanded(!expanded)}
+              className={classes.optionsButton}
+              onClick={() => {}}
             >
               <MoreVertIcon />
             </IconButton>
@@ -48,5 +46,9 @@ function HeaderToolbar({ wellId }) {
       </Card>
     );
 }
+
+HeaderToolbar.propTypes = {
+    wellId: PropTypes.string
+};
 
 export default HeaderToolbar;
