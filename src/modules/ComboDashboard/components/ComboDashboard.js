@@ -4,6 +4,7 @@ import Progress from "@material-ui/core/CircularProgress";
 import surveyData from "../../../data/survey.json";
 import wellPlanData from "../../../data/wellplan";
 import formationData from "../../../data/formationList";
+import projections from "../../../data/projections";
 import CrossSection from "./CrossSection/index";
 import HeaderToolbar from "./HeaderToolbar";
 
@@ -18,14 +19,28 @@ export const ComboDashboard = ({
   const formations = formationData;
 
   const [view, setView] = useState({
-    x: 200,
-    y: -2200,
-    xScale: 0.2,
-    yScale: 0.2
+    x: -844,
+    y: -16700,
+    xScale: 2.14,
+    yScale: 2.14,
+    leftVs: 663.1,
+    leftTot: 7930.8,
+    leftBot: 7956.8,
+    rightVs: 911.4,
+    rightTot: 7930,
+    rightBot: 7956,
+    paVs: 900,
+    paTcl: 7950
   });
-  // Implement merging here so we don't have to everywhere
   const mergeView = useCallback(function(value) {
+    // Implement merging here so we don't have to everywhere else
     setView(prev => {
+      if (typeof value === "function") {
+        return {
+          ...prev,
+          ...value(prev)
+        };
+      }
       return {
         ...prev,
         ...value
@@ -87,7 +102,14 @@ export const ComboDashboard = ({
           </label>
         </div>
       </div>
-      <CrossSection view={view} updateView={mergeView} wellPlan={wellPlan} surveys={surveys} formations={formations} />
+      <CrossSection
+        view={view}
+        updateView={mergeView}
+        wellPlan={wellPlan}
+        surveys={surveys}
+        formations={formations}
+        projections={projections}
+      />
     </Suspense>
   );
 };
