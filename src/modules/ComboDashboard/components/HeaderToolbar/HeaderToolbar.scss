@@ -5,13 +5,22 @@
         width: 35px;
     }
 
+    .cardContent {
+        padding: 7px;
+        width: 100%;
+    }
+
     .hExtraLargeSpacer {
         width: 20%;
     }
 
-    .row {
+    .row, .kpiRow {
         display: flex;
         align-items: center;
+    }
+
+    .kpiRow {
+        width: 100%;
     }
 
     .optionsButton {

@@ -18,9 +18,9 @@ function HeaderToolbar({ wellId }) {
 
     return (
       <Card className={classes.card}>
-        <CardContent style={{ padding: 7, width: '100%' }}>
+        <CardContent className={classes.cardContent}>
           <div className={classes.row}>
-            <div className={classes.row} style={{ width: '100%' }}>
+            <div className={classes.kpiRow}>
               <Typography variant="h5" color="primary">{well.name}</Typography>
               <span className={classes.hExtraLargeSpacer} />
               <WellStatus status={well.status} className={classes.status} />
@@ -37,7 +37,6 @@ function HeaderToolbar({ wellId }) {
             </div>
             <IconButton
               className={classes.optionsButton}
-              onClick={() => {}}
             >
               <MoreVertIcon />
             </IconButton>
