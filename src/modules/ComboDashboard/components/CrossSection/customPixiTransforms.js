@@ -26,13 +26,12 @@ function frozenScaleTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
+    wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
+    wt.b = (lt.a * pt.b + lt.b * pt.d) / pt.d;
+    wt.c = (lt.c * pt.a + lt.d * pt.c) / pt.a;
+    wt.d = (lt.c * pt.b + lt.d * pt.d) / pt.d;
     wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
     wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
     this._parentID = parentTransform._worldID;
@@ -60,13 +59,12 @@ function frozenYTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
+    wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
+    wt.b = (lt.a * pt.b + lt.b * pt.d) / pt.d;
+    wt.c = (lt.c * pt.a + lt.d * pt.c) / pt.a;
+    wt.d = (lt.c * pt.b + lt.d * pt.d) / pt.d;
     // Hold x constant from the local transform
     wt.tx = lt.tx;
     wt.ty = lt.tx * pt.b + lt.ty * pt.d + pt.ty;
@@ -94,13 +92,12 @@ function frozenXTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
+    wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
+    wt.b = (lt.a * pt.b + lt.b * pt.d) / pt.d;
+    wt.c = (lt.c * pt.a + lt.d * pt.c) / pt.a;
+    wt.d = (lt.c * pt.b + lt.d * pt.d) / pt.d;
     wt.tx = lt.tx * pt.a + lt.ty * pt.c + pt.tx;
     // Hold y constant from the local transform
     wt.ty = lt.ty;
@@ -129,13 +126,12 @@ function frozenXYTransform(parentTransform) {
   }
   if (this._parentID !== parentTransform._worldID) {
     const pt = parentTransform.worldTransform;
-    const ps = parentTransform.scale;
     const wt = this.worldTransform;
     // Divide out the parent scale
-    wt.a = (lt.a * pt.a) / ps.x + lt.b * pt.c;
-    wt.b = lt.a * pt.b + (lt.b * pt.d) / ps.y;
-    wt.c = (lt.c * pt.a) / ps.x + lt.d * pt.c;
-    wt.d = lt.c * pt.b + (lt.d * pt.d) / ps.y;
+    wt.a = (lt.a * pt.a + lt.b * pt.c) / pt.a;
+    wt.b = (lt.a * pt.b + lt.b * pt.d) / pt.d;
+    wt.c = (lt.c * pt.a + lt.d * pt.c) / pt.a;
+    wt.d = (lt.c * pt.b + lt.d * pt.d) / pt.d;
     // Hold both x and y constant from the local transform
     wt.tx = lt.tx;
     wt.ty = lt.ty;

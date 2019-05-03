@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
 function makeXTickAndLine(fontSize, height) {
-  let label = new PIXI.Text("", {
+  const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
   });
@@ -12,7 +12,7 @@ function makeXTickAndLine(fontSize, height) {
   label.transform.updateTransform = frozenXTransform;
 
   // Using GraphicsGeometry may offer better performance here?
-  let line = new PIXI.Graphics();
+  const line = new PIXI.Graphics();
   line.lineStyle(1, 0xaaaaaa, 0.25);
   line.moveTo(0, 0);
   line.lineTo(0, height);
@@ -21,7 +21,7 @@ function makeXTickAndLine(fontSize, height) {
   return [line, label];
 }
 function makeYTickAndLine(fontSize, width) {
-  let label = new PIXI.Text("", {
+  const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
   });
@@ -29,7 +29,7 @@ function makeYTickAndLine(fontSize, width) {
   label.x = 5;
   label.transform.updateTransform = frozenYTransform;
 
-  let line = new PIXI.Graphics();
+  const line = new PIXI.Graphics();
   line.lineStyle(1, 0xaaaaaa, 0.25);
   line.moveTo(0, 0);
   line.lineTo(width, 0);
@@ -50,11 +50,10 @@ function makeYTickAndLine(fontSize, width) {
  * @param height  The canvas height
  * @returns {updateGrid}  The function to update the gridlines
  */
-function buildAutoScalingGrid(container, width, height) {
+function drawGrid(container, width, height, gutter = 50) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
-  const gutter = 50;
   let lastBounds = {};
 
   const xLabels = [];
@@ -78,14 +77,14 @@ function buildAutoScalingGrid(container, width, height) {
   yLines.forEach(l => container.addChild(l));
 
   // White background behind tick labels
-  let bgx = new PIXI.Graphics();
+  const bgx = new PIXI.Graphics();
   bgx.beginFill(0xffffff);
   bgx.lineStyle(0);
   bgx.drawRect(0, 0, gutter, height);
   bgx.transform.updateTransform = frozenXYTransform;
   container.addChild(bgx);
 
-  let bgy = new PIXI.Graphics();
+  const bgy = new PIXI.Graphics();
   bgy.beginFill(0xffffff);
   bgy.lineStyle(0);
   bgy.drawRect(0, height - gutter, width, gutter);
@@ -97,7 +96,7 @@ function buildAutoScalingGrid(container, width, height) {
   yLabels.forEach(l => container.addChild(l));
 
   // Corner to hide overlapping tick labels
-  let corner = new PIXI.Graphics();
+  const corner = new PIXI.Graphics();
   corner.beginFill(0xffffff);
   corner.drawRect(0, height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
@@ -108,7 +107,7 @@ function buildAutoScalingGrid(container, width, height) {
 
     const roughStep = yRange / (tickCount - 1);
 
-    const goodSteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
     const step = goodSteps.find(s => s >= roughStep);
 
     return {
@@ -123,14 +122,15 @@ function buildAutoScalingGrid(container, width, height) {
   return function updateGrid() {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
+    const cwt = container.transform.worldTransform;
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
-    const minVisibleX = Math.floor((-1 * container.position._x) / container.scale._x);
-    const maxVisibleX = minVisibleX + Math.floor(width / container.scale._x);
-    const minVisibleY = Math.floor((-1 * container.position._y) / container.scale._y);
-    const maxVisibleY = minVisibleY + Math.floor(height / container.scale._y);
+    const minVisibleX = Math.floor((-1 * cwt.tx) / cwt.a);
+    const maxVisibleX = minVisibleX + Math.floor(width / cwt.a);
+    const minVisibleY = Math.floor((-1 * cwt.ty) / cwt.d);
+    const maxVisibleY = minVisibleY + Math.floor(height / cwt.d);
 
     // Possible improvement: only recalculate step if the x or y range has changed
-    let b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
+    const b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
     if (b.xMin !== lastBounds.xMin || b.step !== lastBounds.step || b.yMin !== lastBounds.yMin) {
       for (let i = 0; i < xLines.length; i++) {
         let pos = b.xMin + b.step * i;
@@ -150,4 +150,4 @@ function buildAutoScalingGrid(container, width, height) {
   };
 }
 
-export { buildAutoScalingGrid };
+export { drawGrid };

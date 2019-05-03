@@ -49,38 +49,36 @@ function subscribeToMoveEvents(obj, cb) {
   }
 }
 
+function drawFormationSegment(color, alpha, points, container) {
+  const p = new PIXI.Graphics();
+  p.lineStyle(0).beginFill(Number(`0x${color}`), Number(alpha));
+  p.drawPolygon(points);
+  p.closePath();
+  container.addChild(p);
+}
+
 /**
  * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
  * @param formations The formation data from the API
  */
-function addDemoFormations(container, formations) {
-  const calcXY = p => [Number(p.vs), Number(p.tot) + Number(p.thickness)];
+function drawFormations(container, formations, bitProjection) {
   for (let f of formations) {
-    f.xyCoords = f.data.map(point => calcXY(point));
+    f.points = f.data.map(point => [Number(point.vs), Number(point.tot)]);
   }
   for (let i = 0; i < formations.length - 1; i++) {
-    const { xyCoords, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
-    let line = new PIXI.Graphics();
-    let poly = new PIXI.Graphics();
-    poly.lineStyle(0);
-    line.lineStyle(4, Number(`0x${bgColor}`), 1);
-    line.moveTo(...xyCoords[0]);
-    for (let i = 1; i < xyCoords.length; i++) {
-      line.lineTo(...xyCoords[i]);
+    let { points, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
+    const { points: nextPoints } = formations[i + 1];
+    for (let j = 0; j < points.length - 1; j++) {
+      //
+      if (points[j][0] >= bitProjection.vs - 0.01) {
+        bgPercent = 0.3;
+      }
+      // Draw a polygon with four points having the height of this layer
+      const p = [...points[j], ...points[j + 1], ...nextPoints[j + 1], ...nextPoints[j]];
+      drawFormationSegment(bgColor, bgPercent, p, container);
     }
-    container.addChild(line);
-    poly.beginFill(Number(`0x${bgColor}`), Number(bgPercent));
-    poly.drawPolygon(
-      xyCoords
-        .reverse()
-        .flat()
-        .concat(formations[i + 1].xyCoords)
-        .flat()
-    );
-    poly.closePath();
-    container.addChild(poly);
   }
 }
 
-export { subscribeToMoveEvents, addDemoFormations };
+export { subscribeToMoveEvents, drawFormations };
