@@ -68,7 +68,7 @@ class CrossSection extends Component {
       surveyUpdate(this.props.surveys);
       projectionLineUpdate(this.props.projections);
       projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
-      sectionUpdate();
+      sectionUpdate(this.props);
       gridUpdate();
       this.renderer.render(stage);
     });
