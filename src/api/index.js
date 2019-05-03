@@ -121,27 +121,13 @@ export function useWellPath(wellId) {
     },
     {
       transform: plan => {
-        return plan.map(p => {
-          return {
-            num: p.num,
-            "dip-c": p["dip-c"],
-            md: Number(p.md),
-            inc: Number(p.inc),
-            azm: Number(p.azm),
-            tvd: Number(p.tvd),
-            vs: Number(p.vs),
-            ns: Number(p.ns),
-            ew: Number(p.ew),
-            cd: Number(p.cd),
-            ca: Number(p.ca),
-            dl: Number(p.dl)
-          };
-        });
+        return plan.map(p => _.mapValues(p, Number));
       }
     }
   );
   return data || EMPTY_ARRAY;
 }
+
 export function useSurveys(wellId) {
   const [data] = useFetch(
     {
@@ -152,14 +138,13 @@ export function useSurveys(wellId) {
     },
     {
       transform: surveys => {
-        return surveys.map(s => {
-          return _.mapValues(s, Number);
-        });
+        return surveys.map(s => _.mapValues(s, Number));
       }
     }
   );
   return data || EMPTY_ARRAY;
 }
+
 export function useFormations(wellId) {
   const [data] = useFetch(
     {
