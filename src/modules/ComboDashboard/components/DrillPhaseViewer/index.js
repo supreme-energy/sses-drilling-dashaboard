@@ -1,95 +1,127 @@
-import React, { useState } from "react";
-import { Card, CardContent, Menu, MenuItem, Button, Typography, ClickAwayListener } from "@material-ui/core";
+import React, { useState, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  Menu,
+  MenuItem,
+  Button,
+  Typography,
+  ClickAwayListener,
+  withStyles
+} from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
-
-import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "../../../../constants/wellPathStatus";
-import DrillPhaseLateralIcon from "./assets/drill-phase-lateral.svg";
-import DrillPhaseCurveIcon from "./assets/drill-phase-curve.svg";
-import DrillPhaseVerticalIcon from "./assets/drill-phase-vertical.svg";
-import classes from "./DrillPhaseViewer.scss";
 import classNames from "classnames";
 
-const gray = "#757575";
+import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "../../../../constants/wellPathStatus";
+import phaseClasses from "./DrillPhaseViewer.scss";
 
-const iconForPhaseViewer = {
+const gray = "#757575";
+const green = "#09C501";
+
+const colorsForPhaseViewer = {
   [ON_SURFACE]: {
-    icon: DrillPhaseVerticalIcon
+    top: green,
+    curve: gray,
+    lateral: gray
   },
   [ON_INTERMEDIATE]: {
-    icon: DrillPhaseVerticalIcon
+    top: green,
+    curve: gray,
+    lateral: gray
   },
   [ON_DRILLOUT]: {
-    icon: DrillPhaseVerticalIcon
+    top: green,
+    curve: gray,
+    lateral: gray
   },
   [ON_CURVE]: {
-    icon: DrillPhaseCurveIcon
+    top: gray,
+    curve: green,
+    lateral: gray
   },
   [ON_LATERAL]: {
-    icon: DrillPhaseLateralIcon
+    top: gray,
+    curve: gray,
+    lateral: green
   }
 };
 
-function DrillPhaseViewer({ className }) {
+const styles = {
+  phaseMenuItem: {
+    minWidth: 185,
+    backgroundColor: "rgba(0, 0, 0, 0.15)"
+  },
+  phaseCodeBuffer: {
+    marginLeft: 10
+  },
+  selectedPhase: {
+    position: "absolute",
+    right: 12,
+    color: gray
+  }
+};
+
+function DrillPhase({ phase }) {
+  return (
+    <svg width={40} height={40}>
+      <title>Icon/Custom/Curve</title>
+      <g id="Icon/Custom/Curve" fill="none" fillRule="nonzero">
+        <path id="lateral" fill={colorsForPhaseViewer[phase].lateral} d="M16 39.5h23v-4H16z" />
+        <path
+          id="curve"
+          fill={colorsForPhaseViewer[phase].curve}
+          d="M0 24.5h4c0 6.075 4.925 11 11 11v4c-8.284 0-15-6.716-15-15z"
+        />
+        <path id="vertical" fill={colorsForPhaseViewer[phase].top} d="M0 .5v23h4V.5z" />
+      </g>
+    </svg>
+  );
+}
+
+function DrillPhaseViewer({ className, classes }) {
   const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
   const [anchorEl, setAnchorEl] = useState(null);
-  const drillPhaseEnum = Object.keys(iconForPhaseViewer);
-  const currStatus = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
-  const drillPhaseCode = currStatus.split(" ")[1];
+  const drillPhaseEnum = Object.keys(colorsForPhaseViewer);
+  const currPhase = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
+  const drillPhaseCode = currPhase.split(" ")[1];
 
+  console.log(drillPhase, "render");
   return (
-    <Card className={classNames(classes.card, className)}>
-      <CardContent className={classes.cardContent}>
+    <Card className={classNames(phaseClasses.card, className)}>
+      <CardContent className={phaseClasses.cardContent}>
         <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
           <div>
             <Button
-              aria-owns={drillPhase ? "simple-menu" : undefined}
+              aria-owns={drillPhase ? "drill-phase-menu" : undefined}
               aria-haspopup="true"
               onClick={e => setAnchorEl(e.currentTarget)}
-              className={classes.drillPhaseButton}
+              className={phaseClasses.drillPhaseButton}
             >
-              <Typography className={classes.drillPhaseButtonText} variant="subtitle1" gutterBottom>
+              <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1" gutterBottom>
                 View
               </Typography>
-              <img src={iconForPhaseViewer[currStatus].icon} />
-              <div>
-                <span className={classes.drillPhaseCode}>{drillPhaseCode}</span>
+              <DrillPhase phase={currPhase} />
+              <div className={phaseClasses.drillPhaseCodeContainer}>
+                <span className={phaseClasses.drillPhaseCode}>{drillPhaseCode}</span>
                 <ArrowDropDown />
               </div>
             </Button>
-            <Menu
-              id="drill-phase-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={() => setDrillPhase(currStatus)}
-              disableAutoFocusItem
-            >
+            <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
               {drillPhaseEnum.map((phase, index) => {
-                if (currStatus === phase) {
+                const phaseCode = phase.split(" ")[1];
+                if (currPhase === phase) {
                   return (
-                    <MenuItem
-                      key={index}
-                      onClick={() => {
-                        setDrillPhase(phase);
-                        setAnchorEl(null);
-                      }}
-                      style={{ minWidth: 185, backgroundColor: "rgba(0, 0, 0, 0.15)" }}
-                    >
-                      <img src={iconForPhaseViewer[phase].icon} />
-                      <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
-                      <CheckCircle style={{ position: "absolute", right: 12, color: gray }} />
+                    <MenuItem key={index} onClick={() => setDrillPhase(phase)} className={classes.phaseMenuItem}>
+                      <DrillPhase phase={phase} />
+                      <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
+                      <CheckCircle className={classes.selectedPhase} />
                     </MenuItem>
                   );
                 } else {
                   return (
-                    <MenuItem
-                      key={index}
-                      onClick={() => {
-                        setDrillPhase(phase);
-                        setAnchorEl(null);
-                      }}
-                    >
-                      <img src={iconForPhaseViewer[phase].icon} />
-                      <div style={{ marginLeft: 10 }}>{phase.split(" ")[1]}</div>
+                    <MenuItem key={index} onClick={() => setDrillPhase(phase)}>
+                      <DrillPhase phase={phase} />
+                      <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
                     </MenuItem>
                   );
                 }
@@ -102,4 +134,4 @@ function DrillPhaseViewer({ className }) {
   );
 }
 
-export default DrillPhaseViewer;
+export default withStyles(styles)(DrillPhaseViewer);

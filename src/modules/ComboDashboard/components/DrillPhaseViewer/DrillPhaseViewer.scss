@@ -1,7 +1,6 @@
 $gold: #817618;
 
 .card {
-
     .cardContent {
         padding: 0px;
     }
@@ -18,16 +17,16 @@ $gold: #817618;
             outline:0;
         }
 
-        img {
-            margin-bottom: 15px;
-        }
-
         .drillPhaseButtonText {
             color: $gold;
         }
     }
 
-    .drillPhaseCode {
-        margin-left: 12px;
+    .drillPhaseCodeContainer {
+        margin-top: 10px;
+
+        .drillPhaseCode {
+            margin-left: 12px;
+        }
     }
 }
