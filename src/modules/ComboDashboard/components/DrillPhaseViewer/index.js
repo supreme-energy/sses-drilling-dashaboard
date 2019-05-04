@@ -13,36 +13,34 @@ import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
 import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "../../../../constants/wellPathStatus";
+import { GREEN, GRAY } from "../../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
-
-const gray = "#757575";
-const green = "#09C501";
 
 const colorsForPhaseViewer = {
   [ON_SURFACE]: {
-    top: green,
-    curve: gray,
-    lateral: gray
+    top: GREEN,
+    curve: GRAY,
+    lateral: GRAY
   },
   [ON_INTERMEDIATE]: {
-    top: green,
-    curve: gray,
-    lateral: gray
+    top: GREEN,
+    curve: GRAY,
+    lateral: GRAY
   },
   [ON_DRILLOUT]: {
-    top: green,
-    curve: gray,
-    lateral: gray
+    top: GREEN,
+    curve: GRAY,
+    lateral: GRAY
   },
   [ON_CURVE]: {
-    top: gray,
-    curve: green,
-    lateral: gray
+    top: GRAY,
+    curve: GREEN,
+    lateral: GRAY
   },
   [ON_LATERAL]: {
-    top: gray,
-    curve: gray,
-    lateral: green
+    top: GRAY,
+    curve: GRAY,
+    lateral: GREEN
   }
 };
 
@@ -60,7 +58,7 @@ const styles = {
   selectedPhase: {
     position: "absolute",
     right: 12,
-    color: gray
+    color: GRAY
   }
 };
 
