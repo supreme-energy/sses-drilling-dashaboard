@@ -163,6 +163,9 @@ WellExplorer.propTypes = {
   activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES]),
   match: PropTypes.shape({
     params: PropTypes.object
+  }),
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
   })
 };
 
