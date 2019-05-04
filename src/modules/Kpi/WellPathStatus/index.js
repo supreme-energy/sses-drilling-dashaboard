@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { line, curveBundle } from "d3-shape";
 import { ON_VERTICAL, ON_CURVE, ON_LATERAL } from "../../../constants/wellPathStatus";
-import { RED, BLUE, GRAY } from "../../../../constants/colors";
+import { RED, BLUE, GRAY } from "../../../constants/colors";
 import { useKpi } from "../../../api";
 import KpiItem from "../KpiItem";
 import { format } from "d3-format";
