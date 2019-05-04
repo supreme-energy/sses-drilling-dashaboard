@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { line, curveBundle } from "d3-shape";
 import { ON_VERTICAL, ON_CURVE, ON_LATERAL } from "../../../constants/wellPathStatus";
+import { RED, BLUE, GRAY } from "../../../constants/colors";
 import { useKpi } from "../../../api";
 import KpiItem from "../KpiItem";
 import { format } from "d3-format";
@@ -20,30 +21,26 @@ const topLine = drawLine([[5, 5], [5, 30]]);
 const arcPath = drawArc([[5, 32], [5, 50], [22, 50]]);
 const bottomLine = drawLine([[24, 50], [240, 50]]);
 
-const red = "#ff0000";
-const blue = "#0000ff";
-const gray = "#757575";
-
 const colorByStatus = {
   [ON_VERTICAL]: {
-    top: red,
-    curve: gray,
-    lateral: gray
+    top: RED,
+    curve: GRAY,
+    lateral: GRAY
   },
   [ON_CURVE]: {
-    top: blue,
-    curve: red,
-    lateral: gray
+    top: BLUE,
+    curve: RED,
+    lateral: GRAY
   },
   [ON_LATERAL]: {
-    top: blue,
-    curve: blue,
-    lateral: red
+    top: BLUE,
+    curve: BLUE,
+    lateral: RED
   }
 };
 
 const renderValue = ({ value, format }) => (
-  <Typography style={{ color: red, fontWeight: "bold" }} variant="h5">
+  <Typography style={{ color: RED, fontWeight: "bold" }} variant="h5">
     {format(value)}
   </Typography>
 );
