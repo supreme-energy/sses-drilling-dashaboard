@@ -1,8 +1,12 @@
-import React, { Component } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
-import { buildAutoScalingGrid } from "./grid.js";
-import { addDemoFormations } from "./pixiUtils.js";
+import React, { Component } from "react";
+import { drawSurveys } from "./drawSurveys";
+import { drawWellPlan } from "./drawWellPlan";
+import { drawGrid } from "./drawGrid.js";
+import { drawFormations } from "./pixiUtils.js";
+import { drawProjections, interactiveProjection } from "./drawProjections";
+import { drawSections } from "./drawSections";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -22,11 +26,14 @@ class CrossSection extends Component {
     });
     this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
 
-    // Viewport will contain our formations, well bore line, and other graphics
-    // TODO: Add UI container
-    this.viewport = new PIXI.Container();
     // Stage contains the draw layers and never moves. Some events are registered here.
-    let stage = new PIXI.Container();
+    const stage = new PIXI.Container();
+    // Viewport will contain our formations, well bore line, and other graphics
+    this.viewport = new PIXI.Container();
+    this.formationsLayer = this.viewport.addChild(new PIXI.Container());
+    this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
+    this.UILayer = this.viewport.addChild(new PIXI.Container());
+    this.gridLayer = this.viewport.addChild(new PIXI.Container());
     stage.addChild(this.viewport);
 
     // Set up events to enable panning of the viewport through stage
@@ -79,34 +86,36 @@ class CrossSection extends Component {
       false
     );
 
+    const gridGutter = 50;
     // Create the formation layers
-    addDemoFormations(this.viewport, this.props.formations);
+    drawFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
 
-    // Draw the well plan line
-    let wpData = this.props.wellPlan.map(x => [Number(x.vs), Number(x.tvd)]);
-    let wellplan = new PIXI.Graphics();
-    wellplan.lineStyle(3, 0x44ff44, 1);
-    wellplan.moveTo(...wpData[0]);
-    for (let i = 1; i < wpData.length; i++) {
-      wellplan.lineTo(...wpData[i]);
-    }
-    this.viewport.addChild(wellplan);
-
-    let surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
-
-    let sData = this.props.surveys.map(x => [Number(x.vs), Number(x.tvd)]);
-    for (let i = 0; i < sData.length; i++) {
-      let icon = new PIXI.Sprite(surveyMarker);
-      icon.position = new PIXI.Point(...sData[i]);
-      icon.scale.set(0.25);
-      icon.anchor.set(0.5, 0.5);
-      this.viewport.addChild(icon);
-    }
-
-    const gridUpdate = buildAutoScalingGrid(this.viewport, this.screenWidth, this.screenHeight);
+    const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
+    drawSurveys(this.wellPathLayer, this.props.surveys);
+    const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
+    const projectionUpdate = interactiveProjection(
+      this.UILayer,
+      this.props.view,
+      this.props.updateView,
+      this.screenWidth,
+      this.screenHeight
+    );
+    const sectionUpdate = drawSections(
+      this.UILayer,
+      this.screenWidth,
+      this.screenHeight,
+      this.props.surveys,
+      this.props.projections,
+      gridGutter
+    );
+    const gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight, gridGutter);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
+      wellPlanUpdate();
+      projectionLineUpdate();
+      projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
+      sectionUpdate();
       gridUpdate();
       this.renderer.render(stage);
     });
@@ -151,6 +160,7 @@ CrossSection.propTypes = {
   view: PropTypes.object,
   updateView: PropTypes.func,
   formations: PropTypes.array,
+  projections: PropTypes.array,
   wellPlan: PropTypes.array,
   surveys: PropTypes.array
 };
