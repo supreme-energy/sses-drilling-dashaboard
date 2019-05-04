@@ -40,7 +40,11 @@ class CrossSection extends Component {
 
     const gridGutter = 50;
     // Create the formation layers
-    drawFormations(this.formationsLayer, this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
+    const formationsUpdate = drawFormations(
+      this.formationsLayer,
+      this.props.formations,
+      this.props.surveys[this.props.surveys.length - 2]
+    );
 
     const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
     const surveyUpdate = drawSurveys(this.wellPathLayer, this.props.surveys);
@@ -64,6 +68,7 @@ class CrossSection extends Component {
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.ticker.add(() => {
+      formationsUpdate(this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
       wellPlanUpdate(this.props.wellPlan);
       surveyUpdate(this.props.surveys);
       projectionLineUpdate(this.props.projections);
