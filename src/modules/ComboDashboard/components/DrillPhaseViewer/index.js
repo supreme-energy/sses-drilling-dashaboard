@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -48,6 +48,9 @@ const colorsForPhaseViewer = {
 
 const styles = {
   phaseMenuItem: {
+    minWidth: 185
+  },
+  selectedMenuItem: {
     minWidth: 185,
     backgroundColor: "rgba(0, 0, 0, 0.15)"
   },
@@ -85,7 +88,6 @@ function DrillPhaseViewer({ className, classes }) {
   const currPhase = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
   const drillPhaseCode = currPhase.split(" ")[1];
 
-  console.log(drillPhase, "render");
   return (
     <Card className={classNames(phaseClasses.card, className)}>
       <CardContent className={phaseClasses.cardContent}>
@@ -109,22 +111,18 @@ function DrillPhaseViewer({ className, classes }) {
             <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
               {drillPhaseEnum.map((phase, index) => {
                 const phaseCode = phase.split(" ")[1];
-                if (currPhase === phase) {
-                  return (
-                    <MenuItem key={index} onClick={() => setDrillPhase(phase)} className={classes.phaseMenuItem}>
-                      <DrillPhase phase={phase} />
-                      <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
-                      <CheckCircle className={classes.selectedPhase} />
-                    </MenuItem>
-                  );
-                } else {
-                  return (
-                    <MenuItem key={index} onClick={() => setDrillPhase(phase)}>
-                      <DrillPhase phase={phase} />
-                      <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
-                    </MenuItem>
-                  );
-                }
+                const selected = currPhase === phase;
+                return (
+                  <MenuItem
+                    key={index}
+                    className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
+                    onClick={() => setDrillPhase(phase)}
+                  >
+                    <DrillPhase phase={phase} />
+                    <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
+                    {selected ? <CheckCircle className={classes.selectedPhase} /> : null}
+                  </MenuItem>
+                );
               })}
             </Menu>
           </div>
