@@ -22,7 +22,9 @@ export const theme = createMuiTheme({
     },
     warning: {
       main: "#EE2211"
-    }
+    },
+    gray: "#757575", // KPI color for reference
+    green: "#09C501" // KPI Color for reference
   },
   drillingStatusColor: "#4B921B",
   trippingStatusColor: "#B00020",
