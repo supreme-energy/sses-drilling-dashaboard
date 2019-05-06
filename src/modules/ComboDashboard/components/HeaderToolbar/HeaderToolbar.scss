@@ -1,0 +1,36 @@
+.card {
+    display: flex;
+    border: 1px solid rgb(209, 208, 208);
+
+    .hBigSpacer {
+        width: 35px;
+    }
+
+    .cardContent {
+        padding: 7px;
+        width: 100%;
+    }
+
+    .hExtraLargeSpacer {
+        width: 20%;
+    }
+
+    .row, .kpiRow {
+        display: flex;
+        align-items: center;
+    }
+
+    .kpiRow {
+        width: 100%;
+    }
+
+    .optionsButton {
+        &:focus {
+            outline: 0;
+        }
+    }
+
+    .status {
+        margin-right: 20px;
+    }
+}
