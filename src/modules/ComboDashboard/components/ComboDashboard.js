@@ -3,13 +3,17 @@ import Progress from "@material-ui/core/CircularProgress";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
 
-export const ComboDashboard = () => {
-  const wellId = "sgta_1563";
+export const ComboDashboard = ({
+  match: {
+    params: { wellId: openedWellId }
+  }
+}) => {
+  // const wellId = "sgta_1563";
   // Replace with useFetch
-  const surveys = useSurveys(wellId);
-  const wellPlan = useWellPath(wellId);
-  const formations = useFormations(wellId);
-  const projections = useProjections(wellId);
+  const surveys = useSurveys(openedWellId);
+  const wellPlan = useWellPath(openedWellId);
+  const formations = useFormations(openedWellId);
+  const projections = useProjections(openedWellId);
 
   const [view, setView] = useState({
     x: -844,
