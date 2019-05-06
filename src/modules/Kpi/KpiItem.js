@@ -13,7 +13,7 @@ function KpiItem({ value, measureUnit, label, format, className, renderValue }) 
         {renderValue({ value, format })}
         <Typography variant="caption">{measureUnit}</Typography>
       </div>
-      <Typography variant="caption" gutterBottom style={{ fontStyle: "italic" }}>
+      <Typography variant="caption" gutterBottom className={classes.italicLabel}>
         {label}
       </Typography>
     </div>
@@ -45,7 +45,7 @@ export function BitDepth() {
 
 export function Rop() {
   const { rateOfPenetration } = useKpi();
-  return <KpiItem label={"Rate of Penetration"} value={rateOfPenetration} measureUnit={"fph"} />;
+  return <KpiItem label={"Rate of Penetration (ROP)"} value={rateOfPenetration} measureUnit={"fph"} />;
 }
 
 export default KpiItem;

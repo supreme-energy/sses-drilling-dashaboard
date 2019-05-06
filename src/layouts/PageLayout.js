@@ -41,7 +41,7 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <div className={classes.container}>
-        <AppBar color="inherit">
+        <AppBar className={classes.appBar} color="inherit">
           <div className={classes.header}>
             <div className={classes.logo}>
               <img src="/sses-logo.svg" />

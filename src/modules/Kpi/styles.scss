@@ -24,7 +24,7 @@
     flex-direction: column;
 }
 
-.serverStatus {
+.serverStatus, .zoneStatus {
     @extend .vertical;
 }
 
@@ -38,4 +38,8 @@
 .status {
     display: flex;
     align-items: center;
+}
+
+.italicLabel {
+    font-style: italic;
 }
