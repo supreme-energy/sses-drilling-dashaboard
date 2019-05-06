@@ -9,8 +9,8 @@ import classes from "./TimeSliderToolbar.scss";
 function TimeSliderToolbar() {
   const [expanded, setExpanded] = useState(true);
   return (
-    <div style={{ display: "flex" }}>
-      <Card className={classes.card}>
+    <div className={classes.timeSliderToolbar}>
+      <Card className={classes.collapseButtonContainer}>
         <IconButton className={classes.collapseButton} onClick={() => setExpanded(e => !e)}>
           {expanded ? <ArrowDropDown /> : <ArrowDropUp />}
         </IconButton>

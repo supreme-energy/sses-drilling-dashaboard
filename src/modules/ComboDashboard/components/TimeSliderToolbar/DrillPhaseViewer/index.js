@@ -97,8 +97,8 @@ function DrillPhaseViewer({ className, classes, expanded }) {
     <Card
       className={
         expanded
-          ? classNames(phaseClasses.card, phaseClasses.expanded, className)
-          : classNames(phaseClasses.card, className)
+          ? classNames(phaseClasses.drillPhaseCard, phaseClasses.expanded, className)
+          : classNames(phaseClasses.drillPhaseCard, className)
       }
     >
       <CardContent className={phaseClasses.cardContent}>

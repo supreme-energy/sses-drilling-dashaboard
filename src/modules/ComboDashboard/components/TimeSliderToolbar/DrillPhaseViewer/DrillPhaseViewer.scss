@@ -1,9 +1,8 @@
 $gold: #817618;
 
-.card {
+.drillPhaseCard {
     border-radius: 0px;
     box-shadow: none;
-    min-width: 156px;
     border-right: 1px solid rgb(209, 208, 208);
     border-bottom: 1px solid rgb(209, 208, 208);
 
@@ -18,6 +17,7 @@ $gold: #817618;
     .drillPhaseButton {
         display: block;
         text-transform: none;
+        min-width: 156px;
 
         &:focus {
             outline:0;
