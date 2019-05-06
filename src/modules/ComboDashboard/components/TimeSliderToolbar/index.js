@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, IconButton, Collapse } from "@material-ui/core";
+import { Card, IconButton } from "@material-ui/core";
 import { ArrowDropDown, ArrowDropUp } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
