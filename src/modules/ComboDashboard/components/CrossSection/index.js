@@ -8,6 +8,72 @@ import { drawGrid } from "./drawGrid.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
 
+const pixiApp = {};
+
+function extracted() {
+  // Set up PIXI classes for rendering and draw layers
+  this.canvas = React.createRef();
+  this.renderer = PIXI.autoDetectRenderer({
+    width: this.screenWidth,
+    height: this.screenHeight,
+    antialias: true,
+    backgroundColor: 0xffffff
+  });
+  this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
+
+  // Stage contains the draw layers and never moves. Some events are registered here.
+  const stage = new PIXI.Container();
+  // Viewport will contain our formations, well bore line, and other graphics
+  this.viewport = new PIXI.Container();
+  this.formationsLayer = this.viewport.addChild(new PIXI.Container());
+  this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
+  this.UILayer = this.viewport.addChild(new PIXI.Container());
+  this.gridLayer = this.viewport.addChild(new PIXI.Container());
+  stage.addChild(this.viewport);
+
+  this.makeInteractive(stage);
+
+  const gridGutter = 50;
+  // Create the formation layers
+  const formationsUpdate = drawFormations(
+    this.formationsLayer,
+    this.props.formations,
+    this.props.surveys[this.props.surveys.length - 2]
+  );
+
+  const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
+  const surveyUpdate = drawSurveys(this.wellPathLayer, this.props.surveys);
+  const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
+  const projectionUpdate = interactiveProjection(
+    this.UILayer,
+    this.props.view,
+    this.props.updateView,
+    this.screenWidth,
+    this.screenHeight
+  );
+  const sectionUpdate = drawSections(
+    this.UILayer,
+    this.screenWidth,
+    this.screenHeight,
+    this.props.surveys,
+    this.props.projections,
+    gridGutter
+  );
+  const gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight, gridGutter);
+  // The ticker is used for render timing, what's done on each frame, etc
+  this.ticker = PIXI.ticker.shared;
+  this.ticker.add(() => {
+    formationsUpdate(this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
+    wellPlanUpdate(this.props.wellPlan);
+    surveyUpdate(this.props.surveys);
+    projectionLineUpdate(this.props.projections);
+    projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
+    sectionUpdate(this.props);
+    gridUpdate();
+    this.renderer.render(stage);
+  });
+}
+
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
 class CrossSection extends Component {
@@ -16,67 +82,7 @@ class CrossSection extends Component {
     this.screenWidth = window.innerWidth;
     this.screenHeight = window.innerHeight - 200;
 
-    // Set up PIXI classes for rendering and draw layers
-    this.canvas = React.createRef();
-    this.renderer = PIXI.autoDetectRenderer({
-      width: this.screenWidth,
-      height: this.screenHeight,
-      antialias: true,
-      backgroundColor: 0xffffff
-    });
-    this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
-
-    // Stage contains the draw layers and never moves. Some events are registered here.
-    const stage = new PIXI.Container();
-    // Viewport will contain our formations, well bore line, and other graphics
-    this.viewport = new PIXI.Container();
-    this.formationsLayer = this.viewport.addChild(new PIXI.Container());
-    this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
-    this.UILayer = this.viewport.addChild(new PIXI.Container());
-    this.gridLayer = this.viewport.addChild(new PIXI.Container());
-    stage.addChild(this.viewport);
-
-    this.makeInteractive(stage);
-
-    const gridGutter = 50;
-    // Create the formation layers
-    const formationsUpdate = drawFormations(
-      this.formationsLayer,
-      this.props.formations,
-      this.props.surveys[this.props.surveys.length - 2]
-    );
-
-    const wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
-    const surveyUpdate = drawSurveys(this.wellPathLayer, this.props.surveys);
-    const projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
-    const projectionUpdate = interactiveProjection(
-      this.UILayer,
-      this.props.view,
-      this.props.updateView,
-      this.screenWidth,
-      this.screenHeight
-    );
-    const sectionUpdate = drawSections(
-      this.UILayer,
-      this.screenWidth,
-      this.screenHeight,
-      this.props.surveys,
-      this.props.projections,
-      gridGutter
-    );
-    const gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight, gridGutter);
-    // The ticker is used for render timing, what's done on each frame, etc
-    this.ticker = PIXI.ticker.shared;
-    this.ticker.add(() => {
-      formationsUpdate(this.props.formations, this.props.surveys[this.props.surveys.length - 2]);
-      wellPlanUpdate(this.props.wellPlan);
-      surveyUpdate(this.props.surveys);
-      projectionLineUpdate(this.props.projections);
-      projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
-      sectionUpdate(this.props);
-      gridUpdate();
-      this.renderer.render(stage);
-    });
+    extracted.call(this);
   }
 
   componentDidMount() {
