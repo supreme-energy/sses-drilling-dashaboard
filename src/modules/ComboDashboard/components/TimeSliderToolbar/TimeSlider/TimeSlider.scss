@@ -1,0 +1,16 @@
+$gold: #817618;
+
+.card {
+    border-radius: 0;
+    box-shadow: 0;
+    width: 100%;
+
+    .cardContent {
+        padding: 0px;
+        width: 100%;
+    }
+
+    .timeSliderTitle {
+        color: $gold;
+    }
+}

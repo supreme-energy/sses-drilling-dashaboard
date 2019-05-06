@@ -1,21 +1,26 @@
 import React, { useState } from "react";
-import { Card, IconButton } from "@material-ui/core";
+import { Card, IconButton, Collapse } from "@material-ui/core";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
-// import classes from "./TimeSliderToolbar.scss";
+import TimeSlider from "./TimeSlider";
+import classes from "./TimeSliderToolbar.scss";
 
 function TimeSliderToolbar() {
   const [expanded, setExpanded] = useState(true);
   return (
     <div style={{ display: "flex" }}>
-      <Card>
-        <IconButton onClick={() => setExpanded(e => !e)}>
+      <Card className={classes.card}>
+        <IconButton className={classes.collapseButton} onClick={() => setExpanded(e => !e)}>
           <ArrowDropDown />
         </IconButton>
       </Card>
-      <DrillPhaseViewer expanded={expanded} />
-      {/* TODO: TimeSlider Goes Here */}
+      <Collapse in={expanded}>
+        <span style={{ display: "flex" }}>
+          <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
+          <TimeSlider className={classes.noShrink} />
+        </span>
+      </Collapse>
     </div>
   );
 }
