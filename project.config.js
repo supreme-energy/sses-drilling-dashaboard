@@ -3,13 +3,13 @@ const TARGET_ENV = process.env.TARGET_ENV || NODE_ENV;
 
 const appConfigs = {
   development: {
-    serverUrl: "https://2018dev.sgta.us/sses",
+    serverUrl: "https://sses-drilling-dashboard.experolabs.com/",
     username: "subsurfacegeosteering",
     password: "sgtageo2018"
   },
   production: {
     isProduction: true,
-    serverUrl: "https://2018dev.sgta.us/sses",
+    serverUrl: "https://sses-drilling-dashboard.experolabs.com/",
     username: "subsurfacegeosteering",
     password: "sgtageo2018"
   }
