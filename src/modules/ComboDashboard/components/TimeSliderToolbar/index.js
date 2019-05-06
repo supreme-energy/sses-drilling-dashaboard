@@ -16,10 +16,8 @@ function TimeSliderToolbar() {
         </IconButton>
       </Card>
       <div className={expanded ? classes.expandedContainer : classes.collapsedContainer}>
-        <div style={{ display: "flex" }}>
-          <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
-          <TimeSlider className={classes.noShrink} expanded={expanded} />
-        </div>
+        <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
+        <TimeSlider className={classes.noShrink} expanded={expanded} />
       </div>
     </div>
   );
