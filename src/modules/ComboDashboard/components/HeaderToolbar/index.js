@@ -17,7 +17,7 @@ function HeaderToolbar({ wellId }) {
   const well = wellsById[wellId] || {};
 
   return (
-    <Card className={classes.card}>
+    <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
         <div className={classes.row}>
           <div className={classes.kpiRow}>

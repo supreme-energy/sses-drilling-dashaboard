@@ -118,15 +118,9 @@ function DrillPhaseViewer({ className, classes, expanded }) {
                   <DrillPhase phase={currPhase} />
                 </div>
               )}
-              <div
-                className={
-                  expanded
-                    ? phaseClasses.drillPhaseCodeContainerExpanded
-                    : phaseClasses.drillPhaseCodeContainerCollapsed
-                }
-              >
-                <span className={expanded ? phaseClasses.drillPhaseCode : ""}>{drillPhaseCode}</span>
-                <ArrowDropDown className={expanded ? phaseClasses.dropDown : phaseClasses.collapsedDropDown} />
+              <div className={expanded ? phaseClasses.drillPhaseCodeContainerExpanded : phaseClasses.alignItem}>
+                <span className={phaseClasses.alignItem}>{drillPhaseCode}</span>
+                <ArrowDropDown className={phaseClasses.alignItem} />
               </div>
             </Button>
             <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>

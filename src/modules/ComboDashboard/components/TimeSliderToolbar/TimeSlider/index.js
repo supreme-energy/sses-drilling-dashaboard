@@ -8,7 +8,7 @@ import classes from "./TimeSlider.scss";
 // TODO: Build Time Slider Component
 function TimeSlider({ className, expanded }) {
   return (
-    <Card className={classNames(classes.card, className)}>
+    <Card className={classNames(classes.timeSlider, className)}>
       <CardContent className={classes.cardContent}>
         <Typography className={classes.timeSliderTitle} variant="subtitle1" gutterBottom>
           Time Slider
