@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import {
   Card,
   CardContent,
@@ -85,7 +86,7 @@ function DrillPhase({ phase }) {
   );
 }
 
-function DrillPhaseViewer({ className, classes }) {
+function DrillPhaseViewer({ className, classes, expanded }) {
   const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
   const [anchorEl, setAnchorEl] = useState(null);
   const drillPhaseEnum = Object.keys(colorsForPhaseViewer);
@@ -93,7 +94,13 @@ function DrillPhaseViewer({ className, classes }) {
   const drillPhaseCode = currPhase.split(" ")[1];
 
   return (
-    <Card className={classNames(phaseClasses.card, className)}>
+    <Card
+      className={
+        expanded
+          ? classNames(phaseClasses.card, phaseClasses.expanded, className)
+          : classNames(phaseClasses.card, className)
+      }
+    >
       <CardContent className={phaseClasses.cardContent}>
         <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
           <div>
@@ -103,13 +110,25 @@ function DrillPhaseViewer({ className, classes }) {
               onClick={e => setAnchorEl(e.currentTarget)}
               className={phaseClasses.drillPhaseButton}
             >
-              <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1" gutterBottom>
-                View
-              </Typography>
-              <DrillPhase phase={currPhase} />
-              <div className={phaseClasses.drillPhaseCodeContainer}>
-                <span className={phaseClasses.drillPhaseCode}>{drillPhaseCode}</span>
-                <ArrowDropDown />
+              {expanded && (
+                <div>
+                  <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1" gutterBottom>
+                    View
+                  </Typography>
+                  <DrillPhase phase={currPhase} />
+                </div>
+              )}
+              <div
+                className={
+                  expanded
+                    ? phaseClasses.drillPhaseCodeContainerExpanded
+                    : phaseClasses.drillPhaseCodeContainerCollapsed
+                }
+              >
+                <span className={expanded ? phaseClasses.drillPhaseCode : phaseClasses.drillPhaseCodeCollapsed}>
+                  {drillPhaseCode}
+                </span>
+                <ArrowDropDown className={expanded || phaseClasses.collapsedDropDown} />
               </div>
             </Button>
             <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
@@ -135,5 +154,11 @@ function DrillPhaseViewer({ className, classes }) {
     </Card>
   );
 }
+
+DrillPhaseViewer.propTypes = {
+  className: PropTypes.string,
+  classes: PropTypes.object,
+  expanded: PropTypes.bool
+};
 
 export default withStyles(styles)(DrillPhaseViewer);

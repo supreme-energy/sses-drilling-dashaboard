@@ -9,18 +9,18 @@ import classes from "./TimeSliderToolbar.scss";
 function TimeSliderToolbar() {
   const [expanded, setExpanded] = useState(true);
   return (
-    <div style={{ display: "flex", minHeight: 50 }}>
+    <div style={{ display: "flex" }}>
       <Card className={classes.card}>
         <IconButton className={classes.collapseButton} onClick={() => setExpanded(e => !e)}>
           {expanded ? <ArrowDropDown /> : <ArrowDropUp />}
         </IconButton>
       </Card>
-      <Collapse style={{ minHeight: 50, border: "1px solid rgb(209, 208, 208)" }} in={expanded}>
+      <div className={expanded ? classes.expandedContainer : classes.collapsedContainer}>
         <div style={{ display: "flex" }}>
           <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
-          <TimeSlider className={classes.noShrink} />
+          <TimeSlider className={classes.noShrink} expanded={expanded} />
         </div>
-      </Collapse>
+      </div>
     </div>
   );
 }

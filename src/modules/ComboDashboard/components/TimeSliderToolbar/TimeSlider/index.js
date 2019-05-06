@@ -5,7 +5,7 @@ import classNames from "classnames";
 
 import classes from "./TimeSlider.scss";
 
-function TimeSlider({ className }) {
+function TimeSlider({ className, expanded }) {
   return (
     <Card className={classNames(classes.card, className)}>
       <CardContent className={classes.cardContent}>
@@ -18,7 +18,8 @@ function TimeSlider({ className }) {
 }
 
 TimeSlider.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  expanded: PropTypes.bool
 };
 
 export default TimeSlider;
