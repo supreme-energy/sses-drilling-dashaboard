@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, IconButton } from "@material-ui/core";
-import { ArrowDropDown, ArrowDropUp } from "@material-ui/icons";
+import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
 import TimeSlider from "./TimeSlider";
@@ -12,10 +12,10 @@ function TimeSliderToolbar() {
     <div className={classes.timeSliderToolbar}>
       <Card className={classes.collapseButtonContainer}>
         <IconButton className={classes.collapseButton} onClick={() => setExpanded(e => !e)}>
-          {expanded ? <ArrowDropDown /> : <ArrowDropUp />}
+          {expanded ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
       </Card>
-      <div className={expanded ? classes.expandedContainer : classes.collapsedContainer}>
+      <div className={classes.expandContainer}>
         <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
         <TimeSlider className={classes.noShrink} expanded={expanded} />
       </div>

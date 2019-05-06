@@ -11,19 +11,16 @@
 
         .collapseButton {
             outline: 0;
-            padding: 5px;
+            padding: 1px;
         }
     }
-}
 
-.expandedContainer {
-    display: flex;
-}
+    .expandContainer {
+        display: flex;
+        flex: 0 0 95%;
+    }
 
-.collapsedContainer {
-    display: flex;
-}
-
-.noShrink {
-    flex-shrink: 0;
+    .noShrink {
+        flex-shrink: 0;
+    }
 }
