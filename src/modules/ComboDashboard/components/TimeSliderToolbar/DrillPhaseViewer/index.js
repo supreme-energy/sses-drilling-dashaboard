@@ -12,8 +12,14 @@ import {
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
-import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "../../../../constants/wellPathStatus";
-import { GREEN, GRAY } from "../../../../constants/colors";
+import {
+  ON_CURVE,
+  ON_LATERAL,
+  ON_DRILLOUT,
+  ON_INTERMEDIATE,
+  ON_SURFACE
+} from "../../../../../constants/wellPathStatus";
+import { GREEN, GRAY } from "../../../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
 
 const colorsForPhaseViewer = {
