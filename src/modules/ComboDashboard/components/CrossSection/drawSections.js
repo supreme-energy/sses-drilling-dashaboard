@@ -25,7 +25,7 @@ function drawSections(container, width, height, surveys, projections, gutter) {
 
   return function update(props) {
     const { surveys, projections, view } = props;
-    if (view.xScale === prevScaleX && backdown === 0) return;
+    if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
     prevScaleX = view.xScale;
     if (backdown === 0) {
       backdown = backdownFactor;
