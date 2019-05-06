@@ -5,6 +5,7 @@ import classNames from "classnames";
 
 import classes from "./TimeSlider.scss";
 
+// TODO: Build Time Slider Component
 function TimeSlider({ className, expanded }) {
   return (
     <Card className={classNames(classes.card, className)}>
