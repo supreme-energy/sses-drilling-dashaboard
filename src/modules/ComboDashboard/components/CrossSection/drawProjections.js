@@ -8,7 +8,6 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  * @param projections An array of projected points
  */
 function drawProjections(container, projections) {
-  const projectedPath = new PIXI.Graphics();
   const projectionGraphics = [];
   let prevDataLength = projections.length;
 
