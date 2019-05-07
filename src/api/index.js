@@ -5,11 +5,15 @@ import Fuse from "fuse.js";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
+import _ from "lodash";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
 export const GET_WELL_INFO = "/wellinfo.php";
+export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
+export const GET_WELL_PROJECTIONS = "/projections.php";
+export const GET_WELL_FORMATIONS = "/formationlist.php";
 
 const options = {
   shouldSort: true,
@@ -105,4 +109,78 @@ export function useWells() {
   );
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
   return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
+}
+
+export function useWellPath(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_PLAN,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: plan => {
+        return plan.map(p => _.mapValues(p, Number));
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useSurveys(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_SURVEYS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: surveys => {
+        return surveys.map(s => _.mapValues(s, Number));
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useFormations(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_FORMATIONS,
+      query: {
+        seldbname: wellId,
+        data: 1
+      }
+    },
+    {
+      transform: formationList => {
+        return formationList.map(f => {
+          return {
+            ...f,
+            data: f.data.map(d => _.mapValues(d, Number))
+          };
+        });
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useProjections(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_PROJECTIONS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: projections => {
+        return projections.map(p => _.mapValues(p, Number));
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
 }
