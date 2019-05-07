@@ -8,6 +8,7 @@
         box-shadow: none;
         border-right: 1px solid rgb(209, 208, 208);
         border-bottom: 1px solid rgb(209, 208, 208);
+        min-width: 25px;
 
         .collapseButton {
             outline: 0;
@@ -17,7 +18,7 @@
 
     .expandContainer {
         display: flex;
-        flex: 0 0 95%;
+        flex: 0 0 calc(100% - 25px);
     }
 
     .noShrink {

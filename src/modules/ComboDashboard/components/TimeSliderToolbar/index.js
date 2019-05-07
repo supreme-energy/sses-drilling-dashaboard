@@ -17,7 +17,7 @@ function TimeSliderToolbar() {
       </Card>
       <div className={classes.expandContainer}>
         <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
-        <TimeSlider className={classes.noShrink} expanded={expanded} />
+        <TimeSlider expanded={expanded} />
       </div>
     </div>
   );

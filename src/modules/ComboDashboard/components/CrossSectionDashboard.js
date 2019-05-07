@@ -1,4 +1,5 @@
 import React, { Suspense, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
@@ -104,6 +105,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
     </Suspense>
   );
 };
-CrossSectionDashboard.propTypes = {};
+CrossSectionDashboard.propTypes = {
+  wellId: PropTypes.string
+};
 
 export default CrossSectionDashboard;
