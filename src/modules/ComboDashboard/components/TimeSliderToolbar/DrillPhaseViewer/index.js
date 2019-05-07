@@ -94,13 +94,7 @@ function DrillPhaseViewer({ className, classes, expanded }) {
   const drillPhaseCode = currPhase.split(" ")[1];
 
   return (
-    <Card
-      className={
-        expanded
-          ? classNames(phaseClasses.drillPhaseCard, phaseClasses.expanded, className)
-          : classNames(phaseClasses.drillPhaseCard, className)
-      }
-    >
+    <Card className={classNames(phaseClasses.drillPhaseCard, expanded && phaseClasses.expanded, className)}>
       <CardContent className={phaseClasses.cardContent}>
         <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
           <div>
