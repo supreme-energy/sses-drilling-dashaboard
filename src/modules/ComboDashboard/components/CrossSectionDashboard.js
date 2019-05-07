@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
+import PropTypes from "prop-types";
 
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
@@ -106,7 +107,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
 };
 CrossSectionDashboard.propTypes = {
-  wellId: PropTypes.string
+  wellId: PropTypes.string.isRequired
 };
 
 export default CrossSectionDashboard;
