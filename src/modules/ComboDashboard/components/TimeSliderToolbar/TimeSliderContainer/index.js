@@ -14,7 +14,6 @@ function TimeSliderContainer({ className, expanded }) {
         <Typography className={classes.timeSliderTitle} variant="subtitle1" gutterBottom>
           Time Slider
         </Typography>
-        <TimeSlider expanded={expanded} />
       </CardContent>
     </Card>
   );
