@@ -3,7 +3,7 @@ import { Card, IconButton } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
-import TimeSlider from "./TimeSlider";
+import TimeSlider from "./TimeSliderContainer";
 import classes from "./TimeSliderToolbar.scss";
 
 function TimeSliderToolbar() {
