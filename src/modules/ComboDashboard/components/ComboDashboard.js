@@ -14,7 +14,7 @@ function ComboDashboard({
     <div>
       <HeaderToolbar wellId={openedWellId} />
       <DrillPhaseViewer />
-      <CrossSectionDashboard />
+      <CrossSectionDashboard wellId={openedWellId} />
     </div>
   );
 }

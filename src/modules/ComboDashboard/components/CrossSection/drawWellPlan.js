@@ -1,20 +1,19 @@
 import * as PIXI from "pixi.js";
 
 export function drawWellPlan(container, wellPlanData) {
-  // Draw the well plan line
-  const wpData = wellPlanData.map(x => [Number(x.vs), Number(x.tvd)]);
+  // Initialize the well plan object
   const wellplan = new PIXI.Graphics();
-  update();
   container.addChild(wellplan);
+  update(wellPlanData);
 
   return update;
 
-  function update() {
-    if (!wellplan.transform) return;
+  function update(planData) {
+    if (planData.length === 0 || !wellplan.transform) return;
     wellplan.clear().lineStyle(3 / container.transform.worldTransform.a, 0x44ff44, 1);
-    wellplan.moveTo(...wpData[0]);
-    for (let i = 1; i < wpData.length; i++) {
-      wellplan.lineTo(...wpData[i]);
+    wellplan.moveTo(planData[0].vs, planData[0].tvd);
+    for (let i = 1; i < planData.length; i++) {
+      wellplan.lineTo(planData[i].vs, planData[i].tvd);
     }
   }
 }
