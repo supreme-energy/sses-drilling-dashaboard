@@ -10,11 +10,12 @@ import classes from "./TimeSlider.scss";
 function TimeSliderContainer({ className, expanded }) {
   return (
     <Card className={classNames(classes.timeSlider, className)}>
-      <CardContent className={classes.cardContent}>
+      {expanded && (
         <Typography className={classes.timeSliderTitle} variant="subtitle1" gutterBottom>
           Time Slider
         </Typography>
-      </CardContent>
+      )}
+      <TimeSlider expanded={expanded} />
     </Card>
   );
 }

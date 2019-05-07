@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import * as PIXI from "pixi.js";
 
+const EXPANDED_HEIGHT = 100;
+const COLLAPSED_HEIGHT = 25;
 class TimeSlider extends React.Component {
   constructor(props) {
     super(props);
@@ -10,7 +12,7 @@ class TimeSlider extends React.Component {
 
     this.renderer = new PIXI.Application({
       width: 900, // default: 800
-      height: 256, // default: 600
+      height: this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT, // default: 600
       antialias: true, // default: false
       transparent: false, // default: false
       resolution: 1, // default: 1,
@@ -67,7 +69,6 @@ class TimeSlider extends React.Component {
     graphics.lineTo(600, 300);
 
     stage.addChild(graphics);
-    this.ticker = PIXI.ticker.shared;
 
     document.body.appendChild(this.renderer.view);
 
@@ -76,10 +77,15 @@ class TimeSlider extends React.Component {
 
   componentDidMount() {
     this.canvas.current.appendChild(this.renderer.view);
-    console.log(this.canvas.current.offsetWidth, "width");
-    const h = this.props.expanded ? 256 : 50;
-    this.renderer.renderer.resize(this.canvas.current.offsetWidth - 150, h);
-    this.ticker.start();
+    const h = this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT;
+    this.renderer.renderer.resize(this.canvas.current.offsetWidth - 170, h);
+  }
+
+  componentDidUpdate({ expanded }) {
+    if (expanded !== this.props.expanded) {
+      const h = this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT;
+      this.renderer.renderer.resize(this.canvas.current.offsetWidth - 170, h);
+    }
   }
 
   render() {
@@ -87,6 +93,8 @@ class TimeSlider extends React.Component {
   }
 }
 
-TimeSlider.propTypes = {};
+TimeSlider.propTypes = {
+  expanded: PropTypes.bool
+};
 
 export default TimeSlider;
