@@ -41,10 +41,10 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <div className={classes.container}>
-        <AppBar color="inherit">
+        <AppBar className={classes.appBar} color="inherit">
           <div className={classes.header}>
             <div className={classes.logo}>
-              <img src="/logo_sses.svg" />
+              <img src="/sses-logo.svg" />
             </div>
             <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
             <span />

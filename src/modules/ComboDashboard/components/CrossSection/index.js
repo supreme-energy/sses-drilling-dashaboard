@@ -80,7 +80,7 @@ class CrossSection extends Component {
   constructor(props) {
     super(props);
     this.screenWidth = window.innerWidth;
-    this.screenHeight = window.innerHeight - 200;
+    this.screenHeight = window.innerHeight - 400;
 
     extracted.call(this);
   }

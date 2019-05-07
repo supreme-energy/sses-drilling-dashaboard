@@ -9,16 +9,30 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  */
 function drawProjections(container, projections) {
   const projectedPath = new PIXI.Graphics();
-  container.addChild(projectedPath);
+  const projectionGraphics = [];
+  let prevDataLength = projections.length;
+
+  const addProjection = function() {
+    let marker = new PIXI.Graphics();
+    marker.lineStyle(1.6, 0xee2211);
+    marker.beginFill(0xffffff, 0);
+    marker.drawRoundedRect(-8, -8, 16, 16, 4);
+    marker.endFill();
+    marker.transform.updateTransform = frozenScaleTransform;
+    container.addChild(marker);
+    return marker;
+  };
 
   return update;
 
   function update(projections) {
-    if (!projectedPath.transform || !projections.length) return;
-    projectedPath.clear().lineStyle(3 / container.transform.worldTransform.a, 0xee3322, 1);
-    projectedPath.moveTo(projections[0].vs, projections[0].tvd);
-    for (let i = 1; i < projections.length; i++) {
-      projectedPath.lineTo(projections[i].vs, projections[i].tvd);
+    if (!projections.length || projections.length === prevDataLength) return;
+    prevDataLength = projections.length;
+
+    for (let i = 0; i < projections.length; i++) {
+      if (!projectionGraphics[i]) projectionGraphics[i] = addProjection();
+      projectionGraphics[i].position.x = projections[i].vs;
+      projectionGraphics[i].position.y = projections[i].tvd;
     }
   }
 }
