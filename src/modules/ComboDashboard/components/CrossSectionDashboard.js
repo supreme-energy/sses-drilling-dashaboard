@@ -1,16 +1,15 @@
 import React, { Suspense, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
-import surveyData from "../../../data/survey.json";
-import wellPlanData from "../../../data/wellplan";
-import formationData from "../../../data/formationList";
-import projections from "../../../data/projections";
+import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
 
-export const CrossSectionDashboard = () => {
-  // Replace with useFetch
-  const surveys = surveyData;
-  const wellPlan = wellPlanData;
-  const formations = formationData;
+export const CrossSectionDashboard = ({ wellId }) => {
+  // TODO: Pull data from store instead. This re-fetches on every tab switch.
+  const surveys = useSurveys(wellId);
+  const wellPlan = useWellPath(wellId);
+  const formations = useFormations(wellId);
+  const projections = useProjections(wellId);
 
   const [view, setView] = useState({
     x: -844,
@@ -106,6 +105,8 @@ export const CrossSectionDashboard = () => {
     </Suspense>
   );
 };
-CrossSectionDashboard.propTypes = {};
+CrossSectionDashboard.propTypes = {
+  wellId: PropTypes.string.isRequired
+};
 
 export default CrossSectionDashboard;
