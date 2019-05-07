@@ -156,7 +156,6 @@ export const WellExplorer = ({
 };
 
 WellExplorer.propTypes = {
-  history: PropTypes.object,
   theme: PropTypes.object,
   wellTimestamps: PropTypes.object,
   changeActiveTab: PropTypes.func,

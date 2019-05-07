@@ -17,26 +17,20 @@ function HeaderToolbar({ wellId }) {
   const well = wellsById[wellId] || {};
 
   return (
-    <Card className={classes.card}>
+    <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
-        <div className={classes.row}>
-          <div className={classes.kpiRow}>
-            <Typography variant="h5" color="primary">
-              {well.name}
-            </Typography>
-            <span className={classes.hExtraLargeSpacer} />
-            <WellStatus status={well.status} className={classes.status} />
-            <span className={classes.hBigSpacer} />
-            <WellPathStatus wellId={well.id} />
-            <span className={classes.hBigSpacer} />
-            <TargetAccuracy wellId={wellId} />
-            <span className={classes.hBigSpacer} />
-            <Rop wellId={well.id} />
-            <span className={classes.hBigSpacer} />
-            <ServerStatus wellId={well.id} />
-            <span className={classes.hBigSpacer} />
-            <BitDepth wellId={well.id} />
-          </div>
+        <div className={classes.wellNameCol}>
+          <Typography variant="h5" color="primary" classNames={classes.wellName}>
+            {well.name}
+          </Typography>
+        </div>
+        <div className={classes.kpiCol}>
+          <WellStatus status={well.status} className={classes.status} />
+          <WellPathStatus wellId={well.id} />
+          <TargetAccuracy wellId={wellId} />
+          <Rop wellId={well.id} />
+          <ServerStatus wellId={well.id} />
+          <BitDepth wellId={well.id} />
           <IconButton className={classes.optionsButton}>
             <MoreVertIcon />
           </IconButton>

@@ -1,0 +1,43 @@
+$gold: #817618;
+
+.drillPhaseCard {
+    border-radius: 0;
+    box-shadow: none;
+    border-right: 1px solid rgb(209, 208, 208);
+    border-bottom: 1px solid rgb(209, 208, 208);
+
+    span {
+        font-weight: 400;
+    }
+
+    .cardContent {
+        padding: 0px;
+    }
+
+    .drillPhaseButton {
+        display: block;
+        text-transform: none;
+        min-width: 156px;
+        border-radius: 0;
+
+        &:focus {
+            outline:0;
+        }
+
+        .drillPhaseButtonText {
+            color: $gold;
+        }
+    }
+
+    .drillPhaseCodeContainerExpanded {
+        margin-top: 10px;
+    }
+
+    .alignItem {
+        margin-left: 10px;
+    }
+}
+
+.expanded {
+    padding: 10px 5px 20px;
+}
