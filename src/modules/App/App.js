@@ -53,11 +53,8 @@ class App extends React.Component {
         <Provider store={store}>
           <Router history={history}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
-              {/* cache the api methods that do not require authentication */}
-              <FetchCache predicate={() => {}}>
+              <FetchCache>
                 <div style={{ height: "100%" }}>
-                  {/* place FakeFetch at any level to intercept calls within its children */}
-                  {/* <FakeFetch routes={crossFilterStore}> */}
                   <PageLayout history={history}>
                     <Route path="/:wellId" component={WellUpdate} />
                     <Switch>
@@ -69,7 +66,6 @@ class App extends React.Component {
                       <Route path="/:wellId?" component={WellExplorer} />
                     </Switch>
                   </PageLayout>
-                  {/* </FakeFetch> */}
                 </div>
               </FetchCache>
             </FetchClientProvider>
