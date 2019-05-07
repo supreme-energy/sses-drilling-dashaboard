@@ -19,12 +19,12 @@ function HeaderToolbar({ wellId }) {
   return (
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
-        <div className={classes.rowLeft}>
+        <div className={classes.wellNameCol}>
           <Typography variant="h5" color="primary" classNames={classes.wellName}>
             {well.name}
           </Typography>
         </div>
-        <div className={classes.rowRight}>
+        <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
           <WellPathStatus wellId={well.id} />
           <TargetAccuracy wellId={wellId} />

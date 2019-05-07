@@ -22,16 +22,16 @@
         width: 20%;
     }
 
-    .rowLeft, .rowRight {
+    .wellNameCol, .kpiCol {
         display: flex;
         align-items: center;        
     }
 
-    .rowLeft {
+    .wellNameCol {
         flex-grow: 1;
     }
 
-    .rowRight {
+    .kpiCol {
         flex-grow: 8;
         justify-content: flex-end;
         & > * {
