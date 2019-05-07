@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import { Card, IconButton } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
@@ -7,11 +7,11 @@ import TimeSlider from "./TimeSlider";
 import classes from "./TimeSliderToolbar.scss";
 
 function TimeSliderToolbar() {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, toggleExpanded] = useReducer(e => !e, true);
   return (
     <div className={classes.timeSliderToolbar}>
       <Card className={classes.collapseButtonContainer}>
-        <IconButton className={classes.collapseButton} onClick={() => setExpanded(e => !e)}>
+        <IconButton className={classes.collapseButton} onClick={toggleExpanded}>
           {expanded ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
       </Card>
