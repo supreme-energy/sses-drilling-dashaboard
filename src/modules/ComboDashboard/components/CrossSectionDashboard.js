@@ -3,7 +3,8 @@ import Progress from "@material-ui/core/CircularProgress";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
 
-export const CrossSectionDashboard = ({wellId}) => {
+export const CrossSectionDashboard = ({ wellId }) => {
+  // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
   const formations = useFormations(wellId);
