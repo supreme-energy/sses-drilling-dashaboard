@@ -4,7 +4,7 @@ import Rop from "./ROP";
 export default function() {
   return (
     <div>
-      <Rop />
+      <Rop style={{ width: "400px", height: "600px" }} />
     </div>
   );
 }

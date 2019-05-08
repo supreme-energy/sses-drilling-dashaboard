@@ -110,8 +110,8 @@ export function useWells() {
 export function useRopData() {
   const [ropData, updateRopData] = useState(EMPTY_ARRAY);
   const loadData = async () => {
-    const response = await fetch("./data/rop.json");
-    
+    const response = await fetch("/data/rop.json");
+
     const data = await response.json();
 
     updateRopData(data.data);
