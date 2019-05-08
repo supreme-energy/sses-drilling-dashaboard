@@ -6,7 +6,6 @@ const projection = [0xee2211, 0.5];
 
 function drawSections(container, width, height, surveys, projections, gutter) {
   const buttonHeight = 10;
-  const y = height - gutter - buttonHeight;
   const pixiList = [];
   // The update function immediately stops re-rendering as soon as the scale
   // is equal to the previous scale.  However, that doesn't re-align the sections
@@ -23,10 +22,11 @@ function drawSections(container, width, height, surveys, projections, gutter) {
     return section;
   };
 
-  return function update(props) {
+  return function update(props, height) {
     const { surveys, projections, view } = props;
     if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
     prevScaleX = view.xScale;
+    const y = height - gutter - buttonHeight;
     if (backdown === 0) {
       backdown = backdownFactor;
     } else {

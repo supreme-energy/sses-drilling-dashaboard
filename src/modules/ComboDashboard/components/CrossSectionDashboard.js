@@ -43,7 +43,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   return (
     <Suspense fallback={<Progress />}>
-      <div style={{ margin: "0 auto" }}>
+      <div>
         <h2>Dev debugging data</h2>
         <div>
           <label>

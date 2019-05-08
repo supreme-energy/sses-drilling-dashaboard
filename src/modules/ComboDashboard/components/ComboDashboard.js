@@ -11,7 +11,7 @@ function ComboDashboard({
   }
 }) {
   return (
-    <div>
+    <div style={{ display: "flex", "flex-direction": "column", height: "100%" }}>
       <HeaderToolbar wellId={openedWellId} />
       <DrillPhaseViewer />
       <CrossSectionDashboard wellId={openedWellId} />

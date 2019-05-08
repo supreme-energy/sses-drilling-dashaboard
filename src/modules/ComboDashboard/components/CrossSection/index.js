@@ -7,6 +7,7 @@ import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
+import css from "./CrossSection.scss";
 
 const pixiApp = {};
 
@@ -14,9 +15,9 @@ function extracted() {
   // Set up PIXI classes for rendering and draw layers
   this.canvas = React.createRef();
   this.renderer = PIXI.autoDetectRenderer({
-    width: this.screenWidth,
-    height: this.screenHeight,
     antialias: true,
+    autoResize: true,
+    resolution: devicePixelRatio,
     backgroundColor: 0xffffff
   });
   this.interactionManager = new PIXI.interaction.InteractionManager(this.renderer);
@@ -48,18 +49,18 @@ function extracted() {
     this.UILayer,
     this.props.view,
     this.props.updateView,
-    this.screenWidth,
-    this.screenHeight
+    this.renderer.screen.width,
+    this.renderer.screen.height
   );
   this.sectionUpdate = drawSections(
     this.UILayer,
-    this.screenWidth,
-    this.screenHeight,
+    this.renderer.screen.width,
+    this.renderer.screen.height,
     this.props.surveys,
     this.props.projections,
     gridGutter
   );
-  this.gridUpdate = drawGrid(this.gridLayer, this.screenWidth, this.screenHeight, gridGutter);
+  this.gridUpdate = drawGrid(this.gridLayer, this.renderer.screen.width, this.renderer.screen.height, gridGutter);
   // The ticker is used for render timing, what's done on each frame, etc
   this.ticker = PIXI.ticker.shared;
   this.newProps = true;
@@ -70,20 +71,26 @@ function extracted() {
     }
   });
 }
+function resize() {
+  const parent = this.renderer.view.parentNode;
+  if (!parent) return;
+  this.renderer.resize(parent.clientWidth, parent.clientHeight);
+}
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
 class CrossSection extends Component {
   constructor(props) {
     super(props);
-    this.screenWidth = window.innerWidth;
-    this.screenHeight = window.innerHeight - 400;
 
     extracted.call(this);
   }
 
   componentDidMount() {
     this.canvas.current.appendChild(this.renderer.view);
+    this.resize = resize.bind(this);
+    window.addEventListener("resize", this.resize);
+    resize.call(this);
 
     this.updateWebGL();
     this.ticker.start();
@@ -100,12 +107,17 @@ class CrossSection extends Component {
   componentWillUnmount() {
     // TODO: Clean up and remove other objects to improve performance
     this.ticker.stop();
+    window.removeEventListener("resize", this.resize);
     this.canvas.current.removeChild(this.renderer.view);
     this.viewport.destroy({ children: true });
   }
 
   render() {
-    return <div ref={this.canvas} />;
+    return (
+      <div className={css.crossSectionWrapper}>
+        <div className={css.crossSection} ref={this.canvas} />
+      </div>
+    );
   }
 
   updateWebGL() {
@@ -119,8 +131,8 @@ class CrossSection extends Component {
     this.wellPlanUpdate(this.props.wellPlan);
     this.surveyUpdate(this.props.surveys);
     this.projectionLineUpdate(this.props.projections);
-    this.projectionUpdate(this.props.view, this.screenWidth, this.screenHeight);
-    this.sectionUpdate(this.props);
+    this.projectionUpdate(this.props.view, this.renderer.screen.width, this.renderer.screen.height);
+    this.sectionUpdate(this.props, this.renderer.screen.height);
     this.gridUpdate();
     this.newProps = true;
   }
@@ -131,7 +143,7 @@ class CrossSection extends Component {
     let isOutside = false;
     const prevMouse = {};
     stage.interactive = true;
-    stage.hitArea = new PIXI.Rectangle(0, 0, this.screenWidth, this.screenHeight);
+    stage.hitArea = new PIXI.Rectangle(0, 0, this.renderer.screen.width, this.renderer.screen.height);
 
     stage.mousedown = function(moveData) {
       const pos = moveData.data.global;
