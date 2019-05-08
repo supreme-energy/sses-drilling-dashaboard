@@ -4,6 +4,7 @@ import useRef from "react-powertools/hooks/useRef";
 import * as PIXI from "pixi.js";
 import { useSize } from "react-hook-size";
 import chunk from "lodash/chunk";
+import { drawGrid } from "../../../../ComboDashboard/components/CrossSection/drawGrid";
 
 function useWebglRenderer({ canvas, width, height }) {
   const stage = useRef(() => new PIXI.Container());
@@ -30,9 +31,9 @@ function useWebglRenderer({ canvas, width, height }) {
     }
   }, [canvas]);
 
-  function refresh() {
+  const refresh = useCallback(() => {
     rendererRef.current.render(stage.current);
-  }
+  }, []);
 
   return [stage.current, refresh, rendererRef.current];
 }
@@ -146,9 +147,9 @@ function useViewport({ renderer, stage, width, height }) {
   return [viewportRef.current, view, updateView];
 }
 
-function useDrawLine(container, data, mapData) {
+function useDrawLine({ container, data, mapData, color }) {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
-  const lineG = useRef(() => new PIXI.Graphics());
+  const lineG = useRef(() => new PIXI.Graphics(true));
 
   useEffect(() => {
     const lineGraphic = lineG.current;
@@ -156,13 +157,14 @@ function useDrawLine(container, data, mapData) {
     return () => container.removeChild(lineGraphic);
   }, [container]);
 
-  useEffect(() => {
-    function drawLine(data) {
-      if (data && data.length) {
-        lineG.current.clear().lineStyle(1, 0x000000, 1);
+  const drawLine = useCallback(
+    function drawLine() {
+      if (lineData && lineData.length) {
+        lineG.current.clear().lineStyle(1, color, 1);
+
         // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
         // I'm picking 10k that should be safe (15k works also)
-        const chunks = chunk(data, 10000);
+        const chunks = chunk(lineData, 10000);
         chunks.forEach(chunk => {
           lineG.current.moveTo(...chunk[0]);
           chunk.forEach(point => {
@@ -170,12 +172,18 @@ function useDrawLine(container, data, mapData) {
           });
         });
       }
-    }
-    drawLine(lineData);
-  }, [lineData]);
+    },
+    [lineData, color]
+  );
+
+  useEffect(() => {
+    drawLine();
+  }, [container, drawLine]);
+
+  return drawLine;
 }
 
-const useRectangle = ({ container, width, height, color }) => {
+const useRectangle = ({ container, width, height, backgroundColor, borderColor, borderThickness }) => {
   const bgRef = useRef(() => new PIXI.Graphics());
   useEffect(
     function addBackground() {
@@ -190,32 +198,64 @@ const useRectangle = ({ container, width, height, color }) => {
     function redraw() {
       const bg = bgRef.current;
       bg.clear();
-      bg.beginFill(color);
-      bg.lineStyle(1);
+      if (backgroundColor) {
+        bg.beginFill(backgroundColor);
+      }
+      bg.lineStyle(borderThickness, borderColor);
       bg.drawRect(0, 0, width, height);
     },
-    [width, height, color]
+    [width, height, backgroundColor, borderColor, borderThickness]
   );
 
   return bgRef.current;
 };
 
+function useGrid({ container, width, height, gridGutter }) {
+  const gridLayerRef = useRef(() => new PIXI.Container());
+
+  useEffect(() => {
+    const gridLayer = gridLayerRef.current;
+    container.addChild(gridLayer);
+
+    return () => container.removeChild(gridLayer);
+  }, [container]);
+
+  const gridUpdate = useMemo(() => {
+    return drawGrid(gridLayerRef.current, width, height, gridGutter);
+  }, [width, height, gridGutter]);
+
+  return [gridLayerRef.current, gridUpdate];
+}
+
 const mapAverage = d => [Number(d.ROP_A), Number(d.Hole_Depth)];
+const mapInstant = d => [Number(d.ROP_I), Number(d.Hole_Depth)];
 
 export default function Rop({ className, style }) {
   const data = useRopData();
+  
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebglRenderer({ canvas: canvasRef.current, width, height });
-  useRectangle({ container: stage, color: 0xffffff, width, height });
-  const [viewport] = useViewport({ renderer, stage, width, height });
 
-  useDrawLine(viewport, data, mapAverage);
+  const [viewport, view] = useViewport({ renderer, stage, width, height });
+  useDrawLine({ container: viewport, data, mapData: mapInstant, color: 0x639142 });
+  useDrawLine({ container: viewport, data, mapData: mapAverage, color: 0xca221d });
+  
+  const [, updateGrid] = useGrid({ container: viewport, width, height, gridGutter: 50 });
+  useRectangle({
+    container: stage,
+    width,
+    height,
+    borderColor: 0x6ee351,
+    borderThickness: 3
+  });
 
   useEffect(() => {
+    updateGrid();
+
     refresh();
-  }, [refresh, stage, data]);
+  }, [refresh, stage, data, updateGrid, view]);
 
   return <div className={className} style={style} ref={canvasRef} />;
 }
