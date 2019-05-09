@@ -5,6 +5,9 @@ import * as PIXI from "pixi.js";
 import { useSize } from "react-hook-size";
 import chunk from "lodash/chunk";
 import { drawGrid } from "../../../../ComboDashboard/components/CrossSection/drawGrid";
+import { scaleLinear } from "d3-scale";
+import { max, group } from "d3-array";
+import * as wellSections from "../../../../../constants/wellSections";
 
 function useWebglRenderer({ canvas, width, height }) {
   const stage = useRef(() => new PIXI.Container());
@@ -41,30 +44,37 @@ function useWebglRenderer({ canvas, width, height }) {
 const globalMouse = { x: 0, y: 0 };
 
 // enable mouse wheel and drag
-function useViewport({ renderer, stage, width, height }) {
-  const [view, updateView] = useState({
-    x: 0,
-    y: 0,
-    xScale: 1,
-    yScale: 1
-  });
+function useViewport({ renderer, stage, width, height, updateView, view, zoomXScale, zoomYScale }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
 
-  const onWhell = useCallback(e => {
-    e.preventDefault();
-    interactionManagerRef.current.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
+  const onWhell = useCallback(
+    e => {
+      e.preventDefault();
+      interactionManagerRef.current.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
 
-    // sign of deltaY (-1,0,1) determines zoom in or out
-    const factor = 1 - Math.sign(e.deltaY) * 0.03;
+      // sign of deltaY (-1,0,1) determines zoom in or out
+      const factor = 1 - Math.sign(e.deltaY) * 0.03;
 
-    updateView(prev => ({
-      x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-      y: globalMouse.y - (globalMouse.y - prev.y) * factor,
-      xScale: prev.xScale * factor,
-      yScale: prev.yScale * factor
-    }));
-  }, []);
+      updateView(prev => {
+        const newValue = {
+          ...prev
+        };
+
+        if (zoomXScale) {
+          newValue.x = globalMouse.x - (globalMouse.x - prev.x) * factor;
+          newValue.xScale = prev.xScale * factor;
+        }
+
+        if (zoomYScale) {
+          newValue.y = globalMouse.y - (globalMouse.y - prev.y) * factor;
+          newValue.yScale = prev.yScale * factor;
+        }
+        return newValue;
+      });
+    },
+    [updateView, zoomXScale, zoomYScale]
+  );
 
   const interactionStateRef = useRef({
     isDragging: false,
@@ -79,21 +89,24 @@ function useViewport({ renderer, stage, width, height }) {
     interactionState.isDragging = true;
   }, []);
 
-  const onMouseMove = useCallback(moveData => {
-    const interactionState = interactionStateRef.current;
-    if (!interactionState.isDragging || interactionState.isOutside) {
-      return;
-    }
+  const onMouseMove = useCallback(
+    moveData => {
+      const interactionState = interactionStateRef.current;
+      if (!interactionState.isDragging || interactionState.isOutside) {
+        return;
+      }
 
-    const currMouse = moveData.data.global;
-    updateView(prev => ({
-      ...prev,
-      x: Number(prev.x) + (currMouse.x - interactionState.prevMouse.x),
-      y: Number(prev.y) + (currMouse.y - interactionState.prevMouse.y)
-    }));
+      const currMouse = moveData.data.global;
+      updateView(prev => ({
+        ...prev,
+        y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
+        x: zoomXScale ? Number(prev.x) + (currMouse.x - prev.x) : prev.x
+      }));
 
-    Object.assign(interactionState.prevMouse, currMouse);
-  }, []);
+      Object.assign(interactionState.prevMouse, currMouse);
+    },
+    [updateView, zoomXScale, zoomYScale]
+  );
 
   useEffect(
     function makeStageInteractive() {
@@ -144,7 +157,7 @@ function useViewport({ renderer, stage, width, height }) {
     [view]
   );
 
-  return [viewportRef.current, view, updateView];
+  return viewportRef.current;
 }
 
 function useDrawLine({ container, data, mapData, color }) {
@@ -183,7 +196,7 @@ function useDrawLine({ container, data, mapData, color }) {
   return drawLine;
 }
 
-const useRectangle = ({ container, width, height, backgroundColor, borderColor, borderThickness }) => {
+const useRectangle = ({ container, width, height, backgroundColor, borderColor, borderThickness, x, y }) => {
   const bgRef = useRef(() => new PIXI.Graphics());
   useEffect(
     function addBackground() {
@@ -202,9 +215,9 @@ const useRectangle = ({ container, width, height, backgroundColor, borderColor, 
         bg.beginFill(backgroundColor);
       }
       bg.lineStyle(borderThickness, borderColor);
-      bg.drawRect(0, 0, width, height);
+      bg.drawRect(x, y, width, height);
     },
-    [width, height, backgroundColor, borderColor, borderThickness]
+    [width, height, backgroundColor, borderColor, borderThickness, x, y]
   );
 
   return bgRef.current;
@@ -227,22 +240,146 @@ function useGrid({ container, width, height, gridGutter }) {
   return [gridLayerRef.current, gridUpdate];
 }
 
+function computeInitialViewYScaleValue(data) {
+  if (data && data.length > 0) {
+    return scaleLinear()
+      .domain([0, data[data.length - 1].Hole_Depth])
+      .range([0, 1]);
+  }
+}
+
+function computeInitialViewXScaleValue(data) {
+  if (data && data.length > 0) {
+    return scaleLinear()
+      .domain([0, max(data, d => Math.max(d.ROP_A, d.ROP_I))])
+      .range([0, 1]);
+  }
+}
+
 const mapAverage = d => [Number(d.ROP_A), Number(d.Hole_Depth)];
 const mapInstant = d => [Number(d.ROP_I), Number(d.Hole_Depth)];
+const gridGutter = 50;
+const colorBySection = {
+  [wellSections.SURFACE]: 0x5c87d5,
+  [wellSections.INTERMEDIATE]: 0x639142,
+  [wellSections.CURVE]: 0x959595,
+  [wellSections.LATERAL]: 0xceaa39
+};
+
+const EMPTY_ARRAY = [];
+
+const getDataBySection = data => {
+  return group(data, d => d.A_interval);
+};
 
 export default function Rop({ className, style }) {
   const data = useRopData();
-  
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebglRenderer({ canvas: canvasRef.current, width, height });
 
-  const [viewport, view] = useViewport({ renderer, stage, width, height });
-  useDrawLine({ container: viewport, data, mapData: mapInstant, color: 0x639142 });
+  const getInitialViewYScaleValue = useMemo(
+    () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
+    [data]
+  );
+
+  const getInitialViewXScaleValue = useMemo(
+    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
+    [data]
+  );
+
+  const [view, updateView] = useState({
+    x: gridGutter,
+    y: 0,
+    xScale: 1,
+    yScale: 1
+  });
+
+  const scaleInitialized = useRef(false);
+
+  const viewport = useViewport({
+    renderer,
+    stage,
+    width,
+    height,
+    view,
+    updateView,
+    refresh,
+    zoomXScale: false,
+    zoomYScale: true
+  });
+  const dataBySection = useMemo(() => getDataBySection(data), [data]);
+
+  useDrawLine({
+    container: viewport,
+    data: dataBySection.get(wellSections.SURFACE) || EMPTY_ARRAY,
+    mapData: mapInstant,
+    color: colorBySection[wellSections.SURFACE]
+  });
+
+  useDrawLine({
+    container: viewport,
+    data: dataBySection.get(wellSections.INTERMEDIATE) || EMPTY_ARRAY,
+    mapData: mapInstant,
+    color: colorBySection[wellSections.INTERMEDIATE]
+  });
+
+  useDrawLine({
+    container: viewport,
+    data: dataBySection.get(wellSections.CURVE) || EMPTY_ARRAY,
+    mapData: mapInstant,
+    color: colorBySection[wellSections.CURVE]
+  });
+
+  useDrawLine({
+    container: viewport,
+    data: dataBySection.get(wellSections.LATERAL) || EMPTY_ARRAY,
+    mapData: mapInstant,
+    color: colorBySection[wellSections.LATERAL]
+  });
+
+  useDrawLine({
+    container: viewport,
+    data: dataBySection.get(wellSections.SURFACE) || EMPTY_ARRAY,
+    mapData: mapInstant,
+    color: colorBySection[wellSections.SURFACE]
+  });
+
+  // at section markers labels
+
+  //useLabel();
+
   useDrawLine({ container: viewport, data, mapData: mapAverage, color: 0xca221d });
-  
-  const [, updateGrid] = useGrid({ container: viewport, width, height, gridGutter: 50 });
+
+  const [, updateGrid] = useGrid({
+    container: viewport,
+    width,
+    height,
+    gridGutter
+  });
+
+  const onReset = useCallback(() => {
+    updateView(view => ({
+      ...view,
+      x: gridGutter + 10,
+      y: 10,
+      yScale: getInitialViewYScaleValue(height - gridGutter - 50),
+      xScale: getInitialViewXScaleValue(width - gridGutter - 20)
+    }));
+  }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
+
+  // set initial scale
+  useEffect(
+    function setInitialXScale() {
+      if (data && data.length && width && height && !scaleInitialized.current) {
+        onReset();
+        scaleInitialized.current = true;
+      }
+    },
+    [width, data, view, getInitialViewXScaleValue, getInitialViewYScaleValue, height, onReset]
+  );
+
   useRectangle({
     container: stage,
     width,
@@ -252,10 +389,14 @@ export default function Rop({ className, style }) {
   });
 
   useEffect(() => {
-    updateGrid();
-
+    updateGrid(view);
     refresh();
   }, [refresh, stage, data, updateGrid, view]);
 
-  return <div className={className} style={style} ref={canvasRef} />;
+  return (
+    <div>
+      <div className={className} style={style} ref={canvasRef} />
+      <button onClick={onReset}>reset</button>
+    </div>
+  );
 }

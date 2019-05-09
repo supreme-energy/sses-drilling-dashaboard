@@ -104,43 +104,53 @@ function drawGrid(container, width, height, gutter = 50) {
 
   function calcBounds(xMin, xMax, yMin, yMax, tickCount) {
     const yRange = yMax - yMin;
-
-    const roughStep = yRange / (tickCount - 1);
+    const yRoughStep = yRange / (tickCount - 1);
+    const xRange = xMax - xMin;
+    const xRoughStep = xRange / (tickCount - 1);
 
     const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
-    const step = goodSteps.find(s => s >= roughStep);
+    const yStep = goodSteps.find(s => s >= yRoughStep);
+    const xStep = goodSteps.find(s => s >= xRoughStep);
 
     return {
-      xMin: Math.floor(xMin / step) * step,
-      xMax: Math.ceil(xMax / step) * step,
-      step: step,
-      yMin: Math.floor(yMin / step) * step,
-      yMax: Math.ceil(yMax / step) * step
+      xMin: Math.floor(xMin / xStep) * xStep,
+      xMax: Math.ceil(xMax / xStep) * xStep,
+      xStep,
+      yStep,
+      yMin: Math.floor(yMin / yStep) * yStep,
+      yMax: Math.ceil(yMax / yStep) * yStep
     };
   }
 
-  return function updateGrid() {
+  return function updateGrid(view) {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
+    const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
-    const minVisibleX = Math.floor((-1 * cwt.tx) / cwt.a);
-    const maxVisibleX = minVisibleX + Math.floor(width / cwt.a);
-    const minVisibleY = Math.floor((-1 * cwt.ty) / cwt.d);
-    const maxVisibleY = minVisibleY + Math.floor(height / cwt.d);
+    const minVisibleX = Math.floor((-1 * t.x) / t.xScale);
+    const maxVisibleX = minVisibleX + Math.floor(width / t.xScale);
+    const minVisibleY = Math.floor((-1 * t.y) / t.yScale);
+    const maxVisibleY = minVisibleY + Math.floor(height / t.yScale);
 
     // Possible improvement: only recalculate step if the x or y range has changed
     const b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
-    if (b.xMin !== lastBounds.xMin || b.step !== lastBounds.step || b.yMin !== lastBounds.yMin) {
+
+    if (
+      b.xMin !== lastBounds.xMin ||
+      b.xStep !== lastBounds.xStep ||
+      b.yStep !== lastBounds.yStep ||
+      b.yMin !== lastBounds.yMin
+    ) {
       for (let i = 0; i < xLines.length; i++) {
-        let pos = b.xMin + b.step * i;
+        let pos = b.xMin + b.xStep * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
         xLabels[i].text = `${pos}`;
       }
 
       for (let i = 0; i < yLines.length; i++) {
-        let pos = b.yMin + b.step * i;
+        let pos = b.yMin + b.yStep * i;
         yLines[i].y = pos;
         yLabels[i].y = pos;
         yLabels[i].text = `${pos}`;
