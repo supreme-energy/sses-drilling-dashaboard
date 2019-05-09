@@ -1,27 +1,33 @@
-.card {
-    display: flex;
-    border: 1px solid rgb(209, 208, 208);
+.headerToolbar {
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: rgb(209, 208, 208);
+    border-radius: 0;
 
-    .hBigSpacer {
-        width: 35px;
+    .wellName {
+        float: left;
     }
 
     .cardContent:last-child {
         padding: 7px;
-        width: 100%;
+        display: flex;
     }
 
-    .hExtraLargeSpacer {
-        width: 20%;
-    }
-
-    .row, .kpiRow {
+    .wellNameCol, .kpiCol {
         display: flex;
         align-items: center;
     }
 
-    .kpiRow {
-        width: 100%;
+    .wellNameCol {
+        flex-grow: 1;
+    }
+
+    .kpiCol {
+        flex-grow: 8;
+        justify-content: flex-end;
+        & > * {
+            margin: 0 0 0 30px;
+        }
     }
 
     .optionsButton {
@@ -29,7 +35,6 @@
             outline: 0;
         }
     }
-
     .status {
         margin-right: 20px;
     }

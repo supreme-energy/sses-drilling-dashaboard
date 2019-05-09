@@ -113,7 +113,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
 };
 CrossSectionDashboard.propTypes = {
-  wellId: PropTypes.string
+  wellId: PropTypes.string.isRequired
 };
 
 export default CrossSectionDashboard;
