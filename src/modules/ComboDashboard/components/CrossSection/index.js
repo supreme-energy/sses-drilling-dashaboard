@@ -9,8 +9,6 @@ import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
 import css from "./CrossSection.scss";
 
-const pixiApp = {};
-
 function extracted(width, height) {
   // Set up PIXI classes for rendering and draw layers
   // this.canvas = React.createRef();
@@ -183,6 +181,8 @@ class CrossSection extends Component {
 }
 
 CrossSection.propTypes = {
+  width: PropTypes.number,
+  height: PropTypes.number,
   view: PropTypes.object,
   updateView: PropTypes.func,
   formations: PropTypes.array,
