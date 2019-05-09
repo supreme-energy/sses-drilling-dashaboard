@@ -92,10 +92,9 @@ class TimeSlider extends React.Component {
     const { expanded } = this.props;
     return (
       <div className={classes.timeSliderComponent}>
-        {this.props.expanded && <div className={classes.timeSliderGraph} ref={this.canvas} />}
+        {expanded && <div className={classes.timeSliderGraph} ref={this.canvas} />}
         <Slider
-          className={this.props.expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
-          style={{ color: "#B6BA3E" }}
+          className={expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
           value={this.state.currentStep}
           onChange={this.handleSetSlider}
           step={STEP_VALUE}
