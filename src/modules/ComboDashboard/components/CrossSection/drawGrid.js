@@ -126,12 +126,6 @@ function drawGrid(container, width, height, gutter = 50) {
     const cwt = container.transform.worldTransform;
     const { width, height } = props;
 
-    bgx.clear().beginFill(0xffffff);
-    bgx.drawRect(0, 0, gutter, height);
-    bgy.clear().beginFill(0xffffff);
-    bgy.drawRect(0, height - gutter, width, gutter);
-    corner.clear().beginFill(0xffffff);
-    corner.drawRect(0, height - gutter, gutter, gutter);
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
     const minVisibleX = Math.floor((-1 * cwt.tx) / cwt.a);
     const maxVisibleX = minVisibleX + Math.floor(width / cwt.a);
@@ -147,6 +141,14 @@ function drawGrid(container, width, height, gutter = 50) {
       b.step !== lastBounds.step ||
       b.yMin !== lastBounds.yMin
     ) {
+      // Redraw the background as width or height may have changed
+      bgx.clear().beginFill(0xffffff);
+      bgx.drawRect(0, 0, gutter, height);
+      bgy.clear().beginFill(0xffffff);
+      bgy.drawRect(0, height - gutter, width, gutter);
+      corner.clear().beginFill(0xffffff);
+      corner.drawRect(0, height - gutter, gutter, gutter);
+
       for (let i = 0; i < xLines.length; i++) {
         let pos = b.xMin + b.step * i;
         xLines[i].x = pos;
