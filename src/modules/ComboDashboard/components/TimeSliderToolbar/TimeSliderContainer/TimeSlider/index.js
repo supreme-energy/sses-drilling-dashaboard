@@ -1,100 +1,114 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Slider from "@material-ui/lab/Slider";
 import * as PIXI from "pixi.js";
 
-const EXPANDED_HEIGHT = 100;
-const COLLAPSED_HEIGHT = 25;
+import { STEP_VALUE } from "../index";
+import classes from "../TimeSlider.scss";
+
+const HEIGHT = 60;
+
 class TimeSlider extends React.Component {
   constructor(props) {
     super(props);
-    // Create a Pixi Application
+
+    this.state = {
+      currentStep: this.props.step
+    };
+
+    this.sliderIntervalId = 0;
+
+    this.stage = new PIXI.Container();
+
     this.canvas = React.createRef();
 
-    this.renderer = new PIXI.Application({
-      width: 900, // default: 800
-      height: this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT, // default: 600
+    this.screenWidth = window.innerWidth;
+
+    this.screenHeight = window.innerHeight - 400;
+
+    this.app = new PIXI.Application({
+      width: this.screenWidth - 250, // default: 800
+      height: HEIGHT, // default: 600
       antialias: true, // default: false
       transparent: false, // default: false
       resolution: 1, // default: 1,
       backgroundColor: 0xffffff
     });
 
-    // Add the canvas that Pixi automatically created for you to the HTML document
-    // create the root of the scene graph
-    var stage = new PIXI.Container();
+    this.app.renderer.autoResize = true;
 
-    stage.interactive = true;
+    this.stage.interactive = true;
 
-    var graphics = new PIXI.Graphics();
-
-    // set a fill and line style
-    graphics.beginFill(0xff3300);
-    graphics.lineStyle(10, 0xffd900, 1);
-
-    // draw a shape
-    graphics.moveTo(50, 50);
-    graphics.lineTo(250, 50);
-    graphics.lineTo(100, 100);
-    graphics.lineTo(250, 220);
-    graphics.lineTo(50, 220);
-    graphics.lineTo(50, 50);
-    graphics.endFill();
-
-    // set a fill and line style again
-    graphics.lineStyle(10, 0xff0000, 0.8);
-    graphics.beginFill(0xff700b, 1);
-
-    // draw a second shape
-    graphics.moveTo(210, 300);
-    graphics.lineTo(450, 320);
-    graphics.lineTo(570, 350);
-    graphics.quadraticCurveTo(600, 0, 480, 100);
-    graphics.lineTo(330, 120);
-    graphics.lineTo(410, 200);
-    graphics.lineTo(210, 300);
-    graphics.endFill();
-
-    // draw a rectangle
-    graphics.lineStyle(2, 0x0000ff, 1);
-    graphics.drawRect(50, 250, 100, 100);
-
-    // draw a circle
-    graphics.lineStyle(0);
-    graphics.beginFill(0xffff0b, 0.5);
-    graphics.drawCircle(470, 200, 100);
-    graphics.endFill();
-
-    graphics.lineStyle(20, 0x33ff00);
-    graphics.moveTo(30, 30);
-    graphics.lineTo(600, 300);
-
-    stage.addChild(graphics);
-
-    document.body.appendChild(this.renderer.view);
-
-    this.renderer.render(stage);
+    this.graphics = new PIXI.Graphics();
   }
 
   componentDidMount() {
-    this.canvas.current.appendChild(this.renderer.view);
-    const h = this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT;
-    this.renderer.renderer.resize(this.canvas.current.offsetWidth - 170, h);
+    this.resizeCanvas();
+    this.drawGraph();
   }
 
-  componentDidUpdate({ expanded }) {
-    if (expanded !== this.props.expanded) {
-      const h = this.props.expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT;
-      this.renderer.renderer.resize(this.canvas.current.offsetWidth - 170, h);
+  componentDidUpdate(prevProps) {
+    const { expanded, step, zoom } = this.props;
+    // Redraw graphs if Time Slider is collapsed or expanded
+    if (prevProps.expanded !== expanded && expanded) {
+      this.resizeCanvas();
+      this.drawGraph();
+    }
+
+    // Set slider state
+    if (prevProps.step !== step) {
+      this.handleSetSlider("", step);
+    }
+
+    // Set zoom level
+    if (prevProps.zoom !== zoom) {
+      this.drawGraph(zoom);
     }
   }
 
+  resizeCanvas() {
+    this.app.renderer.resize(this.screenWidth - 250, HEIGHT);
+  }
+
+  drawGraph(zoom) {
+    if (this.app.view) {
+      // this.canvas.current.removeChild(this.app.view);
+    }
+
+    this.graphics.lineStyle(5, 0xb6ba3e);
+    // this.graphics.moveTo(0, height);
+    // this.graphics.lineTo(100, height);
+
+    this.app.stage.addChild(this.graphics);
+    this.canvas.current.appendChild(this.app.view);
+    this.app.render(this.stage);
+  }
+
+  handleSetSlider = (_, currentStep) => {
+    this.setState({ currentStep });
+  };
+
   render() {
-    return <div ref={this.canvas} />;
+    const { expanded } = this.props;
+    return (
+      <div className={classes.timeSliderComponent}>
+        {this.props.expanded && <div className={classes.timeSliderGraph} ref={this.canvas} />}
+        <Slider
+          className={this.props.expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
+          style={{ color: "#B6BA3E" }}
+          value={this.state.currentStep}
+          onChange={this.handleSetSlider}
+          step={STEP_VALUE}
+        />
+      </div>
+    );
   }
 }
 
 TimeSlider.propTypes = {
-  expanded: PropTypes.bool
+  expanded: PropTypes.bool,
+  step: PropTypes.number,
+  zoom: PropTypes.number
 };
 
 export default TimeSlider;

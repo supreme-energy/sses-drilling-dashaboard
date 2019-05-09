@@ -9,7 +9,7 @@ import classes from "./TimeSliderToolbar.scss";
 function TimeSliderToolbar() {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
   return (
-    <div className={classes.timeSliderToolbar}>
+    <Card className={classes.timeSliderToolbar}>
       <Card className={classes.collapseButtonContainer}>
         <IconButton className={classes.collapseButton} onClick={toggleExpanded}>
           {expanded ? <ExpandLess /> : <ExpandMore />}
@@ -19,7 +19,7 @@ function TimeSliderToolbar() {
         <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
         <TimeSlider expanded={expanded} />
       </div>
-    </div>
+    </Card>
   );
 }
 
