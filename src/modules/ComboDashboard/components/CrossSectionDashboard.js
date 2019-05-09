@@ -95,7 +95,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
           </label>
         </div>
       </div>
-      <ParentSize style={{ height: "100%", flex: 1, position: "relative" }}>
+      <ParentSize debounceTime={100} style={{ height: "100%", flex: 1, position: "relative" }}>
         {({ width, height }) => (
           <CrossSection
             width={width}
