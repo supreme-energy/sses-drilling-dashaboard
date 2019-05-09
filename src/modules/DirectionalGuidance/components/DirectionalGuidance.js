@@ -24,6 +24,7 @@ export const DirectionalGuidance = ({
     <h2>Directional Guidance</h2>
   </div>
 );
+
 DirectionalGuidance.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({

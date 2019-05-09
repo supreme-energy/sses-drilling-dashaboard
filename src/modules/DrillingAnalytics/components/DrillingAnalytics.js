@@ -24,6 +24,7 @@ export const DrillingAnalytics = ({
     <h2>Drilling Analytics</h2>
   </div>
 );
+
 DrillingAnalytics.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
