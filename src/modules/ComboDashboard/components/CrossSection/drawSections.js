@@ -13,6 +13,8 @@ function drawSections(container, width, height, surveys, projections, gutter) {
   const backdownFactor = 10;
   let backdown = 0;
   let prevScaleX = 1;
+  let prevHeight = 0;
+  let prevWidth = 0;
 
   const addSection = function() {
     const section = new PIXI.Graphics();
@@ -22,10 +24,14 @@ function drawSections(container, width, height, surveys, projections, gutter) {
     return section;
   };
 
-  return function update(props, height) {
-    const { surveys, projections, view } = props;
-    if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
+  return function update(props) {
+    const { surveys, projections, view, height, width } = props;
+    if (!(width !== prevWidth || height !== prevHeight)) {
+      if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
+    }
     prevScaleX = view.xScale;
+    prevWidth = width;
+    prevHeight = height;
     const y = height - gutter - buttonHeight;
     if (backdown === 0) {
       backdown = backdownFactor;

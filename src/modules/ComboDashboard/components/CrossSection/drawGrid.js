@@ -15,7 +15,7 @@ function makeXTickAndLine(fontSize, height) {
   const line = new PIXI.Graphics();
   line.lineStyle(1, 0xaaaaaa, 0.25);
   line.moveTo(0, 0);
-  line.lineTo(0, height);
+  line.lineTo(0, 4096);
   line.transform.updateTransform = frozenXTransform;
 
   return [line, label];
@@ -32,7 +32,7 @@ function makeYTickAndLine(fontSize, width) {
   const line = new PIXI.Graphics();
   line.lineStyle(1, 0xaaaaaa, 0.25);
   line.moveTo(0, 0);
-  line.lineTo(width, 0);
+  line.lineTo(8192, 0);
   line.transform.updateTransform = frozenYTransform;
 
   return [line, label];
@@ -48,6 +48,7 @@ function makeYTickAndLine(fontSize, width) {
  * @param container  The PIXI Container to which the grid should be added
  * @param width  The canvas width
  * @param height  The canvas height
+ * @param gutter  The width of both axes
  * @returns {updateGrid}  The function to update the gridlines
  */
 function drawGrid(container, width, height, gutter = 50) {
@@ -119,10 +120,18 @@ function drawGrid(container, width, height, gutter = 50) {
     };
   }
 
-  return function updateGrid() {
+  return function updateGrid(props) {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
+    const { width, height } = props;
+
+    bgx.clear().beginFill(0xffffff);
+    bgx.drawRect(0, 0, gutter, height);
+    bgy.clear().beginFill(0xffffff);
+    bgy.drawRect(0, height - gutter, width, gutter);
+    corner.clear().beginFill(0xffffff);
+    corner.drawRect(0, height - gutter, gutter, gutter);
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
     const minVisibleX = Math.floor((-1 * cwt.tx) / cwt.a);
     const maxVisibleX = minVisibleX + Math.floor(width / cwt.a);
@@ -131,11 +140,18 @@ function drawGrid(container, width, height, gutter = 50) {
 
     // Possible improvement: only recalculate step if the x or y range has changed
     const b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
-    if (b.xMin !== lastBounds.xMin || b.step !== lastBounds.step || b.yMin !== lastBounds.yMin) {
+    if (
+      b.xMax !== lastBounds.xMax ||
+      b.yMax !== lastBounds.yMax ||
+      b.xMin !== lastBounds.xMin ||
+      b.step !== lastBounds.step ||
+      b.yMin !== lastBounds.yMin
+    ) {
       for (let i = 0; i < xLines.length; i++) {
         let pos = b.xMin + b.step * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
+        xLabels[i].y = height - 5;
         xLabels[i].text = `${pos}`;
       }
 
