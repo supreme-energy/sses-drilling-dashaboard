@@ -11,10 +11,12 @@ import css from "./CrossSection.scss";
 
 const pixiApp = {};
 
-function extracted() {
+function extracted(width, height) {
   // Set up PIXI classes for rendering and draw layers
-  this.canvas = React.createRef();
+  // this.canvas = React.createRef();
   this.renderer = PIXI.autoDetectRenderer({
+    width: width,
+    height: height,
     antialias: true,
     autoResize: true,
     resolution: devicePixelRatio,
@@ -71,26 +73,19 @@ function extracted() {
     }
   });
 }
-function resize() {
-  const parent = this.renderer.view.parentNode;
-  if (!parent) return;
-  this.renderer.resize(parent.clientWidth, parent.clientHeight);
-}
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
 class CrossSection extends Component {
   constructor(props) {
     super(props);
-
-    extracted.call(this);
+    this.canvas = React.createRef();
   }
 
   componentDidMount() {
+    extracted.call(this, this.props.width, this.props.height);
     this.canvas.current.appendChild(this.renderer.view);
-    this.resize = resize.bind(this);
-    window.addEventListener("resize", this.resize);
-    resize.call(this);
+    this.renderer.resize(this.props.width, this.props.height);
 
     this.updateWebGL();
     this.ticker.start();
@@ -101,23 +96,20 @@ class CrossSection extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    this.renderer.resize(this.props.width, this.props.height);
+    this.stage.hitArea = new PIXI.Rectangle(0, 0, this.renderer.screen.width, this.renderer.screen.height);
     this.updateWebGL();
   }
 
   componentWillUnmount() {
     // TODO: Clean up and remove other objects to improve performance
     this.ticker.stop();
-    window.removeEventListener("resize", this.resize);
     this.canvas.current.removeChild(this.renderer.view);
     this.viewport.destroy({ children: true });
   }
 
   render() {
-    return (
-      <div className={css.crossSectionWrapper}>
-        <div className={css.crossSection} ref={this.canvas} />
-      </div>
-    );
+    return <div className={css.crossSection} ref={this.canvas} />;
   }
 
   updateWebGL() {

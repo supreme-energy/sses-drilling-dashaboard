@@ -1,6 +1,7 @@
 import React, { Suspense, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
+import { ParentSize } from "@vx/responsive";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
 
@@ -94,14 +95,20 @@ export const CrossSectionDashboard = ({ wellId }) => {
           </label>
         </div>
       </div>
-      <CrossSection
-        view={view}
-        updateView={mergeView}
-        wellPlan={wellPlan}
-        surveys={surveys}
-        formations={formations}
-        projections={projections}
-      />
+      <ParentSize style={{ height: "100%", flex: 1, position: "relative" }}>
+        {({ width, height }) => (
+          <CrossSection
+            width={width}
+            height={height}
+            view={view}
+            updateView={mergeView}
+            wellPlan={wellPlan}
+            surveys={surveys}
+            formations={formations}
+            projections={projections}
+          />
+        )}
+      </ParentSize>
     </Suspense>
   );
 };
