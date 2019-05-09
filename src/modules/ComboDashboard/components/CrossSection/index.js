@@ -18,12 +18,11 @@ class CrossSection extends Component {
   }
 
   componentDidMount() {
-    const { width, height } = this.props;
     // Set up PIXI classes for rendering and draw layers
     // this.canvas = React.createRef();
     this.renderer = PIXI.autoDetectRenderer({
-      width: width,
-      height: height,
+      width: 0,
+      height: 0,
       antialias: true,
       autoResize: true,
       resolution: devicePixelRatio,
@@ -54,22 +53,9 @@ class CrossSection extends Component {
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, this.props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer, this.props.surveys);
     this.projectionLineUpdate = drawProjections(this.wellPathLayer, this.props.projections);
-    this.projectionUpdate = interactiveProjection(
-      this.UILayer,
-      this.props.view,
-      this.props.updateView,
-      this.renderer.screen.width,
-      this.renderer.screen.height
-    );
-    this.sectionUpdate = drawSections(
-      this.UILayer,
-      this.renderer.screen.width,
-      this.renderer.screen.height,
-      this.props.surveys,
-      this.props.projections,
-      gridGutter
-    );
-    this.gridUpdate = drawGrid(this.gridLayer, this.renderer.screen.width, this.renderer.screen.height, gridGutter);
+    this.projectionUpdate = interactiveProjection(this.UILayer, this.props.view, this.props.updateView);
+    this.sectionUpdate = drawSections(this.UILayer, gridGutter);
+    this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.newProps = true;
@@ -80,7 +66,6 @@ class CrossSection extends Component {
       }
     });
     this.canvas.current.appendChild(this.renderer.view);
-    this.renderer.resize(width, height);
 
     this.updateWebGL();
     this.ticker.start();

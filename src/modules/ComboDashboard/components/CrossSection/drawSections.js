@@ -4,7 +4,7 @@ import { frozenXTransform } from "./customPixiTransforms";
 const survey = [0xa6a6a6, 0.5];
 const projection = [0xee2211, 0.5];
 
-function drawSections(container, width, height, surveys, projections, gutter) {
+function drawSections(container, gutter) {
   const buttonHeight = 10;
   const pixiList = [];
   // The update function immediately stops re-rendering as soon as the scale

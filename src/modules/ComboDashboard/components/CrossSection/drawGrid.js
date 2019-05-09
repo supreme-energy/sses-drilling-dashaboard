@@ -1,14 +1,13 @@
 import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
-function makeXTickAndLine(fontSize, height) {
+function makeXTickAndLine(fontSize) {
   const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
   });
   label.anchor.set(1, 0.5);
   label.rotation = Math.PI / 2;
-  label.y = height;
   label.transform.updateTransform = frozenXTransform;
 
   // Using GraphicsGeometry may offer better performance here?
@@ -20,7 +19,7 @@ function makeXTickAndLine(fontSize, height) {
 
   return [line, label];
 }
-function makeYTickAndLine(fontSize, width) {
+function makeYTickAndLine(fontSize) {
   const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
@@ -51,7 +50,7 @@ function makeYTickAndLine(fontSize, width) {
  * @param gutter  The width of both axes
  * @returns {updateGrid}  The function to update the gridlines
  */
-function drawGrid(container, width, height, gutter = 50) {
+function drawGrid(container, gutter = 50) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
@@ -60,7 +59,7 @@ function drawGrid(container, width, height, gutter = 50) {
   const xLabels = [];
   const xLines = [];
   for (let i = 0; i < maxXLines; i++) {
-    let [line, label] = makeXTickAndLine(fontSize, height);
+    let [line, label] = makeXTickAndLine(fontSize);
     xLines.push(line);
     xLabels.push(label);
   }
@@ -68,7 +67,7 @@ function drawGrid(container, width, height, gutter = 50) {
   const yLabels = [];
   const yLines = [];
   for (let i = 0; i < maxYLines; i++) {
-    let [line, label] = makeYTickAndLine(fontSize, width);
+    let [line, label] = makeYTickAndLine(fontSize);
     yLines.push(line);
     yLabels.push(label);
   }
@@ -79,16 +78,10 @@ function drawGrid(container, width, height, gutter = 50) {
 
   // White background behind tick labels
   const bgx = new PIXI.Graphics();
-  bgx.beginFill(0xffffff);
-  bgx.lineStyle(0);
-  bgx.drawRect(0, 0, gutter, height);
   bgx.transform.updateTransform = frozenXYTransform;
   container.addChild(bgx);
 
   const bgy = new PIXI.Graphics();
-  bgy.beginFill(0xffffff);
-  bgy.lineStyle(0);
-  bgy.drawRect(0, height - gutter, width, gutter);
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
@@ -98,8 +91,6 @@ function drawGrid(container, width, height, gutter = 50) {
 
   // Corner to hide overlapping tick labels
   const corner = new PIXI.Graphics();
-  corner.beginFill(0xffffff);
-  corner.drawRect(0, height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
