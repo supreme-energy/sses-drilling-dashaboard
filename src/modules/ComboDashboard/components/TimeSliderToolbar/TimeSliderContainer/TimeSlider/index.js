@@ -48,16 +48,11 @@ class TimeSlider extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { expanded, step, zoom } = this.props;
+    const { expanded, zoom } = this.props;
     // Redraw graphs if Time Slider is collapsed or expanded
     if (prevProps.expanded !== expanded && expanded) {
       this.resizeCanvas();
       this.drawGraph();
-    }
-
-    // Set slider state
-    if (prevProps.step !== step) {
-      this.handleSetSlider("", step);
     }
 
     // Set zoom level
@@ -85,7 +80,8 @@ class TimeSlider extends React.Component {
   }
 
   handleSetSlider = (_, currentStep) => {
-    this.setState({ currentStep });
+    // this.setState({ currentStep });
+    this.props.setSliderStep(currentStep);
   };
 
   render() {
@@ -95,7 +91,7 @@ class TimeSlider extends React.Component {
         {expanded && <div className={classes.timeSliderGraph} ref={this.canvas} />}
         <Slider
           className={expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
-          value={this.state.currentStep}
+          value={this.props.step}
           onChange={this.handleSetSlider}
           step={STEP_VALUE}
         />
@@ -107,7 +103,8 @@ class TimeSlider extends React.Component {
 TimeSlider.propTypes = {
   expanded: PropTypes.bool,
   step: PropTypes.number,
-  zoom: PropTypes.number
+  zoom: PropTypes.number,
+  setSliderStep: PropTypes.func
 };
 
 export default TimeSlider;

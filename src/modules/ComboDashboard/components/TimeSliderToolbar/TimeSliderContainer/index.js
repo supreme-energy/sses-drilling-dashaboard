@@ -99,7 +99,6 @@ function TimeSliderContainer({ className, expanded }) {
     isPlaying ? 1000 : null
   );
 
-  console.log(sliderStep);
   return (
     <Card className={classNames(classes.timeSliderContainer, className)}>
       {expanded && (
@@ -160,7 +159,13 @@ function TimeSliderContainer({ className, expanded }) {
             </Typography>
           )}
         </div>
-        <TimeSlider expanded={expanded} zoom={zoom} step={sliderStep} />
+        <TimeSlider
+          expanded={expanded}
+          zoom={zoom}
+          step={sliderStep}
+          setSliderStep={setSliderStep}
+          setIsPlaying={setIsPlaying}
+        />
         <div>
           <AccessTime
             className={classNames(
