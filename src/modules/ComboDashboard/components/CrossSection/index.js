@@ -17,7 +17,7 @@ class CrossSection extends Component {
   componentDidMount() {
     // Set up PIXI classes for rendering and draw layers
     // this.canvas = React.createRef();
-    pixiApp.init(this.props);
+    pixiApp.init(this.props, this.props.view, this.props.updateView);
     this.canvas.current.appendChild(pixiApp.renderer.view);
 
     this.updateWebGL();

@@ -30,7 +30,8 @@ export default class PixiCrossSection {
 
     this.makeInteractive(this.stage);
   }
-  init(props) {
+  init(props, viewData, viewDataUpdate) {
+    this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 50;
     // Create the formation layers
     this.formationsUpdate = drawFormations(
@@ -72,11 +73,12 @@ export default class PixiCrossSection {
       if (!isDragging || isOutside) {
         return;
       }
-      const prev = this.props.view;
       const currMouse = moveData.data.global;
-      this.props.updateView({
-        x: Number(prev.x) + (currMouse.x - prevMouse.x),
-        y: Number(prev.y) + (currMouse.y - prevMouse.y)
+      this.viewDataUpdate(prev => {
+        return {
+          x: Number(prev.x) + (currMouse.x - prevMouse.x),
+          y: Number(prev.y) + (currMouse.y - prevMouse.y)
+        };
       });
 
       Object.assign(prevMouse, currMouse);
@@ -95,12 +97,13 @@ export default class PixiCrossSection {
 
         // sign of deltaY (-1,0,1) determines zoom in or out
         const factor = 1 - Math.sign(e.deltaY) * 0.03;
-        const prev = this.props.view;
-        this.props.updateView({
-          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
-          xScale: prev.xScale * factor,
-          yScale: prev.yScale * factor
+        this.viewDataUpdate(prev => {
+          return {
+            x: globalMouse.x - (globalMouse.x - prev.x) * factor,
+            y: globalMouse.y - (globalMouse.y - prev.y) * factor,
+            xScale: prev.xScale * factor,
+            yScale: prev.yScale * factor
+          };
         });
       },
       false
