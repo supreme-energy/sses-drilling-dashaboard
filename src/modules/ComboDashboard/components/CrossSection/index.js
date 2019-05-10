@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
+import PixiCrossSection from "./PixiCrossSection";
 import { drawFormations } from "./drawFormations";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
@@ -8,6 +9,8 @@ import { drawGrid } from "./drawGrid.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
 import css from "./CrossSection.scss";
+
+const pixiApp = new PixiCrossSection();
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
