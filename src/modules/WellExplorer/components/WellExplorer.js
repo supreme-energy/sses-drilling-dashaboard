@@ -116,8 +116,12 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
-      <WellImporterModal open={importModalShown} hideBackdrop>
-        <WellImporter onClose={() => toggleShowImportModal(false)} />
+      <WellImporterModal
+        open={importModalShown}
+        onClose={() => toggleShowImportModal(false)}
+        hideBackdrop
+      >
+        <WellImporter />
       </WellImporterModal>
 
       <WellMap
