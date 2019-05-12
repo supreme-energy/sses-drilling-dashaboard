@@ -1,5 +1,8 @@
 import React, { lazy, useState } from "react";
 import PropTypes from "prop-types";
+import WellImporterModal from "../../../modals/WellImporterModal";
+import WellImporter from "../../../modals/WellImporterModal/WellImporter";
+import { addFile } from "../../../store/files";
 import classes from "./WellExplorer.scss";
 import SearchCard from "./SearchCard";
 import { withTheme } from "@material-ui/core/styles";
@@ -69,6 +72,7 @@ function getWellsZoomBounds(wells) {
 export const WellExplorer = ({
   wellTimestamps,
   changeActiveTab,
+  addFile,
   activeTab,
   theme,
   selectedWellId,
@@ -80,7 +84,8 @@ export const WellExplorer = ({
   const [wells, wellsById, updateFavorite] = useWells();
 
   const [searchTerm, onSearchTermChanged] = useState("");
-  const fileterdWells = useMemo(() => getFilteredWells(activeTab, wells, wellTimestamps), [
+  const [importModalShown, toggleShowImportModal] = useState(false);
+  const filteredWells = useMemo(() => getFilteredWells(activeTab, wells, wellTimestamps), [
     activeTab,
     wells,
     wellTimestamps
@@ -88,13 +93,22 @@ export const WellExplorer = ({
 
   const recentWells = getRecentWells(wells, wellTimestamps);
   const mostRecentWell = recentWells[0];
-  const search = useWellsSearch(fileterdWells);
+  const search = useWellsSearch(filteredWells);
   const searchResults = useMemo(() => search(searchTerm), [search, searchTerm]);
   const openedWell = wellsById[openedWellId];
   const selectedWell = wellsById[selectedWellId];
   const overviewMode = !!selectedWellId;
   const wellsBounds = useMemo(() => getWellsZoomBounds(wells), [wells]);
   const selectedWellMapBounds = useMemo(() => getWellZoomBounds(selectedWell), [selectedWell]);
+  const onFilesToImportChange = (event) => {
+    if (!event.target.files || !event.target.files.length) {
+      return;
+    }
+
+    addFile(event.target.files[0]);
+    toggleShowImportModal(true);
+  };
+
   return (
     <div
       className={classNames({
@@ -102,6 +116,10 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
+      <WellImporterModal open={importModalShown} hideBackdrop>
+        <WellImporter onClose={() => toggleShowImportModal(false)} />
+      </WellImporterModal>
+
       <WellMap
         theme={theme}
         showLegend
@@ -148,6 +166,7 @@ export const WellExplorer = ({
             theme={theme}
             openedWell={openedWell}
             lastEditedWell={mostRecentWell}
+            onFilesToImportChange={onFilesToImportChange}
           />
         )}
       </div>
@@ -159,6 +178,7 @@ WellExplorer.propTypes = {
   theme: PropTypes.object,
   wellTimestamps: PropTypes.object,
   changeActiveTab: PropTypes.func,
+  addFile: PropTypes.func.isRequired,
   selectedWellId: PropTypes.string,
   activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES]),
   match: PropTypes.shape({
@@ -178,7 +198,8 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToPops = {
-  changeActiveTab
+  changeActiveTab,
+  addFile
 };
 
 const bindData = flowRight([

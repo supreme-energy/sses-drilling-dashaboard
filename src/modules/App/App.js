@@ -14,7 +14,6 @@ import DirectionalGuidanceModule from "modules/DirectionalGuidance";
 import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
-import WellImporterModule from "modules/WellImporter";
 import plusBasicAuth from "fetch-plus-basicauth";
 import WellUpdate from "./WellUpdate";
 
@@ -46,7 +45,6 @@ class App extends React.Component {
     const DrillingAnalytics = DrillingAnalyticsModule(store);
     const StructuralGuidance = StructuralGuidanceModule(store);
     const WellExplorer = WellExplorerModule(store);
-    const WellImporter = WellImporterModule(store);
 
     return (
       <Suspense fallback={<div>Loading...</div>}>
@@ -61,7 +59,6 @@ class App extends React.Component {
                   <PageLayout history={history}>
                     <Route path="/:wellId" component={WellUpdate} />
                     <Switch>
-                      <Route path="/:wellId/importer" exact component={WellImporter} />
                       <Route path="/:wellId/combo" exact component={ComboDashboard} />
                       <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
                       <Route path="/:wellId/structural" exact component={StructuralGuidance} />
