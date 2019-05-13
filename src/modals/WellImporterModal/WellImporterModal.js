@@ -13,7 +13,6 @@ const styles = {
 const StyledModal = withStyles(styles, { name: 'MuiModal' })(Modal);
 
 const WellImporterModal = ({ onClose, children, ...rest }) => {
-  console.log(children);
   return (
     <StyledModal {...rest} onClose={onClose}>
       <React.Fragment>
