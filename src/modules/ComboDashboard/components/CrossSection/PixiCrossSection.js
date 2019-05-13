@@ -5,6 +5,7 @@ import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
+import { removeAllChildren } from "./pixiUtils";
 
 export default class PixiCrossSection {
   constructor() {
@@ -124,4 +125,10 @@ export default class PixiCrossSection {
     this.newProps = true;
   }
   resize() {}
+  cleanUp() {
+    removeAllChildren(this.formationsLayer);
+    removeAllChildren(this.wellPathLayer);
+    removeAllChildren(this.UILayer);
+    removeAllChildren(this.gridLayer);
+  }
 }

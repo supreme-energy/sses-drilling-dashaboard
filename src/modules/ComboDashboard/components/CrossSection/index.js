@@ -38,6 +38,7 @@ class CrossSection extends Component {
     // TODO: Clean up and remove other objects to improve performance
     pixiApp.ticker.stop();
     this.canvas.current.removeChild(pixiApp.renderer.view);
+    pixiApp.cleanUp();
   }
 
   render() {
