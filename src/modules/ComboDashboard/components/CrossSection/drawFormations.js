@@ -22,20 +22,24 @@ export function drawFormations(container, formations, lastSurvey) {
   function update(formations, lastSurvey) {
     if (!formations.length || !lastSurvey || prevDataLength === formations.length) return;
     prevDataLength = formations.length;
-    // TODO: Handle new formation data and remove unnecessary calculations
-    for (let f of formations) {
-      f.points = f.data.map(point => [Number(point.vs), Number(point.tot)]);
-    }
+    // TODO: Handle updated formation data (for instance adjusting a projection point)
     for (let i = 0; i < formations.length - 1; i++) {
-      let { points, bg_color: bgColor, bg_percent: bgPercent } = formations[i];
-      const { points: nextPoints } = formations[i + 1];
-      for (let j = 0; j < points.length - 1; j++) {
-        //
-        if (points[j][0] >= lastSurvey.vs - 0.01) {
+      let { bg_color: bgColor, bg_percent: bgPercent } = formations[i];
+      for (let j = 0; j < formations[i].data.length - 1; j++) {
+        if (formations[i].data[j].vs >= lastSurvey.vs - 0.01) {
           bgPercent = 0.3;
         }
+        let p1 = formations[i].data[j];
+        let p2 = formations[i].data[j + 1];
+        let p3 = formations[i + 1].data[j + 1];
+        let p4 = formations[i + 1].data[j];
+
         // Draw a polygon with four points having the height of this layer
-        const p = [...points[j], ...points[j + 1], ...nextPoints[j + 1], ...nextPoints[j]];
+        const a1 = [p1.vs, p1.tot + p2.fault];
+        const a2 = [p2.vs, p2.tot];
+        const a3 = [p3.vs, p3.tot];
+        const a4 = [p4.vs, p4.tot + p3.fault];
+        const p = [...a1, ...a2, ...a3, ...a4];
         drawFormationSegment(bgColor, bgPercent, p, container);
       }
     }

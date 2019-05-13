@@ -47,7 +47,7 @@ function drawProjections(container, projections) {
  * @param height        Current canvas height
  * @returns {Function}  The update function to be called each tick
  */
-function interactiveProjection(container, viewProps, pointUpdate, width, height) {
+function interactiveProjection(container, viewProps, pointUpdate) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
   const white = 0xffffff;
