@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import HeaderToolbar from "./HeaderToolbar";
 import TimeSliderToolbar from "./TimeSliderToolbar";
+import classes from "./ComboDashboard.scss";
 
 function ComboDashboard({
   match: {
@@ -11,7 +12,7 @@ function ComboDashboard({
   }
 }) {
   return (
-    <div>
+    <div className={classes.comboDashboardWrapper}>
       <HeaderToolbar wellId={openedWellId} />
       <TimeSliderToolbar />
       <CrossSectionDashboard wellId={openedWellId} />
