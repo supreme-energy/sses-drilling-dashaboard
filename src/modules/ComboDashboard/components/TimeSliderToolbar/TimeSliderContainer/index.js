@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useReducer, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Card, Typography, IconButton } from "@material-ui/core";
+import { Card, ClickAwayListener, Menu, Typography, IconButton, MenuItem } from "@material-ui/core";
 import {
   AccessTime,
   AddCircleOutline,
   Adjust,
+  CheckCircle,
   RemoveCircleOutline,
   PlayCircleOutline,
   PauseCircleOutline,
@@ -21,6 +22,7 @@ import classes from "./TimeSlider.scss";
 export const STEP_VALUE = 1;
 export const FORWARD = "FORWARD";
 export const REWIND = "REWIND";
+const DATA_TYPES = ["Slide", "Connection", "ROP", "Length"];
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -44,21 +46,32 @@ function useInterval(callback, delay) {
 
 // TODO: Build Time Slider Component
 function TimeSliderContainer({ className, expanded }) {
-  const [zoom, setZoom] = useState(0);
+  const [zoom, setZoom] = useState([0, 0]);
+
   const [sliderStep, setSliderStep] = useState(0);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [buttonId, setButtonId] = useState("");
+  const [selectedTypes, setSelectedTypes] = useState(["ROP"]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleZoomOut = useCallback(() => {
-    setZoom(zoom - STEP_VALUE);
+    setZoom(zoom => [zoom[0] - STEP_VALUE, -1]);
   });
 
   const handleResetZoom = useCallback(() => {
-    setZoom(0);
+    setZoom([0, 0]);
   });
 
   const handleZoomIn = useCallback(() => {
-    setZoom(zoom + STEP_VALUE);
+    setZoom(zoom => [zoom[0] + STEP_VALUE, 1]);
+  });
+
+  const handleSetBeginning = useCallback(() => {
+    setSliderStep(0);
+  });
+
+  const handleSetEnd = useCallback(() => {
+    setSliderStep(100);
   });
 
   const onForwardDown = useCallback(() => {
@@ -107,14 +120,17 @@ function TimeSliderContainer({ className, expanded }) {
             Time Slider
           </Typography>
           <div className={classes.legend}>
-            <div className={classNames(classes.legendKey, classes.slideLegendKey)} />
-            <Typography variant="caption">Slide</Typography>
-            <div className={classNames(classes.legendKey, classes.connectionLegendKey)} />
-            <Typography variant="caption">Connection</Typography>
-            <div className={classNames(classes.legendKey, classes.ropLegendKey)} />
-            <Typography variant="caption">ROP</Typography>
-            <div className={classNames(classes.legendKey, classes.lengthLegendKey)} />
-            <Typography variant="caption">Length</Typography>
+            {DATA_TYPES.map((type, index) => {
+              if (selectedTypes.includes(type)) {
+                console.log(typeof `classes.${type.toLowerCase()}LegendKey`);
+                return (
+                  <React.Fragment key={index}>
+                    <div className={classNames(classes.legendKey, classes[`${type.toLowerCase()}LegendKey`])} />
+                    <Typography variant="caption">{type}</Typography>
+                  </React.Fragment>
+                );
+              }
+            })}
           </div>
           <div className={classes.timeSliderControls}>
             <div className={classes.zoomControls}>
@@ -140,24 +156,50 @@ function TimeSliderContainer({ className, expanded }) {
               </IconButton>
             </div>
           </div>
-          <IconButton className={classes.optionsButton}>
+          <IconButton
+            className={classes.optionsButton}
+            aria-owns={selectedTypes.length ? "drill-phase-menu" : undefined}
+            aria-haspopup="true"
+            onClick={e => setAnchorEl(e.currentTarget)}
+          >
             <MoreVert />
+            <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
+              <div>
+                <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
+                  {DATA_TYPES.map((type, index) => {
+                    const selected = selectedTypes.includes(type);
+                    return (
+                      <MenuItem
+                        key={index}
+                        className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
+                        onClick={() => setSelectedTypes(type)}
+                      >
+                        <div className={classes.phaseCodeBuffer}>{type}</div>
+                        {selected && <CheckCircle className={classes.selectedPhase} />}
+                      </MenuItem>
+                    );
+                  })}
+                </Menu>
+              </div>
+            </ClickAwayListener>
           </IconButton>
         </div>
       )}
       <div className={classes.timeSliderView}>
         <div>
-          <Restore
-            className={classNames(
-              classes.backwardTime,
-              expanded ? classes.expandedBackwardTime : classes.collapsedBackwardTime
+          <IconButton onClick={handleSetBeginning}>
+            <Restore
+              className={classNames(
+                classes.backwardTime,
+                expanded ? classes.expandedBackwardTime : classes.collapsedBackwardTime
+              )}
+            />
+            {expanded && (
+              <Typography className={classes.beginningTime} variant="caption">
+                {"09-18-2019"}
+              </Typography>
             )}
-          />
-          {expanded && (
-            <Typography className={classes.beginningTime} variant="caption">
-              {"09-18-2019"}
-            </Typography>
-          )}
+          </IconButton>
         </div>
         <TimeSlider
           expanded={expanded}
@@ -167,17 +209,19 @@ function TimeSliderContainer({ className, expanded }) {
           setIsPlaying={setIsPlaying}
         />
         <div>
-          <AccessTime
-            className={classNames(
-              classes.forwardTime,
-              expanded ? classes.expandedForwardTime : classes.collapsedForwardTime
+          <IconButton onClick={handleSetEnd}>
+            <AccessTime
+              className={classNames(
+                classes.forwardTime,
+                expanded ? classes.expandedForwardTime : classes.collapsedForwardTime
+              )}
+            />
+            {expanded && (
+              <Typography variant="caption" className={classes.now}>
+                NOW
+              </Typography>
             )}
-          />
-          {expanded && (
-            <Typography variant="caption" className={classes.now}>
-              NOW
-            </Typography>
-          )}
+          </IconButton>
         </div>
       </div>
     </Card>
