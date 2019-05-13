@@ -50,7 +50,7 @@ function makeYTickAndLine(fontSize, width) {
  * @param height  The canvas height
  * @returns {updateGrid}  The function to update the gridlines
  */
-function drawGrid(container, width, height, gutter = 50) {
+function drawGrid(container, width, height, gutter = 50, xAxisOrientation) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
@@ -62,6 +62,9 @@ function drawGrid(container, width, height, gutter = 50) {
     let [line, label] = makeXTickAndLine(fontSize, height);
     xLines.push(line);
     xLabels.push(label);
+    if (xAxisOrientation === "top") {
+      label.y = 30;
+    }
   }
 
   const yLabels = [];
@@ -87,7 +90,7 @@ function drawGrid(container, width, height, gutter = 50) {
   const bgy = new PIXI.Graphics();
   bgy.beginFill(0xffffff);
   bgy.lineStyle(0);
-  bgy.drawRect(0, height - gutter, width, gutter);
+  bgy.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, width, gutter);
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
@@ -98,7 +101,7 @@ function drawGrid(container, width, height, gutter = 50) {
   // Corner to hide overlapping tick labels
   const corner = new PIXI.Graphics();
   corner.beginFill(0xffffff);
-  corner.drawRect(0, height - gutter, gutter, gutter);
+  corner.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
