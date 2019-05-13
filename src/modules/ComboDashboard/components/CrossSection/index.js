@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import PixiCrossSection from "./PixiCrossSection";
-import css from "./CrossSection.scss";
+import classes from "./CrossSection.scss";
 
 const pixiApp = new PixiCrossSection();
 
@@ -36,7 +36,7 @@ class CrossSection extends Component {
   }
 
   render() {
-    return <div className={css.crossSection} ref={this.canvas} />;
+    return <div className={classes.crossSection} ref={this.canvas} />;
   }
 }
 
