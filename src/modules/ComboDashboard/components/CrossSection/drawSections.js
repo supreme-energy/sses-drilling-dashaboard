@@ -4,9 +4,8 @@ import { frozenXTransform } from "./customPixiTransforms";
 const survey = [0xa6a6a6, 0.5];
 const projection = [0xee2211, 0.5];
 
-function drawSections(container, width, height, surveys, projections, gutter) {
+function drawSections(container, gutter) {
   const buttonHeight = 10;
-  const y = height - gutter - buttonHeight;
   const pixiList = [];
   // The update function immediately stops re-rendering as soon as the scale
   // is equal to the previous scale.  However, that doesn't re-align the sections
@@ -14,6 +13,8 @@ function drawSections(container, width, height, surveys, projections, gutter) {
   const backdownFactor = 10;
   let backdown = 0;
   let prevScaleX = 1;
+  let prevHeight = 0;
+  let prevWidth = 0;
 
   const addSection = function() {
     const section = new PIXI.Graphics();
@@ -24,9 +25,14 @@ function drawSections(container, width, height, surveys, projections, gutter) {
   };
 
   return function update(props) {
-    const { surveys, projections, view } = props;
-    if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
+    const { surveys, projections, view, height, width } = props;
+    if (!(width !== prevWidth || height !== prevHeight)) {
+      if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
+    }
     prevScaleX = view.xScale;
+    prevWidth = width;
+    prevHeight = height;
+    const y = height - gutter - buttonHeight;
     if (backdown === 0) {
       backdown = backdownFactor;
     } else {

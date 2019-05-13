@@ -8,14 +8,14 @@
         float: left;
     }
 
-    .cardContent {
+    .cardContent:last-child {
         padding: 7px;
         display: flex;
     }
 
     .wellNameCol, .kpiCol {
         display: flex;
-        align-items: center;        
+        align-items: center;
     }
 
     .wellNameCol {
@@ -34,5 +34,8 @@
         &:focus {
             outline: 0;
         }
+    }
+    .status {
+        margin-right: 20px;
     }
 }
