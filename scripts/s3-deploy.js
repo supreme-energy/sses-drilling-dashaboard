@@ -46,7 +46,7 @@ const EXPIRES_DATE = new Date(new Date().setFullYear(new Date().getFullYear() + 
 
 const EXT_TO_MIME_TYPE = {
   html: "text/html",
-  css: "text/classes",
+  css: "text/css",
   json: "application/json",
   js: "application/javascript",
   pdf: "application/pdf",

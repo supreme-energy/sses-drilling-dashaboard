@@ -47,4 +47,9 @@ function subscribeToMoveEvents(obj, cb) {
   }
 }
 
-export { subscribeToMoveEvents };
+function removeAllChildren(pixiObj) {
+  while (pixiObj.children[0]) {
+    pixiObj.children[0].destroy();
+  }
+}
+export { subscribeToMoveEvents, removeAllChildren };
