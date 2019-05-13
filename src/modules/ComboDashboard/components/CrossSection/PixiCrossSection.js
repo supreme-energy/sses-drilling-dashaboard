@@ -23,6 +23,7 @@ export default class PixiCrossSection {
     this.stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
     this.viewport = new PIXI.Container();
+    // Set up PIXI classes for rendering and draw layers
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
@@ -56,6 +57,8 @@ export default class PixiCrossSection {
         this.newProps = false;
       }
     });
+
+    this.ticker.start();
   }
   makeInteractive(stage) {
     // Set up events to enable panning of the viewport through stage
@@ -124,8 +127,12 @@ export default class PixiCrossSection {
     this.gridUpdate(props);
     this.newProps = true;
   }
-  resize() {}
+  resize(width, height) {
+    this.renderer.resize(width, height);
+    this.stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+  }
   cleanUp() {
+    this.ticker.stop();
     removeAllChildren(this.formationsLayer);
     removeAllChildren(this.wellPathLayer);
     removeAllChildren(this.UILayer);

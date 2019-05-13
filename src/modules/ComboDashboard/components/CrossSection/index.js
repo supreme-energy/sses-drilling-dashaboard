@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 import React, { Component } from "react";
 import PixiCrossSection from "./PixiCrossSection";
@@ -15,13 +14,11 @@ class CrossSection extends Component {
   }
 
   componentDidMount() {
-    // Set up PIXI classes for rendering and draw layers
-    // this.canvas = React.createRef();
     pixiApp.init(this.props, this.props.view, this.props.updateView);
+
     this.canvas.current.appendChild(pixiApp.renderer.view);
 
-    this.updateWebGL();
-    pixiApp.ticker.start();
+    pixiApp.update(this.props);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -29,28 +26,21 @@ class CrossSection extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    pixiApp.renderer.resize(this.props.width, this.props.height);
-    pixiApp.stage.hitArea = new PIXI.Rectangle(0, 0, pixiApp.renderer.screen.width, pixiApp.renderer.screen.height);
-    this.updateWebGL();
+    pixiApp.resize(this.props.width, this.props.height);
+    pixiApp.update(this.props);
   }
 
   componentWillUnmount() {
-    // TODO: Clean up and remove other objects to improve performance
-    pixiApp.ticker.stop();
-    this.canvas.current.removeChild(pixiApp.renderer.view);
     pixiApp.cleanUp();
+    this.canvas.current.removeChild(pixiApp.renderer.view);
   }
 
   render() {
     return <div className={css.crossSection} ref={this.canvas} />;
   }
-
-  updateWebGL() {
-    // Update all the PIXI object positions & scale controlled from react
-    pixiApp.update(this.props);
-  }
 }
 
+/* eslint react/no-unused-prop-types: 0 */
 CrossSection.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
