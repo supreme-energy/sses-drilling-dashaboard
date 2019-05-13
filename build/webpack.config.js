@@ -103,7 +103,7 @@ config.module.rules.push({
   use: [
     __DEV__ ? "style-loader" : MiniCssExtractPlugin.loader,
     {
-      loader: "classes-loader",
+      loader: "css-loader",
       options: {
         sourceMap: project.sourcemaps,
         modules: project.scssModules,
