@@ -7,7 +7,7 @@ import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
 import { drawProjections, interactiveProjection } from "./drawProjections";
 import { drawSections } from "./drawSections";
-import css from "./CrossSection.scss";
+import classes from "./CrossSection.scss";
 
 // PIXI has some lowercase constructors
 /* eslint new-cap: 0 */
@@ -89,7 +89,7 @@ class CrossSection extends Component {
   }
 
   render() {
-    return <div className={css.crossSection} ref={this.canvas} />;
+    return <div className={classes.crossSection} ref={this.canvas} />;
   }
 
   updateWebGL() {

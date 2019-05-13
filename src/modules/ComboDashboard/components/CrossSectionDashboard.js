@@ -4,7 +4,7 @@ import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
-import css from "./ComboDashboard.scss";
+import classes from "./ComboDashboard.scss";
 
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
@@ -96,7 +96,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
           </label>
         </div>
       </div>
-      <ParentSize debounceTime={100} className={css.responsiveWrapper}>
+      <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
         {({ width, height }) => (
           <CrossSection
             width={width}
