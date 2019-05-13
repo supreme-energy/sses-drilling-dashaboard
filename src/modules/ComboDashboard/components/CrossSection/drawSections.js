@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { frozenXTransform } from "./customPixiTransforms";
+import { frozenXYTransform } from "./customPixiTransforms";
 
 const survey = [0xa6a6a6, 0.5];
 const projection = [0xee2211, 0.5];
@@ -7,41 +7,24 @@ const projection = [0xee2211, 0.5];
 function drawSections(container, gutter) {
   const buttonHeight = 10;
   const pixiList = [];
-  // The update function immediately stops re-rendering as soon as the scale
-  // is equal to the previous scale.  However, that doesn't re-align the sections
-  // to where they should be.  Allowing for another couple of frame renders fixes this.
-  const backdownFactor = 10;
-  let backdown = 0;
-  let prevScaleX = 1;
-  let prevHeight = 0;
-  let prevWidth = 0;
 
   const addSection = function() {
     const section = new PIXI.Graphics();
-    section.transform.updateTransform = frozenXTransform;
+    section.transform.updateTransform = frozenXYTransform;
     pixiList.push(section);
     container.addChild(section);
     return section;
   };
 
   return function update(props) {
-    const { surveys, projections, view, height, width } = props;
-    if (!(width !== prevWidth || height !== prevHeight)) {
-      if (!surveys.length || (view.xScale === prevScaleX && backdown === 0)) return;
-    }
-    prevScaleX = view.xScale;
-    prevWidth = width;
-    prevHeight = height;
-    const y = height - gutter - buttonHeight;
-    if (backdown === 0) {
-      backdown = backdownFactor;
-    } else {
-      backdown -= 1;
-    }
-    if (!container.transform || !surveys.length || !projections.length) return;
+    const { surveys, projections, width, height } = props;
+    if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
-    const scale = container.transform.worldTransform.a;
+    const cwt = container.transform.worldTransform;
+    const y = height - gutter - buttonHeight;
 
+    let start = 0;
+    let length = 0;
     for (let i = 0; i < points.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
       let pixi = pixiList[i];
@@ -51,7 +34,11 @@ function drawSections(container, gutter) {
       pixi.clear().beginFill(...color);
       // drawRoundedRect may not be performant enough.
       // consider drawing lines with a curved 'I' shape bounding the ends
-      pixi.drawRoundedRect(p1 * scale + 2, y, (p2 - p1) * scale - 2, buttonHeight, buttonHeight / 2);
+      start = p1 * cwt.a + cwt.tx;
+      length = (p2 - p1) * cwt.a;
+      if (start > width) continue;
+      if (start + length < 0) continue;
+      pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
     }
   };
 }
