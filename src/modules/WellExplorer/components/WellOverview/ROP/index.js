@@ -90,7 +90,7 @@ export default function Rop({ className, style }) {
     updateView(view => ({
       ...view,
       x: gridGutter,
-      y: 10,
+      y: gridGutter + 10,
       yScale: getInitialViewYScaleValue(height - gridGutter - 50),
       xScale: getInitialViewXScaleValue(width - gridGutter - 20)
     }));
