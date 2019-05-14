@@ -43,9 +43,13 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
     <React.Fragment>
       <PixiLine container={container} data={lineData} mapData={d => [d.position[0], d.position[1]]} color={0x9d9d9d} />
       {sectionsData.map(d => (
-        <React.Fragment key={d.key}>
-          <PixiPoint container={container} x={d[0].position[0]} y={d[0].position[1]} backgroundColor={d[0].color} />
-        </React.Fragment>
+        <PixiPoint
+          key={d.key}
+          container={container}
+          x={d[0].position[0]}
+          y={d[0].position[1]}
+          backgroundColor={d[0].color}
+        />
       ))}
       {[...dataBySection].map(([key, value]) => {
         const position = mapData(value[0]);

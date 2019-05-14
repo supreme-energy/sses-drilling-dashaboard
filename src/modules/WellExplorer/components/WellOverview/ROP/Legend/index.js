@@ -14,7 +14,7 @@ const LegendItem = ({ color, label }) => {
 export default function Legend() {
   return (
     <div className={classes.hContainer}>
-      <LegendItem color={`#ffffff`} label={"Intant ROP"} />
+      <LegendItem color={`#ffffff`} label={"Instant ROP"} />
       <span className={classes.spacer} />
       <LegendItem color={`#F9001D`} label={"Avg ROP"} />
       <span className={classes.spacer} />
