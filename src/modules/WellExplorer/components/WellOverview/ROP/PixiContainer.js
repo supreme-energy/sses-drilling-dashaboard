@@ -1,13 +1,13 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useEffect } from "react";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 
-export default function PixiContainer({ container: parentContainer, children, x, y, updateTransform }) {
+function Container({ container: parentContainer, children, x, y, updateTransform }, ref) {
   const containerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {
     const container = containerRef.current;
-
+    container.sortableChildren = true;
     if (parentContainer) {
       parentContainer.addChild(container);
     }
@@ -29,10 +29,13 @@ export default function PixiContainer({ container: parentContainer, children, x,
     [updateTransform]
   );
 
+  useImperativeHandle(ref, () => ({
+    container: containerRef.current
+  }));
+
   useEffect(
     function updatePosition() {
       const container = containerRef.current;
-      console.log("update position", x, y);
       container.x = x;
       container.y = y;
     },
@@ -42,7 +45,9 @@ export default function PixiContainer({ container: parentContainer, children, x,
   return children ? children(containerRef.current) : null;
 }
 
+const PixiContainer = forwardRef(Container);
 PixiContainer.defaultProps = {
   x: 0,
   y: 0
 };
+export default PixiContainer;

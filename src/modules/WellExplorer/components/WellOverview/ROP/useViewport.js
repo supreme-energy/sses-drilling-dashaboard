@@ -70,19 +70,23 @@ export default function useViewport({ renderer, stage, width, height, updateView
 
   useEffect(
     function makeStageInteractive() {
-      stage.interactive = true;
-      stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+      if (stage) {
+        stage.interactive = true;
+        stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+      }
     },
     [stage, width, height]
   );
 
   useEffect(
     function enableMouseInteractions() {
-      stage.mousedown = onMouseDown;
-      stage.mousemove = onMouseMove;
-      stage.mouseout = () => (interactionStateRef.current.isOutside = true);
-      stage.mouseover = () => (interactionStateRef.current.isOutside = false);
-      stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
+      if (stage) {
+        stage.mousedown = onMouseDown;
+        stage.mousemove = onMouseMove;
+        stage.mouseout = () => (interactionStateRef.current.isOutside = true);
+        stage.mouseover = () => (interactionStateRef.current.isOutside = false);
+        stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
+      }
       renderer.view.addEventListener("wheel", onWhell, false);
 
       return () => {
@@ -100,7 +104,7 @@ export default function useViewport({ renderer, stage, width, height, updateView
     }
 
     return () => {
-      if (viewport) {
+      if (viewport && stage) {
         stage.removeChild(viewport);
         viewport.destroy({ children: true });
       }

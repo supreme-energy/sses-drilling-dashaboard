@@ -1,15 +1,17 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
-import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function PixiRectangle({ container, width, height, backgroundColor, borderColor, borderThickness, x, y }, ref) {
+function PixiRectangle(
+  { container, width, height, backgroundColor, borderColor, borderThickness, x, y, alpha, updateTransform },
+  ref
+) {
   const bgRef = useRef(() => new PIXI.Graphics());
   useEffect(
     function addBackground() {
       const bg = bgRef.current;
-      bg.transform.updateTransform = frozenScaleTransform;
+
       container.addChild(bg);
       return () => container.removeChild(bg);
     },
@@ -27,17 +29,20 @@ function PixiRectangle({ container, width, height, backgroundColor, borderColor,
 
   useEffect(
     function redraw() {
-      console.log("redraw", backgroundColor, height);
       const bg = bgRef.current;
+      if (updateTransform) {
+        bg.transform.updateTransform = updateTransform;
+      }
 
       bg.clear();
+      bg.alpha = alpha;
       if (backgroundColor) {
         bg.beginFill(backgroundColor);
       }
       bg.lineStyle(borderThickness, borderColor);
       bg.drawRect(0, 0, width, height);
     },
-    [width, height, backgroundColor, borderColor, borderThickness]
+    [width, height, backgroundColor, borderColor, borderThickness, alpha, updateTransform]
   );
 
   useImperativeHandle(ref, () => ({
@@ -49,14 +54,18 @@ function PixiRectangle({ container, width, height, backgroundColor, borderColor,
 
 const ForwardedPixiRectangle = forwardRef(PixiRectangle);
 
-ForwardedPixiRectangle.PropTypes = {
+ForwardedPixiRectangle.propTypes = {
   x: PropTypes.number,
-  y: PropTypes.number
+  y: PropTypes.number,
+  alpha: PropTypes.number,
+  updateTransform: PropTypes.func,
+  xIndex: PropTypes.number
 };
 
 ForwardedPixiRectangle.defaultProps = {
   x: 0,
-  y: 0
+  y: 0,
+  alpha: 1
 };
 
 export default ForwardedPixiRectangle;

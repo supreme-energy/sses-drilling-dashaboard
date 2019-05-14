@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
-function makeXTickAndLine(fontSize, height) {
+export function defaultMakeXTickAndLine(fontSize, height) {
   const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
@@ -20,7 +20,7 @@ function makeXTickAndLine(fontSize, height) {
 
   return [line, label];
 }
-function makeYTickAndLine(fontSize, width) {
+export function defaultMakeYTickAndLine(fontSize, width) {
   const label = new PIXI.Text("", {
     fill: "#999",
     fontSize: fontSize
@@ -50,7 +50,15 @@ function makeYTickAndLine(fontSize, width) {
  * @param height  The canvas height
  * @returns {updateGrid}  The function to update the gridlines
  */
-function drawGrid(container, width, height, gutter = 50, xAxisOrientation) {
+function drawGrid(
+  container,
+  width,
+  height,
+  gutter = 50,
+  xAxisOrientation = "bottom",
+  makeXTickAndLine = defaultMakeXTickAndLine,
+  makeYTickAndLine = defaultMakeYTickAndLine
+) {
   const maxXLines = 45;
   const maxYLines = 12;
   const fontSize = 15;
@@ -59,7 +67,7 @@ function drawGrid(container, width, height, gutter = 50, xAxisOrientation) {
   const xLabels = [];
   const xLines = [];
   for (let i = 0; i < maxXLines; i++) {
-    let [line, label] = makeXTickAndLine(fontSize, height);
+    let [line, label] = makeXTickAndLine(fontSize, height, i);
     xLines.push(line);
     xLabels.push(label);
     if (xAxisOrientation === "top") {

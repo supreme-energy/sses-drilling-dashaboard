@@ -3,7 +3,11 @@ import * as PIXI from "pixi.js";
 import { useEffect, useCallback } from "react";
 
 export function useWebGLRenderer({ canvas, width, height }) {
-  const stage = useRef(() => new PIXI.Container());
+  const stage = useRef(() => {
+    const s = new PIXI.Container();
+    s.sortableChildren = true;
+    return s;
+  });
 
   const rendererRef = useRef(() =>
     PIXI.autoDetectRenderer({

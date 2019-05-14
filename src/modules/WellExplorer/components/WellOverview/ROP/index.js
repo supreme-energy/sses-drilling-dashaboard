@@ -16,6 +16,9 @@ import { colorBySection } from "../../../../../constants/colors";
 import { getHoursDif } from "../../../utils/time";
 import SectionsBg from "./SectionsBg";
 import { orderedSections } from "../../../../../constants/wellSections";
+import XAxis from "./XAxis";
+import { getScaledValue } from "../../../utils/scale";
+import Legend from "./Legend";
 
 function computeInitialViewYScaleValue(data) {
   if (data && data.length > 0) {
@@ -67,9 +70,11 @@ export default function Rop({ className, style }) {
 
   const scaleInitialized = useRef(false);
 
+  const viewportContainer = useRef(null);
+
   const viewport = useViewport({
     renderer,
-    stage,
+    stage: viewportContainer.current && viewportContainer.current.container,
     width,
     height,
     view,
@@ -84,7 +89,7 @@ export default function Rop({ className, style }) {
   const onReset = useCallback(() => {
     updateView(view => ({
       ...view,
-      x: gridGutter + 10,
+      x: gridGutter,
       y: 10,
       yScale: getInitialViewYScaleValue(height - gridGutter - 50),
       xScale: getInitialViewXScaleValue(width - gridGutter - 20)
@@ -109,16 +114,17 @@ export default function Rop({ className, style }) {
     refresh();
   }, [refresh, stage, data, view, width, height]);
 
-  const hoursScale = useMemo(() => {
+  const hoursScaleNoRange = useMemo(() => {
     if (data && data.length) {
-      const hours = getHoursDif(data[0].Date_Time, data[data.length - 1].Date_Time);
-
-      return scaleLinear()
-        .domain([0, hours])
-        .range([0, width]);
+      const totalHours = getHoursDif(data[0].Date_Time, data[data.length - 1].Date_Time);
+      return scaleLinear().domain([0, totalHours]);
     }
-    return () => 0;
-  }, [data, width]);
+    return scaleLinear().domain([0, 0]);
+  }, [data]);
+
+  const hoursScale = useMemo(() => {
+    return hoursScaleNoRange.range([0, getScaledValue(view.xScale, width - gridGutter)]).copy();
+  }, [view, hoursScaleNoRange, width]);
 
   const sectionsData = useMemo(() => {
     const lData = orderedSections
@@ -134,7 +140,6 @@ export default function Rop({ className, style }) {
       });
 
     // add last segment
-
     if (lData.length) {
       const p = mapInstant(data[data.length - 1]);
 
@@ -147,34 +152,54 @@ export default function Rop({ className, style }) {
     return pairs(lData);
   }, [dataBySection, data, hoursScale]);
 
+  // frozenXTransform will disable scaling and we need a different range
+  const xAxisScale = useMemo(() => hoursScale.copy().range([0, width - gridGutter]), [hoursScale, width]);
+
   return (
-    <div className={classNames(className, classes.plot)} style={style} ref={canvasRef}>
-      <PixiContainer container={viewport}>
-        {container =>
-          [...dataBySection].map(([key, value]) => (
-            <PixiLine container={container} key={key} data={value} mapData={mapInstant} color={colorBySection[key]} />
-          ))
-        }
-      </PixiContainer>
-      <PixiLine container={viewport} data={data} mapData={mapAverage} color={0xca221d} />
-      <Grid container={viewport} width={width} height={height} gridGutter={gridGutter} ref={gridRef} />
-      <SectionsBg
-        view={view}
-        sectionsData={sectionsData}
-        hoursScale={hoursScale}
-        container={viewport}
-        width={width - gridGutter}
-      />
-      <SectionsGraph
-        view={view}
-        data={data}
-        sectionsData={sectionsData}
-        hoursScale={hoursScale}
-        container={viewport}
-        dataBySection={dataBySection}
-        mapData={mapInstant}
-        width={width - gridGutter}
-      />
+    <div className={classNames(className, classes.container)} style={style}>
+      <Legend />
+      <div className={classes.plot} ref={canvasRef}>
+        <PixiContainer ref={viewportContainer} container={stage} />
+        <PixiContainer container={viewport}>
+          {container => (
+            <SectionsBg
+              view={view}
+              sectionsData={sectionsData}
+              hoursScale={hoursScale}
+              container={container}
+              width={getScaledValue(view.xScale, width - gridGutter)}
+            />
+          )}
+        </PixiContainer>
+        <PixiLine container={viewport} data={data} mapData={mapInstant} color={0xffffff} />
+        <PixiLine container={viewport} data={data} mapData={mapAverage} color={0xca221d} />
+        <PixiContainer container={viewport}>
+          {container => (
+            <SectionsGraph
+              view={view}
+              data={data}
+              sectionsData={sectionsData}
+              hoursScale={hoursScale}
+              container={container}
+              dataBySection={dataBySection}
+              mapData={mapInstant}
+              width={width - gridGutter}
+            />
+          )}
+        </PixiContainer>
+        <Grid container={viewport} width={width} height={height} gridGutter={gridGutter} ref={gridRef} />
+        <XAxis
+          x={gridGutter}
+          y={height - 20}
+          gridGutter={gridGutter}
+          view={view}
+          minH={0}
+          width={width - gridGutter}
+          maxH={hoursScale.domain()[1]}
+          scale={xAxisScale}
+          container={stage}
+        />
+      </div>
     </div>
   );
 }

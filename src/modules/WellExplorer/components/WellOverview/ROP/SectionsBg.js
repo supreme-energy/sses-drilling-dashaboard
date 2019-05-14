@@ -1,26 +1,28 @@
-import React, { useMemo } from "react";
-import { getHoursDif } from "../../../utils/time";
-import { colorBySection } from "../../../../../constants/colors";
-import { pairs } from "d3-array";
+import React from "react";
 import PixiRectangle from "./PixiRectangle";
+import * as wellSections from "../../../../../constants/wellSections";
 
-export default function SectionsBg({ container, view, width, hoursScale, sectionsData }) {
-  console.log("sections bg", sectionsData);
+const colorBySection = {
+  [wellSections.SURFACE]: 0xc2cfe9,
+  [wellSections.INTERMEDIATE]: 0xc7d5bd,
+  [wellSections.CURVE]: 0xd4d4d4,
+  [wellSections.LATERAL]: 0xe7dab0
+};
+
+export default function SectionsBg({ container, width, hoursScale, sectionsData }) {
   return (
     <React.Fragment>
       {sectionsData.map(s => {
-        console.log("height", s[1].position[1] - s[0].position[1]);
-        console.log("color", s[0].color);
-        console.log("wwidth", width);
         return (
           <PixiRectangle
+            updateTransform={null}
             key={s[0].key}
             container={container}
-            with={width}
-            x={200}
+            width={width}
+            x={0}
             height={s[1].position[1] - s[0].position[1]}
             y={s[0].position[1]}
-            backgroundColor={s[0].color}
+            backgroundColor={colorBySection[s[0].key]}
           />
         );
       })}
