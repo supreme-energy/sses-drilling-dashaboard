@@ -17,10 +17,9 @@ function drawSections(container, gutter) {
   };
 
   return function update(props) {
-    const { surveys, projections, width, height } = props;
+    const { surveys, projections, width, height, view } = props;
     if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
-    const cwt = container.transform.worldTransform;
     const y = height - gutter - buttonHeight;
 
     let start = 0;
@@ -34,8 +33,8 @@ function drawSections(container, gutter) {
       pixi.clear().beginFill(...color);
       // drawRoundedRect may not be performant enough.
       // consider drawing lines with a curved 'I' shape bounding the ends
-      start = p1 * cwt.a + cwt.tx;
-      length = (p2 - p1) * cwt.a;
+      start = p1 * view.xScale + view.x;
+      length = (p2 - p1) * view.xScale;
       if (start > width) continue;
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
