@@ -1,10 +1,10 @@
-import React, { Suspense, useState, useCallback } from "react";
-import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
+import PropTypes from "prop-types";
+import React, { Suspense, useCallback, useReducer, useState } from "react";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
-import CrossSection from "./CrossSection/index";
 import classes from "./ComboDashboard.scss";
+import CrossSection from "./CrossSection/index";
 
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
@@ -12,6 +12,30 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const wellPlan = useWellPath(wellId);
   const formations = useFormations(wellId);
   const projections = useProjections(wellId);
+
+  const lastSurveyIdx = surveys.length - 1;
+  const bitProj = surveys[lastSurveyIdx];
+  const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
+  const [selectedList, setSelectedList] = useState([]);
+
+  const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
+    const { index, tvdDelta, vsDelta } = action;
+    switch (action.type) {
+      case "dip":
+        for (let i = index; i < projections.length; i++) {
+          projections[i].tvd += tvdDelta;
+          projections[i].vs += vsDelta;
+        }
+        return projections;
+      case "fault":
+        for (let i = index; i < projections.length; i++) {
+          projections[i].tvd += tvdDelta;
+        }
+        return projections;
+      default:
+        throw new Error(`Unknown projection reducer type ${action.type}`);
+    }
+  }, sectionList);
 
   const [view, setView] = useState({
     x: -844,
@@ -107,6 +131,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
             surveys={surveys}
             formations={formations}
             projections={projections}
+            calculatedProjections={calculatedProjections}
+            projectionsDispatch={projectionsDispatch}
           />
         )}
       </ParentSize>

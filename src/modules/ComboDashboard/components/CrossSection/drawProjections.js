@@ -5,11 +5,11 @@ import { subscribeToMoveEvents } from "./pixiUtils";
 /**
  * Draw a line representing the projected drill path
  * @param container  The pixi container to draw on
- * @param projections An array of projected points
+ * @param props      The props provided to the pixi cross section
  */
-function drawProjections(container, projections) {
+function drawProjections(container, props) {
   const projectionGraphics = [];
-  let prevDataLength = projections.length;
+  let prevDataLength = props.projections.length;
 
   const addProjection = function() {
     let marker = new PIXI.Graphics();

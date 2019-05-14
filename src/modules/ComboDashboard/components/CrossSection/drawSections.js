@@ -7,6 +7,9 @@ const projection = [0xee2211, 0.5];
 function drawSections(container, gutter) {
   const buttonHeight = 10;
   const pixiList = [];
+  const bg = new PIXI.Graphics();
+  bg.transform.updateTransform = frozenXYTransform;
+  container.addChild(bg);
 
   const addSection = function() {
     const section = new PIXI.Graphics();
@@ -21,6 +24,9 @@ function drawSections(container, gutter) {
     if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const y = height - gutter - buttonHeight;
+
+    bg.clear().beginFill(0xffffff);
+    bg.drawRect(0, y - 2, width, buttonHeight + 2);
 
     let start = 0;
     let length = 0;
