@@ -109,6 +109,8 @@ export const WellExplorer = ({
     toggleShowImportModal(true);
   };
 
+  console.log("test");
+
   return (
     <div
       className={classNames({
