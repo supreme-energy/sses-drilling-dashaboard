@@ -104,22 +104,22 @@ export default function Rop({ className, style }) {
         scaleInitialized.current = true;
       }
     },
-    [width, data, view, getInitialViewXScaleValue, getInitialViewYScaleValue, height, onReset]
+    [width, data, height, onReset]
   );
 
   const gridRef = useRef(null);
 
-  useEffect(() => {
-    gridRef.current.updateGrid(view);
-    refresh();
-  }, [refresh, stage, data, view, width, height]);
+  useEffect(
+    function refreshViewport() {
+      gridRef.current.updateGrid(view);
+      refresh();
+    },
+    [refresh, stage, data, view, width, height]
+  );
 
   const hoursScaleNoRange = useMemo(() => {
-    if (data && data.length) {
-      const totalHours = getHoursDif(data[0].Date_Time, data[data.length - 1].Date_Time);
-      return scaleLinear().domain([0, totalHours]);
-    }
-    return scaleLinear().domain([0, 0]);
+    const totalHours = data && data.length ? getHoursDif(data[0].Date_Time, data[data.length - 1].Date_Time) : 0;
+    return scaleLinear().domain([0, totalHours]);
   }, [data]);
 
   const hoursScale = useMemo(() => {
@@ -127,7 +127,7 @@ export default function Rop({ className, style }) {
   }, [view, hoursScaleNoRange, width]);
 
   const sectionsData = useMemo(() => {
-    const lData = orderedSections
+    const sData = orderedSections
       .filter(key => dataBySection.get(key))
       .map(key => {
         const value = dataBySection.get(key);
@@ -140,19 +140,19 @@ export default function Rop({ className, style }) {
       });
 
     // add last segment
-    if (lData.length) {
+    if (sData.length) {
       const p = mapInstant(data[data.length - 1]);
 
-      lData.push({
+      sData.push({
         position: [hoursScale(getHoursDif(data[0].Date_Time, data[data.length - 1].Date_Time)), p[1]],
-        color: lData[lData.length - 1].color,
+        color: sData[sData.length - 1].color,
         key: "end"
       });
     }
-    return pairs(lData);
+    return pairs(sData);
   }, [dataBySection, data, hoursScale]);
 
-  // frozenXTransform will disable scaling and we need a different range
+  // X axis is on stage that is not scaled so we need a different range
   const xAxisScale = useMemo(() => hoursScale.copy().range([0, width - gridGutter]), [hoursScale, width]);
 
   return (
