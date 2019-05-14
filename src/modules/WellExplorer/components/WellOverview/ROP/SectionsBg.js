@@ -10,22 +10,18 @@ const colorBySection = {
 };
 
 export default function SectionsBg({ container, width, hoursScale, sectionsData }) {
-  return (
-    <React.Fragment>
-      {sectionsData.map(s => {
-        return (
-          <PixiRectangle
-            updateTransform={null}
-            key={s[0].key}
-            container={container}
-            width={width}
-            x={0}
-            height={s[1].position[1] - s[0].position[1]}
-            y={s[0].position[1]}
-            backgroundColor={colorBySection[s[0].key]}
-          />
-        );
-      })}
-    </React.Fragment>
-  );
+  return sectionsData.map(s => {
+    return (
+      <PixiRectangle
+        updateTransform={null}
+        key={s[0].key}
+        container={container}
+        width={width}
+        x={0}
+        height={s[1].position[1] - s[0].position[1]}
+        y={s[0].position[1]}
+        backgroundColor={colorBySection[s[0].key]}
+      />
+    );
+  });
 }
