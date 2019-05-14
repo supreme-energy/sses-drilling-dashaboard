@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Card, CardContent, IconButton, Typography } from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { Card, CardContent, Typography } from "@material-ui/core";
 
+import MoreMenu from "../MoreMenu/index";
 import { useWells } from "../../../../api";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import WellStatus from "../../../Kpi/WellStatus";
@@ -31,9 +31,7 @@ function HeaderToolbar({ wellId }) {
           <Rop wellId={well.id} />
           <ServerStatus wellId={well.id} />
           <BitDepth wellId={well.id} />
-          <IconButton className={classes.optionsButton}>
-            <MoreVertIcon />
-          </IconButton>
+          <MoreMenu selectedMenuItems={[]} menuItemEnum={[]} />
         </div>
       </CardContent>
     </Card>

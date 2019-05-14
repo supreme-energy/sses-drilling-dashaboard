@@ -1,0 +1,24 @@
+@import "../../../../styles/base";
+
+.menuItem {
+    min-width: 185px;
+}
+
+.selectedMenuItem {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.selectedItemIcon {
+    position: absolute;
+    right: 12px;
+    color: $gray;
+}
+
+.menuButton {
+    padding: 0;
+    justify-content: flex-end;
+    margin-right: 68px;
+    &:focus {
+        outline: 0;
+    }
+}
