@@ -193,9 +193,6 @@ export default function Rop({ className, style }) {
           y={height - 20}
           gridGutter={gridGutter}
           view={view}
-          minH={0}
-          width={width - gridGutter}
-          maxH={hoursScale.domain()[1]}
           scale={xAxisScale}
           container={stage}
         />

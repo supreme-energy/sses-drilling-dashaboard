@@ -7,7 +7,7 @@ import PixiLine from "./PixiLine";
 import PixiPoint from "./PixiPoint";
 import { getScaledValue } from "../../../utils/scale";
 
-function Label({ x, y, text, container, view, viewWidth, bgColor }) {
+function Label({ x, y, text, container, view, viewWidth, color }) {
   const textRef = useRef(null);
 
   const textWidth = (textRef.current && textRef.current.pixiText.width) || 0;
@@ -26,7 +26,7 @@ function Label({ x, y, text, container, view, viewWidth, bgColor }) {
           container={container}
           text={text}
           fontSize={12}
-          color={bgColor}
+          color={color}
         />
       )}
     </PixiContainer>
@@ -62,7 +62,7 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
             x={hoursScale(getHoursDif(data[0].Date_Time, value[0].Date_Time)) + 10}
             y={position[1] - getScaledValue(view.yScale, 12)}
             view={view}
-            bgColor={colorBySection[key]}
+            color={colorBySection[key]}
           />
         );
       })}
