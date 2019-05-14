@@ -1,3 +1,5 @@
+@import '../styles/base';
+
 .container {
   width: 100vw;
   height: 100vh;
@@ -13,17 +15,17 @@
   }
 
   .viewport {
-    height: calc(100% - 56px);
-    top: 56px;
+    height: calc(100% - #{$header-height});
+    top: $header-height;
     position: relative;
   }
-  
+
   .navItemActive {
     font-weight: bold;
     text-decoration: underline;
-  }  
+  }
 
   .logo img {
-    height: 56px;
+    height: $header-height;
   }
 }

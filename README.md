@@ -1,7 +1,7 @@
 # SSES Drilling Dashboard
 
 ## Uprading React-Powertools
- - get the latest powertools build from https://build-artefacts.experolabs.com/react-powertools/index.html#
+ - get the latest powertools build from https://build-artifacts.experolabs.com/react-powertools/index.html#
  - add the latest .tgz file to the repo
  - run `yarn remove react-powertools` to remove the old dependency
  - run `yarn add ./react-powertools-v1.x.x.tgz` to add the new
