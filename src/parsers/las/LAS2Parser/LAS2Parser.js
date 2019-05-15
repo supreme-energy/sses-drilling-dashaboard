@@ -1,11 +1,17 @@
 // LAS 2.0 Spec: http://www.cwls.org/wp-content/uploads/2017/02/Las2_Update_Feb2017.pdf
+import isEmpty from "lodash/isEmpty";
+
+import { parseLine } from "../utils";
 import VersionRequiredFields from "./constants/VersionRequiredFields";
 import Sections from "./constants/Sections";
 
 const baseConverter = (lines, saveIndex) => {
   return lines.reduce((version, line, index) => {
-    const parsedLine = parseLine(line);
+    if (isEmpty(line)) {
+      return version;
+    }
 
+    const parsedLine = parseLine(line);
     if (saveIndex) {
       parsedLine.index = index; // we need to keep track of these so that later we can determine ASCII section
     }
@@ -22,19 +28,25 @@ const curveConverter = (lines) => baseConverter(lines, true);
 const asciiConverter = (lines, version) => {
   if (version[ VersionRequiredFields.WRAP ].data.toLowerCase().includes("no")) {
     return lines.reduce((values, line) => {
-      values.push(line.split(" ").reduce((values, value) => {
-        if (value !== "") {
-          values.push(value);
-        }
+      if (!isEmpty(line)) {
+        values.push(line.split(" ").reduce((values, value) => {
+          if (value !== "") {
+            values.push(value);
+          }
 
-        return values;
-      }, []));
+          return values;
+        }, []));
+      }
       return values;
     }, []);
   } else {
     const values = [];
     let currentLineValues;
     lines.forEach((line, index) => {
+      if (isEmpty(line)) {
+        return;
+      }
+
       const splitLine = line.split(" ").filter(part => part !== "");
       if (splitLine.length === 1) {
         if (index !== 0) {
@@ -42,7 +54,7 @@ const asciiConverter = (lines, version) => {
         }
 
         currentLineValues = [];
-        currentLineValues.push(splitLine[0]);
+        currentLineValues.push(splitLine[ 0 ]);
       } else {
         // if the file is formatted properly, this should never be an issue.
         if (!currentLineValues) {
@@ -57,6 +69,16 @@ const asciiConverter = (lines, version) => {
     values.push(currentLineValues);
     return values;
   }
+};
+
+const optionsConverter = (lines) => {
+  return lines.reduce((optionText, line) => {
+    if (!isEmpty(line)) {
+      optionText = optionText.concat(line);
+    }
+
+    return optionText;
+  }, "");
 };
 
 // TODO: need to check required fields and make sure all exist after parsing
@@ -76,12 +98,12 @@ class Parser {
     [ Sections.VERSION ]: baseConverter,
     [ Sections.WELL ]: baseConverter,
     [ Sections.CURVE ]: curveConverter,
-    [ Sections.OPTIONAL ]: baseConverter,
+    [ Sections.OPTIONAL ]: optionsConverter,
     [ Sections.PARAMETER ]: baseConverter,
-    [ Sections.ASCII ]: asciiConverter
+    [ Sections.ASCII ]: asciiConverter,
   };
 
-  convert = (text) => {
+  parse = (text) => {
     const lines = text.replace(`/${this.returnRegex}/g`, this.newLineRegex).split(this.newLineRegex);
 
     let currentSectionName = null;
@@ -148,47 +170,5 @@ class Parser {
     return sectionConverter(sectionLines, versionInfo, curveInfo);
   };
 }
-
-// TODO: this can most likely be re-used for version 3.0 in certain cases
-// This is only for types V(version info), W(well info), C(curve info), P(parameters),
-// refer to section 5.2 in the docs mentioned at the top of this file
-const parseLine = (line) => {
-  /*
-  * Delimiters:
-  * a) The first dot in a line
-  * b) The first space after the first dot in a line
-  * c) The last colon of a line
-  *
-  * Examples:
-  * STRT.M            9066.00  :Start Depth
-  * VERS.                 1.2:    CWLS LOG ASCII STANDARD - VERSION 1.2
-  * DEPT  .FT                                          : DEPTH
-  * */
-
-  const result = {
-    mnemonic: null,
-    units: null,
-    data: null,
-    description: null,
-  };
-
-  const dot = ".";
-  const space = " ";
-  const colon = ":";
-
-  const dotIndex = line.indexOf(dot);
-  const spaceIndex = line.indexOf(space, dotIndex);
-  const colonIndex = line.lastIndexOf(colon); // Spec specifies last colon in line
-
-  result.mnemonic = line.substring(0, dotIndex).trim();
-  if (dotIndex !== spaceIndex - 1) {
-    // contains units information
-    result.units = line.substring(dotIndex + 1, spaceIndex).trim();
-  }
-
-  result.data = line.substring(spaceIndex + 1, colonIndex).trim();
-  result.description = line.substring(colonIndex + 1).trim();
-  return result;
-};
 
 export default new Parser();
