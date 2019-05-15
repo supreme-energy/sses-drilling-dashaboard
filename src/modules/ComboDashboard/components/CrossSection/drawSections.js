@@ -21,7 +21,6 @@ function drawSections(container, props, gutter) {
     section.interactive = true;
     section.on("click", function() {
       props.setSelectedList(this.sectionIndex);
-      props.setBlah([...props.blah, this.sectionIndex]);
     });
     container.addChild(section);
     return section;
