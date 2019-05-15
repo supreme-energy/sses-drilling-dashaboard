@@ -74,7 +74,7 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
             text={key}
             viewWidth={width}
             x={hoursScale(getHoursDif(data[0].Date_Time, value[0].Date_Time)) + 10}
-            y={position[1] - getScaledValue(view.yScale, 12)}
+            y={position[1]}
             view={view}
             color={colorBySection[key]}
           />

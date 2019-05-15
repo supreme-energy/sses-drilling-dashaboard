@@ -9,6 +9,8 @@
     "build": "npm run clean && cross-env NODE_ENV=production npm run compile",
     "start": "cross-env NODE_ENV=development node build/scripts/start",
     "test": "cross-env NODE_ENV=test karma start build/karma.config",
+    "upload": "node scripts/s3-deploy dist expero sses-drilling-dashboard.experolabs.com '' false",
+    "deploy": "npm run build && npm run upload",
     "test:watch": "npm test -- --watch",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix"
@@ -20,6 +22,7 @@
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
+    "@vx/responsive": "^0.0.188",
     "auth0-lock": "11.8.1",
     "bootstrap": "4.1.3",
     "classnames": "^2.2.6",
@@ -68,6 +71,7 @@
     "react-dom": "16.8.6"
   },
   "devDependencies": {
+    "aws-sdk": "^2.444.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
     "babel-loader": "^7.1.5",
@@ -112,11 +116,13 @@
     "karma-webpack-with-fast-source-maps": "^1.10.2",
     "mini-css-extract-plugin": "^0.4.1",
     "mocha": "^5.2.0",
+    "node-readdir": "^1.0.1",
     "node-sass": "^4.9.2",
     "phantomjs-prebuilt": "^2.1.16",
     "react-addons-test-utils": "^15.6.2",
     "react-test-renderer": "^16.4.1",
     "rimraf": "^2.6.2",
+    "s3-ls": "^3.0.0",
     "sass-loader": "^7.0.3",
     "sinon": "^6.1.4",
     "sinon-chai": "^3.2.0",

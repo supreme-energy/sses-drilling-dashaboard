@@ -44,7 +44,7 @@ const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   );
 };
 
-function WelcomeCard({ theme, lastEditedWell, openedWell, className }) {
+function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToImportChange }) {
   return (
     <Card className={classNames(classes.card, className)}>
       <CardContent>
@@ -65,12 +65,21 @@ function WelcomeCard({ theme, lastEditedWell, openedWell, className }) {
                 </ListItemIcon>
                 <ListItemText>Create a new Well</ListItemText>
               </ListItem>
-              <ListItem className={classes.listItem} color="primary">
-                <ListItemIcon>
-                  <Import color="primary" />
-                </ListItemIcon>
-                <ListItemText>Import a new Well</ListItemText>
-              </ListItem>
+              <input
+                onChange={onFilesToImportChange}
+                accept=".csv, .las, .laz"
+                id="raised-button-file"
+                type="file"
+                className={classes.importNewInput}
+              />
+              <label htmlFor="raised-button-file" className={classes.listItem}>
+                <ListItem color="primary">
+                  <ListItemIcon>
+                    <Import color="primary" />
+                  </ListItemIcon>
+                  <ListItemText>Import a new Well</ListItemText>
+                </ListItem>
+              </label>
             </List>
           </div>
           <span className={classes.hSpacer} />

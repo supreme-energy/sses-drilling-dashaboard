@@ -8,19 +8,30 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  * @param projections An array of projected points
  */
 function drawProjections(container, projections) {
-  const wpData = projections.map(x => [Number(x.vs), Number(x.tvd)]);
-  const projectedPath = new PIXI.Graphics();
-  update();
-  container.addChild(projectedPath);
+  const projectionGraphics = [];
+  let prevDataLength = projections.length;
+
+  const addProjection = function() {
+    let marker = new PIXI.Graphics();
+    marker.lineStyle(1.6, 0xee2211);
+    marker.beginFill(0xffffff, 0);
+    marker.drawRoundedRect(-8, -8, 16, 16, 4);
+    marker.endFill();
+    marker.transform.updateTransform = frozenScaleTransform;
+    container.addChild(marker);
+    return marker;
+  };
 
   return update;
 
-  function update() {
-    if (!projectedPath.transform) return;
-    projectedPath.clear().lineStyle(3 / container.transform.worldTransform.a, 0xee3322, 1);
-    projectedPath.moveTo(...wpData[0]);
-    for (let i = 1; i < wpData.length; i++) {
-      projectedPath.lineTo(...wpData[i]);
+  function update(projections) {
+    if (!projections.length || projections.length === prevDataLength) return;
+    prevDataLength = projections.length;
+
+    for (let i = 0; i < projections.length; i++) {
+      if (!projectionGraphics[i]) projectionGraphics[i] = addProjection();
+      projectionGraphics[i].position.x = projections[i].vs;
+      projectionGraphics[i].position.y = projections[i].tvd;
     }
   }
 }
@@ -36,7 +47,7 @@ function drawProjections(container, projections) {
  * @param height        Current canvas height
  * @returns {Function}  The update function to be called each tick
  */
-function interactiveProjection(container, viewProps, pointUpdate, width, height) {
+function interactiveProjection(container, viewProps, pointUpdate) {
   const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
   const red = 0xee2211;
   const white = 0xffffff;

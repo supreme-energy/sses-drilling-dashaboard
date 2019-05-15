@@ -27,12 +27,12 @@ function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
   }, [container]);
 
   const updateGrid = useMemo(() => {
-    return drawGrid(gridLayerRef.current, width, height, gridGutter, "top", makeXTickAndLine);
-  }, [width, height, gridGutter]);
+    return drawGrid(gridLayerRef.current, gridGutter, "top", makeXTickAndLine);
+  }, [gridGutter]);
 
   useEffect(() => {
-    updateGrid(view);
-  }, [updateGrid, view]);
+    updateGrid({ view, width, height });
+  }, [updateGrid, view, width, height]);
 
   useImperativeHandle(ref, () => ({
     updateGrid

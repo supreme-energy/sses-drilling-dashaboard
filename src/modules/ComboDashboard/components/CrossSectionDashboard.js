@@ -1,16 +1,17 @@
 import React, { Suspense, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
-import surveyData from "../../../data/survey.json";
-import wellPlanData from "../../../data/wellplan";
-import formationData from "../../../data/formationList";
-import projections from "../../../data/projections";
+import { ParentSize } from "@vx/responsive";
+import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import CrossSection from "./CrossSection/index";
+import classes from "./ComboDashboard.scss";
 
-export const CrossSectionDashboard = () => {
-  // Replace with useFetch
-  const surveys = surveyData;
-  const wellPlan = wellPlanData;
-  const formations = formationData;
+export const CrossSectionDashboard = ({ wellId }) => {
+  // TODO: Pull data from store instead. This re-fetches on every tab switch.
+  const surveys = useSurveys(wellId);
+  const wellPlan = useWellPath(wellId);
+  const formations = useFormations(wellId);
+  const projections = useProjections(wellId);
 
   const [view, setView] = useState({
     x: -844,
@@ -44,7 +45,7 @@ export const CrossSectionDashboard = () => {
 
   return (
     <Suspense fallback={<Progress />}>
-      <div style={{ margin: "0 auto" }}>
+      <div>
         <h2>Dev debugging data</h2>
         <div>
           <label>
@@ -95,17 +96,25 @@ export const CrossSectionDashboard = () => {
           </label>
         </div>
       </div>
-      <CrossSection
-        view={view}
-        updateView={mergeView}
-        wellPlan={wellPlan}
-        surveys={surveys}
-        formations={formations}
-        projections={projections}
-      />
+      <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
+        {({ width, height }) => (
+          <CrossSection
+            width={width}
+            height={height}
+            view={view}
+            updateView={mergeView}
+            wellPlan={wellPlan}
+            surveys={surveys}
+            formations={formations}
+            projections={projections}
+          />
+        )}
+      </ParentSize>
     </Suspense>
   );
 };
-CrossSectionDashboard.propTypes = {};
+CrossSectionDashboard.propTypes = {
+  wellId: PropTypes.string.isRequired
+};
 
 export default CrossSectionDashboard;

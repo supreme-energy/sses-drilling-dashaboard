@@ -1,20 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="40px" height="40px" viewBox="0 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: sketchtool 53.2 (72643) - https://sketchapp.com -->
-    <title>D35BF186-7A19-4409-9E4A-04E0671C3F2B</title>
-    <desc>Created with sketchtool.</desc>
-    <defs>
-        <rect id="path-1" x="0" y="0" width="8" height="8"></rect>
-    </defs>
-    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g transform="translate(-120.000000, -316.000000)" id="Viz/Graph/Shape/Survey">
-            <g transform="translate(120.000000, 316.000000)">
-                <mask id="mask-2" fill="white">
-                    <use xlink:href="#path-1"></use>
-                </mask>
-                <g id="Background"></g>
-                <path d="M3.8890873,1.76776695 L5.65685425,-5.36903855e-13 L7.77817459,2.12132034 L6.01040764,3.8890873 L7.77817459,5.65685425 L5.65685425,7.77817459 L3.8890873,6.01040764 L2.12132034,7.77817459 L-5.41788836e-14,5.65685425 L1.76776695,3.8890873 L-5.37347944e-14,2.12132034 L2.12132034,-5.37347944e-13 L3.8890873,1.76776695 Z" id="Combined-Shape-Copy" fill="#000000" mask="url(#mask-2)"></path>
-            </g>
-        </g>
-    </g>
+<svg width="40" height="40" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <path id="a" d="M0 0h8v8H0z"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <mask id="b" fill="#fff">
+      <use xlink:href="#a"/>
+    </mask>
+    <path d="M3.88909 1.76777L5.65685 0l2.12132 2.12132-1.76776 1.76777 1.76776 1.76776-2.12132 2.12132L3.8891 6.01041 2.12132 7.77817 0 5.65685 1.76777 3.8891 0 2.12132 2.12132 0l1.76777 1.76777z" fill="#000" mask="url(#b)"/>
+  </g>
 </svg>

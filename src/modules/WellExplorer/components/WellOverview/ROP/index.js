@@ -186,7 +186,8 @@ export default function Rop({ className, style }) {
         <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
         <XAxis
           x={gridGutter}
-          y={height - 20}
+          y={height - 30}
+          height={30}
           gridGutter={gridGutter}
           view={view}
           scale={xAxisScale}
