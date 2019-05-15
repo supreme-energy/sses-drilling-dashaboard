@@ -88,7 +88,7 @@ export default function Rop({ className, style }) {
   const onReset = useCallback(() => {
     updateView(view => ({
       ...view,
-      x: gridGutter,
+      x: gridGutter + 5,
       y: gridGutter + 10,
       yScale: getInitialViewYScaleValue(height - gridGutter - 50),
       xScale: getInitialViewXScaleValue(width - gridGutter - 20)

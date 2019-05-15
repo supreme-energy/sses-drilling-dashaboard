@@ -132,7 +132,7 @@ function drawGrid(
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
-    const { width, height, view, hideCorner } = props;
+    const { width, height, view } = props;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
 
     // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
@@ -157,11 +157,8 @@ function drawGrid(
       bgx.drawRect(0, 0, gutter, height);
       bgy.clear().beginFill(0xffffff);
       bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
-
-      if (!hideCorner) {
-        corner.clear().beginFill(0xffffff);
-        corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
-      }
+      corner.clear().beginFill(0xffffff);
+      corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
 
       for (let i = 0; i < xLines.length; i++) {
         let pos = b.xMin + b.xStep * i;

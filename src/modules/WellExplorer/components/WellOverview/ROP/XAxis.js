@@ -4,7 +4,6 @@ import PixiText from "./PixiText";
 import PixiContainer from "./PixiContainer";
 import PixiRectangle from "./PixiRectangle";
 import PropTypes from "prop-types";
-import { frozenXTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 
 const textAnchor = [0.5, 0.5];
 
@@ -16,7 +15,7 @@ export default function XAxis({ container, scale, numberOfTicks, height, ...prop
   const [minX, maxX] = scale.range();
   const width = maxX - minX;
   return (
-    <PixiContainer updateTransform={frozenXTransform} container={container} {...props}>
+    <PixiContainer container={container} {...props}>
       {container => (
         <React.Fragment>
           <PixiRectangle container={container} width={width} height={height} backgroundColor={0xffffff} />

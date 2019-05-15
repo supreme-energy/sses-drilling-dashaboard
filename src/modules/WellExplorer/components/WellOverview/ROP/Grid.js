@@ -23,7 +23,7 @@ function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
   }, [gridGutter]);
 
   useEffect(() => {
-    updateGrid({ view, width, height, hideCorner: true });
+    updateGrid({ view, width, height });
   }, [updateGrid, view, width, height]);
 
   useImperativeHandle(ref, () => ({
