@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform } from "./customPixiTransforms";
+import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 
 /**
@@ -13,34 +13,29 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  * @param height        Current canvas height
  * @returns {Function}  The update function to be called each tick
  */
-function interactiveProjection(container, viewProps, pointUpdate) {
-  const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
+function interactiveProjection(parent, props) {
+  const container = parent.addChild(new PIXI.Container());
+  const { updateView: pointUpdate, lastSurveyIdx, selectedList } = props;
   const red = 0xee2211;
   const white = 0xffffff;
-  const lineStyle = [2, red, 1];
 
   // -------------------------------------- Line segments
   const totLine = new PIXI.Graphics();
-  totLine.lineStyle(...lineStyle);
-  totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
+  totLine.transform.updateTransform = frozenXYTransform;
   container.addChild(totLine);
 
   const tclLine = new PIXI.Graphics();
-  tclLine.lineStyle(...lineStyle);
-  tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
+  tclLine.transform.updateTransform = frozenXYTransform;
   container.addChild(tclLine);
 
   const botLine = new PIXI.Graphics();
-  botLine.lineStyle(...lineStyle);
-  botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
+  botLine.transform.updateTransform = frozenXYTransform;
   container.addChild(botLine);
 
   // -------------------------------------- Left nodes
   const totCircle = new PIXI.Graphics();
   totCircle.lineStyle(2, red).beginFill(red, 0.4);
   totCircle.drawCircle(0, 0, 10);
-  totCircle.position = new PIXI.Point(leftVs, leftTot);
-  totCircle.endFill();
   totCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircle);
   subscribeToMoveEvents(totCircle, function(pos) {
@@ -56,8 +51,6 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   const botCircle = new PIXI.Graphics();
   botCircle.lineStyle(2, red).beginFill(red, 0.4);
   botCircle.drawCircle(0, 0, 10);
-  botCircle.position = new PIXI.Point(leftVs, leftBot);
-  botCircle.endFill();
   botCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircle);
   subscribeToMoveEvents(botCircle, function(pos) {
@@ -76,8 +69,6 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   totCircleRight.lineStyle(2, white, 1);
   totCircleRight.beginFill(red);
   totCircleRight.drawCircle(0, 0, 10);
-  totCircleRight.position = new PIXI.Point(rightVs, rightTot);
-  totCircleRight.endFill();
   totCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircleRight);
   subscribeToMoveEvents(totCircleRight, function(pos) {
@@ -95,8 +86,6 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   botCircleRight.lineStyle(2, white, 1);
   botCircleRight.beginFill(red);
   botCircleRight.drawCircle(0, 0, 10);
-  botCircleRight.position = new PIXI.Point(rightVs, rightBot);
-  botCircleRight.endFill();
   botCircleRight.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircleRight);
   subscribeToMoveEvents(botCircleRight, function(pos) {
@@ -115,8 +104,6 @@ function interactiveProjection(container, viewProps, pointUpdate) {
   projectionPoint.lineStyle(2, red);
   projectionPoint.beginFill(white, 0);
   projectionPoint.drawRoundedRect(-10, -10, 20, 20, 4);
-  projectionPoint.position = new PIXI.Point(paVs, paTcl);
-  projectionPoint.endFill();
   projectionPoint.transform.updateTransform = frozenScaleTransform;
   container.addChild(projectionPoint);
   subscribeToMoveEvents(projectionPoint, function(pos) {
@@ -126,8 +113,15 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     });
   });
 
-  return (viewProps, width, height) => {
-    const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = viewProps;
+  return props => {
+    const { selectedList, lastSurveyIdx } = props;
+    const selectedIndex = selectedList.findIndex(e => e);
+    if (selectedIndex === -1 || selectedIndex < lastSurveyIdx - 1) {
+      container.visible = false;
+      return;
+    }
+    container.visible = true;
+
     if (
       !totCircleRight.transform ||
       !botCircleRight.transform ||
@@ -137,6 +131,11 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     ) {
       return;
     }
+    const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = props.view;
+    const { x, y, xScale, yScale } = props.view;
+    const xMap = val => val * xScale + x;
+    const yMap = val => val * yScale + y;
+
     totCircle.position.x = leftVs;
     totCircle.position.y = leftTot;
     botCircle.position.x = leftVs;
@@ -145,15 +144,15 @@ function interactiveProjection(container, viewProps, pointUpdate) {
     totCircleRight.position.y = rightTot;
     botCircleRight.position.x = rightVs;
     botCircleRight.position.y = rightBot;
-    projectionPoint.position.x = paVs;
+    projectionPoint.position.x = rightVs;
     projectionPoint.position.y = paTcl;
 
-    totLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
-    totLine.moveTo(leftVs, leftTot).lineTo(rightVs, rightTot);
-    tclLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
-    tclLine.moveTo(leftVs, (leftTot + leftBot) / 2).lineTo(rightVs, (rightTot + rightBot) / 2);
-    botLine.clear().lineStyle(2 / container.transform.worldTransform.a, red, 1);
-    botLine.moveTo(leftVs, leftBot).lineTo(rightVs, rightBot);
+    totLine.clear().lineStyle(2, red, 1);
+    totLine.moveTo(xMap(leftVs), yMap(leftTot)).lineTo(xMap(rightVs), yMap(rightTot));
+    tclLine.clear().lineStyle(2, red, 1);
+    tclLine.moveTo(xMap(leftVs), yMap((leftTot + leftBot) / 2)).lineTo(xMap(rightVs), yMap((rightTot + rightBot) / 2));
+    botLine.clear().lineStyle(2, red, 1);
+    botLine.moveTo(xMap(leftVs), yMap(leftBot)).lineTo(xMap(rightVs), yMap(rightBot));
   };
 }
 
