@@ -116,7 +116,8 @@ function interactiveProjection(parent, props) {
   return props => {
     const { selectedList, lastSurveyIdx } = props;
     const selectedIndex = selectedList.findIndex(e => e);
-    if (selectedIndex === -1 || selectedIndex < lastSurveyIdx - 1) {
+    // If there isn't a selected project ahead segment, don't display the interactive component
+    if (selectedIndex === -1 || selectedIndex < lastSurveyIdx ) {
       container.visible = false;
       return;
     }

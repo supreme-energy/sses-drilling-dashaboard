@@ -18,7 +18,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const formations = useFormations(wellId);
   const projections = useProjections(wellId);
 
-  const lastSurveyIdx = surveys.length - 1;
+  const lastSurveyIdx = surveys.length - 2;
   const bitProj = surveys[lastSurveyIdx];
   const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
   const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);

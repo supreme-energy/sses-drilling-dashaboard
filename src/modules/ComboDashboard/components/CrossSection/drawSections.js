@@ -9,14 +9,14 @@ const selectedProjection = [0xee2211, 1];
 
 function getColor(selectedList, i, lastSurveyIdx) {
   const isSelected = selectedList[i];
-  const isProjection = i >= lastSurveyIdx - 1;
+  const isProjection = i >= lastSurveyIdx;
   let color;
   if (isSelected) {
     color = isProjection ? selectedProjection : selectedSurvey;
   } else {
     color = isProjection ? projection : survey;
   }
-  if (i === lastSurveyIdx - 2 && isSelected) color = selectedLastSurvey;
+  if (i === lastSurveyIdx - 1 && isSelected) color = selectedLastSurvey;
   return color;
 }
 
