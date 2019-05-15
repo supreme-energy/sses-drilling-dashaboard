@@ -6,9 +6,10 @@ import { useFormations, useProjections, useSurveys, useWellPath } from "../../..
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
 
-function listReducer(list, i) {
-  list[i] = !list[i];
-  return [...list];
+function singleSelectionReducer(list, i) {
+  const newList = [];
+  newList[i] = !list[i];
+  return newList;
 }
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
@@ -20,9 +21,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const lastSurveyIdx = surveys.length - 1;
   const bitProj = surveys[lastSurveyIdx];
   const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
-  const [selectedList, setSelectedList] = useReducer(listReducer, []);
-
-  const [selectedIdx, setSelectedIdx] = useState(13);
+  const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);
 
   const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
     const { index, tvdDelta, vsDelta } = action;
@@ -124,17 +123,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
               }}
             />
           </label>
-          <label>
-            selected section
-            <input
-              type="number"
-              step="1"
-              value={selectedIdx}
-              onChange={e => {
-                return setSelectedIdx(Number(e.target.value));
-              }}
-            />
-          </label>
         </div>
       </div>
       <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
@@ -148,10 +136,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
             surveys={surveys}
             formations={formations}
             projections={projections}
-            selectedIdx={selectedIdx}
             selectedList={selectedList}
             setSelectedList={setSelectedList}
-            setSelectedIdx={setSelectedIdx}
             lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}
             projectionsDispatch={projectionsDispatch}

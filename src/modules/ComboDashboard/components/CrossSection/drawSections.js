@@ -13,11 +13,17 @@ function drawSections(container, props, gutter) {
   const bg = new PIXI.Graphics();
   bg.transform.updateTransform = frozenXYTransform;
   container.addChild(bg);
+  const selectedLeft = new PIXI.Graphics();
+  selectedLeft.transform.updateTransform = frozenXYTransform;
+  container.addChild(selectedLeft);
+
+  const selectedRight = new PIXI.Graphics();
+  selectedRight.transform.updateTransform = frozenXYTransform;
+  container.addChild(selectedRight);
 
   const addSection = function() {
     const section = new PIXI.Graphics();
     section.transform.updateTransform = frozenXYTransform;
-    pixiList.push(section);
     section.interactive = true;
     section.on("click", function() {
       props.setSelectedList(this.sectionIndex);
@@ -27,7 +33,7 @@ function drawSections(container, props, gutter) {
   };
 
   return function update(props) {
-    const { surveys, projections, width, height, view, selectedIdx, lastSurveyIdx, selectedList } = props;
+    const { surveys, projections, width, height, view, lastSurveyIdx, selectedList } = props;
     if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const y = height - gutter - buttonHeight;
@@ -41,13 +47,13 @@ function drawSections(container, props, gutter) {
       if (!pixiList[i]) pixiList[i] = addSection();
       let pixi = pixiList[i];
       pixi.sectionIndex = i;
-      let p1 = Number(points[i].vs);
-      let p2 = Number(points[i + 1].vs);
+      const p1 = points[i].vs;
+      const p2 = points[i + 1].vs;
       let color;
-      if (i >= lastSurveyIdx - 1) {
-        color = selectedList[i] ? selectedProjection : projection;
+      if (selectedList[i]) {
+        color = i >= lastSurveyIdx - 1 ? selectedProjection : selectedSurvey;
       } else {
-        color = selectedList[i] ? selectedSurvey : survey;
+        color = i >= lastSurveyIdx - 1 ? projection : survey;
       }
       pixi.clear().beginFill(...color);
 
@@ -56,6 +62,12 @@ function drawSections(container, props, gutter) {
       if (start > width) continue;
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
+      if (selectedList[i]) {
+        selectedLeft.clear().lineStyle(2, color[0], 0.5);
+        selectedLeft.moveTo(start, 0).lineTo(start, height);
+        selectedRight.clear().lineStyle(2, color[0], 0.5);
+        selectedRight.moveTo(start + length, 0).lineTo(start + length, height);
+      }
     }
   };
 }
