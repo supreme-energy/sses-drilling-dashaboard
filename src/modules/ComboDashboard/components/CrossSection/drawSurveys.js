@@ -27,7 +27,7 @@ export function drawSurveys(container, surveyData) {
       surveyGraphics[i].position.y = surveys[i].tvd;
       surveyGraphics[i].texture = surveyMarker;
     }
-    surveyGraphics[surveyGraphics.length - 2].texture = lastMarker;
     surveyGraphics[surveyGraphics.length - 1].texture = bitProjection;
+    if (surveyGraphics.length > 1) surveyGraphics[surveyGraphics.length - 2].texture = lastMarker;
   };
 }
