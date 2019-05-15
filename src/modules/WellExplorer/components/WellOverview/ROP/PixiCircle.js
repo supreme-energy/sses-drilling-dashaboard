@@ -52,7 +52,7 @@ function PixiCircle({ container, width, height, backgroundColor, borderColor, bo
 
 const ForwardedPixiCircle = forwardRef(PixiCircle);
 
-ForwardedPixiCircle.PropTypes = {
+ForwardedPixiCircle.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   radius: PropTypes.number
