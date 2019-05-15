@@ -6,6 +6,7 @@ import { getHoursDif } from "../../../utils/time";
 import PixiLine from "./PixiLine";
 import PixiPoint from "./PixiPoint";
 import { getScaledValue } from "../../../utils/scale";
+import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 
 function Label({ x, y, text, container, view, viewWidth, color }) {
   const textRef = useRef(null);
@@ -41,7 +42,20 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
   );
   return (
     <React.Fragment>
-      <PixiLine container={container} data={lineData} mapData={d => [d.position[0], d.position[1]]} color={0x9d9d9d} />
+      {/* frozenScaleTransform will not scale */}
+      <PixiContainer container={container} updateTransform={frozenScaleTransform}>
+        {container => (
+          <PixiLine
+            view={view}
+            nativeLines={false}
+            lineWidth={3}
+            container={container}
+            data={lineData}
+            mapData={d => [d.position[0], d.position[1]]}
+            color={0x9d9d9d}
+          />
+        )}
+      </PixiContainer>
       {sectionsData.map(d => (
         <PixiPoint
           key={d.key}
