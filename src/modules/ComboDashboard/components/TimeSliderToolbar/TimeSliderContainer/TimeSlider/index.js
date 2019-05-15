@@ -145,7 +145,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   }, [refresh, stage, data, view, width, height]);
 
   const handleDragSlider = useCallback((_, currentStep) => {
-    setSliderStep(currentStep);
+    setSliderStep([currentStep, 1]);
   });
 
   return (
@@ -175,7 +175,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
 TimeSlider.propTypes = {
   expanded: PropTypes.bool,
   step: PropTypes.number,
-  zoom: PropTypes.array,
+  zoom: PropTypes.arrayOf(PropTypes.number),
   setSliderStep: PropTypes.func,
   selectedGraphs: PropTypes.arrayOf(PropTypes.string)
 };

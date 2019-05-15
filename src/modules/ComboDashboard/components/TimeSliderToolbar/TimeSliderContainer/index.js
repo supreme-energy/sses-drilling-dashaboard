@@ -21,10 +21,12 @@ function TimeSliderContainer({ className, expanded }) {
   const [zoom, setZoom] = useState([0, 0]);
   const [selectedMenuItems, setSelectedMenuItem] = useState(["ROP"]);
 
-  const [sliderStep, setSliderStep] = useState(0);
+  const [sliderStep, setSliderStep] = useState([0, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
-  const [isZooming, setIsZooming] = useReducer(a => !a, false);
-  const [buttonId, setButtonId] = useState("");
+  const [isSpeeding, setIsSpeeding] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
+
+  console.log("sliderStep", sliderStep);
 
   return (
     <Card className={classNames(classes.timeSliderContainer, className)}>
@@ -35,14 +37,13 @@ function TimeSliderContainer({ className, expanded }) {
           </Typography>
           <Legend selectedGraphs={selectedMenuItems} keys={DATA_TYPES} />
           <div className={classes.timeSliderControls}>
-            <ZoomControls setZoom={setZoom} zoom={zoom} isZooming={isZooming} setIsZooming={setIsZooming} />
+            <ZoomControls setZoom={setZoom} isZooming={isZooming} setIsZooming={setIsZooming} />
             <LocalTimeControls
               setIsPlaying={setIsPlaying}
               setSliderStep={setSliderStep}
               isPlaying={isPlaying}
-              sliderStep={sliderStep}
-              setButtonId={setButtonId}
-              buttonId={buttonId}
+              isSpeeding={isSpeeding}
+              setIsSpeeding={setIsSpeeding}
             />
           </div>
           <MoreMenu
@@ -58,7 +59,7 @@ function TimeSliderContainer({ className, expanded }) {
         <TimeSlider
           expanded={expanded}
           zoom={zoom}
-          step={sliderStep}
+          step={sliderStep[0]}
           setSliderStep={setSliderStep}
           setIsPlaying={setIsPlaying}
           selectedGraphs={selectedMenuItems}

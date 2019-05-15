@@ -8,6 +8,8 @@ import { useInterval } from "./useInterval";
 import { STEP_VALUE } from "./index";
 import classes from "./TimeSlider.scss";
 
+let zoomTimeout;
+
 function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
   const handleResetZoom = useCallback(() => {
     setZoom([0, 0]);
@@ -15,26 +17,20 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
 
   const onZoomInDown = useCallback(() => {
     setZoom(zoom => [zoom[0] + STEP_VALUE, 1]);
-    setIsZooming();
+    zoomTimeout = setTimeout(() => setIsZooming(true), 600);
   });
 
   const onZoomOutDown = useCallback(() => {
     setZoom(zoom => [zoom[0] - STEP_VALUE, -1]);
-    setIsZooming();
+    zoomTimeout = setTimeout(() => setIsZooming(true), 600);
   });
 
   const onMouseUp = useCallback(() => {
-    setIsZooming();
+    clearTimeout(zoomTimeout);
+    setIsZooming(false);
   });
 
-  useInterval(
-    () => {
-      if (isZooming) {
-        setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]);
-      }
-    },
-    isZooming ? 200 : null
-  );
+  useInterval(() => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]), isZooming ? 100 : null);
 
   return (
     <div className={classNames(classes.zoomControls, className)}>

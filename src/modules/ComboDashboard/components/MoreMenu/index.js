@@ -5,7 +5,6 @@ import { CheckCircle, MoreVert } from "@material-ui/icons";
 import classNames from "classnames";
 import classes from "./MoreMenu.scss";
 
-// TODO: Build Time Slider Component
 function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuItemEnum, multiSelect }) {
   const [anchorEl, setAnchorEl] = useState(null);
 

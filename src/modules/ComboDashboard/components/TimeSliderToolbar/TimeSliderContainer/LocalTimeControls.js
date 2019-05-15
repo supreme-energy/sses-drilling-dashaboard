@@ -10,53 +10,64 @@ import classes from "./TimeSlider.scss";
 export const FORWARD = "FORWARD";
 export const REWIND = "REWIND";
 
-function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, sliderStep, setButtonId, buttonId }) {
+let speedingTimeout;
+function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding }) {
+  const onPlayClick = useCallback(() => {
+    setIsPlaying();
+  });
+
   const onForwardDown = useCallback(() => {
-    setSliderStep(sliderStep + STEP_VALUE);
-    setButtonId(FORWARD);
+    setSliderStep(sliderStep => [sliderStep[0] + STEP_VALUE, 1]);
+    speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
   });
 
   const onRewindDown = useCallback(() => {
-    if (sliderStep > 0) {
-      setSliderStep(sliderStep - STEP_VALUE);
-    }
-    setButtonId(REWIND);
+    setSliderStep(sliderStep => {
+      if (sliderStep[0]) return [sliderStep[0] - STEP_VALUE, -1];
+      return sliderStep;
+    });
+    speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
   });
 
   const onMouseUp = useCallback(() => {
-    setButtonId("");
+    clearTimeout(speedingTimeout);
+    setIsSpeeding(false);
   });
 
   useInterval(
     () => {
-      if (buttonId === FORWARD) {
-        setSliderStep(sliderStep + STEP_VALUE);
-      } else if (buttonId === REWIND) {
-        if (sliderStep > 0) {
-          setSliderStep(sliderStep - STEP_VALUE);
+      setSliderStep(sliderStep => {
+        if (sliderStep[0] >= 100) {
+          return sliderStep;
         }
-      }
+        return [sliderStep[0] + STEP_VALUE, sliderStep[1]];
+      });
     },
-    buttonId ? 500 : null
+    isPlaying && !isSpeeding ? 800 : null
   );
 
   useInterval(
     () => {
-      if (isPlaying) {
-        setSliderStep(sliderStep + STEP_VALUE);
-      }
+      setSliderStep(sliderStep => {
+        if ((!sliderStep[0] && sliderStep[1] < 0) || (sliderStep[1] && sliderStep[0] >= 100)) {
+          return sliderStep;
+        }
+        return [sliderStep[0] + STEP_VALUE * sliderStep[1], sliderStep[1]];
+      });
     },
-    isPlaying ? 1000 : null
+    isSpeeding ? 200 : null
   );
+
+  console.log("isSpeeding", isSpeeding);
 
   return (
     <div className={classes.timeControls}>
-      <IconButton id={REWIND} onMouseDown={onRewindDown} onMouseUp={onMouseUp}>
-        <FastRewind id={REWIND} />
+      <IconButton onMouseDown={onRewindDown} onMouseUp={onMouseUp}>
+        <FastRewind />
       </IconButton>
-      <IconButton onClick={setIsPlaying}>{isPlaying ? <PauseCircleOutline /> : <PlayCircleOutline />}</IconButton>
-      <IconButton id={FORWARD} onMouseDown={onForwardDown} onMouseUp={onMouseUp}>
-        <FastForward id={FORWARD} />
+      <IconButton onClick={onPlayClick}>{isPlaying ? <PauseCircleOutline /> : <PlayCircleOutline />}</IconButton>
+      <IconButton onMouseDown={onForwardDown} onMouseUp={onMouseUp}>
+        <FastForward />
       </IconButton>
     </div>
   );
@@ -64,11 +75,10 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, sliderStep,
 
 LocalTimeControls.propTypes = {
   setSliderStep: PropTypes.func,
-  sliderStep: PropTypes.number,
   setIsPlaying: PropTypes.func,
   isPlaying: PropTypes.bool,
-  setButtonId: PropTypes.func,
-  buttonId: PropTypes.string
+  isSpeeding: PropTypes.bool,
+  setIsSpeeding: PropTypes.func
 };
 
 export default LocalTimeControls;
