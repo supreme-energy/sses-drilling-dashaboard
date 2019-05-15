@@ -2,9 +2,12 @@ import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
 const survey = [0xa6a6a6, 0.5];
+const selectedSurvey = [0x000000, 1];
 const projection = [0xee2211, 0.5];
+const selectedLastSurvey = [0x0000ff, 1];
+const selectedProjection = [0xee2211, 1];
 
-function drawSections(container, gutter) {
+function drawSections(container, props, gutter) {
   const buttonHeight = 10;
   const pixiList = [];
   const bg = new PIXI.Graphics();
@@ -15,12 +18,16 @@ function drawSections(container, gutter) {
     const section = new PIXI.Graphics();
     section.transform.updateTransform = frozenXYTransform;
     pixiList.push(section);
+    section.interactive = true;
+    section.on("click", function() {
+      props.setSelectedIdx(this.sectionIndex);
+    });
     container.addChild(section);
     return section;
   };
 
   return function update(props) {
-    const { surveys, projections, width, height, view } = props;
+    const { surveys, projections, width, height, view, selectedIdx, lastSurveyIdx } = props;
     if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const y = height - gutter - buttonHeight;
@@ -33,12 +40,17 @@ function drawSections(container, gutter) {
     for (let i = 0; i < points.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
       let pixi = pixiList[i];
+      pixi.sectionIndex = i;
       let p1 = Number(points[i].vs);
       let p2 = Number(points[i + 1].vs);
-      const color = i >= surveys.length - 2 ? projection : survey;
+      let color;
+      if (i >= lastSurveyIdx - 1) {
+        color = i === selectedIdx ? selectedProjection : projection;
+      } else {
+        color = i === selectedIdx ? selectedSurvey : survey;
+      }
       pixi.clear().beginFill(...color);
-      // drawRoundedRect may not be performant enough.
-      // consider drawing lines with a curved 'I' shape bounding the ends
+
       start = p1 * view.xScale + view.x;
       length = (p2 - p1) * view.xScale;
       if (start > width) continue;

@@ -17,6 +17,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const bitProj = surveys[lastSurveyIdx];
   const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
   const [selectedList, setSelectedList] = useState([]);
+  const [selectedIdx, setSelectedIdx] = useState(13);
 
   const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
     const { index, tvdDelta, vsDelta } = action;
@@ -118,6 +119,17 @@ export const CrossSectionDashboard = ({ wellId }) => {
               }}
             />
           </label>
+          <label>
+            selected section
+            <input
+              type="number"
+              step="1"
+              value={selectedIdx}
+              onChange={e => {
+                return setSelectedIdx(Number(e.target.value));
+              }}
+            />
+          </label>
         </div>
       </div>
       <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
@@ -131,6 +143,9 @@ export const CrossSectionDashboard = ({ wellId }) => {
             surveys={surveys}
             formations={formations}
             projections={projections}
+            selectedIdx={selectedIdx}
+            setSelectedIdx={setSelectedIdx}
+            lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}
             projectionsDispatch={projectionsDispatch}
           />
