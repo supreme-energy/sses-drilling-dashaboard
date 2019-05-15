@@ -4,7 +4,7 @@ import { frozenScaleTransform } from "../../../../ComboDashboard/components/Cros
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function PixiPoint({ container, width, height, backgroundColor, borderColor, borderThickness, x, y, radius }, ref) {
+function PixiCircle({ container, width, height, backgroundColor, borderColor, borderThickness, x, y, radius }, ref) {
   const pointRef = useRef(() => {
     const point = new PIXI.Graphics();
     point.transform.updateTransform = frozenScaleTransform;
@@ -50,18 +50,18 @@ function PixiPoint({ container, width, height, backgroundColor, borderColor, bor
   return null;
 }
 
-const ForwardedPixiPoint = forwardRef(PixiPoint);
+const ForwardedPixiCircle = forwardRef(PixiCircle);
 
-ForwardedPixiPoint.PropTypes = {
+ForwardedPixiCircle.PropTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   radius: PropTypes.number
 };
 
-ForwardedPixiPoint.defaultProps = {
+ForwardedPixiCircle.defaultProps = {
   x: 0,
   y: 0,
   radius: 4
 };
 
-export default ForwardedPixiPoint;
+export default ForwardedPixiCircle;
