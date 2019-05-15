@@ -79,7 +79,6 @@ export default function Rop({ className, style }) {
     height,
     view,
     updateView,
-    refresh,
     zoomXScale: false,
     zoomYScale: true
   });
@@ -107,11 +106,8 @@ export default function Rop({ className, style }) {
     [width, data, height, onReset]
   );
 
-  const gridRef = useRef(null);
-
   useEffect(
-    function refreshViewport() {
-      gridRef.current.updateGrid(view);
+    function refreshWebGLRenderer() {
       refresh();
     },
     [refresh, stage, data, view, width, height]
@@ -187,7 +183,7 @@ export default function Rop({ className, style }) {
             />
           )}
         </PixiContainer>
-        <Grid container={viewport} width={width} height={height} gridGutter={gridGutter} ref={gridRef} />
+        <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
         <XAxis
           x={gridGutter}
           y={height - 20}

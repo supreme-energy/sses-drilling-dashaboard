@@ -17,7 +17,7 @@ function makeXTickAndLine(...args) {
 
   return [line, label];
 }
-function Grid({ container, width, height, gridGutter, x, y }, ref) {
+function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
   const gridLayerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {
@@ -29,6 +29,10 @@ function Grid({ container, width, height, gridGutter, x, y }, ref) {
   const updateGrid = useMemo(() => {
     return drawGrid(gridLayerRef.current, width, height, gridGutter, "top", makeXTickAndLine);
   }, [width, height, gridGutter]);
+
+  useEffect(() => {
+    updateGrid(view);
+  }, [updateGrid, view]);
 
   useImperativeHandle(ref, () => ({
     updateGrid
