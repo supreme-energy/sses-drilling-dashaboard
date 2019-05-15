@@ -6,6 +6,10 @@ import { useFormations, useProjections, useSurveys, useWellPath } from "../../..
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
 
+function listReducer(list, i) {
+  list[i] = !list[i];
+  return list;
+}
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const surveys = useSurveys(wellId);
@@ -16,7 +20,10 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const lastSurveyIdx = surveys.length - 1;
   const bitProj = surveys[lastSurveyIdx];
   const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
-  const [selectedList, setSelectedList] = useState([]);
+  const [selectedList, setSelectedList] = useReducer(listReducer, []);
+
+  const [blah, setBlah] = useState([]);
+
   const [selectedIdx, setSelectedIdx] = useState(13);
 
   const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
@@ -144,6 +151,10 @@ export const CrossSectionDashboard = ({ wellId }) => {
             formations={formations}
             projections={projections}
             selectedIdx={selectedIdx}
+            selectedList={selectedList}
+            setSelectedList={setSelectedList}
+            blah={blah}
+            setBlah={setBlah}
             setSelectedIdx={setSelectedIdx}
             lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}

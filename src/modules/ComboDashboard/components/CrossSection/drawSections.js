@@ -20,14 +20,15 @@ function drawSections(container, props, gutter) {
     pixiList.push(section);
     section.interactive = true;
     section.on("click", function() {
-      props.setSelectedIdx(this.sectionIndex);
+      props.setSelectedList(this.sectionIndex);
+      props.setBlah([...props.blah, this.sectionIndex]);
     });
     container.addChild(section);
     return section;
   };
 
   return function update(props) {
-    const { surveys, projections, width, height, view, selectedIdx, lastSurveyIdx } = props;
+    const { surveys, projections, width, height, view, selectedIdx, lastSurveyIdx, selectedList } = props;
     if (!container.transform) return;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const y = height - gutter - buttonHeight;
@@ -45,9 +46,9 @@ function drawSections(container, props, gutter) {
       let p2 = Number(points[i + 1].vs);
       let color;
       if (i >= lastSurveyIdx - 1) {
-        color = i === selectedIdx ? selectedProjection : projection;
+        color = selectedList[i] ? selectedProjection : projection;
       } else {
-        color = i === selectedIdx ? selectedSurvey : survey;
+        color = selectedList[i] ? selectedSurvey : survey;
       }
       pixi.clear().beginFill(...color);
 
