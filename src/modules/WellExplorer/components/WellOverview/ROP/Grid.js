@@ -6,14 +6,6 @@ import { drawGrid, defaultMakeXTickAndLine } from "../../../../ComboDashboard/co
 function makeXTickAndLine(...args) {
   const [line, label] = defaultMakeXTickAndLine(...args);
   label.rotation = 0;
-  const [, , index] = args;
-
-  // this code is a bit fragile but it was the fastest way to acheive custom anchor for first value
-  if (index === 1) {
-    label.anchor.set(0, 0.5);
-  } else {
-    label.anchor.set(0.5, 0.5);
-  }
 
   return [line, label];
 }
@@ -31,7 +23,7 @@ function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
   }, [gridGutter]);
 
   useEffect(() => {
-    updateGrid({ view, width, height });
+    updateGrid({ view, width, height, hideCorner: true });
   }, [updateGrid, view, width, height]);
 
   useImperativeHandle(ref, () => ({
