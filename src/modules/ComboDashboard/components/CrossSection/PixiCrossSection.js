@@ -3,8 +3,9 @@ import { drawFormations } from "./drawFormations";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
-import { drawProjections, interactiveProjection } from "./drawProjections";
+import { drawProjections} from "./drawProjections";
 import { drawSections } from "./drawSections";
+import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 
 export default class PixiCrossSection {

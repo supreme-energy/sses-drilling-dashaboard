@@ -63,8 +63,8 @@ function drawSections(container, props, gutter) {
       const p1 = points[i].vs;
       const p2 = points[i + 1].vs;
       const color = getColor(selectedList, i, lastSurveyIdx);
-      let pixi = pixiList[i];
 
+      let pixi = pixiList[i];
       pixi.clear().beginFill(...color);
       pixi.sectionIndex = i;
 
@@ -73,6 +73,7 @@ function drawSections(container, props, gutter) {
       if (start > width) continue;
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
+
       if (selectedList[i]) {
         selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
