@@ -33,13 +33,15 @@ function drawSections(container, props, gutter) {
   };
 
   return function update(props) {
-    const { surveys, projections, width, height, view, lastSurveyIdx, selectedList } = props;
     if (!container.transform) return;
+    const { surveys, projections, width, height, view, lastSurveyIdx, selectedList } = props;
     const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
     bg.drawRect(0, y - 2, width, buttonHeight + 2);
+    selectedLeft.clear();
+    selectedRight.clear();
 
     let start = 0;
     let length = 0;
@@ -63,9 +65,9 @@ function drawSections(container, props, gutter) {
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
       if (selectedList[i]) {
-        selectedLeft.clear().lineStyle(2, color[0], 0.5);
+        selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
-        selectedRight.clear().lineStyle(2, color[0], 0.5);
+        selectedRight.lineStyle(2, color[0], 0.5);
         selectedRight.moveTo(start + length, 0).lineTo(start + length, height);
       }
     }
