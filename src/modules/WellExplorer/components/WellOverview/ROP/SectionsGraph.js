@@ -4,7 +4,7 @@ import PixiContainer from "./PixiContainer";
 import { colorBySection } from "../../../../../constants/colors";
 import { getHoursDif } from "../../../utils/time";
 import PixiLine from "./PixiLine";
-import PixiPoint from "./PixiPoint";
+import PixiCircle from "./PixiCircle";
 import { getScaledValue } from "../../../utils/scale";
 import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 
@@ -57,7 +57,7 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
         )}
       </PixiContainer>
       {sectionsData.map(d => (
-        <PixiPoint
+        <PixiCircle
           key={d.key}
           container={container}
           x={d[0].position[0]}
