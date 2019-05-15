@@ -5,42 +5,46 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
 function PixiPoint({ container, width, height, backgroundColor, borderColor, borderThickness, x, y, radius }, ref) {
-  const bgRef = useRef(() => new PIXI.Graphics());
+  const pointRef = useRef(() => {
+    const point = new PIXI.Graphics();
+    point.transform.updateTransform = frozenScaleTransform;
+    return point;
+  });
   useEffect(
     function addBackground() {
-      const bg = bgRef.current;
-      bg.transform.updateTransform = frozenScaleTransform;
-      container.addChild(bg);
-      return () => container.removeChild(bg);
+      const point = pointRef.current;
+
+      container.addChild(point);
+      return () => container.removeChild(point);
     },
     [container]
   );
 
   useEffect(
     function reposition() {
-      const bg = bgRef.current;
-      bg.x = x;
-      bg.y = y;
+      const point = pointRef.current;
+      point.x = x;
+      point.y = y;
     },
     [x, y]
   );
 
   useEffect(
     function redraw() {
-      const bg = bgRef.current;
+      const point = pointRef.current;
 
-      bg.clear();
+      point.clear();
       if (backgroundColor) {
-        bg.beginFill(backgroundColor);
+        point.beginFill(backgroundColor);
       }
-      bg.lineStyle(borderThickness, borderColor);
-      bg.drawCircle(0, 0, radius);
+      point.lineStyle(borderThickness, borderColor);
+      point.drawCircle(0, 0, radius);
     },
     [radius, backgroundColor, borderColor, borderThickness]
   );
 
   useImperativeHandle(ref, () => ({
-    graphics: bgRef.current
+    graphics: pointRef.current
   }));
 
   return null;

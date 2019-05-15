@@ -15,21 +15,13 @@ function PixiText({ container, fontSize, color, x, y, text, anchor, updateTransf
   );
 
   useEffect(
-    function reposition() {
-      const pixiText = textRef.current;
-      pixiText.x = x;
-      pixiText.y = y;
-    },
-    [x, y]
-  );
-
-  useEffect(
     function updateText() {
       const pixiText = textRef.current;
       if (updateTransform) {
         pixiText.transform.updateTransform = updateTransform;
       }
-
+      pixiText.x = x;
+      pixiText.y = y;
       pixiText.anchor.set(...anchor);
       pixiText.text = text;
       pixiText.style.fontSize = fontSize;
