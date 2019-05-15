@@ -114,10 +114,10 @@ function interactiveProjection(parent, props) {
   });
 
   return props => {
-    const { selectedList, lastSurveyIdx } = props;
+    const { selectedList, lastSurveyIdx, sectionList } = props;
     const selectedIndex = selectedList.findIndex(e => e);
     // If there isn't a selected project ahead segment, don't display the interactive component
-    if (selectedIndex === -1 || selectedIndex < lastSurveyIdx ) {
+    if (selectedIndex === -1 || selectedIndex < lastSurveyIdx) {
       container.visible = false;
       return;
     }
@@ -132,28 +132,36 @@ function interactiveProjection(parent, props) {
     ) {
       return;
     }
-    const { leftVs, leftTot, leftBot, rightVs, rightTot, rightBot, paVs, paTcl } = props.view;
     const { x, y, xScale, yScale } = props.view;
     const xMap = val => val * xScale + x;
     const yMap = val => val * yScale + y;
+    const pa = sectionList[selectedIndex + 1];
+    const prev = sectionList[selectedIndex];
+    if (pa.tot === 0 || pa.bot === 0) {
+      // These shouldn't be blank and this code will be removed pending a conversation with Tyler
+      let totDiff = prev.tcl - prev.tot;
+      let botDiff = prev.tcl - prev.bot;
+      pa.tot = pa.tcl - totDiff;
+      pa.bot = pa.tcl - botDiff;
+    }
 
-    totCircle.position.x = leftVs;
-    totCircle.position.y = leftTot;
-    botCircle.position.x = leftVs;
-    botCircle.position.y = leftBot;
-    totCircleRight.position.x = rightVs;
-    totCircleRight.position.y = rightTot;
-    botCircleRight.position.x = rightVs;
-    botCircleRight.position.y = rightBot;
-    projectionPoint.position.x = rightVs;
-    projectionPoint.position.y = paTcl;
+    totCircle.position.x = prev.vs;
+    totCircle.position.y = prev.tot;
+    botCircle.position.x = prev.vs;
+    botCircle.position.y = prev.bot;
+    totCircleRight.position.x = pa.vs;
+    totCircleRight.position.y = pa.tot;
+    botCircleRight.position.x = pa.vs;
+    botCircleRight.position.y = pa.bot;
+    projectionPoint.position.x = pa.vs;
+    projectionPoint.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, red, 1);
-    totLine.moveTo(xMap(leftVs), yMap(leftTot)).lineTo(xMap(rightVs), yMap(rightTot));
+    totLine.moveTo(xMap(prev.vs), yMap(prev.tot)).lineTo(xMap(pa.vs), yMap(pa.tot));
     tclLine.clear().lineStyle(2, red, 1);
-    tclLine.moveTo(xMap(leftVs), yMap((leftTot + leftBot) / 2)).lineTo(xMap(rightVs), yMap((rightTot + rightBot) / 2));
+    tclLine.moveTo(xMap(prev.vs), yMap(prev.tcl)).lineTo(xMap(pa.vs), yMap(pa.tcl));
     botLine.clear().lineStyle(2, red, 1);
-    botLine.moveTo(xMap(leftVs), yMap(leftBot)).lineTo(xMap(rightVs), yMap(rightBot));
+    botLine.moveTo(xMap(prev.vs), yMap(prev.bot)).lineTo(xMap(pa.vs), yMap(pa.bot));
   };
 }
 

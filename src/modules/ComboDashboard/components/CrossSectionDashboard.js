@@ -20,7 +20,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   const lastSurveyIdx = surveys.length - 2;
   const bitProj = surveys[lastSurveyIdx];
-  const sectionList = surveys.slice(0, lastSurveyIdx).concat(projections);
+  const sectionList = surveys.slice(0, lastSurveyIdx + 1).concat(projections);
   const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);
 
   const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
@@ -31,14 +31,14 @@ export const CrossSectionDashboard = ({ wellId }) => {
           projections[i].tvd += tvdDelta;
           projections[i].vs += vsDelta;
         }
-        return projections;
+        return [...projections];
       case "fault":
         for (let i = index; i < projections.length; i++) {
           projections[i].tvd += tvdDelta;
         }
-        return projections;
+        return [...projections];
       default:
-        throw new Error(`Unknown projection reducer type ${action.type}`);
+        return [...projections];
     }
   }, sectionList);
 
@@ -136,6 +136,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             surveys={surveys}
             formations={formations}
             projections={projections}
+            sectionList={sectionList}
             selectedList={selectedList}
             setSelectedList={setSelectedList}
             lastSurveyIdx={lastSurveyIdx}
