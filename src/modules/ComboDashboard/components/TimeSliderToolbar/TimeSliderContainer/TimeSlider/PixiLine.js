@@ -2,10 +2,24 @@ import useRef from "react-powertools/hooks/useRef";
 import { useMemo, useEffect, useCallback } from "react";
 import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
+import PropTypes from "prop-types";
 
-export default function PixiLine({ container, data, mapData, color }) {
+function draw(lineG, lineWidth, color, lineData, view) {
+  lineG.current.clear().lineStyle(lineWidth, color, 1);
+  // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
+  // I'm picking 10k that should be safe (15k works also)
+  const chunks = chunk(lineData, 10000);
+  chunks.forEach(chunk => {
+    lineG.current.moveTo(chunk[0][0] * view.xScale, chunk[0][1] * view.yScale);
+    chunk.forEach(point => {
+      lineG.current.lineTo(point[0] * view.xScale, point[1] * view.yScale);
+    });
+  });
+}
+
+export default function PixiLine({ container, data, mapData, color, nativeLines, view, lineWidth }) {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
-  const lineG = useRef(() => new PIXI.Graphics(true));
+  const lineG = useRef(() => new PIXI.Graphics(nativeLines));
 
   useEffect(() => {
     const lineGraphic = lineG.current;
@@ -16,25 +30,41 @@ export default function PixiLine({ container, data, mapData, color }) {
   const drawLine = useCallback(
     function drawLine() {
       if (lineData && lineData.length) {
-        lineG.current.clear().lineStyle(1, color, 1);
-
-        // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
-        // I'm picking 10k that should be safe (15k works also)
-        const chunks = chunk(lineData, 10000);
-        chunks.forEach(chunk => {
-          lineG.current.moveTo(...chunk[0]);
-          chunk.forEach(point => {
-            lineG.current.lineTo(point[0], point[1]);
-          });
-        });
+        draw(lineG, lineWidth, color, lineData, { xScale: 1, yScale: 1 });
       }
     },
-    [lineData, color]
+    [lineData, color, lineWidth]
   );
 
+  // initial line draw
   useEffect(() => {
     drawLine();
   }, [container, drawLine]);
 
+  useEffect(
+    function redrawNonNativeLineWhenScaleChange() {
+      if (!nativeLines && lineData && lineData.length) {
+        draw(lineG, lineWidth, color, lineData, view);
+      }
+    },
+    [view, nativeLines, drawLine, color, lineData, lineWidth]
+  );
+
   return null;
 }
+
+PixiLine.propTypes = {
+  nativeLines: PropTypes.bool,
+  data: PropTypes.array.isRequired,
+  container: PropTypes.object,
+  mapData: PropTypes.func.isRequired,
+  color: PropTypes.number,
+  view: PropTypes.object,
+  lineWidth: PropTypes.number
+};
+
+PixiLine.defaultProps = {
+  nativeLines: true,
+  lineWidth: 1,
+  view: { xScale: 1, yScale: 1 }
+};

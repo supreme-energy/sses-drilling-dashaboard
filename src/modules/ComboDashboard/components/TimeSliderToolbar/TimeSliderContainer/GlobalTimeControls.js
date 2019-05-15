@@ -16,36 +16,28 @@ function GlobalTimeControls({ children, expanded, setSliderStep }) {
   });
   return (
     <div className={classes.timeSliderView}>
-      <div>
+      <div
+        className={classNames(
+          classes.backwardTime,
+          expanded ? classes.expandedBackwardTime : classes.collapsedBackwardTime
+        )}
+      >
         <IconButton onClick={handleSetBeginning}>
-          <Restore
-            className={classNames(
-              classes.backwardTime,
-              expanded ? classes.expandedBackwardTime : classes.collapsedBackwardTime
-            )}
-          />
-          {expanded && (
-            <Typography className={classes.beginningTime} variant="caption">
-              {"09-18-2019"}
-            </Typography>
-          )}
+          <Restore />
         </IconButton>
+        {expanded && <Typography variant="caption">{"09-18-2019"}</Typography>}
       </div>
       {children}
-      <div>
+      <div
+        className={classNames(
+          classes.forwardTime,
+          expanded ? classes.expandedForwardTime : classes.collapsedForwardTime
+        )}
+      >
         <IconButton onClick={handleSetEnd}>
-          <AccessTime
-            className={classNames(
-              classes.forwardTime,
-              expanded ? classes.expandedForwardTime : classes.collapsedForwardTime
-            )}
-          />
-          {expanded && (
-            <Typography variant="caption" className={classes.now}>
-              NOW
-            </Typography>
-          )}
+          <AccessTime />
         </IconButton>
+        {expanded && <Typography variant="caption">NOW</Typography>}
       </div>
     </div>
   );

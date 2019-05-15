@@ -1,6 +1,7 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
+import { gridGutter } from ".";
 
 const globalMouse = { x: 0, y: 0 };
 // enable mouse wheel and drag
@@ -41,7 +42,6 @@ export default function useViewport({
           newValue.y = globalMouse.y - (globalMouse.y - prev.y) * factor;
           newValue.yScale = prev.yScale * factor;
         }
-
         return newValue;
       });
     },
@@ -69,13 +69,11 @@ export default function useViewport({
       }
 
       const currMouse = moveData.data.global;
-      updateView(prev => {
-        return {
-          ...prev,
-          y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
-          x: zoomXScale ? Number(prev.x) + (currMouse.x - prev.x) : prev.x
-        };
-      });
+      updateView(prev => ({
+        ...prev,
+        y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
+        x: zoomXScale ? Number(prev.x) + (currMouse.x - prev.x) : prev.x
+      }));
 
       Object.assign(interactionState.prevMouse, currMouse);
     },
@@ -83,23 +81,19 @@ export default function useViewport({
   );
 
   useEffect(() => {
-    if (zoom[0] === 0) {
-      updateView({
-        x: 0,
-        y: 0,
-        xScale: 1,
-        yScale: 1
-      });
-    } else {
+    if (zoom[1] !== 0) {
       const factor = 1 + zoom[1] * 0.03;
-      // console.log(step);
+      const stepFactor = (window.innerWidth - 20) * (step / 100);
+      interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
+
+      // Use current slider position
       updateView(prev => {
-        // console.log(Number(prev.x) + (step - Number(prev.x)) * factor, factor, step, prev.x);
+        console.log(prev.xScale, prev.yScale, "scale");
         return {
-          x: prev.x,
-          y: prev.y,
-          xScale: zoomXScale ? prev.xScale * factor : prev.xScale,
-          yScale: zoomYScale ? prev.yScale * factor : prev.yScale
+          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
+          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
+          xScale: prev.xScale * factor,
+          yScale: prev.yScale * factor
         };
       });
     }
@@ -107,19 +101,23 @@ export default function useViewport({
 
   useEffect(
     function makeStageInteractive() {
-      stage.interactive = true;
-      stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+      if (stage) {
+        stage.interactive = true;
+        stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
+      }
     },
     [stage, width, height]
   );
 
   useEffect(
     function enableMouseInteractions() {
-      stage.mousedown = onMouseDown;
-      stage.mousemove = onMouseMove;
-      stage.mouseout = () => (interactionStateRef.current.isOutside = true);
-      stage.mouseover = () => (interactionStateRef.current.isOutside = false);
-      stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
+      if (stage) {
+        stage.mousedown = onMouseDown;
+        stage.mousemove = onMouseMove;
+        stage.mouseout = () => (interactionStateRef.current.isOutside = true);
+        stage.mouseover = () => (interactionStateRef.current.isOutside = false);
+        stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
+      }
       renderer.view.addEventListener("wheel", onWhell, false);
 
       return () => {
@@ -137,7 +135,7 @@ export default function useViewport({
     }
 
     return () => {
-      if (viewport) {
+      if (viewport && stage) {
         stage.removeChild(viewport);
         viewport.destroy({ children: true });
       }

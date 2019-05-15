@@ -30,7 +30,10 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
     setIsZooming(false);
   });
 
-  useInterval(() => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]), isZooming ? 100 : null);
+  // Stop zoom if mouseup happens outside component
+  window.addEventListener("mouseup", onMouseUp, false);
+
+  useInterval(() => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]), isZooming ? 50 : null);
 
   return (
     <div className={classNames(classes.zoomControls, className)}>

@@ -43,6 +43,7 @@
     "leaflet-fullscreen": "^1.0.2",
     "lodash": "4.17.10",
     "memoize-one": "^5.0.4",
+    "moment": "^2.24.0",
     "object-assign": "^4.1.1",
     "pixi.js": "^4.8.7",
     "prettier": "^1.16.4",

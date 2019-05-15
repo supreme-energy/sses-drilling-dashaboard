@@ -9,7 +9,7 @@ const LEGEND_BY_COLOR = {
   SLIDE: "#A9FFFB",
   CONNECTION: "#D9AAFE",
   ROP: "#08BB00",
-  LEGEND: "#967F2F"
+  LENGTH: "#967F2F"
 };
 
 function Legend({ className, selectedGraphs, keys }) {

@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
 import { scaleLinear } from "d3-scale";
 import { max, group, pairs } from "d3-array";
+import { useSize } from "react-hook-size";
+import moment from "moment";
 
 import useRef from "react-powertools/hooks/useRef";
 
@@ -10,20 +12,27 @@ import Grid from "./Grid";
 import PixiContainer from "./PixiContainer";
 import PixiLine from "./PixiLine";
 import useViewport from "./useViewport";
-import useWebGLRenderer from "./WebglRenderer";
+import { useWebGLRenderer } from "./useWebGLRenderer";
 import { STEP_VALUE } from "../index";
 import classes from "../TimeSlider.scss";
 
-const width = window.innerWidth - 300;
-const height = 200;
-const gridGutter = 50;
+export const gridGutter = 60;
 
 const EMPTY_ARRAY = [];
-export const colorBySection = {
+export const colorByGraph = {
   ROP: 0x08bb00,
   SLIDE: 0xa9fffb,
   CONNECTION: 0xd9aafe,
   LENGTH: 0x967f2f
+};
+
+export const getScaledValue = (scaleFactor, value) => (1 / scaleFactor) * value;
+
+export const getHoursDif = (start, end) => {
+  const startTime = moment(start);
+  const endTime = moment(end);
+  const duration = moment.duration(endTime.diff(startTime));
+  return duration.asHours();
 };
 
 function useRopData() {
@@ -80,7 +89,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   const slideData = useSlideData();
 
   const canvasRef = useRef(null);
-  // const { width, height } = useSize(canvasRef);
+  const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
 
   const getInitialViewYScaleValue = useMemo(
@@ -94,37 +103,49 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   );
 
   const [view, updateView] = useState({
-    x: 0,
+    x: gridGutter,
     y: 0,
     xScale: 1,
     yScale: 1
   });
 
   const scaleInitialized = useRef(false);
+  const viewportContainer = useRef(null);
 
   const viewport = useViewport({
     renderer,
-    stage,
+    stage: viewportContainer.current && viewportContainer.current.container,
     width,
     height,
     view,
     updateView,
-    refresh,
-    zoomXScale: true,
+    zoomXScale: false,
     zoomYScale: true,
     zoom,
     step
   });
 
   const onReset = useCallback(() => {
+    //  0.07, -0.2;
+    console.log(
+      getInitialViewXScaleValue((width - gridGutter) / 15),
+      getInitialViewYScaleValue(height - gridGutter - 500)
+    );
     updateView(view => ({
       ...view,
-      x: gridGutter + 10,
-      y: 10,
-      yScale: getInitialViewYScaleValue(height - gridGutter - 50),
-      xScale: getInitialViewXScaleValue(width - gridGutter - 20)
+      x: 0,
+      y: 20,
+      yScale: getInitialViewYScaleValue((height - gridGutter) * 30),
+      xScale: getInitialViewXScaleValue((width - gridGutter) / 20)
     }));
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
+
+  useEffect(
+    function resetZoom() {
+      if (!zoom[1]) onReset();
+    },
+    [onReset, zoom]
+  );
 
   // set initial scale
   useEffect(
@@ -134,15 +155,15 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
         scaleInitialized.current = true;
       }
     },
-    [width, data, view, getInitialViewXScaleValue, getInitialViewYScaleValue, height, onReset]
+    [width, data, height, onReset]
   );
 
-  const gridRef = useRef(null);
-
-  useEffect(() => {
-    gridRef.current.updateGrid(view);
-    refresh();
-  }, [refresh, stage, data, view, width, height]);
+  useEffect(
+    function refreshWebGLRenderer() {
+      refresh();
+    },
+    [refresh, stage, data, view, width, height]
+  );
 
   const handleDragSlider = useCallback((_, currentStep) => {
     setSliderStep([currentStep, 1]);
@@ -152,14 +173,15 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
     <div className={classes.timeSliderComponent}>
       {expanded && (
         <div className={classes.timeSliderGraph} ref={canvasRef}>
+          <PixiContainer ref={viewportContainer} container={stage} />
           <PixiContainer container={viewport}>
             {container =>
-              selectedGraphs.map((value, key) => (
-                <PixiLine container={container} key={key} data={data} mapData={mapRop} color={colorBySection[value]} />
+              selectedGraphs.map((graph, key) => (
+                <PixiLine key={key} container={container} data={data} mapData={mapRop} color={colorByGraph[graph]} />
               ))
             }
           </PixiContainer>
-          <Grid container={viewport} width={width} height={height} ref={gridRef} />
+          <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
         </div>
       )}
       <Slider

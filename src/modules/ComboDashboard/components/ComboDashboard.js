@@ -14,7 +14,7 @@ function ComboDashboard({
     <div>
       <HeaderToolbar wellId={openedWellId} />
       <TimeSliderToolbar />
-      <CrossSectionDashboard wellId={openedWellId} />
+      {/* <CrossSectionDashboard wellId={openedWellId} /> */}
     </div>
   );
 }

@@ -21,12 +21,10 @@ function TimeSliderContainer({ className, expanded }) {
   const [zoom, setZoom] = useState([0, 0]);
   const [selectedMenuItems, setSelectedMenuItem] = useState(["ROP"]);
 
-  const [sliderStep, setSliderStep] = useState([0, 1]);
+  const [sliderStep, setSliderStep] = useState([100, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [isSpeeding, setIsSpeeding] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
-
-  console.log("sliderStep", sliderStep);
 
   return (
     <Card className={classNames(classes.timeSliderContainer, className)}>

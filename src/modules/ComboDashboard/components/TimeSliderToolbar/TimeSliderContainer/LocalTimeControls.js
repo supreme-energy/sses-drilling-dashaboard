@@ -24,7 +24,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   const onRewindDown = useCallback(() => {
     setSliderStep(sliderStep => {
       if (sliderStep[0]) return [sliderStep[0] - STEP_VALUE, -1];
-      return sliderStep;
+      return [sliderStep[0], -1];
     });
     speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
   });
@@ -58,10 +58,11 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
     isSpeeding ? 200 : null
   );
 
-  console.log("isSpeeding", isSpeeding);
+  // Stop Slider if mouseup happens outside component
+  window.addEventListener("mouseup", onMouseUp, false);
 
   return (
-    <div className={classes.timeControls}>
+    <div className={classes.timeControls} onMouseUp={onMouseUp}>
       <IconButton onMouseDown={onRewindDown} onMouseUp={onMouseUp}>
         <FastRewind />
       </IconButton>

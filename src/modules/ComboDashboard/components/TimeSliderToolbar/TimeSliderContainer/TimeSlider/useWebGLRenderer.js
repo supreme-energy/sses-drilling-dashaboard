@@ -1,9 +1,13 @@
-import { useCallback, useEffect } from "react";
-import * as PIXI from "pixi.js";
 import useRef from "react-powertools/hooks/useRef";
+import * as PIXI from "pixi.js";
+import { useEffect, useCallback } from "react";
 
-function useWebglRenderer({ canvas, width, height }) {
-  const stage = useRef(() => new PIXI.Container());
+export function useWebGLRenderer({ canvas, width, height }) {
+  const stage = useRef(() => {
+    const s = new PIXI.Container();
+    s.sortableChildren = true;
+    return s;
+  });
 
   const rendererRef = useRef(() =>
     PIXI.autoDetectRenderer({
@@ -29,9 +33,7 @@ function useWebglRenderer({ canvas, width, height }) {
 
   const refresh = useCallback(() => {
     rendererRef.current.render(stage.current);
-  }, []);
+  }, [width, height]);
 
   return [stage.current, refresh, rendererRef.current];
 }
-
-export default useWebglRenderer;

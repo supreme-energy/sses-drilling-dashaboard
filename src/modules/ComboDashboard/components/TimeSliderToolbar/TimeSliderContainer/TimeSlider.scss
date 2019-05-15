@@ -7,6 +7,13 @@
     width: 100%;
 }
 
+.timeSliderGraph {
+    canvas {
+        // position: absolute;
+        max-height: 100px
+    }
+}
+
 .timeSliderHeader {
     padding: 10px;
     display: flex;
@@ -85,14 +92,12 @@
     display: flex;
 
     .timeSliderExpanded {
-        position: relative;
         color: $gold;
-        bottom: 20px;
-        width: 93%;
+        bottom: 30px;
+        width: 98%;
     }
 
     .timeSliderCollapsed {
-        position: relative;
         color: $gold;
         top: 20px;
         left: 50px;
@@ -101,6 +106,10 @@
 
     .backwardTime {
         position: relative;
+
+        > button {
+            padding-left: 0;
+        }
     }
 
     .expandedBackwardTime {
@@ -117,29 +126,21 @@
     .forwardTime {
         color: #000000;
         position: relative;
+        display: block;
+
+        > button {
+            padding-left: 5px;
+        }
     }
 
     .expandedForwardTime {
-        right: 55px;
-        top: 35px;
+        top: 45px;
+        right: 10px;
     }
 
     .collapsedForwardTime {
         right: 25px;
         top: 7px;
-    }
-
-    .now {
-        position: relative;
-        right: 80px;
-        top: 60px;
-    }
-
-    .beginningTime {
-        position: relative;
-        top: 60px;
-        left: 15px;
-        min-width: 40px;
     }
 }
 
