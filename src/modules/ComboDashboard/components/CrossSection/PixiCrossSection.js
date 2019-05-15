@@ -46,7 +46,6 @@ export default class PixiCrossSection {
     this.surveyUpdate = drawSurveys(this.wellPathLayer, props.surveys);
     this.projectionLineUpdate = drawProjections(this.wellPathLayer, props);
     this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
-    this.projectionUpdate = interactiveProjection(this.UILayer, props.view, props.updateView);
     this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
@@ -122,7 +121,6 @@ export default class PixiCrossSection {
     this.wellPlanUpdate(props.wellPlan);
     this.surveyUpdate(props.surveys);
     this.projectionLineUpdate(props.projections);
-    this.projectionUpdate(props.view, this.renderer.screen.width, this.renderer.screen.height);
     this.sectionUpdate(props);
     this.gridUpdate(props);
     this.newProps = true;
