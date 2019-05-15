@@ -2,10 +2,23 @@ import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
 const survey = [0xa6a6a6, 0.5];
-const selectedSurvey = [0x000000, 1];
 const projection = [0xee2211, 0.5];
+const selectedSurvey = [0x000000, 1];
 const selectedLastSurvey = [0x0000ff, 1];
 const selectedProjection = [0xee2211, 1];
+
+function getColor(selectedList, i, lastSurveyIdx) {
+  const isSelected = selectedList[i];
+  const isProjection = i >= lastSurveyIdx - 1;
+  let color;
+  if (isSelected) {
+    color = isProjection ? selectedProjection : selectedSurvey;
+  } else {
+    color = isProjection ? projection : survey;
+  }
+  if (i === lastSurveyIdx - 2 && isSelected) color = selectedLastSurvey;
+  return color;
+}
 
 function drawSections(container, props, gutter) {
   const buttonHeight = 10;
@@ -47,17 +60,13 @@ function drawSections(container, props, gutter) {
     let length = 0;
     for (let i = 0; i < points.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
-      let pixi = pixiList[i];
-      pixi.sectionIndex = i;
       const p1 = points[i].vs;
       const p2 = points[i + 1].vs;
-      let color;
-      if (selectedList[i]) {
-        color = i >= lastSurveyIdx - 1 ? selectedProjection : selectedSurvey;
-      } else {
-        color = i >= lastSurveyIdx - 1 ? projection : survey;
-      }
+      const color = getColor(selectedList, i, lastSurveyIdx);
+      let pixi = pixiList[i];
+
       pixi.clear().beginFill(...color);
+      pixi.sectionIndex = i;
 
       start = p1 * view.xScale + view.x;
       length = (p2 - p1) * view.xScale;
