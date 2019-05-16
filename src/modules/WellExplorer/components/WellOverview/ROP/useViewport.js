@@ -87,10 +87,9 @@ export default function useViewport({
 
       // Use current slider position
       updateView(prev => ({
+        ...prev,
         x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-        y: globalMouse.y - (globalMouse.y - prev.y) * factor,
-        xScale: prev.xScale * factor,
-        yScale: prev.yScale * factor
+        xScale: prev.xScale * factor
       }));
     }
   }, [zoom, updateView]);
