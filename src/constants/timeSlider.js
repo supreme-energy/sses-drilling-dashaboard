@@ -1,6 +1,8 @@
 import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "./wellPathStatus";
 import { GREEN, GRAY } from "./colors";
 
+export const STEP_VALUE = 1;
+
 const CONNECTION = "CONNECTION";
 const ROP = "ROP";
 const SLIDE = "SLIDE";
@@ -39,14 +41,14 @@ export const COLOR_BY_PHASE_VIEWER = {
     top: GRAY,
     curve: GRAY,
     lateral: GREEN,
-    graphs: [SLIDE, ROP, CONNECTION, LENGTH, PLANNED_ANGLE]
+    graphs: [SLIDE, ROP, CONNECTION, LENGTH]
   }
 };
 
 export const COLOR_BY_GRAPH = {
-  [ROP]: 0x08bb00,
-  [SLIDE]: 0xa9fffb,
-  [CONNECTION]: 0xd9aafe,
-  [LENGTH]: 0x967f2f,
-  [PLANNED_ANGLE]: 0xbfbfbf
+  [ROP]: "08bb00",
+  [SLIDE]: "a9fffb",
+  [CONNECTION]: "d9aafe",
+  [LENGTH]: "967f2f",
+  [PLANNED_ANGLE]: "bfbfbf"
 };

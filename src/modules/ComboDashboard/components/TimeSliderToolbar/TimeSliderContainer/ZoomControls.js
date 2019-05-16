@@ -5,7 +5,7 @@ import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icon
 import classNames from "classnames";
 
 import { useInterval } from "./useInterval";
-import { STEP_VALUE } from "./index";
+import { STEP_VALUE } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
 let zoomTimeout;

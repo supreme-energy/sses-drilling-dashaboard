@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
-import { scaleLinear } from "d3-scale";
-import { max } from "d3-array";
 import { useSize } from "react-hook-size";
-import moment from "moment";
 
 import useRef from "react-powertools/hooks/useRef";
 
@@ -14,75 +11,19 @@ import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/R
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { STEP_VALUE } from "../index";
-import { LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
+import { STEP_VALUE, LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
+import {
+  useRopData,
+  GRID_GUTTER,
+  computeInitialViewXScaleValue,
+  computeInitialViewYScaleValue,
+  mapRop,
+  mapSlide
+} from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
-
-export const gridGutter = 60;
-
-const EMPTY_ARRAY = [];
-
-export const getScaledValue = (scaleFactor, value) => (1 / scaleFactor) * value;
-
-export const getHoursDif = (start, end) => {
-  const startTime = moment(start);
-  const endTime = moment(end);
-  const duration = moment.duration(endTime.diff(startTime));
-  return duration.asHours();
-};
-
-function useRopData() {
-  const [ropData, updateRopData] = useState(EMPTY_ARRAY);
-  const loadData = async () => {
-    const response = await fetch("/data/rop.json");
-
-    const data = await response.json();
-
-    updateRopData(data.data);
-  };
-  useEffect(() => {
-    loadData();
-  }, []);
-  return ropData;
-}
-
-function useSlideData() {
-  const [slideData, updateSlideData] = useState(EMPTY_ARRAY);
-  const loadData = async () => {
-    const response = await fetch("/data/slider.json");
-
-    const data = await response.json();
-
-    updateSlideData(data.data);
-  };
-  useEffect(() => {
-    loadData();
-  }, []);
-  return slideData;
-}
-
-function computeInitialViewYScaleValue(data) {
-  if (data && data.length > 0) {
-    return scaleLinear()
-      .domain([0, data[data.length - 1].Hole_Depth])
-      .range([0, 1]);
-  }
-}
-
-function computeInitialViewXScaleValue(data) {
-  if (data && data.length > 0) {
-    return scaleLinear()
-      .domain([0, max(data, d => Math.max(d.ROP_A, d.ROP_I))])
-      .range([0, 1]);
-  }
-}
-
-const mapRop = d => [Number(d.Hole_Depth), Number(d.ROP_A)];
-const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
 
 function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   const data = useRopData();
-  const slideData = useSlideData();
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -99,7 +40,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   );
 
   const [view, updateView] = useState({
-    x: gridGutter,
+    x: GRID_GUTTER,
     y: 0,
     xScale: 1,
     yScale: 1
@@ -123,15 +64,15 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
 
   const onReset = useCallback(() => {
     // console.log(
-    //   getInitialViewYScaleValue((height - gridGutter) * 200),
-    //   getInitialViewXScaleValue((width - gridGutter) / 21)
+    //   getInitialViewYScaleValue((height - GRID_GUTTER) * 200),
+    //   getInitialViewXScaleValue((width - GRID_GUTTER) / 21)
     // );
     updateView(view => ({
       ...view,
       x: 0,
       y: 0,
-      yScale: getInitialViewYScaleValue((height - gridGutter) * 200),
-      xScale: getInitialViewXScaleValue((width - gridGutter) / 21)
+      yScale: getInitialViewYScaleValue((height - GRID_GUTTER) * 200),
+      xScale: getInitialViewXScaleValue((width - GRID_GUTTER) / 21)
     }));
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
 
@@ -180,7 +121,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
                       container={container}
                       data={data}
                       mapData={graph === "ROP" ? mapRop : mapSlide}
-                      color={COLOR_BY_GRAPH[graph]}
+                      color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
                     />
                   )}
                 />
@@ -191,7 +132,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
                   key={index}
                   container={viewport}
                   child={container =>
-                    slideData.map((data, barIndex) => {
+                    data.map((data, barIndex) => {
                       if (barIndex % 131 === 0) {
                         return (
                           <PixiRectangle
@@ -201,7 +142,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
                             y={0}
                             width={50}
                             height={9000}
-                            backgroundColor={COLOR_BY_GRAPH[graph]}
+                            backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[graph])}
                           />
                         );
                       }
@@ -211,7 +152,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
               );
             }
           })}
-          <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} hideGrid />
+          <Grid container={viewport} view={view} width={width} height={height} gridGutter={GRID_GUTTER} hideGrid />
         </div>
       )}
       <Slider

@@ -3,12 +3,9 @@ import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
 
-import { STEP_VALUE } from "./index";
 import { useInterval } from "./useInterval";
+import { STEP_VALUE } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
-
-export const FORWARD = "FORWARD";
-export const REWIND = "REWIND";
 
 let speedingTimeout;
 function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding }) {
