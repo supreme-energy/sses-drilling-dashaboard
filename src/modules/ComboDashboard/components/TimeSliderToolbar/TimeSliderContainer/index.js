@@ -19,7 +19,7 @@ export const DATA_TYPES = ["SLIDE", "CONNECTION", "ROP", "LENGTH"];
 // TODO: Build Time Slider Component
 function TimeSliderContainer({ className, expanded }) {
   const [zoom, setZoom] = useState([0, 0]);
-  const [selectedMenuItems, setSelectedMenuItem] = useState(["ROP", "LENGTH"]);
+  const [selectedMenuItems, setSelectedMenuItem] = useState(["CONNECTION"]);
 
   const [sliderStep, setSliderStep] = useState([100, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);

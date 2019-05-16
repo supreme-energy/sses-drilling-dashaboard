@@ -1,13 +1,22 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
+import PropTypes from "prop-types";
 
-function Container({ container: parentContainer, children, x, y, updateTransform }, ref) {
-  const containerRef = useRef(() => new PIXI.Container());
+function Container({ container: parentContainer, child, x, y, updateTransform, name }, ref) {
+  const {
+    current: { container, initialUpdateTransform }
+  } = useRef(() => {
+    const container = new PIXI.Container();
+    return {
+      container,
+      initialUpdateTransform: container.transform.updateTransform
+    };
+  });
 
   useEffect(() => {
-    const container = containerRef.current;
     container.sortableChildren = true;
+
     if (parentContainer) {
       parentContainer.addChild(container);
     }
@@ -17,35 +26,44 @@ function Container({ container: parentContainer, children, x, y, updateTransform
         parentContainer.removeChild(container);
       }
     };
-  }, [parentContainer]);
+  }, [parentContainer, container]);
 
   useEffect(
     function changeUpdateTransform() {
       if (updateTransform) {
-        const container = containerRef.current;
         container.transform.updateTransform = updateTransform;
+      } else {
+        container.transform.updateTransform = initialUpdateTransform;
       }
     },
-    [updateTransform]
+    [updateTransform, container, initialUpdateTransform]
   );
 
   useImperativeHandle(ref, () => ({
-    container: containerRef.current
+    container
   }));
 
   useEffect(
     function updatePosition() {
-      const container = containerRef.current;
       container.x = x;
       container.y = y;
     },
-    [x, y]
+    [x, y, container]
   );
 
-  return children ? children(containerRef.current) : null;
+  return child ? child(container) : null;
 }
 
 const PixiContainer = forwardRef(Container);
+
+PixiContainer.propTypes = {
+  updateTransform: PropTypes.func,
+  child: PropTypes.func,
+  container: PropTypes.object.isRequired,
+  x: PropTypes.number,
+  y: PropTypes.number
+};
+
 PixiContainer.defaultProps = {
   x: 0,
   y: 0

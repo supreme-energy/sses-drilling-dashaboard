@@ -13,13 +13,13 @@ export default function useViewport({
   view,
   zoomXScale,
   zoomYScale,
-  zoom,
-  step
+  step,
+  zoom
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
 
-  const onWhell = useCallback(
+  const onWheel = useCallback(
     e => {
       e.preventDefault();
       interactionManagerRef.current.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
@@ -114,13 +114,13 @@ export default function useViewport({
         stage.mouseover = () => (interactionStateRef.current.isOutside = false);
         stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
       }
-      renderer.view.addEventListener("wheel", onWhell, false);
+      renderer.view.addEventListener("wheel", onWheel, false);
 
       return () => {
-        renderer.view.removeEventListener("wheel", onWhell, false);
+        renderer.view.removeEventListener("wheel", onWheel, false);
       };
     },
-    [renderer, onWhell, stage, onMouseDown, onMouseMove]
+    [renderer, onWheel, stage, onMouseDown, onMouseMove]
   );
 
   useEffect(() => {

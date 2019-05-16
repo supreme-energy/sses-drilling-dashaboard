@@ -1,9 +1,19 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import PropTypes from "prop-types";
+import Progress from "@material-ui/core/CircularProgress";
+import classes from "./ComboDashboard.scss";
 
-import CrossSectionDashboard from "./CrossSectionDashboard";
-import HeaderToolbar from "./HeaderToolbar";
-import TimeSliderToolbar from "./TimeSliderToolbar";
+const CrossSectionDashboard = lazy(() =>
+  import(
+    /* webpackChunkName: 'CrossSectionDashboard' */ "./CrossSectionDashboard"
+  )
+);
+const HeaderToolbar = lazy(() =>
+  import(/* webpackChunkName: 'HeaderToolbar' */ "./HeaderToolbar")
+);
+const TimeSliderToolbar = lazy(() =>
+  import(/* webpackChunkName: 'TimeSliderToolbar' */ "./TimeSliderToolbar")
+);
 
 function ComboDashboard({
   match: {
@@ -11,10 +21,16 @@ function ComboDashboard({
   }
 }) {
   return (
-    <div>
-      <HeaderToolbar wellId={openedWellId} />
-      <TimeSliderToolbar />
-      {/* <CrossSectionDashboard wellId={openedWellId} /> */}
+    <div className={classes.comboDashboardWrapper}>
+      <Suspense fallback={<Progress />}>
+        <HeaderToolbar wellId={openedWellId} />
+      </Suspense>
+      <Suspense fallback={<Progress />}>
+        <TimeSliderToolbar />
+      </Suspense>
+      <Suspense fallback={<Progress />}>
+        <CrossSectionDashboard wellId={openedWellId} />
+      </Suspense>
     </div>
   );
 }

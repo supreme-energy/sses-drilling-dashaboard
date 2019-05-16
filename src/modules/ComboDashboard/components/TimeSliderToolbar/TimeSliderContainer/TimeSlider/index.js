@@ -2,32 +2,25 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
 import { scaleLinear } from "d3-scale";
-import { max, group, pairs } from "d3-array";
+import { max } from "d3-array";
 import { useSize } from "react-hook-size";
 import moment from "moment";
 
 import useRef from "react-powertools/hooks/useRef";
 
-import Grid from "./Grid";
-import PixiContainer from "./PixiContainer";
-import PixiRectangle from "./PixiRectangle";
-import PixiLine from "./PixiLine";
-import useViewport from "./useViewport";
-import { useWebGLRenderer } from "./useWebGLRenderer";
+import Grid from "../../../../../WellExplorer/components/WellOverview/ROP/Grid";
+import PixiContainer from "../../../../../WellExplorer/components/WellOverview/ROP/PixiContainer";
+import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/ROP/PixiRectangle";
+import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
+import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
+import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
 import { STEP_VALUE } from "../index";
+import { LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
 import classes from "../TimeSlider.scss";
 
 export const gridGutter = 60;
 
 const EMPTY_ARRAY = [];
-const LINE_GRAPHS = ["ROP", "LENGTH"];
-const BAR_GRAPHS = ["SLIDE", "CONNECTION"];
-export const colorByGraph = {
-  ROP: 0x08bb00,
-  SLIDE: 0xa9fffb,
-  CONNECTION: 0xd9aafe,
-  LENGTH: 0x967f2f
-};
 
 export const getScaledValue = (scaleFactor, value) => (1 / scaleFactor) * value;
 
@@ -90,7 +83,6 @@ const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
 function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   const data = useRopData();
   const slideData = useSlideData();
-  const connectionData = useSlideData();
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -125,11 +117,15 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
     updateView,
     zoomXScale: false,
     zoomYScale: true,
-    zoom,
-    step
+    step,
+    zoom
   });
 
   const onReset = useCallback(() => {
+    // console.log(
+    //   getInitialViewYScaleValue((height - gridGutter) * 200),
+    //   getInitialViewXScaleValue((width - gridGutter) / 21)
+    // );
     updateView(view => ({
       ...view,
       x: 0,
@@ -176,66 +172,46 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
           {selectedGraphs.map((graph, index) => {
             if (LINE_GRAPHS.includes(graph)) {
               return (
-                <PixiContainer container={viewport}>
-                  {container => (
+                <PixiContainer
+                  key={index}
+                  container={viewport}
+                  child={container => (
                     <PixiLine
-                      key={index}
                       container={container}
                       data={data}
                       mapData={graph === "ROP" ? mapRop : mapSlide}
-                      color={colorByGraph[graph]}
+                      color={COLOR_BY_GRAPH[graph]}
                     />
                   )}
-                </PixiContainer>
+                />
               );
             } else {
               return (
-                <PixiContainer>
-                  {slideData.map((data, barIndex) => {
-                    if (barIndex % 223 === 0) {
-                      return (
-                        <PixiRectangle
-                          key={barIndex}
-                          container={viewport}
-                          x={110 * barIndex + 50}
-                          y={0}
-                          width={(1000 * barIndex) / 1000}
-                          height={9000}
-                          backgroundColor={colorByGraph["CONNECTION"]}
-                        />
-                      );
-                    }
-                  })}
-                </PixiContainer>
+                <PixiContainer
+                  key={index}
+                  container={viewport}
+                  child={container =>
+                    slideData.map((data, barIndex) => {
+                      if (barIndex % 131 === 0) {
+                        return (
+                          <PixiRectangle
+                            key={barIndex}
+                            container={container}
+                            x={100 * barIndex + 100}
+                            y={0}
+                            width={50}
+                            height={9000}
+                            backgroundColor={COLOR_BY_GRAPH[graph]}
+                          />
+                        );
+                      }
+                    })
+                  }
+                />
               );
             }
           })}
-          {/* {slideData.map((data, barIndex) => {
-            if (barIndex % 31 === 0) {
-              return (
-                <PixiRectangle
-                  key={barIndex}
-                  container={viewport}
-                  x={110 * barIndex + 50}
-                  y={0}
-                  width={(1000 * barIndex) / 1000}
-                  height={9000}
-                  backgroundColor={colorByGraph["SLIDE"]}
-                />
-
-                //     <PixiRectangle
-                //   key={index}
-                //   container={viewport}
-                //   x={100 * index + 100}
-                //   y={0}
-                //   width={50}
-                //   height={9000}
-                //   backgroundColor={colorByGraph["CONNECTION"]}
-                // />
-              );
-            }
-          })} */}
-          <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
+          <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} hideGrid />
         </div>
       )}
       <Slider
@@ -257,13 +233,3 @@ TimeSlider.propTypes = {
 };
 
 export default TimeSlider;
-
-//     <PixiRectangle
-//   key={index}
-//   container={viewport}
-//   x={100 * index + 100}
-//   y={0}
-//   width={50}
-//   height={9000}
-//   backgroundColor={colorByGraph["CONNECTION"]}
-// />

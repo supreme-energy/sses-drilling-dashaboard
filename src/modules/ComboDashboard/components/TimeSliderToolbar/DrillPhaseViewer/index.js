@@ -13,43 +13,9 @@ import {
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
-import {
-  ON_CURVE,
-  ON_LATERAL,
-  ON_DRILLOUT,
-  ON_INTERMEDIATE,
-  ON_SURFACE
-} from "../../../../../constants/wellPathStatus";
-import { GREEN, GRAY } from "../../../../../constants/colors";
+import { ON_SURFACE, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
+import { GRAY } from "../../../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
-
-const colorsForPhaseViewer = {
-  [ON_SURFACE]: {
-    top: GREEN,
-    curve: GRAY,
-    lateral: GRAY
-  },
-  [ON_INTERMEDIATE]: {
-    top: GREEN,
-    curve: GRAY,
-    lateral: GRAY
-  },
-  [ON_DRILLOUT]: {
-    top: GREEN,
-    curve: GRAY,
-    lateral: GRAY
-  },
-  [ON_CURVE]: {
-    top: GRAY,
-    curve: GREEN,
-    lateral: GRAY
-  },
-  [ON_LATERAL]: {
-    top: GRAY,
-    curve: GRAY,
-    lateral: GREEN
-  }
-};
 
 const styles = {
   phaseMenuItem: {
@@ -74,22 +40,21 @@ function DrillPhase({ phase }) {
     <svg width={40} height={40}>
       <title>Icon/Custom/Curve</title>
       <g id="Icon/Custom/Curve" fill="none" fillRule="nonzero">
-        <path id="lateral" fill={colorsForPhaseViewer[phase].lateral} d="M16 39.5h23v-4H16z" />
+        <path id="lateral" fill={COLOR_BY_PHASE_VIEWER[phase].lateral} d="M16 39.5h23v-4H16z" />
         <path
           id="curve"
-          fill={colorsForPhaseViewer[phase].curve}
+          fill={COLOR_BY_PHASE_VIEWER[phase].curve}
           d="M0 24.5h4c0 6.075 4.925 11 11 11v4c-8.284 0-15-6.716-15-15z"
         />
-        <path id="vertical" fill={colorsForPhaseViewer[phase].top} d="M0 .5v23h4V.5z" />
+        <path id="vertical" fill={COLOR_BY_PHASE_VIEWER[phase].top} d="M0 .5v23h4V.5z" />
       </g>
     </svg>
   );
 }
 
-function DrillPhaseViewer({ className, classes, expanded }) {
-  const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
+function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPhase }) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const drillPhaseEnum = Object.keys(colorsForPhaseViewer);
+  const drillPhaseEnum = Object.keys(COLOR_BY_PHASE_VIEWER);
   const currPhase = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
   const drillPhaseCode = currPhase.split(" ")[1];
 
@@ -125,6 +90,7 @@ function DrillPhaseViewer({ className, classes, expanded }) {
                   <MenuItem
                     key={index}
                     className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
+                    value={phase}
                     onClick={() => setDrillPhase(phase)}
                   >
                     <DrillPhase phase={phase} />
@@ -144,7 +110,9 @@ function DrillPhaseViewer({ className, classes, expanded }) {
 DrillPhaseViewer.propTypes = {
   className: PropTypes.string,
   classes: PropTypes.object,
-  expanded: PropTypes.bool
+  expanded: PropTypes.bool,
+  drillPhase: PropTypes.string,
+  setDrillPhase: PropTypes.func
 };
 
 export default withStyles(styles)(DrillPhaseViewer);

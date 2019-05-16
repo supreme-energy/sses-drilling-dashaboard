@@ -20,7 +20,7 @@ function HeaderToolbar({ wellId }) {
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
         <div className={classes.wellNameCol}>
-          <Typography variant="h5" color="primary">
+          <Typography variant="h5" color="primary" className={classes.wellName}>
             {well.name}
           </Typography>
         </div>

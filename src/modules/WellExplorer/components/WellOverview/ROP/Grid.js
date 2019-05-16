@@ -1,7 +1,7 @@
 import useRef from "react-powertools/hooks/useRef";
 import * as PIXI from "pixi.js";
 import { useEffect, useMemo, useImperativeHandle, forwardRef } from "react";
-import { drawGrid, defaultMakeXTickAndLine } from "../../../CrossSection/drawGrid";
+import { drawGrid, defaultMakeXTickAndLine } from "../../../../ComboDashboard/components/CrossSection/drawGrid";
 
 function makeXTickAndLine(...args) {
   const [line, label] = defaultMakeXTickAndLine(...args);
@@ -9,13 +9,15 @@ function makeXTickAndLine(...args) {
 
   return [line, label];
 }
-function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
+function Grid({ container, width, height, gridGutter, view, hideGrid }, ref) {
   const gridLayerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {
     const gridLayer = gridLayerRef.current;
-    // container.addChild(gridLayer);
-    // return () => container.removeChild(gridLayer);
+    if (!hideGrid) {
+      container.addChild(gridLayer);
+      return () => container.removeChild(gridLayer);
+    }
   }, [container]);
 
   const updateGrid = useMemo(() => {
@@ -23,7 +25,7 @@ function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
   }, [gridGutter]);
 
   useEffect(() => {
-    updateGrid({ view, width, height, hideCorner: true });
+    updateGrid({ view, width, height });
   }, [updateGrid, view, width, height]);
 
   useImperativeHandle(ref, () => ({

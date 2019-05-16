@@ -14,7 +14,6 @@ import DirectionalGuidanceModule from "modules/DirectionalGuidance";
 import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
-import WellImporterModule from "modules/WellImporter";
 import plusBasicAuth from "fetch-plus-basicauth";
 import WellUpdate from "./WellUpdate";
 
@@ -46,22 +45,17 @@ class App extends React.Component {
     const DrillingAnalytics = DrillingAnalyticsModule(store);
     const StructuralGuidance = StructuralGuidanceModule(store);
     const WellExplorer = WellExplorerModule(store);
-    const WellImporter = WellImporterModule(store);
 
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>
           <Router history={history}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
-              {/* cache the api methods that do not require authentication */}
-              <FetchCache predicate={() => {}}>
+              <FetchCache>
                 <div style={{ height: "100%" }}>
-                  {/* place FakeFetch at any level to intercept calls within its children */}
-                  {/* <FakeFetch routes={crossFilterStore}> */}
                   <PageLayout history={history}>
                     <Route path="/:wellId" component={WellUpdate} />
                     <Switch>
-                      <Route path="/:wellId/importer" exact component={WellImporter} />
                       <Route path="/:wellId/combo" exact component={ComboDashboard} />
                       <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
                       <Route path="/:wellId/structural" exact component={StructuralGuidance} />
@@ -69,7 +63,6 @@ class App extends React.Component {
                       <Route path="/:wellId?" component={WellExplorer} />
                     </Switch>
                   </PageLayout>
-                  {/* </FakeFetch> */}
                 </div>
               </FetchCache>
             </FetchClientProvider>

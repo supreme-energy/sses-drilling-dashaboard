@@ -43,6 +43,8 @@
     .wellOverview {
         flex: 1;
         pointer-events: auto;
+        display: flex;
+        flex-direction: column;
     }
 
     .miniMap {

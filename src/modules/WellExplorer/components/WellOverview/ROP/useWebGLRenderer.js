@@ -33,7 +33,7 @@ export function useWebGLRenderer({ canvas, width, height }) {
 
   const refresh = useCallback(() => {
     rendererRef.current.render(stage.current);
-  }, [width, height]);
+  }, []);
 
   return [stage.current, refresh, rendererRef.current];
 }
