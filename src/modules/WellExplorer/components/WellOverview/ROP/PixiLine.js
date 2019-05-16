@@ -1,5 +1,5 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect } from "react";
 import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
