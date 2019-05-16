@@ -44,6 +44,6 @@ XAxis.defaultProps = {
 XAxis.propTypes = {
   numberOfTicks: PropTypes.number,
   container: PropTypes.object.isRequired,
-  scale: PropTypes.object.isRequired,
+  scale: PropTypes.func.isRequired,
   height: PropTypes.number.isRequired
 };

@@ -9,7 +9,7 @@ function makeXTickAndLine(...args) {
 
   return [line, label];
 }
-function Grid({ container, width, height, gridGutter, x, y, view }, ref) {
+function Grid({ container, width, height, gridGutter, view }, ref) {
   const gridLayerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {

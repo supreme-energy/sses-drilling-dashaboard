@@ -1,7 +1,7 @@
 import React, { useRef, useCallback, useMemo } from "react";
 import PixiText from "./PixiText";
 import PixiContainer from "./PixiContainer";
-import { colorBySection } from "../../../../../constants/colors";
+import { colorBySection } from "../../../../../constants/pixiColors";
 import { getHoursDif } from "../../../utils/time";
 import PixiLine from "./PixiLine";
 import PixiCircle from "./PixiCircle";
@@ -40,6 +40,7 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
       sectionsData.length ? sectionsData.map(s => s[0]).concat(sectionsData[sectionsData.length - 1][1]) : sectionsData,
     [sectionsData]
   );
+
   return (
     <React.Fragment>
       {/* frozenScaleTransform will not scale */}
@@ -58,7 +59,7 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
       </PixiContainer>
       {sectionsData.map(d => (
         <PixiCircle
-          key={d.key}
+          key={d[0].key}
           container={container}
           x={d[0].position[0]}
           y={d[0].position[1]}

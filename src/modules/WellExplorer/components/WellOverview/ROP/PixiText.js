@@ -4,22 +4,36 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 
 function PixiText({ container, fontSize, color, x, y, text, anchor, updateTransform }, ref) {
-  const textRef = useRef(() => new PIXI.Text(""));
+  const {
+    current: { pixiText, initialUpdateTransform }
+  } = useRef(() => {
+    const pixiText = new PIXI.Text("");
+    return {
+      pixiText,
+      initialUpdateTransform: pixiText.transform.updateTransform
+    };
+  });
   useEffect(
     function addText() {
-      const pixiText = textRef.current;
       container.addChild(pixiText);
       return () => container.removeChild(pixiText);
     },
-    [container]
+    [container, pixiText]
+  );
+
+  useEffect(
+    function changeUpdateTransform() {
+      if (updateTransform) {
+        pixiText.transform.updateTransform = updateTransform;
+      } else {
+        pixiText.transform.updateTransform = initialUpdateTransform;
+      }
+    },
+    [updateTransform, pixiText, initialUpdateTransform]
   );
 
   useEffect(
     function updateText() {
-      const pixiText = textRef.current;
-      if (updateTransform) {
-        pixiText.transform.updateTransform = updateTransform;
-      }
       pixiText.x = x;
       pixiText.y = y;
       pixiText.anchor.set(...anchor);
@@ -27,11 +41,11 @@ function PixiText({ container, fontSize, color, x, y, text, anchor, updateTransf
       pixiText.style.fontSize = fontSize;
       pixiText.style.fill = color;
     },
-    [x, y, text, fontSize, color, anchor, updateTransform]
+    [x, y, text, fontSize, color, anchor, updateTransform, pixiText]
   );
 
   useImperativeHandle(ref, () => ({
-    pixiText: textRef.current
+    pixiText
   }));
 
   return null;

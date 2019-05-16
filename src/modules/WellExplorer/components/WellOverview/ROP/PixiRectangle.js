@@ -7,33 +7,44 @@ function PixiRectangle(
   { container, width, height, backgroundColor, borderColor, borderThickness, x, y, alpha, updateTransform },
   ref
 ) {
-  const bgRef = useRef(() => new PIXI.Graphics());
+  const {
+    current: { bg, initialUpdateTransform }
+  } = useRef(() => {
+    const bg = new PIXI.Graphics();
+    return {
+      bg: new PIXI.Graphics(),
+      initialUpdateTransform: bg.transform.updateTransform
+    };
+  });
   useEffect(
     function addBackground() {
-      const bg = bgRef.current;
-
       container.addChild(bg);
       return () => container.removeChild(bg);
     },
-    [container]
+    [container, bg]
   );
 
   useEffect(
     function reposition() {
-      const bg = bgRef.current;
       bg.x = x;
       bg.y = y;
     },
-    [x, y]
+    [x, y, bg]
+  );
+
+  useEffect(
+    function changeUpdateTransform() {
+      if (updateTransform) {
+        bg.transform.updateTransform = updateTransform;
+      } else {
+        bg.transform.updateTransform = initialUpdateTransform;
+      }
+    },
+    [updateTransform, bg, initialUpdateTransform]
   );
 
   useEffect(
     function redraw() {
-      const bg = bgRef.current;
-      if (updateTransform) {
-        bg.transform.updateTransform = updateTransform;
-      }
-
       bg.clear();
       bg.alpha = alpha;
       if (backgroundColor) {
@@ -42,11 +53,11 @@ function PixiRectangle(
       bg.lineStyle(borderThickness, borderColor);
       bg.drawRect(0, 0, width, height);
     },
-    [width, height, backgroundColor, borderColor, borderThickness, alpha, updateTransform]
+    [width, height, backgroundColor, borderColor, borderThickness, alpha, updateTransform, bg]
   );
 
   useImperativeHandle(ref, () => ({
-    graphics: bgRef.current
+    graphics: bg
   }));
 
   return null;
@@ -59,7 +70,12 @@ ForwardedPixiRectangle.propTypes = {
   y: PropTypes.number,
   alpha: PropTypes.number,
   updateTransform: PropTypes.func,
-  xIndex: PropTypes.number
+  xIndex: PropTypes.number,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  backgroundColor: PropTypes.number,
+  borderColor: PropTypes.number,
+  borderThickness: PropTypes.number
 };
 
 ForwardedPixiRectangle.defaultProps = {

@@ -27,27 +27,13 @@ export default function PixiLine({ container, data, mapData, color, nativeLines,
     return () => container.removeChild(lineGraphic);
   }, [container]);
 
-  const drawLine = useCallback(
+  useEffect(
     function drawLine() {
       if (lineData && lineData.length) {
-        draw(lineG, lineWidth, color, lineData, { xScale: 1, yScale: 1 });
-      }
-    },
-    [lineData, color, lineWidth]
-  );
-
-  // initial line draw
-  useEffect(() => {
-    drawLine();
-  }, [container, drawLine]);
-
-  useEffect(
-    function redrawNonNativeLineWhenScaleChange() {
-      if (!nativeLines && lineData && lineData.length) {
         draw(lineG, lineWidth, color, lineData, view);
       }
     },
-    [view, nativeLines, drawLine, color, lineData, lineWidth]
+    [view, nativeLines, color, lineData, lineWidth]
   );
 
   return null;

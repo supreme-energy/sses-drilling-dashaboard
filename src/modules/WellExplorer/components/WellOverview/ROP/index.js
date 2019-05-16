@@ -12,7 +12,7 @@ import { useWebGLRenderer } from "./useWebGLRenderer";
 import Grid from "./Grid";
 import classNames from "classnames";
 import classes from "./styles.scss";
-import { colorBySection } from "../../../../../constants/colors";
+import { colorBySection } from "../../../../../constants/pixiColors";
 import { getHoursDif } from "../../../utils/time";
 import SectionsBg from "./SectionsBg";
 import { orderedSections } from "../../../../../constants/wellSections";
