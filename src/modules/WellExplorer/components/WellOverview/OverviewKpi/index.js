@@ -19,7 +19,7 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>
-        <Typography variant="h5" color="primary" gutterTop>
+        <Typography variant="h5" color="primary">
           {well.name}
         </Typography>
         <span className={classes.hSpacer} />

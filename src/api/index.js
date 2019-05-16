@@ -1,6 +1,6 @@
 import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect, useState, useRef } from "react";
 import Fuse from "fuse.js";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
@@ -109,6 +109,25 @@ export function useWells() {
   );
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
   return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
+}
+
+export function useRopData() {
+  const unmountedRef = useRef();
+  const [ropData, updateRopData] = useState(EMPTY_ARRAY);
+  const loadData = async () => {
+    const response = await fetch("/data/rop.json");
+
+    const data = await response.json();
+
+    if (!unmountedRef.current) {
+      updateRopData(data.data);
+    }
+  };
+  useEffect(() => {
+    loadData();
+    return () => (unmountedRef.current = true);
+  }, []);
+  return ropData;
 }
 
 export function useWellPath(wellId) {
