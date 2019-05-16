@@ -14,7 +14,7 @@ export const DrillingAnalytics = ({
     params: { wellId: openedWellId }
   }
 }) => (
-  <div style={{ margin: "0 auto" }}>
+  <div>
     <Suspense fallback={<Progress />}>
       <HeaderToolbar wellId={openedWellId} />
     </Suspense>
