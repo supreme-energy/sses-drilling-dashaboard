@@ -1,5 +1,5 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useEffect, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
@@ -51,7 +51,7 @@ function Container({ container: parentContainer, children, x, y, updateTransform
     [x, y, container]
   );
 
-  return children ? children(container) : null;
+  return React.Children.map(child => child(container));
 }
 
 const PixiContainer = forwardRef(Container);
