@@ -8,7 +8,7 @@ import { STEP_VALUE } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
 let speedingTimeout;
-function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding }) {
+function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding, maxSliderStep }) {
   const onPlayClick = useCallback(() => {
     setIsPlaying();
   });
@@ -34,7 +34,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        if (sliderStep[0] >= 100) {
+        if (sliderStep[0] >= maxSliderStep) {
           return sliderStep;
         }
         return [sliderStep[0] + STEP_VALUE, sliderStep[1]];
@@ -46,7 +46,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        if ((!sliderStep[0] && sliderStep[1] < 0) || (sliderStep[1] && sliderStep[0] >= 100)) {
+        if ((!sliderStep[0] && sliderStep[1] < 0) || (sliderStep[1] && sliderStep[0] >= maxSliderStep)) {
           return sliderStep;
         }
         return [sliderStep[0] + STEP_VALUE * sliderStep[1], sliderStep[1]];
@@ -76,7 +76,8 @@ LocalTimeControls.propTypes = {
   setIsPlaying: PropTypes.func,
   isPlaying: PropTypes.bool,
   isSpeeding: PropTypes.bool,
-  setIsSpeeding: PropTypes.func
+  setIsSpeeding: PropTypes.func,
+  maxSliderStep: PropTypes.number
 };
 
 export default LocalTimeControls;

@@ -6,13 +6,13 @@ import classNames from "classnames";
 
 import classes from "./TimeSlider.scss";
 
-function GlobalTimeControls({ children, expanded, setSliderStep, dates }) {
+function GlobalTimeControls({ children, expanded, setSliderStep, dates, maxSliderStep }) {
   const handleSetBeginning = useCallback(() => {
     setSliderStep([0, 1]);
   });
 
   const handleSetEnd = useCallback(() => {
-    setSliderStep([100, 1]);
+    setSliderStep([maxSliderStep, 1]);
   });
   return (
     <div className={classes.timeSliderView}>
@@ -47,6 +47,7 @@ GlobalTimeControls.propTypes = {
   expanded: PropTypes.bool,
   setSliderStep: PropTypes.func,
   children: PropTypes.node,
-  dates: PropTypes.arrayOf(PropTypes.string)
+  dates: PropTypes.arrayOf(PropTypes.string),
+  maxSliderStep: PropTypes.number
 };
 export default GlobalTimeControls;

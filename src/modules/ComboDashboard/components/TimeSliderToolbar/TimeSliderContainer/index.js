@@ -9,18 +9,28 @@ import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
 import TimeSlider from "./TimeSlider";
+import { useRopData } from "./TimeSlider/TimeSliderUtil";
 import { COLOR_BY_GRAPH, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
 // TODO: Build Time Slider Component
 function TimeSliderContainer({ className, expanded, drillPhase }) {
+  // Fetch data for Time Slider
+  const data = useRopData();
+  const maxSliderStep = data.length;
+  console.log(maxSliderStep);
+
   const [zoom, setZoom] = useState([0, 0]);
   const [selectedMenuItems, setSelectedMenuItem] = useState(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
-  const [sliderStep, setSliderStep] = useState([100, 1]);
+  const [sliderStep, setSliderStep] = useState([maxSliderStep, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [isSpeeding, setIsSpeeding] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [globalDates, setGlobalDates] = useState(["", ""]);
+
+  useEffect(() => {
+    setSliderStep([maxSliderStep, 1]);
+  }, [maxSliderStep]);
 
   useEffect(() => {
     setSelectedMenuItem(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
@@ -42,6 +52,7 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
               isPlaying={isPlaying}
               isSpeeding={isSpeeding}
               setIsSpeeding={setIsSpeeding}
+              maxSliderStep={maxSliderStep}
             />
           </div>
           <MoreMenu
@@ -53,7 +64,12 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
           />
         </div>
       )}
-      <GlobalTimeControls setSliderStep={setSliderStep} expanded={expanded} dates={globalDates}>
+      <GlobalTimeControls
+        setSliderStep={setSliderStep}
+        expanded={expanded}
+        dates={globalDates}
+        maxSliderStep={maxSliderStep}
+      >
         <TimeSlider
           expanded={expanded}
           zoom={zoom}

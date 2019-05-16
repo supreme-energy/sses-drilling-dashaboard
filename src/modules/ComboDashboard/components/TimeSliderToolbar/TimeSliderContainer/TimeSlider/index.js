@@ -22,7 +22,6 @@ import {
 import classes from "../TimeSlider.scss";
 
 const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
-
 const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
 
 function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGlobalDates }) {
@@ -32,9 +31,16 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
   useMemo(() => {
     const beginningDate = get(data, "[0].Date_Time", "");
     const endDate = get(data, "[data.length - 1].Date_Time", "NOW");
-    console.log(endDate);
 
-    const transformDate = date => date.split(" ")[0];
+    const transformDate = dateTime => {
+      const splitDateTime = dateTime.split(" ");
+      if (splitDateTime.length > 1) {
+        const date = splitDateTime[0].split("/");
+        return `${date[0]}-${date[1]} ${date[2]}`;
+      }
+      return dateTime;
+    };
+
     setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
   }, [data, zoom]);
 
@@ -72,6 +78,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
     zoomXScale: false,
     zoomYScale: true,
     step,
+    maxStep: lastRowIdx,
     zoom
   });
 

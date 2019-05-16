@@ -14,6 +14,7 @@ export default function useViewport({
   zoomXScale,
   zoomYScale,
   step,
+  maxStep,
   zoom
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
@@ -82,7 +83,7 @@ export default function useViewport({
   useEffect(() => {
     if (zoom[1] !== 0) {
       const factor = 1 + zoom[1] * 0.03;
-      const stepFactor = (window.innerWidth - 20) * (step / 100);
+      const stepFactor = (window.innerWidth - 20) * (step / maxStep);
       interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
 
       // Use current slider position
