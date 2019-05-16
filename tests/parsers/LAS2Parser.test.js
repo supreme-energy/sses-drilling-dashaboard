@@ -63,7 +63,7 @@ describe("Parser Utils tests", () => {
     expect(expectedResult).toEqual(result);
   });
 
-  test("parseLine(): should successfully parses line without unit", () => {
+  test("parseLine(): should successfully parse line without unit", () => {
     const line = "VERS.                 1.2:    CWLS LOG ASCII STANDARD - VERSION 1.2";
     const expectedResult = {
       mnemonic: "VERS",

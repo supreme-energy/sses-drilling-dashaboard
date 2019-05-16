@@ -1,1 +1,1 @@
-export {default} from "./LAS2Parser";
+export { default } from "./LAS2Parser";
