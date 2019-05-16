@@ -2,17 +2,23 @@
 
 .timeSliderContainer {
     border-radius: 0;
-    box-shadow: none;
     border-bottom: 1px solid rgb(209, 208, 208);
     width: 100%;
+    padding-bottom: 35px;
 }
 
 .timeSliderGraph {
     canvas {
         position: relative;
-        max-height: 100px;
-        bottom: 8px;
+        max-height: 70px;
+        width: 100%;
+        bottom: 10px;
     }
+}
+
+.globalTimeControls {
+    padding-left: 3px;
+    padding-bottom: 5px;
 }
 
 .timeSliderHeader {
@@ -94,7 +100,7 @@
 
     .timeSliderExpanded {
         color: $gold;
-        bottom: 30px;
+        bottom: 15px;
         width: 98%;
     }
 
@@ -109,19 +115,18 @@
         position: relative;
 
         > button {
-            padding-left: 0;
+            @extend .globalTimeControls;
         }
     }
 
     .expandedBackwardTime {
         left: 20px;
-        top: 35px;
+        top: 30px;
     }
 
     .collapsedBackwardTime {
         top: 8px;
         left: 30px;
-
     }
 
     .forwardTime {
@@ -130,12 +135,13 @@
         display: block;
 
         > button {
-            padding-left: 5px;
+            @extend .globalTimeControls;
+
         }
     }
 
     .expandedForwardTime {
-        top: 45px;
+        top: 30px;
         right: 10px;
     }
 

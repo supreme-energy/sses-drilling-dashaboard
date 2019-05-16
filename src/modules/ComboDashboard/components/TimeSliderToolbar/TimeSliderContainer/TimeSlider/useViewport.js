@@ -86,15 +86,12 @@ export default function useViewport({
       interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
 
       // Use current slider position
-      updateView(prev => {
-        console.log(prev.xScale, prev.yScale, "scale");
-        return {
-          x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-          y: globalMouse.y - (globalMouse.y - prev.y) * factor,
-          xScale: prev.xScale * factor,
-          yScale: prev.yScale * factor
-        };
-      });
+      updateView(prev => ({
+        x: globalMouse.x - (globalMouse.x - prev.x) * factor,
+        y: globalMouse.y - (globalMouse.y - prev.y) * factor,
+        xScale: prev.xScale * factor,
+        yScale: prev.yScale * factor
+      }));
     }
   }, [zoom, updateView]);
 

@@ -11,9 +11,9 @@ function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuI
   const handleMenuClick = useCallback(({ currentTarget: { innerText } }) => {
     const clickedItemText = innerText.toUpperCase();
     if (selectedMenuItems.includes(clickedItemText)) {
-      setSelectedMenuItem(selectedMenuItems.filter(item => item !== clickedItemText));
+      setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== clickedItemText));
     } else {
-      setSelectedMenuItem([...selectedMenuItems, clickedItemText]);
+      setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, clickedItemText]);
     }
   });
 

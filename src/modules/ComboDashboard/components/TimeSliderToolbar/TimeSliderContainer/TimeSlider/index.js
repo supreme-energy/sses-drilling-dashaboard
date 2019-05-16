@@ -20,6 +20,8 @@ import classes from "../TimeSlider.scss";
 export const gridGutter = 60;
 
 const EMPTY_ARRAY = [];
+const LINE_GRAPHS = ["ROP", "LENGTH"];
+const BAR_GRAPHS = ["SLIDE", "CONNECTION"];
 export const colorByGraph = {
   ROP: 0x08bb00,
   SLIDE: 0xa9fffb,
@@ -128,17 +130,12 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   });
 
   const onReset = useCallback(() => {
-    //  0.07, -0.2;
-    console.log(
-      getInitialViewXScaleValue((width - gridGutter) / 15),
-      getInitialViewYScaleValue(height - gridGutter - 500)
-    );
     updateView(view => ({
       ...view,
       x: 0,
-      y: 30,
-      yScale: getInitialViewYScaleValue((height - gridGutter) * 30),
-      xScale: getInitialViewXScaleValue((width - gridGutter) / 20)
+      y: 0,
+      yScale: getInitialViewYScaleValue((height - gridGutter) * 200),
+      xScale: getInitialViewXScaleValue((width - gridGutter) / 21)
     }));
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
 
@@ -164,7 +161,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, data, view, width, height]
+    [refresh, stage, data, view, width, height, selectedGraphs]
   );
 
   const handleDragSlider = useCallback((_, currentStep) => {
@@ -176,51 +173,68 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
       {expanded && (
         <div className={classes.timeSliderGraph} ref={canvasRef}>
           <PixiContainer ref={viewportContainer} container={stage} />
-          <PixiContainer container={viewport}>
-            {container =>
-              selectedGraphs.map((graph, index) => (
-                <PixiLine key={index} container={container} data={data} mapData={mapRop} color={colorByGraph[graph]} />
-              ))
-            }
-          </PixiContainer>
-          <PixiContainer container={viewport}>
-            {container =>
-              slideData.map((graph, index) => {
-                if (index % 31 === 0) {
-                  return (
-                    <PixiRectangle
+          {selectedGraphs.map((graph, index) => {
+            if (LINE_GRAPHS.includes(graph)) {
+              return (
+                <PixiContainer container={viewport}>
+                  {container => (
+                    <PixiLine
                       key={index}
-                      container={viewport}
-                      x={110 * index + 50}
-                      y={0}
-                      width={(1000 * index) / 100}
-                      height={800}
-                      backgroundColor={colorByGraph["SLIDE"]}
+                      container={container}
+                      data={data}
+                      mapData={graph === "ROP" ? mapRop : mapSlide}
+                      color={colorByGraph[graph]}
                     />
-                  );
-                }
-              })
+                  )}
+                </PixiContainer>
+              );
+            } else {
+              return (
+                <PixiContainer>
+                  {slideData.map((data, barIndex) => {
+                    if (barIndex % 223 === 0) {
+                      return (
+                        <PixiRectangle
+                          key={barIndex}
+                          container={viewport}
+                          x={110 * barIndex + 50}
+                          y={0}
+                          width={(1000 * barIndex) / 1000}
+                          height={9000}
+                          backgroundColor={colorByGraph["CONNECTION"]}
+                        />
+                      );
+                    }
+                  })}
+                </PixiContainer>
+              );
             }
-          </PixiContainer>
-          <PixiContainer container={viewport}>
-            {container =>
-              connectionData.map((graph, index) => {
-                if (index % 31 === 0) {
-                  return (
-                    <PixiRectangle
-                      key={index}
-                      container={viewport}
-                      x={100 * index + 100}
-                      y={0}
-                      width={50}
-                      height={800}
-                      backgroundColor={colorByGraph["CONNECTION"]}
-                    />
-                  );
-                }
-              })
+          })}
+          {/* {slideData.map((data, barIndex) => {
+            if (barIndex % 31 === 0) {
+              return (
+                <PixiRectangle
+                  key={barIndex}
+                  container={viewport}
+                  x={110 * barIndex + 50}
+                  y={0}
+                  width={(1000 * barIndex) / 1000}
+                  height={9000}
+                  backgroundColor={colorByGraph["SLIDE"]}
+                />
+
+                //     <PixiRectangle
+                //   key={index}
+                //   container={viewport}
+                //   x={100 * index + 100}
+                //   y={0}
+                //   width={50}
+                //   height={9000}
+                //   backgroundColor={colorByGraph["CONNECTION"]}
+                // />
+              );
             }
-          </PixiContainer>
+          })} */}
           <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
         </div>
       )}
@@ -243,3 +257,13 @@ TimeSlider.propTypes = {
 };
 
 export default TimeSlider;
+
+//     <PixiRectangle
+//   key={index}
+//   container={viewport}
+//   x={100 * index + 100}
+//   y={0}
+//   width={50}
+//   height={9000}
+//   backgroundColor={colorByGraph["CONNECTION"]}
+// />
