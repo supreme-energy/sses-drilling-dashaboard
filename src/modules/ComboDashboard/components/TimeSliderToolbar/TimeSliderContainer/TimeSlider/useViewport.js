@@ -1,7 +1,6 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
-import { gridGutter } from ".";
 
 const globalMouse = { x: 0, y: 0 };
 // enable mouse wheel and drag

@@ -10,6 +10,7 @@ import useRef from "react-powertools/hooks/useRef";
 
 import Grid from "./Grid";
 import PixiContainer from "./PixiContainer";
+import PixiRectangle from "./PixiRectangle";
 import PixiLine from "./PixiLine";
 import useViewport from "./useViewport";
 import { useWebGLRenderer } from "./useWebGLRenderer";
@@ -87,6 +88,7 @@ const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
 function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   const data = useRopData();
   const slideData = useSlideData();
+  const connectionData = useSlideData();
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -134,7 +136,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
     updateView(view => ({
       ...view,
       x: 0,
-      y: 20,
+      y: 30,
       yScale: getInitialViewYScaleValue((height - gridGutter) * 30),
       xScale: getInitialViewXScaleValue((width - gridGutter) / 20)
     }));
@@ -176,9 +178,47 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
           <PixiContainer ref={viewportContainer} container={stage} />
           <PixiContainer container={viewport}>
             {container =>
-              selectedGraphs.map((graph, key) => (
-                <PixiLine key={key} container={container} data={data} mapData={mapRop} color={colorByGraph[graph]} />
+              selectedGraphs.map((graph, index) => (
+                <PixiLine key={index} container={container} data={data} mapData={mapRop} color={colorByGraph[graph]} />
               ))
+            }
+          </PixiContainer>
+          <PixiContainer container={viewport}>
+            {container =>
+              slideData.map((graph, index) => {
+                if (index % 31 === 0) {
+                  return (
+                    <PixiRectangle
+                      key={index}
+                      container={viewport}
+                      x={110 * index + 50}
+                      y={0}
+                      width={(1000 * index) / 100}
+                      height={800}
+                      backgroundColor={colorByGraph["SLIDE"]}
+                    />
+                  );
+                }
+              })
+            }
+          </PixiContainer>
+          <PixiContainer container={viewport}>
+            {container =>
+              connectionData.map((graph, index) => {
+                if (index % 31 === 0) {
+                  return (
+                    <PixiRectangle
+                      key={index}
+                      container={viewport}
+                      x={100 * index + 100}
+                      y={0}
+                      width={50}
+                      height={800}
+                      backgroundColor={colorByGraph["CONNECTION"]}
+                    />
+                  );
+                }
+              })
             }
           </PixiContainer>
           <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />

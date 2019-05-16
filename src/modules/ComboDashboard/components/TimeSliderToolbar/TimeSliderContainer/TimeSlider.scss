@@ -9,8 +9,9 @@
 
 .timeSliderGraph {
     canvas {
-        // position: absolute;
-        max-height: 100px
+        position: relative;
+        max-height: 100px;
+        bottom: 8px;
     }
 }
 
