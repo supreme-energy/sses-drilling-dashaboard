@@ -37,6 +37,6 @@ export function computeInitialViewXScaleValue(data) {
 }
 
 export const mapRop = (d, index) => {
-  return [Number(d.Hole_Depth), Number(d.ROP_A)];
+  return [index, Number(d.ROP_A)];
 };
 export const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
