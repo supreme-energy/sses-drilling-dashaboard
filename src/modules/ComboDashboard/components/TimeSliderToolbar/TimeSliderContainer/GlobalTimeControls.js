@@ -6,7 +6,7 @@ import classNames from "classnames";
 
 import classes from "./TimeSlider.scss";
 
-function GlobalTimeControls({ children, expanded, setSliderStep }) {
+function GlobalTimeControls({ children, expanded, setSliderStep, dates }) {
   const handleSetBeginning = useCallback(() => {
     setSliderStep([0, 1]);
   });
@@ -25,7 +25,7 @@ function GlobalTimeControls({ children, expanded, setSliderStep }) {
         <IconButton onClick={handleSetBeginning}>
           <Restore />
         </IconButton>
-        {expanded && <Typography variant="caption">{"09-18-2019"}</Typography>}
+        {expanded && <Typography variant="caption">{dates[0]}</Typography>}
       </div>
       {children}
       <div
@@ -37,7 +37,7 @@ function GlobalTimeControls({ children, expanded, setSliderStep }) {
         <IconButton onClick={handleSetEnd}>
           <AccessTime />
         </IconButton>
-        {expanded && <Typography variant="caption">NOW</Typography>}
+        {expanded && <Typography variant="caption">{dates[1]}</Typography>}
       </div>
     </div>
   );
@@ -46,6 +46,7 @@ function GlobalTimeControls({ children, expanded, setSliderStep }) {
 GlobalTimeControls.propTypes = {
   expanded: PropTypes.bool,
   setSliderStep: PropTypes.func,
-  children: PropTypes.node
+  children: PropTypes.node,
+  dates: PropTypes.arrayOf(PropTypes.string)
 };
 export default GlobalTimeControls;

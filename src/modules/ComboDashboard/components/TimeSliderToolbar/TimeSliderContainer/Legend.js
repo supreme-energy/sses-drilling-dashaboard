@@ -12,7 +12,6 @@ function Legend({ className, selectedGraphs, keys }) {
       {keys.map((key, index) => {
         if (selectedGraphs.includes(key)) {
           const color = "#" + COLOR_BY_GRAPH[key];
-          console.log(color);
           return (
             <React.Fragment key={index}>
               <div className={classes.legendKey} style={{ backgroundColor: color }} />

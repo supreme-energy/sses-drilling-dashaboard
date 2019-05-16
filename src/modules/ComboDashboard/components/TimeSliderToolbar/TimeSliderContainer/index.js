@@ -20,12 +20,12 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [isSpeeding, setIsSpeeding] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
+  const [globalDates, setGlobalDates] = useState(["", ""]);
 
   useEffect(() => {
     setSelectedMenuItem(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
   }, [drillPhase]);
 
-  console.log(selectedMenuItems);
   return (
     <Card className={classNames(classes.timeSliderContainer, className)}>
       {expanded && (
@@ -53,7 +53,7 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
           />
         </div>
       )}
-      <GlobalTimeControls setSliderStep={setSliderStep} expanded={expanded}>
+      <GlobalTimeControls setSliderStep={setSliderStep} expanded={expanded} dates={globalDates}>
         <TimeSlider
           expanded={expanded}
           zoom={zoom}
@@ -61,6 +61,7 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
           setSliderStep={setSliderStep}
           setIsPlaying={setIsPlaying}
           selectedGraphs={selectedMenuItems}
+          setGlobalDates={setGlobalDates}
         />
       </GlobalTimeControls>
     </Card>

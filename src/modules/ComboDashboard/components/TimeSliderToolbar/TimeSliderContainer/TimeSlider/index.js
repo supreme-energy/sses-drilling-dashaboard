@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
 import { useSize } from "react-hook-size";
+import get from "lodash/get";
 
 import useRef from "react-powertools/hooks/useRef";
 
@@ -16,14 +17,26 @@ import {
   useRopData,
   GRID_GUTTER,
   computeInitialViewXScaleValue,
-  computeInitialViewYScaleValue,
-  mapRop,
-  mapSlide
+  computeInitialViewYScaleValue
 } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
-function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
+const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
+
+const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
+
+function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGlobalDates }) {
   const data = useRopData();
+  const lastRowIdx = data.length;
+
+  useMemo(() => {
+    const beginningDate = get(data, "[0].Date_Time", "");
+    const endDate = get(data, "[data.length - 1].Date_Time", "NOW");
+    console.log(endDate);
+
+    const transformDate = date => date.split(" ")[0];
+    setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
+  }, [data, zoom]);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -63,10 +76,6 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
   });
 
   const onReset = useCallback(() => {
-    // console.log(
-    //   getInitialViewYScaleValue((height - GRID_GUTTER) * 200),
-    //   getInitialViewXScaleValue((width - GRID_GUTTER) / 21)
-    // );
     updateView(view => ({
       ...view,
       x: 0,
@@ -158,6 +167,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs }) {
       <Slider
         className={expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
         value={step}
+        max={lastRowIdx - 1}
         onChange={handleDragSlider}
         step={STEP_VALUE}
       />
@@ -170,7 +180,8 @@ TimeSlider.propTypes = {
   step: PropTypes.number,
   zoom: PropTypes.arrayOf(PropTypes.number),
   setSliderStep: PropTypes.func,
-  selectedGraphs: PropTypes.arrayOf(PropTypes.string)
+  selectedGraphs: PropTypes.arrayOf(PropTypes.string),
+  setGlobalDates: PropTypes.func
 };
 
 export default TimeSlider;
