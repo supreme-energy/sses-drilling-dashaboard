@@ -26,7 +26,7 @@ pipelines:
     'DD-113-master-dev-server':
       - step:
           name: Build and deploy
-          deployment: staging
+          deployment: test
           caches:
             - node
           script:
