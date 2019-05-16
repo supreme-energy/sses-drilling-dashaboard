@@ -23,7 +23,7 @@ pipelines:
             - yarn run lint
             - yarn run build
             - yarn run uploadDev
-    'DD-113-master-dev-server':
+    'master':
       - step:
           name: Build and deploy
           deployment: test
