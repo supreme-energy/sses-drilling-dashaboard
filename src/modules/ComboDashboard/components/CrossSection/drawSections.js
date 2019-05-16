@@ -47,7 +47,7 @@ function drawSections(container, props, gutter) {
 
   return function update(props) {
     if (!container.transform) return;
-    const { surveys, projections, width, height, view, lastSurveyIdx, selectedList, sectionList } = props;
+    const { width, height, view, lastSurveyIdx, selectedList, sectionList } = props;
     // const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const points = sectionList;
     const y = height - gutter - buttonHeight;

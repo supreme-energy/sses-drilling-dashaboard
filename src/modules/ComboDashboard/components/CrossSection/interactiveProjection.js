@@ -15,7 +15,7 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { updateView: pointUpdate, lastSurveyIdx, selectedList } = props;
+  const { updateView: pointUpdate } = props;
   const red = 0xee2211;
   const white = 0xffffff;
 
