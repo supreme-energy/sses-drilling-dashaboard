@@ -13,7 +13,8 @@ import {
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
-import { ON_SURFACE, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
+import { COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
+import { ON_SURFACE } from "../../../../../constants/wellPathStatus";
 import { GRAY } from "../../../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
 
