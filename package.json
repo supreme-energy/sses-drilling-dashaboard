@@ -6,6 +6,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "compile": "node build/scripts/compile",
+    "buildMaster": "cross-env DEPLOY_ENV=master npm run build",
+    "buildDev": "cross-env DEPLOY_ENV=dev npm run build",
     "build": "npm run clean && cross-env NODE_ENV=production npm run compile",
     "start": "cross-env NODE_ENV=development node build/scripts/start",
     "test": "cross-env NODE_ENV=test karma start build/karma.config",
