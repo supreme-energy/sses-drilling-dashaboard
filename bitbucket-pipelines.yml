@@ -12,15 +12,6 @@ pipelines:
             - yarn run lint
             - yarn run build
   branches:
-    'master':
-      - step:
-          name: Build and test
-          caches:
-            - node
-          script:
-            - yarn
-            - yarn run lint
-            - yarn run build
     'develop':
       - step:
           name: Build and deploy
@@ -31,4 +22,15 @@ pipelines:
             - yarn
             - yarn run lint
             - yarn run build
-            - yarn run upload
+            - yarn run uploadDev
+    'DD-113-master-dev-server':
+      - step:
+          name: Build and deploy
+          deployment: staging
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
+            - yarn run build
+            - yarn run uploadMaster
