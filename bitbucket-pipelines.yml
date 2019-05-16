@@ -31,5 +31,6 @@ pipelines:
           script:
             - yarn
             - yarn run lint
+            - yarn run test
             - yarn run build
             - yarn run upload
