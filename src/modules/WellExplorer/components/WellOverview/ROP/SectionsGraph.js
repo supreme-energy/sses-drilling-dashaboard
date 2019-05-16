@@ -19,8 +19,11 @@ function Label({ x, y, text, container, view, viewWidth, color }) {
   );
 
   return (
-    <PixiContainer container={container} x={getScaledValue(view.xScale, viewWidth - textWidth - 20)} y={y}>
-      {container => (
+    <PixiContainer
+      container={container}
+      x={getScaledValue(view.xScale, viewWidth - textWidth - 20)}
+      y={y}
+      child={container => (
         <PixiText
           {...getScaledPosition(padding, padding)}
           ref={textRef}
@@ -30,7 +33,7 @@ function Label({ x, y, text, container, view, viewWidth, color }) {
           color={color}
         />
       )}
-    </PixiContainer>
+    />
   );
 }
 
@@ -44,8 +47,10 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
   return (
     <React.Fragment>
       {/* frozenScaleTransform will not scale */}
-      <PixiContainer container={container} updateTransform={frozenScaleTransform}>
-        {container => (
+      <PixiContainer
+        container={container}
+        updateTransform={frozenScaleTransform}
+        child={container => (
           <PixiLine
             view={view}
             nativeLines={false}
@@ -56,7 +61,8 @@ export function SectionsGraph({ container, view, dataBySection, mapData, data, h
             color={0x9d9d9d}
           />
         )}
-      </PixiContainer>
+      />
+
       {sectionsData.map(d => (
         <PixiCircle
           key={d[0].key}

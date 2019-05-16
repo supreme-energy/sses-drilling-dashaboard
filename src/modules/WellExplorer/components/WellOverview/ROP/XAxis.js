@@ -15,8 +15,10 @@ export default function XAxis({ container, scale, numberOfTicks, height, ...prop
   const [minX, maxX] = scale.range();
   const width = maxX - minX;
   return (
-    <PixiContainer container={container} {...props}>
-      {container => (
+    <PixiContainer
+      container={container}
+      {...props}
+      child={container => (
         <React.Fragment>
           <PixiRectangle container={container} width={width} height={height} backgroundColor={0xffffff} />
           {xTicks.map((t, index) => (
@@ -33,7 +35,7 @@ export default function XAxis({ container, scale, numberOfTicks, height, ...prop
           ))}
         </React.Fragment>
       )}
-    </PixiContainer>
+    />
   );
 }
 

@@ -1,9 +1,9 @@
 import useRef from "react-powertools/hooks/useRef";
-import React, { useEffect, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function Container({ container: parentContainer, children, x, y, updateTransform, name }, ref) {
+function Container({ container: parentContainer, child, x, y, updateTransform, name }, ref) {
   const {
     current: { container, initialUpdateTransform }
   } = useRef(() => {
@@ -51,14 +51,14 @@ function Container({ container: parentContainer, children, x, y, updateTransform
     [x, y, container]
   );
 
-  return React.Children.map(child => child(container));
+  return child ? child(container) : null;
 }
 
 const PixiContainer = forwardRef(Container);
 
 PixiContainer.propTypes = {
   updateTransform: PropTypes.func,
-  children: PropTypes.func,
+  child: PropTypes.func,
   container: PropTypes.object.isRequired,
   x: PropTypes.number,
   y: PropTypes.number

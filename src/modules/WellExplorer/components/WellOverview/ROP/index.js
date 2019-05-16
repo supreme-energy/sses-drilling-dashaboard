@@ -156,8 +156,9 @@ export default function Rop({ className, style }) {
       <Legend />
       <div className={classes.plot} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
-        <PixiContainer container={viewport}>
-          {container => (
+        <PixiContainer
+          container={viewport}
+          child={container => (
             <SectionsBg
               view={view}
               sectionsData={sectionsData}
@@ -166,11 +167,13 @@ export default function Rop({ className, style }) {
               width={getScaledValue(view.xScale, width - gridGutter)}
             />
           )}
-        </PixiContainer>
+        />
+
         <PixiLine container={viewport} data={data} mapData={mapInstant} color={0xffffff} />
         <PixiLine container={viewport} data={data} mapData={mapAverage} color={0xca221d} />
-        <PixiContainer container={viewport}>
-          {container => (
+        <PixiContainer
+          container={viewport}
+          child={container => (
             <SectionsGraph
               view={view}
               data={data}
@@ -182,7 +185,8 @@ export default function Rop({ className, style }) {
               width={width - gridGutter}
             />
           )}
-        </PixiContainer>
+        />
+
         <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
         <XAxis
           x={gridGutter}
