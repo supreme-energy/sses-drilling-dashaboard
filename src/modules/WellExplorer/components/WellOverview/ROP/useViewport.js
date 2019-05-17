@@ -86,12 +86,17 @@ export default function useViewport({
       const stepFactor = (window.innerWidth - 20) * (step / maxStep);
       interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
 
-      // Use current slider position
-      updateView(prev => ({
-        ...prev,
-        x: globalMouse.x - (globalMouse.x - prev.x) * factor,
-        xScale: prev.xScale * factor
-      }));
+      // Calc new view, bound graph to sides of canvas when zooming
+      updateView(prev => {
+        const xMaxBound =
+          Math.round(maxStep * prev.xScale * factor + Math.abs(prev.x * prev.xScale)) >= Math.round(width);
+        const newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
+        return {
+          ...prev,
+          x: newX < 0 && xMaxBound ? newX : prev.x,
+          xScale: xMaxBound ? prev.xScale * factor : prev.xScale
+        };
+      });
     }
   }, [zoom, updateView]);
 

@@ -18,7 +18,6 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
   // Fetch data for Time Slider
   const data = useRopData();
   const maxSliderStep = data.length;
-  console.log(maxSliderStep);
 
   const [zoom, setZoom] = useState([0, 0]);
   const [selectedMenuItems, setSelectedMenuItem] = useState(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
@@ -78,6 +77,8 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
           setIsPlaying={setIsPlaying}
           selectedGraphs={selectedMenuItems}
           setGlobalDates={setGlobalDates}
+          maxStep={maxSliderStep}
+          data={data}
         />
       </GlobalTimeControls>
     </Card>

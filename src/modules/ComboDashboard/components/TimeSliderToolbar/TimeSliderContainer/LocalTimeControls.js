@@ -52,7 +52,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
         return [sliderStep[0] + STEP_VALUE * sliderStep[1], sliderStep[1]];
       });
     },
-    isSpeeding ? 200 : null
+    isSpeeding ? 100 / maxSliderStep : null
   );
 
   // Stop Slider if mouseup happens outside component

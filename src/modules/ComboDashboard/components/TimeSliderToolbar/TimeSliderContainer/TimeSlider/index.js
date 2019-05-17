@@ -13,25 +13,18 @@ import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/Pi
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
 import { STEP_VALUE, LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
-import {
-  useRopData,
-  GRID_GUTTER,
-  computeInitialViewXScaleValue,
-  computeInitialViewYScaleValue
-} from "./TimeSliderUtil";
+import { GRID_GUTTER, computeInitialViewXScaleValue, computeInitialViewYScaleValue } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
 const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
 const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
 
-function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGlobalDates }) {
-  const data = useRopData();
-  const lastRowIdx = data.length;
-
+function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGlobalDates, data, maxStep }) {
   useMemo(() => {
+    const factor = Math.round((1 - zoom[1] * 0.03) * (step - zoom[0]) - step / maxStep);
+    console.log(factor, step);
     const beginningDate = get(data, "[0].Date_Time", "");
-    const endDate = get(data, "[data.length - 1].Date_Time", "NOW");
-
+    const endDate = get(data, `[${factor}].Date_Time`, "NOW");
     const transformDate = dateTime => {
       const splitDateTime = dateTime.split(" ");
       if (splitDateTime.length > 1) {
@@ -42,7 +35,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
     };
 
     setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
-  }, [data, zoom]);
+  }, [data, zoom, step]);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -78,7 +71,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
     zoomXScale: false,
     zoomYScale: true,
     step,
-    maxStep: lastRowIdx,
+    maxStep,
     zoom
   });
 
@@ -174,7 +167,7 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
       <Slider
         className={expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
         value={step}
-        max={lastRowIdx - 1}
+        max={maxStep}
         onChange={handleDragSlider}
         step={STEP_VALUE}
       />
