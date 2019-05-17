@@ -118,10 +118,9 @@ export const WellExplorer = ({
     >
       <WellImporterModal
         open={importModalShown}
-        onClose={() => toggleShowImportModal(false)}
         hideBackdrop
       >
-        <WellImporter />
+        <WellImporter onClickCancel={() => toggleShowImportModal(false)} />
       </WellImporterModal>
 
       <WellMap

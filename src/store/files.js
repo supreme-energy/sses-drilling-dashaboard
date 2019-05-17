@@ -40,7 +40,7 @@ const HANDLERS = {
     return {
       ...state,
       error: null,
-      files: [ action.file ],
+      files: [ action.fileInfo ],
     };
   },
   [ ADD_FILE_ERROR ]: (state, action) => {
