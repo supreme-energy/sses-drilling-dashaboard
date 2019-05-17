@@ -33,6 +33,11 @@ const styles = {
     position: "absolute",
     right: 12,
     color: GRAY
+  },
+  cardContent: {
+    lastChild: {
+      padding: 0
+    }
   }
 };
 

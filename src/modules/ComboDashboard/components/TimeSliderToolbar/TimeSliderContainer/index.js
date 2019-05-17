@@ -36,7 +36,9 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
   }, [drillPhase]);
 
   return (
-    <Card className={classNames(classes.timeSliderContainer, className)}>
+    <Card
+      className={classNames(classes.timeSliderContainer, expanded && classes.timeSliderContainerExpanded, className)}
+    >
       {expanded && (
         <div className={classes.timeSliderHeader}>
           <Typography className={classes.timeSliderTitle} variant="subtitle1">

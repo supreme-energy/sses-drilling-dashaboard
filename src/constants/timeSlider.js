@@ -3,11 +3,11 @@ import { GREEN, GRAY } from "./colors";
 
 export const STEP_VALUE = 1;
 
-const CONNECTION = "CONNECTION";
-const ROP = "ROP";
-const SLIDE = "SLIDE";
-const LENGTH = "LENGTH";
-const PLANNED_ANGLE = "PLANNED ANGLE";
+export const CONNECTION = "CONNECTION";
+export const ROP = "ROP";
+export const SLIDE = "SLIDE";
+export const LENGTH = "LENGTH";
+export const PLANNED_ANGLE = "PLANNED ANGLE";
 
 export const LINE_GRAPHS = [ROP, LENGTH];
 export const BAR_GRAPHS = [SLIDE, CONNECTION];
