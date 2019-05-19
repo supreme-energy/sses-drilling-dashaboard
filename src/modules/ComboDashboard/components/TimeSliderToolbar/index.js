@@ -1,11 +1,12 @@
-import React, { useReducer, useState } from "react";
-import { Card, IconButton } from "@material-ui/core";
+import React, { useReducer, useState, lazy, Suspense } from "react";
+import { Card, IconButton, CircularProgress } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
-import TimeSlider from "./TimeSliderContainer";
 import classes from "./TimeSliderToolbar.scss";
 import { ON_SURFACE } from "../../../../constants/wellPathStatus";
+
+const TimeSliderContainer = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSliderContainer"));
 
 function TimeSliderToolbar() {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
@@ -25,7 +26,9 @@ function TimeSliderToolbar() {
           drillPhase={drillPhase}
           setDrillPhase={setDrillPhase}
         />
-        <TimeSlider drillPhase={drillPhase} expanded={expanded} />
+        <Suspense fallback={<CircularProgress />}>
+          <TimeSliderContainer drillPhase={drillPhase} expanded={expanded} />
+        </Suspense>
       </div>
     </Card>
   );

@@ -1,5 +1,6 @@
-import React, { useState, useReducer, useEffect } from "react";
+import React, { useState, useReducer, useEffect, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
+import Progress from "@material-ui/core/CircularProgress";
 import { Card, Typography } from "@material-ui/core";
 import classNames from "classnames";
 
@@ -8,10 +9,11 @@ import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
-import TimeSlider from "./TimeSlider";
-import { useRopData } from "./TimeSlider/TimeSliderUtil";
+import { useRopData } from "../../../../../api";
 import { COLOR_BY_GRAPH, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
+
+const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
 
 // TODO: Build Time Slider Component
 function TimeSliderContainer({ className, expanded, drillPhase }) {
@@ -71,17 +73,19 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
         dates={globalDates}
         maxSliderStep={maxSliderStep}
       >
-        <TimeSlider
-          expanded={expanded}
-          zoom={zoom}
-          step={sliderStep[0]}
-          setSliderStep={setSliderStep}
-          setIsPlaying={setIsPlaying}
-          selectedGraphs={selectedMenuItems}
-          setGlobalDates={setGlobalDates}
-          maxStep={maxSliderStep}
-          data={data}
-        />
+        <Suspense fallback={<Progress />}>
+          <TimeSlider
+            expanded={expanded}
+            zoom={zoom}
+            step={sliderStep[0]}
+            setSliderStep={setSliderStep}
+            setIsPlaying={setIsPlaying}
+            selectedGraphs={selectedMenuItems}
+            setGlobalDates={setGlobalDates}
+            maxStep={maxSliderStep}
+            data={data}
+          />
+        </Suspense>
       </GlobalTimeControls>
     </Card>
   );

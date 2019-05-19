@@ -1,24 +1,7 @@
-import { useState, useEffect } from "react";
 import { scaleLinear, scalePow } from "d3-scale";
 import { max } from "d3-array";
 
 export const GRID_GUTTER = 60;
-const EMPTY_ARRAY = [];
-
-export function useRopData() {
-  const [ropData, updateRopData] = useState(EMPTY_ARRAY);
-  const loadData = async () => {
-    const response = await fetch("/data/rop.json");
-
-    const data = await response.json();
-
-    updateRopData(data.data);
-  };
-  useEffect(() => {
-    loadData();
-  }, []);
-  return ropData;
-}
 
 export function computeInitialViewYScaleValue(data) {
   if (data && data.length > 0) {
