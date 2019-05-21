@@ -37,7 +37,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
         if (sliderStep[0] >= maxSliderStep) {
           return sliderStep;
         }
-        return [sliderStep[0] + STEP_VALUE, sliderStep[1]];
+        return [sliderStep[0] + STEP_VALUE * (maxSliderStep / 100), sliderStep[1]];
       });
     },
     isPlaying && !isSpeeding ? 800 : null
@@ -49,10 +49,10 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
         if ((!sliderStep[0] && sliderStep[1] < 0) || (sliderStep[1] && sliderStep[0] >= maxSliderStep)) {
           return sliderStep;
         }
-        return [sliderStep[0] + STEP_VALUE * sliderStep[1], sliderStep[1]];
+        return [sliderStep[0] + STEP_VALUE * (maxSliderStep / 100) * sliderStep[1], sliderStep[1]];
       });
     },
-    isSpeeding ? 100 / maxSliderStep : null
+    isSpeeding ? 100 : null
   );
 
   // Stop Slider if mouseup happens outside component

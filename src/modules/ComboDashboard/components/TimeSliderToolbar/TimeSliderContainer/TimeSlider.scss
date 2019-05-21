@@ -113,6 +113,8 @@
 
     .globalTimeControls {
         padding: 8px;
+        padding-bottom: 1px;
+        padding-left: 0;
         &:focus {
             outline: 0;
         }
@@ -127,8 +129,8 @@
     }
 
     .expandedBackwardTime {
-        left: 20px;
-        top: 30px;
+        left: 15px;
+        top: 35px;
     }
 
     .collapsedBackwardTime {
@@ -139,6 +141,7 @@
         color: #000000;
         position: relative;
         display: block;
+        width: 30px;
 
         > button {
             @extend .globalTimeControls;
@@ -146,8 +149,8 @@
     }
 
     .expandedForwardTime {
-        top: 30px;
-        right: 10px;
+        top: 35px;
+        right: 15px;
     }
 
     .collapsedForwardTime {

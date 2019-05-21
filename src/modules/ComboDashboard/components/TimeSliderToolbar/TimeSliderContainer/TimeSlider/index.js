@@ -14,29 +14,26 @@ import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/Pi
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
 import { STEP_VALUE, LINE_GRAPHS, COLOR_BY_GRAPH, PLANNED_ANGLE } from "../../../../../../constants/timeSlider";
-import { GRID_GUTTER, computeInitialViewXScaleValue, computeInitialViewYScaleValue } from "./TimeSliderUtil";
+import {
+  GRID_GUTTER,
+  computeInitialViewXScaleValue,
+  computeInitialViewYScaleValue,
+  mapRop,
+  mapSlide
+} from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
-const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
-const mapSlide = d => [Number(d.Hole_Depth), Number(d.ROP_I)];
-
-function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGlobalDates, data, maxStep }) {
-  useMemo(() => {
-    const factor = Math.round((1 - zoom[1] * 0.03) * (step - zoom[0]) - step / maxStep);
-    const beginningDate = get(data, "[0].Date_Time", "");
-    const endDate = get(data, `[${factor}].Date_Time`, "NOW");
-    const transformDate = dateTime => {
-      const splitDateTime = dateTime.split(" ");
-      if (splitDateTime.length > 1) {
-        const date = splitDateTime[0].split("/");
-        return `${date[0]}-${date[1]} ${date[2]}`;
-      }
-      return dateTime;
-    };
-
-    setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
-  }, [data, zoom, step]);
-
+function TimeSlider({
+  expanded,
+  zoom,
+  step,
+  setSliderStep,
+  selectedGraphs,
+  setGlobalDates,
+  data,
+  maxStep,
+  setMaxStep
+}) {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
@@ -81,24 +78,10 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
       ...view,
       x: 0,
       y: 0,
-      yScale: getInitialViewYScaleValue((height - GRID_GUTTER) * 200),
-      xScale: getInitialViewXScaleValue((width - GRID_GUTTER) / 21)
+      yScale: getInitialViewYScaleValue(height),
+      xScale: getInitialViewXScaleValue(width - GRID_GUTTER)
     }));
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
-
-  useEffect(
-    function resetZoom() {
-      if (!zoom[1]) onReset();
-    },
-    [onReset, zoom]
-  );
-
-  useEffect(
-    function resetOnExpanded() {
-      if (expanded) onReset();
-    },
-    [expanded, onReset]
-  );
 
   // set initial scale
   useEffect(
@@ -117,6 +100,39 @@ function TimeSlider({ expanded, zoom, step, setSliderStep, selectedGraphs, setGl
     },
     [refresh, stage, data, view, width, height, selectedGraphs]
   );
+
+  useEffect(
+    function resetZoom() {
+      if (!zoom[1]) onReset();
+    },
+    [onReset, zoom]
+  );
+
+  useEffect(
+    function resetOnExpand() {
+      if (expanded) onReset();
+    },
+    [expanded, onReset]
+  );
+
+  useMemo(() => {
+    const factor = Math.round((1 - zoom[1] * 0.03) * (step - zoom[0]) - step / maxStep);
+    const extFactor = Math.round(maxStep - maxStep * view.xScale * (zoom[1] || 1));
+    const beginningDate = get(data, "[0].Date_Time", "");
+    const endDate = get(data, `[${factor}].Date_Time`, "NOW");
+    const transformDate = dateTime => {
+      const splitDateTime = dateTime.split(" ");
+      if (splitDateTime.length > 1) {
+        const date = splitDateTime[0].split("/");
+        return `${date[0]}-${date[1]} ${date[2]}`;
+      }
+      return dateTime;
+    };
+
+    console.log("new max step", view);
+    // setMaxStep(maxStep => Math.round(maxStep - maxStep * view.xScale * (zoom[1] || 1)));
+    setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
+  }, [data, zoom, step]);
 
   const handleDragSlider = useCallback((_, currentStep) => {
     setSliderStep([currentStep, 1]);

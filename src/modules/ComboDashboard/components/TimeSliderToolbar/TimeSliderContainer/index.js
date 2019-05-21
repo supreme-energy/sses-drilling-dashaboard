@@ -19,9 +19,9 @@ const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./Tim
 function TimeSliderContainer({ className, expanded, drillPhase }) {
   // Fetch data for Time Slider
   const data = useRopData();
-  const maxSliderStep = data.length;
 
   const [zoom, setZoom] = useState([0, 0]);
+  const [maxSliderStep, setMaxSliderStep] = useState(data.length);
   const [selectedMenuItems, setSelectedMenuItem] = useState(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
   const [sliderStep, setSliderStep] = useState([maxSliderStep, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
@@ -30,8 +30,11 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
   const [globalDates, setGlobalDates] = useState(["", ""]);
 
   useEffect(() => {
-    setSliderStep([maxSliderStep, 1]);
-  }, [maxSliderStep]);
+    const max = data.length;
+    console.log("data changed");
+    setMaxSliderStep(max);
+    setSliderStep([max, 1]);
+  }, [data]);
 
   useEffect(() => {
     setSelectedMenuItem(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
@@ -83,6 +86,7 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
             selectedGraphs={selectedMenuItems}
             setGlobalDates={setGlobalDates}
             maxStep={maxSliderStep}
+            setMaxStep={setMaxSliderStep}
             data={data}
           />
         </Suspense>
