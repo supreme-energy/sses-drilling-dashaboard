@@ -31,7 +31,6 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
 
   useEffect(() => {
     const max = data.length;
-    console.log("data changed");
     setMaxSliderStep(max);
     setSliderStep([max, 1]);
   }, [data]);
