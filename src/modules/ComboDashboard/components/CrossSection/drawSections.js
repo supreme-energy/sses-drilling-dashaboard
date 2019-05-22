@@ -7,16 +7,16 @@ const selectedSurvey = [0x000000, 1];
 const selectedLastSurvey = [0x0000ff, 1];
 const selectedProjection = [0xee2211, 1];
 
-function getColor(selectedList, i, lastSurveyIdx) {
-  const isSelected = selectedList[i];
-  const isProjection = i >= lastSurveyIdx;
+function getColor(selectedList, index, lastSurveyIdx) {
+  const isSelected = selectedList[index];
+  const isProjection = index >= lastSurveyIdx;
   let color;
   if (isSelected) {
     color = isProjection ? selectedProjection : selectedSurvey;
   } else {
     color = isProjection ? projection : survey;
   }
-  if (i === lastSurveyIdx - 1 && isSelected) color = selectedLastSurvey;
+  if (index === lastSurveyIdx - 1 && isSelected) color = selectedLastSurvey;
   return color;
 }
 
