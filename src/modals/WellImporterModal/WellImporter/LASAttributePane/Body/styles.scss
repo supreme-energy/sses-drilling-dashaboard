@@ -10,6 +10,10 @@
   color: white;
 }
 
+%selectedTextState {
+  color: green;
+}
+
 .importContentTable {
   @extend %table;
   border-width: 1px;
@@ -31,6 +35,10 @@
         @extend %selectedState;
       }
 
+      &.selectedText {
+        @extend %selectedTextState;
+      }
+
       &:hover {
         @extend %selectedState;
       }
@@ -45,6 +53,10 @@
     background-color: white;
     &.selectedCell {
       @extend %selectedState;
+    }
+
+    &.selectedText {
+      @extend %selectedTextState;
     }
   }
 }

@@ -8,17 +8,18 @@ import css from "./styles.scss";
 
 const truncatedMessage = "-------Log data intentionally truncated. All log data will be imported-------";
 
-const nonDisplayFields = [ "index" ];
+const nonDisplayFields = ["index"];
 
 const Body = ({
   unlocked,
   data,
   className,
   onClickCell,
-  highlightedRowAndColumnList = { version: [[true, true]] }
+  highlightedRowAndColumnList,
+  textHighlightedRowAndColumnList
 }) => {
-  const onClick = (rowIndex, columnIndex, cellData) => () => {
-    onClickCell(rowIndex, columnIndex, cellData);
+  const onClick = (sectionName, key, cellData, rowIndex, columnIndex) => () => {
+    onClickCell(sectionName, key, cellData, rowIndex, columnIndex);
   };
 
   const renderAsciiSection = (sectionName, data) => {
@@ -59,18 +60,20 @@ const Body = ({
   const renderSection = (sectionName, data) => {
     return Object.keys(data[sectionName]).map((key, rowIndex) => {
       const rowData = data[sectionName][key];
-
       return (
         <tr key={`${sectionName}-${key}-${rowIndex}`}>
           {Object.keys(rowData).reduce((columns, sectionItemKey, columnIndex) => {
             const cellData = rowData[sectionItemKey];
-            const isSelected = get(highlightedRowAndColumnList, [sectionName, columnIndex, rowIndex], false);
+            const cellId = `${sectionName}-${key}-${cellData}`;
+            const cellHighlighted = get(highlightedRowAndColumnList, cellId, false);
+
+            const textHighlighted = get(textHighlightedRowAndColumnList, cellId, false);
 
             if (columnIndex === 3) {
               columns.push(
                 <td
                   key={`${sectionName}-${sectionItemKey}-${rowIndex}-${columnIndex}`}
-                  onClick={onClick(rowIndex, columnIndex, cellData)}
+                  onClick={onClick(sectionName, key, cellData, rowIndex, columnIndex)}
                 >
                   :
                 </td>
@@ -81,9 +84,10 @@ const Body = ({
               columns.push(
                 <td
                   key={`${sectionItemKey}-${rowIndex}-${columnIndex}`}
-                  onClick={onClick(rowIndex, columnIndex, cellData)}
+                  onClick={onClick(sectionName, key, cellData, rowIndex, columnIndex)}
                   className={classnames({
-                    [css.selectedCell]: isSelected
+                    [css.selectedCell]: cellHighlighted,
+                    [css.selectedText]: textHighlighted
                   })}
                 >
                   {columnIndex === 1 ? "." : ""}
@@ -126,7 +130,9 @@ const Body = ({
 };
 
 Body.defaultProps = {
-  unlocked: true
+  unlocked: true,
+  highlightedRowAndColumnList: null,
+  textHighlightedRowAndColumnList: null
 };
 
 Body.propTypes = {
@@ -134,6 +140,7 @@ Body.propTypes = {
   onClickCell: PropTypes.func.isRequired,
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
+  textHighlightedRowAndColumnList: PropTypes.object,
   unlocked: PropTypes.bool
 };
 

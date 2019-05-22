@@ -1,5 +1,5 @@
 .container {
-  height: 80%;
+  height: calc(100% - 130px);
   display: flex;
   flex-direction: row;
 }
@@ -7,10 +7,12 @@
 .appAttributePaneBodyContainer {
   height: 100%;
   width: 25%;
+  overflow: auto;
 }
 
 .lasAttributePaneBodyContainer {
   height: 100%;
   width: 75%;
   overflow: auto;
+  padding: 15px;
 }
