@@ -37,7 +37,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
         }
         return [...projections];
       default:
-        return [...projections];
+        throw new Error(`Unknown projections reducer action type ${action.type}`);
     }
   }, sectionList);
 
