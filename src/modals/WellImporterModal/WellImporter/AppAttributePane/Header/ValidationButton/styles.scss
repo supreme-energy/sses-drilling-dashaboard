@@ -1,0 +1,28 @@
+.button {
+  margin-right: 5px;
+  border-color: rgb(224, 224, 224);
+  text-transform: none;
+  line-height: 3px;
+  &:last-of-type {
+    margin-right: 0;
+  }
+
+
+  &.valid {
+    background-color: rgb(242, 248, 233);
+  }
+}
+
+%icon {
+  margin-right: 3px;
+}
+
+.checkIcon {
+  @extend %icon;
+  color: rgb(76, 140, 53);
+}
+
+.closeIcon {
+  @extend %icon;
+  color: rgb(164, 38, 47);
+}

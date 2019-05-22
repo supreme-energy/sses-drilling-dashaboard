@@ -5,121 +5,11 @@ import cloneDeep from "lodash/cloneDeep";
 import Body from "./Body";
 import Header from "./Header";
 import LAS2Parser from "../../../parsers/las/LAS2Parser";
+import { buildCellId } from "./utils";
+import { defaultAppAttributesModel } from "./models";
+import { appAttributesFieldMapping, sectionMapping } from "./mappings";
 
 import css from "./styles.scss";
-
-const wellInfoFieldMapping = {
-  well: {
-    labelName: "Well",
-    required: ["Well Info"],
-    predictedFieldName: "", // field name to be used when importing new well, we guess that it is associated with this
-    // field
-    index: 0
-  },
-  operator: {
-    labelName: "Operator",
-    required: ["Well Info"],
-    index: 1
-  },
-  rigId: {
-    labelName: "Rig Id",
-    index: 2
-  },
-  jobNumber: {
-    labelName: "Job Number",
-    index: 3
-  },
-  api: {
-    labelName: "API or UWI",
-    required: ["Well Info"],
-    index: 4
-  },
-  field: {
-    labelName: "Field",
-    required: ["Well Info"],
-    index: 5
-  },
-  location: {
-    labelName: "Location",
-    required: ["Well Info"],
-    index: 6
-  },
-  state: {
-    labelName: "State or Province",
-    required: ["Well Info"],
-    index: 7
-  },
-  county: {
-    labelName: "County",
-    required: ["Well Info"],
-    index: 8
-  },
-  country: {
-    labelName: "Country",
-    required: ["Well Info"],
-    index: 9
-  }
-};
-
-const sectionMapping = {
-  wellInfo: {
-    labelName: "Well Info"
-  },
-  wellParameters: {
-    labelName: "Well Parameters"
-  },
-  wellData: {
-    labelName: "Well Data"
-  }
-};
-
-const wellParametersFieldMapping = {
-  longitude: {
-    labelName: "Longitude",
-    required: ["Well Data"],
-    index: 0
-  },
-  latitude: {
-    labelName: "Latitude",
-    required: ["Well Data"],
-    index: 1
-  }
-};
-
-const defaultFieldModel = { value: "" };
-
-// TODO: we will need to account for Canada.
-const defaultWellInfoModel = {
-  well: cloneDeep(defaultFieldModel),
-  operator: cloneDeep(defaultFieldModel),
-  rigId: cloneDeep(defaultFieldModel),
-  jobNumber: cloneDeep(defaultFieldModel),
-  api: cloneDeep(defaultFieldModel), // This well id can either be API for the US or UWI for locations in Canada.
-  field: cloneDeep(defaultFieldModel),
-  location: cloneDeep(defaultFieldModel),
-  state: cloneDeep(defaultFieldModel), // Province is used for canada (this is obvious but wanted to keep track)
-  county: cloneDeep(defaultFieldModel),
-  country: cloneDeep(defaultFieldModel)
-};
-
-const defaultWellParametersModel = {
-  latitude: cloneDeep(defaultFieldModel),
-  longitude: cloneDeep(defaultFieldModel)
-};
-
-const defaultWellDataModel = {};
-
-const defaultAppAttributesModel = {
-  wellInfo: defaultWellInfoModel,
-  wellParameters: defaultWellParametersModel,
-  wellData: defaultWellDataModel
-};
-
-const appAttributesFieldMapping = {
-  wellInfo: wellInfoFieldMapping,
-  wellParameters: wellParametersFieldMapping,
-  wellData: {}
-};
 
 const WellImporter = ({ files, onClickCancel }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -132,51 +22,83 @@ const WellImporter = ({ files, onClickCancel }) => {
 
   const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {
     const cellAlreadySelected = Object.keys(inputToCellId).find(inputId => {
-      return inputToCellId[inputId] === `${sectionName}-${key}-${cellData}`;
+      return inputToCellId[inputId] === buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
     });
 
     if (activeInput) {
       const currentState = cloneDeep(appAttributesModel);
-      const updatedState = {
-        ...currentState,
-        [activeInput.sectionKey]: {
-          ...currentState[activeInput.sectionKey],
-          [activeInput.fieldKey]: {
-            ...currentState[activeInput.sectionKey][activeInput.fieldKey],
-            value: !cellAlreadySelected ? cellData : "",
-            cellId: !cellAlreadySelected ? `${sectionName}-${key}-${cellData}` : ""
+      if (!activeInput.type || activeInput.type === "cell") {
+        const updatedState = {
+          ...currentState,
+          [activeInput.sectionKey]: {
+            ...currentState[activeInput.sectionKey],
+            [activeInput.fieldKey]: {
+              ...currentState[activeInput.sectionKey][activeInput.fieldKey],
+              value: !cellAlreadySelected ? cellData : "",
+              cellId: !cellAlreadySelected ? buildCellId(sectionName, key, rowIndex, columnIndex, cellData) : ""
+            }
+          }
+        };
+
+        const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
+        const cellId = buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
+        if (!cellAlreadySelected) {
+          setAppAttributesModel(updatedState);
+          setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData);
+          setInputToCellId({
+            ...inputToCellId,
+            [inputId]: cellId
+          });
+        } else {
+          if (inputToCellId[cellAlreadySelected] === cellId && inputId === cellAlreadySelected) {
+            setHighlightedRowAndColumnList({});
+            const updatedTextHighlightedRowAndColumnList = { ...textHighlightedRowAndColumnList };
+            delete updatedTextHighlightedRowAndColumnList[cellId];
+            setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
+            const updatedInputToCellId = { ...inputToCellId };
+            delete updatedInputToCellId[inputId];
+            setInputToCellId(updatedInputToCellId);
           }
         }
-      };
+      } else if (activeInput.type === "column") {
+        const columnCellData = `(${data[sectionName][0][columnIndex]})-end-(${
+          data[sectionName][data[sectionName].length - 1][columnIndex]
+        })`;
 
-      const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
-      const cellId = `${sectionName}-${key}-${cellData}`;
-      setAppAttributesModel(updatedState);
-      if (!cellAlreadySelected) {
-        setHighlightedRowAndColumnListHelper(sectionName, key, cellData);
-        setInputToCellId({
-          ...inputToCellId,
-          [inputId]: cellId
-        });
-      } else {
-        if (inputToCellId[cellAlreadySelected] === cellId && inputId === cellAlreadySelected) {
-          setHighlightedRowAndColumnList({});
-          const updatedTextHighlightedRowAndColumnList = { ...textHighlightedRowAndColumnList };
-          delete updatedTextHighlightedRowAndColumnList[cellId];
-          setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
-          const updatedInputToCellId = { ...inputToCellId };
-          delete updatedInputToCellId[inputId];
-          setInputToCellId(updatedInputToCellId);
-        }
+        const updatedState = {
+          ...currentState,
+          [activeInput.sectionKey]: {
+            ...currentState[activeInput.sectionKey],
+            [activeInput.fieldKey]: {
+              ...currentState[activeInput.sectionKey][activeInput.fieldKey],
+              value: !cellAlreadySelected ? columnCellData : "",
+              cellId: !cellAlreadySelected ? buildCellId(sectionName, key, rowIndex, columnIndex, cellData) : ""
+            }
+          }
+        };
+
+        setAppAttributesModel(updatedState);
+        setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData, true);
       }
     }
   };
 
-  const setHighlightedRowAndColumnListHelper = (sectionName, key, cellData) => {
-    const cellId = `${sectionName}-${key}-${cellData}`;
-    setHighlightedRowAndColumnList({
-      [cellId]: true
-    });
+  const setHighlightedRowAndColumnListHelper = (sectionName, key, rowIndex, columnIndex, cellData, entireColumn) => {
+    if (!entireColumn) {
+      const cellId = buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
+      setHighlightedRowAndColumnList({
+        [cellId]: true
+      });
+    } else {
+      const sectionData = data[sectionName];
+      const highlighted = sectionData.reduce((map, row, rowIndex) => {
+        const id = buildCellId(sectionName, null, rowIndex, columnIndex);
+        map[id] = true;
+        return map;
+      }, {});
+
+      setHighlightedRowAndColumnList(highlighted);
+    }
   };
 
   useEffect(() => {
@@ -207,6 +129,8 @@ const WellImporter = ({ files, onClickCancel }) => {
       } else {
         setHighlightedRowAndColumnList({});
       }
+    } else {
+      setHighlightedRowAndColumnList({});
     }
 
     const updatedTextHighlightedRowAndColumnList = Object.values(inputToCellId).reduce((map, cellId) => {
@@ -250,10 +174,6 @@ const WellImporter = ({ files, onClickCancel }) => {
       />
     </div>
   );
-};
-
-WellImporter.defaultProps = {
-  onClickCell: () => {}
 };
 
 WellImporter.propTypes = {
