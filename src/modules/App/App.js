@@ -45,7 +45,7 @@ class App extends React.Component {
     const DrillingAnalytics = DrillingAnalyticsModule(store);
     const StructuralGuidance = StructuralGuidanceModule(store);
     const WellExplorer = WellExplorerModule(store);
-
+    console.log("basename", __CONFIG__.basename);
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>

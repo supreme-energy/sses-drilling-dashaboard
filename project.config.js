@@ -1,7 +1,7 @@
 const NODE_ENV = process.env.NODE_ENV || "development";
 const TARGET_ENV = process.env.TARGET_ENV || NODE_ENV;
 const DEPLOY_ENV = process.env.DEPLOY_ENV || "";
-const basename = DEPLOY_ENV === "dev" ? "/dev/index.html" : "";
+const basename = DEPLOY_ENV === "dev" ? "/dev" : "";
 const appConfigs = {
   development: {
     serverUrl: "https://2018dev.sgta.us/sses",
