@@ -137,13 +137,6 @@ function interactiveProjection(parent, props) {
     const yMap = val => val * yScale + y;
     const pa = sectionList[selectedIndex + 1];
     const prev = sectionList[selectedIndex];
-    if (pa.tot === 0 || pa.bot === 0) {
-      // These shouldn't be blank and this code will be removed pending a conversation with Tyler
-      let totDiff = prev.tcl - prev.tot;
-      let botDiff = prev.tcl - prev.bot;
-      pa.tot = pa.tcl - totDiff;
-      pa.bot = pa.tcl - botDiff;
-    }
 
     totCircle.position.x = prev.vs;
     totCircle.position.y = prev.tot;
