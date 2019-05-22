@@ -13,7 +13,7 @@ pipelines:
             - yarn run test
             - yarn run build
   branches:
-    'develop':
+    'fix-basename':
       - step:
           name: Build and deploy
           deployment: test
