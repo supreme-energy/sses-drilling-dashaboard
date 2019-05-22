@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: auto;
+
+    .content {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+    }
+
+    .verticalContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .verticalSegments {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        
+        z-index: 2;
+        flex: 1;
+
+        .totalHours {
+            margin-bottom: 20px;
+        }
+    }
+
+    .horizontalSegment {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        margin-left: 5px;
+        position: relative;
+        z-index: 1;
+        width: 470px;
+    }
+}

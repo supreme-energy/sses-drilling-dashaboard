@@ -1,0 +1,30 @@
+.container {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    flex-direction: row;
+    padding: 8px;
+    .left {
+        flex: 2;
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        height: 100%;
+        .ropChart {
+            
+            flex: 1;
+            align-self: flex-end;
+            
+        }
+
+        .KPIGraphic {
+            flex: 1;
+        }
+
+        
+    }
+
+    .right {
+        flex: 1
+    }
+}

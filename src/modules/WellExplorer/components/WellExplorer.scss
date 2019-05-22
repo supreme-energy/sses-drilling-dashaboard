@@ -23,6 +23,7 @@
     .column {
         display: flex;
         flex-direction: column;
+        width: 680px;
     }
 
     .hSpacer {
@@ -58,7 +59,7 @@
     }
 
     .searchCard {
-        align-self: flex-start;
+        align-self: stretch;
         max-height: 60%;
         pointer-events: auto;
     }

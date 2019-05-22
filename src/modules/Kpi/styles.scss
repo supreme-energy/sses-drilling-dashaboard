@@ -31,9 +31,29 @@
 .spacer {
     width: 10px;
 }
+
 .kpiValue {
     font-weight: bold;
 }
+
+.measure {
+    margin-left: 4px;
+}
+
+.small {
+    .kpiValue {
+        font-size: 16px;
+    }
+
+    .caption {
+        font-size: 10px;
+    }
+
+    .measure {
+        margin-left: 3px;
+    }
+}
+
 
 .status {
     display: flex;

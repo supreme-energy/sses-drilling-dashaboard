@@ -34,6 +34,8 @@ class App extends React.Component {
     plusBasicAuth(__CONFIG__.username, __CONFIG__.password)
   ];
 
+  fetchMWMock = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
+
   shouldComponentUpdate() {
     return false;
   }
@@ -51,20 +53,22 @@ class App extends React.Component {
         <Provider store={store}>
           <Router history={history}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
-              <FetchCache>
-                <div style={{ height: "100%" }}>
-                  <PageLayout history={history}>
-                    <Route path="/:wellId" component={WellUpdate} />
-                    <Switch>
-                      <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                      <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                      <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                      <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                      <Route path="/:wellId?" component={WellExplorer} />
-                    </Switch>
-                  </PageLayout>
-                </div>
-              </FetchCache>
+              <FetchClientProvider id="mock" url={`/data`} options={fetchClientOptions} middleware={this.fetchMWMock}>
+                <FetchCache>
+                  <div style={{ height: "100%" }}>
+                    <PageLayout history={history}>
+                      <Route path="/:wellId" component={WellUpdate} />
+                      <Switch>
+                        <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                        <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                        <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                        <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                        <Route path="/:wellId?" component={WellExplorer} />
+                      </Switch>
+                    </PageLayout>
+                  </div>
+                </FetchCache>
+              </FetchClientProvider>
             </FetchClientProvider>
           </Router>
         </Provider>
