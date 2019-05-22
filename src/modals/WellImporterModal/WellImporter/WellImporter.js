@@ -11,79 +11,79 @@ import css from "./styles.scss";
 const wellInfoFieldMapping = {
   well: {
     labelName: "Well",
-    required: [ "Well Info" ],
+    required: ["Well Info"],
     predictedFieldName: "", // field name to be used when importing new well, we guess that it is associated with this
-                            // field
-    index: 0,
+    // field
+    index: 0
   },
   operator: {
     labelName: "Operator",
-    required: [ "Well Info" ],
-    index: 1,
+    required: ["Well Info"],
+    index: 1
   },
   rigId: {
     labelName: "Rig Id",
-    index: 2,
+    index: 2
   },
   jobNumber: {
     labelName: "Job Number",
-    index: 3,
+    index: 3
   },
   api: {
     labelName: "API or UWI",
-    required: [ "Well Info" ],
-    index: 4,
+    required: ["Well Info"],
+    index: 4
   },
   field: {
     labelName: "Field",
-    required: [ "Well Info" ],
-    index: 5,
+    required: ["Well Info"],
+    index: 5
   },
   location: {
     labelName: "Location",
-    required: [ "Well Info" ],
-    index: 6,
+    required: ["Well Info"],
+    index: 6
   },
   state: {
     labelName: "State or Province",
-    required: [ "Well Info" ],
-    index: 7,
+    required: ["Well Info"],
+    index: 7
   },
   county: {
     labelName: "County",
-    required: [ "Well Info" ],
-    index: 8,
+    required: ["Well Info"],
+    index: 8
   },
   country: {
     labelName: "Country",
-    required: [ "Well Info" ],
-    index: 9,
-  },
+    required: ["Well Info"],
+    index: 9
+  }
 };
 
 const sectionMapping = {
   wellInfo: {
-    labelName: "Well Info",
+    labelName: "Well Info"
   },
   wellParameters: {
-    labelName: "Well Parameters",
+    labelName: "Well Parameters"
   },
   wellData: {
-    labelName: "Well Data",
-  },
+    labelName: "Well Data"
+  }
 };
 
 const wellParametersFieldMapping = {
   longitude: {
     labelName: "Longitude",
-    required: [ "Well Data" ],
-    index: 0,
+    required: ["Well Data"],
+    index: 0
   },
   latitude: {
     labelName: "Latitude",
-    required: [ "Well Data" ],
-    index: 1,
-  },
+    required: ["Well Data"],
+    index: 1
+  }
 };
 
 const defaultFieldModel = { value: "" };
@@ -99,12 +99,12 @@ const defaultWellInfoModel = {
   location: cloneDeep(defaultFieldModel),
   state: cloneDeep(defaultFieldModel), // Province is used for canada (this is obvious but wanted to keep track)
   county: cloneDeep(defaultFieldModel),
-  country: cloneDeep(defaultFieldModel),
+  country: cloneDeep(defaultFieldModel)
 };
 
 const defaultWellParametersModel = {
   latitude: cloneDeep(defaultFieldModel),
-  longitude: cloneDeep(defaultFieldModel),
+  longitude: cloneDeep(defaultFieldModel)
 };
 
 const defaultWellDataModel = {};
@@ -112,41 +112,41 @@ const defaultWellDataModel = {};
 const defaultAppAttributesModel = {
   wellInfo: defaultWellInfoModel,
   wellParameters: defaultWellParametersModel,
-  wellData: defaultWellDataModel,
+  wellData: defaultWellDataModel
 };
 
 const appAttributesFieldMapping = {
   wellInfo: wellInfoFieldMapping,
   wellParameters: wellParametersFieldMapping,
-  wellData: {},
+  wellData: {}
 };
 
 const WellImporter = ({ files, onClickCancel }) => {
-  const [ isLoaded, setIsLoaded ] = useState(false);
-  const [ data, setData ] = useState(null);
-  const [ appAttributesModel, setAppAttributesModel ] = useState(defaultAppAttributesModel);
-  const [ activeInput, setActiveInput ] = useState(null);
-  const [ inputToCellId, setInputToCellId ] = useState({});
-  const [ highlightedRowAndColumnList, setHighlightedRowAndColumnList ] = useState(null);
-  const [ textHighlightedRowAndColumnList, setTextHighlightedRowAndColumnList ] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [data, setData] = useState(null);
+  const [appAttributesModel, setAppAttributesModel] = useState(defaultAppAttributesModel);
+  const [activeInput, setActiveInput] = useState(null);
+  const [inputToCellId, setInputToCellId] = useState({});
+  const [highlightedRowAndColumnList, setHighlightedRowAndColumnList] = useState(null);
+  const [textHighlightedRowAndColumnList, setTextHighlightedRowAndColumnList] = useState(null);
 
   const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {
-    const cellAlreadySelected = Object.keys(inputToCellId).find((inputId) => {
-      return inputToCellId[ inputId ] === `${sectionName}-${key}-${cellData}`;
+    const cellAlreadySelected = Object.keys(inputToCellId).find(inputId => {
+      return inputToCellId[inputId] === `${sectionName}-${key}-${cellData}`;
     });
 
     if (activeInput) {
       const currentState = cloneDeep(appAttributesModel);
       const updatedState = {
         ...currentState,
-        [ activeInput.sectionKey ]: {
-          ...currentState[ activeInput.sectionKey ],
-          [ activeInput.fieldKey ]: {
-            ...currentState[ activeInput.sectionKey ][ activeInput.fieldKey ],
+        [activeInput.sectionKey]: {
+          ...currentState[activeInput.sectionKey],
+          [activeInput.fieldKey]: {
+            ...currentState[activeInput.sectionKey][activeInput.fieldKey],
             value: !cellAlreadySelected ? cellData : "",
-            cellId: !cellAlreadySelected ? `${sectionName}-${key}-${cellData}` : "",
-          },
-        },
+            cellId: !cellAlreadySelected ? `${sectionName}-${key}-${cellData}` : ""
+          }
+        }
       };
 
       const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
@@ -156,53 +156,55 @@ const WellImporter = ({ files, onClickCancel }) => {
         setHighlightedRowAndColumnListHelper(sectionName, key, cellData);
         setInputToCellId({
           ...inputToCellId,
-          [ inputId ]: cellId,
+          [inputId]: cellId
         });
-      }
-      else {
-        if (inputToCellId[ cellAlreadySelected ] === cellId && inputId === cellAlreadySelected) {
+      } else {
+        if (inputToCellId[cellAlreadySelected] === cellId && inputId === cellAlreadySelected) {
           setHighlightedRowAndColumnList({});
           const updatedTextHighlightedRowAndColumnList = { ...textHighlightedRowAndColumnList };
-          delete updatedTextHighlightedRowAndColumnList[ cellId ];
+          delete updatedTextHighlightedRowAndColumnList[cellId];
           setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
           const updatedInputToCellId = { ...inputToCellId };
-          delete updatedInputToCellId[ inputId ];
+          delete updatedInputToCellId[inputId];
           setInputToCellId(updatedInputToCellId);
         }
       }
-
     }
   };
 
   const setHighlightedRowAndColumnListHelper = (sectionName, key, cellData) => {
     const cellId = `${sectionName}-${key}-${cellData}`;
     setHighlightedRowAndColumnList({
-      [ cellId ]: true,
+      [cellId]: true
     });
   };
 
   useEffect(() => {
     if (!isLoaded && files.length) {
-      const parsedData = LAS2Parser.parse(files[ 0 ].fileText);
+      const parsedData = LAS2Parser.parse(files[0].fileText);
       setData(parsedData);
       setIsLoaded(true);
     }
-  }, [ isLoaded, files ]);
+  }, [isLoaded, files]);
 
-  const activateInput = (newActiveInput) => {
-    if (activeInput && newActiveInput && activeInput.sectionKey === newActiveInput.sectionKey && activeInput.fieldKey === newActiveInput.fieldKey) {
+  const activateInput = newActiveInput => {
+    if (
+      activeInput &&
+      newActiveInput &&
+      activeInput.sectionKey === newActiveInput.sectionKey &&
+      activeInput.fieldKey === newActiveInput.fieldKey
+    ) {
       setActiveInput(null);
       return;
     }
 
     let newActiveInputCellValue;
     if (newActiveInput) {
-      newActiveInputCellValue = inputToCellId[ `${newActiveInput.sectionKey}-${newActiveInput.fieldKey}` ];
+      newActiveInputCellValue = inputToCellId[`${newActiveInput.sectionKey}-${newActiveInput.fieldKey}`];
       // Need to add it to the highlighted cells
       if (newActiveInputCellValue) {
-        setHighlightedRowAndColumnList({ [ newActiveInputCellValue ]: true });
-      }
-      else {
+        setHighlightedRowAndColumnList({ [newActiveInputCellValue]: true });
+      } else {
         setHighlightedRowAndColumnList({});
       }
     }
@@ -212,7 +214,7 @@ const WellImporter = ({ files, onClickCancel }) => {
         return map;
       }
 
-      return { ...map, [ cellId ]: true };
+      return { ...map, [cellId]: true };
     }, {});
 
     setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
@@ -251,13 +253,12 @@ const WellImporter = ({ files, onClickCancel }) => {
 };
 
 WellImporter.defaultProps = {
-  onClickCell: () => {
-  },
+  onClickCell: () => {}
 };
 
 WellImporter.propTypes = {
   onClickCancel: PropTypes.func.isRequired,
-  files: PropTypes.array,
+  files: PropTypes.array
 };
 
 export default WellImporter;

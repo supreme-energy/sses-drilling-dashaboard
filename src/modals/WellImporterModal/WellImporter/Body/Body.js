@@ -5,17 +5,10 @@ import LASAttributePaneBody from "../LASAttributePane/Body";
 
 import css from "./styles.scss";
 
-const Body = ({
-                data,
-                className,
-                highlightedRowAndColumnList,
-                textHighlightedRowAndColumnList,
-                onClickCell,
-              }) => {
+const Body = ({ data, className, highlightedRowAndColumnList, textHighlightedRowAndColumnList, onClickCell }) => {
   return (
     <div className={className}>
-      <div className={css.appAttributePaneBodyContainer}>
-      </div>
+      <div className={css.appAttributePaneBodyContainer} />
       <div className={css.lasAttributePaneBodyContainer}>
         <LASAttributePaneBody
           data={data}
@@ -30,7 +23,7 @@ const Body = ({
 
 Body.defaultProps = {
   className: css.container,
-  highlightedRowAndColumnList: [],
+  highlightedRowAndColumnList: []
 };
 
 Body.propTypes = {
@@ -38,7 +31,7 @@ Body.propTypes = {
   onClickCell: PropTypes.func.isRequired,
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
-  textHighlightedRowAndColumnList: PropTypes.object,
+  textHighlightedRowAndColumnList: PropTypes.object
 };
 
 export default Body;
