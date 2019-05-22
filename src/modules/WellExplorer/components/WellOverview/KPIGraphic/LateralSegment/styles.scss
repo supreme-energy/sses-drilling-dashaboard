@@ -20,6 +20,7 @@
 
             .label {
                 color: #898125;
+                margin-bottom: 10px;
             }
             .left, .right {
                 display: flex;
@@ -29,13 +30,13 @@
             }
 
             .topSpace {
-                height: 25px;
+                height: 35px;
             }
         }
 
         
         .svgIcon {
-            margin-top: 40px;    
+            margin-top: 44px;    
             position: relative;
             left: -9px;
         }

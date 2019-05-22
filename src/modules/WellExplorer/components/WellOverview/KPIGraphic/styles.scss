@@ -38,4 +38,17 @@
         z-index: 1;
         width: 470px;
     }
+
+    
+    :global {
+        .undrilled {
+            .kpi {
+                visibility: hidden;
+            }
+
+            .segmentBackground {
+                background-color: #F3F3F3;
+            }
+        }
+    }
 }

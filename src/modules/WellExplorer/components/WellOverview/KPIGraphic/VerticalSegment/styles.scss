@@ -65,6 +65,18 @@
             @extend .vertical;
         }
     }
+
+    &.surface {
+        .background {
+            background-color: #C6D3EE;
+        }
+    }
+
+    &.intermediate, &.drillout {
+        .background {
+            background-color: #CDD9C4;
+        }
+    }
     .background {
         width: 100%;
         top: 10px;

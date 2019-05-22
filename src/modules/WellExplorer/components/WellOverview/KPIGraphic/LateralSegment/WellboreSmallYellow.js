@@ -1,6 +1,15 @@
 import React from "react";
 
-export default function WellboreSmallYellow({ className, width }) {
+export default function WellboreSmallYellow({ className, width, transparent, openHole }) {
+  const transparentColor = <stop stopColor="#E2E2E2" offset="100%" />;
+  const openHoleColor = <stop stopColor="#000000" offset="100%" />;
+  const segmentColor = (
+    <React.Fragment>
+      <stop stopColor="#C39200" offset="0%" />
+      <stop stopColor="#DEC683" offset="100%" />
+    </React.Fragment>
+  );
+  const wellColor = transparent ? transparentColor : openHole ? openHoleColor : segmentColor;
   return (
     <svg
       className={className}
@@ -15,12 +24,10 @@ export default function WellboreSmallYellow({ className, width }) {
       <desc>Created with Sketch.</desc>
       <defs>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbsy-linearGradient-1">
-          <stop stopColor="#DEC683" offset="0%" />
-          <stop stopColor="#C39200" offset="100%" />
+          {wellColor}
         </linearGradient>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbsy-linearGradient-2">
-          <stop stopColor="#DEC683" offset="0%" />
-          <stop stopColor="#C39200" offset="100%" />
+          {wellColor}
         </linearGradient>
         <linearGradient x1="0%" y1="41.0801055%" x2="100%" y2="41.0801055%" id="wbsy-linearGradient-3">
           <stop stopColor="#C39200" offset="0%" />

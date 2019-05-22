@@ -1,6 +1,26 @@
 import React from "react";
 
-export default function WellboreMediumCurve({ className }) {
+export default function WellboreMediumCurve({ className, transparent, openHole }) {
+  const transparentColor = <stop stopColor="#e2e2e2" offset="100%" />;
+  const openHoleColor = <stop stopColor="#000000" offset="100%" />;
+  const segmentColor = (
+    <React.Fragment>
+      <stop stopColor="#A7A7A7" offset="0%" />
+      <stop stopColor="#7C7C7C" offset="100%" />
+    </React.Fragment>
+  );
+
+  const activeCurveColor = (
+    <React.Fragment>
+      <stop stopColor="#A6A6A6" offset="0%" />
+      <stop stopColor="#7C7C7C" offset="100%" />
+    </React.Fragment>
+  );
+
+  const curveColor = transparent ? transparentColor : openHole ? openHoleColor : activeCurveColor;
+
+  const wellColor = transparent ? transparentColor : openHole ? openHoleColor : segmentColor;
+
   return (
     <svg
       className={className}
@@ -15,16 +35,13 @@ export default function WellboreMediumCurve({ className }) {
       <desc>Created with Sketch.</desc>
       <defs>
         <radialGradient cx="53.3251016%" cy="50%" fx="53.3251016%" fy="50%" r="50.3441611%" id="wbmc-radialGradient-1">
-          <stop stopColor="#A6A6A6" offset="0%" />
-          <stop stopColor="#7C7C7C" offset="100%" />
+          {curveColor}
         </radialGradient>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbmc-linearGradient-2">
-          <stop stopColor="#A7A7A7" offset="0%" />
-          <stop stopColor="#7C7C7C" offset="100%" />
+          {wellColor}
         </linearGradient>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbmc-linearGradient-3">
-          <stop stopColor="#A7A7A7" offset="0%" />
-          <stop stopColor="#7C7C7C" offset="100%" />
+          {wellColor}
         </linearGradient>
         <ellipse id="wbmc-path-4" cx="35.5" cy="7" rx="35.5" ry="7" />
         <filter x="-9.9%" y="-35.7%" width="119.7%" height="200.0%" filterUnits="objectBoundingBox" id="wbmc-filter-5">
@@ -33,12 +50,10 @@ export default function WellboreMediumCurve({ className }) {
           <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" />
         </filter>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbmc-linearGradient-6">
-          <stop stopColor="#A7A7A7" offset="0%" />
-          <stop stopColor="#7C7C7C" offset="100%" />
+          {wellColor}
         </linearGradient>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbmmc-linearGradient-7">
-          <stop stopColor="#A7A7A7" offset="0%" />
-          <stop stopColor="#7C7C7C" offset="100%" />
+          {wellColor}
         </linearGradient>
       </defs>
       <g id="Scratch-Symbols" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">

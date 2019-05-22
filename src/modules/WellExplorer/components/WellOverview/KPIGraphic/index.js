@@ -6,32 +6,32 @@ import classes from "./styles.scss";
 import classNames from "classnames";
 import CurveSegment from "./CurveSegment";
 import LateralSegment from "./LateralSegment";
-import { useSize } from "react-hook-size";
-import { sum } from "d3-array";
+import { sum, group, rollup } from "d3-array";
 import KpiItem from "../../../../Kpi/KpiItem";
 import PropTypes from "prop-types";
 
-const curveSectionHeight = 216;
-
-const minSegmentHeight = 139;
-
-const gap = 10;
+// will result in Map(5){"Surface" => 0, "Intermediate" => 1, "Drillout" => 2, "Curve" => 3, "Lateral" => 4}
+const orderMap = rollup(
+  wellSections.orderedSections.map((s, index) => ({
+    section: s,
+    index
+  })),
+  values => values[0].index,
+  d => d.section
+);
 
 export default function KPIGraphic({ className, child }) {
   const data = useWellOverviewKPI();
-
+  const bySegment = useMemo(() => group(data, d => d.type), [data]);
+  const sortByWellOrder = (s1, s2) => orderMap.get(s1.type) - orderMap.get(s2.type);
+  const segments = useMemo(() => {
+    const segmentsToFill = wellSections.orderedSections
+      .filter(w => w !== wellSections.DRILLOUT && !bySegment.get(w))
+      .map(w => ({ type: w, undrilled: true }));
+    return [...data, ...segmentsToFill].sort(sortByWellOrder);
+  }, [data, bySegment]);
   const containerRef = useRef(null);
-  const laterlaSegmentData = useMemo(() => data.find(d => d.type === wellSections.LATERAL), [data]);
-  const { height } = useSize(containerRef);
-
-  const intermediateSectionHeight = useMemo(() => {
-    const nrVerticalSegments = data.filter(
-      d => d.type === wellSections.INTERMEDIATE || d.type === wellSections.DRILLOUT
-    ).length;
-    const computedHeight = (height - curveSectionHeight - minSegmentHeight + 2 * gap) / nrVerticalSegments + gap;
-
-    return Math.max(minSegmentHeight, computedHeight);
-  }, [height, data]);
+  const laterlaSegmentData = useMemo(() => segments.find(d => d.type === wellSections.LATERAL), [segments]);
 
   const totalHours = useMemo(() => sum(data, d => d.totalHours), [data]);
 
@@ -40,7 +40,6 @@ export default function KPIGraphic({ className, child }) {
       case wellSections.SURFACE:
       case wellSections.INTERMEDIATE:
       case wellSections.DRILLOUT:
-        const sectionHeight = d.type === wellSections.SURFACE ? minSegmentHeight : intermediateSectionHeight;
         return (
           <VerticalSegment
             index={index}
@@ -63,7 +62,7 @@ export default function KPIGraphic({ className, child }) {
         <div className={classes.verticalContainer}>
           <KpiItem value={totalHours} measureUnit={"h"} label={"Drilling Time"} className={classes.totalHours} />
           <div className={classes.verticalSegments} ref={containerRef}>
-            {data.map(renderVerticalSegments)}
+            {segments.map(renderVerticalSegments)}
           </div>
         </div>
         {laterlaSegmentData && (
