@@ -1,17 +1,38 @@
-import React, { Suspense, useState, useCallback } from "react";
-import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
+import PropTypes from "prop-types";
+import React, { Suspense, useCallback, useReducer, useState } from "react";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
-import CrossSection from "./CrossSection/index";
 import classes from "./ComboDashboard.scss";
+import CrossSection from "./CrossSection/index";
 
+function singleSelectionReducer(list, i) {
+  const newList = [];
+  newList[i] = !list[i];
+  return newList;
+}
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
   const formations = useFormations(wellId);
   const projections = useProjections(wellId);
+
+  const lastSurveyIdx = surveys.length - 2;
+  const sectionList = surveys.slice(0, lastSurveyIdx + 1).concat(projections);
+  const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);
+
+  const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
+    const { index, tvdDelta, vsDelta } = action;
+    switch (action.type) {
+      case "dip":
+        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta, vs: p.vs + vsDelta }));
+      case "fault":
+        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta }));
+      default:
+        throw new Error(`Unknown projections reducer action type ${action.type}`);
+    }
+  }, sectionList);
 
   const [view, setView] = useState({
     x: -844,
@@ -107,6 +128,12 @@ export const CrossSectionDashboard = ({ wellId }) => {
             surveys={surveys}
             formations={formations}
             projections={projections}
+            sectionList={sectionList}
+            selectedList={selectedList}
+            setSelectedList={setSelectedList}
+            lastSurveyIdx={lastSurveyIdx}
+            calculatedProjections={calculatedProjections}
+            projectionsDispatch={projectionsDispatch}
           />
         )}
       </ParentSize>
