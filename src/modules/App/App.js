@@ -49,8 +49,7 @@ class App extends React.Component {
     return (
       <Suspense fallback={<div>Loading...</div>}>
         <Provider store={store}>
-          <Router history={history}>
-            <BrowserRouter basename={__CONFIG__.basename} />
+          <BrowserRouter history={history} basename={__CONFIG__.basename}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
               <FetchCache>
                 <div style={{ height: "100%" }}>
@@ -67,7 +66,7 @@ class App extends React.Component {
                 </div>
               </FetchCache>
             </FetchClientProvider>
-          </Router>
+          </BrowserRouter>
         </Provider>
       </Suspense>
     );
