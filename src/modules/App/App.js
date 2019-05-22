@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Provider } from "react-redux";
 import PropTypes from "prop-types";
-import { Router, Route, Switch, BrowserRouter } from "react-router-dom";
+import { Route, Switch, BrowserRouter } from "react-router-dom";
 
 import FetchClientProvider from "react-powertools/data/FetchClientProvider";
 import FetchCache from "react-powertools/data/FetchCache";
