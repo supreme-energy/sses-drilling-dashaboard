@@ -60,7 +60,7 @@ function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToIm
               <ListItem className={classes.listItem} color="primary">
                 <ListItemIcon>
                   <div className={classes.iconBg} style={{ background: theme.palette.primary.main }}>
-                    <Add color="white" />
+                    <Add />
                   </div>
                 </ListItemIcon>
                 <ListItemText>Create a new Well</ListItemText>

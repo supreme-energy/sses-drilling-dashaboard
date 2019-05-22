@@ -10,6 +10,7 @@ pipelines:
           script:
             - yarn
             - yarn run lint
+            - yarn run test
             - yarn run build
   branches:
     'develop':
@@ -32,5 +33,6 @@ pipelines:
           script:
             - yarn
             - yarn run lint
+            - yarn run test
             - yarn run build
             - yarn run uploadMaster
