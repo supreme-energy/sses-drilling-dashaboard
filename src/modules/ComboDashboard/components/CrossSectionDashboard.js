@@ -26,16 +26,9 @@ export const CrossSectionDashboard = ({ wellId }) => {
     const { index, tvdDelta, vsDelta } = action;
     switch (action.type) {
       case "dip":
-        for (let i = index; i < projections.length; i++) {
-          projections[i].tvd += tvdDelta;
-          projections[i].vs += vsDelta;
-        }
-        return [...projections];
+        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta, vs: p.vs + vsDelta }));
       case "fault":
-        for (let i = index; i < projections.length; i++) {
-          projections[i].tvd += tvdDelta;
-        }
-        return [...projections];
+        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta }));
       default:
         throw new Error(`Unknown projections reducer action type ${action.type}`);
     }
