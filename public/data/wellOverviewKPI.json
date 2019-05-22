@@ -58,7 +58,7 @@
             "SubmitDate": "4/22/2019"
         },
         {
-            "holesize": 12.5,
+            "holesize": 15.5,
             "INTERVAL_NAME": "Intermediate",
             "INTERVAL_CODE": 2,
             "DAY_NUM": 4,
@@ -114,9 +114,9 @@
             "SubmitDate": "4/22/2019"
         },
         {
-            "holesize": 12.5,
+            "holesize": 15.5,
             "INTERVAL_NAME": "Intermediate",
-            "casingSize": 10.5,
+            "casingSize": 14.5,
             "INTERVAL_CODE": 2,
             "DAY_NUM": 4,
             "BHA_NUM": 1,
@@ -171,10 +171,10 @@
             "SubmitDate": "4/22/2019"
         },
         {
-            "holesize": 12.5,
+            "holesize": 15.5,
             "INTERVAL_NAME": "Intermediate",
             
-            "casingSize": 10.5,
+            "casingSize": 13.5,
             "INTERVAL_CODE": 2,
             "DAY_NUM": 4,
             "BHA_NUM": 1,
@@ -229,9 +229,9 @@
             "SubmitDate": "4/22/2019"
         },
         {
-            "holesize": 12.5,
+            "holesize": 15.5,
             "INTERVAL_NAME": "Intermediate",
-            "casingSize": 9.5,
+            "casingSize": 12.5,
             "INTERVAL_CODE": 3,
             "DAY_NUM": 4,
             "BHA_NUM": 1,
@@ -286,7 +286,7 @@
             "SubmitDate": "4/22/2019"
         },
         {
-            "holesize": 12.5,
+            "holesize": 9.5,
             "INTERVAL_NAME": "Drillout",
             "casingSize": 7,
             "INTERVAL_CODE": 2,
