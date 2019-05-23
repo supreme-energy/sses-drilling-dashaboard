@@ -216,6 +216,7 @@ export function useWellOverviewKPI() {
       transform: data => {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
+          id: _.uniqueId(),
           rop: d.ROP_AVG,
           depth: d.HOLE_DEPTH_END,
           bitSize: d.holesize,

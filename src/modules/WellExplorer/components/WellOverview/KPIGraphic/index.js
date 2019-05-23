@@ -43,14 +43,14 @@ export default function KPIGraphic({ className, child }) {
         return (
           <VerticalSegment
             index={index}
-            key={d.startTime}
+            key={d.id}
             className={classes.segment}
             data={d}
             style={{ zIndex: data.length - index }}
           />
         );
       case wellSections.CURVE:
-        return <CurveSegment key={d.startTime} data={d} />;
+        return <CurveSegment key={d.id} data={d} />;
       default:
         return null;
     }
