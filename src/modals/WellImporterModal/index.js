@@ -1,1 +1,1 @@
-export {default} from "./WellImporterModal";
+export { default } from "./WellImporterModal";

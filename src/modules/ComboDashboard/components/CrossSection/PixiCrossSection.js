@@ -3,8 +3,9 @@ import { drawFormations } from "./drawFormations";
 import { drawSurveys } from "./drawSurveys";
 import { drawWellPlan } from "./drawWellPlan";
 import { drawGrid } from "./drawGrid.js";
-import { drawProjections, interactiveProjection } from "./drawProjections";
+import { drawProjections } from "./drawProjections";
 import { drawSections } from "./drawSections";
+import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 
 export default class PixiCrossSection {
@@ -44,9 +45,9 @@ export default class PixiCrossSection {
 
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer, props.surveys);
-    this.projectionLineUpdate = drawProjections(this.wellPathLayer, props.projections);
-    this.projectionUpdate = interactiveProjection(this.UILayer, props.view, props.updateView);
-    this.sectionUpdate = drawSections(this.UILayer, gridGutter);
+    this.projectionLineUpdate = drawProjections(this.wellPathLayer, props);
+    this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
+    this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
@@ -122,8 +123,8 @@ export default class PixiCrossSection {
     this.wellPlanUpdate(props.wellPlan);
     this.surveyUpdate(props.surveys);
     this.projectionLineUpdate(props.projections);
-    this.projectionUpdate(props.view, this.renderer.screen.width, this.renderer.screen.height);
     this.sectionUpdate(props);
+    this.interactivePAUpdate(props);
     this.gridUpdate(props);
     this.newProps = true;
   }

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { Card, CardContent, Typography } from "@material-ui/core";
 
 import MoreMenu from "../MoreMenu/index";
@@ -20,9 +21,11 @@ function HeaderToolbar({ wellId }) {
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
         <div className={classes.wellNameCol}>
-          <Typography variant="h5" color="primary" className={classes.wellName}>
-            {well.name}
-          </Typography>
+          <Link to={`/${well.id}`}>
+            <Typography variant="h5" color="primary" className={classes.wellName}>
+              {well.name}
+            </Typography>
+          </Link>
         </div>
         <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
