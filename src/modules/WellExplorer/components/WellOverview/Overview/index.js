@@ -2,6 +2,7 @@ import React from "react";
 import Rop from "../ROP";
 import classes from "./styles.scss";
 import KPIGraphic from "../KPIGraphic";
+import DrillPhaseKPI from "../DrillPhaseKPI";
 
 export default function() {
   return (
@@ -9,7 +10,9 @@ export default function() {
       <div className={classes.left}>
         <KPIGraphic className={classes.KPIGraphic} child={<Rop className={classes.ropChart} />} />
       </div>
-      <div className={classes.right} />
+      <div className={classes.right}>
+        <DrillPhaseKPI />
+      </div>
     </div>
   );
 }

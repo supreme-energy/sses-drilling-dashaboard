@@ -6,6 +6,7 @@ import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
 import _ from "lodash";
+import { group } from "d3-array";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -206,7 +207,7 @@ export function useProjections(wellId) {
 }
 
 export function useWellOverviewKPI() {
-  const [data] = useFetch(
+  let [data] = useFetch(
     {
       path: GET_MOCK_OVERVIEW_KPI
     },
@@ -231,5 +232,12 @@ export function useWellOverviewKPI() {
       }
     }
   );
-  return data || EMPTY_ARRAY;
+
+  data = data || EMPTY_ARRAY;
+
+  const bySegment = useMemo(() => group(data, d => d.type), [data]);
+  return {
+    data,
+    bySegment
+  };
 }

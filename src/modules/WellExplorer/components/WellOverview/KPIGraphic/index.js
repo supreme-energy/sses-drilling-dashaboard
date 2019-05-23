@@ -6,13 +6,13 @@ import classes from "./styles.scss";
 import classNames from "classnames";
 import CurveSegment from "./CurveSegment";
 import LateralSegment from "./LateralSegment";
-import { sum, group } from "d3-array";
+import { sum } from "d3-array";
 import KpiItem from "../../../../Kpi/KpiItem";
 import PropTypes from "prop-types";
 
 export default function KPIGraphic({ className, child }) {
-  const data = useWellOverviewKPI();
-  const bySegment = useMemo(() => group(data, d => d.type), [data]);
+  const { data, bySegment } = useWellOverviewKPI();
+
   const segments = useMemo(() => {
     return wellSections.orderedSections.reduce((acc, segmentType) => {
       if (bySegment.get(segmentType)) {
