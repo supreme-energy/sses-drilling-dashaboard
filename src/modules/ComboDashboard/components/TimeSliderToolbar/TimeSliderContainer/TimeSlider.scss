@@ -14,7 +14,7 @@
     canvas {
         position: relative;
         height: 70px;
-        width: 100%;
+        width: 98%;
         bottom: 10px;
     }
 }
@@ -122,6 +122,7 @@
 
     .backwardTime {
         position: relative;
+        width: 55px;
 
         > button {
             @extend .globalTimeControls;

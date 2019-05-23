@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect, lazy, Suspense } from "react";
+import React, { useState, useReducer, useEffect, useMemo, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { Card, Typography } from "@material-ui/core";
@@ -9,31 +9,25 @@ import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
-import { useRopData } from "../../../../../api";
+import { useRopData, useAdditionalData } from "../../../../../api";
 import { COLOR_BY_GRAPH, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
 const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
 
-// TODO: Build Time Slider Component
-function TimeSliderContainer({ className, expanded, drillPhase }) {
+function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
   // Fetch data for Time Slider
-  const data = useRopData();
+  const ropData = useRopData();
+  // const additionalData = useAdditionalData(wellId);
 
   const [zoom, setZoom] = useState([0, 0]);
-  const [maxSliderStep, setMaxSliderStep] = useState(data.length);
+  const [maxSliderStep, setMaxSliderStep] = useState(1);
   const [selectedMenuItems, setSelectedMenuItem] = useState(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
-  const [sliderStep, setSliderStep] = useState([maxSliderStep, 1]);
+  const [sliderStep, setSliderStep] = useState([0, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [isSpeeding, setIsSpeeding] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [globalDates, setGlobalDates] = useState(["", ""]);
-
-  useEffect(() => {
-    const max = data.length;
-    setMaxSliderStep(max);
-    setSliderStep([max, 1]);
-  }, [data]);
 
   useEffect(() => {
     setSelectedMenuItem(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
@@ -86,7 +80,7 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
             setGlobalDates={setGlobalDates}
             maxStep={maxSliderStep}
             setMaxStep={setMaxSliderStep}
-            data={data}
+            data={ropData}
           />
         </Suspense>
       </GlobalTimeControls>
@@ -97,7 +91,8 @@ function TimeSliderContainer({ className, expanded, drillPhase }) {
 TimeSliderContainer.propTypes = {
   className: PropTypes.string,
   expanded: PropTypes.bool,
-  drillPhase: PropTypes.string
+  drillPhase: PropTypes.string,
+  wellId: PropTypes.string
 };
 
 export default TimeSliderContainer;

@@ -14,22 +14,27 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   });
 
   const onForwardDown = useCallback(() => {
-    setSliderStep(sliderStep => [sliderStep[0] + STEP_VALUE, 1]);
+    setSliderStep(sliderStep => {
+      const newStep = sliderStep[0] + STEP_VALUE;
+      if (newStep <= maxSliderStep) return [sliderStep[0] + STEP_VALUE, 1];
+      return sliderStep;
+    });
     speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
-  });
+  }, [setSliderStep, setIsSpeeding, maxSliderStep]);
 
   const onRewindDown = useCallback(() => {
     setSliderStep(sliderStep => {
-      if (sliderStep[0]) return [sliderStep[0] - STEP_VALUE, -1];
-      return [sliderStep[0], -1];
+      const newStep = sliderStep[0] - STEP_VALUE;
+      if (sliderStep[0] && newStep >= 0) return [sliderStep[0] - STEP_VALUE, -1];
+      return sliderStep;
     });
     speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
-  });
+  }, [setIsSpeeding, setSliderStep]);
 
   const onMouseUp = useCallback(() => {
     clearTimeout(speedingTimeout);
     setIsSpeeding(false);
-  });
+  }, [setIsSpeeding]);
 
   useInterval(
     () => {
@@ -46,8 +51,11 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        if ((!sliderStep[0] && sliderStep[1] < 0) || (sliderStep[1] && sliderStep[0] >= maxSliderStep)) {
-          return sliderStep;
+        const stepFactor = STEP_VALUE * (maxSliderStep / 100) * sliderStep[1];
+        if (sliderStep[0] + stepFactor <= 0 && sliderStep[1] < 0) {
+          return [0, 0];
+        } else if (sliderStep[1] && sliderStep[0] + stepFactor >= maxSliderStep) {
+          return [maxSliderStep, 0];
         }
         return [sliderStep[0] + STEP_VALUE * (maxSliderStep / 100) * sliderStep[1], sliderStep[1]];
       });

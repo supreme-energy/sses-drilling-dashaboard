@@ -1,6 +1,7 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
+// eslint-disable-next-line max-len
 import { GRID_GUTTER } from "../../../../ComboDashboard/components/TimeSliderToolbar/TimeSliderContainer/TimeSlider/TimeSliderUtil";
 
 const globalMouse = { x: 0, y: 0 };
@@ -84,35 +85,33 @@ export default function useViewport({
   useEffect(() => {
     if (zoom[1] !== 0) {
       const factor = 1 + zoom[1] * 0.03;
-      const stepFactor = (width + 216) * (step / maxStep);
 
       // Calc new view, bound graph to sides of canvas when zooming
       updateView(prev => {
+        const stepFactor = (step * factor * width) / maxStep + 160;
         const graphTotalLength = maxStep * prev.xScale;
         const graphHiddenLength = Math.abs(prev.x);
         const graphVisibleLength = graphTotalLength - graphHiddenLength;
 
-        if (!step && zoom[1] < 0) {
-          interactionManagerRef.current.mapPositionToPoint(globalMouse, graphVisibleLength, 250);
-        } else {
-          interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
-        }
+        interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
 
         // Graph should either take up entire view, or be larger than view
-        const shouldScaleX =
-          graphTotalLength * factor + GRID_GUTTER >= width &&
-          (width <= graphVisibleLength * factor + GRID_GUTTER || zoom[1] < 0);
-        const newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
-        console.log(graphTotalLength + GRID_GUTTER > width, width <= graphVisibleLength + GRID_GUTTER);
-        console.log(graphVisibleLength, graphTotalLength, width);
+        const isTotalOverflow = graphTotalLength * factor >= Math.floor(width - GRID_GUTTER);
+        const isVisibleOverflow = graphVisibleLength * factor >= Math.floor(width - GRID_GUTTER);
+
+        let newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
+        if (!isVisibleOverflow && zoom[1] < 0) {
+          newX = newX + (width - graphVisibleLength * factor - 1);
+        }
+
         return {
           ...prev,
-          x: newX < 0 && shouldScaleX ? newX : prev.x,
-          xScale: shouldScaleX ? prev.xScale * factor : prev.xScale
+          x: newX < 0 ? newX : prev.x,
+          xScale: isTotalOverflow ? prev.xScale * factor : prev.xScale
         };
       });
     }
-  }, [zoom, updateView, maxStep, width]);
+  }, [zoom, updateView, width]);
 
   useEffect(
     function makeStageInteractive() {

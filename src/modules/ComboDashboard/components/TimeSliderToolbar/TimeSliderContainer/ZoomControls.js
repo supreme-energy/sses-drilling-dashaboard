@@ -13,22 +13,22 @@ let zoomTimeout;
 function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
   const handleResetZoom = useCallback(() => {
     setZoom([0, 0]);
-  });
+  }, [setZoom]);
 
   const onZoomInDown = useCallback(() => {
     setZoom(zoom => [zoom[0] + STEP_VALUE, 1]);
     zoomTimeout = setTimeout(() => setIsZooming(true), 600);
-  });
+  }, [setZoom, setIsZooming]);
 
   const onZoomOutDown = useCallback(() => {
     setZoom(zoom => [zoom[0] - STEP_VALUE, -1]);
     zoomTimeout = setTimeout(() => setIsZooming(true), 600);
-  });
+  }, [setZoom, setIsZooming]);
 
   const onMouseUp = useCallback(() => {
     clearTimeout(zoomTimeout);
     setIsZooming(false);
-  });
+  }, [setIsZooming]);
 
   // Stop zoom if mouseup happens outside component
   window.addEventListener("mouseup", onMouseUp, false);

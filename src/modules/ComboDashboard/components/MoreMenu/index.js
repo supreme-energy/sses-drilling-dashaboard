@@ -8,22 +8,31 @@ import classes from "./MoreMenu.scss";
 function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuItemEnum, multiSelect }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleMenuClick = useCallback(({ currentTarget: { innerText } }) => {
-    const clickedItemText = innerText.toUpperCase();
-    if (selectedMenuItems.includes(clickedItemText)) {
-      setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== clickedItemText));
-    } else {
-      setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, clickedItemText]);
-    }
-  });
+  const handleMenuClick = useCallback(
+    ({ currentTarget: { innerText } }) => {
+      const clickedItemText = innerText.toUpperCase();
+      if (selectedMenuItems.includes(clickedItemText)) {
+        setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== clickedItemText));
+      } else {
+        setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, clickedItemText]);
+      }
+    },
+    [selectedMenuItems, setSelectedMenuItem]
+  );
 
-  const handleAnchorEl = useCallback(({ currentTarget }) => {
-    setAnchorEl(currentTarget);
-  });
+  const handleAnchorEl = useCallback(
+    ({ currentTarget }) => {
+      setAnchorEl(currentTarget);
+    },
+    [setAnchorEl]
+  );
 
-  const handleMenuClose = useCallback(({ currentTarget }) => {
-    setAnchorEl(null);
-  });
+  const handleMenuClose = useCallback(
+    ({ currentTarget }) => {
+      setAnchorEl(null);
+    },
+    [setAnchorEl]
+  );
 
   return (
     <div className={className}>

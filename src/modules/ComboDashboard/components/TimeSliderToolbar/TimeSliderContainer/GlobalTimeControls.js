@@ -4,6 +4,7 @@ import { Typography, IconButton } from "@material-ui/core";
 import { AccessTime, Restore } from "@material-ui/icons";
 import classNames from "classnames";
 
+import { transformDate } from "./TimeSlider/TimeSliderUtil";
 import classes from "./TimeSlider.scss";
 
 function GlobalTimeControls({ children, expanded, setSliderStep, dates, maxSliderStep }) {
@@ -25,7 +26,7 @@ function GlobalTimeControls({ children, expanded, setSliderStep, dates, maxSlide
         <IconButton onClick={handleSetBeginning}>
           <Restore />
         </IconButton>
-        {expanded && <Typography variant="caption">{dates[0]}</Typography>}
+        {expanded && <Typography variant="caption">{transformDate(dates[0])}</Typography>}
       </div>
       {children}
       <div
@@ -37,7 +38,7 @@ function GlobalTimeControls({ children, expanded, setSliderStep, dates, maxSlide
         <IconButton onClick={handleSetEnd}>
           <AccessTime />
         </IconButton>
-        {expanded && <Typography variant="caption">{dates[1]}</Typography>}
+        {expanded && <Typography variant="caption">{transformDate(dates[1])}</Typography>}
       </div>
     </div>
   );

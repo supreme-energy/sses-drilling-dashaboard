@@ -115,28 +115,40 @@ function TimeSlider({
     [expanded, onReset]
   );
 
-  useMemo(() => {
-    const factor = Math.round((1 - zoom[1] * 0.03) * (step - zoom[0]) - step / maxStep);
-    const extFactor = Math.round(maxStep - maxStep * view.xScale * (zoom[1] || 1));
-    const beginningDate = get(data, "[0].Date_Time", "");
-    const endDate = get(data, `[${factor}].Date_Time`, "NOW");
-    const transformDate = dateTime => {
-      const splitDateTime = dateTime.split(" ");
-      if (splitDateTime.length > 1) {
-        const date = splitDateTime[0].split("/");
-        return `${date[0]}-${date[1]} ${date[2]}`;
-      }
-      return dateTime;
-    };
+  useEffect(() => {
+    setMaxStep(data.length);
+  }, [data]);
 
-    console.log("new max step", view);
-    // setMaxStep(maxStep => Math.round(maxStep - maxStep * view.xScale * (zoom[1] || 1)));
-    setGlobalDates([transformDate(beginningDate), transformDate(endDate)]);
-  }, [data, zoom, step]);
+  useEffect(() => {
+    setSliderStep(step => [data.length, step[1]]);
+  }, [data, setSliderStep]);
 
-  const handleDragSlider = useCallback((_, currentStep) => {
-    setSliderStep([currentStep, 1]);
-  });
+  useEffect(() => {
+    setMaxStep(prevMaxStep => {
+      const newMaxStep = (width - GRID_GUTTER) / view.xScale - 1;
+      setSliderStep(prevStep => [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]]);
+      return newMaxStep;
+    });
+  }, [view, setMaxStep, setSliderStep, width]);
+
+  useEffect(() => {
+    const stepFactor = step / maxStep;
+    const hiddenDataLength = Math.ceil(Math.abs(view.x) / view.xScale);
+    const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
+    const endDataIndex = stepFactor ? stepFactor * visibleDataLength + hiddenDataLength - 1 : 0;
+
+    const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
+    const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
+
+    setGlobalDates([beginningDate, endDate]);
+  }, [zoom, data, setGlobalDates, width, view, step, maxStep]);
+
+  const handleDragSlider = useCallback(
+    (_, currentStep) => {
+      setSliderStep([currentStep, 1]);
+    },
+    [setSliderStep]
+  );
 
   return (
     <div className={classes.timeSliderComponent}>
@@ -243,7 +255,10 @@ TimeSlider.propTypes = {
   zoom: PropTypes.arrayOf(PropTypes.number),
   setSliderStep: PropTypes.func,
   selectedGraphs: PropTypes.arrayOf(PropTypes.string),
-  setGlobalDates: PropTypes.func
+  setGlobalDates: PropTypes.func,
+  data: PropTypes.arrayOf(PropTypes.object),
+  maxStep: PropTypes.string,
+  setMaxStep: PropTypes.func
 };
 
 export default TimeSlider;

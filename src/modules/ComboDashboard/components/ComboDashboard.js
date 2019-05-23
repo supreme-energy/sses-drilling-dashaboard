@@ -4,16 +4,10 @@ import Progress from "@material-ui/core/CircularProgress";
 import classes from "./ComboDashboard.scss";
 
 const CrossSectionDashboard = lazy(() =>
-  import(
-    /* webpackChunkName: 'CrossSectionDashboard' */ "./CrossSectionDashboard"
-  )
+  import(/* webpackChunkName: 'CrossSectionDashboard' */ "./CrossSectionDashboard")
 );
-const HeaderToolbar = lazy(() =>
-  import(/* webpackChunkName: 'HeaderToolbar' */ "./HeaderToolbar")
-);
-const TimeSliderToolbar = lazy(() =>
-  import(/* webpackChunkName: 'TimeSliderToolbar' */ "./TimeSliderToolbar")
-);
+const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "./HeaderToolbar"));
+const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderToolbar' */ "./TimeSliderToolbar"));
 
 function ComboDashboard({
   match: {
@@ -26,7 +20,7 @@ function ComboDashboard({
         <HeaderToolbar wellId={openedWellId} />
       </Suspense>
       <Suspense fallback={<Progress />}>
-        <TimeSliderToolbar />
+        <TimeSliderToolbar wellId={openedWellId} />
       </Suspense>
       <Suspense fallback={<Progress />}>
         <CrossSectionDashboard wellId={openedWellId} />

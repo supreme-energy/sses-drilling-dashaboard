@@ -1,7 +1,7 @@
 import { scaleLinear, scalePow } from "d3-scale";
 import { max } from "d3-array";
 
-export const GRID_GUTTER = 30;
+export const GRID_GUTTER = 1;
 
 export const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
 export const mapSlide = (d, index) => [Number(index), Number(d.ROP_I)];
@@ -29,3 +29,12 @@ export function computeDataToSliderScale(data) {
       .range([0, 1]);
   }
 }
+
+export const transformDate = dateTime => {
+  const splitDateTime = dateTime.split(" ");
+  if (splitDateTime.length > 1) {
+    const date = splitDateTime[0].split("/");
+    return `${date[0]}-${date[1]} ${date[2]}`;
+  }
+  return dateTime;
+};
