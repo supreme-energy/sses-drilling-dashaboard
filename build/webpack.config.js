@@ -11,7 +11,7 @@ const inProjectSrc = file => inProject(project.srcDir, file);
 const __DEV__ = project.env === "development";
 const __TEST__ = project.env === "test";
 const __PROD__ = project.env === "production";
-
+console.log("project.publicPath", project.publicPath);
 const config = {
   mode: __DEV__ ? "development" : "production",
   entry: {
