@@ -30,7 +30,7 @@ module.exports = {
   /** The name of the directory in which to emit compiled assets */
   outDir: "dist",
   /** The base path for all projects assets (relative to the website root) */
-  publicPath: "/" + (DEPLOY_ENV === "dev" ? "dev" : ""),
+  publicPath: "/" + (DEPLOY_ENV === "dev" ? "dev/" : ""),
   /** Whether to generate sourcemaps */
   sourcemaps: true,
   /** Whether to use CSS Modules in your scss files */
