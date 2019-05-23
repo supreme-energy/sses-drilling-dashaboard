@@ -257,7 +257,7 @@ TimeSlider.propTypes = {
   selectedGraphs: PropTypes.arrayOf(PropTypes.string),
   setGlobalDates: PropTypes.func,
   data: PropTypes.arrayOf(PropTypes.object),
-  maxStep: PropTypes.string,
+  maxStep: PropTypes.number,
   setMaxStep: PropTypes.func
 };
 
