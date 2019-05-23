@@ -6,30 +6,25 @@ import classes from "./styles.scss";
 import classNames from "classnames";
 import CurveSegment from "./CurveSegment";
 import LateralSegment from "./LateralSegment";
-import { sum, group, rollup } from "d3-array";
+import { sum, group } from "d3-array";
 import KpiItem from "../../../../Kpi/KpiItem";
 import PropTypes from "prop-types";
-
-// will result in Map(5){"Surface" => 0, "Intermediate" => 1, "Drillout" => 2, "Curve" => 3, "Lateral" => 4}
-const orderMap = rollup(
-  wellSections.orderedSections.map((s, index) => ({
-    section: s,
-    index
-  })),
-  values => values[0].index,
-  d => d.section
-);
 
 export default function KPIGraphic({ className, child }) {
   const data = useWellOverviewKPI();
   const bySegment = useMemo(() => group(data, d => d.type), [data]);
-  const sortByWellOrder = (s1, s2) => orderMap.get(s1.type) - orderMap.get(s2.type);
   const segments = useMemo(() => {
-    const segmentsToFill = wellSections.orderedSections
-      .filter(w => w !== wellSections.DRILLOUT && !bySegment.get(w))
-      .map(w => ({ type: w, undrilled: true }));
-    return [...data, ...segmentsToFill].sort(sortByWellOrder);
-  }, [data, bySegment]);
+    return wellSections.orderedSections.reduce((acc, segmentType) => {
+      if (bySegment.get(segmentType)) {
+        return [...acc, ...bySegment.get(segmentType)]; // add existing segments
+      } else if (segmentType !== wellSections.DRILLOUT) {
+        // Drillout segment is not mandatory
+        return [...acc, { type: segmentType, undrilled: true }];
+      }
+      return acc;
+    }, []);
+  }, [bySegment]);
+
   const containerRef = useRef(null);
   const lateralSegmentData = useMemo(() => segments.find(d => d.type === wellSections.LATERAL), [segments]);
 
