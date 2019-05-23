@@ -31,9 +31,9 @@ export default function KPIGraphic({ className, child }) {
     return [...data, ...segmentsToFill].sort(sortByWellOrder);
   }, [data, bySegment]);
   const containerRef = useRef(null);
-  const laterlaSegmentData = useMemo(() => segments.find(d => d.type === wellSections.LATERAL), [segments]);
+  const lateralSegmentData = useMemo(() => segments.find(d => d.type === wellSections.LATERAL), [segments]);
 
-  const totalHours = useMemo(() => sum(data, d => d.totalHours), [data]);
+  const totalHours = useMemo(() => sum(data, d => Number(d.totalHours) || 0), [data]);
 
   const renderVerticalSegments = (d, index) => {
     switch (d.type) {
@@ -65,10 +65,10 @@ export default function KPIGraphic({ className, child }) {
             {segments.map(renderVerticalSegments)}
           </div>
         </div>
-        {laterlaSegmentData && (
+        {lateralSegmentData && (
           <div className={classes.horizontalSegment}>
             {child}
-            <LateralSegment data={laterlaSegmentData} />
+            <LateralSegment data={lateralSegmentData} />
           </div>
         )}
       </div>
