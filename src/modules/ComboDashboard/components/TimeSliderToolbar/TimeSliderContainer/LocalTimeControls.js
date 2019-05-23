@@ -11,7 +11,7 @@ let speedingTimeout;
 function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding, maxSliderStep }) {
   const onPlayClick = useCallback(() => {
     setIsPlaying();
-  });
+  }, [setIsPlaying]);
 
   const onForwardDown = useCallback(() => {
     setSliderStep(sliderStep => {

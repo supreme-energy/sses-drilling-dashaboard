@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect, useMemo, lazy, Suspense } from "react";
+import React, { useState, useReducer, useEffect, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
 import { Card, Typography } from "@material-ui/core";
@@ -9,7 +9,7 @@ import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
-import { useRopData, useAdditionalData } from "../../../../../api";
+import { useRopData } from "../../../../../api";
 import { COLOR_BY_GRAPH, COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
@@ -18,7 +18,6 @@ const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./Tim
 function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
   // Fetch data for Time Slider
   const ropData = useRopData();
-  // const additionalData = useAdditionalData(wellId);
 
   const [zoom, setZoom] = useState([0, 0]);
   const [maxSliderStep, setMaxSliderStep] = useState(1);

@@ -117,7 +117,7 @@ function TimeSlider({
 
   useEffect(() => {
     setMaxStep(data.length);
-  }, [data]);
+  }, [data, setMaxStep]);
 
   useEffect(() => {
     setSliderStep(step => [data.length, step[1]]);

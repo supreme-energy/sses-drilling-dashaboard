@@ -10,11 +10,12 @@ import classes from "./TimeSlider.scss";
 function GlobalTimeControls({ children, expanded, setSliderStep, dates, maxSliderStep }) {
   const handleSetBeginning = useCallback(() => {
     setSliderStep([0, 1]);
-  });
+  }, [setSliderStep]);
 
   const handleSetEnd = useCallback(() => {
     setSliderStep([maxSliderStep, 1]);
-  });
+  }, [setSliderStep, maxSliderStep]);
+
   return (
     <div className={classes.timeSliderView}>
       <div
