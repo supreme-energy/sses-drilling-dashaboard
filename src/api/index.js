@@ -1,6 +1,6 @@
 import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo, useEffect, useState, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import Fuse from "fuse.js";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";

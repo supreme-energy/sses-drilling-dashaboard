@@ -47,7 +47,8 @@ export default function WellboreSmallYellow({ className, width, transparent, ope
       <g id="Scratch-Symbols" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g
           id="Illustration-/-Wellbore_Small_Yellow"
-          transform="translate(166.500000, 35.000000) rotate(-90.000000) translate(-166.500000, -35.000000) translate(135.500000, -131.500000)"
+          transform="translate(166.500000, 35.000000) rotate(-90.000000)
+          translate(-166.500000, -35.000000) translate(135.500000, -131.500000)"
         >
           <rect id="Rectangle" fill="url(#wbsy-linearGradient-1)" x="1" y="7" width="61" height={width - 15} />
           <ellipse
