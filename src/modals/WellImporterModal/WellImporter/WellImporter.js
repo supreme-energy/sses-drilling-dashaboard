@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import cloneDeep from "lodash/cloneDeep";
+import intersection from "lodash/intersection";
 
 import Body from "./Body";
 import Header from "./Header";
@@ -16,18 +17,26 @@ const WellImporter = ({ files, onClickCancel }) => {
   const [data, setData] = useState(null);
   const [appAttributesModel, setAppAttributesModel] = useState(defaultAppAttributesModel);
   const [activeInput, setActiveInput] = useState(null);
-  const [inputToCellId, setInputToCellId] = useState({});
+  const [inputToCellIds, setInputToCellIds] = useState({});
   const [highlightedRowAndColumnList, setHighlightedRowAndColumnList] = useState(null);
   const [textHighlightedRowAndColumnList, setTextHighlightedRowAndColumnList] = useState(null);
 
+  useEffect(() => {
+    if (!isLoaded && files.length) {
+      const parsedData = LAS2Parser.parse(files[0].fileText);
+      setData(parsedData);
+      setIsLoaded(true);
+    }
+  }, [isLoaded, files]);
+
   const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {
-    const cellAlreadySelected = Object.keys(inputToCellId).find(inputId => {
-      return inputToCellId[inputId] === buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
+    const cellAlreadySelected = Object.keys(inputToCellIds).find(inputId => {
+      return inputToCellIds[inputId].includes(buildCellId(sectionName, key, rowIndex, columnIndex, cellData));
     });
 
     if (activeInput) {
       const currentState = cloneDeep(appAttributesModel);
-      if (!activeInput.type || activeInput.type === "cell") {
+      if (activeInput.type === "cell") {
         const updatedState = {
           ...currentState,
           [activeInput.sectionKey]: {
@@ -43,23 +52,27 @@ const WellImporter = ({ files, onClickCancel }) => {
         const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
         const cellId = buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
         if (!cellAlreadySelected) {
-          setAppAttributesModel(updatedState);
           setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData);
-          setInputToCellId({
-            ...inputToCellId,
-            [inputId]: cellId
+          setInputToCellIds({
+            ...inputToCellIds,
+            [inputId]: [cellId]
           });
         } else {
-          if (inputToCellId[cellAlreadySelected] === cellId && inputId === cellAlreadySelected) {
+          if (
+            inputToCellIds[cellAlreadySelected] &&
+            inputToCellIds[cellAlreadySelected].includes(cellId) &&
+            inputId === cellAlreadySelected
+          ) {
             setHighlightedRowAndColumnList({});
             const updatedTextHighlightedRowAndColumnList = { ...textHighlightedRowAndColumnList };
             delete updatedTextHighlightedRowAndColumnList[cellId];
             setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
-            const updatedInputToCellId = { ...inputToCellId };
-            delete updatedInputToCellId[inputId];
-            setInputToCellId(updatedInputToCellId);
+            const updatedInputToCellIds = { ...inputToCellIds };
+            delete updatedInputToCellIds[inputId];
+            setInputToCellIds(updatedInputToCellIds);
           }
         }
+        setAppAttributesModel(updatedState);
       } else if (activeInput.type === "column") {
         const columnCellData = `(${data[sectionName][0][columnIndex]})-end-(${
           data[sectionName][data[sectionName].length - 1][columnIndex]
@@ -77,8 +90,40 @@ const WellImporter = ({ files, onClickCancel }) => {
           }
         };
 
+        const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
         setAppAttributesModel(updatedState);
-        setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData, true);
+        const sectionData = data[sectionName];
+
+        const cellIds = sectionData.reduce((array, row, rowIndex) => {
+          const id = buildCellId(sectionName, null, rowIndex, columnIndex);
+          array.push(id);
+          return array;
+        }, []);
+
+        if (!cellAlreadySelected) {
+          setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData, true);
+          setInputToCellIds({
+            ...inputToCellIds,
+            [inputId]: cellIds
+          });
+        } else {
+          if (
+            inputToCellIds[cellAlreadySelected] &&
+            intersection(inputToCellIds[cellAlreadySelected], cellIds).length &&
+            inputId === cellAlreadySelected
+          ) {
+            setHighlightedRowAndColumnList({});
+            const updatedTextHighlightedRowAndColumnList = { ...textHighlightedRowAndColumnList };
+            cellIds.forEach(cellId => {
+              delete updatedTextHighlightedRowAndColumnList[cellId];
+            });
+
+            setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
+            const updatedInputToCellIds = { ...inputToCellIds };
+            delete updatedInputToCellIds[inputId];
+            setInputToCellIds(updatedInputToCellIds);
+          }
+        }
       }
     }
   };
@@ -101,14 +146,6 @@ const WellImporter = ({ files, onClickCancel }) => {
     }
   };
 
-  useEffect(() => {
-    if (!isLoaded && files.length) {
-      const parsedData = LAS2Parser.parse(files[0].fileText);
-      setData(parsedData);
-      setIsLoaded(true);
-    }
-  }, [isLoaded, files]);
-
   const activateInput = newActiveInput => {
     if (
       activeInput &&
@@ -120,12 +157,17 @@ const WellImporter = ({ files, onClickCancel }) => {
       return;
     }
 
-    let newActiveInputCellValue;
+    let newActiveInputCellValues;
     if (newActiveInput) {
-      newActiveInputCellValue = inputToCellId[`${newActiveInput.sectionKey}-${newActiveInput.fieldKey}`];
+      newActiveInputCellValues = inputToCellIds[`${newActiveInput.sectionKey}-${newActiveInput.fieldKey}`];
       // Need to add it to the highlighted cells
-      if (newActiveInputCellValue) {
-        setHighlightedRowAndColumnList({ [newActiveInputCellValue]: true });
+      if (newActiveInputCellValues) {
+        const highlightedRowAndColumList = newActiveInputCellValues.reduce((map, value) => {
+          map[value] = true;
+          return map;
+        }, {});
+
+        setHighlightedRowAndColumnList(highlightedRowAndColumList);
       } else {
         setHighlightedRowAndColumnList({});
       }
@@ -133,12 +175,18 @@ const WellImporter = ({ files, onClickCancel }) => {
       setHighlightedRowAndColumnList({});
     }
 
-    const updatedTextHighlightedRowAndColumnList = Object.values(inputToCellId).reduce((map, cellId) => {
-      if (cellId === newActiveInputCellValue) {
+    const updatedTextHighlightedRowAndColumnList = Object.values(inputToCellIds).reduce((map, cellIds) => {
+      if (intersection(cellIds, newActiveInputCellValues).length) {
         return map;
       }
 
-      return { ...map, [cellId]: true };
+      return {
+        ...map,
+        ...cellIds.reduce((cellIdMap, cellId) => {
+          cellIdMap[cellId] = true;
+          return cellIdMap;
+        }, {})
+      };
     }, {});
 
     setTextHighlightedRowAndColumnList(updatedTextHighlightedRowAndColumnList);
@@ -169,7 +217,7 @@ const WellImporter = ({ files, onClickCancel }) => {
         setTextHighlightedRowAndColumnList={setTextHighlightedRowAndColumnList}
         activeInput={activeInput}
         setActiveInput={setActiveInput}
-        inputToCellId={inputToCellId}
+        inputToCellId={inputToCellIds}
         activateInput={activateInput}
       />
     </div>

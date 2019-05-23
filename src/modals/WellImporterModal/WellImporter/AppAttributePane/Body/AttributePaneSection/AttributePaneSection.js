@@ -39,7 +39,7 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
   );
 };
 
-AttributePaneTextField.propTypes = {
+AttributePaneSection.propTypes = {
   sectionTitle: PropTypes.string.isRequired,
   sectionKey: PropTypes.string.isRequired,
   onFocus: PropTypes.func.isRequired,
