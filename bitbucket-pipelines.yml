@@ -22,7 +22,7 @@ pipelines:
           script:
             - yarn
             - yarn run lint
-            - yarn run build
+            - yarn run buildDev
             - yarn run uploadDev
     'master':
       - step:
@@ -34,5 +34,5 @@ pipelines:
             - yarn
             - yarn run lint
             - yarn run test
-            - yarn run build
+            - yarn run buildMaster
             - yarn run uploadMaster
