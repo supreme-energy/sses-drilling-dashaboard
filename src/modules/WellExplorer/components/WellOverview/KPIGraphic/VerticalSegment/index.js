@@ -52,7 +52,7 @@ export default function VerticalSegment({ index, style, data }) {
           />
         </div>
         <div className={classes.wellbore}>
-          <SvgIcon height={height} transparent={data.undrilled} openHole={openHole} />
+          <SvgIcon height={height || undefined} transparent={data.undrilled} openHole={openHole} />
 
           <div className={classes.kpis}>
             <KpiItem

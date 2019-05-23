@@ -19,7 +19,7 @@ export default function KPIGraphic({ className, child }) {
         return [...acc, ...bySegment.get(segmentType)]; // add existing segments
       } else if (segmentType !== wellSections.DRILLOUT) {
         // Drillout segment is not mandatory
-        return [...acc, { type: segmentType, undrilled: true }];
+        return [...acc, { type: segmentType, undrilled: true, id: segmentType }];
       }
       return acc;
     }, []);

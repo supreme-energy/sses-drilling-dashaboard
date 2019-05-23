@@ -16,7 +16,7 @@ export default function CurveSegment({ data }) {
       <div className={classNames(classes.imgContainer, "segmentBackground")}>
         <WellboreSmallYellow
           className={classes.svgIcon}
-          width={width}
+          width={width || undefined}
           transparent={data.undrilled}
           openHole={openHole}
         />
