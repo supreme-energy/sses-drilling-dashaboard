@@ -12,6 +12,7 @@ import css from "./styles.scss";
 const Body = ({
   data,
   onClickCell,
+  onClickAsciiHeader,
   appAttributesModel,
   appAttributesFieldMapping,
   activateInput,
@@ -43,6 +44,7 @@ const Body = ({
           highlightedRowAndColumnList={highlightedRowAndColumnList}
           textHighlightedRowAndColumnList={textHighlightedRowAndColumnList}
           onClickCell={onClickCell}
+          onClickAsciiHeader={onClickAsciiHeader}
           unlocked={!isEmpty(activeInput)}
         />
       </div>
@@ -59,6 +61,7 @@ Body.defaultProps = {
 Body.propTypes = {
   data: PropTypes.object.isRequired,
   onClickCell: PropTypes.func.isRequired,
+  onClickAsciiHeader: PropTypes.func.isRequired,
   appAttributesModel: PropTypes.object.isRequired,
   appAttributesFieldMapping: PropTypes.object.isRequired,
   activateInput: PropTypes.func.isRequired,

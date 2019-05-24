@@ -17,13 +17,27 @@ const Body = ({
   className,
   onClickCell,
   highlightedRowAndColumnList,
-  textHighlightedRowAndColumnList
+  textHighlightedRowAndColumnList,
+  onClickAsciiHeader
 }) => {
   const onClick = (sectionName, key, cellData, rowIndex, columnIndex) => () => {
     onClickCell(sectionName, key, cellData, rowIndex, columnIndex);
   };
 
   const renderAsciiSection = (sectionName, data) => {
+    const headerData = Object.keys(data["curve"]);
+    const header = (
+      <tr key="ascii-header">
+        {headerData.map((headerName, columnIndex) => {
+          return (
+            <td key={`ascii-header-${headerName}`} onClick={() => onClickAsciiHeader(headerName, columnIndex)}>
+              {headerName}
+            </td>
+          );
+        })}
+      </tr>
+    );
+
     const first = data[sectionName].slice(0, 30).map((arrayOfValues, index) => {
       return (
         <tr key={`${sectionName}-${index}`}>
@@ -94,7 +108,7 @@ const Body = ({
         </td>
       </tr>
     );
-    return [...first, middle, ...last];
+    return [header, ...first, middle, ...last];
   };
 
   const renderSection = (sectionName, data) => {
@@ -178,6 +192,7 @@ Body.defaultProps = {
 Body.propTypes = {
   data: PropTypes.object.isRequired,
   onClickCell: PropTypes.func.isRequired,
+  onClickAsciiHeader: PropTypes.func.isRequired,
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
   textHighlightedRowAndColumnList: PropTypes.object,

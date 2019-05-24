@@ -62,7 +62,7 @@ const AttributePaneTextField = ({
           endAdornment:
             appAttributeModel.value !== "" && appAttributeConfig.required ? (
               <InputAdornment position="end">
-                <CheckCircleOutline color="blue" className={classes.icon} />
+                <CheckCircleOutline className={classes.icon} />
               </InputAdornment>
             ) : null
         }}

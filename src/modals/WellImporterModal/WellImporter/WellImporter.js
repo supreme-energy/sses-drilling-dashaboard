@@ -116,15 +116,40 @@ const WellImporter = ({ files, onClickCancel }) => {
     dispatch(updateAttributesModel(activeInput, cellAlreadySelected, cellData, cellIds, { rowIndex, columnIndex }));
   };
 
-  const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {
-    const cellAlreadySelected = Object.keys(inputToCellIds).find(inputId => {
-      return inputToCellIds[inputId].includes(buildCellId(sectionName, key, rowIndex, columnIndex));
-    });
-
+  const onClickAsciiHeader = (headerName, columnIndex) => {
     if (!activeInput) {
       // Look into activating the input if the cell has been selected
       return;
     }
+    const parameters = buildHandlerParamaters("ascii", null, 0, columnIndex, "");
+    const {
+      currentState,
+      updatedState,
+      cellAlreadySelected,
+      cellData,
+      sectionName,
+      key,
+      rowIndex,
+      inputId
+    } = parameters;
+
+    columnHandler(
+      currentState,
+      updatedState,
+      cellAlreadySelected,
+      cellData,
+      sectionName,
+      key,
+      rowIndex,
+      columnIndex,
+      inputId
+    );
+  };
+
+  const buildHandlerParamaters = (sectionName, key, rowIndex, columnIndex, cellData) => {
+    const cellAlreadySelected = Object.keys(inputToCellIds).find(inputId => {
+      return inputToCellIds[inputId].includes(buildCellId(sectionName, key, rowIndex, columnIndex));
+    });
 
     const currentState = cloneDeep(appAttributesModel);
     let actualCellData = cellData;
@@ -147,6 +172,26 @@ const WellImporter = ({ files, onClickCancel }) => {
     };
 
     const inputId = `${activeInput.sectionKey}-${activeInput.fieldKey}`;
+
+    return {
+      currentState,
+      updatedState,
+      cellAlreadySelected,
+      cellData: actualCellData,
+      sectionName,
+      key,
+      rowIndex,
+      columnIndex,
+      inputId
+    };
+  };
+
+  const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {
+    if (!activeInput) {
+      return;
+    }
+    const parameters = buildHandlerParamaters(sectionName, key, rowIndex, columnIndex, cellData);
+    const { currentState, updatedState, cellAlreadySelected, cellData: actualCellData, inputId } = parameters;
     const handler = getHandler(activeInput.type);
     handler(
       currentState,
@@ -236,6 +281,7 @@ const WellImporter = ({ files, onClickCancel }) => {
       <Body
         data={data}
         onClickCell={onClickCell}
+        onClickAsciiHeader={onClickAsciiHeader}
         appAttributesModel={appAttributesModel}
         appAttributesFieldMapping={appAttributesFieldMapping}
         activateInput={activateInput}
