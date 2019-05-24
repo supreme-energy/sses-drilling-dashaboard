@@ -1,7 +1,7 @@
 import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { Suspense, useCallback, useReducer, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
@@ -11,6 +11,39 @@ function singleSelectionReducer(list, i) {
   newList[i] = !list[i];
   return newList;
 }
+function PADeltaInit(section) {
+  return {
+    id: section.id,
+    tvd: 0,
+    tot: 0,
+    bot: 0,
+    vs: 0,
+    fault: 0,
+    dip: 0,
+    ...section
+  };
+}
+function PADeltaReducer(state, action) {
+  switch (action.type) {
+    case "dip_tot":
+      return { ...state, tvd: state.tvd + action.tvd, vs: state.tvd + action.vs };
+    case "dip_bot":
+      return { ...state, tvd: state.tvd + action.tvd, vs: state.tvd + action.vs };
+    case "fault_tot":
+      let totToTvd = state.tot - state.tvd;
+      let totToBot = state.tot - state.bot;
+      return { ...state, tot: action.tot, tvd: action.tot + totToTvd, bot: action.tot + totToBot };
+    case "fault_bot":
+      let botToTVD = state.bot - state.tvd;
+      let botToTot = state.bot - state.tot;
+      return { ...state, bot: action.bot, tvd: action.bot + botToTVD, tot: action.bot + botToTot };
+    case "init":
+      console.log(`init called and resetting with ${action.section}`);
+      return PADeltaInit(action.section);
+    default:
+      throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
+  }
+}
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const surveys = useSurveys(wellId);
@@ -19,34 +52,44 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const projections = useProjections(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
-  const sectionList = surveys.slice(0, lastSurveyIdx + 1).concat(projections);
   const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);
+  const [PADelta, PADeltaDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const [calculatedProjections, projectionsDispatch] = useReducer(function(projections, action) {
-    const { index, tvdDelta, vsDelta } = action;
-    switch (action.type) {
-      case "dip":
-        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta, vs: p.vs + vsDelta }));
-      case "fault":
-        return projections.map((p, i) => (i <= index ? { ...p } : { ...p, tvd: p.tvd + tvdDelta }));
-      default:
-        throw new Error(`Unknown projections reducer action type ${action.type}`);
+  const calculatedProjections = useMemo(() => {
+    let index = projections.findIndex(p => p.id === PADelta.id);
+    return projections.map((p, i) => {
+      if (i < index) {
+        return { ...p };
+      } else {
+        return {
+          ...p,
+          tvd: p.tvd + PADelta.tvd,
+          vs: p.vs + PADelta.vs,
+          tot: PADelta.tot,
+          bot: PADelta.bot
+        };
+      }
+    });
+  }, [projections, PADelta]);
+
+  const sectionList = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
+    surveys,
+    lastSurveyIdx,
+    calculatedProjections
+  ]);
+
+  useEffect(() => {
+    let i = selectedList.findIndex(a => a === true);
+    if (i !== -1) {
+      PADeltaDispatch({ type: "init", section: sectionList[i] });
     }
-  }, sectionList);
+  }, [selectedList.join(","), selectedList]); // array changes size and useEffect doesn't like that, so join instead
 
   const [view, setView] = useState({
     x: -844,
     y: -16700,
     xScale: 2.14,
-    yScale: 2.14,
-    leftVs: 663.1,
-    leftTot: 7930.8,
-    leftBot: 7956.8,
-    rightVs: 911.4,
-    rightTot: 7930,
-    rightBot: 7956,
-    paVs: 900,
-    paTcl: 7950
+    yScale: 2.14
   });
   const mergeView = useCallback(function(value) {
     // Implement merging here so we don't have to everywhere else
@@ -133,7 +176,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             setSelectedList={setSelectedList}
             lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}
-            projectionsDispatch={projectionsDispatch}
+            interactivePADispatch={PADeltaDispatch}
           />
         )}
       </ParentSize>

@@ -15,7 +15,7 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { updateView: pointUpdate } = props;
+  const { interactivePADispatch } = props;
   const red = 0xee2211;
   const white = 0xffffff;
 
@@ -39,13 +39,9 @@ function interactiveProjection(parent, props) {
   totCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(totCircle);
   subscribeToMoveEvents(totCircle, function(pos) {
-    pointUpdate(prev => {
-      const diff = prev.leftTot - prev.leftBot;
-      return {
-        leftVs: pos.x,
-        leftTot: pos.y,
-        leftBot: pos.y - diff
-      };
+    interactivePADispatch({
+      type: "fault_tot",
+      tot: pos.y
     });
   });
   const botCircle = new PIXI.Graphics();
@@ -54,13 +50,9 @@ function interactiveProjection(parent, props) {
   botCircle.transform.updateTransform = frozenScaleTransform;
   container.addChild(botCircle);
   subscribeToMoveEvents(botCircle, function(pos) {
-    pointUpdate(prev => {
-      const diff = prev.leftTot - prev.leftBot;
-      return {
-        leftVs: pos.x,
-        leftBot: pos.y,
-        leftTot: pos.y + diff
-      };
+    interactivePADispatch({
+      type: "fault_bot",
+      bot: pos.y
     });
   });
 

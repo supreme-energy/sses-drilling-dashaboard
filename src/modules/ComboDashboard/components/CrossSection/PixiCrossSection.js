@@ -122,7 +122,7 @@ export default class PixiCrossSection {
     this.formationsUpdate(props.formations, props.surveys[props.surveys.length - 2]);
     this.wellPlanUpdate(props.wellPlan);
     this.surveyUpdate(props.surveys);
-    this.projectionLineUpdate(props.projections);
+    this.projectionLineUpdate(props);
     this.sectionUpdate(props);
     this.interactivePAUpdate(props);
     this.gridUpdate(props);
