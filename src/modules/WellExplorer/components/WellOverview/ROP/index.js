@@ -153,7 +153,7 @@ export default function Rop({ className, style }) {
 
   return (
     <div className={classNames(className, classes.container)} style={style}>
-      <Legend />
+      <Legend className={classes.legend} />
       <div className={classes.plot} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
         <PixiContainer

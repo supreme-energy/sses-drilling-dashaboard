@@ -1,12 +1,6 @@
 .container {
     position: relative;
     height: 100%;
-
-    &.overview {
-        .row {
-            background: rgba(0, 0, 0, 0.3)
-        }
-    }
     
     .row {
         position: absolute;
@@ -43,7 +37,6 @@
     }
 
     .wellOverview {
-        flex: 2;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
