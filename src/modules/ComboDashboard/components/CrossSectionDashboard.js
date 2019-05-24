@@ -14,31 +14,42 @@ function singleSelectionReducer(list, i) {
 function PADeltaInit(section) {
   return {
     op: section,
-    id: section.id,
-    tvd: 0,
-    tot: 0,
-    bot: 0,
-    vs: 0,
-    fault: 0,
-    dip: 0
+    ...section
   };
 }
 function PADeltaReducer(state, action) {
+  const op = state.op;
   switch (action.type) {
     case "dip_tot":
-      console.log("dip_tot fired");
-      return { ...state, tvd: state.tvd + action.tvd, vs: state.vs + action.vs };
+      return {
+        ...state,
+        tot: action.tot,
+        bot: action.tot - (op.tot - op.bot),
+        tcl: action.tot - (op.tot - op.tcl)
+      };
     case "dip_bot":
-      console.log("dip_bot fired");
-      return { ...state, tvd: state.tvd + action.tvd, vs: state.vs + action.vs };
+      return {
+        ...state,
+        bot: action.bot,
+        tot: action.bot - (op.bot - op.tot),
+        tcl: action.bot - (op.bot - op.tcl)
+      };
     case "fault_tot":
-      let totToTvd = state.tot - state.tvd;
-      let totToBot = state.tot - state.bot;
-      return { ...state, tot: action.tot, tvd: action.tot + totToTvd, bot: action.tot + totToBot };
+      return {
+        ...state,
+        tot: action.tot,
+        tvd: action.tot - (op.tot - op.tvd),
+        bot: action.tot - (op.tot - op.bot),
+        tcl: action.tot - (op.tot - op.tcl)
+      };
     case "fault_bot":
-      let botToTVD = state.bot - state.tvd;
-      let botToTot = state.bot - state.tot;
-      return { ...state, bot: action.bot, tvd: action.bot + botToTVD, tot: action.bot + botToTot };
+      return {
+        ...state,
+        bot: action.bot,
+        tvd: action.bot - (op.bot - op.tvd),
+        tot: action.bot - (op.bot - op.tot),
+        tcl: action.bot - (op.bot - op.tcl)
+      };
     case "init":
       console.log(`init called and resetting with `, action.section);
       return PADeltaInit(action.section);
@@ -65,10 +76,11 @@ export const CrossSectionDashboard = ({ wellId }) => {
       } else {
         return {
           ...p,
-          tvd: p.tvd + PADelta.tvd,
-          vs: p.vs + PADelta.vs,
+          tvd: PADelta.tvd,
+          vs: p.vs,
           tot: PADelta.tot,
-          bot: PADelta.bot
+          bot: PADelta.bot,
+          tcl: PADelta.tcl
         };
       }
     });

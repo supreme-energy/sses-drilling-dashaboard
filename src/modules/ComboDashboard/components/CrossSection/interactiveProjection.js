@@ -61,13 +61,9 @@ function interactiveProjection(parent, props) {
   currTot.transform.updateTransform = frozenScaleTransform;
   container.addChild(currTot);
   subscribeToMoveEvents(currTot, function(pos) {
-    pointUpdate(prev => {
-      const diff = prev.rightTot - prev.rightBot;
-      return {
-        rightVs: pos.x,
-        rightTot: pos.y,
-        rightBot: pos.y - diff
-      };
+    interactivePADispatch({
+      type: "dip_tot",
+      tot: pos.y
     });
   });
 
@@ -78,13 +74,9 @@ function interactiveProjection(parent, props) {
   currBot.transform.updateTransform = frozenScaleTransform;
   container.addChild(currBot);
   subscribeToMoveEvents(currBot, function(pos) {
-    pointUpdate(prev => {
-      const diff = prev.rightTot - prev.rightBot;
-      return {
-        rightVs: pos.x,
-        rightBot: pos.y,
-        rightTot: pos.y + diff
-      };
+    interactivePADispatch({
+      type: "dip_bot",
+      bot: pos.y
     });
   });
 
