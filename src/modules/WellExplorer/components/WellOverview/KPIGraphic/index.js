@@ -10,7 +10,7 @@ import { sum } from "d3-array";
 import KpiItem from "../../../../Kpi/KpiItem";
 import PropTypes from "prop-types";
 
-export default function KPIGraphic({ className, child }) {
+function KPIGraphic({ className, child }) {
   const { data, bySegment } = useWellOverviewKPI();
 
   const segments = useMemo(() => {
@@ -19,7 +19,7 @@ export default function KPIGraphic({ className, child }) {
         return [...acc, ...bySegment.get(segmentType)]; // add existing segments
       } else if (segmentType !== wellSections.DRILLOUT) {
         // Drillout segment is not mandatory
-        return [...acc, { type: segmentType, undrilled: true }];
+        return [...acc, { type: segmentType, undrilled: true, id: segmentType }];
       }
       return acc;
     }, []);
@@ -75,3 +75,5 @@ KPIGraphic.propTypes = {
   className: PropTypes.string,
   child: PropTypes.node
 };
+
+export default KPIGraphic;

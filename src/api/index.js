@@ -227,7 +227,13 @@ export function useWellOverviewKPI() {
           drillingHours: d.D_HOURS,
           landingPoint: d.landingPoint,
           toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
-          zoneAccuracy: d.zoneAccuracy
+          zoneAccuracy: 100, // TBD
+          targetAccuracy: 98, // TBD,
+          footageDrilled: d.FOOTAGE_DRILLED,
+          avgSliding: d.ROP_AVG_SLIDING,
+          avgRotating: d.ROP_AVG_ROTATING,
+          slidingFootage: d.SLIDING_FOOTAGE,
+          rotatingFootage: d.ROTATING_FOOTAGE
         }));
       }
     }

@@ -23,7 +23,8 @@
     .column {
         display: flex;
         flex-direction: column;
-        width: 680px;
+        flex: 1;
+        max-width: 440px;
     }
 
     .hSpacer {
@@ -42,7 +43,7 @@
     }
 
     .wellOverview {
-        flex: 1;
+        flex: 2;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
@@ -55,6 +56,7 @@
     }
 
     .welcome {
+        
         pointer-events: auto;
     }
 

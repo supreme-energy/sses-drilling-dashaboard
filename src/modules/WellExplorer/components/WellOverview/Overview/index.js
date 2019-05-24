@@ -2,7 +2,7 @@ import React from "react";
 import Rop from "../ROP";
 import classes from "./styles.scss";
 import KPIGraphic from "../KPIGraphic";
-import DrillPhaseKPI from "../DrillPhaseKPI";
+import DrillPhaseKPI from "../../../../Kpi/DrillPhaseKPI";
 
 export default function() {
   return (

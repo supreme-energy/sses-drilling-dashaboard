@@ -1,7 +1,6 @@
 import React from "react";
 import classes from "./styles.scss";
 import * as wellSections from "../../../../../../constants/wellSections";
-import Typography from "@material-ui/core/Typography";
 import KpiItem from "../../../../../Kpi/KpiItem";
 import classNames from "classnames";
 import WellboreLargeGreen from "./WellboreLargeGreen";
@@ -10,12 +9,7 @@ import WellboreMediumGreen from "./WellboreMediumGreen";
 import { useSize } from "react-hook-size";
 import useRef from "react-powertools/hooks/useRef";
 import OpenHole from "../../components/OpenHole";
-
-const titleColorByType = {
-  [wellSections.SURFACE]: "#406DC5",
-  [wellSections.INTERMEDIATE]: "#538531",
-  [wellSections.DRILLOUT]: "#538531"
-};
+import PhaseLabel from "../../../../../Kpi/components/PhaseLabel.js";
 
 export default function VerticalSegment({ index, style, data }) {
   const openHole = !data.casingSize;
@@ -40,9 +34,10 @@ export default function VerticalSegment({ index, style, data }) {
     >
       <div className={classes.content}>
         <div className={classes.left}>
-          <Typography style={{ color: titleColorByType[data.type] }} variant="body1">
+          <PhaseLabel className={classes.label} phase={data.type}>
             {data.type}
-          </Typography>
+          </PhaseLabel>
+
           <KpiItem
             className={classNames(classes.kpi, "kpi")}
             value={data.depth}
@@ -52,7 +47,7 @@ export default function VerticalSegment({ index, style, data }) {
           />
         </div>
         <div className={classes.wellbore}>
-          <SvgIcon height={height} transparent={data.undrilled} openHole={openHole} />
+          <SvgIcon height={height || undefined} transparent={data.undrilled} openHole={openHole} />
 
           <div className={classes.kpis}>
             <KpiItem

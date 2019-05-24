@@ -100,7 +100,7 @@ export const WellExplorer = ({
   const overviewMode = !!selectedWellId;
   const wellsBounds = useMemo(() => getWellsZoomBounds(wells), [wells]);
   const selectedWellMapBounds = useMemo(() => getWellZoomBounds(selectedWell), [selectedWell]);
-  const onFilesToImportChange = (event) => {
+  const onFilesToImportChange = event => {
     if (!event.target.files || !event.target.files.length) {
       return;
     }
@@ -116,11 +116,7 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
-      <WellImporterModal
-        open={importModalShown}
-        onClose={() => toggleShowImportModal(false)}
-        hideBackdrop
-      >
+      <WellImporterModal open={importModalShown} onClose={() => toggleShowImportModal(false)} hideBackdrop>
         <WellImporter />
       </WellImporterModal>
 
@@ -207,7 +203,7 @@ const mapDispatchToPops = {
 };
 
 const bindData = flowRight([
-  withTheme(),
+  withTheme,
   connect(
     mapStateToProps,
     mapDispatchToPops

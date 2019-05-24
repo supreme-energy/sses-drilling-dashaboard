@@ -6,9 +6,9 @@ import { useKpi } from "../../api";
 import { format } from "d3-format";
 import classNames from "classnames";
 
-function KpiItem({ value, measureUnit, label, format, className, renderValue, labelClass, small, textClass }) {
+function KpiItem({ value, measureUnit, label, format, className, renderValue, labelClass, small, textClass, style }) {
   return (
-    <div className={classNames(className, classes.vertical, { [classes.small]: small })}>
+    <div className={classNames(className, classes.vertical, { [classes.small]: small })} style={style}>
       <div className={classes.horizontalTop}>
         {renderValue({ value, format, textClass })}
         <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
@@ -26,6 +26,14 @@ function KpiItem({ value, measureUnit, label, format, className, renderValue, la
   );
 }
 
+export function defaultRenderValue({ value, format, textClass }) {
+  return (
+    <Typography className={classNames(classes.kpiValue, textClass)} variant="h5">
+      {format(value)}
+    </Typography>
+  );
+}
+
 KpiItem.propTypes = {
   format: PropTypes.func,
   value: PropTypes.number,
@@ -35,16 +43,13 @@ KpiItem.propTypes = {
   renderValue: PropTypes.func,
   labelClass: PropTypes.string,
   small: PropTypes.bool,
-  textClass: PropTypes.string
+  textClass: PropTypes.string,
+  style: PropTypes.object
 };
 
 KpiItem.defaultProps = {
   format: format(",.2f"),
-  renderValue: ({ value, format, textClass }) => (
-    <Typography className={classNames(classes.kpiValue, textClass)} variant="h5">
-      {format(value)}
-    </Typography>
-  )
+  renderValue: defaultRenderValue
 };
 
 export function BitDepth() {
