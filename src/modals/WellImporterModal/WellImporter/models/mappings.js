@@ -1,3 +1,5 @@
+import { INPUT_TYPES } from "../constants";
+
 export const wellInfoFieldMapping = {
   well: {
     labelName: "Well",
@@ -81,7 +83,7 @@ export const wellDataFieldMapping = {
     labelName: "Gamma",
     required: true,
     index: 0,
-    type: "column"
+    type: INPUT_TYPES.COLUMN
   }
 };
 

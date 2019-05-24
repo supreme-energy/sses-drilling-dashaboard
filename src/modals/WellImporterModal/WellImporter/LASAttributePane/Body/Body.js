@@ -104,7 +104,7 @@ const Body = ({
         <tr key={`${sectionName}-${key}-${rowIndex}`}>
           {Object.keys(rowData).reduce((columns, sectionItemKey, columnIndex) => {
             const cellData = rowData[sectionItemKey];
-            const cellId = buildCellId(sectionName, key, rowIndex, columnIndex, cellData);
+            const cellId = buildCellId(sectionName, key, rowIndex, columnIndex);
             const cellHighlighted = get(highlightedRowAndColumnList, cellId, false);
 
             const textHighlighted = get(textHighlightedRowAndColumnList, cellId, false);

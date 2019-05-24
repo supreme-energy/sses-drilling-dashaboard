@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { InputAdornment, TextField } from "@material-ui/core";
 import { CheckCircleOutline } from "@material-ui/icons";
 
+import { INPUT_TYPES } from "../../../constants";
+
 import css from "./styles.scss";
 
 const AttributePaneTextField = ({
@@ -80,7 +82,7 @@ const AttributePaneTextField = ({
 
 AttributePaneTextField.defaultProps = {
   isFocused: false,
-  type: "cell"
+  type: INPUT_TYPES.CELL
 };
 
 AttributePaneTextField.propTypes = {
