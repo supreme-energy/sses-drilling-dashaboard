@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Map, TileLayer, Marker, ZoomControl } from "react-leaflet";
+import { TileLayer, Marker, ZoomControl } from "react-leaflet";
 import CenterControl from "../CenterControl";
 import { mapIcons, mapIconsSelected } from "../IconsByStatus";
 import L from "leaflet";
@@ -12,6 +12,7 @@ import "leaflet-fullscreen";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import Map from "./Map";
 
 const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
 const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
@@ -31,27 +32,17 @@ export const WellMap = ({
   onMarkerClick,
   ...props
 }) => {
-  const mapRef = useRef(null);
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
   const [showLegend, changeShowLegend] = useState(defaultShowLegend);
   return (
     <Map
       {...props}
       center={mapCenter}
-      attributionControl={false}
-      length={4}
+      selectedTiles={selectedTiles}
       onClick={handleClickWell}
       // onfullscreenchange={handleMapFullscreenChange}
-      zoom={6}
-      ref={mapRef}
-      className={classNames(classes.map, props.className)}
+      className={props.className}
     >
-      {selectedTiles === MAP ? (
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" /> // eslint-disable-line max-len
-      ) : (
-        <TileLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-      )}
-
       {wells.length > 0 &&
         wells.map(well => (
           <Marker

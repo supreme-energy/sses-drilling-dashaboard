@@ -26,5 +26,12 @@
     .right {
         flex: 1;
         max-width: 400px;
+        display: flex;
+        flex-direction: column;
+
+        .mapPlot {
+            flex: 1;
+            height: 100%;
+        }
     }
 }
