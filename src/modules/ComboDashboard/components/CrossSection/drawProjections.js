@@ -25,7 +25,7 @@ function drawProjections(container, props) {
 
   function update(props) {
     const { calculatedProjections: projections } = props;
-    if (!projections.length || projections.length === prevDataLength) return;
+    if (!projections.length) return;
     prevDataLength = projections.length;
 
     for (let i = 0; i < projections.length; i++) {

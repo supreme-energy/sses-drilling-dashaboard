@@ -112,13 +112,13 @@ function interactiveProjection(parent, props) {
     const { x, y, xScale, yScale } = props.view;
     const xMap = val => val * xScale + x;
     const yMap = val => val * yScale + y;
-    const pa = sectionList[selectedIndex];
     const prev = sectionList[selectedIndex - 1];
+    const pa = sectionList[selectedIndex];
 
     prevTot.position.x = prev.vs;
-    prevTot.position.y = prev.tot;
+    prevTot.position.y = prev.tot + pa.fault;
     prevBot.position.x = prev.vs;
-    prevBot.position.y = prev.bot;
+    prevBot.position.y = prev.bot + pa.fault;
 
     currTot.position.x = pa.vs;
     currTot.position.y = pa.tot;
@@ -129,11 +129,11 @@ function interactiveProjection(parent, props) {
     paMarker.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, red, 1);
-    totLine.moveTo(xMap(prev.vs), yMap(prev.tot)).lineTo(xMap(pa.vs), yMap(pa.tot));
+    totLine.moveTo(xMap(prev.vs), yMap(prev.tot + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.tot));
     tclLine.clear().lineStyle(2, red, 1);
-    tclLine.moveTo(xMap(prev.vs), yMap(prev.tcl)).lineTo(xMap(pa.vs), yMap(pa.tcl));
+    tclLine.moveTo(xMap(prev.vs), yMap(prev.tcl + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.tcl));
     botLine.clear().lineStyle(2, red, 1);
-    botLine.moveTo(xMap(prev.vs), yMap(prev.bot)).lineTo(xMap(pa.vs), yMap(pa.bot));
+    botLine.moveTo(xMap(prev.vs), yMap(prev.bot + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.bot));
   };
 }
 

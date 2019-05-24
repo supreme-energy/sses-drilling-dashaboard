@@ -39,6 +39,7 @@ function PADeltaReducer(state, action) {
     case "fault_tot":
       return {
         ...state,
+        fault: action.tot - op.tot,
         tot: action.tot,
         tvd: action.tot - (op.tot - op.tvd),
         bot: action.tot - (op.tot - op.bot),
@@ -47,6 +48,7 @@ function PADeltaReducer(state, action) {
     case "fault_bot":
       return {
         ...state,
+        fault: action.bot - op.bot,
         bot: action.bot,
         tvd: action.bot - (op.bot - op.tvd),
         tot: action.bot - (op.bot - op.tot),
@@ -86,7 +88,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
           vs: PADelta.vs,
           tot: PADelta.tot,
           bot: PADelta.bot,
-          tcl: PADelta.tcl
+          tcl: PADelta.tcl,
+          fault: PADelta.fault
         };
       } else {
         return { ...p };
