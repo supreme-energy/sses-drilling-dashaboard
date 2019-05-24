@@ -9,11 +9,11 @@
     padding-bottom: 35px;
 }
 
-.timeSliderGraph {
+.timeSliderGraph {    
     canvas {
         position: relative;
         height: 70px;
-        width: 98%;
+        width: 100%;
         bottom: 15px;
     }
 }
@@ -107,14 +107,14 @@
     .timeSliderExpanded {
         color: $gold;
         bottom: 20px;
-        width: 98%;
+        width: 100%;
     }
 
     .timeSliderCollapsed {
         color: $gold;
         top: 24px;
         right: 5px;
-        width: 99%;
+        width: 100%;
     }
 
 
@@ -141,7 +141,6 @@
     }
 
     .collapsedBackwardTime {
-        left: 4px;
         top: 10px;
     }
 
@@ -157,15 +156,15 @@
 
     .expandedForwardTime {
         top: 40px;
-        right: 15px;
+        left: 15px;
     }
 
     .collapsedForwardTime {
-        right: 10px;
+        left: 10px;
         top: 10px;
     }
 }
 
 .timeSliderComponent {
-    width: 100%;
+    width: 93%;
 }

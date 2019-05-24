@@ -1,24 +1,10 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
-// eslint-disable-next-line max-len
-import { GRID_GUTTER } from "../../../../ComboDashboard/components/TimeSliderToolbar/TimeSliderContainer/TimeSlider/TimeSliderUtil";
 
 const globalMouse = { x: 0, y: 0 };
 // enable mouse wheel and drag
-export default function useViewport({
-  renderer,
-  stage,
-  width,
-  height,
-  updateView,
-  view,
-  zoomXScale,
-  zoomYScale,
-  step,
-  maxStep,
-  zoom
-}) {
+export default function useViewport({ renderer, stage, width, height, updateView, view, zoomXScale, zoomYScale }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
 
@@ -81,37 +67,6 @@ export default function useViewport({
     },
     [updateView, zoomXScale, zoomYScale]
   );
-
-  useEffect(() => {
-    if (zoom[1] !== 0) {
-      const factor = 1 + zoom[1] * 0.03;
-
-      // Calc new view, bound graph to sides of canvas when zooming
-      updateView(prev => {
-        const stepFactor = (step * factor * width) / maxStep + 160;
-        const graphTotalLength = maxStep * prev.xScale;
-        const graphHiddenLength = Math.abs(prev.x);
-        const graphVisibleLength = graphTotalLength - graphHiddenLength;
-
-        interactionManagerRef.current.mapPositionToPoint(globalMouse, stepFactor, 250);
-
-        // Graph should either take up entire view, or be larger than view
-        const isTotalOverflow = graphTotalLength * factor >= Math.floor(width - GRID_GUTTER);
-        const isVisibleOverflow = graphVisibleLength * factor >= Math.floor(width - GRID_GUTTER);
-
-        let newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
-        if (!isVisibleOverflow && zoom[1] < 0) {
-          newX = newX + (width - graphVisibleLength * factor - 1);
-        }
-
-        return {
-          ...prev,
-          x: newX < 0 ? newX : prev.x,
-          xScale: isTotalOverflow ? prev.xScale * factor : prev.xScale
-        };
-      });
-    }
-  }, [zoom, updateView, width]);
 
   useEffect(
     function makeStageInteractive() {
