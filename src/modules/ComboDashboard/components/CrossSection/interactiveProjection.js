@@ -63,6 +63,7 @@ function interactiveProjection(parent, props) {
   subscribeToMoveEvents(currTot, function(pos) {
     interactivePADispatch({
       type: "dip_tot",
+      vs: pos.x,
       tot: pos.y
     });
   });
@@ -76,6 +77,7 @@ function interactiveProjection(parent, props) {
   subscribeToMoveEvents(currBot, function(pos) {
     interactivePADispatch({
       type: "dip_bot",
+      vs: pos.x,
       bot: pos.y
     });
   });
@@ -87,9 +89,10 @@ function interactiveProjection(parent, props) {
   paMarker.transform.updateTransform = frozenScaleTransform;
   container.addChild(paMarker);
   subscribeToMoveEvents(paMarker, function(pos) {
-    pointUpdate({
-      paVs: pos.x,
-      paTcl: pos.y
+    interactivePADispatch({
+      type: "pa",
+      tvd: pos.y,
+      vs: pos.x
     });
   });
 

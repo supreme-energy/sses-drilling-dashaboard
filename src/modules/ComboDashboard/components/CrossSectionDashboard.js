@@ -24,6 +24,7 @@ function PADeltaReducer(state, action) {
       return {
         ...state,
         tot: action.tot,
+        vs: action.vs,
         bot: action.tot - (op.tot - op.bot),
         tcl: action.tot - (op.tot - op.tcl)
       };
@@ -31,6 +32,7 @@ function PADeltaReducer(state, action) {
       return {
         ...state,
         bot: action.bot,
+        vs: action.vs,
         tot: action.bot - (op.bot - op.tot),
         tcl: action.bot - (op.bot - op.tcl)
       };
@@ -49,6 +51,12 @@ function PADeltaReducer(state, action) {
         tvd: action.bot - (op.bot - op.tvd),
         tot: action.bot - (op.bot - op.tot),
         tcl: action.bot - (op.bot - op.tcl)
+      };
+    case "pa":
+      return {
+        ...state,
+        tvd: action.tvd,
+        vs: action.vs
       };
     case "init":
       console.log(`init called and resetting with `, action.section);
@@ -71,17 +79,17 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const calculatedProjections = useMemo(() => {
     let index = projections.findIndex(p => p.id === PADelta.id);
     return projections.map((p, i) => {
-      if (i < index || index === -1) {
-        return { ...p };
-      } else {
+      if (i === index) {
         return {
           ...p,
           tvd: PADelta.tvd,
-          vs: p.vs,
+          vs: PADelta.vs,
           tot: PADelta.tot,
           bot: PADelta.bot,
           tcl: PADelta.tcl
         };
+      } else {
+        return { ...p };
       }
     });
   }, [projections, PADelta]);
