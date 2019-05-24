@@ -7,7 +7,15 @@ import AppAttributePaneHeader from "../AppAttributePane/Header";
 
 import css from "./styles.scss";
 
-const Header = ({ data, appAttributesModel, appAttributesFieldMapping, sectionMapping, className, onClickCancel }) => {
+const Header = ({
+  data,
+  appAttributesModel,
+  appAttributesFieldMapping,
+  sectionMapping,
+  className,
+  onClickCancel,
+  activateInput
+}) => {
   return (
     <AppBar className={className} position="relative">
       <div className={css.appAttributePaneHeaderContainer}>
@@ -15,6 +23,7 @@ const Header = ({ data, appAttributesModel, appAttributesFieldMapping, sectionMa
           appAttributesModel={appAttributesModel}
           appAttributesFieldMapping={appAttributesFieldMapping}
           sectionMapping={sectionMapping}
+          activateInput={activateInput}
         />
       </div>
       <div className={css.lasAttributePaneHeaderContainer}>
@@ -33,6 +42,7 @@ Header.propTypes = {
   appAttributesModel: PropTypes.object.isRequired,
   appAttributesFieldMapping: PropTypes.object.isRequired,
   sectionMapping: PropTypes.object.isRequired,
+  activateInput: PropTypes.func.isRequired,
   className: PropTypes.string,
   onClickCancel: PropTypes.func
 };

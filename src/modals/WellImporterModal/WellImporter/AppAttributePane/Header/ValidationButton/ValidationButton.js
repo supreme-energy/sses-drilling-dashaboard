@@ -13,9 +13,6 @@ const ValidationButton = ({ sectionName, model, fieldMapping, sectionInfoMapping
       Object.keys(model).reduce((isValid, modelKey) => {
         const data = model[modelKey];
         const mapping = fieldMapping[modelKey];
-        if (!isValid) {
-          return isValid;
-        }
 
         if (mapping.required && data.value === "") {
           return false;

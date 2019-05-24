@@ -2,6 +2,7 @@ import React, { useEffect, useState, useReducer } from "react";
 import PropTypes from "prop-types";
 import cloneDeep from "lodash/cloneDeep";
 import intersection from "lodash/intersection";
+import get from "lodash/get";
 
 import {
   setActiveInput,
@@ -121,7 +122,11 @@ const WellImporter = ({ files, onClickCancel }) => {
       // Look into activating the input if the cell has been selected
       return;
     }
-    const parameters = buildHandlerParamaters("ascii", null, 0, columnIndex, "");
+    const parameters = buildHandlerParameters("ascii", null, 0, columnIndex, "");
+    if (!parameters) {
+      return;
+    }
+
     const {
       currentState,
       updatedState,
@@ -146,7 +151,7 @@ const WellImporter = ({ files, onClickCancel }) => {
     );
   };
 
-  const buildHandlerParamaters = (sectionName, key, rowIndex, columnIndex, cellData) => {
+  const buildHandlerParameters = (sectionName, key, rowIndex, columnIndex, cellData) => {
     const cellAlreadySelected = Object.keys(inputToCellIds).find(inputId => {
       return inputToCellIds[inputId].includes(buildCellId(sectionName, key, rowIndex, columnIndex));
     });
@@ -154,9 +159,13 @@ const WellImporter = ({ files, onClickCancel }) => {
     const currentState = cloneDeep(appAttributesModel);
     let actualCellData = cellData;
     if (activeInput.type === INPUT_TYPES.COLUMN) {
-      actualCellData = `(${data[sectionName][0][columnIndex]})-end-(${
-        data[sectionName][data[sectionName].length - 1][columnIndex]
-      })`;
+      const start = get(data, [sectionName, 0, columnIndex], null);
+      const end = get(data, [sectionName, data[sectionName].length - 1, columnIndex], null);
+      if (!start || !end) {
+        return null;
+      }
+
+      actualCellData = `(${start})-end-(${end})`;
     }
 
     const updatedState = {
@@ -190,7 +199,11 @@ const WellImporter = ({ files, onClickCancel }) => {
     if (!activeInput) {
       return;
     }
-    const parameters = buildHandlerParamaters(sectionName, key, rowIndex, columnIndex, cellData);
+    const parameters = buildHandlerParameters(sectionName, key, rowIndex, columnIndex, cellData);
+    if (!parameters) {
+      return;
+    }
+
     const { currentState, updatedState, cellAlreadySelected, cellData: actualCellData, inputId } = parameters;
     const handler = getHandler(activeInput.type);
     handler(
@@ -262,13 +275,13 @@ const WellImporter = ({ files, onClickCancel }) => {
     }, []);
 
     dispatch(addHighlightedTextCellIds(cellIds));
+    dispatch(removeHighlightedTextCellIds(newActiveInputCellIds));
     dispatch(setActiveInput(newActiveInput));
   };
 
   if (!files || !files.length || !data) {
     return null;
   }
-
   return (
     <div className={css.container}>
       <Header
@@ -277,6 +290,7 @@ const WellImporter = ({ files, onClickCancel }) => {
         appAttributesFieldMapping={appAttributesFieldMapping}
         appAttributesModel={appAttributesModel}
         sectionMapping={sectionMapping}
+        activateInput={activateInput}
       />
       <Body
         data={data}
