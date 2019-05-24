@@ -19,7 +19,6 @@ function interactiveProjection(parent, props) {
   const red = 0xee2211;
   const white = 0xffffff;
 
-  // -------------------------------------- Line segments
   const totLine = new PIXI.Graphics();
   totLine.transform.updateTransform = frozenXYTransform;
   container.addChild(totLine);
@@ -32,38 +31,36 @@ function interactiveProjection(parent, props) {
   botLine.transform.updateTransform = frozenXYTransform;
   container.addChild(botLine);
 
-  // -------------------------------------- Left nodes
-  const totCircle = new PIXI.Graphics();
-  totCircle.lineStyle(2, red).beginFill(red, 0.4);
-  totCircle.drawCircle(0, 0, 10);
-  totCircle.transform.updateTransform = frozenScaleTransform;
-  container.addChild(totCircle);
-  subscribeToMoveEvents(totCircle, function(pos) {
+  const prevTot = new PIXI.Graphics();
+  prevTot.lineStyle(2, red).beginFill(red, 0.4);
+  prevTot.drawCircle(0, 0, 10);
+  prevTot.transform.updateTransform = frozenScaleTransform;
+  container.addChild(prevTot);
+  subscribeToMoveEvents(prevTot, function(pos) {
     interactivePADispatch({
       type: "fault_tot",
       tot: pos.y
     });
   });
-  const botCircle = new PIXI.Graphics();
-  botCircle.lineStyle(2, red).beginFill(red, 0.4);
-  botCircle.drawCircle(0, 0, 10);
-  botCircle.transform.updateTransform = frozenScaleTransform;
-  container.addChild(botCircle);
-  subscribeToMoveEvents(botCircle, function(pos) {
+  const prevBot = new PIXI.Graphics();
+  prevBot.lineStyle(2, red).beginFill(red, 0.4);
+  prevBot.drawCircle(0, 0, 10);
+  prevBot.transform.updateTransform = frozenScaleTransform;
+  container.addChild(prevBot);
+  subscribeToMoveEvents(prevBot, function(pos) {
     interactivePADispatch({
       type: "fault_bot",
       bot: pos.y
     });
   });
 
-  // -------------------------------------- Right nodes
-  const totCircleRight = new PIXI.Graphics();
-  totCircleRight.lineStyle(2, white, 1);
-  totCircleRight.beginFill(red);
-  totCircleRight.drawCircle(0, 0, 10);
-  totCircleRight.transform.updateTransform = frozenScaleTransform;
-  container.addChild(totCircleRight);
-  subscribeToMoveEvents(totCircleRight, function(pos) {
+  const currTot = new PIXI.Graphics();
+  currTot.lineStyle(2, white, 1);
+  currTot.beginFill(red);
+  currTot.drawCircle(0, 0, 10);
+  currTot.transform.updateTransform = frozenScaleTransform;
+  container.addChild(currTot);
+  subscribeToMoveEvents(currTot, function(pos) {
     pointUpdate(prev => {
       const diff = prev.rightTot - prev.rightBot;
       return {
@@ -74,13 +71,13 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  const botCircleRight = new PIXI.Graphics();
-  botCircleRight.lineStyle(2, white, 1);
-  botCircleRight.beginFill(red);
-  botCircleRight.drawCircle(0, 0, 10);
-  botCircleRight.transform.updateTransform = frozenScaleTransform;
-  container.addChild(botCircleRight);
-  subscribeToMoveEvents(botCircleRight, function(pos) {
+  const currBot = new PIXI.Graphics();
+  currBot.lineStyle(2, white, 1);
+  currBot.beginFill(red);
+  currBot.drawCircle(0, 0, 10);
+  currBot.transform.updateTransform = frozenScaleTransform;
+  container.addChild(currBot);
+  subscribeToMoveEvents(currBot, function(pos) {
     pointUpdate(prev => {
       const diff = prev.rightTot - prev.rightBot;
       return {
@@ -91,14 +88,13 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  // -------------------------------------- Project ahead point
-  const projectionPoint = new PIXI.Graphics();
-  projectionPoint.lineStyle(2, red);
-  projectionPoint.beginFill(white, 0);
-  projectionPoint.drawRoundedRect(-10, -10, 20, 20, 4);
-  projectionPoint.transform.updateTransform = frozenScaleTransform;
-  container.addChild(projectionPoint);
-  subscribeToMoveEvents(projectionPoint, function(pos) {
+  const paMarker = new PIXI.Graphics();
+  paMarker.lineStyle(2, red);
+  paMarker.beginFill(white, 0);
+  paMarker.drawRoundedRect(-10, -10, 20, 20, 4);
+  paMarker.transform.updateTransform = frozenScaleTransform;
+  container.addChild(paMarker);
+  subscribeToMoveEvents(paMarker, function(pos) {
     pointUpdate({
       paVs: pos.x,
       paTcl: pos.y
@@ -115,13 +111,7 @@ function interactiveProjection(parent, props) {
     }
     container.visible = true;
 
-    if (
-      !totCircleRight.transform ||
-      !botCircleRight.transform ||
-      !projectionPoint.transform ||
-      !totCircle.transform ||
-      !botCircle.transform
-    ) {
+    if (!currTot.transform || !currBot.transform || !paMarker.transform || !prevTot.transform || !prevBot.transform) {
       return;
     }
     const { x, y, xScale, yScale } = props.view;
@@ -130,16 +120,18 @@ function interactiveProjection(parent, props) {
     const pa = sectionList[selectedIndex];
     const prev = sectionList[selectedIndex - 1];
 
-    totCircle.position.x = prev.vs;
-    totCircle.position.y = prev.tot;
-    botCircle.position.x = prev.vs;
-    botCircle.position.y = prev.bot;
-    totCircleRight.position.x = pa.vs;
-    totCircleRight.position.y = pa.tot;
-    botCircleRight.position.x = pa.vs;
-    botCircleRight.position.y = pa.bot;
-    projectionPoint.position.x = pa.vs;
-    projectionPoint.position.y = pa.tvd;
+    prevTot.position.x = prev.vs;
+    prevTot.position.y = prev.tot;
+    prevBot.position.x = prev.vs;
+    prevBot.position.y = prev.bot;
+
+    currTot.position.x = pa.vs;
+    currTot.position.y = pa.tot;
+    currBot.position.x = pa.vs;
+    currBot.position.y = pa.bot;
+
+    paMarker.position.x = pa.vs;
+    paMarker.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, red, 1);
     totLine.moveTo(xMap(prev.vs), yMap(prev.tot)).lineTo(xMap(pa.vs), yMap(pa.tot));
