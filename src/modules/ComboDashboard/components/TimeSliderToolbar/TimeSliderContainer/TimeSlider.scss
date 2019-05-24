@@ -2,7 +2,6 @@
 
 .timeSliderContainer {
     border-radius: 0;
-    border-bottom: 1px solid rgb(209, 208, 208);
     width: 100%;
 }
 
@@ -15,18 +14,25 @@
         position: relative;
         height: 70px;
         width: 98%;
-        bottom: 10px;
+        bottom: 15px;
     }
 }
 
 .timeSliderHeader {
-    padding: 10px;
+    padding: 10px 10px 10px 15px;
     display: flex;
     justify-content: space-between;
 
     .timeSliderTitle {
         color: $gold;
         flex-grow: 1;
+    }
+
+    .timeSliderMenu {
+        button {
+            padding: 0;
+            margin: 0 12px 12px;
+        }
     }
 
     .legend {
@@ -95,26 +101,25 @@
 
 .timeSliderView {
     display: flex;
+    min-height: 45px;
 
 
     .timeSliderExpanded {
         color: $gold;
-        bottom: 10px;
+        bottom: 20px;
         width: 98%;
     }
 
     .timeSliderCollapsed {
         color: $gold;
-        top: 20px;
-        left: 10px;
-        width: 98%;
+        top: 24px;
+        right: 5px;
+        width: 99%;
     }
 
 
     .globalTimeControls {
-        padding: 8px;
-        padding-bottom: 1px;
-        padding-left: 0;
+        padding: 0;
         &:focus {
             outline: 0;
         }
@@ -123,6 +128,7 @@
     .backwardTime {
         position: relative;
         width: 55px;
+        text-align: center;
 
         > button {
             @extend .globalTimeControls;
@@ -130,19 +136,19 @@
     }
 
     .expandedBackwardTime {
-        left: 15px;
-        top: 35px;
+        left: 5px;
+        top: 40px;
     }
 
     .collapsedBackwardTime {
-        left: 3px;
+        left: 4px;
+        top: 10px;
     }
 
     .forwardTime {
-        color: #000000;
         position: relative;
-        display: block;
         width: 30px;
+        text-align: center;
 
         > button {
             @extend .globalTimeControls;
@@ -150,12 +156,13 @@
     }
 
     .expandedForwardTime {
-        top: 35px;
+        top: 40px;
         right: 15px;
     }
 
     .collapsedForwardTime {
         right: 10px;
+        top: 10px;
     }
 }
 

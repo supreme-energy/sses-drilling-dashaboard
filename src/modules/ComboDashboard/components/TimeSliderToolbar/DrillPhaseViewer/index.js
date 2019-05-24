@@ -8,7 +8,8 @@ import {
   Button,
   Typography,
   ClickAwayListener,
-  withStyles
+  withStyles,
+  CardActionArea
 } from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
@@ -65,50 +66,48 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
   const drillPhaseCode = currPhase.split(" ")[1];
 
   return (
-    <Card className={classNames(phaseClasses.drillPhaseCard, expanded && phaseClasses.expanded, className)}>
-      <CardContent className={phaseClasses.cardContent}>
-        <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
-          <div>
-            <Button
-              aria-owns={drillPhase ? "drill-phase-menu" : undefined}
-              aria-haspopup="true"
-              onClick={e => setAnchorEl(e.currentTarget)}
-              className={phaseClasses.drillPhaseButton}
-            >
-              {expanded && (
-                <div>
-                  <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1" gutterBottom>
-                    View
-                  </Typography>
-                  <DrillPhase phase={currPhase} />
-                </div>
-              )}
-              <div className={expanded ? phaseClasses.drillPhaseCodeContainerExpanded : phaseClasses.alignItem}>
-                <span className={phaseClasses.alignItem}>{drillPhaseCode}</span>
-                <ArrowDropDown className={phaseClasses.alignItem} />
+    <Card className={classNames(phaseClasses.drillPhaseCard, className)}>
+      <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
+        <div className={phaseClasses.clickListenerContent}>
+          <CardActionArea
+            aria-owns={drillPhase ? "drill-phase-menu" : undefined}
+            aria-haspopup="true"
+            onClick={e => setAnchorEl(e.currentTarget)}
+            className={phaseClasses.drillPhaseButton}
+          >
+            {expanded && (
+              <div className={phaseClasses.drillPhaseViewerExpanded}>
+                <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1">
+                  View
+                </Typography>
+                <DrillPhase phase={currPhase} />
               </div>
-            </Button>
-            <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
-              {drillPhaseEnum.map((phase, index) => {
-                const phaseCode = phase.split(" ")[1];
-                const selected = currPhase === phase;
-                return (
-                  <MenuItem
-                    key={index}
-                    className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
-                    value={phase}
-                    onClick={() => setDrillPhase(phase)}
-                  >
-                    <DrillPhase phase={phase} />
-                    <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
-                    {selected ? <CheckCircle className={classes.selectedPhase} /> : null}
-                  </MenuItem>
-                );
-              })}
-            </Menu>
-          </div>
-        </ClickAwayListener>
-      </CardContent>
+            )}
+            <div className={expanded ? phaseClasses.drillPhaseCodeContainerExpanded : phaseClasses.alignItem}>
+              <span className={phaseClasses.alignItem}>{drillPhaseCode}</span>
+              <ArrowDropDown className={phaseClasses.alignItem} />
+            </div>
+          </CardActionArea>
+          <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
+            {drillPhaseEnum.map((phase, index) => {
+              const phaseCode = phase.split(" ")[1];
+              const selected = currPhase === phase;
+              return (
+                <MenuItem
+                  key={index}
+                  className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
+                  value={phase}
+                  onClick={() => setDrillPhase(phase)}
+                >
+                  <DrillPhase phase={phase} />
+                  <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
+                  {selected ? <CheckCircle className={classes.selectedPhase} /> : null}
+                </MenuItem>
+              );
+            })}
+          </Menu>
+        </div>
+      </ClickAwayListener>
     </Card>
   );
 }

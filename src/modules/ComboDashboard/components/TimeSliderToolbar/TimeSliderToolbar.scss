@@ -2,18 +2,35 @@
 
 .timeSliderToolbar {
     display: flex;
-    
+    border-radius: 0;
+
     .collapseButtonContainer {
+        border-radius: 0;
+        border-right: 1px solid rgb(209, 208, 208);
+        min-width: 30px;
+
+        .collapseButton {
+            outline: 0;
+            height: 100%;
+            
+            svg {
+                position: relative;
+                left: 2px;
+            }
+
+            .svgExpanded {
+                bottom: 60px;
+            }
+        }
+    }
+
+    .collapseButton {
         border-radius: 0;
         box-shadow: none;
         border-right: 1px solid rgb(209, 208, 208);
         border-bottom: 1px solid rgb(209, 208, 208);
-        min-width: 25px;
-
-        .collapseButton {
-            outline: 0;
-            padding: 1px;
-        }
+        min-width: 30px;
+        border: none;
     }
 
     .expandContainer {

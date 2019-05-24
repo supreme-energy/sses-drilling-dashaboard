@@ -1,6 +1,6 @@
 import React, { useReducer, useState, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
-import { Card, IconButton, CircularProgress } from "@material-ui/core";
+import { Card, CardActionArea, CircularProgress } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
@@ -16,10 +16,11 @@ function TimeSliderToolbar({ wellId }) {
   return (
     <Card className={classes.timeSliderToolbar}>
       <Card className={classes.collapseButtonContainer}>
-        <IconButton className={classes.collapseButton} onClick={toggleExpanded}>
-          {expanded ? <ExpandLess /> : <ExpandMore />}
-        </IconButton>
+        <CardActionArea className={classes.collapseButton} onClick={toggleExpanded}>
+          {expanded ? <ExpandLess className={classes.svgExpanded} /> : <ExpandMore className={classes.svgCollapsed} />}
+        </CardActionArea>
       </Card>
+
       <div className={classes.expandContainer}>
         <DrillPhaseViewer
           className={classes.noShrink}

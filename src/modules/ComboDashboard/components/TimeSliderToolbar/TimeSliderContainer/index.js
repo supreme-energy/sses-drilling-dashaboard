@@ -55,6 +55,7 @@ function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
           </div>
           <MoreMenu
             id="time-slider-menu"
+            className={classes.timeSliderMenu}
             selectedMenuItems={selectedMenuItems}
             setSelectedMenuItem={setSelectedMenuItem}
             menuItemEnum={Object.keys(COLOR_BY_GRAPH)}
