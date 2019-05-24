@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import get from "lodash/get";
 import isEmpty from "lodash/isEmpty";
+import { INPUT_TYPES } from "../constants";
 
 import AppAttributePaneBody from "../AppAttributePane/Body";
 import LASAttributePaneBody from "../LASAttributePane/Body";
@@ -30,7 +31,7 @@ const Body = ({
             if (activeInput && activeInput.sectionKey === sectionKey && activeInput.fieldKey === fieldKey) {
               activateInput(null);
             } else {
-              const type = get(appAttributesFieldMapping, [sectionKey, fieldKey, "type"], "cell");
+              const type = get(appAttributesFieldMapping, [sectionKey, fieldKey, "type"], INPUT_TYPES.CELL);
               activateInput({ sectionKey, fieldKey, type });
             }
           }}
@@ -64,7 +65,7 @@ Body.propTypes = {
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
   textHighlightedRowAndColumnList: PropTypes.object,
-  activeInput: PropTypes.string
+  activeInput: PropTypes.object
 };
 
 export default Body;
