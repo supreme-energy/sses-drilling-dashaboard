@@ -1,16 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Card,
-  CardContent,
-  Menu,
-  MenuItem,
-  Button,
-  Typography,
-  ClickAwayListener,
-  withStyles,
-  CardActionArea
-} from "@material-ui/core";
+import { Card, Menu, MenuItem, Typography, ClickAwayListener, withStyles, CardActionArea } from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
