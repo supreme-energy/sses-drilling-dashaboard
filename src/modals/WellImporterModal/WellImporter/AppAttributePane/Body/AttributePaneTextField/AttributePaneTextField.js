@@ -52,7 +52,6 @@ const AttributePaneTextField = ({
         inputRef={inputRef}
         innerRef={innerRef}
         variant="filled"
-        float
         label={appAttributeConfig.labelName}
         fullWidth
         InputProps={{

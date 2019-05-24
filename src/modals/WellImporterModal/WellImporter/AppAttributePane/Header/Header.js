@@ -13,13 +13,13 @@ const Header = ({ sectionMapping, appAttributesFieldMapping, appAttributesModel 
         const sectionInfoMapping = sectionMapping[key];
         const model = appAttributesModel[key];
         const fieldMapping = appAttributesFieldMapping[key];
-
         return (
           <ValidationButton
             key={key}
             model={model}
             fieldMapping={fieldMapping}
             sectionInfoMapping={sectionInfoMapping}
+            sectionName={key}
           />
         );
       }),

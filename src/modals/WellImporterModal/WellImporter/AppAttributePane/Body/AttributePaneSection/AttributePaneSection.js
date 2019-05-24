@@ -29,7 +29,7 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
 
   return (
     <div>
-      <div className={css.sectionTitle}>
+      <div className={css.sectionTitle} id={`validation-${sectionKey}`}>
         <Typography className={css.sectionTitleTypography} variant="body1">
           {sectionTitle}
         </Typography>

@@ -113,7 +113,7 @@ const WellImporter = ({ files, onClickCancel }) => {
       }
     }
 
-    dispatch(updateAttributesModel(activeInput, cellAlreadySelected, cellData, cellIds));
+    dispatch(updateAttributesModel(activeInput, cellAlreadySelected, cellData, cellIds, { rowIndex, columnIndex }));
   };
 
   const onClickCell = (sectionName, key, cellData, rowIndex, columnIndex) => {

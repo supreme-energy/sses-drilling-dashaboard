@@ -16,12 +16,13 @@ export const setActiveInput = activeInput => ({ type: SET_ACTIVE_INPUT, activeIn
 export const addInputToCellIds = (inputId, cellIds) => ({ type: ADD_INPUT_TO_CELL_IDS, inputId, cellIds });
 export const removeInputToCellIds = inputId => ({ type: REMOVE_INPUT_TO_CELL_IDS, inputId });
 
-export const updateAttributesModel = (activeInput, cellAlreadySelected, data, cellIds) => ({
+export const updateAttributesModel = (activeInput, cellAlreadySelected, data, cellIds, extraInformation) => ({
   type: UPDATE_ATTRIBUTES_MODEL,
   activeInput,
   cellAlreadySelected,
   data,
-  cellIds
+  cellIds,
+  extraInformation
 });
 
 export const clearHighlightedCellIds = () => ({ type: CLEAR_HIGHLIGHTED_CELL_IDS });

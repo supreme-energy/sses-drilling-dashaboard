@@ -6,9 +6,4 @@ const mapStateToProps = state => ({
   files: state.files.files
 });
 
-const mapDispatchToProps = {};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(WellImporter);
+export default connect(mapStateToProps)(WellImporter);

@@ -35,7 +35,7 @@ const reducer = (state, action) => {
       };
 
     case UPDATE_ATTRIBUTES_MODEL:
-      const { activeInput, cellAlreadySelected, data, cellIds } = action;
+      const { activeInput, cellAlreadySelected, data, cellIds, extraInformation } = action;
       return {
         ...state,
         appAttributesModel: {
@@ -45,7 +45,8 @@ const reducer = (state, action) => {
             [activeInput.fieldKey]: {
               ...state.appAttributesModel[activeInput.sectionKey][activeInput.fieldKey],
               value: !cellAlreadySelected ? data : "",
-              cellId: !cellAlreadySelected ? cellIds : ""
+              cellId: !cellAlreadySelected ? cellIds : "",
+              extraInformation: !cellAlreadySelected ? extraInformation : {}
             }
           }
         }

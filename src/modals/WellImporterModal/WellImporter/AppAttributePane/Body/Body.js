@@ -45,7 +45,7 @@ Body.propTypes = {
   appAttributesModel: PropTypes.object.isRequired,
   appAttributesFieldMapping: PropTypes.object.isRequired,
   onFocus: PropTypes.func.isRequired,
-  activeInput: PropTypes.string
+  activeInput: PropTypes.object
 };
 
 export default Body;
