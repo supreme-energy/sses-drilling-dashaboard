@@ -13,22 +13,24 @@ function singleSelectionReducer(list, i) {
 }
 function PADeltaInit(section) {
   return {
+    op: section,
     id: section.id,
     tvd: 0,
     tot: 0,
     bot: 0,
     vs: 0,
     fault: 0,
-    dip: 0,
-    ...section
+    dip: 0
   };
 }
 function PADeltaReducer(state, action) {
   switch (action.type) {
     case "dip_tot":
-      return { ...state, tvd: state.tvd + action.tvd, vs: state.tvd + action.vs };
+      console.log("dip_tot fired");
+      return { ...state, tvd: state.tvd + action.tvd, vs: state.vs + action.vs };
     case "dip_bot":
-      return { ...state, tvd: state.tvd + action.tvd, vs: state.tvd + action.vs };
+      console.log("dip_bot fired");
+      return { ...state, tvd: state.tvd + action.tvd, vs: state.vs + action.vs };
     case "fault_tot":
       let totToTvd = state.tot - state.tvd;
       let totToBot = state.tot - state.bot;
@@ -38,7 +40,7 @@ function PADeltaReducer(state, action) {
       let botToTot = state.bot - state.tot;
       return { ...state, bot: action.bot, tvd: action.bot + botToTVD, tot: action.bot + botToTot };
     case "init":
-      console.log(`init called and resetting with ${action.section}`);
+      console.log(`init called and resetting with `, action.section);
       return PADeltaInit(action.section);
     default:
       throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
@@ -58,7 +60,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const calculatedProjections = useMemo(() => {
     let index = projections.findIndex(p => p.id === PADelta.id);
     return projections.map((p, i) => {
-      if (i < index) {
+      if (i < index || index === -1) {
         return { ...p };
       } else {
         return {
@@ -83,7 +85,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
     if (i !== -1) {
       PADeltaDispatch({ type: "init", section: sectionList[i] });
     }
-  }, [selectedList.join(","), selectedList]); // array changes size and useEffect doesn't like that, so join instead
+  }, [selectedList.join(",")]); // array changes size and useEffect doesn't like that, so join instead
 
   const [view, setView] = useState({
     x: -844,

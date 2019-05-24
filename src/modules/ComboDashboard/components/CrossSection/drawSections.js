@@ -9,14 +9,14 @@ const selectedProjection = [0xee2211, 1];
 
 function getColor(selectedList, index, lastSurveyIdx) {
   const isSelected = selectedList[index];
-  const isProjection = index >= lastSurveyIdx;
+  const isProjection = index > lastSurveyIdx;
   let color;
   if (isSelected) {
     color = isProjection ? selectedProjection : selectedSurvey;
   } else {
     color = isProjection ? projection : survey;
   }
-  if (index === lastSurveyIdx - 1 && isSelected) color = selectedLastSurvey;
+  if (index === lastSurveyIdx && isSelected) color = selectedLastSurvey;
   return color;
 }
 
@@ -48,7 +48,6 @@ function drawSections(container, props, gutter) {
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, lastSurveyIdx, selectedList, sectionList } = props;
-    // const points = surveys.slice(0, surveys.length - 1).concat(projections);
     const points = sectionList;
     const y = height - gutter - buttonHeight;
 
@@ -59,10 +58,10 @@ function drawSections(container, props, gutter) {
 
     let start = 0;
     let length = 0;
-    for (let i = 0; i < points.length - 1; i++) {
+    for (let i = 1; i <= points.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
-      const p1 = points[i].vs;
-      const p2 = points[i + 1].vs;
+      const p1 = points[i - 1].vs;
+      const p2 = points[i].vs;
       const color = getColor(selectedList, i, lastSurveyIdx);
 
       let pixi = pixiList[i];

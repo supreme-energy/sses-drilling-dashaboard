@@ -35,6 +35,7 @@ export function drawFormations(container, formations, lastSurvey) {
         let p4 = formations[i + 1].data[j];
 
         // Draw a polygon with four points having the height of this layer
+        // The right side points determine the fault applied on drawing
         const a1 = [p1.vs, p1.tot + p2.fault];
         const a2 = [p2.vs, p2.tot];
         const a3 = [p3.vs, p3.tot];
