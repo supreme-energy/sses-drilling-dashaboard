@@ -9,16 +9,14 @@ function makeXTickAndLine(...args) {
 
   return [line, label];
 }
-function Grid({ container, width, height, gridGutter, view, hideGrid }, ref) {
+function Grid({ container, width, height, gridGutter, view }, ref) {
   const gridLayerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {
     const gridLayer = gridLayerRef.current;
-    if (!hideGrid) {
-      container.addChild(gridLayer);
-      return () => container.removeChild(gridLayer);
-    }
-  }, [container, hideGrid]);
+    container.addChild(gridLayer);
+    return () => container.removeChild(gridLayer);
+  }, [container]);
 
   const updateGrid = useMemo(() => {
     return drawGrid(gridLayerRef.current, gridGutter, "top", makeXTickAndLine);

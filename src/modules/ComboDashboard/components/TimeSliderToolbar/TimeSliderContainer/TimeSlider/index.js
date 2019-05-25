@@ -6,7 +6,6 @@ import get from "lodash/get";
 
 import useRef from "react-powertools/hooks/useRef";
 
-import Grid from "../../../../../WellExplorer/components/WellOverview/ROP/Grid";
 import PixiContainer from "../../../../../WellExplorer/components/WellOverview/ROP/PixiContainer";
 import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/ROP/PixiRectangle";
 import PixiText from "../../../../../WellExplorer/components/WellOverview/ROP/PixiText";
@@ -272,7 +271,6 @@ function TimeSlider({
             );
           }
         })}
-        <Grid container={viewport} view={view} width={width} height={height} gridGutter={GRID_GUTTER} hideGrid />
       </div>
       <Slider
         className={expanded ? classes.timeSliderExpanded : classes.timeSliderCollapsed}
