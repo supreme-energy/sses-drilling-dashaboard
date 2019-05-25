@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { Card, CardContent, Typography } from "@material-ui/core";
 
-import VerticalMenu from "../VerticalMenu/index";
+import VerticalMenu from "../VerticalMenu";
 import { useWells } from "../../../../api";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import WellStatus from "../../../Kpi/WellStatus";

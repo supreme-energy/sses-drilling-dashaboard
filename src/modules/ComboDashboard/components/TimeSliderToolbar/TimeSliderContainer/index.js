@@ -4,7 +4,7 @@ import Progress from "@material-ui/core/CircularProgress";
 import { Card, Typography } from "@material-ui/core";
 import classNames from "classnames";
 
-import VerticalMenu from "../../VerticalMenu/index";
+import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
