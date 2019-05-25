@@ -41,7 +41,7 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
 
   // Too few data points on screen will make slider useless
   return (
-    <div className={classNames(classes.zoomControls, className)}>
+    <div className={className}>
       <IconButton onMouseDown={onZoomOutDown} onMouseUp={onMouseUp} disabled={zoomOutDisabled}>
         <RemoveCircleOutline />
       </IconButton>

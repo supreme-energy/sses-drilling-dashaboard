@@ -142,6 +142,8 @@ function TimeSlider({
     const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
 
+    console.log(endDate);
+
     setGlobalDates([beginningDate, endDate]);
   }, [data, setGlobalDates, width, view, step, maxStep]);
 
@@ -158,7 +160,7 @@ function TimeSlider({
 
         // Graph should either take up entire view, or be larger than view
         const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
-        const isVisibleOverflow = graphVisibleLength * factor >= Math.floor(width - GRID_GUTTER);
+        const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
 
         let newX = stepFactor - (stepFactor - prev.x) * factor;
         let newScale = prev.xScale * factor;
@@ -177,7 +179,7 @@ function TimeSlider({
         };
       });
     }
-  }, [zoom, updateView, width]);
+  }, [zoom, updateView, width, data, getInitialViewXScaleValue]);
 
   const handleDragSlider = useCallback(
     (_, currentStep) => {

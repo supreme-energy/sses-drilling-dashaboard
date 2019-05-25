@@ -14,7 +14,7 @@
         position: relative;
         height: 70px;
         width: 100%;
-        bottom: 15px;
+        bottom: 10px;
     }
 }
 
@@ -30,7 +30,7 @@
 
     .timeSliderMenu {
         button {
-            padding: 0;
+            padding: 2px;
             margin: 0 12px 12px;
         }
     }
@@ -77,24 +77,14 @@
         margin-right: 15px;
 
         button {
-            padding: 0;
+            padding: 5px;
             &:focus {
                 outline: 0;
             }
         }
 
-        .zoomControls {
-            svg {
-                margin-right: 10px;
-            }
-        }
-
         .timeControls {
             margin-left: 20px;
-
-            svg {
-                margin-right: 10px;
-            }
         }
     }
 }
@@ -106,7 +96,7 @@
 
     .timeSliderExpanded {
         color: $gold;
-        bottom: 20px;
+        bottom: 8px;
         width: 100%;
     }
 

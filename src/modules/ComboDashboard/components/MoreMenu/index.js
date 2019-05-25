@@ -50,9 +50,10 @@ function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuI
           return (
             <MenuItem
               key={index}
-              className={classNames(classes.menuItem, selected ? classes.selectedMenuItem : null)}
+              className={classes.menuItem}
               onClick={handleMenuClick}
               onClose={!multiSelect ? handleMenuClose : null}
+              selected={selected}
             >
               {item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()}
               {selected && <CheckCircle className={classes.selectedItemIcon} />}
