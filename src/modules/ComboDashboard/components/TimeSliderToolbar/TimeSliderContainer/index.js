@@ -32,6 +32,8 @@ function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
     setSelectedMenuItem(COLOR_BY_PHASE_VIEWER[drillPhase].graphs);
   }, [drillPhase]);
 
+  const zoomInDisabled = maxSliderStep <= 10;
+  const zoomOutDisabled = maxSliderStep >= ropData.length;
   return (
     <Card
       className={classNames(classes.timeSliderContainer, expanded && classes.timeSliderContainerExpanded, className)}
@@ -43,7 +45,14 @@ function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
           </Typography>
           <Legend selectedGraphs={selectedMenuItems} keys={Object.keys(COLOR_BY_GRAPH)} />
           <div className={classes.timeSliderControls}>
-            <ZoomControls setZoom={setZoom} isZooming={isZooming} setIsZooming={setIsZooming} />
+            <ZoomControls
+              setZoom={setZoom}
+              isZooming={isZooming}
+              setIsZooming={setIsZooming}
+              zoom={zoom}
+              zoomInDisabled={zoomInDisabled}
+              zoomOutDisabled={zoomOutDisabled}
+            />
             <LocalTimeControls
               setIsPlaying={setIsPlaying}
               setSliderStep={setSliderStep}

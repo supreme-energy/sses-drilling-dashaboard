@@ -10,7 +10,7 @@ import classes from "./TimeSlider.scss";
 
 let zoomTimeout;
 
-function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
+function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomInDisabled, zoomOutDisabled }) {
   const handleResetZoom = useCallback(() => {
     setZoom([0, 0]);
   }, [setZoom]);
@@ -33,17 +33,22 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming }) {
   // Stop zoom if mouseup happens outside component
   window.addEventListener("mouseup", onMouseUp, false);
 
-  useInterval(() => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]), isZooming ? 50 : null);
+  const isZoomingEnabled = (zoom[1] > 0 && !zoomInDisabled) || (zoom[1] < 0 && !zoomOutDisabled);
+  useInterval(
+    () => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]),
+    isZooming && isZoomingEnabled ? 50 : null
+  );
 
+  // Too few data points on screen will make slider useless
   return (
     <div className={classNames(classes.zoomControls, className)}>
-      <IconButton onMouseDown={onZoomOutDown} onMouseUp={onMouseUp}>
+      <IconButton onMouseDown={onZoomOutDown} onMouseUp={onMouseUp} disabled={zoomOutDisabled}>
         <RemoveCircleOutline />
       </IconButton>
       <IconButton onClick={handleResetZoom}>
         <Adjust />
       </IconButton>
-      <IconButton onMouseDown={onZoomInDown} onMouseUp={onMouseUp}>
+      <IconButton onMouseDown={onZoomInDown} onMouseUp={onMouseUp} disabled={zoomInDisabled}>
         <AddCircleOutline />
       </IconButton>
     </div>
@@ -54,7 +59,10 @@ ZoomControls.propTypes = {
   className: PropTypes.string,
   setZoom: PropTypes.func,
   isZooming: PropTypes.bool,
-  setIsZooming: PropTypes.func
+  setIsZooming: PropTypes.func,
+  zoom: PropTypes.arrayOf(PropTypes.number),
+  zoomInDisabled: PropTypes.bool,
+  zoomOutDisabled: PropTypes.bool
 };
 
 export default ZoomControls;

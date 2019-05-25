@@ -42,7 +42,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
         if (sliderStep[0] >= maxSliderStep) {
           return sliderStep;
         }
-        return [sliderStep[0] + STEP_VALUE * (maxSliderStep / 100), sliderStep[1]];
+        return [sliderStep[0] + STEP_VALUE * Math.ceil(maxSliderStep / 100), sliderStep[1]];
       });
     },
     isPlaying && !isSpeeding ? 800 : null
@@ -57,7 +57,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
         } else if (sliderStep[1] && sliderStep[0] + stepFactor >= maxSliderStep) {
           return [maxSliderStep, 0];
         }
-        return [sliderStep[0] + STEP_VALUE * (maxSliderStep / 100) * sliderStep[1], sliderStep[1]];
+        return [sliderStep[0] + STEP_VALUE * Math.ceil(maxSliderStep / 50) * sliderStep[1], sliderStep[1]];
       });
     },
     isSpeeding ? 100 : null

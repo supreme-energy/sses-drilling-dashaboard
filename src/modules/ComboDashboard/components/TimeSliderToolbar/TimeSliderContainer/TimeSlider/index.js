@@ -127,11 +127,8 @@ function TimeSlider({
     if (expanded) {
       setMaxStep(prevMaxStep => {
         const newMaxStep = (width - GRID_GUTTER) / view.xScale;
-        setSliderStep(prevStep => {
-          console.log(("steppps", newMaxStep * prevStep[0]) / prevMaxStep);
-          return [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]];
-        });
-        return Math.floor(newMaxStep);
+        setSliderStep(prevStep => [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]]);
+        return newMaxStep;
       });
     }
   }, [setMaxStep, setSliderStep, width, expanded, view.xScale]);
@@ -154,27 +151,31 @@ function TimeSlider({
 
       // Calc new view, bound graph to sides of canvas when zooming
       updateView(prev => {
-        const stepFactor = (step * width) / maxStep;
-        const graphHiddenLength = (Math.abs(prev.x) * factor) / prev.xScale;
-        const graphVisibleLength = ((width - GRID_GUTTER) * factor) / prev.xScale;
-        const graphTotalLength = graphHiddenLength + graphVisibleLength;
+        const stepFactor = ((step * (width + GRID_GUTTER)) / maxStep).toFixed(2);
+        const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
+        const graphTotalLength = data.length;
+        const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
 
         // Graph should either take up entire view, or be larger than view
-        const isTotalOverflow = graphTotalLength >= Math.floor(((width - GRID_GUTTER) * factor) / prev.xScale);
-        const isVisibleOverflow = graphVisibleLength >= Math.floor(((width - GRID_GUTTER) * factor) / prev.xScale);
+        const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
+        const isVisibleOverflow = graphVisibleLength * factor >= Math.floor(width - GRID_GUTTER);
 
-        console.log(step, stepFactor);
         let newX = stepFactor - (stepFactor - prev.x) * factor;
-        if (!isVisibleOverflow && zoom[1] < 0) {
-          // newX = newX + (width - graphVisibleLength * factor - GRID_GUTTER);
+        let newScale = prev.xScale * factor;
+
+        console.log(isTotalOverflow, graphTotalLength * prev.xScale, isVisibleOverflow);
+
+        if (!isVisibleOverflow && zoom[1] > 0) {
+          newX = newX + (width - graphVisibleLength - GRID_GUTTER);
+        } else if (!isTotalOverflow && !isVisibleOverflow && zoom[1] < 0) {
           newX = 0;
+          newScale = getInitialViewXScaleValue(width - GRID_GUTTER);
         }
 
-        console.log(width, "x / scale", ((width - GRID_GUTTER) * factor) / prev.xScale, prev.x / prev.xScale);
         return {
           ...prev,
           x: newX <= 0 ? newX : prev.x,
-          xScale: isTotalOverflow ? prev.xScale * factor : prev.xScale
+          xScale: newScale
         };
       });
     }
