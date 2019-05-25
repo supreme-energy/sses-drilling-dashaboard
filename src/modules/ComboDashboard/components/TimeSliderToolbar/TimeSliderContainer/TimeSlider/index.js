@@ -142,8 +142,6 @@ function TimeSlider({
     const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
 
-    console.log(endDate);
-
     setGlobalDates([beginningDate, endDate]);
   }, [data, setGlobalDates, width, view, step, maxStep]);
 

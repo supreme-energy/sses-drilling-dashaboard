@@ -4,7 +4,7 @@ import Progress from "@material-ui/core/CircularProgress";
 import { Card, Typography } from "@material-ui/core";
 import classNames from "classnames";
 
-import MoreMenu from "../../MoreMenu/index";
+import VerticalMenu from "../../VerticalMenu/index";
 import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
@@ -62,7 +62,7 @@ function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
               maxSliderStep={maxSliderStep}
             />
           </div>
-          <MoreMenu
+          <VerticalMenu
             id="time-slider-menu"
             className={classes.timeSliderMenu}
             selectedMenuItems={selectedMenuItems}

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { Card, CardContent, Typography } from "@material-ui/core";
 
-import MoreMenu from "../MoreMenu/index";
+import VerticalMenu from "../VerticalMenu/index";
 import { useWells } from "../../../../api";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import WellStatus from "../../../Kpi/WellStatus";
@@ -34,7 +34,7 @@ function HeaderToolbar({ wellId }) {
           <Rop wellId={well.id} />
           <ServerStatus wellId={well.id} />
           <BitDepth wellId={well.id} />
-          <MoreMenu selectedMenuItems={[]} menuItemEnum={[]} />
+          <VerticalMenu selectedMenuItems={[]} menuItemEnum={[]} />
         </div>
       </CardContent>
     </Card>

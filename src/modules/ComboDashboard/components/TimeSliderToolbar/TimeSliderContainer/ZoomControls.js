@@ -2,14 +2,11 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
-import classNames from "classnames";
 
 import { useInterval } from "./useInterval";
 import { STEP_VALUE } from "../../../../../constants/timeSlider";
-import classes from "./TimeSlider.scss";
 
 let zoomTimeout;
-
 function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomInDisabled, zoomOutDisabled }) {
   const handleResetZoom = useCallback(() => {
     setZoom([0, 0]);

@@ -2,19 +2,19 @@ import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Menu, IconButton, MenuItem } from "@material-ui/core";
 import { CheckCircle, MoreVert } from "@material-ui/icons";
-import classNames from "classnames";
-import classes from "./MoreMenu.scss";
 
-function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuItemEnum, multiSelect }) {
+import classes from "./VerticalMenu.scss";
+
+function VerticalMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuItemEnum, multiSelect }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuClick = useCallback(
     ({ currentTarget: { innerText } }) => {
-      const clickedItemText = innerText.toUpperCase();
-      if (selectedMenuItems.includes(clickedItemText)) {
-        setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== clickedItemText));
+      const selectedItem = innerText.toUpperCase();
+      if (selectedMenuItems.includes(selectedItem)) {
+        setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== selectedItem));
       } else {
-        setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, clickedItemText]);
+        setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, selectedItem]);
       }
     },
     [selectedMenuItems, setSelectedMenuItem]
@@ -27,21 +27,13 @@ function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuI
     [setAnchorEl]
   );
 
-  const handleMenuClose = useCallback(
-    ({ currentTarget }) => {
-      setAnchorEl(null);
-    },
-    [setAnchorEl]
-  );
+  const handleMenuClose = useCallback(() => {
+    setAnchorEl(null);
+  }, [setAnchorEl]);
 
   return (
     <div className={className}>
-      <IconButton
-        className={classes.menuButton}
-        aria-owns={selectedMenuItems.length ? id : undefined}
-        aria-haspopup="true"
-        onClick={handleAnchorEl}
-      >
+      <IconButton className={classes.menuButton} aria-owns={id} aria-haspopup="true" onClick={handleAnchorEl}>
         <MoreVert />
       </IconButton>
       <Menu id={id} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} disableAutoFocusItem>
@@ -65,7 +57,7 @@ function MoreMenu({ className, id, selectedMenuItems, setSelectedMenuItem, menuI
   );
 }
 
-MoreMenu.propTypes = {
+VerticalMenu.propTypes = {
   id: PropTypes.string,
   className: PropTypes.string,
   selectedMenuItems: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -74,4 +66,4 @@ MoreMenu.propTypes = {
   multiSelect: PropTypes.bool
 };
 
-export default MoreMenu;
+export default VerticalMenu;
