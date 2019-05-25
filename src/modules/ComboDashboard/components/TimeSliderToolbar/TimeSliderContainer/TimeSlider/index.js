@@ -163,8 +163,6 @@ function TimeSlider({
         let newX = stepFactor - (stepFactor - prev.x) * factor;
         let newScale = prev.xScale * factor;
 
-        console.log(isTotalOverflow, graphTotalLength * prev.xScale, isVisibleOverflow);
-
         if (!isVisibleOverflow && zoom[1] > 0) {
           newX = newX + (width - graphVisibleLength - GRID_GUTTER);
         } else if (!isTotalOverflow && !isVisibleOverflow && zoom[1] < 0) {

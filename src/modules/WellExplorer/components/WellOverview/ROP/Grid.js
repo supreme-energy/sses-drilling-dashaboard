@@ -18,7 +18,7 @@ function Grid({ container, width, height, gridGutter, view, hideGrid }, ref) {
       container.addChild(gridLayer);
       return () => container.removeChild(gridLayer);
     }
-  }, [container]);
+  }, [container, hideGrid]);
 
   const updateGrid = useMemo(() => {
     return drawGrid(gridLayerRef.current, gridGutter, "top", makeXTickAndLine);
