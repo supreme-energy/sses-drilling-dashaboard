@@ -17,21 +17,19 @@ function TimeSliderToolbar({ wellId }) {
     <Card className={classes.timeSliderToolbar}>
       <Card className={classes.collapseButtonContainer}>
         <CardActionArea className={classes.collapseButton} onClick={toggleExpanded}>
-          {expanded ? <ExpandLess className={classes.svgExpanded} /> : <ExpandMore className={classes.svgCollapsed} />}
+          {expanded ? <ExpandLess className={classes.expandLessIcon} /> : <ExpandMore />}
         </CardActionArea>
       </Card>
 
-      <div className={classes.expandContainer}>
-        <DrillPhaseViewer
-          className={classes.noShrink}
-          expanded={expanded}
-          drillPhase={drillPhase}
-          setDrillPhase={setDrillPhase}
-        />
-        <Suspense fallback={<CircularProgress />}>
-          <TimeSliderContainer drillPhase={drillPhase} expanded={expanded} wellId={wellId} />
-        </Suspense>
-      </div>
+      <DrillPhaseViewer
+        className={classes.noShrink}
+        expanded={expanded}
+        drillPhase={drillPhase}
+        setDrillPhase={setDrillPhase}
+      />
+      <Suspense fallback={<CircularProgress />}>
+        <TimeSliderContainer drillPhase={drillPhase} expanded={expanded} wellId={wellId} />
+      </Suspense>
     </Card>
   );
 }
