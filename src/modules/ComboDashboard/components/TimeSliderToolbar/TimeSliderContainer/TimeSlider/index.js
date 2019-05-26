@@ -134,12 +134,13 @@ function TimeSlider({
 
   useEffect(() => {
     const stepFactor = step / maxStep;
-    const hiddenDataLength = Math.ceil(Math.abs(view.x) / view.xScale);
+    const hiddenDataLength = Math.abs(view.x) / view.xScale;
     const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
     const endDataIndex = stepFactor ? stepFactor * visibleDataLength + hiddenDataLength - 1 : 0;
 
     const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
+    console.log(endDataIndex, stepFactor, visibleDataLength, hiddenDataLength, "index");
 
     setGlobalDates([beginningDate, endDate]);
   }, [data, setGlobalDates, width, view, step, maxStep]);
