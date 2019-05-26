@@ -218,57 +218,17 @@ function TimeSlider({
                 child={container =>
                   data.map((data, barIndex) => {
                     if (barIndex % 131 === 0) {
-                      if (graph === PLANNED_ANGLE) {
-                        return (
-                          <React.Fragment key={barIndex}>
-                            <PixiRectangle
-                              container={container}
-                              x={200}
-                              y={0}
-                              width={50}
-                              height={150}
-                              backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[PLANNED_ANGLE])}
-                            />
-                            <PixiRectangle
-                              container={container}
-                              x={200}
-                              y={200}
-                              width={50}
-                              height={150}
-                              backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[PLANNED_ANGLE])}
-                            />
-                            <PixiRectangle
-                              container={container}
-                              x={200}
-                              y={400}
-                              width={50}
-                              height={150}
-                              backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[PLANNED_ANGLE])}
-                            />
-                            <PixiRectangle
-                              container={container}
-                              x={200}
-                              y={600}
-                              width={50}
-                              height={150}
-                              backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[PLANNED_ANGLE])}
-                            />
-                            <PixiText container={container} text="90" fontSize="40" color={0xbfbfbf} />
-                          </React.Fragment>
-                        );
-                      } else {
-                        return (
-                          <PixiRectangle
-                            key={barIndex}
-                            container={container}
-                            x={100 * barIndex + 100}
-                            y={0}
-                            width={50}
-                            height={9000}
-                            backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[graph])}
-                          />
-                        );
-                      }
+                      return (
+                        <PixiRectangle
+                          key={barIndex}
+                          container={container}
+                          x={100 * barIndex + 100}
+                          y={0}
+                          width={50}
+                          height={9000}
+                          backgroundColor={parseInt("0x" + COLOR_BY_GRAPH[graph])}
+                        />
+                      );
                     }
                   })
                 }
