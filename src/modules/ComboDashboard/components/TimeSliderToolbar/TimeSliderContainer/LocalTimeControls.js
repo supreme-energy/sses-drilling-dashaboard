@@ -4,7 +4,7 @@ import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { STEP_VALUE } from "../../../../../constants/timeSlider";
+import { STEP_SIZE } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
 let speedingTimeout;
@@ -15,8 +15,8 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
 
   const onForwardDown = useCallback(() => {
     setSliderStep(sliderStep => {
-      const newStep = sliderStep[0] + STEP_VALUE;
-      if (newStep <= maxSliderStep) return [sliderStep[0] + STEP_VALUE, 1];
+      const newStep = sliderStep[0] + STEP_SIZE;
+      if (newStep <= maxSliderStep) return [sliderStep[0] + STEP_SIZE, 1];
       return sliderStep;
     });
     speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
@@ -24,8 +24,8 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
 
   const onRewindDown = useCallback(() => {
     setSliderStep(sliderStep => {
-      const newStep = sliderStep[0] - STEP_VALUE;
-      if (sliderStep[0] && newStep >= 0) return [sliderStep[0] - STEP_VALUE, -1];
+      const newStep = sliderStep[0] - STEP_SIZE;
+      if (sliderStep[0] && newStep >= 0) return [sliderStep[0] - STEP_SIZE, -1];
       return sliderStep;
     });
     speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
@@ -40,9 +40,10 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
     () => {
       setSliderStep(sliderStep => {
         if (sliderStep[0] >= maxSliderStep) {
+          setIsPlaying(false);
           return sliderStep;
         }
-        return [sliderStep[0] + STEP_VALUE * Math.ceil(maxSliderStep / 100), sliderStep[1]];
+        return [sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 100), sliderStep[1]];
       });
     },
     isPlaying && !isSpeeding ? 800 : null
@@ -51,13 +52,13 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        const stepFactor = STEP_VALUE * (maxSliderStep / 100) * sliderStep[1];
+        const stepFactor = STEP_SIZE * (maxSliderStep / 100) * sliderStep[1];
         if (sliderStep[0] + stepFactor <= 0 && sliderStep[1] < 0) {
           return [0, 0];
         } else if (sliderStep[1] && sliderStep[0] + stepFactor >= maxSliderStep) {
           return [maxSliderStep, 0];
         }
-        return [sliderStep[0] + STEP_VALUE * Math.ceil(maxSliderStep / 50) * sliderStep[1], sliderStep[1]];
+        return [sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 50) * sliderStep[1], sliderStep[1]];
       });
     },
     isSpeeding ? 100 : null

@@ -4,7 +4,7 @@ import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { STEP_VALUE } from "../../../../../constants/timeSlider";
+import { STEP_SIZE } from "../../../../../constants/timeSlider";
 
 let zoomTimeout;
 function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomInDisabled, zoomOutDisabled }) {
@@ -13,12 +13,12 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
   }, [setZoom]);
 
   const onZoomInDown = useCallback(() => {
-    setZoom(zoom => [zoom[0] + STEP_VALUE, 1]);
+    setZoom(zoom => [zoom[0] + STEP_SIZE, 1]);
     zoomTimeout = setTimeout(() => setIsZooming(true), 600);
   }, [setZoom, setIsZooming]);
 
   const onZoomOutDown = useCallback(() => {
-    setZoom(zoom => [zoom[0] - STEP_VALUE, -1]);
+    setZoom(zoom => [zoom[0] - STEP_SIZE, -1]);
     zoomTimeout = setTimeout(() => setIsZooming(true), 600);
   }, [setZoom, setIsZooming]);
 
@@ -30,7 +30,7 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
   // Determine if zooming in a particular direction is enabled
   const isZoomingEnabled = (zoom[1] > 0 && !zoomInDisabled) || (zoom[1] < 0 && !zoomOutDisabled);
   useInterval(
-    () => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]),
+    () => setZoom(zoom => [zoom[0] + STEP_SIZE * zoom[1], zoom[1]]),
     isZooming && isZoomingEnabled ? 50 : null
   );
 

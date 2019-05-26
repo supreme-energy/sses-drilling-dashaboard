@@ -1,7 +1,7 @@
 import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "./wellPathStatus";
 import { GREEN, GRAY } from "./colors";
 
-export const STEP_VALUE = 1;
+export const STEP_SIZE = 1;
 
 export const CONNECTION = "CONNECTION";
 export const ROP = "ROP";

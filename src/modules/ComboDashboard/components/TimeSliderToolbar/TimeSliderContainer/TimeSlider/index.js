@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
 import { useSize } from "react-hook-size";
 import get from "lodash/get";
+import classNames from "classnames";
 
 import useRef from "react-powertools/hooks/useRef";
 
@@ -12,7 +13,7 @@ import PixiText from "../../../../../WellExplorer/components/WellOverview/ROP/Pi
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { STEP_VALUE, LINE_GRAPHS, COLOR_BY_GRAPH, PLANNED_ANGLE } from "../../../../../../constants/timeSlider";
+import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH, PLANNED_ANGLE } from "../../../../../../constants/timeSlider";
 import {
   GRID_GUTTER,
   computeInitialViewXScaleValue,
@@ -140,7 +141,6 @@ function TimeSlider({
 
     const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
-    console.log(endDataIndex, stepFactor, visibleDataLength, hiddenDataLength, "index");
 
     setGlobalDates([beginningDate, endDate]);
   }, [data, setGlobalDates, width, view, step, maxStep]);
@@ -188,7 +188,10 @@ function TimeSlider({
 
   return (
     <div className={classes.timeSliderComponent}>
-      <div className={classes.timeSliderGraph} style={{ display: expanded ? "" : "none" }} ref={canvasRef}>
+      <div
+        className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
+        ref={canvasRef}
+      >
         <PixiContainer ref={viewportContainer} container={stage} />
         {selectedGraphs.map((graph, index) => {
           if (LINE_GRAPHS.includes(graph)) {
@@ -207,6 +210,7 @@ function TimeSlider({
               />
             );
           } else {
+            // TODO Implement based on actual data
             return (
               <PixiContainer
                 key={index}
@@ -278,7 +282,7 @@ function TimeSlider({
         value={step}
         max={maxStep}
         onChange={handleDragSlider}
-        step={STEP_VALUE}
+        step={STEP_SIZE}
       />
     </div>
   );
