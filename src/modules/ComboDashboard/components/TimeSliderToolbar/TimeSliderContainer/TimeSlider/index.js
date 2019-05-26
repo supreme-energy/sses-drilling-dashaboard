@@ -9,17 +9,10 @@ import useRef from "react-powertools/hooks/useRef";
 
 import PixiContainer from "../../../../../WellExplorer/components/WellOverview/ROP/PixiContainer";
 import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/ROP/PixiRectangle";
-import PixiText from "../../../../../WellExplorer/components/WellOverview/ROP/PixiText";
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import {
-  STEP_SIZE,
-  LINE_GRAPHS,
-  COLOR_BY_GRAPH,
-  PLANNED_ANGLE,
-  GRID_GUTTER
-} from "../../../../../../constants/timeSlider";
+import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH, GRID_GUTTER } from "../../../../../../constants/timeSlider";
 import { computeInitialViewXScaleValue, computeInitialViewYScaleValue, mapRop, mapSlide } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
