@@ -13,14 +13,14 @@ import PixiText from "../../../../../WellExplorer/components/WellOverview/ROP/Pi
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH, PLANNED_ANGLE } from "../../../../../../constants/timeSlider";
 import {
-  GRID_GUTTER,
-  computeInitialViewXScaleValue,
-  computeInitialViewYScaleValue,
-  mapRop,
-  mapSlide
-} from "./TimeSliderUtil";
+  STEP_SIZE,
+  LINE_GRAPHS,
+  COLOR_BY_GRAPH,
+  PLANNED_ANGLE,
+  GRID_GUTTER
+} from "../../../../../../constants/timeSlider";
+import { computeInitialViewXScaleValue, computeInitialViewYScaleValue, mapRop, mapSlide } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
 function TimeSlider({
@@ -210,7 +210,7 @@ function TimeSlider({
               />
             );
           } else {
-            // TODO Implement based on actual data
+            // TODO Implement based on real data
             return (
               <PixiContainer
                 key={index}

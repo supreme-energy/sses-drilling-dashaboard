@@ -1,8 +1,6 @@
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
 
-export const GRID_GUTTER = 1;
-
 export const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
 export const mapSlide = (d, index) => [Number(index), Number(d.ROP_I)];
 

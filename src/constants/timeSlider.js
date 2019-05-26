@@ -2,6 +2,7 @@ import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "
 import { GREEN, GRAY } from "./colors";
 
 export const STEP_SIZE = 1;
+export const GRID_GUTTER = 1;
 
 export const CONNECTION = "CONNECTION";
 export const ROP = "ROP";
