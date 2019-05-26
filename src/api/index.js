@@ -14,7 +14,6 @@ export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
-export const GET_ADDITIONAL_DATA = "/additiondatalog.php";
 
 const options = {
   shouldSort: true,
@@ -202,24 +201,5 @@ export function useProjections(wellId) {
       }
     }
   );
-  return data || EMPTY_ARRAY;
-}
-
-export function useAdditionalData(wellId) {
-  const [data] = useFetch(
-    {
-      path: GET_ADDITIONAL_DATA,
-      query: {
-        seldbname: wellId,
-        id: 3
-      }
-    },
-    {
-      transform: additionals => {
-        return additionals.data.map(d => _.mapValues(d, Number));
-      }
-    }
-  );
-
   return data || EMPTY_ARRAY;
 }
