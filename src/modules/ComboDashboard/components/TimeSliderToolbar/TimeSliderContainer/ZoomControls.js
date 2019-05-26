@@ -27,16 +27,16 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
     setIsZooming(false);
   }, [setIsZooming]);
 
-  // Stop zoom if mouseup happens outside component
-  window.addEventListener("mouseup", onMouseUp, false);
-
+  // Determine if zooming in a particular direction is enabled
   const isZoomingEnabled = (zoom[1] > 0 && !zoomInDisabled) || (zoom[1] < 0 && !zoomOutDisabled);
   useInterval(
     () => setZoom(zoom => [zoom[0] + STEP_VALUE * zoom[1], zoom[1]]),
     isZooming && isZoomingEnabled ? 50 : null
   );
 
-  // Too few data points on screen will make slider useless
+  // Stop zoom if mouseup happens outside component
+  window.addEventListener("mouseup", onMouseUp, false);
+
   return (
     <div className={className}>
       <IconButton onMouseDown={onZoomOutDown} onMouseUp={onMouseUp} disabled={zoomOutDisabled}>

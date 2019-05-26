@@ -1,7 +1,6 @@
 import React, { useState, useReducer, useEffect, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
-import Progress from "@material-ui/core/CircularProgress";
-import { Card, Typography } from "@material-ui/core";
+import { Card, CircularProgress, Typography } from "@material-ui/core";
 import classNames from "classnames";
 
 import VerticalMenu from "../../VerticalMenu";
@@ -78,7 +77,7 @@ function TimeSliderContainer({ className, expanded, drillPhase, wellId }) {
         dates={globalDates}
         maxSliderStep={maxSliderStep}
       >
-        <Suspense fallback={<Progress />}>
+        <Suspense fallback={<CircularProgress />}>
           <TimeSlider
             expanded={expanded}
             zoom={zoom}

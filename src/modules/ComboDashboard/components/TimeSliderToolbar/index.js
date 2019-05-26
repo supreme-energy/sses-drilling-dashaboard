@@ -20,7 +20,6 @@ function TimeSliderToolbar({ wellId }) {
           {expanded ? <ExpandLess className={classes.expandLessIcon} /> : <ExpandMore />}
         </CardActionArea>
       </Card>
-
       <DrillPhaseViewer
         className={classes.noShrink}
         expanded={expanded}
