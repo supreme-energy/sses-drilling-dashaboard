@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import upperFirst from "lodash/upperFirst";
 import get from "lodash/get";
 import classnames from "classnames";
+import { buildCellId } from "../../utils";
 
 import css from "./styles.scss";
 
@@ -16,32 +17,85 @@ const Body = ({
   className,
   onClickCell,
   highlightedRowAndColumnList,
-  textHighlightedRowAndColumnList
+  textHighlightedRowAndColumnList,
+  onClickAsciiHeader
 }) => {
   const onClick = (sectionName, key, cellData, rowIndex, columnIndex) => () => {
     onClickCell(sectionName, key, cellData, rowIndex, columnIndex);
   };
 
   const renderAsciiSection = (sectionName, data) => {
+    const headerData = Object.keys(data["curve"]);
+    const header = (
+      <tr key="ascii-header">
+        {headerData.map((headerName, columnIndex) => {
+          return (
+            <td key={`ascii-header-${headerName}`} onClick={() => onClickAsciiHeader(headerName, columnIndex)}>
+              {headerName}
+            </td>
+          );
+        })}
+      </tr>
+    );
+
     const first = data[sectionName].slice(0, 30).map((arrayOfValues, index) => {
       return (
         <tr key={`${sectionName}-${index}`}>
-          {arrayOfValues.map((value, valueIndex) => (
-            <td key={`${sectionName}-${index}-${valueIndex}`}>{value}</td>
-          ))}
+          {arrayOfValues.map((value, valueIndex) => {
+            const cellData = data[sectionName][index][valueIndex];
+            const cellId = buildCellId(sectionName, null, index, valueIndex, cellData);
+            const cellHighlighted = get(highlightedRowAndColumnList, cellId, false);
+            const textHighlighted = get(textHighlightedRowAndColumnList, cellId, false);
+
+            return (
+              <td
+                onClick={onClick(sectionName, null, value, index, valueIndex)}
+                key={`${sectionName}-${index}-${valueIndex}`}
+                className={classnames({
+                  [css.selectedCell]: cellHighlighted,
+                  [css.selectedText]: textHighlighted
+                })}
+              >
+                {value}
+              </td>
+            );
+          })}
         </tr>
       );
     });
 
     const last = data[sectionName]
       .slice(data[sectionName].length - 30, data[sectionName].length)
-      .map((arrayOfValues, index) => (
-        <tr key={`${sectionName}-${index + first.length}`}>
-          {arrayOfValues.map((value, valueIndex) => (
-            <td key={`${index + first.length}-${valueIndex}`}>{value}</td>
-          ))}
-        </tr>
-      ));
+      .map((arrayOfValues, index) => {
+        return (
+          <tr key={`${sectionName}-${index + first.length}`}>
+            {arrayOfValues.map((value, valueIndex) => {
+              const cellData = data[sectionName][index][valueIndex];
+              const cellId = buildCellId(
+                sectionName,
+                null,
+                index + data[sectionName].length - 30,
+                valueIndex,
+                cellData
+              );
+              const cellHighlighted = get(highlightedRowAndColumnList, cellId, false);
+              const textHighlighted = get(textHighlightedRowAndColumnList, cellId, false);
+              return (
+                <td
+                  onClick={onClick(sectionName, null, value, index, valueIndex)}
+                  key={`${index + first.length}-${valueIndex}`}
+                  className={classnames({
+                    [css.selectedCell]: cellHighlighted,
+                    [css.selectedText]: textHighlighted
+                  })}
+                >
+                  {value}
+                </td>
+              );
+            })}
+          </tr>
+        );
+      });
 
     const middle = (
       <tr key={`${sectionName}-truncation-row`}>
@@ -54,7 +108,7 @@ const Body = ({
         </td>
       </tr>
     );
-    return [...first, middle, ...last];
+    return [header, ...first, middle, ...last];
   };
 
   const renderSection = (sectionName, data) => {
@@ -64,7 +118,7 @@ const Body = ({
         <tr key={`${sectionName}-${key}-${rowIndex}`}>
           {Object.keys(rowData).reduce((columns, sectionItemKey, columnIndex) => {
             const cellData = rowData[sectionItemKey];
-            const cellId = `${sectionName}-${key}-${cellData}`;
+            const cellId = buildCellId(sectionName, key, rowIndex, columnIndex);
             const cellHighlighted = get(highlightedRowAndColumnList, cellId, false);
 
             const textHighlighted = get(textHighlightedRowAndColumnList, cellId, false);
@@ -138,6 +192,7 @@ Body.defaultProps = {
 Body.propTypes = {
   data: PropTypes.object.isRequired,
   onClickCell: PropTypes.func.isRequired,
+  onClickAsciiHeader: PropTypes.func.isRequired,
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
   textHighlightedRowAndColumnList: PropTypes.object,
