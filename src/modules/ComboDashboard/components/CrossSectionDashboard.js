@@ -92,6 +92,13 @@ export const CrossSectionDashboard = ({ wellId }) => {
           tcl: p.tcl + PADelta.tcl + PADelta.fault,
           fault: PADelta.fault
         };
+      } else if (i > index) {
+        // TODO: Confirm this results in the right display
+        return {
+          ...p,
+          tvd: p.tvd + PADelta.fault,
+          vs: p.vs + PADelta.vs
+        };
       } else {
         return { ...p };
       }
