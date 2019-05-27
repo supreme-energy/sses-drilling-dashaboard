@@ -11,58 +11,59 @@ function singleSelectionReducer(list, i) {
   newList[i] = !list[i];
   return newList;
 }
-function PADeltaInit(section) {
+function PADeltaInit(section, prevSection) {
   return {
+    prevOp: prevSection,
     op: section,
-    ...section
+    id: section.id,
+    bot: 0,
+    fault: 0,
+    tcl: 0,
+    tot: 0,
+    tvd: 0,
+    vs: 0
   };
 }
 function PADeltaReducer(state, action) {
   const op = state.op;
+  let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
+      depthDelta = action.tot - op.tot;
       return {
         ...state,
-        tot: action.tot,
-        vs: action.vs,
-        bot: action.tot - (op.tot - op.bot),
-        tcl: action.tot - (op.tot - op.tcl)
+        tot: depthDelta,
+        vs: action.vs - op.vs,
+        bot: depthDelta,
+        tcl: depthDelta
       };
     case "dip_bot":
+      depthDelta = action.bot - op.bot;
       return {
         ...state,
-        bot: action.bot,
-        vs: action.vs,
-        tot: action.bot - (op.bot - op.tot),
-        tcl: action.bot - (op.bot - op.tcl)
+        bot: depthDelta,
+        vs: action.vs - op.vs,
+        tot: depthDelta,
+        tcl: depthDelta
       };
     case "fault_tot":
       return {
         ...state,
-        fault: action.tot - op.tot,
-        tot: action.tot,
-        tvd: action.tot - (op.tot - op.tvd),
-        bot: action.tot - (op.tot - op.bot),
-        tcl: action.tot - (op.tot - op.tcl)
+        fault: action.tot - state.prevOp.tot
       };
     case "fault_bot":
       return {
         ...state,
-        fault: action.bot - op.bot,
-        bot: action.bot,
-        tvd: action.bot - (op.bot - op.tvd),
-        tot: action.bot - (op.bot - op.tot),
-        tcl: action.bot - (op.bot - op.tcl)
+        fault: action.bot - state.prevOp.bot
       };
     case "pa":
       return {
         ...state,
-        tvd: action.tvd,
-        vs: action.vs
+        tvd: action.tvd - op.tvd,
+        vs: action.vs - op.vs
       };
     case "init":
-      console.log(`init called and resetting with `, action.section);
-      return PADeltaInit(action.section);
+      return PADeltaInit(action.section, action.prevSection);
     default:
       throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
   }
@@ -84,11 +85,11 @@ export const CrossSectionDashboard = ({ wellId }) => {
       if (i === index) {
         return {
           ...p,
-          tvd: PADelta.tvd,
-          vs: PADelta.vs,
-          tot: PADelta.tot,
-          bot: PADelta.bot,
-          tcl: PADelta.tcl,
+          tvd: p.tvd + PADelta.tvd,
+          vs: p.vs + PADelta.vs,
+          tot: p.tot + PADelta.tot + PADelta.fault,
+          bot: p.bot + PADelta.bot + PADelta.fault,
+          tcl: p.tcl + PADelta.tcl + PADelta.fault,
           fault: PADelta.fault
         };
       } else {
@@ -106,7 +107,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   useEffect(() => {
     let i = selectedList.findIndex(a => a === true);
     if (i !== -1) {
-      PADeltaDispatch({ type: "init", section: sectionList[i] });
+      PADeltaDispatch({ type: "init", section: sectionList[i], prevSection: sectionList[i - 1] });
     }
   }, [selectedList.join(",")]); // array changes size and useEffect doesn't like that, so join instead
 
