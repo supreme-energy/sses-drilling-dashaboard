@@ -37,11 +37,7 @@ export default class PixiCrossSection {
     this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 50;
     // Create the formation layers
-    this.formationsUpdate = drawFormations(
-      this.formationsLayer,
-      props.formations,
-      props.surveys[props.surveys.length - 2]
-    );
+    this.formationsUpdate = drawFormations(this.formationsLayer);
 
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer, props.surveys);

@@ -15,26 +15,41 @@ function drawFormationSegment(color, alpha, points, container) {
  * @param lastSurvey The most recent survey point (not the bit projection)
  */
 export function drawFormations(container, formations, lastSurvey) {
-  let prevDataLength = 0;
+  let prevFormationsLength = 0;
+  const formationGraphicsArray = [];
+
+  const createTiles = function(layers) {
+    layers.map(() => {
+      let tile = new PIXI.Graphics();
+      container.addChild(tile);
+      return tile;
+    });
+  };
 
   return update;
 
   function update(formations, lastSurvey) {
-    if (!formations.length || !lastSurvey || prevDataLength === formations.length) return;
-    prevDataLength = formations.length;
+    if (!formations.length || !lastSurvey || formations.length === prevFormationsLength) return;
+    prevFormationsLength = formations.length;
     // TODO: Handle updated formation data (for instance adjusting a projection point)
     for (let i = 0; i < formations.length - 1; i++) {
+      if (!formationGraphicsArray[i]) {
+        formationGraphicsArray[i] = createTiles(formations[i].data);
+      }
       let { bg_color: bgColor, bg_percent: bgPercent } = formations[i];
       for (let j = 0; j < formations[i].data.length - 1; j++) {
         if (formations[i].data[j].vs >= lastSurvey.vs - 0.01) {
           bgPercent = 0.3;
         }
+        // Each formation tile is drawn from four points arranged like this:
+        // p1    p2
+        //
+        // p4    p3
         let p1 = formations[i].data[j];
         let p2 = formations[i].data[j + 1];
         let p3 = formations[i + 1].data[j + 1];
         let p4 = formations[i + 1].data[j];
 
-        // Draw a polygon with four points having the height of this layer
         // The right side points determine the fault applied on drawing
         const a1 = [p1.vs, p1.tot + p2.fault];
         const a2 = [p2.vs, p2.tot];
