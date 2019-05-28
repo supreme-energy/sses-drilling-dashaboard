@@ -64,7 +64,7 @@ function drawSections(container, props, gutter) {
       const p2 = points[i].vs;
       const color = getColor(selectedList, i, lastSurveyIdx);
 
-      let pixi = pixiList[i];
+      const pixi = pixiList[i];
       pixi.clear().beginFill(...color);
       pixi.sectionIndex = i;
 

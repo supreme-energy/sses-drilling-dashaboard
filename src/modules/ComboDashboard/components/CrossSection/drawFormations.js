@@ -8,7 +8,7 @@ export function drawFormations(container) {
   const layerTiles = [];
 
   const createTile = function() {
-    let tile = new PIXI.Graphics();
+    const tile = new PIXI.Graphics();
     container.addChild(tile);
     return tile;
   };
@@ -19,8 +19,8 @@ export function drawFormations(container) {
     const { calculatedFormations: layers, lastSurveyIdx } = props;
     if (!layers || !layers.length) return;
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
-      let currLayer = layers[layerIdx];
-      let nextLayer = layers[layerIdx + 1];
+      const currLayer = layers[layerIdx];
+      const nextLayer = layers[layerIdx + 1];
       let { bg_color: currColor, bg_percent: currAlpha } = currLayer;
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {

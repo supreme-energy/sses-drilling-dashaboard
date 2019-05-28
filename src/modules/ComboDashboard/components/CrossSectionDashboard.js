@@ -80,7 +80,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const [PADelta, PADeltaDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const calculatedProjections = useMemo(() => {
-    let index = projections.findIndex(p => p.id === PADelta.id);
+    const index = projections.findIndex(p => p.id === PADelta.id);
     return projections.map((p, i) => {
       if (i === index) {
         return {
@@ -112,11 +112,11 @@ export const CrossSectionDashboard = ({ wellId }) => {
   ]);
 
   const calculatedFormations = useMemo(() => {
-    let index = sectionList.findIndex(p => p.id === PADelta.id);
+    const index = sectionList.findIndex(p => p.id === PADelta.id);
     // TODO: Determine if the bit projection formation point should be left in
     // Currently formations includes a point for the bit projection and sectionsList doesn't
     // Remove the bit projection from formations until we know how to handle that
-    let f = formations.map(f => {
+    const f = formations.map(f => {
       return {
         ...f,
         data: f.data.filter((p, i) => i !== lastSurveyIdx + 1)
@@ -149,7 +149,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [formations, PADelta, sectionList, lastSurveyIdx]);
 
   useEffect(() => {
-    let i = selectedList.findIndex(a => a === true);
+    const i = selectedList.findIndex(a => a === true);
     if (i !== -1) {
       PADeltaDispatch({ type: "init", section: sectionList[i], prevSection: sectionList[i - 1] });
     }
