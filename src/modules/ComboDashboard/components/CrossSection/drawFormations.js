@@ -1,20 +1,10 @@
 import * as PIXI from "pixi.js";
 
-function drawFormationSegment(color, alpha, points, container) {
-  const p = new PIXI.Graphics();
-  p.lineStyle(0).beginFill(Number(`0x${color}`), Number(alpha));
-  p.drawPolygon(points);
-  p.closePath();
-  container.addChild(p);
-}
-
 /**
  * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
- * @param formations The formation data from the API
- * @param lastSurvey The most recent survey point (not the bit projection)
  */
-export function drawFormations(container, formations, lastSurvey) {
+export function drawFormations(container) {
   let prevFormationsLength = 0;
   const formationGraphicsArray = [];
 
@@ -28,35 +18,45 @@ export function drawFormations(container, formations, lastSurvey) {
 
   return update;
 
-  function update(formations, lastSurvey) {
-    if (!formations.length || !lastSurvey || formations.length === prevFormationsLength) return;
-    prevFormationsLength = formations.length;
+  function update(props) {
+    const { formations: layers, lastSurveyIdx } = props;
+    if (!layers || !layers.length || layers.length === prevFormationsLength) return;
+    prevFormationsLength = layers.length;
     // TODO: Handle updated formation data (for instance adjusting a projection point)
-    for (let i = 0; i < formations.length - 1; i++) {
+    for (let i = 0; i < layers.length - 1; i++) {
       if (!formationGraphicsArray[i]) {
-        formationGraphicsArray[i] = createTiles(formations[i].data);
+        formationGraphicsArray[i] = createTiles(layers[i].data);
       }
-      let { bg_color: bgColor, bg_percent: bgPercent } = formations[i];
-      for (let j = 0; j < formations[i].data.length - 1; j++) {
-        if (formations[i].data[j].vs >= lastSurvey.vs - 0.01) {
+      let currLayer = layers[i];
+      let nextLayer = layers[i + 1];
+      let { bg_color: bgColor, bg_percent: bgPercent } = currLayer;
+
+      for (let j = 0; j < currLayer.data.length - 1; j++) {
+        if (j >= lastSurveyIdx) {
           bgPercent = 0.3;
         }
         // Each formation tile is drawn from four points arranged like this:
-        // p1    p2
-        //
-        // p4    p3
-        let p1 = formations[i].data[j];
-        let p2 = formations[i].data[j + 1];
-        let p3 = formations[i + 1].data[j + 1];
-        let p4 = formations[i + 1].data[j];
+        // p1  ->  p2
+        //         |
+        //         v
+        // p4  <-  p3
+        let p1 = currLayer.data[j];
+        let p2 = currLayer.data[j + 1];
+        let p3 = nextLayer.data[j + 1];
+        let p4 = nextLayer.data[j];
 
-        // The right side points determine the fault applied on drawing
+        // The right side points determine the tile fault
         const a1 = [p1.vs, p1.tot + p2.fault];
         const a2 = [p2.vs, p2.tot];
         const a3 = [p3.vs, p3.tot];
         const a4 = [p4.vs, p4.tot + p3.fault];
-        const p = [...a1, ...a2, ...a3, ...a4];
-        drawFormationSegment(bgColor, bgPercent, p, container);
+        const tilePath = [...a1, ...a2, ...a3, ...a4];
+
+        const p = new PIXI.Graphics();
+        p.lineStyle(0).beginFill(Number(`0x${bgColor}`), bgPercent);
+        p.drawPolygon(tilePath);
+        p.closePath();
+        container.addChild(p);
       }
     }
   }

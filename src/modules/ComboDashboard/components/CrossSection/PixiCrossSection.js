@@ -36,15 +36,15 @@ export default class PixiCrossSection {
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 50;
-    // Create the formation layers
-    this.formationsUpdate = drawFormations(this.formationsLayer);
 
+    this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer, props.surveys);
     this.projectionLineUpdate = drawProjections(this.wellPathLayer, props);
     this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
+
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
     this.newProps = true;
@@ -115,7 +115,7 @@ export default class PixiCrossSection {
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-    this.formationsUpdate(props.formations, props.surveys[props.surveys.length - 2]);
+    this.formationsUpdate(props);
     this.wellPlanUpdate(props.wellPlan);
     this.surveyUpdate(props.surveys);
     this.projectionLineUpdate(props);
