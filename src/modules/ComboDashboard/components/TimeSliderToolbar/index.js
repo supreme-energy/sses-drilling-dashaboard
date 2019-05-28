@@ -4,14 +4,29 @@ import { Card, CardActionArea, CircularProgress } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
-import classes from "./TimeSliderToolbar.scss";
+import { COLOR_BY_PHASE_VIEWER } from "../../../../constants/timeSlider";
 import { ON_SURFACE } from "../../../../constants/wellPathStatus";
+import classes from "./TimeSliderToolbar.scss";
 
 const TimeSliderContainer = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSliderContainer"));
+
+function graphReducer(state, action) {
+  switch (action.type) {
+    case "CHANGE_PHASE":
+      return COLOR_BY_PHASE_VIEWER[action.payload].graphs;
+    case "ADD":
+      return [...state, action.payload];
+    case "REMOVE":
+      return state.filter(item => item !== action.payload);
+    default:
+      return state;
+  }
+}
 
 function TimeSliderToolbar({ wellId }) {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
   const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
+  const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[ON_SURFACE].graphs);
 
   return (
     <Card className={classes.timeSliderToolbar}>
@@ -25,9 +40,15 @@ function TimeSliderToolbar({ wellId }) {
         expanded={expanded}
         drillPhase={drillPhase}
         setDrillPhase={setDrillPhase}
+        setSelectedMenuItem={setSelectedMenuItem}
       />
       <Suspense fallback={<CircularProgress />}>
-        <TimeSliderContainer drillPhase={drillPhase} expanded={expanded} wellId={wellId} />
+        <TimeSliderContainer
+          selectedMenuItems={selectedMenuItems}
+          setSelectedMenuItem={setSelectedMenuItem}
+          expanded={expanded}
+          wellId={wellId}
+        />
       </Suspense>
     </Card>
   );

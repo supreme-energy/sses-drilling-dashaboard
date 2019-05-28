@@ -12,9 +12,9 @@ function VerticalMenu({ className, id, selectedMenuItems, setSelectedMenuItem, m
     ({ currentTarget: { innerText } }) => {
       const selectedItem = innerText.toUpperCase();
       if (selectedMenuItems.includes(selectedItem)) {
-        setSelectedMenuItem(selectedMenuItems => selectedMenuItems.filter(item => item !== selectedItem));
+        setSelectedMenuItem({ type: "REMOVE", payload: selectedItem });
       } else {
-        setSelectedMenuItem(selectedMenuItems => [...selectedMenuItems, selectedItem]);
+        setSelectedMenuItem({ type: "ADD", payload: selectedItem });
       }
     },
     [selectedMenuItems, setSelectedMenuItem]

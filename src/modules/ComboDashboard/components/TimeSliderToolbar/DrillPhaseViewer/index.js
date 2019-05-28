@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { Card, Menu, MenuItem, Typography, ClickAwayListener, withStyles, CardActionArea } from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
@@ -49,15 +49,27 @@ function DrillPhase({ phase }) {
   );
 }
 
-function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPhase }) {
+function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPhase, setSelectedMenuItem }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const drillPhaseEnum = Object.keys(COLOR_BY_PHASE_VIEWER);
   const currPhase = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
   const drillPhaseCode = currPhase.split(" ")[1];
 
+  const handleClickAway = useCallback(() => {
+    setAnchorEl(null);
+  }, []);
+
+  const handleDrillPhaseSelect = useCallback(
+    phase => {
+      setDrillPhase(phase);
+      setSelectedMenuItem({ type: "CHANGE_PHASE", payload: phase });
+    },
+    [setDrillPhase, setSelectedMenuItem]
+  );
+
   return (
     <Card className={classNames(phaseClasses.drillPhaseCard, className)}>
-      <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
+      <ClickAwayListener onClickAway={handleClickAway}>
         <div className={phaseClasses.clickListenerContent}>
           <CardActionArea
             aria-owns={drillPhase ? "drill-phase-menu" : undefined}
@@ -87,7 +99,7 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
                   key={index}
                   className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
                   value={phase}
-                  onClick={() => setDrillPhase(phase)}
+                  onClick={() => handleDrillPhaseSelect(phase)}
                 >
                   <DrillPhase phase={phase} />
                   <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
@@ -107,7 +119,8 @@ DrillPhaseViewer.propTypes = {
   classes: PropTypes.object,
   expanded: PropTypes.bool,
   drillPhase: PropTypes.string,
-  setDrillPhase: PropTypes.func
+  setDrillPhase: PropTypes.func,
+  setSelectedMenuItem: PropTypes.func
 };
 
 export default withStyles(styles)(DrillPhaseViewer);
