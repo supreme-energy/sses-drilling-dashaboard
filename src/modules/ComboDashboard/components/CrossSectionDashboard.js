@@ -76,43 +76,43 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const projections = useProjections(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
-  const [selectedList, setSelectedList] = useReducer(singleSelectionReducer, []);
-  const [PADelta, PADeltaDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+  const [selectedSections, setselectedSections] = useReducer(singleSelectionReducer, []);
+  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const calculatedProjections = useMemo(() => {
-    const index = projections.findIndex(p => p.id === PADelta.id);
+    const index = projections.findIndex(p => p.id === ghostDiff.id);
     return projections.map((p, i) => {
       if (i === index) {
         return {
           ...p,
-          tvd: p.tvd + PADelta.tvd,
-          vs: p.vs + PADelta.vs,
-          tot: p.tot + PADelta.tot + PADelta.fault,
-          bot: p.bot + PADelta.bot + PADelta.fault,
-          tcl: p.tcl + PADelta.tcl + PADelta.fault,
-          fault: PADelta.fault
+          tvd: p.tvd + ghostDiff.tvd,
+          vs: p.vs + ghostDiff.vs,
+          tot: p.tot + ghostDiff.tot + ghostDiff.fault,
+          bot: p.bot + ghostDiff.bot + ghostDiff.fault,
+          tcl: p.tcl + ghostDiff.tcl + ghostDiff.fault,
+          fault: ghostDiff.fault
         };
       } else if (i > index) {
         // TODO: Confirm this results in the right display
         return {
           ...p,
-          tvd: p.tvd + PADelta.tot + PADelta.fault,
-          vs: p.vs + PADelta.vs
+          tvd: p.tvd + ghostDiff.tot + ghostDiff.fault,
+          vs: p.vs + ghostDiff.vs
         };
       } else {
         return { ...p };
       }
     });
-  }, [projections, PADelta]);
+  }, [projections, ghostDiff]);
 
-  const sectionList = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
+  const allSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
     surveys,
     lastSurveyIdx,
     calculatedProjections
   ]);
 
   const calculatedFormations = useMemo(() => {
-    const index = sectionList.findIndex(p => p.id === PADelta.id);
+    const index = allSections.findIndex(p => p.id === ghostDiff.id);
     // TODO: Determine if the bit projection formation point should be left in
     // Currently formations includes a point for the bit projection and sectionsList doesn't
     // Remove the bit projection from formations until we know how to handle that
@@ -130,15 +130,15 @@ export const CrossSectionDashboard = ({ wellId }) => {
           if (j === index) {
             return {
               ...point,
-              vs: point.vs + PADelta.vs,
-              tot: point.tot + PADelta.tot + PADelta.fault,
-              fault: PADelta.fault
+              vs: point.vs + ghostDiff.vs,
+              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
+              fault: ghostDiff.fault
             };
           } else if (j > index) {
             return {
               ...point,
-              vs: point.vs + PADelta.vs,
-              tot: point.tot + PADelta.tot + PADelta.fault,
+              vs: point.vs + ghostDiff.vs,
+              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
               fault: point.fault
             };
           }
@@ -146,17 +146,17 @@ export const CrossSectionDashboard = ({ wellId }) => {
         })
       };
     });
-  }, [formations, PADelta, sectionList, lastSurveyIdx]);
+  }, [formations, ghostDiff, allSections, lastSurveyIdx]);
 
   useEffect(() => {
-    const i = selectedList.findIndex(a => a === true);
+    const i = selectedSections.findIndex(a => a === true);
     if (i !== -1) {
-      PADeltaDispatch({ type: "init", section: sectionList[i], prevSection: sectionList[i - 1] });
+      ghostDiffDispatch({ type: "init", section: allSections[i], prevSection: allSections[i - 1] });
     }
     /* eslint react-hooks/exhaustive-deps: 0 */
-    /* This should only recalculate if the selected item changes.  Including either sectionList or
-     * selectedList themselves will cause this to calculate thousands of times in a few seconds */
-  }, [selectedList.join(",")]);
+    /* This should only recalculate if the selected item changes.  Including either allSections or
+     * selectedSections themselves will cause this to calculate thousands of times in a few seconds */
+  }, [selectedSections.join(",")]);
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
   const [view, setView] = useState({
@@ -196,12 +196,12 @@ export const CrossSectionDashboard = ({ wellId }) => {
             formations={formations}
             calculatedFormations={calculatedFormations}
             projections={projections}
-            sectionList={sectionList}
-            selectedList={selectedList}
-            setSelectedList={setSelectedList}
+            allSections={allSections}
+            selectedSections={selectedSections}
+            setselectedSections={setselectedSections}
             lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}
-            interactivePADispatch={PADeltaDispatch}
+            ghostDiffDispatch={ghostDiffDispatch}
           />
         )}
       </ParentSize>

@@ -15,7 +15,7 @@ import { subscribeToMoveEvents } from "./pixiUtils";
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { interactivePADispatch } = props;
+  const { ghostDiffDispatch } = props;
   const red = 0xee2211;
   const white = 0xffffff;
 
@@ -37,7 +37,7 @@ function interactiveProjection(parent, props) {
   prevTot.transform.updateTransform = frozenScaleTransform;
   container.addChild(prevTot);
   subscribeToMoveEvents(prevTot, function(pos) {
-    interactivePADispatch({
+    ghostDiffDispatch({
       type: "fault_tot",
       tot: pos.y
     });
@@ -48,7 +48,7 @@ function interactiveProjection(parent, props) {
   prevBot.transform.updateTransform = frozenScaleTransform;
   container.addChild(prevBot);
   subscribeToMoveEvents(prevBot, function(pos) {
-    interactivePADispatch({
+    ghostDiffDispatch({
       type: "fault_bot",
       bot: pos.y
     });
@@ -61,7 +61,7 @@ function interactiveProjection(parent, props) {
   currTot.transform.updateTransform = frozenScaleTransform;
   container.addChild(currTot);
   subscribeToMoveEvents(currTot, function(pos) {
-    interactivePADispatch({
+    ghostDiffDispatch({
       type: "dip_tot",
       vs: pos.x,
       tot: pos.y
@@ -75,7 +75,7 @@ function interactiveProjection(parent, props) {
   currBot.transform.updateTransform = frozenScaleTransform;
   container.addChild(currBot);
   subscribeToMoveEvents(currBot, function(pos) {
-    interactivePADispatch({
+    ghostDiffDispatch({
       type: "dip_bot",
       vs: pos.x,
       bot: pos.y
@@ -89,7 +89,7 @@ function interactiveProjection(parent, props) {
   paMarker.transform.updateTransform = frozenScaleTransform;
   container.addChild(paMarker);
   subscribeToMoveEvents(paMarker, function(pos) {
-    interactivePADispatch({
+    ghostDiffDispatch({
       type: "pa",
       tvd: pos.y,
       vs: pos.x
@@ -97,8 +97,8 @@ function interactiveProjection(parent, props) {
   });
 
   return props => {
-    const { selectedList, lastSurveyIdx, sectionList } = props;
-    const selectedIndex = selectedList.findIndex(e => e);
+    const { selectedSections, lastSurveyIdx, allSections } = props;
+    const selectedIndex = selectedSections.findIndex(e => e);
     // If there isn't a selected project ahead segment, don't display the interactive component
     if (selectedIndex === -1 || selectedIndex <= lastSurveyIdx) {
       container.visible = false;
@@ -112,8 +112,8 @@ function interactiveProjection(parent, props) {
     const { x, y, xScale, yScale } = props.view;
     const xMap = val => val * xScale + x;
     const yMap = val => val * yScale + y;
-    const prev = sectionList[selectedIndex - 1];
-    const pa = sectionList[selectedIndex];
+    const prev = allSections[selectedIndex - 1];
+    const pa = allSections[selectedIndex];
 
     prevTot.position.x = prev.vs;
     prevTot.position.y = prev.tot + pa.fault;
