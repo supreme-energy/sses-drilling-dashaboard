@@ -85,15 +85,15 @@ function TimeSlider({
   }, [width, data, height, onReset]);
 
   useEffect(() => {
-      refresh();
+    refresh();
   }, [refresh, stage, data, view, width, height, selectedGraphs]);
 
   useEffect(() => {
-      if (!zoom[1]) onReset();
+    if (!zoom[1]) onReset();
   }, [onReset, zoom]);
 
   useEffect(() => {
-      if (expanded) onReset();
+    if (expanded) onReset();
   }, [expanded, onReset]);
 
   useEffect(() => {
@@ -178,7 +178,7 @@ function TimeSlider({
           if (LINE_GRAPHS.includes(graph)) {
             return (
               <PixiContainer
-                key={index}
+                key={graph}
                 container={viewport}
                 child={container => (
                   <PixiLine
@@ -194,7 +194,7 @@ function TimeSlider({
             // TODO Implement based on real data
             return (
               <PixiContainer
-                key={index}
+                key={graph}
                 container={viewport}
                 child={container =>
                   data.map((data, barIndex) => {

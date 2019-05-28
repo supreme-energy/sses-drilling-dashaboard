@@ -67,9 +67,9 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
 
   useEffect(() => {
     // Stop zoom if mouseup happens outside component
-    window.addEventListener("mouseup", onMouseUp, false);
+    window.addEventListener("mouseup", onMouseUp);
     return () => {
-      window.removeEventListener("mouseup", onMouseUp, false);
+      window.removeEventListener("mouseup", onMouseUp);
     };
   }, [onMouseUp]);
 
