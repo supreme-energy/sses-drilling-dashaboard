@@ -20,7 +20,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
       if (newStep <= maxSliderStep) return [sliderStep[0] + STEP_SIZE, 1];
       return sliderStep;
     });
-    speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
+    speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
   }, [setSliderStep, setIsSpeeding, maxSliderStep]);
 
   const onRewindDown = useCallback(() => {
@@ -29,11 +29,11 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
       if (sliderStep[0] && newStep >= 0) return [sliderStep[0] - STEP_SIZE, -1];
       return sliderStep;
     });
-    speedingTimeout = setTimeout(() => setIsSpeeding(true), 500);
+    speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
   }, [setIsSpeeding, setSliderStep]);
 
   const onMouseUp = useCallback(() => {
-    clearTimeout(speedingTimeout);
+    // clearTimeout(speedingTimeout.current);
     setIsSpeeding(false);
   }, [setIsSpeeding]);
 
@@ -74,12 +74,12 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   }, [onMouseUp]);
 
   return (
-    <div className={classes.timeControls} onMouseUp={onMouseUp}>
-      <IconButton onMouseDown={onRewindDown} onMouseUp={onMouseUp}>
+    <div className={classes.timeControls}>
+      <IconButton onMouseDown={onRewindDown}>
         <FastRewind />
       </IconButton>
       <IconButton onClick={onPlayClick}>{isPlaying ? <PauseCircleOutline /> : <PlayCircleOutline />}</IconButton>
-      <IconButton onMouseDown={onForwardDown} onMouseUp={onMouseUp}>
+      <IconButton onMouseDown={onForwardDown}>
         <FastForward />
       </IconButton>
     </div>

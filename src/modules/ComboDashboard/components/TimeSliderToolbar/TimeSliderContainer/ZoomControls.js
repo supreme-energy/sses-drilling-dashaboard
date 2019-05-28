@@ -41,17 +41,17 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
     return () => {
       window.removeEventListener("mouseup", onMouseUp, false);
     };
-  }, [onMouseUp])
+  }, [onMouseUp]);
 
   return (
     <div className={className}>
-      <IconButton onMouseDown={onZoomOutDown} onMouseUp={onMouseUp} disabled={zoomOutDisabled}>
+      <IconButton onMouseDown={onZoomOutDown} disabled={zoomOutDisabled}>
         <RemoveCircleOutline />
       </IconButton>
       <IconButton onClick={handleResetZoom}>
         <Adjust />
       </IconButton>
-      <IconButton onMouseDown={onZoomInDown} onMouseUp={onMouseUp} disabled={zoomInDisabled}>
+      <IconButton onMouseDown={onZoomInDown} disabled={zoomInDisabled}>
         <AddCircleOutline />
       </IconButton>
     </div>
