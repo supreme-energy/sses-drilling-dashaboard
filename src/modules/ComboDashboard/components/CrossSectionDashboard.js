@@ -29,6 +29,7 @@ function PADeltaReducer(state, action) {
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
+      console.log(state);
       depthDelta = action.tot - op.tot - state.fault;
       return {
         ...state,
@@ -113,7 +114,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   const calculatedFormations = useMemo(() => {
     const index = allSections.findIndex(p => p.id === ghostDiff.id);
-    // TODO: Determine if the bit projection formation point should be left in
+    // TODO: Rewrite so the bit projection forms it's own section
     // Currently formations includes a point for the bit projection and sectionsList doesn't
     // Remove the bit projection from formations until we know how to handle that
     const f = formations.map(f => {
@@ -151,6 +152,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   useEffect(() => {
     const i = selectedSections.findIndex(a => a === true);
     if (i !== -1) {
+      // TODO use unmodified sections for initialization instead of edited.
       ghostDiffDispatch({ type: "init", section: allSections[i], prevSection: allSections[i - 1] });
     }
     /* eslint react-hooks/exhaustive-deps: 0 */
