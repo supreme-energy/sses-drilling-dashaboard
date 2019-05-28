@@ -7,12 +7,10 @@ import * as PIXI from "pixi.js";
 export function drawFormations(container) {
   const layerTiles = [];
 
-  const createTiles = function(points) {
-    return points.map(() => {
-      let tile = new PIXI.Graphics();
-      container.addChild(tile);
-      return tile;
-    });
+  const createTile = function() {
+    let tile = new PIXI.Graphics();
+    container.addChild(tile);
+    return tile;
   };
 
   return update;
@@ -20,16 +18,16 @@ export function drawFormations(container) {
   function update(props) {
     const { calculatedFormations: layers, lastSurveyIdx } = props;
     if (!layers || !layers.length) return;
-    // TODO: Handle updated formation data (for instance adjusting a projection point)
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       let currLayer = layers[layerIdx];
       let nextLayer = layers[layerIdx + 1];
       let { bg_color: currColor, bg_percent: currAlpha } = currLayer;
-      if (!layerTiles[layerIdx]) {
-        layerTiles[layerIdx] = createTiles(currLayer.data);
-      }
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
+        if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
+        if (!layerTiles[layerIdx][pointIdx]) {
+          layerTiles[layerIdx][pointIdx] = createTile();
+        }
         if (pointIdx >= lastSurveyIdx) {
           currAlpha = 0.3;
         }
@@ -50,12 +48,9 @@ export function drawFormations(container) {
         const a4 = [p4.vs, p4.tot + p3.fault];
         const tilePath = [...a1, ...a2, ...a3, ...a4];
 
-        const p = layerTiles[layerIdx][pointIdx];
-        p.clear()
-          .lineStyle(0)
-          .beginFill(Number(`0x${currColor}`), currAlpha);
-        p.drawPolygon(tilePath);
-        p.closePath();
+        const tile = layerTiles[layerIdx][pointIdx];
+        tile.clear().beginFill(Number(`0x${currColor}`), currAlpha);
+        tile.drawPolygon(tilePath);
       }
     }
   }
