@@ -5,11 +5,10 @@ import * as PIXI from "pixi.js";
  * @param container The PIXI container that will get the formations
  */
 export function drawFormations(container) {
-  let prevFormationsLength = 0;
-  const formationGraphicsArray = [];
+  const layerTiles = [];
 
-  const createTiles = function(layers) {
-    layers.map(() => {
+  const createTiles = function(points) {
+    return points.map(() => {
       let tile = new PIXI.Graphics();
       container.addChild(tile);
       return tile;
@@ -19,31 +18,30 @@ export function drawFormations(container) {
   return update;
 
   function update(props) {
-    const { formations: layers, lastSurveyIdx } = props;
-    if (!layers || !layers.length || layers.length === prevFormationsLength) return;
-    prevFormationsLength = layers.length;
+    const { calculatedFormations: layers, lastSurveyIdx } = props;
+    if (!layers || !layers.length) return;
     // TODO: Handle updated formation data (for instance adjusting a projection point)
-    for (let i = 0; i < layers.length - 1; i++) {
-      if (!formationGraphicsArray[i]) {
-        formationGraphicsArray[i] = createTiles(layers[i].data);
+    for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
+      let currLayer = layers[layerIdx];
+      let nextLayer = layers[layerIdx + 1];
+      let { bg_color: currColor, bg_percent: currAlpha } = currLayer;
+      if (!layerTiles[layerIdx]) {
+        layerTiles[layerIdx] = createTiles(currLayer.data);
       }
-      let currLayer = layers[i];
-      let nextLayer = layers[i + 1];
-      let { bg_color: bgColor, bg_percent: bgPercent } = currLayer;
 
-      for (let j = 0; j < currLayer.data.length - 1; j++) {
-        if (j >= lastSurveyIdx) {
-          bgPercent = 0.3;
+      for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
+        if (pointIdx >= lastSurveyIdx) {
+          currAlpha = 0.3;
         }
         // Each formation tile is drawn from four points arranged like this:
         // p1  ->  p2
         //         |
         //         v
         // p4  <-  p3
-        let p1 = currLayer.data[j];
-        let p2 = currLayer.data[j + 1];
-        let p3 = nextLayer.data[j + 1];
-        let p4 = nextLayer.data[j];
+        const p1 = currLayer.data[pointIdx];
+        const p2 = currLayer.data[pointIdx + 1];
+        const p3 = nextLayer.data[pointIdx + 1];
+        const p4 = nextLayer.data[pointIdx];
 
         // The right side points determine the tile fault
         const a1 = [p1.vs, p1.tot + p2.fault];
@@ -52,11 +50,12 @@ export function drawFormations(container) {
         const a4 = [p4.vs, p4.tot + p3.fault];
         const tilePath = [...a1, ...a2, ...a3, ...a4];
 
-        const p = new PIXI.Graphics();
-        p.lineStyle(0).beginFill(Number(`0x${bgColor}`), bgPercent);
+        const p = layerTiles[layerIdx][pointIdx];
+        p.clear()
+          .lineStyle(0)
+          .beginFill(Number(`0x${currColor}`), currAlpha);
         p.drawPolygon(tilePath);
         p.closePath();
-        container.addChild(p);
       }
     }
   }

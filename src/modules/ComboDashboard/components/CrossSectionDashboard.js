@@ -96,7 +96,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
         // TODO: Confirm this results in the right display
         return {
           ...p,
-          tvd: p.tvd + PADelta.fault,
+          tvd: p.tvd + PADelta.tot + PADelta.fault,
           vs: p.vs + PADelta.vs
         };
       } else {
@@ -111,12 +111,52 @@ export const CrossSectionDashboard = ({ wellId }) => {
     calculatedProjections
   ]);
 
+  const calculatedFormations = useMemo(() => {
+    let index = sectionList.findIndex(p => p.id === PADelta.id);
+    // TODO: Determine if the bit projection formation point should be left in
+    // Currently formations includes a point for the bit projection and sectionsList doesn't
+    // Remove the bit projection from formations until we know how to handle that
+    let f = formations.map(f => {
+      return {
+        ...f,
+        data: f.data.filter((p, i) => i !== lastSurveyIdx + 1)
+      };
+    });
+
+    return f.map(layer => {
+      return {
+        ...layer,
+        data: layer.data.map((point, j) => {
+          if (j === index) {
+            return {
+              ...point,
+              vs: point.vs + PADelta.vs,
+              tot: point.tot + PADelta.tot + PADelta.fault,
+              fault: PADelta.fault
+            };
+          } else if (j > index) {
+            return {
+              ...point,
+              vs: point.vs + PADelta.vs,
+              tot: point.tot + PADelta.tot + PADelta.fault,
+              fault: point.fault
+            };
+          }
+          return { ...point };
+        })
+      };
+    });
+  }, [formations, PADelta, sectionList, lastSurveyIdx]);
+
   useEffect(() => {
     let i = selectedList.findIndex(a => a === true);
     if (i !== -1) {
       PADeltaDispatch({ type: "init", section: sectionList[i], prevSection: sectionList[i - 1] });
     }
-  }, [selectedList.join(",")]); // array changes size and useEffect doesn't like that, so join instead
+    /* eslint react-hooks/exhaustive-deps: 0 */
+    /* This should only recalculate if the selected item changes.  Including either sectionList or
+     * selectedList themselves will cause this to calculate thousands of times in a few seconds */
+  }, [selectedList.join(",")]);
 
   const [view, setView] = useState({
     x: -844,
@@ -203,6 +243,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             wellPlan={wellPlan}
             surveys={surveys}
             formations={formations}
+            calculatedFormations={calculatedFormations}
             projections={projections}
             sectionList={sectionList}
             selectedList={selectedList}
