@@ -158,6 +158,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
      * selectedList themselves will cause this to calculate thousands of times in a few seconds */
   }, [selectedList.join(",")]);
 
+  // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
   const [view, setView] = useState({
     x: -844,
     y: -16700,
@@ -182,57 +183,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   return (
     <Suspense fallback={<Progress />}>
-      <div>
-        <h2>Dev debugging data</h2>
-        <div>
-          <label>
-            X value
-            <input
-              type="number"
-              value={view.x}
-              onChange={e => {
-                const value = e.target.value;
-                return mergeView({ x: value });
-              }}
-            />
-          </label>
-          <label>
-            Y value
-            <input
-              type="number"
-              value={view.y}
-              onChange={e => {
-                const value = e.target.value;
-                return mergeView({ y: value });
-              }}
-            />
-          </label>
-          <label>
-            xScale
-            <input
-              type="number"
-              step="0.001"
-              value={view.xScale}
-              onChange={e => {
-                const value = e.target.value;
-                return mergeView({ xScale: value });
-              }}
-            />
-          </label>
-          <label>
-            yScale
-            <input
-              type="number"
-              step="0.001"
-              value={view.yScale}
-              onChange={e => {
-                const value = e.target.value;
-                return mergeView({ yScale: value });
-              }}
-            />
-          </label>
-        </div>
-      </div>
+      <h2>Cross-section</h2>
       <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
         {({ width, height }) => (
           <CrossSection
