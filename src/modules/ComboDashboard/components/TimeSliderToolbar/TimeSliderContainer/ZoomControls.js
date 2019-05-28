@@ -1,39 +1,83 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { STEP_SIZE } from "../../../../../constants/timeSlider";
+import { GRID_GUTTER } from "../../../../../constants/timeSlider";
 
-function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomInDisabled, zoomOutDisabled }) {
+function ZoomControls({
+  className,
+  zoomType,
+  setZoomType,
+  zoomInDisabled,
+  zoomOutDisabled,
+  updateView,
+  width,
+  maxSliderStep,
+  step,
+  dataSize,
+  getInitialViewXScaleValue,
+  onReset
+}) {
   let zoomTimeout = useRef(null);
+  const graphTotalLength = dataSize;
+  const stepFactor = useMemo(() => {
+    return ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
+  }, [step, width, maxSliderStep]);
+
+  const onZoom = useCallback(
+    type => {
+      if (type) {
+        updateView(prev => {
+          const factor = type === "IN" ? 1.03 : 0.97;
+          const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
+          const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
+          // Graph should either take up entire view, or be larger than view
+          const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
+          const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
+          let newX = stepFactor - (stepFactor - prev.x) * factor;
+          let newScale = prev.xScale * factor;
+          if (!isVisibleOverflow && type === "IN") {
+            newX = newX + (width - graphVisibleLength - GRID_GUTTER);
+          } else if (!isTotalOverflow && !isVisibleOverflow && type === "OUT") {
+            newX = 0;
+            newScale = getInitialViewXScaleValue(width - GRID_GUTTER);
+          }
+
+          return {
+            ...prev,
+            x: newX <= 0 ? newX : prev.x,
+            xScale: newScale
+          };
+        });
+      }
+    },
+    [getInitialViewXScaleValue, graphTotalLength, updateView, width, stepFactor]
+  );
 
   const handleResetZoom = useCallback(() => {
-    setZoom([0, 0]);
-  }, [setZoom]);
+    onReset();
+  }, [onReset]);
 
   const onZoomInDown = useCallback(() => {
-    setZoom(zoom => [zoom[0] + STEP_SIZE, 1]);
-    zoomTimeout.current = setTimeout(() => setIsZooming(true), 600);
-  }, [setZoom, setIsZooming]);
+    onZoom("IN");
+    zoomTimeout.current = setTimeout(() => setZoomType("IN"), 600);
+  }, [onZoom, setZoomType]);
 
   const onZoomOutDown = useCallback(() => {
-    setZoom(zoom => [zoom[0] - STEP_SIZE, -1]);
-    zoomTimeout.current = setTimeout(() => setIsZooming(true), 600);
-  }, [setZoom, setIsZooming]);
+    onZoom("OUT");
+    zoomTimeout.current = setTimeout(() => setZoomType("OUT"), 600);
+  }, [onZoom, setZoomType]);
 
   const onMouseUp = useCallback(() => {
     clearTimeout(zoomTimeout.current);
-    setIsZooming(false);
-  }, [setIsZooming]);
+    setZoomType("");
+  }, [setZoomType]);
 
   // Determine if zooming in a particular direction is enabled
-  const isZoomingEnabled = (zoom[1] > 0 && !zoomInDisabled) || (zoom[1] < 0 && !zoomOutDisabled);
-  useInterval(
-    () => setZoom(zoom => [zoom[0] + STEP_SIZE * zoom[1], zoom[1]]),
-    isZooming && isZoomingEnabled ? 50 : null
-  );
+  const isZoomingEnabled = (zoomType === "IN" && !zoomInDisabled) || (zoomType === "OUT" && !zoomOutDisabled);
+  useInterval(() => onZoom(zoomType), zoomType && isZoomingEnabled ? 50 : null);
 
   useEffect(() => {
     // Stop zoom if mouseup happens outside component
@@ -60,12 +104,22 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
 
 ZoomControls.propTypes = {
   className: PropTypes.string,
-  setZoom: PropTypes.func,
-  isZooming: PropTypes.bool,
-  setIsZooming: PropTypes.func,
-  zoom: PropTypes.arrayOf(PropTypes.number),
+  zoomType: PropTypes.string,
+  setZoomType: PropTypes.func,
   zoomInDisabled: PropTypes.bool,
-  zoomOutDisabled: PropTypes.bool
+  zoomOutDisabled: PropTypes.bool,
+  updateView: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+    xScale: PropTypes.number,
+    yScale: PropTypes.number
+  }),
+  width: PropTypes.number,
+  maxSliderStep: PropTypes.number,
+  step: PropTypes.number,
+  dataSize: PropTypes.number,
+  getInitialViewXScaleValue: PropTypes.number,
+  onReset: PropTypes.func
 };
 
 export default ZoomControls;

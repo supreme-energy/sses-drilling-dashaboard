@@ -1,8 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useCallback, forwardRef } from "react";
 import PropTypes from "prop-types";
 import Slider from "@material-ui/lab/Slider";
-import { useSize } from "react-hook-size";
-import get from "lodash/get";
 import classNames from "classnames";
 
 import useRef from "react-powertools/hooks/useRef";
@@ -12,41 +10,15 @@ import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/R
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH, GRID_GUTTER } from "../../../../../../constants/timeSlider";
-import { computeInitialViewXScaleValue, computeInitialViewYScaleValue, mapRop, mapSlide } from "./TimeSliderUtil";
+import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
+import { mapRop, mapSlide } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
-function TimeSlider({
-  expanded,
-  zoom,
-  step,
-  setSliderStep,
-  selectedGraphs,
-  setGlobalDates,
-  data,
-  maxStep,
-  setMaxStep
-}) {
-  const canvasRef = useRef(null);
-  const { width, height } = useSize(canvasRef);
-  const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
-
-  const getInitialViewYScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
-    [data]
-  );
-
-  const getInitialViewXScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
-    [data]
-  );
-
-  const [view, updateView] = useState({
-    x: GRID_GUTTER,
-    y: 0,
-    xScale: 1,
-    yScale: 1
-  });
+function Slide(
+  { expanded, step, setSliderStep, selectedGraphs, data, maxStep, view, updateView, onReset, width, height },
+  ref
+) {
+  const [stage, refresh, renderer] = useWebGLRenderer({ canvas: ref.current, width, height });
 
   const scaleInitialized = useRef(false);
   const viewportContainer = useRef(null);
@@ -59,22 +31,8 @@ function TimeSlider({
     view,
     updateView,
     zoomXScale: false,
-    zoomYScale: true,
-    step,
-    maxStep,
-    zoom,
-    dataSize: data.length
+    zoomYScale: true
   });
-
-  const onReset = useCallback(() => {
-    updateView(view => ({
-      ...view,
-      x: 0,
-      y: 0,
-      yScale: getInitialViewYScaleValue(height),
-      xScale: getInitialViewXScaleValue(width - GRID_GUTTER)
-    }));
-  }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
 
   // set initial scale
   useEffect(() => {
@@ -88,78 +46,6 @@ function TimeSlider({
     refresh();
   }, [refresh, stage, data, view, width, height, selectedGraphs]);
 
-  useEffect(() => {
-    if (!zoom[1]) onReset();
-  }, [onReset, zoom]);
-
-  useEffect(() => {
-    if (expanded) onReset();
-  }, [expanded, onReset]);
-
-  useEffect(() => {
-    setMaxStep(data.length);
-  }, [data, setMaxStep]);
-
-  useEffect(() => {
-    setSliderStep(step => [data.length, step[1]]);
-  }, [data, setSliderStep]);
-
-  useEffect(() => {
-    if (expanded) {
-      setMaxStep(prevMaxStep => {
-        const newMaxStep = (width - GRID_GUTTER) / view.xScale;
-        setSliderStep(prevStep => [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]]);
-        return newMaxStep;
-      });
-    }
-  }, [setMaxStep, setSliderStep, width, expanded, view.xScale]);
-
-  useEffect(() => {
-    const stepFactor = step / maxStep;
-    const hiddenDataLength = Math.abs(view.x) / view.xScale;
-    const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
-    const endDataIndex = stepFactor ? stepFactor * visibleDataLength + hiddenDataLength - 1 : 0;
-
-    const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
-    const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
-
-    setGlobalDates([beginningDate, endDate]);
-  }, [data, setGlobalDates, width, view, step, maxStep]);
-
-  useEffect(() => {
-    if (zoom && zoom[1] !== 0) {
-      const factor = 1 + zoom[1] * 0.03;
-
-      // Calc new view, bound graph to sides of canvas when zooming
-      updateView(prev => {
-        const stepFactor = ((step * (width + GRID_GUTTER)) / maxStep).toFixed(2);
-        const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
-        const graphTotalLength = data.length;
-        const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
-
-        // Graph should either take up entire view, or be larger than view
-        const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
-        const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
-
-        let newX = stepFactor - (stepFactor - prev.x) * factor;
-        let newScale = prev.xScale * factor;
-
-        if (!isVisibleOverflow && zoom[1] > 0) {
-          newX = newX + (width - graphVisibleLength - GRID_GUTTER);
-        } else if (!isTotalOverflow && !isVisibleOverflow && zoom[1] < 0) {
-          newX = 0;
-          newScale = getInitialViewXScaleValue(width - GRID_GUTTER);
-        }
-
-        return {
-          ...prev,
-          x: newX <= 0 ? newX : prev.x,
-          xScale: newScale
-        };
-      });
-    }
-  }, [zoom, updateView, width, data, getInitialViewXScaleValue]);
-
   const handleDragSlider = useCallback(
     (_, currentStep) => {
       setSliderStep([currentStep, 1]);
@@ -169,10 +55,7 @@ function TimeSlider({
 
   return (
     <div className={classes.timeSliderComponent}>
-      <div
-        className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
-        ref={canvasRef}
-      >
+      <div className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)} ref={ref}>
         <PixiContainer ref={viewportContainer} container={stage} />
         {selectedGraphs.map((graph, index) => {
           if (LINE_GRAPHS.includes(graph)) {
@@ -229,13 +112,13 @@ function TimeSlider({
   );
 }
 
+const TimeSlider = forwardRef(Slide);
+
 TimeSlider.propTypes = {
   expanded: PropTypes.bool,
   step: PropTypes.number,
-  zoom: PropTypes.arrayOf(PropTypes.number),
   setSliderStep: PropTypes.func,
   selectedGraphs: PropTypes.arrayOf(PropTypes.string),
-  setGlobalDates: PropTypes.func,
   data: PropTypes.arrayOf(PropTypes.object),
   maxStep: PropTypes.number,
   setMaxStep: PropTypes.func
