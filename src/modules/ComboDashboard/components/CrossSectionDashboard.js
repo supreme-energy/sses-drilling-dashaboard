@@ -29,7 +29,7 @@ function PADeltaReducer(state, action) {
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
-      depthDelta = action.tot - op.tot;
+      depthDelta = action.tot - op.tot - state.fault;
       return {
         ...state,
         tot: depthDelta,
@@ -38,12 +38,12 @@ function PADeltaReducer(state, action) {
         tcl: depthDelta
       };
     case "dip_bot":
-      depthDelta = action.bot - op.bot;
+      depthDelta = action.bot - op.bot - state.fault;
       return {
         ...state,
-        bot: depthDelta,
-        vs: action.vs - op.vs,
         tot: depthDelta,
+        vs: action.vs - op.vs,
+        bot: depthDelta,
         tcl: depthDelta
       };
     case "fault_tot":
