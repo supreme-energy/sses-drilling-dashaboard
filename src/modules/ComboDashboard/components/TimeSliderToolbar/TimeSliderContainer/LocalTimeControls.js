@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
@@ -7,8 +7,9 @@ import { useInterval } from "./useInterval";
 import { STEP_SIZE } from "../../../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
-let speedingTimeout;
 function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding, setIsSpeeding, maxSliderStep }) {
+  let speedingTimeout = useRef(null);
+
   const onPlayClick = useCallback(() => {
     setIsPlaying();
   }, [setIsPlaying]);
@@ -64,8 +65,13 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
     isSpeeding ? 100 : null
   );
 
-  // Stop Slider if mouseup happens outside component
-  window.addEventListener("mouseup", onMouseUp, false);
+  useEffect(() => {
+    // Stop zoom if mouseup happens outside component
+    window.addEventListener("mouseup", onMouseUp, false);
+    return () => {
+      window.removeEventListener("mouseup", onMouseUp, false);
+    };
+  }, [onMouseUp]);
 
   return (
     <div className={classes.timeControls} onMouseUp={onMouseUp}>

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
@@ -6,24 +6,25 @@ import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icon
 import { useInterval } from "./useInterval";
 import { STEP_SIZE } from "../../../../../constants/timeSlider";
 
-let zoomTimeout;
 function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomInDisabled, zoomOutDisabled }) {
+  let zoomTimeout = useRef(null);
+
   const handleResetZoom = useCallback(() => {
     setZoom([0, 0]);
   }, [setZoom]);
 
   const onZoomInDown = useCallback(() => {
     setZoom(zoom => [zoom[0] + STEP_SIZE, 1]);
-    zoomTimeout = setTimeout(() => setIsZooming(true), 600);
+    zoomTimeout.current = setTimeout(() => setIsZooming(true), 600);
   }, [setZoom, setIsZooming]);
 
   const onZoomOutDown = useCallback(() => {
     setZoom(zoom => [zoom[0] - STEP_SIZE, -1]);
-    zoomTimeout = setTimeout(() => setIsZooming(true), 600);
+    zoomTimeout.current = setTimeout(() => setIsZooming(true), 600);
   }, [setZoom, setIsZooming]);
 
   const onMouseUp = useCallback(() => {
-    clearTimeout(zoomTimeout);
+    clearTimeout(zoomTimeout.current);
     setIsZooming(false);
   }, [setIsZooming]);
 
@@ -34,8 +35,13 @@ function ZoomControls({ className, setZoom, isZooming, setIsZooming, zoom, zoomI
     isZooming && isZoomingEnabled ? 50 : null
   );
 
-  // Stop zoom if mouseup happens outside component
-  window.addEventListener("mouseup", onMouseUp, false);
+  useEffect(() => {
+    // Stop zoom if mouseup happens outside component
+    window.addEventListener("mouseup", onMouseUp, false);
+    return () => {
+      window.removeEventListener("mouseup", onMouseUp, false);
+    };
+  }, [onMouseUp])
 
   return (
     <div className={className}>

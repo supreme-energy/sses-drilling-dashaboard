@@ -77,36 +77,24 @@ function TimeSlider({
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
 
   // set initial scale
-  useEffect(
-    function setInitialXScale() {
-      if (data && data.length && width && height && !scaleInitialized.current) {
-        onReset();
-        scaleInitialized.current = true;
-      }
-    },
-    [width, data, height, onReset]
-  );
+  useEffect(() => {
+    if (data && data.length && width && height && !scaleInitialized.current) {
+      onReset();
+      scaleInitialized.current = true;
+    }
+  }, [width, data, height, onReset]);
 
-  useEffect(
-    function refreshWebGLRenderer() {
+  useEffect(() => {
       refresh();
-    },
-    [refresh, stage, data, view, width, height, selectedGraphs]
-  );
+  }, [refresh, stage, data, view, width, height, selectedGraphs]);
 
-  useEffect(
-    function resetZoom() {
+  useEffect(() => {
       if (!zoom[1]) onReset();
-    },
-    [onReset, zoom]
-  );
+  }, [onReset, zoom]);
 
-  useEffect(
-    function resetOnExpand() {
+  useEffect(() => {
       if (expanded) onReset();
-    },
-    [expanded, onReset]
-  );
+  }, [expanded, onReset]);
 
   useEffect(() => {
     setMaxStep(data.length);
