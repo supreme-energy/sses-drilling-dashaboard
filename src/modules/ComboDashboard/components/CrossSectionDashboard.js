@@ -161,12 +161,25 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [selectedSections, rawSections]);
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
+  // TODO: This should all be a reducer
   const [view, setView] = useState({
     x: -844,
     y: -16700,
     xScale: 2.14,
     yScale: 2.14
   });
+  const viewObj = {
+    ...view,
+    scale: function(xVal, yVal) {
+      return [xVal * view.xScale + view.x, yVal * view.yScale + view.y];
+    },
+    scaleByX: function(val) {
+      return view.scale(val, 0)[0];
+    },
+    scaleByY: function(val) {
+      return view.scale(0, val)[1];
+    }
+  };
   const mergeView = useCallback(function(value) {
     // Implement merging here so we don't have to everywhere else
     setView(prev => {
@@ -191,7 +204,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
           <CrossSection
             width={width}
             height={height}
-            view={view}
+            view={viewObj}
             updateView={mergeView}
             wellPlan={wellPlan}
             surveys={surveys}
