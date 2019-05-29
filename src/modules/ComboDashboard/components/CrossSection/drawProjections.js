@@ -8,7 +8,6 @@ import { frozenScaleTransform } from "./customPixiTransforms";
  */
 function drawProjections(container, props) {
   const projectionGraphics = [];
-  let prevDataLength = props.projections.length;
 
   const addProjection = function() {
     let marker = new PIXI.Graphics();
@@ -23,9 +22,9 @@ function drawProjections(container, props) {
 
   return update;
 
-  function update(projections) {
-    if (!projections.length || projections.length === prevDataLength) return;
-    prevDataLength = projections.length;
+  function update(props) {
+    const { calculatedProjections: projections } = props;
+    if (!projections.length) return;
 
     for (let i = 0; i < projections.length; i++) {
       if (!projectionGraphics[i]) projectionGraphics[i] = addProjection();
