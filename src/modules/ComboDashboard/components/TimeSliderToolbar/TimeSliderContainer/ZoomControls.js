@@ -37,7 +37,7 @@ function ZoomControls({
           const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
 
           let newX = stepFactor - (stepFactor - prev.x) * factor;
-          let newScale = prev.xScale * factor;
+          const newScale = prev.xScale * factor;
 
           // Adjust graph if zoom moves it out of view
           if (!isVisibleOverflow) {
