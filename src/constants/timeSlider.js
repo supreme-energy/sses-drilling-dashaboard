@@ -1,17 +1,24 @@
 import { ON_CURVE, ON_LATERAL, ON_DRILLOUT, ON_INTERMEDIATE, ON_SURFACE } from "./wellPathStatus";
 import { GREEN, GRAY } from "./colors";
 
+// Slider constants
 export const STEP_SIZE = 1;
 export const GRID_GUTTER = 1;
 
+// Graphs
 export const CONNECTION = "CONNECTION";
 export const ROP = "ROP";
 export const SLIDE = "SLIDE";
 export const LENGTH = "LENGTH";
 export const PLANNED_ANGLE = "PLANNED ANGLE";
 
+// Graph types
 export const LINE_GRAPHS = [ROP, LENGTH];
 export const BAR_GRAPHS = [SLIDE, CONNECTION];
+
+// Zoom constants
+export const ZOOM_IN = "ZOOM IN";
+export const ZOOM_OUT = "ZOOM OUT";
 
 export const COLOR_BY_PHASE_VIEWER = {
   [ON_SURFACE]: {

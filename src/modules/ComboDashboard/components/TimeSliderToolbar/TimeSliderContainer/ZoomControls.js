@@ -4,7 +4,7 @@ import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { GRID_GUTTER } from "../../../../../constants/timeSlider";
+import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../../../constants/timeSlider";
 
 function ZoomControls({
   className,
@@ -29,7 +29,7 @@ function ZoomControls({
       if (type) {
         updateView(prev => {
           const stepFactor = ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
-          const factor = type === "IN" ? 1.03 : 0.97;
+          const factor = type === ZOOM_IN ? 1.03 : 0.97;
           const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
           const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
 
@@ -60,13 +60,13 @@ function ZoomControls({
   }, [onReset]);
 
   const onZoomInDown = useCallback(() => {
-    onZoom("IN");
-    zoomTimeout.current = setTimeout(() => setZoomType("IN"), 600);
+    onZoom(ZOOM_IN);
+    zoomTimeout.current = setTimeout(() => setZoomType(ZOOM_IN), 600);
   }, [onZoom, setZoomType]);
 
   const onZoomOutDown = useCallback(() => {
-    onZoom("OUT");
-    zoomTimeout.current = setTimeout(() => setZoomType("OUT"), 600);
+    onZoom(ZOOM_OUT);
+    zoomTimeout.current = setTimeout(() => setZoomType(ZOOM_OUT), 600);
   }, [onZoom, setZoomType]);
 
   const onMouseUp = useCallback(() => {
@@ -75,7 +75,7 @@ function ZoomControls({
   }, [setZoomType]);
 
   // Determine if zooming in a particular direction is enabled
-  const isZoomingEnabled = (zoomType === "IN" && !zoomInDisabled) || (zoomType === "OUT" && !zoomOutDisabled);
+  const isZoomingEnabled = (zoomType === ZOOM_IN && !zoomInDisabled) || (zoomType === ZOOM_OUT && !zoomOutDisabled);
   useInterval(() => onZoom(zoomType), zoomType && isZoomingEnabled ? 50 : null);
 
   // Stop zoom if mouseup happens outside component
