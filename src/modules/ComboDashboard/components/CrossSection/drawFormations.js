@@ -18,6 +18,7 @@ export function drawFormations(container) {
   function update(props) {
     const { calculatedFormations: layers, lastSurveyIdx } = props;
     if (!layers || !layers.length) return;
+    // TODO: Can optimize performance by redrawing only when data changes
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
