@@ -14,13 +14,9 @@ import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../consta
 import { mapRop, mapSlide } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
-function Slide(
-  { expanded, step, setSliderStep, selectedGraphs, data, maxStep, view, updateView, onReset, width, height },
-  ref
-) {
+function Slide({ expanded, step, setSliderStep, selectedGraphs, data, maxStep, view, updateView, width, height }, ref) {
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: ref.current, width, height });
 
-  const scaleInitialized = useRef(false);
   const viewportContainer = useRef(null);
 
   const viewport = useViewport({
@@ -33,14 +29,6 @@ function Slide(
     zoomXScale: false,
     zoomYScale: true
   });
-
-  // set initial scale
-  useEffect(() => {
-    if (data && data.length && width && height && !scaleInitialized.current) {
-      onReset();
-      scaleInitialized.current = true;
-    }
-  }, [width, data, height, onReset]);
 
   useEffect(() => {
     refresh();
@@ -121,7 +109,15 @@ TimeSlider.propTypes = {
   selectedGraphs: PropTypes.arrayOf(PropTypes.string),
   data: PropTypes.arrayOf(PropTypes.object),
   maxStep: PropTypes.number,
-  setMaxStep: PropTypes.func
+  view: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+    xScale: PropTypes.number,
+    yScale: PropTypes.number
+  }),
+  updateView: PropTypes.func,
+  width: PropTypes.number,
+  height: PropTypes.number
 };
 
 export default TimeSlider;

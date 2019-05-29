@@ -28,6 +28,7 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   const [globalDates, setGlobalDates] = useState(["", ""]);
 
   // Canvas resizing hooks
+  const scaleInitialized = useRef(false);
   const canvasRef = useRef(null);
   const obs = useRef();
   const [{ width, height }, setSize] = useState({ width: null, height: null });
@@ -77,6 +78,14 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
       xScale: getInitialViewXScaleValue(width - GRID_GUTTER)
     }));
   }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
+
+  // set initial scale
+  useEffect(() => {
+    if (data && data.length && width && height && !scaleInitialized.current) {
+      onReset();
+      scaleInitialized.current = true;
+    }
+  }, [width, data, height, onReset]);
 
   useEffect(() => {
     setMaxSliderStep(data.length);
@@ -178,7 +187,6 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
             updateView={updateView}
             height={height}
             width={width}
-            onReset={onReset}
             ref={canvasRef}
           />
         </Suspense>
