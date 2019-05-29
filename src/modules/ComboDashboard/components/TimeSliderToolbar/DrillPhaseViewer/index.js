@@ -62,7 +62,7 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
   const handleDrillPhaseSelect = useCallback(
     phase => {
       setDrillPhase(phase);
-      setSelectedMenuItem({ type: "CHANGE_PHASE", payload: phase });
+      setSelectedMenuItem({ type: "CHANGE", payload: phase });
     },
     [setDrillPhase, setSelectedMenuItem]
   );

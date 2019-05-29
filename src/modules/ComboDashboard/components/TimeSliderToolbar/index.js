@@ -12,7 +12,7 @@ const TimeSliderContainer = lazy(() => import(/* webpackChunkName: 'TimeSlider' 
 
 function graphReducer(state, action) {
   switch (action.type) {
-    case "CHANGE_PHASE":
+    case "CHANGE":
       return COLOR_BY_PHASE_VIEWER[action.payload].graphs;
     case "ADD":
       return [...state, action.payload];
