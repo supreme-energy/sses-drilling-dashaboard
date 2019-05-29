@@ -39,7 +39,7 @@ export default class PixiCrossSection {
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
-    this.surveyUpdate = drawSurveys(this.wellPathLayer, props.surveys);
+    this.surveyUpdate = drawSurveys(this.wellPathLayer);
     this.projectionLineUpdate = drawProjections(this.wellPathLayer, props);
     this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
@@ -117,7 +117,7 @@ export default class PixiCrossSection {
     this.viewport.scale.y = view.yScale;
     this.formationsUpdate(props);
     this.wellPlanUpdate(props.wellPlan);
-    this.surveyUpdate(props.surveys);
+    this.surveyUpdate(props);
     this.projectionLineUpdate(props);
     this.sectionUpdate(props);
     this.interactivePAUpdate(props);

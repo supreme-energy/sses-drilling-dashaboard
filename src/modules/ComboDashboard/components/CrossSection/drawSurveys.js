@@ -1,13 +1,17 @@
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform } from "./customPixiTransforms";
+import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 
 /* eslint new-cap: 0 */
-export function drawSurveys(container, surveyData) {
+export function drawSurveys(container) {
   const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
   const lastMarker = new PIXI.Texture.fromImage("/lastSurvey.svg");
   const bitProjection = new PIXI.Texture.fromImage("/bitProjection.svg");
+  const widePath = container.addChild(new PIXI.Graphics());
+  widePath.transform.updateTransform = frozenXYTransform;
+  const narrowPath = container.addChild(new PIXI.Graphics());
+  narrowPath.transform.updateTransform = frozenXYTransform;
   const surveyGraphics = [];
-  let prevDataLength = surveyData.length;
+  let prevDataLength = 0;
 
   const addSurvey = function() {
     let icon = new PIXI.Sprite(surveyMarker);
@@ -18,15 +22,34 @@ export function drawSurveys(container, surveyData) {
     return icon;
   };
 
-  return function(surveys) {
-    if (surveys.length === 0 || surveys.length === prevDataLength) return;
+  function redrawLine(surveys, xMap, yMap, line, width, color) {
+    line.clear().lineStyle(width, color, 1);
+    line.moveTo(xMap(surveys[0].vs), yMap(surveys[0].tvd));
+    for (let i = 1; i < surveys.length - 1; i++) {
+      line.lineTo(xMap(surveys[i].vs), yMap(surveys[i].tvd));
+    }
+  }
+
+  return function(props) {
+    const { surveys, view } = props;
+    if (surveys.length === 0) return;
+    const { x, y, xScale, yScale } = view;
+    // TODO: optimize to not create a function on every call.  useReducer?
+    const xMap = val => val * xScale + x;
+    const yMap = val => val * yScale + y;
+    redrawLine(surveys, xMap, yMap, widePath, 6, 0x333333);
+    redrawLine(surveys, xMap, yMap, narrowPath, 2, 0xffffff);
+
+    if (surveys.length === prevDataLength) return;
     prevDataLength = surveys.length;
+
     for (let i = 0; i < surveys.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
       surveyGraphics[i].position.x = surveys[i].vs;
       surveyGraphics[i].position.y = surveys[i].tvd;
       surveyGraphics[i].texture = surveyMarker;
     }
+    // Set the correct graphics for last survey and bit projection
     surveyGraphics[surveyGraphics.length - 1].texture = bitProjection;
     if (surveyGraphics.length > 1) surveyGraphics[surveyGraphics.length - 2].texture = lastMarker;
   };
