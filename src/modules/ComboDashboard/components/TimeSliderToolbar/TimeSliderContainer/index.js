@@ -33,6 +33,7 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   const [{ width, height }, setSize] = useState({ width: null, height: null });
   const item = canvasRef.current;
 
+  // Monitor window for resize
   useEffect(() => {
     function observe(entries) {
       const { width, height } = entries[0].contentRect;
