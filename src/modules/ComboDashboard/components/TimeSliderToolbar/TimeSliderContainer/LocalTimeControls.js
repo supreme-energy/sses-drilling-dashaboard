@@ -42,14 +42,16 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
+        const stepFactor = STEP_SIZE * Math.ceil(maxSliderStep / 100);
+        const nextStep = sliderStep[0] + stepFactor;
         // Stop playing if slider reaches max step
-        if (sliderStep[0] >= maxSliderStep) {
+        if (nextStep >= maxSliderStep) {
           setIsPlaying(false);
-          return sliderStep;
+          return [maxSliderStep, 0];
         }
 
         // Otherwise return next slider step
-        return [sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 100), sliderStep[1]];
+        return [nextStep, sliderStep[1]];
       });
     },
     isPlaying && !isSpeeding ? 800 : null
