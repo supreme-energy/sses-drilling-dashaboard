@@ -17,7 +17,8 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   const onForwardDown = useCallback(() => {
     setSliderStep(sliderStep => {
       const newStep = sliderStep[0] + STEP_SIZE;
-      if (newStep <= maxSliderStep) return [sliderStep[0] + STEP_SIZE, 1];
+
+      if (newStep <= maxSliderStep) return [newStep, 1];
       return sliderStep;
     });
     speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
@@ -26,7 +27,8 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   const onRewindDown = useCallback(() => {
     setSliderStep(sliderStep => {
       const newStep = sliderStep[0] - STEP_SIZE;
-      if (sliderStep[0] && newStep >= 0) return [sliderStep[0] - STEP_SIZE, -1];
+
+      if (sliderStep[0] && newStep >= 0) return [newStep, -1];
       return sliderStep;
     });
     speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
@@ -40,10 +42,13 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
+        // Stop playing if slider reaches max step
         if (sliderStep[0] >= maxSliderStep) {
           setIsPlaying(false);
           return sliderStep;
         }
+
+        // Otherwise return next slider step
         return [sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 100), sliderStep[1]];
       });
     },
@@ -53,13 +58,18 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        const stepFactor = STEP_SIZE * (maxSliderStep / 100) * sliderStep[1];
-        if (sliderStep[0] + stepFactor <= 0 && sliderStep[1] < 0) {
+        const stepFactor = STEP_SIZE * (maxSliderStep / 50) * sliderStep[1];
+        const nextStep = sliderStep[0] + stepFactor;
+
+        // If slider step is at min or max, don't move anymore
+        if (nextStep <= 0 && sliderStep[1] < 0) {
           return [0, 0];
-        } else if (sliderStep[1] && sliderStep[0] + stepFactor >= maxSliderStep) {
+        } else if (sliderStep[1] && nextStep >= maxSliderStep) {
           return [maxSliderStep, 0];
         }
-        return [sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 50) * sliderStep[1], sliderStep[1]];
+
+        // Otherwise return next slider step
+        return [nextStep, sliderStep[1]];
       });
     },
     isSpeeding ? 100 : null
