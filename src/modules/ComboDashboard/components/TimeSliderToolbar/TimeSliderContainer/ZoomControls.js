@@ -21,7 +21,6 @@ function ZoomControls({
   onReset
 }) {
   let zoomTimeout = useRef(null);
-  const graphTotalLength = dataSize;
 
   // Update view based on zoom direction
   const onZoom = useCallback(
@@ -31,7 +30,7 @@ function ZoomControls({
           const stepFactor = ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
           const factor = type === ZOOM_IN ? 1.03 : 0.97;
           const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
-          const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
+          const graphVisibleLength = (dataSize - graphHiddenLength) * prev.xScale;
 
           // Graph should either take up entire view, or be larger than view
           const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
@@ -41,7 +40,7 @@ function ZoomControls({
 
           // Adjust graph if zoom moves it out of view
           if (!isVisibleOverflow) {
-            newX = newX + (width - graphVisibleLength - GRID_GUTTER) * factor;
+            newX = newX + width - graphVisibleLength;
           }
 
           return {
@@ -52,7 +51,7 @@ function ZoomControls({
         });
       }
     },
-    [getInitialViewXScaleValue, graphTotalLength, updateView, width, maxSliderStep, step]
+    [getInitialViewXScaleValue, dataSize, updateView, width, maxSliderStep, step]
   );
 
   const handleResetZoom = useCallback(() => {

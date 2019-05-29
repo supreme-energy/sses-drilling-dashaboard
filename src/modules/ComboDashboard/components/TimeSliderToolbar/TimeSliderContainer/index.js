@@ -88,21 +88,20 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   }, [width, data, height, onReset]);
 
   useEffect(() => {
-    setMaxSliderStep(data.length);
+    if (data.length) {
+      setSliderStep(step => [data.length - 1, step[1]]);
+      setMaxSliderStep(data.length - 1);
+    }
   }, [data, setMaxSliderStep]);
-
-  useEffect(() => {
-    setSliderStep(step => [data.length, step[1]]);
-  }, [data, setSliderStep]);
 
   useEffect(() => {
     if (expanded) onReset();
   }, [expanded, onReset]);
 
   useEffect(() => {
-    if (expanded) {
+    const newMaxStep = (width - GRID_GUTTER) / view.xScale - 1;
+    if (expanded && newMaxStep > 0) {
       setMaxSliderStep(prevMaxStep => {
-        const newMaxStep = (width - GRID_GUTTER) / view.xScale;
         setSliderStep(prevStep => [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]]);
         return newMaxStep;
       });
