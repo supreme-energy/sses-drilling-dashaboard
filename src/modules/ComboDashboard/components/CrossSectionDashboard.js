@@ -161,40 +161,23 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [selectedSections, rawSections]);
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
-  // TODO: This should all be a reducer
-  const [view, setView] = useState({
-    x: -844,
-    y: -16700,
-    xScale: 2.14,
-    yScale: 2.14
-  });
-  const viewObj = {
-    ...view,
-    scale: function(xVal, yVal) {
-      return [xVal * view.xScale + view.x, yVal * view.yScale + view.y];
-    },
-    scaleByX: function(val) {
-      return view.scale(val, 0)[0];
-    },
-    scaleByY: function(val) {
-      return view.scale(0, val)[1];
-    }
-  };
-  const mergeView = useCallback(function(value) {
-    // Implement merging here so we don't have to everywhere else
-    setView(prev => {
-      if (typeof value === "function") {
-        return {
-          ...prev,
-          ...value(prev)
-        };
+  const [view, setView] = useReducer(
+    function(state, arg) {
+      if (typeof arg === "function") {
+        return { ...state, ...arg(state) };
       }
-      return {
-        ...prev,
-        ...value
-      };
-    });
-  }, []);
+      return { ...state, ...arg };
+    },
+    {
+      x: -844,
+      y: -16700,
+      xScale: 2.14,
+      yScale: 2.14
+    }
+  );
+  const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
+  const scaleByX = useCallback(val => scale(val, 0)[0], [view]);
+  const scaleByY = useCallback(val => scale(0, val)[1], [view]);
 
   return (
     <Suspense fallback={<Progress />}>
@@ -204,8 +187,11 @@ export const CrossSectionDashboard = ({ wellId }) => {
           <CrossSection
             width={width}
             height={height}
-            view={viewObj}
-            updateView={mergeView}
+            view={view}
+            updateView={setView}
+            scale={scale}
+            scaleByX={scaleByX}
+            scaleByY={scaleByY}
             wellPlan={wellPlan}
             surveys={surveys}
             formations={formations}

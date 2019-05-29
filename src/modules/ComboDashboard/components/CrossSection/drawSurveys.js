@@ -22,23 +22,19 @@ export function drawSurveys(container) {
     return icon;
   };
 
-  function redrawLine(surveys, xMap, yMap, line, width, color) {
+  function redrawLine(surveys, scale, line, width, color) {
     line.clear().lineStyle(width, color, 1);
-    line.moveTo(xMap(surveys[0].vs), yMap(surveys[0].tvd));
+    line.moveTo(...scale(surveys[0].vs, surveys[0].tvd));
     for (let i = 1; i < surveys.length - 1; i++) {
-      line.lineTo(xMap(surveys[i].vs), yMap(surveys[i].tvd));
+      line.lineTo(...scale(surveys[i].vs, surveys[i].tvd));
     }
   }
 
   return function(props) {
-    const { surveys, view } = props;
+    const { surveys, scale } = props;
     if (surveys.length === 0) return;
-    const { x, y, xScale, yScale } = view;
-    // TODO: optimize to not create a function on every call.  useReducer?
-    const xMap = val => val * xScale + x;
-    const yMap = val => val * yScale + y;
-    redrawLine(surveys, xMap, yMap, widePath, 6, 0x333333);
-    redrawLine(surveys, xMap, yMap, narrowPath, 2, 0xffffff);
+    redrawLine(surveys, scale, widePath, 6, 0x333333);
+    redrawLine(surveys, scale, narrowPath, 2, 0xffffff);
 
     if (surveys.length === prevDataLength) return;
     prevDataLength = surveys.length;
