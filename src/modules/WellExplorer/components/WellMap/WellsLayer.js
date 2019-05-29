@@ -11,11 +11,12 @@ const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUr
 export default function WellsLayer({ wells, onMarkerClick, selectedWellId }) {
   return (
     wells.length > 0 &&
-    wells.map(well => (
+    wells.map((well, index) => (
       <Marker
         key={well.id}
         onClick={() => onMarkerClick(well)}
-        position={well.position}
+        zIndexOffset={selectedWellId === well.id ? wells.length + 1 : index + 1}
+        position={well.surfacePosition}
         icon={selectedWellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
         className={classes.marker}
       />

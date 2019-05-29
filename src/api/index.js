@@ -7,6 +7,8 @@ import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
 import _ from "lodash";
 import { group } from "d3-array";
+import proj4 from "proj4";
+import { toWGS84 } from "../utils/projections";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -60,9 +62,14 @@ export function useWellInfo(wellId) {
   });
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
-
+  const wellInfo = data && data.wellinfo;
+  const wellSurfaceLocation = wellInfo && {
+    x: wellInfo.survey_easting,
+    y: wellInfo.survey_northing
+  };
   return {
-    serverStatus: online ? ONLINE : OFFLINE
+    serverStatus: online ? ONLINE : OFFLINE,
+    wellSurfaceLocation
   };
 }
 
@@ -73,14 +80,17 @@ export function useWells() {
     },
     {
       transform: wells => {
+        // TODO get map source projection name from backend
+        const source = proj4.Proj("EPSG:32040");
+        const transform = toWGS84(source);
         return wells.map(w => {
-          const pos = [Math.random() * 5 + 28, -95 - Math.random() * 5];
+          const surfacePos = transform({ x: Number(w.survey_easting), y: Number(w.survey_northing) });
           return {
             id: w.jobname,
             name: w.realjobname,
             status: DRILLING,
             fav: Boolean(w.favorite),
-            position: pos
+            surfacePosition: [surfacePos.y, surfacePos.x]
           };
         });
       }
@@ -147,6 +157,26 @@ export function useWellPath(wellId) {
     }
   );
   return data || EMPTY_ARRAY;
+}
+
+export function useWellsMapPosition(wellId, wellPositions) {
+  const wellInfo = useWellInfo(wellId);
+
+  return useMemo(() => {
+    // TODO get map source projection from backend
+    const source = proj4.Proj("EPSG:32040");
+    const transform = toWGS84(source);
+    function addMapPosition(p) {
+      return {
+        ...p,
+        mapPosition: transform({
+          y: Number(p.ns + wellInfo.wellSurfaceLocation.y),
+          x: Number(p.ew + wellInfo.wellSurfaceLocation.x)
+        })
+      };
+    }
+    return wellInfo.wellSurfaceLocation ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+  }, [wellPositions, wellInfo]);
 }
 
 export function useSurveys(wellId) {
