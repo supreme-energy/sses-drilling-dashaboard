@@ -176,8 +176,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
     }
   );
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
-  const scaleByX = useCallback(val => scale(val, 0)[0], [scale]);
-  const scaleByY = useCallback(val => scale(0, val)[1], [scale]);
 
   return (
     <Suspense fallback={<Progress />}>
@@ -190,8 +188,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
             view={view}
             updateView={setView}
             scale={scale}
-            scaleByX={scaleByX}
-            scaleByY={scaleByY}
             wellPlan={wellPlan}
             surveys={surveys}
             formations={formations}
