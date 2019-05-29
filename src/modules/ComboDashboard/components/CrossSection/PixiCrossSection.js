@@ -77,6 +77,7 @@ export default class PixiCrossSection {
       const currMouse = moveData.data.global;
       this.viewDataUpdate(prev => {
         return {
+          ...prev,
           x: Number(prev.x) + (currMouse.x - prevMouse.x),
           y: Number(prev.y) + (currMouse.y - prevMouse.y)
         };
@@ -100,6 +101,7 @@ export default class PixiCrossSection {
         const factor = 1 - Math.sign(e.deltaY) * 0.03;
         this.viewDataUpdate(prev => {
           return {
+            ...prev,
             x: globalMouse.x - (globalMouse.x - prev.x) * factor,
             y: globalMouse.y - (globalMouse.y - prev.y) * factor,
             xScale: prev.xScale * factor,
@@ -116,7 +118,7 @@ export default class PixiCrossSection {
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
     this.formationsUpdate(props);
-    this.wellPlanUpdate(props.wellPlan);
+    this.wellPlanUpdate(props);
     this.surveyUpdate(props);
     this.projectionLineUpdate(props);
     this.sectionUpdate(props);

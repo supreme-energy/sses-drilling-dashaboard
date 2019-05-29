@@ -1,7 +1,7 @@
 import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
@@ -161,27 +161,21 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [selectedSections, rawSections]);
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
-  const [view, setView] = useState({
-    x: -844,
-    y: -16700,
-    xScale: 2.14,
-    yScale: 2.14
-  });
-  const mergeView = useCallback(function(value) {
-    // Implement merging here so we don't have to everywhere else
-    setView(prev => {
-      if (typeof value === "function") {
-        return {
-          ...prev,
-          ...value(prev)
-        };
+  const [view, setView] = useReducer(
+    function(state, arg) {
+      if (typeof arg === "function") {
+        return { ...state, ...arg(state) };
       }
-      return {
-        ...prev,
-        ...value
-      };
-    });
-  }, []);
+      return { ...state, ...arg };
+    },
+    {
+      x: -844,
+      y: -16700,
+      xScale: 2.14,
+      yScale: 2.14
+    }
+  );
+  const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
     <Suspense fallback={<Progress />}>
@@ -192,7 +186,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
             width={width}
             height={height}
             view={view}
-            updateView={mergeView}
+            updateView={setView}
+            scale={scale}
             wellPlan={wellPlan}
             surveys={surveys}
             formations={formations}

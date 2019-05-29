@@ -1,19 +1,20 @@
 import * as PIXI from "pixi.js";
+import { frozenXYTransform } from "./customPixiTransforms";
 
-export function drawWellPlan(container, wellPlanData) {
+export function drawWellPlan(container) {
   // Initialize the well plan object
-  const wellplan = new PIXI.Graphics();
-  container.addChild(wellplan);
-  update(wellPlanData);
+  const line = container.addChild(new PIXI.Graphics());
+  line.transform.updateTransform = frozenXYTransform;
 
   return update;
 
-  function update(planData) {
-    if (planData.length === 0 || !wellplan.transform) return;
-    wellplan.clear().lineStyle(3 / container.transform.worldTransform.a, 0x44ff44, 1);
-    wellplan.moveTo(planData[0].vs, planData[0].tvd);
-    for (let i = 1; i < planData.length; i++) {
-      wellplan.lineTo(planData[i].vs, planData[i].tvd);
+  function update(props) {
+    const { wellPlan, scale } = props;
+    if (wellPlan.length === 0 || !line.transform) return;
+    line.clear().lineStyle(3, 0x44ff44, 1);
+    line.moveTo(...scale(wellPlan[0].vs, wellPlan[0].tvd));
+    for (let i = 1; i < wellPlan.length; i++) {
+      line.lineTo(...scale(wellPlan[i].vs, wellPlan[i].tvd));
     }
   }
 }

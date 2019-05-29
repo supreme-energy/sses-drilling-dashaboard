@@ -97,7 +97,7 @@ function interactiveProjection(parent, props) {
   });
 
   return props => {
-    const { selectedSections, lastSurveyIdx, calcSections } = props;
+    const { selectedSections, lastSurveyIdx, calcSections, scale } = props;
     const selectedIndex = selectedSections.findIndex(e => e);
     // If there isn't a selected project ahead segment, don't display the interactive component
     if (selectedIndex === -1 || selectedIndex <= lastSurveyIdx) {
@@ -109,9 +109,6 @@ function interactiveProjection(parent, props) {
     if (!currTot.transform || !currBot.transform || !paMarker.transform || !prevTot.transform || !prevBot.transform) {
       return;
     }
-    const { x, y, xScale, yScale } = props.view;
-    const xMap = val => val * xScale + x;
-    const yMap = val => val * yScale + y;
     const prev = calcSections[selectedIndex - 1];
     const pa = calcSections[selectedIndex];
 
@@ -129,11 +126,11 @@ function interactiveProjection(parent, props) {
     paMarker.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, red, 1);
-    totLine.moveTo(xMap(prev.vs), yMap(prev.tot + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.tot));
+    totLine.moveTo(...scale(prev.vs, prev.tot + pa.fault)).lineTo(...scale(pa.vs, pa.tot));
     tclLine.clear().lineStyle(2, red, 1);
-    tclLine.moveTo(xMap(prev.vs), yMap(prev.tcl + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.tcl));
+    tclLine.moveTo(...scale(prev.vs, prev.tcl + pa.fault)).lineTo(...scale(pa.vs, pa.tcl));
     botLine.clear().lineStyle(2, red, 1);
-    botLine.moveTo(xMap(prev.vs), yMap(prev.bot + pa.fault)).lineTo(xMap(pa.vs), yMap(pa.bot));
+    botLine.moveTo(...scale(prev.vs, prev.bot + pa.fault)).lineTo(...scale(pa.vs, pa.bot));
   };
 }
 
