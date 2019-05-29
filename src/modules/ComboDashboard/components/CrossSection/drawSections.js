@@ -39,7 +39,7 @@ function drawSections(container, props, gutter) {
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
     section.on("click", function() {
-      props.setselectedSections(this.sectionIndex);
+      props.setSelectedSections(this.sectionIndex);
     });
     container.addChild(section);
     return section;

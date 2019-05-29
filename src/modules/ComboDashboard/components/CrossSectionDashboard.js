@@ -77,7 +77,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const projections = useProjections(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
-  const [selectedSections, setselectedSections] = useReducer(singleSelectionReducer, []);
+  const [selectedSections, setSelectedSections] = useReducer(singleSelectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const calculatedProjections = useMemo(() => {
@@ -200,7 +200,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             projections={projections}
             allSections={allSections}
             selectedSections={selectedSections}
-            setselectedSections={setselectedSections}
+            setSelectedSections={setSelectedSections}
             lastSurveyIdx={lastSurveyIdx}
             calculatedProjections={calculatedProjections}
             ghostDiffDispatch={ghostDiffDispatch}
