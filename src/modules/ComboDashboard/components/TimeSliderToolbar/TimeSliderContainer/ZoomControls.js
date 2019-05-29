@@ -27,16 +27,18 @@ function ZoomControls({
     type => {
       if (type) {
         updateView(prev => {
+          // Determine where slider is relative to graph
           const stepFactor = ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
-          const factor = type === ZOOM_IN ? 1.03 : 0.97;
-          const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
-          const graphVisibleLength = (dataSize - graphHiddenLength) * prev.xScale;
+
+          // Determine length of visible graph
+          const graphVisibleLength = dataSize * prev.xScale - Math.abs(prev.x);
 
           // Graph should either take up entire view, or be larger than view
           const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
 
+          // Calculate new x position of graph based on zoom type
+          const factor = type === ZOOM_IN ? 1.03 : 0.97;
           let newX = stepFactor - (stepFactor - prev.x) * factor;
-          const newScale = prev.xScale * factor;
 
           // Adjust graph if zoom moves it out of view
           if (!isVisibleOverflow) {
@@ -46,7 +48,7 @@ function ZoomControls({
           return {
             ...prev,
             x: newX <= 0 ? newX : 0,
-            xScale: newX <= 0 ? newScale : getInitialViewXScaleValue(width - GRID_GUTTER)
+            xScale: newX <= 0 ? prev.xScale * factor : getInitialViewXScaleValue(width - GRID_GUTTER)
           };
         });
       }
