@@ -42,8 +42,8 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        const stepFactor = STEP_SIZE * Math.ceil(maxSliderStep / 100);
-        const nextStep = sliderStep[0] + stepFactor;
+        const nextStep = sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 100);
+
         // Stop playing if slider reaches max step
         if (nextStep >= maxSliderStep) {
           setIsPlaying(false);
@@ -60,8 +60,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useInterval(
     () => {
       setSliderStep(sliderStep => {
-        const stepFactor = STEP_SIZE * (maxSliderStep / 50) * sliderStep[1];
-        const nextStep = sliderStep[0] + stepFactor;
+        const nextStep = sliderStep[0] + STEP_SIZE * (maxSliderStep / 50) * sliderStep[1];
 
         // If slider step is at min or max, don't move anymore
         if (nextStep <= 0 && sliderStep[1] < 0) {
