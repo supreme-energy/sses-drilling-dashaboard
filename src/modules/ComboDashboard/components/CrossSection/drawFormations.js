@@ -7,12 +7,6 @@ import * as PIXI from "pixi.js";
 export function drawFormations(container) {
   const layerTiles = [];
 
-  const createTile = function() {
-    const tile = new PIXI.Graphics();
-    container.addChild(tile);
-    return tile;
-  };
-
   return update;
 
   function update(props) {
@@ -27,7 +21,7 @@ export function drawFormations(container) {
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
         if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
         if (!layerTiles[layerIdx][pointIdx]) {
-          layerTiles[layerIdx][pointIdx] = createTile();
+          layerTiles[layerIdx][pointIdx] = container.addChild(new PIXI.Graphics());
         }
         if (pointIdx >= lastSurveyIdx) {
           currAlpha = 0.3;
