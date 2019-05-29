@@ -97,7 +97,7 @@ function interactiveProjection(parent, props) {
   });
 
   return props => {
-    const { selectedSections, lastSurveyIdx, allSections } = props;
+    const { selectedSections, lastSurveyIdx, calcSections } = props;
     const selectedIndex = selectedSections.findIndex(e => e);
     // If there isn't a selected project ahead segment, don't display the interactive component
     if (selectedIndex === -1 || selectedIndex <= lastSurveyIdx) {
@@ -112,8 +112,8 @@ function interactiveProjection(parent, props) {
     const { x, y, xScale, yScale } = props.view;
     const xMap = val => val * xScale + x;
     const yMap = val => val * yScale + y;
-    const prev = allSections[selectedIndex - 1];
-    const pa = allSections[selectedIndex];
+    const prev = calcSections[selectedIndex - 1];
+    const pa = calcSections[selectedIndex];
 
     prevTot.position.x = prev.vs;
     prevTot.position.y = prev.tot + pa.fault;

@@ -29,7 +29,6 @@ function PADeltaReducer(state, action) {
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
-      console.log(state);
       depthDelta = action.tot - op.tot - state.fault;
       return {
         ...state,
@@ -77,6 +76,11 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const projections = useProjections(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
+  const rawSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(projections), [
+    surveys,
+    lastSurveyIdx,
+    projections
+  ]);
   const [selectedSections, setSelectedSections] = useReducer(singleSelectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
@@ -106,14 +110,14 @@ export const CrossSectionDashboard = ({ wellId }) => {
     });
   }, [projections, ghostDiff]);
 
-  const allSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
+  const calcSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
     surveys,
     lastSurveyIdx,
     calculatedProjections
   ]);
 
   const calculatedFormations = useMemo(() => {
-    const index = allSections.findIndex(p => p.id === ghostDiff.id);
+    const index = calcSections.findIndex(p => p.id === ghostDiff.id);
     // TODO: Rewrite so the bit projection forms it's own section
     // Currently formations includes a point for the bit projection and sectionsList doesn't
     // Remove the bit projection from formations until we know how to handle that
@@ -147,16 +151,16 @@ export const CrossSectionDashboard = ({ wellId }) => {
         })
       };
     });
-  }, [formations, ghostDiff, allSections, lastSurveyIdx]);
+  }, [formations, ghostDiff, calcSections, lastSurveyIdx]);
 
   useEffect(() => {
     const i = selectedSections.findIndex(a => a === true);
     if (i !== -1) {
-      // TODO use unmodified sections for initialization instead of edited.
-      ghostDiffDispatch({ type: "init", section: allSections[i], prevSection: allSections[i - 1] });
+      // TODO use unmodified rawSections for initialization instead of edited.
+      ghostDiffDispatch({ type: "init", section: rawSections[i], prevSection: rawSections[i - 1] });
     }
     /* eslint react-hooks/exhaustive-deps: 0 */
-    /* This should only recalculate if the selected item changes.  Including either allSections or
+    /* This should only recalculate if the selected item changes.  Including either calcSections or
      * selectedSections themselves will cause this to calculate thousands of times in a few seconds */
   }, [selectedSections.join(",")]);
 
@@ -198,7 +202,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             formations={formations}
             calculatedFormations={calculatedFormations}
             projections={projections}
-            allSections={allSections}
+            calcSections={calcSections}
             selectedSections={selectedSections}
             setSelectedSections={setSelectedSections}
             lastSurveyIdx={lastSurveyIdx}

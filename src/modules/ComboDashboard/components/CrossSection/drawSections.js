@@ -47,8 +47,8 @@ function drawSections(container, props, gutter) {
 
   return function update(props) {
     if (!container.transform) return;
-    const { width, height, view, lastSurveyIdx, selectedSections, allSections } = props;
-    const points = allSections;
+    const { width, height, view, lastSurveyIdx, selectedSections, calcSections } = props;
+    const points = calcSections;
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
