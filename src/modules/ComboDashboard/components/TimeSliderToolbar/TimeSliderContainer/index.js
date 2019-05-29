@@ -20,7 +20,14 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   // Fetch data for Time Slider
   const data = useRopData();
 
-  // Handle window resize
+  const [maxSliderStep, setMaxSliderStep] = useState(1);
+  const [sliderStep, setSliderStep] = useState([0, 1]);
+  const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
+  const [isSpeeding, setIsSpeeding] = useState(false);
+  const [zoomType, setZoomType] = useState();
+  const [globalDates, setGlobalDates] = useState(["", ""]);
+
+  // Canvas resizing hooks
   const canvasRef = useRef(null);
   const obs = useRef();
   const [{ width, height }, setSize] = useState({ width: null, height: null });
@@ -42,13 +49,6 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
       obs.current.disconnect();
     };
   }, [item]);
-
-  const [maxSliderStep, setMaxSliderStep] = useState(1);
-  const [sliderStep, setSliderStep] = useState([0, 1]);
-  const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
-  const [isSpeeding, setIsSpeeding] = useState(false);
-  const [zoomType, setZoomType] = useState();
-  const [globalDates, setGlobalDates] = useState(["", ""]);
 
   const getInitialViewYScaleValue = useMemo(
     () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
@@ -103,7 +103,7 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
     const stepFactor = sliderStep[0] / maxSliderStep;
     const hiddenDataLength = Math.abs(view.x) / view.xScale;
     const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
-    const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength
+    const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength;
 
     const beginningDate = get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");

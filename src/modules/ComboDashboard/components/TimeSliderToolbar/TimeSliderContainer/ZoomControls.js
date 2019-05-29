@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useMemo } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
@@ -22,22 +22,25 @@ function ZoomControls({
 }) {
   let zoomTimeout = useRef(null);
   const graphTotalLength = dataSize;
-  const stepFactor = useMemo(() => {
-    return ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
-  }, [step, width, maxSliderStep]);
 
+  // Update view based on zoom direction
   const onZoom = useCallback(
     type => {
       if (type) {
         updateView(prev => {
+          const stepFactor = ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
           const factor = type === "IN" ? 1.03 : 0.97;
           const graphHiddenLength = Math.abs(prev.x) / prev.xScale;
           const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
+
           // Graph should either take up entire view, or be larger than view
           const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
           const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
+
           let newX = stepFactor - (stepFactor - prev.x) * factor;
           let newScale = prev.xScale * factor;
+
+          // Adjust graph if zoom moves it out of view
           if (!isVisibleOverflow && type === "IN") {
             newX = newX + (width - graphVisibleLength - GRID_GUTTER);
           } else if (!isTotalOverflow && !isVisibleOverflow && type === "OUT") {
@@ -53,7 +56,7 @@ function ZoomControls({
         });
       }
     },
-    [getInitialViewXScaleValue, graphTotalLength, updateView, width, stepFactor]
+    [getInitialViewXScaleValue, graphTotalLength, updateView, width, maxSliderStep, step]
   );
 
   const handleResetZoom = useCallback(() => {
@@ -79,8 +82,8 @@ function ZoomControls({
   const isZoomingEnabled = (zoomType === "IN" && !zoomInDisabled) || (zoomType === "OUT" && !zoomOutDisabled);
   useInterval(() => onZoom(zoomType), zoomType && isZoomingEnabled ? 50 : null);
 
+  // Stop zoom if mouseup happens outside component
   useEffect(() => {
-    // Stop zoom if mouseup happens outside component
     window.addEventListener("mouseup", onMouseUp);
     return () => window.removeEventListener("mouseup", onMouseUp);
   }, [onMouseUp]);
