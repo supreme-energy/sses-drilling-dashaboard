@@ -156,13 +156,9 @@ export const CrossSectionDashboard = ({ wellId }) => {
   useEffect(() => {
     const i = selectedSections.findIndex(a => a === true);
     if (i !== -1) {
-      // TODO use unmodified rawSections for initialization instead of edited.
       ghostDiffDispatch({ type: "init", section: rawSections[i], prevSection: rawSections[i - 1] });
     }
-    /* eslint react-hooks/exhaustive-deps: 0 */
-    /* This should only recalculate if the selected item changes.  Including either calcSections or
-     * selectedSections themselves will cause this to calculate thousands of times in a few seconds */
-  }, [selectedSections.join(",")]);
+  }, [selectedSections, rawSections]);
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
   const [view, setView] = useState({
