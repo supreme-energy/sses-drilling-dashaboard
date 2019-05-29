@@ -1,7 +1,7 @@
 import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
 import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
@@ -176,8 +176,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
     }
   );
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
-  const scaleByX = useCallback(val => scale(val, 0)[0], [view]);
-  const scaleByY = useCallback(val => scale(0, val)[1], [view]);
+  const scaleByX = useCallback(val => scale(val, 0)[0], [scale]);
+  const scaleByY = useCallback(val => scale(0, val)[1], [scale]);
 
   return (
     <Suspense fallback={<Progress />}>
