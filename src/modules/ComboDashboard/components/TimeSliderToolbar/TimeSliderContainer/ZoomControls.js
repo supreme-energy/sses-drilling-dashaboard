@@ -82,9 +82,7 @@ function ZoomControls({
   useEffect(() => {
     // Stop zoom if mouseup happens outside component
     window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mouseup", onMouseUp);
-    };
+    return () => window.removeEventListener("mouseup", onMouseUp);
   }, [onMouseUp]);
 
   return (
@@ -108,17 +106,12 @@ ZoomControls.propTypes = {
   setZoomType: PropTypes.func,
   zoomInDisabled: PropTypes.bool,
   zoomOutDisabled: PropTypes.bool,
-  updateView: PropTypes.shape({
-    x: PropTypes.number,
-    y: PropTypes.number,
-    xScale: PropTypes.number,
-    yScale: PropTypes.number
-  }),
+  updateView: PropTypes.func,
   width: PropTypes.number,
   maxSliderStep: PropTypes.number,
   step: PropTypes.number,
   dataSize: PropTypes.number,
-  getInitialViewXScaleValue: PropTypes.number,
+  getInitialViewXScaleValue: PropTypes.func,
   onReset: PropTypes.func
 };
 

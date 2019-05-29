@@ -47,7 +47,7 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   const [sliderStep, setSliderStep] = useState([0, 1]);
   const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
   const [isSpeeding, setIsSpeeding] = useState(false);
-  const [zoomType, setZoomType] = useState(false);
+  const [zoomType, setZoomType] = useState();
   const [globalDates, setGlobalDates] = useState(["", ""]);
 
   const getInitialViewYScaleValue = useMemo(
@@ -100,12 +100,12 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
   }, [setMaxSliderStep, setSliderStep, width, expanded, view.xScale]);
 
   useEffect(() => {
-    const stepFactor = sliderStep / maxSliderStep;
+    const stepFactor = sliderStep[0] / maxSliderStep;
     const hiddenDataLength = Math.abs(view.x) / view.xScale;
     const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
-    const endDataIndex = stepFactor ? stepFactor * visibleDataLength + hiddenDataLength - 1 : 0;
+    const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength
 
-    const beginningDate = get(data, `[${hiddenDataLength}].Date_Time`, "");
+    const beginningDate = get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
     const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
 
     setGlobalDates([beginningDate, endDate]);

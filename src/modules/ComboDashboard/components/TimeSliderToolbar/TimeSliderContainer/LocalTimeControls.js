@@ -33,7 +33,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   }, [setIsSpeeding, setSliderStep]);
 
   const onMouseUp = useCallback(() => {
-    // clearTimeout(speedingTimeout.current);
+    clearTimeout(speedingTimeout.current);
     setIsSpeeding(false);
   }, [setIsSpeeding]);
 
@@ -68,9 +68,7 @@ function LocalTimeControls({ setSliderStep, setIsPlaying, isPlaying, isSpeeding,
   useEffect(() => {
     // Stop zoom if mouseup happens outside component
     window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mouseup", onMouseUp);
-    };
+    return () => window.removeEventListener("mouseup", onMouseUp);
   }, [onMouseUp]);
 
   return (
