@@ -107,7 +107,7 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
     const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength;
 
     const beginningDate = get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
-    const endDate = get(data, `[${Math.ceil(endDataIndex)}].Date_Time`, "NOW");
+    const endDate = get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
 
     setGlobalDates([beginningDate, endDate]);
   }, [data, setGlobalDates, width, view, sliderStep, maxSliderStep]);

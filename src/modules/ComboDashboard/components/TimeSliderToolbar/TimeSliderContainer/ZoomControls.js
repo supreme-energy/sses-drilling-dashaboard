@@ -41,7 +41,7 @@ function ZoomControls({
 
           // Adjust graph if zoom moves it out of view
           if (!isVisibleOverflow) {
-            newX = newX + (width - graphVisibleLength + GRID_GUTTER) * factor;
+            newX = newX + (width - graphVisibleLength - GRID_GUTTER) * factor;
           }
 
           return {
