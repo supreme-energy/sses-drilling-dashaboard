@@ -34,24 +34,20 @@ function ZoomControls({
           const graphVisibleLength = (graphTotalLength - graphHiddenLength) * prev.xScale;
 
           // Graph should either take up entire view, or be larger than view
-          const isTotalOverflow = graphTotalLength * prev.xScale * factor >= Math.floor(width - GRID_GUTTER);
           const isVisibleOverflow = graphVisibleLength >= width - GRID_GUTTER;
 
           let newX = stepFactor - (stepFactor - prev.x) * factor;
           let newScale = prev.xScale * factor;
 
           // Adjust graph if zoom moves it out of view
-          if (!isVisibleOverflow && type === "IN") {
-            newX = newX + (width - graphVisibleLength - GRID_GUTTER);
-          } else if (!isTotalOverflow && !isVisibleOverflow && type === "OUT") {
-            newX = 0;
-            newScale = getInitialViewXScaleValue(width - GRID_GUTTER);
+          if (!isVisibleOverflow) {
+            newX = newX + (width - graphVisibleLength + GRID_GUTTER) * factor;
           }
 
           return {
             ...prev,
-            x: newX <= 0 ? newX : prev.x,
-            xScale: newScale
+            x: newX <= 0 ? newX : 0,
+            xScale: newX <= 0 ? newScale : getInitialViewXScaleValue(width - GRID_GUTTER)
           };
         });
       }
