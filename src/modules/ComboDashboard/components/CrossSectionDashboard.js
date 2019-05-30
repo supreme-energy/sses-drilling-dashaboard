@@ -76,17 +76,13 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const projections = useProjections(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
-  const rawSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(projections), [
-    surveys,
-    lastSurveyIdx,
-    projections
-  ]);
+  const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(singleSelectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const calculatedProjections = useMemo(() => {
-    const index = projections.findIndex(p => p.id === ghostDiff.id);
-    return projections.map((p, i) => {
+  const calcSections = useMemo(() => {
+    const index = rawSections.findIndex(p => p.id === ghostDiff.id);
+    return rawSections.map((p, i) => {
       if (i === index) {
         return {
           ...p,
@@ -108,27 +104,12 @@ export const CrossSectionDashboard = ({ wellId }) => {
         return { ...p };
       }
     });
-  }, [projections, ghostDiff]);
-
-  const calcSections = useMemo(() => surveys.slice(0, lastSurveyIdx + 1).concat(calculatedProjections), [
-    surveys,
-    lastSurveyIdx,
-    calculatedProjections
-  ]);
+  }, [rawSections, ghostDiff]);
 
   const calculatedFormations = useMemo(() => {
     const index = calcSections.findIndex(p => p.id === ghostDiff.id);
-    // TODO: Rewrite so the bit projection forms it's own section
-    // Currently formations includes a point for the bit projection and sectionsList doesn't
-    // Remove the bit projection from formations until we know how to handle that
-    const f = formations.map(f => {
-      return {
-        ...f,
-        data: f.data.filter((p, i) => i !== lastSurveyIdx + 1)
-      };
-    });
 
-    return f.map(layer => {
+    return formations.map(layer => {
       return {
         ...layer,
         data: layer.data.map((point, j) => {
@@ -151,7 +132,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
         })
       };
     });
-  }, [formations, ghostDiff, calcSections, lastSurveyIdx]);
+  }, [formations, ghostDiff, calcSections]);
 
   useEffect(() => {
     const i = selectedSections.findIndex(a => a === true);
@@ -197,7 +178,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
             selectedSections={selectedSections}
             setSelectedSections={setSelectedSections}
             lastSurveyIdx={lastSurveyIdx}
-            calculatedProjections={calculatedProjections}
             ghostDiffDispatch={ghostDiffDispatch}
           />
         )}

@@ -23,13 +23,13 @@ function drawProjections(container, props) {
   return update;
 
   function update(props) {
-    const { calculatedProjections: projections } = props;
-    if (!projections.length) return;
+    const { calcSections, lastSurveyIdx } = props;
+    if (!calcSections.length || calcSections.length < lastSurveyIdx + 2) return;
 
-    for (let i = 0; i < projections.length; i++) {
+    for (let i = lastSurveyIdx + 2; i < calcSections.length; i++) {
       if (!projectionGraphics[i]) projectionGraphics[i] = addProjection();
-      projectionGraphics[i].position.x = projections[i].vs;
-      projectionGraphics[i].position.y = projections[i].tvd;
+      projectionGraphics[i].position.x = calcSections[i].vs;
+      projectionGraphics[i].position.y = calcSections[i].tvd;
     }
   }
 }
