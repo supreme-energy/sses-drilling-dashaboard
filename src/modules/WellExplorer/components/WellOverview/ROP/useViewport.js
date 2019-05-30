@@ -13,7 +13,7 @@ export default function useViewport({
   view,
   zoomXScale,
   zoomYScale,
-  isScalingValid
+  isXScalingValid
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
@@ -33,7 +33,7 @@ export default function useViewport({
 
         const newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
         const newScale = prev.xScale * factor;
-        if (zoomXScale && isScalingValid(newScale, newX)) {
+        if (zoomXScale && isXScalingValid(newScale, newX)) {
           newValue.x = newX;
           newValue.xScale = newScale;
         }
@@ -45,7 +45,7 @@ export default function useViewport({
         return newValue;
       });
     },
-    [updateView, zoomXScale, zoomYScale, isScalingValid]
+    [updateView, zoomXScale, zoomYScale, isXScalingValid]
   );
 
   const interactionStateRef = useRef({
@@ -75,13 +75,13 @@ export default function useViewport({
         return {
           ...prev,
           y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
-          x: zoomXScale && isScalingValid(prev.xScale, newX) ? newX : prev.x
+          x: zoomXScale && isXScalingValid(prev.xScale, newX) ? newX : prev.x
         };
       });
 
       Object.assign(interactionState.prevMouse, currMouse);
     },
-    [updateView, zoomXScale, zoomYScale, isScalingValid]
+    [updateView, zoomXScale, zoomYScale, isXScalingValid]
   );
 
   useEffect(

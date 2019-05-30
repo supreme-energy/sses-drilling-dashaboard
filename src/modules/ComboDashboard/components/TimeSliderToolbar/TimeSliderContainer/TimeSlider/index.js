@@ -31,7 +31,7 @@ function Slide({ expanded, step, setSliderStep, selectedGraphs, data, maxStep, v
     updateView,
     zoomXScale: true,
     zoomYScale: false,
-    isScalingValid: isGraphWithinBounds
+    isXScalingValid: isGraphWithinBounds
   });
 
   useEffect(() => {
