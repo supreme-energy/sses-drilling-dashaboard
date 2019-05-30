@@ -6,17 +6,15 @@ import { frozenScaleTransform } from "./customPixiTransforms";
  * @param container  The pixi container to draw on
  * @param props      The props provided to the pixi cross section
  */
-function drawProjections(container, props) {
+function drawProjections(container) {
+  const svgMarker = new PIXI.Texture.fromImage("/projectAhead.svg");
   const projectionGraphics = [];
 
   const addProjection = function() {
-    let marker = new PIXI.Graphics();
-    marker.lineStyle(1.6, 0xee2211);
-    marker.beginFill(0xffffff, 0);
-    marker.drawRoundedRect(-8, -8, 16, 16, 4);
-    marker.endFill();
+    const marker = container.addChild(new PIXI.Sprite(svgMarker));
+    marker.scale.set(0.4);
+    marker.anchor.set(0.5);
     marker.transform.updateTransform = frozenScaleTransform;
-    container.addChild(marker);
     return marker;
   };
 
