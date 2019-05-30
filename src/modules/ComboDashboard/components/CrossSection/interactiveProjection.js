@@ -85,7 +85,7 @@ function interactiveProjection(parent, props) {
   const paMarker = new PIXI.Graphics();
   paMarker.lineStyle(2, red);
   paMarker.beginFill(white, 0);
-  paMarker.drawRoundedRect(-10, -10, 20, 20, 4);
+  paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
   container.addChild(paMarker);
   subscribeToMoveEvents(paMarker, function(pos) {
