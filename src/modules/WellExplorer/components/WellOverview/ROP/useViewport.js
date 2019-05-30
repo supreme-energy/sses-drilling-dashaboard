@@ -4,7 +4,17 @@ import * as PIXI from "pixi.js";
 
 const globalMouse = { x: 0, y: 0 };
 // enable mouse wheel and drag
-export default function useViewport({ renderer, stage, width, height, updateView, view, zoomXScale, zoomYScale }) {
+export default function useViewport({
+  renderer,
+  stage,
+  width,
+  height,
+  updateView,
+  view,
+  zoomXScale,
+  zoomYScale,
+  isDragValid
+}) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
 
@@ -57,15 +67,19 @@ export default function useViewport({ renderer, stage, width, height, updateView
       }
 
       const currMouse = moveData.data.global;
-      updateView(prev => ({
-        ...prev,
-        y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
-        x: zoomXScale ? Number(prev.x) + (currMouse.x - prev.x) : prev.x
-      }));
+      updateView(prev => {
+        const newX = Number(prev.x) + (currMouse.x - interactionState.prevMouse.x);
+
+        return {
+          ...prev,
+          y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
+          x: zoomXScale && isDragValid(prev.xScale, newX) ? newX : prev.x
+        };
+      });
 
       Object.assign(interactionState.prevMouse, currMouse);
     },
-    [updateView, zoomXScale, zoomYScale]
+    [updateView, zoomXScale, zoomYScale, isDragValid]
   );
 
   useEffect(

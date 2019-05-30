@@ -10,7 +10,7 @@ import PixiRectangle from "../../../../../WellExplorer/components/WellOverview/R
 import PixiLine from "../../../../../WellExplorer/components/WellOverview/ROP/PixiLine";
 import useViewport from "../../../../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH } from "../../../../../../constants/timeSlider";
+import { STEP_SIZE, LINE_GRAPHS, COLOR_BY_GRAPH, GRID_GUTTER } from "../../../../../../constants/timeSlider";
 import { mapRop, mapSlide } from "./TimeSliderUtil";
 import classes from "../TimeSlider.scss";
 
@@ -19,6 +19,9 @@ function Slide({ expanded, step, setSliderStep, selectedGraphs, data, maxStep, v
 
   const viewportContainer = useRef(null);
 
+  // Determine if graph has been moved off screen by drag
+  const isGraphWithinBounds = (xScale, newX) => data.length * xScale - Math.abs(newX) > width - GRID_GUTTER;
+
   const viewport = useViewport({
     renderer,
     stage: viewportContainer.current && viewportContainer.current.container,
@@ -26,8 +29,9 @@ function Slide({ expanded, step, setSliderStep, selectedGraphs, data, maxStep, v
     height,
     view,
     updateView,
-    zoomXScale: false,
-    zoomYScale: true
+    zoomXScale: true,
+    zoomYScale: false,
+    isDragValid: isGraphWithinBounds
   });
 
   useEffect(() => {
