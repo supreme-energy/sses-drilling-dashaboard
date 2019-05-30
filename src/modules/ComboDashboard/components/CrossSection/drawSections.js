@@ -2,21 +2,29 @@ import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
 const survey = [0xa6a6a6, 0.5];
+const bitPrj = [0xff00ff, 0.5];
 const projection = [0xee2211, 0.5];
 const selectedSurvey = [0x000000, 1];
 const selectedLastSurvey = [0x0000ff, 1];
+const selectedBitPrj = [0xff00ff, 1];
 const selectedProjection = [0xee2211, 1];
 
 function getColor(selectedSections, index, lastSurveyIdx) {
   const isSelected = selectedSections[index];
   const isProjection = index > lastSurveyIdx;
+  const isLastSurvey = index === lastSurveyIdx;
+  const isBitPrj = index === lastSurveyIdx + 1;
   let color;
-  if (isSelected) {
-    color = isProjection ? selectedProjection : selectedSurvey;
+
+  if (isBitPrj) {
+    color = isSelected ? selectedBitPrj : bitPrj;
+  } else if (isLastSurvey) {
+    color = isSelected ? selectedLastSurvey : survey;
+  } else if (isProjection) {
+    color = isSelected ? selectedProjection : projection;
   } else {
-    color = isProjection ? projection : survey;
+    color = isSelected ? selectedSurvey : survey;
   }
-  if (index === lastSurveyIdx && isSelected) color = selectedLastSurvey;
   return color;
 }
 
