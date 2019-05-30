@@ -6,19 +6,19 @@ export function drawSurveys(container) {
   const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
   const lastMarker = new PIXI.Texture.fromImage("/lastSurvey.svg");
   const bitProjection = new PIXI.Texture.fromImage("/bitProjection.svg");
+  const surveyGraphics = [];
+  let prevDataLength = 0;
+
   const widePath = container.addChild(new PIXI.Graphics());
   widePath.transform.updateTransform = frozenXYTransform;
   const narrowPath = container.addChild(new PIXI.Graphics());
   narrowPath.transform.updateTransform = frozenXYTransform;
-  const surveyGraphics = [];
-  let prevDataLength = 0;
 
   const addSurvey = function() {
-    let icon = new PIXI.Sprite(surveyMarker);
+    let icon = container.addChild(new PIXI.Sprite(surveyMarker));
     icon.scale.set(0.4);
     icon.anchor.set(0.5, 0.5);
     icon.transform.updateTransform = frozenScaleTransform;
-    container.addChild(icon);
     return icon;
   };
 
