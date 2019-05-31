@@ -19,34 +19,29 @@ function interactiveProjection(parent, props) {
   const red = 0xee2211;
   const white = 0xffffff;
 
-  const totLine = new PIXI.Graphics();
+  const totLine = container.addChild(new PIXI.Graphics());
   totLine.transform.updateTransform = frozenXYTransform;
-  container.addChild(totLine);
 
-  const tclLine = new PIXI.Graphics();
+  const tclLine = container.addChild(new PIXI.Graphics());
   tclLine.transform.updateTransform = frozenXYTransform;
-  container.addChild(tclLine);
 
-  const botLine = new PIXI.Graphics();
+  const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
-  container.addChild(botLine);
 
-  const prevTot = new PIXI.Graphics();
+  const prevTot = container.addChild(new PIXI.Graphics());
   prevTot.lineStyle(2, red).beginFill(red, 0.4);
   prevTot.drawCircle(0, 0, 10);
   prevTot.transform.updateTransform = frozenScaleTransform;
-  container.addChild(prevTot);
   subscribeToMoveEvents(prevTot, function(pos) {
     ghostDiffDispatch({
       type: "fault_tot",
       tot: pos.y
     });
   });
-  const prevBot = new PIXI.Graphics();
+  const prevBot = container.addChild(new PIXI.Graphics());
   prevBot.lineStyle(2, red).beginFill(red, 0.4);
   prevBot.drawCircle(0, 0, 10);
   prevBot.transform.updateTransform = frozenScaleTransform;
-  container.addChild(prevBot);
   subscribeToMoveEvents(prevBot, function(pos) {
     ghostDiffDispatch({
       type: "fault_bot",
@@ -54,12 +49,11 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  const currTot = new PIXI.Graphics();
+  const currTot = container.addChild(new PIXI.Graphics());
   currTot.lineStyle(2, white, 1);
   currTot.beginFill(red);
   currTot.drawCircle(0, 0, 10);
   currTot.transform.updateTransform = frozenScaleTransform;
-  container.addChild(currTot);
   subscribeToMoveEvents(currTot, function(pos) {
     ghostDiffDispatch({
       type: "dip_tot",
@@ -68,12 +62,11 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  const currBot = new PIXI.Graphics();
+  const currBot = container.addChild(new PIXI.Graphics());
   currBot.lineStyle(2, white, 1);
   currBot.beginFill(red);
   currBot.drawCircle(0, 0, 10);
   currBot.transform.updateTransform = frozenScaleTransform;
-  container.addChild(currBot);
   subscribeToMoveEvents(currBot, function(pos) {
     ghostDiffDispatch({
       type: "dip_bot",
@@ -82,12 +75,11 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  const paMarker = new PIXI.Graphics();
+  const paMarker = container.addChild(new PIXI.Graphics());
   paMarker.lineStyle(2, red);
   paMarker.beginFill(white, 0);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
-  container.addChild(paMarker);
   subscribeToMoveEvents(paMarker, function(pos) {
     ghostDiffDispatch({
       type: "pa",
