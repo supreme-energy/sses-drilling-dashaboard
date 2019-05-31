@@ -20,7 +20,12 @@ function Slide({ expanded, step, setSliderStep, selectedGraphs, data, maxStep, v
   const viewportContainer = useRef(null);
 
   // Determine if graph has been moved off screen by drag
-  const isGraphWithinBounds = (xScale, newX) => data.length * xScale - Math.abs(newX) > width - GRID_GUTTER;
+  const isGraphWithinBounds = useCallback(
+    (xScale, newX) => {
+      return data.length * xScale - Math.abs(newX) > width - GRID_GUTTER;
+    },
+    [width, data.length]
+  );
 
   const viewport = useViewport({
     renderer,
