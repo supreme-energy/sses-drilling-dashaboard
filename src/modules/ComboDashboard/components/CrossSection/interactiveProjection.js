@@ -2,6 +2,15 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 
+function createCircle(container, lineColor, fillColor, cb) {
+  const circle = container.addChild(new PIXI.Graphics());
+  circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
+  circle.drawCircle(0, 0, 10);
+  circle.transform.updateTransform = frozenScaleTransform;
+  subscribeToMoveEvents(circle, cb);
+  return circle;
+}
+
 /**
  * Function to draw the interactive project ahead UI for a selected projection. Currently
  * only displays the UI and is not tied to real data.  Projections cannot be selected yet.
@@ -28,33 +37,20 @@ function interactiveProjection(parent, props) {
   const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
 
-  const prevTot = container.addChild(new PIXI.Graphics());
-  prevTot.lineStyle(2, red).beginFill(red, 0.4);
-  prevTot.drawCircle(0, 0, 10);
-  prevTot.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(prevTot, function(pos) {
+  const prevTot = createCircle(container, red, red, function(pos) {
     ghostDiffDispatch({
       type: "fault_tot",
       tot: pos.y
     });
   });
-  const prevBot = container.addChild(new PIXI.Graphics());
-  prevBot.lineStyle(2, red).beginFill(red, 0.4);
-  prevBot.drawCircle(0, 0, 10);
-  prevBot.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(prevBot, function(pos) {
+  const prevBot = createCircle(container, red, red, function(pos) {
     ghostDiffDispatch({
       type: "fault_bot",
       bot: pos.y
     });
   });
 
-  const currTot = container.addChild(new PIXI.Graphics());
-  currTot.lineStyle(2, white, 1);
-  currTot.beginFill(red);
-  currTot.drawCircle(0, 0, 10);
-  currTot.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(currTot, function(pos) {
+  const currTot = createCircle(container, white, red, function(pos) {
     ghostDiffDispatch({
       type: "dip_tot",
       vs: pos.x,
@@ -62,12 +58,7 @@ function interactiveProjection(parent, props) {
     });
   });
 
-  const currBot = container.addChild(new PIXI.Graphics());
-  currBot.lineStyle(2, white, 1);
-  currBot.beginFill(red);
-  currBot.drawCircle(0, 0, 10);
-  currBot.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(currBot, function(pos) {
+  const currBot = createCircle(container, white, red, function(pos) {
     ghostDiffDispatch({
       type: "dip_bot",
       vs: pos.x,
@@ -76,8 +67,7 @@ function interactiveProjection(parent, props) {
   });
 
   const paMarker = container.addChild(new PIXI.Graphics());
-  paMarker.lineStyle(2, red);
-  paMarker.beginFill(white, 0);
+  paMarker.lineStyle(2, red).beginFill(white, 0);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(paMarker, function(pos) {
