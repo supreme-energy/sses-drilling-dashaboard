@@ -1,4 +1,4 @@
-import React, { lazy, useState } from "react";
+import React, { lazy, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import WellImporterModal from "../../../modals/WellImporterModal";
 import WellImporter from "../../../modals/WellImporterModal/WellImporter";
@@ -109,6 +109,13 @@ export const WellExplorer = ({
     toggleShowImportModal(true);
   };
 
+  const onClickCancel = useCallback(
+    () => {
+      toggleShowImportModal(false);
+    },
+    []
+  );
+
   return (
     <div
       className={classNames({
@@ -118,10 +125,9 @@ export const WellExplorer = ({
     >
       <WellImporterModal
         open={importModalShown}
-        onClose={() => toggleShowImportModal(false)}
         hideBackdrop
       >
-        <WellImporter />
+        <WellImporter onClickCancel={onClickCancel} />
       </WellImporterModal>
 
       <WellMap

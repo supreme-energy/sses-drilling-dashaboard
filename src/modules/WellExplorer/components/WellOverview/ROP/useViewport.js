@@ -4,7 +4,17 @@ import * as PIXI from "pixi.js";
 
 const globalMouse = { x: 0, y: 0 };
 // enable mouse wheel and drag
-export default function useViewport({ renderer, stage, width, height, updateView, view, zoomXScale, zoomYScale }) {
+export default function useViewport({
+  renderer,
+  stage,
+  width,
+  height,
+  updateView,
+  view,
+  zoomXScale,
+  zoomYScale,
+  isXScalingValid
+}) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const viewportRef = useRef(() => new PIXI.Container());
 
@@ -21,9 +31,11 @@ export default function useViewport({ renderer, stage, width, height, updateView
           ...prev
         };
 
-        if (zoomXScale) {
-          newValue.x = globalMouse.x - (globalMouse.x - prev.x) * factor;
-          newValue.xScale = prev.xScale * factor;
+        const newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
+        const newScale = prev.xScale * factor;
+        if (zoomXScale && isXScalingValid(newScale, newX)) {
+          newValue.x = newX;
+          newValue.xScale = newScale;
         }
 
         if (zoomYScale) {
@@ -33,7 +45,7 @@ export default function useViewport({ renderer, stage, width, height, updateView
         return newValue;
       });
     },
-    [updateView, zoomXScale, zoomYScale]
+    [updateView, zoomXScale, zoomYScale, isXScalingValid]
   );
 
   const interactionStateRef = useRef({
@@ -57,15 +69,19 @@ export default function useViewport({ renderer, stage, width, height, updateView
       }
 
       const currMouse = moveData.data.global;
-      updateView(prev => ({
-        ...prev,
-        y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
-        x: zoomXScale ? Number(prev.x) + (currMouse.x - prev.x) : prev.x
-      }));
+      updateView(prev => {
+        const newX = Number(prev.x) + (currMouse.x - interactionState.prevMouse.x);
+
+        return {
+          ...prev,
+          y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
+          x: zoomXScale && isXScalingValid(prev.xScale, newX) ? newX : prev.x
+        };
+      });
 
       Object.assign(interactionState.prevMouse, currMouse);
     },
-    [updateView, zoomXScale, zoomYScale]
+    [updateView, zoomXScale, zoomYScale, isXScalingValid]
   );
 
   useEffect(

@@ -2,9 +2,9 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { Card, CardContent, Button, IconButton, Typography } from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { Card, CardContent, Button, Typography } from "@material-ui/core";
 
+import VerticalMenu from "../VerticalMenu";
 import { useWells } from "../../../../api";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import WellStatus from "../../../Kpi/WellStatus";
@@ -40,9 +40,7 @@ function HeaderToolbar({ wellId, changeSelectedWell, history }) {
           <Rop wellId={well.id} />
           <ServerStatus wellId={well.id} />
           <BitDepth wellId={well.id} />
-          <IconButton className={classes.optionsButton}>
-            <MoreVertIcon />
-          </IconButton>
+          <VerticalMenu selectedMenuItems={[]} menuItemEnum={[]} />
         </div>
       </CardContent>
     </Card>

@@ -1,54 +1,62 @@
 .headerToolbar {
-    border-width: 1px 0;
-    border-style: solid;
-    border-color: rgb(209, 208, 208);
-    border-radius: 0;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: rgb(209, 208, 208);
+  border-radius: 0;
 
-    .wellName {
-        float: left;
+  .wellName {
+    float: left;
+  }
+
+  .cardContent:last-child {
+    padding: 7px;
+    display: flex;
+
+    @media (max-width: 1100px) {
+      flex-wrap: wrap;
+    }
+  }
+
+  .wellNameCol,
+  .kpiCol {
+    display: flex;
+    align-items: center;
+  }
+
+  .wellNameCol {
+    flex-grow: 1;
+    @media (max-width: 1100px) {
+      justify-content: center;
     }
 
-    .cardContent:last-child {
-        padding: 7px;
-        display: flex;
-    }
-
-    .wellNameCol, .kpiCol {
-        display: flex;
-        align-items: center;
-    }
-
-    .wellNameButton {
+     .wellNameButton {
       outline: 0;
       text-transform: none;
 
       &:hover {
         background-color: white;
       }
-
-      &:focus {
-        background-color: white;
-      }
     }
+  }
 
-    .wellNameCol {
-        flex-grow: 1;
-    }
-
-    .kpiCol {
-        flex-grow: 8;
-        justify-content: flex-end;
-        & > * {
-            margin: 0 0 0 30px;
-        }
+  .kpiCol {
+    flex-grow: 8;
+    justify-content: flex-end;
+    & > * {
+      margin: 0 0 0 30px;
     }
 
-    .optionsButton {
-        &:focus {
-            outline: 0;
-        }
+    @media (max-width: 1100px) {
+      justify-content: flex-start;
     }
-    .status {
-        margin-right: 20px;
+  }
+
+  .optionsButton {
+    &:focus {
+      outline: 0;
     }
+  }
+  .status {
+    margin-right: 20px;
+  }
 }
