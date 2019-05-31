@@ -6,7 +6,7 @@ import classNames from "classnames";
 import classes from "./styles.scss";
 import WellsLayer from "../../WellMap/WellsLayer";
 import WellPhasePointsLayer from "./WellPhasePointsLayer";
-import { Polyline, ScaleControl } from "react-leaflet";
+import { Polyline } from "react-leaflet";
 import { group, max } from "d3-array";
 import { scaleThreshold } from "d3-scale";
 import * as wellSections from "../../../../../constants/wellSections";
@@ -90,7 +90,6 @@ function WellMapPlot({ className, selectedWellId }) {
             color={colorsBySection[section]}
           />
         ))}
-        <ScaleControl position="bottomright" className={classes.zoom} />
       </LeafletMap>
       <Legend className={classes.legend} />
     </div>

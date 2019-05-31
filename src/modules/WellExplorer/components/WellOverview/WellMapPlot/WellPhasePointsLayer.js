@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useMemo } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { Marker, FeatureGroup } from "react-leaflet";
 import { useWellInfo } from "../../../../../api";
 import L from "leaflet";

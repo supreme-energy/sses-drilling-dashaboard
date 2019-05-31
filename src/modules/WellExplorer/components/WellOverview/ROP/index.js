@@ -3,7 +3,7 @@ import { useRopData } from "../../../../../api";
 import useRef from "react-powertools/hooks/useRef";
 import { useSize } from "react-hook-size";
 import { scaleLinear } from "d3-scale";
-import { max, group, pairs } from "d3-array";
+import { max, pairs } from "d3-array";
 import { SectionsGraph } from "./SectionsGraph";
 import PixiLine from "./PixiLine";
 import PixiContainer from "./PixiContainer";
