@@ -18,6 +18,19 @@
         align-items: center;
     }
 
+    .wellNameButton {
+      outline: 0;
+      text-transform: none;
+
+      &:hover {
+        background-color: white;
+      }
+
+      &:focus {
+        background-color: white;
+      }
+    }
+
     .wellNameCol {
         flex-grow: 1;
     }

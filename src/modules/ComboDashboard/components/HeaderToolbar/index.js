@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
-import { Card, CardContent, IconButton, Typography } from "@material-ui/core";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { Card, CardContent, Button, IconButton, Typography } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 import { useWells } from "../../../../api";
@@ -10,22 +11,27 @@ import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
 import TargetAccuracy from "../../../Kpi/TargetAccuracy";
+import { actions } from "../../../WellExplorer/store";
 import classes from "./HeaderToolbar.scss";
 
-function HeaderToolbar({ wellId }) {
+function HeaderToolbar({ wellId, changeSelectedWell, history }) {
   // Get currently opened well
   const [, wellsById] = useWells();
   const well = wellsById[wellId] || {};
 
+  const handleWellNameClick = useCallback(() => {
+    changeSelectedWell(well.id);
+    history.push(`/${well.id}`);
+  }, [changeSelectedWell, history, well.id]);
   return (
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
         <div className={classes.wellNameCol}>
-          <Link to={`/${well.id}`}>
+          <Button className={classes.wellNameButton} onClick={handleWellNameClick}>
             <Typography variant="h5" color="primary" className={classes.wellName}>
               {well.name}
             </Typography>
-          </Link>
+          </Button>
         </div>
         <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
@@ -44,7 +50,18 @@ function HeaderToolbar({ wellId }) {
 }
 
 HeaderToolbar.propTypes = {
-  wellId: PropTypes.string
+  wellId: PropTypes.string,
+  changeSelectedWell: PropTypes.func,
+  history: PropTypes.shape({
+    push: PropTypes.func
+  })
 };
 
-export default HeaderToolbar;
+const mapDispatchToPops = {
+  changeSelectedWell: actions.changeSelectedWell
+};
+
+export default connect(
+  null,
+  mapDispatchToPops
+)(withRouter(HeaderToolbar));
