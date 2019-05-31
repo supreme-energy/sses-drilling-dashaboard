@@ -13,6 +13,7 @@ export default function() {
       </div>
       <div className={classes.right}>
         <DrillPhaseKPI />
+        <div className={classes.toolFace} />
         <WellMapPlot className={classes.mapPlot} />
       </div>
     </div>

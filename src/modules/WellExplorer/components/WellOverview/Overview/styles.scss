@@ -1,6 +1,5 @@
 .container {
     display: flex;
-    width: 100%;
     flex: 1;
     flex-direction: row;
     padding: 8px;
@@ -19,8 +18,6 @@
         .KPIGraphic {
             flex: 1;
         }
-
-        
     }
 
     .right {
@@ -31,7 +28,11 @@
 
         .mapPlot {
             flex: 1;
-            height: 100%;
+            align-self: stretch;
+        }
+
+        .toolFace {
+            height: 128px;
         }
     }
 }

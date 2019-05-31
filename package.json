@@ -47,6 +47,7 @@
     "object-assign": "^4.1.1",
     "pixi.js": "^4.8.7",
     "prettier": "^1.16.4",
+    "proj4": "^2.5.0",
     "promise": "^8.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.8.6",
