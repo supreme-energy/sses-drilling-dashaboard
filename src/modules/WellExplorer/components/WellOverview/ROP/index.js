@@ -40,12 +40,9 @@ const mapAverage = d => [Number(d.ROP_A), Number(d.Hole_Depth)];
 const mapInstant = d => [Number(d.ROP_I), Number(d.Hole_Depth)];
 const gridGutter = 50;
 
-const getDataBySection = data => {
-  return group(data, d => d.A_interval);
-};
-
 export default function Rop({ className, style }) {
-  const data = useRopData();
+  const [data, getDataBySection] = useRopData();
+  const dataBySection = getDataBySection(data);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -82,8 +79,6 @@ export default function Rop({ className, style }) {
     zoomXScale: false,
     zoomYScale: true
   });
-
-  const dataBySection = useMemo(() => getDataBySection(data), [data]);
 
   const onReset = useCallback(() => {
     updateView(view => ({

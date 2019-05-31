@@ -11,9 +11,9 @@ export default function Map({ selectedTiles, children, ...props }) {
   return (
     <LeafletMap
       attributionControl={false}
-      length={4}
-      // onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
+      // onfullscreenchange={handleMapFullscreenChange}
+
       {...props}
       className={classNames(classes.map, props.className)}
     >

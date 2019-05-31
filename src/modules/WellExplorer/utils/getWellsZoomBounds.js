@@ -1,36 +1,36 @@
 import L from "leaflet";
 
-export function getWellZoomBounds(well) {
+export function getWellZoomBounds(well, getPosition = d => d.surfacePosition) {
   return well
     ? L.latLngBounds(
-        L.latLng(well.surfacePosition[0] - 0.4, well.surfacePosition[1] - 0.4),
-        L.latLng(well.surfacePosition[0] + 0.4, well.surfacePosition[1] + 0.4)
+        L.latLng(getPosition(well)[0] - 0.4, getPosition(well)[1] - 0.4),
+        L.latLng(getPosition(well)[0] + 0.4, getPosition(well)[1] + 0.4)
       )
     : null;
 }
 
-export function getWellsZoomBounds(wells) {
+export function getWellsZoomBounds(wells, mapPosition = d => d.surfacePosition) {
   if (wells.length === 0) {
     return null;
   } else if (wells.length === 1) {
-    return getWellZoomBounds(wells[0]);
+    return getWellZoomBounds(wells[0], mapPosition);
   } else {
     const { minLat, minLng, maxLat, maxLng } = wells.reduce(
       (acc, next) => {
         return {
-          minLat: Math.min(next.surfacePosition[0], acc.minLat),
-          minLng: Math.min(next.surfacePosition[1], acc.minLng),
-          maxLat: Math.max(next.surfacePosition[0], acc.maxLat),
-          maxLng: Math.max(next.surfacePosition[1], acc.maxLng)
+          minLat: Math.min(mapPosition(next)[0], acc.minLat),
+          minLng: Math.min(mapPosition(next)[1], acc.minLng),
+          maxLat: Math.max(mapPosition(next)[0], acc.maxLat),
+          maxLng: Math.max(mapPosition(next)[1], acc.maxLng)
         };
       },
       {
-        minLat: wells[0].surfacePosition[0],
-        minLng: wells[0].surfacePosition[1],
-        maxLat: wells[0].surfacePosition[0],
-        maxLng: wells[0].surfacePosition[1]
+        minLat: mapPosition(wells[0])[0],
+        minLng: mapPosition(wells[0])[1],
+        maxLat: mapPosition(wells[0])[0],
+        maxLng: mapPosition(wells[0])[1]
       }
     );
-    return L.latLngBounds(L.latLng(minLat - 1, minLng - 1), L.latLng(maxLat + 1, maxLng + 1));
+    return L.latLngBounds(L.latLng(minLat, minLng), L.latLng(maxLat, maxLng));
   }
 }
