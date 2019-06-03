@@ -6,7 +6,7 @@ export function defaultMakeXTickAndLine(fontSize) {
     fill: "#999",
     fontSize: fontSize
   });
-  label.anchor.set(0.5, 0.5);
+  label.anchor.set(-0.2, 0.5);
   label.rotation = Math.PI / 2;
   label.transform.updateTransform = frozenXTransform;
 
@@ -164,7 +164,7 @@ function drawGrid(
         let pos = b.xMin + b.xStep * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
-        xLabels[i].y = xAxisAnchor - gutter / 2;
+        xLabels[i].y = xAxisAnchor - gutter;
         xLabels[i].text = `${pos}`;
       }
 

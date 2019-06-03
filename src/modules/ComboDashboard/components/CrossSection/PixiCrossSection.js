@@ -34,7 +34,7 @@ export default class PixiCrossSection {
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 50;
+    const gridGutter = 80;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
