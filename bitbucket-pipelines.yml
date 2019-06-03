@@ -13,15 +13,6 @@ pipelines:
             - yarn run test
             - yarn run build
   branches:
-    'master':
-      - step:
-          name: Build and test
-          caches:
-            - node
-          script:
-            - yarn
-            - yarn run lint
-            - yarn run build
     'develop':
       - step:
           name: Build and deploy
@@ -31,6 +22,17 @@ pipelines:
           script:
             - yarn
             - yarn run lint
+            - yarn run buildDev
+            - yarn run uploadDev
+    'master':
+      - step:
+          name: Build and deploy
+          deployment: staging
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
             - yarn run test
-            - yarn run build
-            - yarn run upload
+            - yarn run buildMaster
+            - yarn run uploadMaster

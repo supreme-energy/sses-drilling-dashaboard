@@ -20,7 +20,7 @@ function ComboDashboard({
         <HeaderToolbar wellId={openedWellId} />
       </Suspense>
       <Suspense fallback={<Progress />}>
-        <TimeSliderToolbar />
+        <TimeSliderToolbar wellId={openedWellId} />
       </Suspense>
       <Suspense fallback={<Progress />}>
         <CrossSectionDashboard wellId={openedWellId} />

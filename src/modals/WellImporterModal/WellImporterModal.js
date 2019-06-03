@@ -1,5 +1,5 @@
-import { Button, DialogActions } from "@material-ui/core";
 import React from "react";
+import PropTypes from "prop-types";
 import Modal from "@material-ui/core/Modal";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -12,19 +12,21 @@ const styles = {
 
 const StyledModal = withStyles(styles, { name: 'MuiModal' })(Modal);
 
-const WellImporterModal = ({ onClose, children, ...rest }) => {
+const WellImporterModal = ({ children, ...rest }) => {
   return (
-    <StyledModal {...rest} onClose={onClose}>
+    <StyledModal {...rest}>
       <React.Fragment>
         {children}
-        <DialogActions>
-          <Button onClick={onClose} color="primary">
-            Close
-          </Button>
-        </DialogActions>
       </React.Fragment>
     </StyledModal>
   );
+};
+
+WellImporterModal.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
+  ]).isRequired
 };
 
 export default WellImporterModal;
