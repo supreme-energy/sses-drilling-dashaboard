@@ -33,4 +33,4 @@ function ServerStatus({ wellId, theme }) {
   );
 }
 
-export default withTheme(ServerStatus);
+export default withTheme()(ServerStatus);

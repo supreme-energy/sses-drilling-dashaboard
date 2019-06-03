@@ -207,7 +207,7 @@ const mapDispatchToPops = {
 };
 
 const bindData = flowRight([
-  withTheme,
+  withTheme(),
   connect(
     mapStateToProps,
     mapDispatchToPops
