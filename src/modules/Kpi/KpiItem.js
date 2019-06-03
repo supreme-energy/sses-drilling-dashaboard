@@ -6,14 +6,20 @@ import { useKpi } from "../../api";
 import { format } from "d3-format";
 import classNames from "classnames";
 
-function KpiItem({ value, measureUnit, label, format, className, renderValue }) {
+function KpiItem({ value, measureUnit, label, format, className, renderValue, labelClass, small, textClass }) {
   return (
-    <div className={classNames(className, classes.vertical)}>
+    <div className={classNames(className, classes.vertical, { [classes.small]: small })}>
       <div className={classes.horizontalTop}>
-        {renderValue({ value, format })}
-        <Typography variant="caption">{measureUnit}</Typography>
+        {renderValue({ value, format, textClass })}
+        <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
+          {measureUnit}
+        </Typography>
       </div>
-      <Typography variant="caption" gutterBottom className={classes.italicLabel}>
+      <Typography
+        variant="caption"
+        gutterBottom
+        className={classNames(classes.italicLabel, labelClass, classes.caption, textClass)}
+      >
         {label}
       </Typography>
     </div>
@@ -26,13 +32,16 @@ KpiItem.propTypes = {
   measureUnit: PropTypes.string,
   label: PropTypes.string,
   className: PropTypes.string,
-  renderValue: PropTypes.func
+  renderValue: PropTypes.func,
+  labelClass: PropTypes.string,
+  small: PropTypes.bool,
+  textClass: PropTypes.string
 };
 
 KpiItem.defaultProps = {
   format: format(",.2f"),
-  renderValue: ({ value, format }) => (
-    <Typography className={classes.kpiValue} variant="h5">
+  renderValue: ({ value, format, textClass }) => (
+    <Typography className={classNames(classes.kpiValue, textClass)} variant="h5">
       {format(value)}
     </Typography>
   )

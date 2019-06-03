@@ -1,0 +1,45 @@
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: 170px;
+    .imgContainer {
+        background-color: #F2E8CA;
+        width: 100%;
+        border-radius: 8px;
+        .kpis {
+            position: absolute;
+            left: 20px;
+            top: 10px;
+            bottom: 0px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            width: 100%;
+
+            .label {
+                color: #898125;
+                margin-bottom: 10px;
+            }
+            .left, .right {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                flex: 1;
+            }
+
+            .topSpace {
+                height: 35px;
+            }
+        }
+
+        
+        .svgIcon {
+            margin-top: 44px;    
+            position: relative;
+            left: -9px;
+        }
+    }
+    
+}
