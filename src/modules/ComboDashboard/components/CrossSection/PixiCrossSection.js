@@ -28,6 +28,7 @@ export default class PixiCrossSection {
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
+    this.UILayer2 = this.viewport.addChild(new PIXI.Container());
     this.stage.addChild(this.viewport);
 
     this.makeInteractive(this.stage);
@@ -39,7 +40,7 @@ export default class PixiCrossSection {
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
 
