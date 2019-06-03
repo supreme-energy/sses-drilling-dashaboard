@@ -37,8 +37,8 @@ function getSurveyBySection(surveyMapPositions, wellOverviewDataBySection) {
     return new Map();
   }
 
-  const sections = [wellSections.INTERMEDIATE, wellSections.DRILLOUT, wellSections.LATERAL].filter(
-    s => s !== wellSections.SURFACE && wellOverviewDataBySection.get(s)
+  const sections = [wellSections.INTERMEDIATE, wellSections.DRILLOUT, wellSections.LATERAL].filter(s =>
+    wellOverviewDataBySection.get(s)
   );
 
   // scale::(Number) =>  INTERMEDIATE | LATERAL ...

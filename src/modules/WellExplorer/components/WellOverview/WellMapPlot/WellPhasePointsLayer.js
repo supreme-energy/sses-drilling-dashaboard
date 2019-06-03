@@ -37,7 +37,6 @@ function WellPhasePointsLayer({ wellId, zIndexOffset }, ref) {
         />
       )}
       {wellPBHL && <Marker position={[wellPBHL.y, wellPBHL.x]} icon={PBHLIcon} zIndexOffset={zIndexOffset + 2} />}
-      {/* {wellPBHL && <Circle center={[wellPBHL.y, wellPBHL.x]} radius={2} zIndexOffset={zIndexOffset + 3} />} */}
     </FeatureGroup>
   );
 }
