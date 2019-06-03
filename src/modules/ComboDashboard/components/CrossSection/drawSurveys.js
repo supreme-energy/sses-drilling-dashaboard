@@ -6,19 +6,19 @@ export function drawSurveys(container) {
   const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
   const lastMarker = new PIXI.Texture.fromImage("/lastSurvey.svg");
   const bitProjection = new PIXI.Texture.fromImage("/bitProjection.svg");
+  const paMarker = new PIXI.Texture.fromImage("/projectAhead.svg");
+  const surveyGraphics = [];
+
   const widePath = container.addChild(new PIXI.Graphics());
   widePath.transform.updateTransform = frozenXYTransform;
   const narrowPath = container.addChild(new PIXI.Graphics());
   narrowPath.transform.updateTransform = frozenXYTransform;
-  const surveyGraphics = [];
-  let prevDataLength = 0;
 
   const addSurvey = function() {
-    let icon = new PIXI.Sprite(surveyMarker);
+    let icon = container.addChild(new PIXI.Sprite(surveyMarker));
     icon.scale.set(0.4);
     icon.anchor.set(0.5, 0.5);
     icon.transform.updateTransform = frozenScaleTransform;
-    container.addChild(icon);
     return icon;
   };
 
@@ -30,23 +30,25 @@ export function drawSurveys(container) {
     }
   }
 
+  function getTexture(index, lastSurveyIndex) {
+    if (index === lastSurveyIndex) return lastMarker;
+    else if (index === lastSurveyIndex + 1) return bitProjection;
+    else if (index > lastSurveyIndex + 1) return paMarker;
+    else return surveyMarker;
+  }
+
   return function(props) {
-    const { surveys, scale } = props;
-    if (surveys.length === 0) return;
-    redrawLine(surveys, scale, widePath, 6, 0x333333);
-    redrawLine(surveys, scale, narrowPath, 2, 0xffffff);
+    const { calcSections, lastSurveyIdx, scale } = props;
+    if (calcSections.length === 0 || lastSurveyIdx < 0) return;
+    redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, widePath, 6, 0x333333);
+    redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, narrowPath, 2, 0xffffff);
 
-    if (surveys.length === prevDataLength) return;
-    prevDataLength = surveys.length;
-
-    for (let i = 0; i < surveys.length; i++) {
+    for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
-      surveyGraphics[i].position.x = surveys[i].vs;
-      surveyGraphics[i].position.y = surveys[i].tvd;
-      surveyGraphics[i].texture = surveyMarker;
+
+      surveyGraphics[i].position.x = calcSections[i].vs;
+      surveyGraphics[i].position.y = calcSections[i].tvd;
+      surveyGraphics[i].texture = getTexture(i, lastSurveyIdx);
     }
-    // Set the correct graphics for last survey and bit projection
-    surveyGraphics[surveyGraphics.length - 1].texture = bitProjection;
-    if (surveyGraphics.length > 1) surveyGraphics[surveyGraphics.length - 2].texture = lastMarker;
   };
 }
