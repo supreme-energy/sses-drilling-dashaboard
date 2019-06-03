@@ -94,14 +94,13 @@ export const CrossSectionDashboard = ({ wellId }) => {
           fault: p.fault + ghostDiff.fault
         };
       } else if (i > index) {
-        // TODO: Confirm this results in the right display
         return {
           ...p,
           tvd: p.tvd + ghostDiff.tot + ghostDiff.fault,
           vs: p.vs + ghostDiff.vs
         };
       } else {
-        return { ...p };
+        return p;
       }
     });
   }, [rawSections, ghostDiff]);
@@ -128,7 +127,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               fault: point.fault
             };
           }
-          return { ...point };
+          return point;
         })
       };
     });
