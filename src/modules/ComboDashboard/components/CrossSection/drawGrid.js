@@ -153,7 +153,7 @@ function drawGrid(
       b.xMin !== lastBounds.xMin ||
       b.yMin !== lastBounds.yMin ||
       lastHeight !== height ||
-      lastWidth !== lastWidth
+      lastWidth !== width
     ) {
       const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
       // Redraw the background as width or height may have changed
