@@ -61,6 +61,8 @@ function drawGrid(
   const maxYLines = 12;
   const fontSize = 15;
   let lastBounds = {};
+  let lastHeight = 0;
+  let lastWidth = 0;
 
   const xLabels = [];
   const xLines = [];
@@ -149,7 +151,9 @@ function drawGrid(
       b.xMax !== lastBounds.xMax ||
       b.yMax !== lastBounds.yMax ||
       b.xMin !== lastBounds.xMin ||
-      b.yMin !== lastBounds.yMin
+      b.yMin !== lastBounds.yMin ||
+      lastHeight !== height ||
+      lastWidth !== lastWidth
     ) {
       const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
       // Redraw the background as width or height may have changed
@@ -175,6 +179,8 @@ function drawGrid(
         yLabels[i].text = `${pos}`;
       }
       lastBounds = b;
+      lastHeight = height;
+      lastWidth = width;
     }
   };
 }
