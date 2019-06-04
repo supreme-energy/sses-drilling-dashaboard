@@ -50,7 +50,7 @@ export function defaultMakeYTickAndLine(fontSize) {
  * @returns {updateGrid}  The function to update the gridlines
  */
 function drawGrid(container, options = {}) {
-  let {
+  const {
     gutter = 50,
     xAxisOrientation = "bottom",
     makeXTickAndLine = defaultMakeXTickAndLine,
@@ -140,7 +140,7 @@ function drawGrid(container, options = {}) {
     const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
 
-    let bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
+    const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {
       const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
@@ -153,7 +153,7 @@ function drawGrid(container, options = {}) {
       corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
 
       for (let i = 0; i < xLines.length; i++) {
-        let pos = bounds.xMin + bounds.xStep * i;
+        const pos = bounds.xMin + bounds.xStep * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
         xLabels[i].y = xAxisAnchor - gutter / 2;
@@ -161,7 +161,7 @@ function drawGrid(container, options = {}) {
       }
 
       for (let i = 0; i < yLines.length; i++) {
-        let pos = bounds.yMin + bounds.yStep * i;
+        const pos = bounds.yMin + bounds.yStep * i;
         yLines[i].y = pos;
         yLabels[i].y = pos;
         yLabels[i].text = `${pos}`;
