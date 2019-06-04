@@ -133,6 +133,7 @@ export default class PixiCrossSection {
     removeAllChildren(this.formationsLayer);
     removeAllChildren(this.wellPathLayer);
     removeAllChildren(this.UILayer);
+    removeAllChildren(this.UILayer2);
     removeAllChildren(this.gridLayer);
   }
 }
