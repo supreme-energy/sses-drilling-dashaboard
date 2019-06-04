@@ -113,8 +113,8 @@ function drawGrid(container, options = {}) {
     const yMin = Math.floor((-1 * y) / yScale);
     const yMax = yMin + Math.floor(height / yScale);
 
-    const yRoughStep = (yMax - yMin) / (yMaxLines - 1);
-    const xRoughStep = (xMax - xMin) / (xMaxLines - 1);
+    const yRoughStep = (yMax - yMin) / yMaxLines;
+    const xRoughStep = (xMax - xMin) / xMaxLines;
 
     const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
     const yStep = goodSteps.find(s => s >= yRoughStep);
