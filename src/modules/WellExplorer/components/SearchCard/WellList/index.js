@@ -20,7 +20,6 @@ const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, s
   const itemRef = useRef(null);
   useEffect(() => {
     if (selected && itemRef.current) {
-      console.log("itemRef", itemRef.current);
       itemRef.current.scrollIntoView();
     }
   }, [selected]);
