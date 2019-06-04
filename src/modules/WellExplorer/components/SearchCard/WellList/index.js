@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import classes from "./WellList.scss";
@@ -17,38 +17,47 @@ import flowRight from "lodash/flowRight";
 const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }) => {
   const FavIcon = fav ? Favorite : FavoriteBorder;
   const icon = listIcons[status];
+  const itemRef = useRef(null);
+  useEffect(() => {
+    if (selected && itemRef.current) {
+      console.log("itemRef", itemRef.current);
+      itemRef.current.scrollIntoView();
+    }
+  }, [selected]);
 
   return (
-    <ListItem button disableRipple selected={selected} className={classes.wellItem} onClick={onClick}>
-      <div className={classes.itemContent}>
-        <div>{name}</div>
-        <Typography variant="body2" gutterBottom>
-          {`${lat}  |  ${lng}`}{" "}
-        </Typography>
-        <Typography variant="body2" gutterBottom>
-          {status.toUpperCase()}
-        </Typography>
-      </div>
-      <div className={classes.buttons}>
-        {selected || opened ? (
-          <Link to={opened ? `/` : `/${id}/combo`}>
-            <Button color="primary" className={classes.button}>
-              {opened ? "Close" : "Open"}
-            </Button>
-          </Link>
-        ) : (
-          <IconButton
-            onClick={e => {
-              changeFav(id, !fav);
-              e.stopPropagation();
-            }}
-          >
-            <FavIcon className={classes.icon} />
-          </IconButton>
-        )}
-        <img src={icon} />
-      </div>
-    </ListItem>
+    <div ref={itemRef}>
+      <ListItem button disableRipple selected={selected} className={classes.wellItem} onClick={onClick}>
+        <div className={classes.itemContent}>
+          <div>{name}</div>
+          <Typography variant="body2" gutterBottom>
+            {`${lat}  |  ${lng}`}{" "}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {status.toUpperCase()}
+          </Typography>
+        </div>
+        <div className={classes.buttons}>
+          {selected || opened ? (
+            <Link to={opened ? `/` : `/${id}/combo`}>
+              <Button color="primary" className={classes.button}>
+                {opened ? "Close" : "Open"}
+              </Button>
+            </Link>
+          ) : (
+            <IconButton
+              onClick={e => {
+                changeFav(id, !fav);
+                e.stopPropagation();
+              }}
+            >
+              <FavIcon className={classes.icon} />
+            </IconButton>
+          )}
+          <img src={icon} />
+        </div>
+      </ListItem>
+    </div>
   );
 };
 
