@@ -107,7 +107,7 @@ function drawGrid(container, options = {}) {
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
-  function calcBounds(yScale, y, x, xScale, width, height, xMaxLines, yMaxLines) {
+  const memoCalcBounds = memoizeOne((yScale, y, x, xScale, width, height, xMaxLines, yMaxLines) => {
     const xMin = Math.floor((-1 * x) / xScale);
     const xMax = xMin + Math.floor(width / xScale);
     const yMin = Math.floor((-1 * y) / yScale);
@@ -128,9 +128,7 @@ function drawGrid(container, options = {}) {
       yMin: Math.floor(yMin / yStep) * yStep,
       yMax: Math.ceil(yMax / yStep) * yStep
     };
-  }
-
-  const memoCalcBounds = memoizeOne(calcBounds);
+  });
 
   return function updateGrid(props, options = {}) {
     // Sometimes transform is undefined and we need it for position/scale
