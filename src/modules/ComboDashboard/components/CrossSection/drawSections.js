@@ -74,6 +74,7 @@ function drawSections(container, otherContainer, props, gutter) {
     selectedLeft.clear();
     selectedRight.clear();
     selectedLabel.clear();
+    labelText.visible = false;
 
     let start = 0;
     let length = 0;
@@ -103,6 +104,7 @@ function drawSections(container, otherContainer, props, gutter) {
         selectedLabel.position.x = start + length - 10;
         selectedLabel.position.y = height - gutter;
         labelText.text = p2.toFixed(2);
+        labelText.visible = true;
       }
     }
   };
