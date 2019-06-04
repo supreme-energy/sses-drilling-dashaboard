@@ -1,6 +1,6 @@
 import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo, useEffect, useState, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import Fuse from "fuse.js";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
@@ -14,6 +14,10 @@ export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+
+// mock data
+const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
+const GET_MOCK_ROP_DATA = "/rop.json";
 
 const options = {
   shouldSort: true,
@@ -112,22 +116,19 @@ export function useWells() {
 }
 
 export function useRopData() {
-  const unmountedRef = useRef();
-  const [ropData, updateRopData] = useState(EMPTY_ARRAY);
-  const loadData = async () => {
-    const response = await fetch("/data/rop.json");
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_ROP_DATA
+    },
 
-    const data = await response.json();
-
-    if (!unmountedRef.current) {
-      updateRopData(data.data);
+    {
+      id: "mock",
+      transform: data => {
+        return data.data;
+      }
     }
-  };
-  useEffect(() => {
-    loadData();
-    return () => (unmountedRef.current = true);
-  }, []);
-  return ropData;
+  );
+  return data || EMPTY_ARRAY;
 }
 
 export function useWellPath(wellId) {
@@ -198,6 +199,35 @@ export function useProjections(wellId) {
     {
       transform: projections => {
         return projections.map(p => _.mapValues(p, Number));
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useWellOverviewKPI() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_OVERVIEW_KPI
+    },
+
+    {
+      id: "mock",
+      transform: data => {
+        return data.data.map(d => ({
+          type: d.INTERVAL_NAME,
+          id: _.uniqueId(),
+          rop: d.ROP_AVG,
+          depth: d.HOLE_DEPTH_END,
+          bitSize: d.holesize,
+          casingSize: d.casingSize,
+          startTime: d.DT_START,
+          totalHours: d.TOTAL_HOURS,
+          drillingHours: d.D_HOURS,
+          landingPoint: d.landingPoint,
+          toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
+          zoneAccuracy: d.zoneAccuracy
+        }));
       }
     }
   );

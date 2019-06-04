@@ -42,7 +42,7 @@ export default class PixiCrossSection {
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
     this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
-    this.gridUpdate = drawGrid(this.gridLayer, gridGutter);
+    this.gridUpdate = drawGrid(this.gridLayer, { gridGutter });
 
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
@@ -112,7 +112,7 @@ export default class PixiCrossSection {
     );
   }
   update(props) {
-    const { view } = props;
+    const { width, height, view } = props;
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
@@ -121,7 +121,7 @@ export default class PixiCrossSection {
     this.surveyUpdate(props);
     this.sectionUpdate(props);
     this.interactivePAUpdate(props);
-    this.gridUpdate(props);
+    this.gridUpdate(props, { maxXTicks: Math.ceil((12 * width) / height) });
     this.newProps = true;
   }
   resize(width, height) {

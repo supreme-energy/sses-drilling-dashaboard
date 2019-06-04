@@ -23,6 +23,8 @@
     .column {
         display: flex;
         flex-direction: column;
+        flex: 1;
+        max-width: 440px;
     }
 
     .hSpacer {
@@ -41,7 +43,7 @@
     }
 
     .wellOverview {
-        flex: 1;
+        flex: 2;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
@@ -54,11 +56,12 @@
     }
 
     .welcome {
+        
         pointer-events: auto;
     }
 
     .searchCard {
-        align-self: flex-start;
+        align-self: stretch;
         max-height: 60%;
         pointer-events: auto;
     }

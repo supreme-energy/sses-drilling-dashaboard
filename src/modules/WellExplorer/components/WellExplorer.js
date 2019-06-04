@@ -100,7 +100,7 @@ export const WellExplorer = ({
   const overviewMode = !!selectedWellId;
   const wellsBounds = useMemo(() => getWellsZoomBounds(wells), [wells]);
   const selectedWellMapBounds = useMemo(() => getWellZoomBounds(selectedWell), [selectedWell]);
-  const onFilesToImportChange = (event) => {
+  const onFilesToImportChange = event => {
     if (!event.target.files || !event.target.files.length) {
       return;
     }
@@ -109,12 +109,9 @@ export const WellExplorer = ({
     toggleShowImportModal(true);
   };
 
-  const onClickCancel = useCallback(
-    () => {
-      toggleShowImportModal(false);
-    },
-    []
-  );
+  const onClickCancel = useCallback(() => {
+    toggleShowImportModal(false);
+  }, []);
 
   return (
     <div
@@ -123,10 +120,7 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
-      <WellImporterModal
-        open={importModalShown}
-        hideBackdrop
-      >
+      <WellImporterModal open={importModalShown} hideBackdrop>
         <WellImporter onClickCancel={onClickCancel} />
       </WellImporterModal>
 
