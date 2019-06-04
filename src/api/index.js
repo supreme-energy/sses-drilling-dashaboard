@@ -2,6 +2,7 @@ import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo } from "react";
 import Fuse from "fuse.js";
+import memoizeOne from "memoize-one";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
@@ -30,6 +31,12 @@ const options = {
 };
 
 const EMPTY_ARRAY = [];
+
+function transform(data) {
+  return data.map(d => _.mapValues(d, Number));
+}
+
+const memoizedTransform = memoizeOne(transform);
 
 export function useWellsSearch(wells) {
   const fuse = useMemo(() => new Fuse(wells, options), [wells]);
@@ -140,9 +147,7 @@ export function useWellPath(wellId) {
       }
     },
     {
-      transform: plan => {
-        return plan.map(p => _.mapValues(p, Number));
-      }
+      transform: memoizedTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -157,9 +162,7 @@ export function useSurveys(wellId) {
       }
     },
     {
-      transform: surveys => {
-        return surveys.map(s => _.mapValues(s, Number));
-      }
+      transform: memoizedTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -179,7 +182,7 @@ export function useFormations(wellId) {
         return formationList.map(f => {
           return {
             ...f,
-            data: f.data.map(d => _.mapValues(d, Number))
+            data: memoizedTransform(f.data)
           };
         });
       }
@@ -197,9 +200,7 @@ export function useProjections(wellId) {
       }
     },
     {
-      transform: projections => {
-        return projections.map(p => _.mapValues(p, Number));
-      }
+      transform: memoizedTransform
     }
   );
   return data || EMPTY_ARRAY;

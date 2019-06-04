@@ -18,6 +18,9 @@ import WellExplorerModule from "modules/WellExplorer";
 import plusBasicAuth from "fetch-plus-basicauth";
 import WellUpdate from "./WellUpdate";
 
+// Import UI State Providers
+import { TimeSliderProvider } from "./Containers";
+
 // Lazy load header
 const PageLayout = React.lazy(() => import("layouts/PageLayout"));
 const fetchClientOptions = { mode: "cors", credentials: "include" };
@@ -58,14 +61,16 @@ class App extends React.Component {
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
-                      <Route path="/:wellId" component={WellUpdate} />
-                      <Switch>
-                        <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                        <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                        <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                        <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                        <Route path="/:wellId?" component={WellExplorer} />
-                      </Switch>
+                      <TimeSliderProvider>
+                        <Route path="/:wellId" component={WellUpdate} />
+                        <Switch>
+                          <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                          <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                          <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                          <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                          <Route path="/:wellId?" component={WellExplorer} />
+                        </Switch>
+                      </TimeSliderProvider>
                     </PageLayout>
                   </div>
                 </FetchCache>
