@@ -121,7 +121,7 @@ export default class PixiCrossSection {
     this.surveyUpdate(props);
     this.sectionUpdate(props);
     this.interactivePAUpdate(props);
-    this.gridUpdate(props, { maxXTicks: Math.ceil((12 * width) / height) });
+    this.gridUpdate(props, { maxXTicks: (12 * width) / height });
     this.newProps = true;
   }
   resize(width, height) {
