@@ -23,6 +23,9 @@ export const theme = createMuiTheme({
     warning: {
       main: "#EE2211"
     },
+    yellow: {
+      main: "#E9CA00"
+    },
     lateralLabel: {
       main: "#86863B"
     },

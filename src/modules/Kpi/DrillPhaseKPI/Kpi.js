@@ -4,9 +4,10 @@ import KpiItem, { defaultRenderValue } from "../KpiItem";
 import classes from "./styles.scss";
 import classNames from "classnames";
 import PhaseLabel from "../components/PhaseLabel";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear, scaleThreshold } from "d3-scale";
 import { useSize } from "react-hook-size";
 import { sum } from "d3-array";
+import { useTheme } from "@material-ui/styles";
 
 const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
 const renderRotating = props => defaultRenderValue({ ...props, textClass: classes.rotatingLabel });
@@ -33,6 +34,15 @@ const PercentageBar = ({ values }) => {
   );
 };
 export default function Kpi({ data }) {
+  const theme = useTheme();
+
+  const getTargetColor = useMemo(
+    () =>
+      scaleThreshold()
+        .domain([50, 80, 100])
+        .range([theme.palette.warning.main, theme.palette.yellow.main, theme.palette.success.main]),
+    [theme]
+  );
   return (
     <Card className={classNames("layout vertical", classes.container)}>
       {data ? (
@@ -40,7 +50,13 @@ export default function Kpi({ data }) {
           <PhaseLabel phase={data.type}>{data.type}</PhaseLabel>
           <div className="layout horizontal space-between">
             <div className={classNames("layout vertical", classes.firstColumn)}>
-              <KpiItem className={classes.kpi} label="Target Accuracy" value={data.targetAccuracy} measureUnit="%" />
+              <KpiItem
+                textStyle={{ color: getTargetColor(data.targetAccuracy) }}
+                className={classes.kpi}
+                label="Target Accuracy"
+                value={data.targetAccuracy}
+                measureUnit="%"
+              />
               <KpiItem className={classes.kpi} label="Drilling Time" value={data.totalHours} measureUnit="h" />
             </div>
             <div className={classNames("layout vertical", classes.secondColumn)}>

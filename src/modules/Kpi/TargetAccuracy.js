@@ -10,6 +10,7 @@ import classes from "./styles.scss";
 // of KpiItem in KpiItem.js
 function TargetAccuracy({ wellId, theme }) {
   const [{ zoneStatus }] = useWellInfo(wellId);
+
   const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
 
   return (
