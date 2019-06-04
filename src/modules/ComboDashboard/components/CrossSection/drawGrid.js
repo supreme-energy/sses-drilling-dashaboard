@@ -91,9 +91,6 @@ function drawGrid(
   container.addChild(bgx);
 
   const bgy = new PIXI.Graphics();
-  // bgy.beginFill(0xffffff);
-  // bgy.lineStyle(0);
-  // bgy.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, width, gutter);
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
@@ -103,8 +100,6 @@ function drawGrid(
 
   // Corner to hide overlapping tick labels
   const corner = new PIXI.Graphics();
-  // corner.beginFill(0xffffff);
-  // corner.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
