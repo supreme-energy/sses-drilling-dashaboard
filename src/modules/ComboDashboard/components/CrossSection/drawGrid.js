@@ -1,5 +1,5 @@
-import * as PIXI from "pixi.js";
 import memoizeOne from "memoize-one";
+import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
 export function defaultMakeXTickAndLine(fontSize) {
@@ -113,10 +113,8 @@ function drawGrid(container, options = {}) {
     const yMin = Math.floor((-1 * y) / yScale);
     const yMax = yMin + Math.floor(height / yScale);
 
-    const yRange = yMax - yMin;
-    const yRoughStep = yRange / (yMaxLines - 1);
-    const xRange = xMax - xMin;
-    const xRoughStep = xRange / (xMaxLines - 1);
+    const yRoughStep = (yMax - yMin) / (yMaxLines - 1);
+    const xRoughStep = (xMax - xMin) / (xMaxLines - 1);
 
     const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
     const yStep = goodSteps.find(s => s >= yRoughStep);
