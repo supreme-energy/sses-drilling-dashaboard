@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
-import { frozenXYTransform } from "./customPixiTransforms";
+import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
+import { subscribeToMoveEvents } from "./pixiUtils";
 
 const survey = [0xa6a6a6, 0.5];
 const lastSurvey = [0x0000ff, 0.5];
@@ -29,7 +30,8 @@ function getColor(selectedSections, index, lastSurveyIdx) {
   return color;
 }
 
-function drawSections(container, otherContainer, props, gutter) {
+function drawSections(container, higherContainer, props, gutter) {
+  const { ghostDiffDispatch } = props;
   const buttonHeight = 10;
   const pixiList = [];
 
@@ -43,12 +45,20 @@ function drawSections(container, otherContainer, props, gutter) {
   selectedRight.transform.updateTransform = frozenXYTransform;
 
   const labelHeight = 75;
-  const selectedLabel = otherContainer.addChildAt(new PIXI.Graphics());
-  selectedLabel.beginFill(0xff0000, 1);
-  selectedLabel.drawRoundedRect(0, 0, 20, labelHeight, 5);
-  selectedLabel.transform.updateTransform = frozenXYTransform;
+  const selectedLabel = higherContainer.addChild(new PIXI.Container());
+  selectedLabel.transform.updateTransform = frozenXTransform;
+  subscribeToMoveEvents(selectedLabel, function(pos) {
+    ghostDiffDispatch({
+      type: "tag_move",
+      vs: pos.x
+    });
+  });
+  const labelBG = selectedLabel.addChild(new PIXI.Graphics());
+  labelBG.beginFill(0xff0000, 1);
+  labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
+  labelBG.position.x = -10;
 
-  const labelText = selectedLabel.addChild(new PIXI.Text("hello", { fill: "#fff", fontSize: 16 }));
+  const labelText = labelBG.addChild(new PIXI.Text("", { fill: "#fff", fontSize: 16 }));
   labelText.anchor.set(0.5, 1);
   labelText.rotation = Math.PI / 2;
   labelText.position.y = labelHeight / 2;
@@ -73,8 +83,7 @@ function drawSections(container, otherContainer, props, gutter) {
     bg.drawRect(0, y - 2, width, buttonHeight + 2);
     selectedLeft.clear();
     selectedRight.clear();
-    selectedLabel.clear();
-    labelText.visible = false;
+    selectedLabel.visible = false;
 
     let start = 0;
     let length = 0;
@@ -99,12 +108,12 @@ function drawSections(container, otherContainer, props, gutter) {
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);
         selectedRight.moveTo(start + length, 0).lineTo(start + length, height);
-        selectedLabel.beginFill(color[0], 1);
-        selectedLabel.drawRoundedRect(0, 0, 20, labelHeight, 5);
-        selectedLabel.position.x = start + length - 10;
+        selectedLabel.visible = true;
+        selectedLabel.position.x = p2;
         selectedLabel.position.y = height - gutter;
+        labelBG.beginFill(color[0], 1);
+        labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
         labelText.text = p2.toFixed(2);
-        labelText.visible = true;
       }
     }
   };

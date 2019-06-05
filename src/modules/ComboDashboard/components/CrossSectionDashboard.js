@@ -62,6 +62,11 @@ function PADeltaReducer(state, action) {
         tvd: action.tvd - op.tvd,
         vs: action.vs - op.vs
       };
+    case "tag_move":
+      return {
+        ...state,
+        vs: action.vs - op.vs
+      };
     case "init":
       return PADeltaInit(action.section, action.prevSection);
     default:
