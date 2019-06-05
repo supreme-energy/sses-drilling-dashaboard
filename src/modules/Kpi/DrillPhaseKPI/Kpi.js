@@ -43,6 +43,7 @@ export default function Kpi({ data }) {
         .range([theme.palette.warning.main, theme.palette.yellow.main, theme.palette.success.main]),
     [theme]
   );
+
   return (
     <Card className={classNames("layout vertical", classes.container)}>
       {data ? (
