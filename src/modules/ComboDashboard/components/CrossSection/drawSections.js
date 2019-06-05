@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
+import memoizeOne from "memoize-one";
 
 const survey = [0xa6a6a6, 0.5];
 const lastSurvey = [0x0000ff, 0.5];
@@ -54,9 +55,11 @@ function drawSections(container, higherContainer, props, gutter) {
     });
   });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
-  labelBG.beginFill(0xff0000, 1);
-  labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
   labelBG.position.x = -10;
+  const memoInitLabel = memoizeOne(color => {
+    labelBG.beginFill(color, 1);
+    labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
+  });
 
   const labelText = labelBG.addChild(new PIXI.Text("", { fill: "#fff", fontSize: 16 }));
   labelText.anchor.set(0.5, 1);
@@ -108,11 +111,11 @@ function drawSections(container, higherContainer, props, gutter) {
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);
         selectedRight.moveTo(start + length, 0).lineTo(start + length, height);
+
+        memoInitLabel(color[0]);
         selectedLabel.visible = true;
         selectedLabel.position.x = p2;
         selectedLabel.position.y = height - gutter;
-        labelBG.beginFill(color[0], 1);
-        labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
         labelText.text = p2.toFixed(2);
       }
     }
