@@ -2,23 +2,25 @@
 
 .timeSliderToolbar {
     display: flex;
-    
+    border-radius: 0;
+
     .collapseButtonContainer {
         border-radius: 0;
-        box-shadow: none;
         border-right: 1px solid rgb(209, 208, 208);
-        border-bottom: 1px solid rgb(209, 208, 208);
-        min-width: 25px;
+        min-width: 30px;
 
         .collapseButton {
-            outline: 0;
-            padding: 1px;
-        }
-    }
+            height: 100%;
+            
+            svg {
+                position: relative;
+                left: 2px;
+            }
 
-    .expandContainer {
-        display: flex;
-        flex: 0 0 calc(100% - 25px);
+            .expandLessIcon {
+                bottom: 60px;
+            }
+        }
     }
 
     .noShrink {

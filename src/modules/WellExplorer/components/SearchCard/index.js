@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
+import Search from "../../../../components/Search";
 import classes from "./SearchCard.scss";
 import WellList from "./WellList";
 import Tabs from "@material-ui/core/Tabs";
@@ -9,8 +10,6 @@ import Favorite from "@material-ui/icons/Favorite";
 import Alarm from "@material-ui/icons/Alarm";
 import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../../store";
 import { connect } from "react-redux";
-import { Paper, InputBase, IconButton } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
 import classNames from "classnames";
 
 const EMPTY_ARRAY = [];
@@ -28,15 +27,20 @@ function SearchCard({
   const onInputChanged = useCallback(e => onSearchTermChanged(e.target.value), [onSearchTermChanged]);
   return (
     <Card className={classNames(classes.card, className)}>
-      <Paper className={classes.root} elevation={1}>
-        <IconButton className={classes.iconButton} aria-label="Search">
-          <SearchIcon />
-        </IconButton>
-        <InputBase className={classes.input} placeholder="Search by Well attributes" onChange={onInputChanged} />
-      </Paper>
-
+      <Search
+        onChange={onInputChanged}
+        className={classes.root}
+        iconButtonClassName={classes.iconButton}
+        inputClassName={classes.input}
+      />
       <div className={classes.listContainer}>
-        <Tabs value={activeTab} indicatorColor="primary" centered onChange={(_, tab) => changeActiveTab(tab)}>
+        <Tabs
+          value={activeTab}
+          indicatorColor="primary"
+          centered
+          onChange={(_, tab) => changeActiveTab(tab)}
+          className={classes.tabs}
+        >
           <Tab label={ALL_WELLS} value={ALL_WELLS} className={classes.tab} />
           <Tab label={RECENT_WELLS} value={RECENT_WELLS} className={classes.tab} icon={<Alarm />} />
           <Tab label={FAVORITES} value={FAVORITES} className={classes.tab} icon={<Favorite />} />

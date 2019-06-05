@@ -7,13 +7,15 @@
     .content {
         display: flex;
         flex-direction: row;
-        flex: 1;
+        flex: none;
     }
 
     .verticalContainer {
         display: flex;
         flex-direction: column;
         align-items: center;
+        flex: none;
+        align-self: flex-end;
     }
 
     .verticalSegments {
@@ -37,7 +39,8 @@
         position: relative;
         flex: 1;
         z-index: 1;
-        width: 400px;
+        width: 470px;
+        align-self: stretch;
     }
 
     

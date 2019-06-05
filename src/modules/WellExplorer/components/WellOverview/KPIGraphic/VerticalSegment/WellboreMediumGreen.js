@@ -1,30 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { transparentColor, openHoleColor } from "../colorStops";
 
 export default function WellboreMediumGreen({ height, transparent, className, openHole }) {
-  const transparentColor = <stop stopColor="#E2E2E2" offset="100%" />;
-  const openHoleColor = <stop stopColor="#000000" offset="100%" />;
-  const segmentColor = transparent ? (
-    transparentColor
-  ) : openHole ? (
-    openHoleColor
-  ) : (
+  const segmentColor = (
     <React.Fragment>
       <stop stopColor="#8AAC74" offset="0%" />
       <stop stopColor="#538531" offset="100%" />
     </React.Fragment>
   );
 
-  const curveColor = transparent ? (
-    transparentColor
-  ) : openHole ? (
-    openHoleColor
-  ) : (
+  const curveColor = (
     <React.Fragment>
       <stop stopColor="#538531" offset="0%" />
       <stop stopColor="#8AAC74" offset="100%" />
     </React.Fragment>
   );
+  const getColor = defaultColor => (transparent ? transparentColor : openHole ? openHoleColor : defaultColor);
   return (
     <svg
       width="79px"
@@ -39,10 +31,10 @@ export default function WellboreMediumGreen({ height, transparent, className, op
       <desc>Created with Sketch.</desc>
       <defs>
         <linearGradient x1="100%" y1="41.0801055%" x2="-1.11022302e-14%" y2="41.0801055%" id="wbmg-linearGradient-1">
-          {segmentColor}
+          {getColor(segmentColor)}
         </linearGradient>
         <linearGradient x1="0%" y1="41.0801055%" x2="100%" y2="41.0801055%" id="wbmg-linearGradient-3">
-          {curveColor}
+          {getColor(curveColor)}
         </linearGradient>
         <ellipse id="wbmg-path-4" cx="35.5" cy="7" rx="35.5" ry="7" />
         <filter x="-11.3%" y="-28.6%" width="122.5%" height="214.3%" filterUnits="objectBoundingBox" id="wbmg-filter-5">
