@@ -25,7 +25,7 @@ const AttributePaneTextField = ({
     if (isFocused) {
       setTimeout(() => {
         inputRef.current.focus();
-        innerRef.current.handleFocus();
+        //innerRef.current.handleFocus();
       }, 0);
     }
   }, [inputRef, innerRef, isFocused]);
@@ -41,7 +41,8 @@ const AttributePaneTextField = ({
       innerRef.current.handleFocus();
     } else {
       inputRef.current.blur();
-      innerRef.current.handleBlur();
+      console.log("innerRef.current", innerRef.current);
+      //innerRef.current.handleBlur();
     }
   }, [isFocused]);
 
