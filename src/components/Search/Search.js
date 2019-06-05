@@ -9,7 +9,13 @@ const Search = ({ onChange, className, iconButtonClassName, inputClassName, plac
       <IconButton className={iconButtonClassName} aria-label="Search">
         <SearchIcon />
       </IconButton>
-      <InputBase className={inputClassName} placeholder={placeholder} onChange={onChange} onClick={onClick} />
+      <InputBase
+        className={inputClassName}
+        placeholder={placeholder}
+        onChange={onChange}
+        onClick={onClick}
+        type="search"
+      />
     </Paper>
   );
 };
