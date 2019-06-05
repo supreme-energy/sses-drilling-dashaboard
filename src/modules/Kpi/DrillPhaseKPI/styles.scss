@@ -1,10 +1,7 @@
 .container {
     width: 100%;
     padding: 8px;
-
-    .kpi {
-        width: 135px;
-    }
+    min-width: 320px;
 
     .slidingLabel {
         color: #AFB42B;
@@ -13,10 +10,19 @@
     .rotatingLabel {
         color: #827717;
     }
+
+    .secondColumn {
+        min-width: 185px;
+    }
+}
+
+.spacer {
+    width: 20px;
 }
 
 .percentageBar {
     position: relative;
+
     top: -6px;
     .bars {
         position: absolute;
