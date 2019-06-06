@@ -26,6 +26,7 @@ function PADeltaInit(section, prevSection) {
 }
 function PADeltaReducer(state, action) {
   const op = state.op;
+  const prevOp = state.prevOp;
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
@@ -63,9 +64,11 @@ function PADeltaReducer(state, action) {
         vs: action.vs - op.vs
       };
     case "tag_move":
+      const newDip = prevOp.tot - Math.tan(op.dip / 57.29578) * Math.abs(action.vs - prevOp.vs);
       return {
         ...state,
-        vs: action.vs - op.vs
+        vs: action.vs - op.vs,
+        tot: newDip - op.tot - state.fault
       };
     case "init":
       return PADeltaInit(action.section, action.prevSection);
