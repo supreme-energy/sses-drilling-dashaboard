@@ -4,12 +4,13 @@ import { Card, CircularProgress, Typography } from "@material-ui/core";
 import classNames from "classnames";
 import get from "lodash/get";
 
+import { useTimeSliderContainer } from "../../../../App/Containers";
+import { useRopData } from "../../../../../api";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
 import ZoomControls from "./ZoomControls";
 import GlobalTimeControls from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
-import { useRopData } from "../../../../../api";
 import { COLOR_BY_GRAPH, GRID_GUTTER } from "../../../../../constants/timeSlider";
 import { computeInitialViewXScaleValue, computeInitialViewYScaleValue } from "./TimeSlider/TimeSliderUtil";
 import classes from "./TimeSlider.scss";
@@ -18,7 +19,9 @@ const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./Tim
 
 function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, setSelectedMenuItem }) {
   // Fetch data for Time Slider
-  const data = useRopData();
+  const data = useRopData(wellId);
+
+  const { setSliderInterval } = useTimeSliderContainer();
 
   const [maxSliderStep, setMaxSliderStep] = useState(1);
   const [sliderStep, setSliderStep] = useState([0, 1]);
@@ -117,8 +120,13 @@ function TimeSliderContainer({ className, expanded, wellId, selectedMenuItems, s
     const beginningDate = get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
     const endDate = get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
 
+    setSliderInterval([
+      get(data, `[${Math.floor(hiddenDataLength)}].Hole_Depth`),
+      get(data, `[${Math.round(endDataIndex)}].Hole_Depth`)
+    ]);
+
     setGlobalDates([beginningDate, endDate]);
-  }, [data, setGlobalDates, width, view, sliderStep, maxSliderStep]);
+  }, [data, setGlobalDates, width, view, sliderStep, maxSliderStep, setSliderInterval]);
 
   // Zoom constants
   const zoomInDisabled = maxSliderStep <= 10;

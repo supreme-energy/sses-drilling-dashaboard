@@ -180,7 +180,8 @@ config.plugins.push(
     inject: true,
     minify: {
       collapseWhitespace: true
-    }
+    },
+    chunksSortMode: "none" // Remove on upgrade to next stable release of HtmlWebpackPlugin
   })
 );
 

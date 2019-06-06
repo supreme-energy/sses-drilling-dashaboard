@@ -34,7 +34,13 @@ function SearchCard({
         inputClassName={classes.input}
       />
       <div className={classes.listContainer}>
-        <Tabs value={activeTab} indicatorColor="primary" centered onChange={(_, tab) => changeActiveTab(tab)}>
+        <Tabs
+          value={activeTab}
+          indicatorColor="primary"
+          centered
+          onChange={(_, tab) => changeActiveTab(tab)}
+          className={classes.tabs}
+        >
           <Tab label={ALL_WELLS} value={ALL_WELLS} className={classes.tab} />
           <Tab label={RECENT_WELLS} value={RECENT_WELLS} className={classes.tab} icon={<Alarm />} />
           <Tab label={FAVORITES} value={FAVORITES} className={classes.tab} icon={<Favorite />} />
