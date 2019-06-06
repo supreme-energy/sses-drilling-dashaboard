@@ -36,7 +36,7 @@ const config = {
     new webpack.DefinePlugin(
       Object.assign(
         {
-          "process.env": { NODE_ENV: JSON.stringify(project.env) },
+          "process.env": { NODE_ENV: JSON.stringify(project.env), DEPLOY_ENV: JSON.stringify(process.env.DEPLOY_ENV) },
           __DEV__,
           __TEST__,
           __PROD__
@@ -180,7 +180,8 @@ config.plugins.push(
     inject: true,
     minify: {
       collapseWhitespace: true
-    }
+    },
+    chunksSortMode: "none" // Remove on upgrade to next stable release of HtmlWebpackPlugin
   })
 );
 

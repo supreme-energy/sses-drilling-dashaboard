@@ -5,8 +5,8 @@ export default function WellboreSmallYellow({ className, width, transparent, ope
   const openHoleColor = <stop stopColor="#000000" offset="100%" />;
   const segmentColor = (
     <React.Fragment>
-      <stop stopColor="#C39200" offset="0%" />
-      <stop stopColor="#DEC683" offset="100%" />
+      <stop stopColor="#DEC683" offset="0%" />
+      <stop stopColor="#C39200" offset="100%" />
     </React.Fragment>
   );
   const wellColor = transparent ? transparentColor : openHole ? openHoleColor : segmentColor;

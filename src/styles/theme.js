@@ -53,6 +53,10 @@ export const theme = createMuiTheme({
       root: {
         padding: "8px 16px"
       }
+    },
+    MuiSlider: {
+      track: { backgroundColor: "#B6BA3E" },
+      thumb: { backgroundColor: "#B6BA3E" }
     }
   }
 });

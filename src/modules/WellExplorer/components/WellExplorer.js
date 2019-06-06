@@ -1,4 +1,4 @@
-import React, { lazy, useState } from "react";
+import React, { lazy, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import WellImporterModal from "../../../modals/WellImporterModal";
 import WellImporter from "../../../modals/WellImporterModal/WellImporter";
@@ -8,7 +8,7 @@ import SearchCard from "./SearchCard";
 import { withTheme } from "@material-ui/core/styles";
 import flowRight from "lodash/flowRight";
 import { connect } from "react-redux";
-import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab } from "../store";
+import { ALL_WELLS, RECENT_WELLS, FAVORITES, changeActiveTab, changeSelectedWell } from "../store";
 import { useWells, useWellsSearch } from "../../../api";
 import useMemo from "react-powertools/hooks/useMemo";
 import WelcomeCard from "./WelcomeCard";
@@ -77,6 +77,7 @@ export const WellExplorer = ({
   theme,
   selectedWellId,
   history,
+  changeSelectedWell,
   match: {
     params: { wellId: openedWellId }
   }
@@ -109,6 +110,10 @@ export const WellExplorer = ({
     toggleShowImportModal(true);
   };
 
+  const onClickCancel = useCallback(() => {
+    toggleShowImportModal(false);
+  }, []);
+
   return (
     <div
       className={classNames({
@@ -116,14 +121,14 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
-      <WellImporterModal open={importModalShown} onClose={() => toggleShowImportModal(false)} hideBackdrop>
-        <WellImporter />
+      <WellImporterModal open={importModalShown} hideBackdrop>
+        <WellImporter onClickCancel={onClickCancel} />
       </WellImporterModal>
 
       <WellMap
         theme={theme}
         showLegend
-        onMarkerClick={well => history.push(`/${well.id}/combo`)}
+        onMarkerClick={well => changeSelectedWell(well.id)}
         bounds={wellsBounds}
         selectedWellId={openedWellId || selectedWellId}
         showMapTypeControls={!overviewMode}
@@ -149,7 +154,7 @@ export const WellExplorer = ({
               showToggleLegend
               defaultShowLegend={false}
               theme={theme}
-              onMarkerClick={well => history.push(`/${well.id}/combo`)}
+              onMarkerClick={well => changeSelectedWell(well.id)}
               bounds={selectedWellMapBounds}
               wells={searchResults}
               className={classes.miniMap}
@@ -177,6 +182,7 @@ export const WellExplorer = ({
 WellExplorer.propTypes = {
   theme: PropTypes.object,
   wellTimestamps: PropTypes.object,
+  changeSelectedWell: PropTypes.func,
   changeActiveTab: PropTypes.func,
   addFile: PropTypes.func.isRequired,
   selectedWellId: PropTypes.string,
@@ -199,6 +205,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToPops = {
   changeActiveTab,
+  changeSelectedWell,
   addFile
 };
 

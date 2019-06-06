@@ -19,7 +19,7 @@ function Grid({ container, width, height, gridGutter, view }, ref) {
   }, [container]);
 
   const updateGrid = useMemo(() => {
-    return drawGrid(gridLayerRef.current, gridGutter, "top", makeXTickAndLine);
+    return drawGrid(gridLayerRef.current, { gridGutter, xAxisOrientation: "top", makeXTickAndLine, maxXLines: 10 });
   }, [gridGutter]);
 
   useEffect(() => {
