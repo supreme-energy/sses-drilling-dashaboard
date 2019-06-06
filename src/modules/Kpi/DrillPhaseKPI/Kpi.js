@@ -10,7 +10,8 @@ import { sum } from "d3-array";
 import { useTheme } from "@material-ui/styles";
 import { format } from "d3-format";
 
-const percentage = value => (value !== undefined ? format(".2%") : "-");
+const fmtPercentage = format(".2%");
+const percentage = value => (value !== undefined ? fmtPercentage(value) : "-");
 const noDecimal = format(".0f");
 
 const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
