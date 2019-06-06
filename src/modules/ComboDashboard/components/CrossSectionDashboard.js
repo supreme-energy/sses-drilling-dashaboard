@@ -2,7 +2,8 @@ import Progress from "@material-ui/core/CircularProgress";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
 import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
-import { useFormations, useProjections, useSurveys, useWellPath } from "../../../api";
+import { useFilteredWellData } from "../../App/Containers";
+
 import classes from "./ComboDashboard.scss";
 import CrossSection from "./CrossSection/index";
 
@@ -68,12 +69,10 @@ function PADeltaReducer(state, action) {
       throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
   }
 }
+
 export const CrossSectionDashboard = ({ wellId }) => {
   // TODO: Pull data from store instead. This re-fetches on every tab switch.
-  const surveys = useSurveys(wellId);
-  const wellPlan = useWellPath(wellId);
-  const formations = useFormations(wellId);
-  const projections = useProjections(wellId);
+  const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);

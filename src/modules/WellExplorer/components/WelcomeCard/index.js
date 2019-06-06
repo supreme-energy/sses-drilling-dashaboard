@@ -16,7 +16,7 @@ const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   return (
     <div>
       <Typography variant="subtitle1" gutterBottom>
-        Last time you were opened the well
+        Last time you opened the well
       </Typography>
       <div>{well.name}</div>
       <Typography variant="body2" gutterBottom>
