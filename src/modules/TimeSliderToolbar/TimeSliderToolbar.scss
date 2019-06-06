@@ -1,3 +1,4 @@
+$header-height: 300px;
 
 
 .timeSliderToolbar {
@@ -27,3 +28,7 @@
         flex-shrink: 0;
     }
 }
+
+.viewport {
+    height: calc(100vh - #{$header-height});
+  }

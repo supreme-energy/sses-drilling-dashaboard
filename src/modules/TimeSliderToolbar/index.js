@@ -1,15 +1,16 @@
 import React, { useReducer, lazy, Suspense } from "react";
 import PropTypes from "prop-types";
+import { Route } from "react-router-dom";
 import { Card, CardActionArea, CircularProgress } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
-import { useTimeSliderContainer } from "../../../App/Containers";
+import { useTimeSliderContainer } from "../App/Containers";
 import DrillPhaseViewer from "./DrillPhaseViewer";
-import { COLOR_BY_PHASE_VIEWER } from "../../../../constants/timeSlider";
-import { ON_SURFACE } from "../../../../constants/wellPathStatus";
+import { COLOR_BY_PHASE_VIEWER } from "../../constants/timeSlider";
+import { ON_SURFACE } from "../../constants/wellPathStatus";
 import classes from "./TimeSliderToolbar.scss";
 
-const TimeSliderContainer = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSliderContainer"));
+const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
 
 function graphReducer(state, action) {
   switch (action.type) {
@@ -24,7 +25,11 @@ function graphReducer(state, action) {
   }
 }
 
-function TimeSliderToolbar({ wellId }) {
+export function TimeSliderToolbar({
+  match: {
+    params: { wellId }
+  }
+}) {
   const { drillPhase, setDrillPhase } = useTimeSliderContainer();
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
   const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[ON_SURFACE].graphs);
@@ -44,7 +49,7 @@ function TimeSliderToolbar({ wellId }) {
         setSelectedMenuItem={setSelectedMenuItem}
       />
       <Suspense fallback={<CircularProgress />}>
-        <TimeSliderContainer
+        <TimeSlider
           selectedMenuItems={selectedMenuItems}
           setSelectedMenuItem={setSelectedMenuItem}
           expanded={expanded}
@@ -56,7 +61,24 @@ function TimeSliderToolbar({ wellId }) {
 }
 
 TimeSliderToolbar.propTypes = {
-  wellId: PropTypes.string
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      wellId: PropTypes.string
+    })
+  })
 };
 
-export default TimeSliderToolbar;
+export function TimeSliderToolbarWrapper({ children }) {
+  return (
+    <div>
+      <Route path="/:wellId/:page" exact component={TimeSliderToolbar} />
+      <div className={classes.viewport}>{children}</div>
+    </div>
+  );
+}
+
+TimeSliderToolbarWrapper.propTypes = {
+  children: PropTypes.node
+};
+
+export default TimeSliderToolbarWrapper;

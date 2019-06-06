@@ -4,7 +4,7 @@ import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../../../constants/timeSlider";
+import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../constants/timeSlider";
 
 function ZoomControls({
   className,
@@ -71,8 +71,10 @@ function ZoomControls({
   }, [onZoom, setZoomType]);
 
   const onMouseUp = useCallback(() => {
-    clearTimeout(zoomTimeout.current);
-    setZoomType("");
+    if (zoomTimeout.current) {
+      clearTimeout(zoomTimeout.current);
+      setZoomType("");
+    }
   }, [setZoomType]);
 
   // Determine if zooming in a particular direction is enabled
