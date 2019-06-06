@@ -88,8 +88,8 @@ function drawSections(container, higherContainer, props, gutter) {
     selectedRight.clear();
     selectedLabel.visible = false;
 
-    let start = 0;
-    let length = 0;
+    // Clear out all previous drawn sections
+    pixiList.forEach(p => p.clear());
     for (let i = 1; i <= calcSections.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
       const p1 = calcSections[i - 1].vs;
@@ -97,11 +97,11 @@ function drawSections(container, higherContainer, props, gutter) {
       const color = getColor(selectedSections, i, lastSurveyIdx);
 
       const pixi = pixiList[i];
-      pixi.clear().beginFill(...color);
+      pixi.beginFill(...color);
       pixi.sectionIndex = i;
 
-      start = p1 * view.xScale + view.x;
-      length = (p2 - p1) * view.xScale;
+      const start = p1 * view.xScale + view.x;
+      const length = (p2 - p1) * view.xScale;
       if (start > width) continue;
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
