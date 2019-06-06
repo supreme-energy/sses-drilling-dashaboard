@@ -7,6 +7,7 @@ function toDegrees(angle) {
 }
 
 function calculateDip(tot, prevTot, vs, prevVs) {
+  if (vs - prevVs === 0) return 0;
   let newDip = -toDegrees(Math.atan((tot - prevTot) / (vs - prevVs)));
   return newDip < -180 ? newDip + 360 : newDip;
 }
