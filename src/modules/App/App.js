@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, lazy } from "react";
 import { Provider } from "react-redux";
 import PropTypes from "prop-types";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
@@ -10,6 +10,7 @@ import plusJsonStrict from "react-powertools/data/fetch-plus-strict";
 import plusErrorJson from "react-powertools/data/fetch-plus-error-json";
 import plusUrlPattern from "react-powertools/data/fetch-plus-url-pattern";
 
+import PageLayout from "layouts/PageLayout";
 import ComboDashboardModule from "modules/ComboDashboard";
 import DirectionalGuidanceModule from "modules/DirectionalGuidance";
 import DrillingAnalyticsModule from "modules/DrillingAnalytics";
@@ -21,8 +22,11 @@ import WellUpdate from "./WellUpdate";
 // Import UI State Providers
 import { TimeSliderProvider } from "./Containers";
 
+// Lazy load toolbars
+const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
+const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderToolbar' */ "modules/TimeSliderToolbar"));
+
 // Lazy load header
-const PageLayout = React.lazy(() => import("layouts/PageLayout"));
 const fetchClientOptions = { mode: "cors", credentials: "include" };
 
 class App extends React.Component {
@@ -64,11 +68,15 @@ class App extends React.Component {
                       <TimeSliderProvider>
                         <Route path="/:wellId" component={WellUpdate} />
                         <Switch>
-                          <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                          <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                          <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                          <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                          <Route path="/:wellId?" component={WellExplorer} />
+                          <Route path="/:wellId?" exact component={WellExplorer} />
+                          <HeaderToolbar history={history}>
+                            <TimeSliderToolbar>
+                              <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                              <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                              <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                              <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                            </TimeSliderToolbar>
+                          </HeaderToolbar>
                         </Switch>
                       </TimeSliderProvider>
                     </PageLayout>
