@@ -1,20 +1,26 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
-import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { Card, CardContent, Button, Typography } from "@material-ui/core";
+import { Route } from "react-router-dom";
+import { Button, Card, CardContent, Typography } from "@material-ui/core";
 
 import VerticalMenu from "../VerticalMenu";
-import { useWells } from "../../../../api";
-import { BitDepth, Rop } from "../../../Kpi/KpiItem";
-import WellStatus from "../../../Kpi/WellStatus";
-import ServerStatus from "../../../Kpi/ServerStatus";
-import WellPathStatus from "../../../Kpi/WellPathStatus";
-import TargetAccuracy from "../../../Kpi/TargetAccuracy";
-import { actions } from "../../../WellExplorer/store";
+import { useWells } from "../../api";
+import { BitDepth, Rop } from "../Kpi/KpiItem";
+import WellStatus from "../Kpi/WellStatus";
+import ServerStatus from "../Kpi/ServerStatus";
+import WellPathStatus from "../Kpi/WellPathStatus";
+import TargetAccuracy from "../Kpi/TargetAccuracy";
+import { actions } from "../WellExplorer/store";
 import classes from "./HeaderToolbar.scss";
 
-function HeaderToolbar({ wellId, changeSelectedWell, history }) {
+export function HeaderToolbar({
+  match: {
+    params: { wellId }
+  },
+  changeSelectedWell,
+  history
+}) {
   // Get currently opened well
   const [, wellsById] = useWells();
   const well = wellsById[wellId] || {};
@@ -48,7 +54,33 @@ function HeaderToolbar({ wellId, changeSelectedWell, history }) {
 }
 
 HeaderToolbar.propTypes = {
-  wellId: PropTypes.string,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      wellId: PropTypes.string
+    })
+  }),
+  changeSelectedWell: PropTypes.func,
+  history: PropTypes.shape({
+    push: PropTypes.func
+  })
+};
+
+export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) {
+  return (
+    <div>
+      <Route
+        path="/:wellId/:page"
+        exact
+        render={props => <HeaderToolbar {...props} changeSelectedWell={changeSelectedWell} />}
+        history={history}
+      />
+      <div className={classes.viewport}>{children}</div>
+    </div>
+  );
+}
+
+HeaderToolbarWrapper.propTypes = {
+  children: PropTypes.node,
   changeSelectedWell: PropTypes.func,
   history: PropTypes.shape({
     push: PropTypes.func
@@ -62,4 +94,4 @@ const mapDispatchToPops = {
 export default connect(
   null,
   mapDispatchToPops
-)(withRouter(HeaderToolbar));
+)(HeaderToolbarWrapper);

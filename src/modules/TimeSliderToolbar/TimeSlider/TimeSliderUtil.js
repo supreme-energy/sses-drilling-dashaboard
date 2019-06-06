@@ -1,8 +1,8 @@
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
 
-export const mapRop = (d, index) => [Number(index), Number(d.ROP_A)];
-export const mapSlide = (d, index) => [Number(index), Number(d.ROP_I)];
+export const mapRop = (d, index) => [index, Number(d.ROP_A)];
+export const mapSlide = (d, index) => [index, Number(d.ROP_I)];
 
 export function computeInitialViewYScaleValue(data) {
   if (data && data.length > 0) {
@@ -15,7 +15,7 @@ export function computeInitialViewYScaleValue(data) {
 export function computeInitialViewXScaleValue(data) {
   if (data && data.length > 0) {
     return scaleLinear()
-      .domain([0, data.length])
+      .domain([0, data.length - 1])
       .range([0, 1]);
   }
 }

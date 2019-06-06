@@ -1,4 +1,4 @@
-@import "../../../../../styles/base";
+@import "../../../styles/base";
 
 .timeSliderContainer {
     border-radius: 0;
@@ -89,9 +89,9 @@
 .timeSliderView {
     display: flex;
     min-height: 45px;
+}
 
-
-    .timeSliderExpanded {
+.timeSliderExpanded {
         color: $gold;
         bottom: 10px;
         width: 100%;
@@ -142,15 +142,20 @@
 
     .expandedForwardTime {
         top: 40px;
-        left: 15px;
+        left: 20px;
     }
 
     .collapsedForwardTime {
-        left: 10px;
+        left: 25px;
         top: 10px;
     }
+
+.timeSlider {
+    width: 93%;
+    position: relative;
+    left: 12px;
 }
 
-.timeSliderComponent {
-    width: 93%;
+.timeSliderExpanded {
+    left: 2px;
 }

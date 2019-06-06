@@ -4,9 +4,9 @@ import { Card, Menu, MenuItem, Typography, ClickAwayListener, withStyles, CardAc
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 
-import { COLOR_BY_PHASE_VIEWER } from "../../../../../constants/timeSlider";
-import { ON_SURFACE } from "../../../../../constants/wellPathStatus";
-import { GRAY } from "../../../../../constants/colors";
+import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
+import { ON_SURFACE } from "../../../constants/wellPathStatus";
+import { GRAY } from "../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
 
 const styles = {
@@ -96,7 +96,7 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
               const selected = currPhase === phase;
               return (
                 <MenuItem
-                  key={index}
+                  key={phase}
                   className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
                   value={phase}
                   onClick={() => handleDrillPhaseSelect(phase)}
