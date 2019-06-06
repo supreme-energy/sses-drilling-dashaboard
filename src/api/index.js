@@ -218,22 +218,23 @@ export function useWellOverviewKPI() {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
           id: _.uniqueId(),
-          rop: d.ROP_AVG,
-          depth: d.HOLE_DEPTH_END,
-          bitSize: d.holesize,
-          casingSize: d.casingSize,
-          startTime: d.DT_START,
-          totalHours: d.TOTAL_HOURS,
-          drillingHours: d.D_HOURS,
+          rop: Number(d.ROP_AVG),
+          depth: Number(d.HOLE_DEPTH_END),
+          holeDepthStart: Number(d.HOLE_DEPTH_START),
+          bitSize: Number(d.holesize),
+          casingSize: Number(d.casingSize),
+          startTime: Number(d.DT_START),
+          totalHours: Number(d.TOTAL_HOURS),
+          drillingHours: Number(d.D_HOURS),
           landingPoint: d.landingPoint,
-          toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
+          toolFaceEfficiency: Number(d.TOOLFACE_EFFICIENCY_PCT),
           zoneAccuracy: 100, // TBD
           targetAccuracy: 98, // TBD,
-          footageDrilled: d.FOOTAGE_DRILLED,
-          avgSliding: d.ROP_AVG_SLIDING,
-          avgRotating: d.ROP_AVG_ROTATING,
-          slidingFootage: d.SLIDING_FOOTAGE,
-          rotatingFootage: d.ROTATING_FOOTAGE
+          footageDrilled: Number(d.FOOTAGE_DRILLED),
+          avgSliding: Number(d.ROP_AVG_SLIDING),
+          avgRotating: Number(d.ROP_AVG_ROTATING),
+          slidingPct: Number(d.SLIDE_PCT_D),
+          rotatingPct: Number(d.ROTATE_PCT_D)
         }));
       }
     }

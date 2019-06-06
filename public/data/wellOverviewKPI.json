@@ -402,6 +402,7 @@
         },
         {
             "holesize": 12.5,
+            "casingSize": 10,
             "INTERVAL_NAME": "Lateral",
             "INTERVAL_CODE": 4,
             "DAY_NUM": 5,
