@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import TextField from "../../../../../components/TextField";
+import React, { useCallback } from "react";
+
 import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
 import classNames from "classNames";
 import { useWellInfo } from "../../../../../api";
+import DebouncedTextField from "../../../../../components/DebouncedTextField";
 
 const generalFields = [
   { label: "Well", property: "wellborename" },
@@ -22,27 +23,34 @@ const locationFields = [
   { label: "Country", property: "country" }
 ];
 
-const FieldsList = ({ wellInfo, fields }) => (
+const FieldsList = ({ wellInfo, fields, onChange }) => (
   <React.Fragment>
     {fields.map(f => (
-      <TextField key={f.property} variant="filled" label={f.label} value={wellInfo[f.property]} fullWidth />
+      <DebouncedTextField
+        key={f.property}
+        variant="filled"
+        label={f.label}
+        value={wellInfo[f.property]}
+        fullWidth
+        onChange={value => onChange(f.property, value)}
+      />
     ))}
   </React.Fragment>
 );
 
-const GeneralInfo = ({ wellInfo }) => {
+const GeneralInfo = props => {
   return (
     <div className="layout vertical">
-      <FieldsList fields={generalFields} wellInfo={wellInfo} />
+      <FieldsList fields={generalFields} {...props} />
     </div>
   );
 };
 
-const LocationFields = ({ wellInfo }) => {
+const LocationFields = props => {
   return (
     <div className="layout vertical">
       <Title>Location Info</Title>
-      <FieldsList fields={locationFields} wellInfo={wellInfo} />
+      <FieldsList fields={locationFields} {...props} />
     </div>
   );
 };
@@ -51,14 +59,21 @@ export default function WellInfo({ wellId }) {
   const [data, _, updateWell] = useWellInfo(wellId);
   const wellInfo = data.wellInfo || {};
 
-  useEffect(() => {
-    updateWell({ wellId, field: "wellborename", value: "Test Db" });
-  }, [wellId, updateWell]);
+  // useEffect(() => {
+  //   updateWell({ wellId, field: "wellborename", value: "Test Db" });
+  // }, [wellId, updateWell]);
+
+  const onFieldChange = useCallback(
+    (field, value) => {
+      updateWell({ wellId, field, value });
+    },
+    [updateWell, wellId]
+  );
   return (
     <div className={classNames("layout horizontal flex", classes.root)}>
       <div className="layout vertical flex">
-        <GeneralInfo wellInfo={wellInfo} />
-        <LocationFields wellInfo={wellInfo} />
+        <GeneralInfo wellInfo={wellInfo} onChange={onFieldChange} />
+        <LocationFields wellInfo={wellInfo} onChange={onFieldChange} />
       </div>
       <div className="flex-2">
         <Title>Geospatial Info</Title>
