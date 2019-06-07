@@ -7,7 +7,6 @@ import PhaseLabel from "../components/PhaseLabel";
 import { scaleLinear, scaleThreshold } from "d3-scale";
 import { useSize } from "react-hook-size";
 import { sum } from "d3-array";
-
 import { useTheme } from "@material-ui/styles";
 import { noDecimals, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/format";
 

@@ -1,0 +1,41 @@
+.container {
+    padding: 10px;
+
+    .legendItem {
+        position: relative;
+    }
+
+    .label {
+        margin-left: 7px;
+    }
+
+    .intermediate {
+        &::before {
+            background-color: #538531;
+        }
+    }
+
+    .drillout {
+        &::before {
+            background-color: #7C7C7C;
+        }
+    }
+
+    .lateral {
+        &::before {
+            background-color: #C39200;
+        }
+    }
+
+    .drilling {
+        &::before {
+            background-color: #7500A6;
+        }
+    }
+
+    .wellPlan {
+        &::before {
+            background-color: #10B900;
+        }
+    }
+} 

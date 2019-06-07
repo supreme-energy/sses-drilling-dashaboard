@@ -11,8 +11,8 @@ import Typography from "@material-ui/core/Typography";
 import Map from "./Map";
 import WellsLayer from "./WellsLayer";
 
-const MAP = "Map";
-const SATELLITE = "Satellite";
+export const MAP = "Map";
+export const SATELLITE = "Satellite";
 
 export const WellMap = ({
   mapCenter,

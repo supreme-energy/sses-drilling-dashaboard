@@ -10,6 +10,7 @@ import _ from "lodash";
 import { group } from "d3-array";
 import proj4 from "proj4";
 import { toWGS84 } from "../utils/projections";
+import memoize from "react-powertools/memoize";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -62,7 +63,7 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const [data] = useFetch({
+  const [data, isLoading] = useFetch({
     path: GET_WELL_INFO,
     query: {
       seldbname: wellId
@@ -71,14 +72,44 @@ export function useWellInfo(wellId) {
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
-  const wellSurfaceLocation = wellInfo && {
-    x: wellInfo.survey_easting,
-    y: wellInfo.survey_northing
+
+  if (!wellInfo) {
+    return [{}, isLoading];
+  }
+
+  const source = proj4.Proj("EPSG:32040");
+  const transform = toWGS84(source);
+
+  const wellSurfaceLocationLocal = {
+    x: Number(wellInfo.survey_easting),
+    y: Number(wellInfo.survey_northing)
   };
-  return {
-    serverStatus: online ? ONLINE : OFFLINE,
-    wellSurfaceLocation
+  const wellLandingLocationLocal = {
+    x: Number(wellInfo.landing_easting),
+    y: Number(wellInfo.landing_northing)
   };
+
+  const wellPBHLLocal = {
+    x: Number(wellInfo.pbhl_easting),
+    y: Number(wellInfo.pbhl_northing)
+  };
+
+  const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
+  const wellLandingLocation = transform(wellLandingLocationLocal);
+  const wellPBHL = transform(wellPBHLLocal);
+
+  return [
+    {
+      serverStatus: online ? ONLINE : OFFLINE,
+      wellSurfaceLocationLocal,
+      wellSurfaceLocation,
+      wellLandingLocation,
+      wellLandingLocationLocal,
+      wellPBHL,
+      wellPBHLLocal
+    },
+    isLoading
+  ];
 }
 
 export function useWells() {
@@ -93,6 +124,7 @@ export function useWells() {
         const transform = toWGS84(source);
         return wells.map(w => {
           const surfacePos = transform({ x: Number(w.survey_easting), y: Number(w.survey_northing) });
+
           return {
             id: w.jobname,
             name: w.realjobname,
@@ -134,6 +166,10 @@ export function useWells() {
   return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
 }
 
+const groupBySection = memoize(data => {
+  return group(data, d => d.A_interval);
+});
+
 export function useRopData() {
   const [data] = useFetch(
     {
@@ -147,7 +183,8 @@ export function useRopData() {
       }
     }
   );
-  return data || EMPTY_ARRAY;
+  const ropData = data || EMPTY_ARRAY;
+  return [ropData, groupBySection];
 }
 
 export function useWellPath(wellId) {
@@ -166,7 +203,7 @@ export function useWellPath(wellId) {
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {
-  const wellInfo = useWellInfo(wellId);
+  const [wellInfo] = useWellInfo(wellId);
 
   return useMemo(() => {
     // TODO get map source projection from backend
@@ -181,7 +218,7 @@ export function useWellsMapPosition(wellId, wellPositions) {
         })
       };
     }
-    return wellInfo.wellSurfaceLocation ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+    return wellInfo.wellSurfaceLocationLocal ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
   }, [wellPositions, wellInfo]);
 }
 
