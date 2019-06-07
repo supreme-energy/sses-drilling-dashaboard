@@ -87,7 +87,7 @@ export function useWellInfo(wellId) {
           }
         },
         (data, ...rest) => {
-          console.log("current data", data);
+          console.log("current data", data, rest);
           console.log("rest", rest);
           return data;
         }

@@ -1,10 +1,12 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
 import classNames from "classNames";
 import { useWellInfo } from "../../../../../api";
-import DebouncedTextField from "../../../../../components/DebouncedTextField";
+import { DebouncedTextField, DebouncedDatePicker } from "../../../../../components/DebouncedInputs";
+import moment from "moment";
+import useMemo from "react-powertools/hooks/useMemo";
 
 const generalFields = [
   { label: "Well", property: "wellborename" },
@@ -23,6 +25,15 @@ const locationFields = [
   { label: "Country", property: "country" }
 ];
 
+const geospatialFields = [
+  { label: "Latitude", property: "" },
+  { label: "Longitude", property: "" },
+  { label: "Surface Location", property: "" },
+  { label: "Easting (X)", property: "" },
+  { label: "Northing (Y)", property: "" },
+  { label: "API/AFE/UWI", property: "wellid" }
+];
+
 const FieldsList = ({ wellInfo, fields, onChange }) => (
   <React.Fragment>
     {fields.map(f => (
@@ -39,9 +50,25 @@ const FieldsList = ({ wellInfo, fields, onChange }) => (
 );
 
 const GeneralInfo = props => {
+  const startDate = useMemo(() => moment(props.wellInfo.startdate || Date.now()), [props.wellInfo.startdate]);
+  const endDate = useMemo(() => moment(props.wellInfo.enddate || Date.now()), [props.wellInfo.enddate]);
   return (
     <div className="layout vertical">
       <FieldsList fields={generalFields} {...props} />
+      <div className="layout horizontal">
+        <DebouncedDatePicker
+          label="Start Date"
+          value={startDate}
+          onChange={value => props.onChange("startdate", value.format())}
+          animateYearScrolling
+        />
+        <DebouncedDatePicker
+          label="End Date"
+          value={endDate}
+          onChange={value => props.onChange("enddate", value.format())}
+          animateYearScrolling
+        />
+      </div>
     </div>
   );
 };
