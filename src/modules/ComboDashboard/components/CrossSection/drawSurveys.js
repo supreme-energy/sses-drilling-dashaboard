@@ -39,11 +39,15 @@ export function drawSurveys(container) {
 
   return function(props) {
     const { calcSections, lastSurveyIdx, scale } = props;
-    if (calcSections.length === 0 || lastSurveyIdx < 0) return;
+    if (calcSections.length === 0 || lastSurveyIdx < 0) {
+      widePath.clear();
+      narrowPath.clear();
+      surveyGraphics.forEach(g => (g.visible = false));
+      return;
+    }
     redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, widePath, 6, 0x333333);
     redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, narrowPath, 2, 0xffffff);
 
-    surveyGraphics.forEach(g => (g.visible = false));
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
