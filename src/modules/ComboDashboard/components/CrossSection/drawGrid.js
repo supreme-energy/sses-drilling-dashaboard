@@ -1,3 +1,4 @@
+import memoizeOne from "memoize-one";
 import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform, frozenYTransform } from "./customPixiTransforms";
 
@@ -6,7 +7,7 @@ export function defaultMakeXTickAndLine(fontSize) {
     fill: "#999",
     fontSize: fontSize
   });
-  label.anchor.set(0.5, 0.5);
+  label.anchor.set(-0.2, 0.5);
   label.rotation = Math.PI / 2;
   label.transform.updateTransform = frozenXTransform;
 
@@ -45,20 +46,18 @@ export function defaultMakeYTickAndLine(fontSize) {
  * as many as are visible.
  *
  * @param container  The PIXI Container to which the grid should be added
- * @param width  The canvas width
- * @param height  The canvas height
- * @param gutter  The width of both axes
+ * @param options    Optional configuration parameters
  * @returns {updateGrid}  The function to update the gridlines
  */
-function drawGrid(
-  container,
-  gutter = 50,
-  xAxisOrientation = "bottom",
-  makeXTickAndLine = defaultMakeXTickAndLine,
-  makeYTickAndLine = defaultMakeYTickAndLine
-) {
-  const maxXLines = 45;
-  const maxYLines = 12;
+function drawGrid(container, options = {}) {
+  const {
+    gutter = 50,
+    xAxisOrientation = "bottom",
+    makeXTickAndLine = defaultMakeXTickAndLine,
+    makeYTickAndLine = defaultMakeYTickAndLine,
+    maxXLines = 45,
+    maxYLines = 12
+  } = options;
   const fontSize = 15;
   let lastBounds = {};
 
@@ -91,9 +90,6 @@ function drawGrid(
   container.addChild(bgx);
 
   const bgy = new PIXI.Graphics();
-  // bgy.beginFill(0xffffff);
-  // bgy.lineStyle(0);
-  // bgy.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, width, gutter);
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
@@ -103,18 +99,19 @@ function drawGrid(
 
   // Corner to hide overlapping tick labels
   const corner = new PIXI.Graphics();
-  // corner.beginFill(0xffffff);
-  // corner.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
-  function calcBounds(xMin, xMax, yMin, yMax, tickCount) {
-    const yRange = yMax - yMin;
-    const yRoughStep = yRange / (tickCount - 1);
-    const xRange = xMax - xMin;
-    const xRoughStep = xRange / (tickCount - 1);
+  const memoCalcBounds = memoizeOne((yScale, y, x, xScale, width, height, xMaxLines, yMaxLines) => {
+    const xMin = Math.floor((-1 * x) / xScale);
+    const xMax = xMin + Math.floor(width / xScale);
+    const yMin = Math.floor((-1 * y) / yScale);
+    const yMax = yMin + Math.floor(height / yScale);
 
-    const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    const yRoughStep = (yMax - yMin) / yMaxLines;
+    const xRoughStep = (xMax - xMin) / xMaxLines;
+
+    const goodSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
     const yStep = goodSteps.find(s => s >= yRoughStep);
     const xStep = goodSteps.find(s => s >= xRoughStep);
 
@@ -126,31 +123,19 @@ function drawGrid(
       yMin: Math.floor(yMin / yStep) * yStep,
       yMax: Math.ceil(yMax / yStep) * yStep
     };
-  }
+  });
 
-  return function updateGrid(props) {
+  return function updateGrid(props, options = {}) {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
     const { width, height, view } = props;
+    const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
 
-    // Instead of using lastBounds, it may be faster to compare previous min/max visible x & y
-    const minVisibleX = Math.floor((-1 * t.x) / t.xScale);
-    const maxVisibleX = minVisibleX + Math.floor(width / t.xScale);
-    const minVisibleY = Math.floor((-1 * t.y) / t.yScale);
-    const maxVisibleY = minVisibleY + Math.floor(height / t.yScale);
+    const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
-    // Possible improvement: only recalculate step if the x or y range has changed
-    const b = calcBounds(minVisibleX, maxVisibleX, minVisibleY, maxVisibleY, maxYLines);
-    if (
-      b.xStep !== lastBounds.xStep ||
-      b.yStep !== lastBounds.yStep ||
-      b.xMax !== lastBounds.xMax ||
-      b.yMax !== lastBounds.yMax ||
-      b.xMin !== lastBounds.xMin ||
-      b.yMin !== lastBounds.yMin
-    ) {
+    if (bounds !== lastBounds) {
       const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
       // Redraw the background as width or height may have changed
       bgx.clear().beginFill(0xffffff);
@@ -161,20 +146,20 @@ function drawGrid(
       corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
 
       for (let i = 0; i < xLines.length; i++) {
-        let pos = b.xMin + b.xStep * i;
+        const pos = bounds.xMin + bounds.xStep * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
-        xLabels[i].y = xAxisAnchor - gutter / 2;
+        xLabels[i].y = xAxisAnchor - gutter;
         xLabels[i].text = `${pos}`;
       }
 
       for (let i = 0; i < yLines.length; i++) {
-        let pos = b.yMin + b.yStep * i;
+        const pos = bounds.yMin + bounds.yStep * i;
         yLines[i].y = pos;
         yLabels[i].y = pos;
         yLabels[i].text = `${pos}`;
       }
-      lastBounds = b;
+      lastBounds = bounds;
     }
   };
 }

@@ -23,6 +23,9 @@ export const theme = createMuiTheme({
     warning: {
       main: "#EE2211"
     },
+    yellow: {
+      main: "#E9CA00"
+    },
     lateralLabel: {
       main: "#86863B"
     },
@@ -50,6 +53,10 @@ export const theme = createMuiTheme({
       root: {
         padding: "8px 16px"
       }
+    },
+    MuiSlider: {
+      track: { backgroundColor: "#B6BA3E" },
+      thumb: { backgroundColor: "#B6BA3E" }
     }
   }
 });

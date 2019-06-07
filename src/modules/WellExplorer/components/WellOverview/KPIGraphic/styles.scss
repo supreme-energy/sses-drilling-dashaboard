@@ -3,6 +3,7 @@
     flex-direction: column;
     position: relative;
     overflow: auto;
+    width: 840px;
 
     .content {
         display: flex;
@@ -14,6 +15,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        flex: none;
+        
     }
 
     .verticalSegments {
@@ -35,10 +38,27 @@
         justify-content: flex-end;
         margin-left: 5px;
         position: relative;
-        flex: 1;
+        flex: none;
         z-index: 1;
-        width: 400px;
+        width: 470px;
     }
+
+    
+    @media (max-height: 1172px) {
+        .content {
+            align-items: flex-end;
+            flex: none;
+            width: 818px;
+            position: relative;
+
+            .horizontalSegment {
+                position: absolute;
+                top: 0;
+                bottom: 0px;
+                right: 0px;
+            }
+        }
+      }
 
     
     :global {

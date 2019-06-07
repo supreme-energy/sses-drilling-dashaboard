@@ -1,18 +1,27 @@
 import React from "react";
+import { transparentColor, openHoleColor } from "../colorStops";
 
 export default function WellboreBlue({ className, height = 139, transparent, openHole }) {
-  const transparentColor = <stop stopColor="#E2E2E2" offset="100%" />;
-  const openHoleColor = <stop stopColor="#000000" offset="100%" />;
-  const segmentColor = transparent ? (
-    transparentColor
-  ) : openHole ? (
-    openHoleColor
-  ) : (
+  const defaultSegmentColor1 = (
     <React.Fragment>
       <stop stopColor="#74A6E4" offset="0%" />
       <stop stopColor="#406DC5" offset="100%" />
     </React.Fragment>
   );
+  const defaultSegmentColor2 = (
+    <React.Fragment>
+      <stop stopColor="#DFE9F5" offset="0%" />
+      <stop stopColor="#91ABDE" offset="100%" />
+    </React.Fragment>
+  );
+  const defaultSegmentColor3 = (
+    <React.Fragment>
+      <stop stopColor="#064EA8" offset="0%" />
+      <stop stopColor="#406DC5" offset="100%" />
+    </React.Fragment>
+  );
+
+  const getSegmentColor = defaultColor => (transparent ? transparentColor : openHole ? openHoleColor : defaultColor);
   return (
     <svg
       className={className}
@@ -26,34 +35,17 @@ export default function WellboreBlue({ className, height = 139, transparent, ope
       <desc>Created with Sketch.</desc>
       <defs>
         <linearGradient x1="100%" y1="50%" x2="0%" y2="50%" id="linearGradient-1">
-          {segmentColor}
+          {getSegmentColor(defaultSegmentColor1)}
         </linearGradient>
         <linearGradient x1="100%" y1="41.0801055%" x2="0%" y2="41.0801055%" id="linearGradient-2">
-          {segmentColor}
+          {getSegmentColor(defaultSegmentColor1)}
         </linearGradient>
+
         <linearGradient x1="50%" y1="100%" x2="50%" y2="3.061617e-15%" id="linearGradient-3">
-          {transparent ? (
-            transparentColor
-          ) : openHole ? (
-            openHoleColor
-          ) : (
-            <React.Fragment>
-              <stop stopColor="#DFE9F5" offset="0%" />
-              <stop stopColor="#91ABDE" offset="100%" />
-            </React.Fragment>
-          )}
+          {getSegmentColor(defaultSegmentColor2)}
         </linearGradient>
         <linearGradient x1="100%" y1="50%" x2="-2.22044605e-14%" y2="50%" id="linearGradient-4">
-          {transparent ? (
-            transparentColor
-          ) : openHole ? (
-            openHoleColor
-          ) : (
-            <React.Fragment>
-              <stop stopColor="#064EA8" offset="0%" />
-              <stop stopColor="#406DC5" offset="100%" />
-            </React.Fragment>
-          )}
+          {getSegmentColor(defaultSegmentColor3)}
         </linearGradient>
       </defs>
       <g id="Scratch-Symbols" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">

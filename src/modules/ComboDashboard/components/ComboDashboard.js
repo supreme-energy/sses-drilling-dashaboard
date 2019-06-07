@@ -6,8 +6,6 @@ import classes from "./ComboDashboard.scss";
 const CrossSectionDashboard = lazy(() =>
   import(/* webpackChunkName: 'CrossSectionDashboard' */ "./CrossSectionDashboard")
 );
-const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "./HeaderToolbar"));
-const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderToolbar' */ "./TimeSliderToolbar"));
 
 function ComboDashboard({
   match: {
@@ -16,12 +14,6 @@ function ComboDashboard({
 }) {
   return (
     <div className={classes.comboDashboardWrapper}>
-      <Suspense fallback={<Progress />}>
-        <HeaderToolbar wellId={openedWellId} />
-      </Suspense>
-      <Suspense fallback={<Progress />}>
-        <TimeSliderToolbar />
-      </Suspense>
       <Suspense fallback={<Progress />}>
         <CrossSectionDashboard wellId={openedWellId} />
       </Suspense>
