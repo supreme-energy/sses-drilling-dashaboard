@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { InputAdornment, TextField } from "@material-ui/core";
+import { InputAdornment } from "@material-ui/core";
+import TextField from "../../../../../../components/TextField";
 import { CheckCircleOutline } from "@material-ui/icons";
 
 import { INPUT_TYPES } from "../../../constants";
@@ -25,10 +26,9 @@ const AttributePaneTextField = ({
     if (isFocused) {
       setTimeout(() => {
         inputRef.current.focus();
-        //innerRef.current.handleFocus();
       }, 0);
     }
-  }, [inputRef, innerRef, isFocused]);
+  }, [inputRef, isFocused]);
 
   const onClickTextField = useCallback(
     event => onFocus(event, appAttributeConfig, appAttributeModel, fieldKey, sectionKey),
@@ -38,11 +38,8 @@ const AttributePaneTextField = ({
   useEffect(() => {
     if (isFocused) {
       inputRef.current.focus();
-      innerRef.current.handleFocus();
     } else {
       inputRef.current.blur();
-      console.log("innerRef.current", innerRef.current);
-      //innerRef.current.handleBlur();
     }
   }, [isFocused]);
 
@@ -56,21 +53,12 @@ const AttributePaneTextField = ({
         label={appAttributeConfig.labelName}
         fullWidth
         InputProps={{
-          classes: {
-            root: classes.root,
-            underline: classes.cssUnderline
-          },
           endAdornment:
             appAttributeModel.value !== "" && appAttributeConfig.required ? (
               <InputAdornment position="end">
                 <CheckCircleOutline className={classes.icon} />
               </InputAdornment>
             ) : null
-        }}
-        FormHelperTextProps={{
-          classes: {
-            root: classes.helperTextRoot
-          }
         }}
         helperText={isFocused ? "Choose the appropriate value from LAS file on right" : ""}
         onBlur={handleBlur}

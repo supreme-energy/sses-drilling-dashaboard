@@ -14,6 +14,7 @@ import memoize from "react-powertools/memoize";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
+export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
@@ -35,6 +36,7 @@ const options = {
 };
 
 const EMPTY_ARRAY = [];
+const IDENTITY = d => d;
 
 function transform(data) {
   return data.map(d => _.mapValues(d, Number));
@@ -62,7 +64,7 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const [data, isLoading] = useFetch({
+  const [data, isLoading, , , , { fetch }] = useFetch({
     path: GET_WELL_INFO,
     query: {
       seldbname: wellId
@@ -72,8 +74,29 @@ export function useWellInfo(wellId) {
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
 
+  const updateWell = useCallback(
+    ({ wellId, field, value }) =>
+      fetch(
+        {
+          path: SET_WELL_FIELD,
+          query: {
+            seldbname: wellId,
+            table: "wellinfo",
+            field,
+            value
+          }
+        },
+        (data, ...rest) => {
+          console.log("current data", data);
+          console.log("rest", rest);
+          return data;
+        }
+      ),
+    [fetch]
+  );
+
   if (!wellInfo) {
-    return [{}, isLoading];
+    return [{}, isLoading, updateWell];
   }
 
   const source = proj4.Proj("EPSG:32040");
@@ -105,9 +128,11 @@ export function useWellInfo(wellId) {
       wellLandingLocation,
       wellLandingLocationLocal,
       wellPBHL,
-      wellPBHLLocal
+      wellPBHLLocal,
+      wellInfo
     },
-    isLoading
+    isLoading,
+    updateWell
   ];
 }
 

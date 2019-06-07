@@ -23,6 +23,9 @@ export const theme = createMuiTheme({
     warning: {
       main: "#EE2211"
     },
+    sectionTitle: {
+      main: "#86863B"
+    },
     yellow: {
       main: "#E9CA00"
     },

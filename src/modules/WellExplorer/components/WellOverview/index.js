@@ -25,7 +25,7 @@ function WellOverivew({ className, well, match, history, updateFavorite }) {
       </Tabs>
       <React.Fragment>
         {currentTab === "overview" && <Overview />}
-        {currentTab === "info" && <WellInfo />}
+        {currentTab === "info" && <WellInfo wellId={well.id} />}
       </React.Fragment>
     </Card>
   );
