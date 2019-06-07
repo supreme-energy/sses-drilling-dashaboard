@@ -8,7 +8,7 @@ import { scaleLinear, scaleThreshold } from "d3-scale";
 import { useSize } from "react-hook-size";
 import { sum } from "d3-array";
 import { useTheme } from "@material-ui/styles";
-import { noDecimal, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/formats";
+import { noDecimals, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/format";
 
 const percentage = value => (value !== undefined ? fmtPercentage(value) : EMPTY_FIELD);
 const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
@@ -66,7 +66,7 @@ export default function Kpi({ data }) {
             <div className="layout horizontal space-between">
               <KpiItem
                 className={classes.kpi}
-                format={noDecimal}
+                format={noDecimals}
                 label={`Sliding ${percentage(data.slidingPct)}`}
                 value={data.avgSliding}
                 renderValue={renderSliding}
@@ -74,7 +74,7 @@ export default function Kpi({ data }) {
 
               <KpiItem
                 className={classes.kpi}
-                format={noDecimal}
+                format={noDecimals}
                 label={`Rotating ${percentage(data.rotatingPct)}`}
                 value={data.avgRotating}
                 renderValue={renderRotating}

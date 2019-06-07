@@ -5,12 +5,10 @@ import { ON_VERTICAL, ON_CURVE, ON_LATERAL } from "../../../constants/wellPathSt
 import { RED, BLUE, GRAY } from "../../../constants/colors";
 import { useKpi } from "../../../api";
 import KpiItem from "../KpiItem";
-import { format } from "d3-format";
+
 import classes from "./styles.scss";
 import { Typography } from "@material-ui/core";
-
-const percentage = format(".0%");
-const depthFormat = format(".0f");
+import { noDecimals, percentage } from "../../../constants/format";
 
 const drawLine = line()
   .x(d => d[0])
@@ -73,7 +71,7 @@ export default function Status({ wellId }) {
         renderValue={renderValue}
         value={depth}
         measureUnit={"ft"}
-        format={depthFormat}
+        format={noDecimals}
         className={classes.kpi}
       />
       <WellPathStatus status={wellPathStatus} />

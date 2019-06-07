@@ -4,7 +4,7 @@ import classes from "./styles.scss";
 import { Typography } from "@material-ui/core";
 import { useKpi } from "../../api";
 import classNames from "classnames";
-import { twoDecimals, EMPTY_FIELD } from "../../constants/formats";
+import { twoDecimals, EMPTY_FIELD } from "../../constants/format";
 
 function KpiItem({
   value,
