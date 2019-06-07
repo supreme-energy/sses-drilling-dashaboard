@@ -3,7 +3,7 @@ import { useRopData } from "../../../../../api";
 import useRef from "react-powertools/hooks/useRef";
 import { useSize } from "react-hook-size";
 import { scaleLinear } from "d3-scale";
-import { max, group, pairs } from "d3-array";
+import { max, pairs } from "d3-array";
 import { SectionsGraph } from "./SectionsGraph";
 import PixiLine from "./PixiLine";
 import PixiContainer from "./PixiContainer";
@@ -40,12 +40,9 @@ const mapAverage = d => [Number(d.ROP_A), Number(d.Hole_Depth)];
 const mapInstant = d => [Number(d.ROP_I), Number(d.Hole_Depth)];
 const gridGutter = 50;
 
-const getDataBySection = data => {
-  return group(data, d => d.A_interval);
-};
-
 export default function Rop({ className, style }) {
-  const data = useRopData();
+  const [data, getDataBySection] = useRopData();
+  const dataBySection = getDataBySection(data);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -82,8 +79,6 @@ export default function Rop({ className, style }) {
     zoomXScale: false,
     zoomYScale: true
   });
-
-  const dataBySection = useMemo(() => getDataBySection(data), [data]);
 
   const onReset = useCallback(() => {
     updateView(view => ({
@@ -153,7 +148,7 @@ export default function Rop({ className, style }) {
 
   return (
     <div className={classNames(className, classes.container)} style={style}>
-      <Legend />
+      <Legend className={classes.legend} />
       <div className={classes.plot} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
         <PixiContainer

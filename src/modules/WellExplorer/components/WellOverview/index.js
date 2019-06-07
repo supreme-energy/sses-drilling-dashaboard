@@ -6,6 +6,7 @@ import Tabs from "@material-ui/core/Tabs";
 import { withRouter } from "react-router-dom";
 import Overview from "./Overview";
 import WellInfo from "./WellInfo";
+import classNames from "classnames";
 
 function WellOverivew({ className, well, match, history, updateFavorite }) {
   const [currentTab, changeCurrentTab] = useState("overview");
@@ -14,7 +15,7 @@ function WellOverivew({ className, well, match, history, updateFavorite }) {
   };
 
   return (
-    <Card className={className}>
+    <Card className={classNames(className, "layout vertical")}>
       {well && <OverivewKpi well={well} updateFavorite={updateFavorite} />}
       <Tabs value={currentTab} indicatorColor="primary" onChange={onTabChange}>
         <Tab value="overview" label="Well Overview" />

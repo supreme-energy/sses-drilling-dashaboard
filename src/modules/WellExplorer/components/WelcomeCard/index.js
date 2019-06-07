@@ -20,7 +20,7 @@ const LastEditedWell = ({ lastEditedWell, openedWell }) => {
       </Typography>
       <div>{well.name}</div>
       <Typography variant="body2" gutterBottom>
-        {`${well.position[0]}  |  ${well.position[1]}`}
+        {`${well.surfacePosition[0]}  |  ${well.surfacePosition[1]}`}
       </Typography>
 
       <div className={classes.row}>

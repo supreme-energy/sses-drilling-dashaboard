@@ -1,0 +1,86 @@
+.mapContainer {
+    position: relative;
+    .map {
+        position: absolute;
+        width: 100%;
+        top: 0px;
+        bottom: 100px;
+    }
+
+    .legend {
+        bottom: 0px;
+        height: 100px;
+        position: absolute;
+        width: 100%;
+    }
+}
+
+.horizontalLine {
+    width: 13px;
+    height: 3px;
+    &::before {
+        display: block;
+        content: "";
+        position: absolute;
+        width: 13px;
+        height: 3px;
+        background-color: #1AA4FF;
+    }
+
+    &.intermediate {
+        background-color: #538531;
+    }
+
+    &.drillout {
+        background-color: #7C7C7C;
+    }
+
+    &.lateral {
+        background-color: #C39200;
+    }
+
+    &.drilling {
+       background-color:  #7500A6;
+    }
+}
+
+.phasePointIcon {
+    position: relative;
+    height: 13px;
+
+    @extend .horizontalLine;
+
+    &::after {
+        display: block;
+        content: "";
+        position: absolute;
+        width: 3px;
+        height: 13px;
+        background-color: #1AA4FF;
+    }
+
+    &.landing {
+        &::after {
+            background-color: #72B600;
+        }
+    
+        &::before {
+            background-color: #72B600;
+        }
+    }
+
+    &.pbhl {
+        &::after {
+            background-color: #B000DF;
+        }
+    
+        &::before {
+            background-color: #B000DF;
+        }
+    }
+}
+
+
+
+
+

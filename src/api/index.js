@@ -7,6 +7,10 @@ import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
 import _ from "lodash";
+import { group } from "d3-array";
+import proj4 from "proj4";
+import { toWGS84 } from "../utils/projections";
+import memoize from "react-powertools/memoize";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -59,7 +63,7 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const [data] = useFetch({
+  const [data, isLoading] = useFetch({
     path: GET_WELL_INFO,
     query: {
       seldbname: wellId
@@ -67,10 +71,45 @@ export function useWellInfo(wellId) {
   });
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
+  const wellInfo = data && data.wellinfo;
 
-  return {
-    serverStatus: online ? ONLINE : OFFLINE
+  if (!wellInfo) {
+    return [{}, isLoading];
+  }
+
+  const source = proj4.Proj("EPSG:32040");
+  const transform = toWGS84(source);
+
+  const wellSurfaceLocationLocal = {
+    x: Number(wellInfo.survey_easting),
+    y: Number(wellInfo.survey_northing)
   };
+  const wellLandingLocationLocal = {
+    x: Number(wellInfo.landing_easting),
+    y: Number(wellInfo.landing_northing)
+  };
+
+  const wellPBHLLocal = {
+    x: Number(wellInfo.pbhl_easting),
+    y: Number(wellInfo.pbhl_northing)
+  };
+
+  const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
+  const wellLandingLocation = transform(wellLandingLocationLocal);
+  const wellPBHL = transform(wellPBHLLocal);
+
+  return [
+    {
+      serverStatus: online ? ONLINE : OFFLINE,
+      wellSurfaceLocationLocal,
+      wellSurfaceLocation,
+      wellLandingLocation,
+      wellLandingLocationLocal,
+      wellPBHL,
+      wellPBHLLocal
+    },
+    isLoading
+  ];
 }
 
 export function useWells() {
@@ -80,14 +119,18 @@ export function useWells() {
     },
     {
       transform: wells => {
+        // TODO get map source projection name from backend
+        const source = proj4.Proj("EPSG:32040");
+        const transform = toWGS84(source);
         return wells.map(w => {
-          const pos = [Math.random() * 5 + 28, -95 - Math.random() * 5];
+          const surfacePos = transform({ x: Number(w.survey_easting), y: Number(w.survey_northing) });
+
           return {
             id: w.jobname,
             name: w.realjobname,
             status: DRILLING,
             fav: Boolean(w.favorite),
-            position: pos
+            surfacePosition: [surfacePos.y, surfacePos.x]
           };
         });
       }
@@ -123,6 +166,10 @@ export function useWells() {
   return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
 }
 
+const groupBySection = memoize(data => {
+  return group(data, d => d.A_interval);
+});
+
 export function useRopData() {
   const [data] = useFetch(
     {
@@ -136,7 +183,8 @@ export function useRopData() {
       }
     }
   );
-  return data || EMPTY_ARRAY;
+  const ropData = data || EMPTY_ARRAY;
+  return [ropData, groupBySection];
 }
 
 export function useWellPath(wellId) {
@@ -152,6 +200,26 @@ export function useWellPath(wellId) {
     }
   );
   return data || EMPTY_ARRAY;
+}
+
+export function useWellsMapPosition(wellId, wellPositions) {
+  const [wellInfo] = useWellInfo(wellId);
+
+  return useMemo(() => {
+    // TODO get map source projection from backend
+    const source = proj4.Proj("EPSG:32040");
+    const transform = toWGS84(source);
+    function addMapPosition(p) {
+      return {
+        ...p,
+        mapPosition: transform({
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
+        })
+      };
+    }
+    return wellInfo.wellSurfaceLocationLocal ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+  }, [wellPositions, wellInfo]);
 }
 
 export function useSurveys(wellId) {
@@ -208,7 +276,7 @@ export function useProjections(wellId) {
 }
 
 export function useWellOverviewKPI() {
-  const [data] = useFetch(
+  let [data] = useFetch(
     {
       path: GET_MOCK_OVERVIEW_KPI
     },
@@ -219,22 +287,35 @@ export function useWellOverviewKPI() {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
           id: _.uniqueId(),
-          rop: d.ROP_AVG,
-          depth: d.HOLE_DEPTH_END,
-          bitSize: d.holesize,
-          casingSize: d.casingSize,
-          startTime: d.DT_START,
-          totalHours: d.TOTAL_HOURS,
-          drillingHours: d.D_HOURS,
+          rop: Number(d.ROP_AVG),
+          depth: Number(d.HOLE_DEPTH_END),
+          holeDepthStart: Number(d.HOLE_DEPTH_START),
+          bitSize: Number(d.holesize),
+          casingSize: Number(d.casingSize),
+          startTime: Number(d.DT_START),
+          totalHours: Number(d.TOTAL_HOURS),
+          drillingHours: Number(d.D_HOURS),
           landingPoint: d.landingPoint,
-          toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
-          zoneAccuracy: d.zoneAccuracy,
-          depthStart: d.HOLE_DEPTH_START
+          toolFaceEfficiency: Number(d.TOOLFACE_EFFICIENCY_PCT),
+          zoneAccuracy: 100, // TBD
+          targetAccuracy: 98, // TBD,
+          footageDrilled: Number(d.FOOTAGE_DRILLED),
+          avgSliding: Number(d.ROP_AVG_SLIDING),
+          avgRotating: Number(d.ROP_AVG_ROTATING),
+          slidingPct: Number(d.SLIDE_PCT_D),
+          rotatingPct: Number(d.ROTATE_PCT_D)
         }));
       }
     }
   );
-  return data || EMPTY_ARRAY;
+
+  data = data || EMPTY_ARRAY;
+
+  const bySegment = useMemo(() => group(data, d => d.type), [data]);
+  return {
+    data,
+    bySegment
+  };
 }
 
 export function useTimeSliderData() {

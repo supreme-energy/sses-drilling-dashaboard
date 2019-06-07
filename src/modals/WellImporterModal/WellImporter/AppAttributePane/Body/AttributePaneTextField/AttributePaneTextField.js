@@ -25,10 +25,9 @@ const AttributePaneTextField = ({
     if (isFocused) {
       setTimeout(() => {
         inputRef.current.focus();
-        innerRef.current.handleFocus();
       }, 0);
     }
-  }, [inputRef, innerRef, isFocused]);
+  }, [inputRef, isFocused]);
 
   const onClickTextField = useCallback(
     event => onFocus(event, appAttributeConfig, appAttributeModel, fieldKey, sectionKey),
@@ -38,10 +37,8 @@ const AttributePaneTextField = ({
   useEffect(() => {
     if (isFocused) {
       inputRef.current.focus();
-      innerRef.current.handleFocus();
     } else {
       inputRef.current.blur();
-      innerRef.current.handleBlur();
     }
   }, [isFocused]);
 

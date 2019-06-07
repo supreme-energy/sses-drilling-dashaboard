@@ -22,6 +22,21 @@ export const theme = createMuiTheme({
     },
     warning: {
       main: "#EE2211"
+    },
+    yellow: {
+      main: "#E9CA00"
+    },
+    lateralLabel: {
+      main: "#86863B"
+    },
+    surfaceLabel: {
+      main: "#406DC5"
+    },
+    intermadiateLabel: {
+      main: "#538531"
+    },
+    curveLabel: {
+      main: "#7D7D7D"
     }
   },
   drillingStatusColor: "#4B921B",

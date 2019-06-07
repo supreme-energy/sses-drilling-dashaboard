@@ -3,7 +3,17 @@
     flex-direction: column;
     align-self: stretch;
     align-items: center;
+    position: relative;
+
+    .legend {
+        position: absolute;
+        left: 50px;
+        right: 0px;
+        top: 35px;
+        z-index: 2;
+    }
     .plot {
+        z-index: 1;
         align-self: stretch;
         flex: 1;
         position: relative;

@@ -1,20 +1,30 @@
 import React from "react";
 import classes from "./styles.scss";
 import Typography from "@material-ui/core/Typography";
-const LegendItem = ({ color, label }) => {
+import classNames from "classnames";
+
+const LegendItem = ({ color, label, bordered }) => {
   return (
     <div className={classes.hContainer}>
-      <div style={{ backgroundColor: color, width: 50, height: 20, border: "solid 1px black", marginRight: "10px" }} />
-      <Typography variant="body2" gutterBottom>
+      <div
+        style={{
+          backgroundColor: color,
+          width: 15,
+          height: 6,
+          border: bordered ? "solid 1px black" : "none",
+          marginRight: "10px"
+        }}
+      />
+      <Typography variant="caption" gutterBottom>
         {label}
       </Typography>
     </div>
   );
 };
-export default function Legend() {
+export default function Legend({ className }) {
   return (
-    <div className={classes.hContainer}>
-      <LegendItem color={`#ffffff`} label={"Instant ROP"} />
+    <div className={classNames(classes.hContainer, className)}>
+      <LegendItem color={`#ffffff`} label={"Instant ROP"} bordered />
       <span className={classes.spacer} />
       <LegendItem color={`#F9001D`} label={"Avg ROP"} />
       <span className={classes.spacer} />

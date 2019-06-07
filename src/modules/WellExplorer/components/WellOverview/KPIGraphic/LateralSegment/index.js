@@ -1,16 +1,17 @@
 import React, { useRef } from "react";
 import classes from "./styles.scss";
 import WellboreSmallYellow from "./WellboreSmallYellow";
-import { Typography } from "@material-ui/core";
 import KpiItem from "../../../../../Kpi/KpiItem";
 import { useSize } from "react-hook-size";
 import classNames from "classnames";
 import OpenHole from "../../components/OpenHole";
+import PhaseLabel from "../../../../../Kpi/components/PhaseLabel.js";
 
 export default function CurveSegment({ data }) {
   const containerRef = useRef(null);
   const { width } = useSize(containerRef);
   const openHole = !data.casingSize;
+
   return (
     <div className={classNames(classes.container, { undrilled: data.undrilled })} ref={containerRef}>
       <div className={classNames(classes.imgContainer, "segmentBackground")}>
@@ -23,9 +24,9 @@ export default function CurveSegment({ data }) {
 
         <div className={classes.kpis}>
           <div className={classes.left}>
-            <Typography className={classes.label} variant="body1">
+            <PhaseLabel className={classes.label} phase={data.type}>
               {data.type}
-            </Typography>
+            </PhaseLabel>
 
             <KpiItem
               textClass={"whiteText"}

@@ -69,7 +69,7 @@ export function useWellSections() {
         return {
           index,
           phase: section.type,
-          phaseStart: section.depthStart,
+          phaseStart: section.holeDepthStart,
           phaseEnd: section.depth,
           inView: true
         };

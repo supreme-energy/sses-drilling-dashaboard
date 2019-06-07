@@ -9,21 +9,22 @@ import classes from "./styles.scss";
 // Once data type is known, this component MAY use the form
 // of KpiItem in KpiItem.js
 function TargetAccuracy({ wellId, theme }) {
-    const { zoneStatus } = useWellInfo(wellId);
-    const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
+  const [{ zoneStatus }] = useWellInfo(wellId);
 
-    return (
-      <div className={classes.zoneStatus}>
-        <div className={classes.horizontalCenter}>
-          <Typography variant="h5" style={{ color }}>
-            {zoneStatus || "In Zone"}
-          </Typography>
-        </div>
-        <Typography className={classes.italicLabel} variant="caption" gutterBottom>
-            Target Accuracy
+  const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
+
+  return (
+    <div className={classes.zoneStatus}>
+      <div className={classes.horizontalCenter}>
+        <Typography variant="h5" style={{ color }}>
+          {zoneStatus || "In Zone"}
         </Typography>
       </div>
-    );
+      <Typography className={classes.italicLabel} variant="caption" gutterBottom>
+        Target Accuracy
+      </Typography>
+    </div>
+  );
 }
 
-export default withTheme()(TargetAccuracy);
+export default withTheme(TargetAccuracy);

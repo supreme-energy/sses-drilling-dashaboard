@@ -1,10 +1,10 @@
 import React from "react";
 import WellboreCurve from "./WellboreMediumCurve.js";
 import classes from "./styles.scss";
-import { Typography } from "@material-ui/core";
 import KpiItem from "../../../../../Kpi/KpiItem.js";
 import classNames from "classnames";
 import OpenHole from "../../components/OpenHole.js";
+import PhaseLabel from "../../../../../Kpi/components/PhaseLabel.js";
 
 export default function CurveSegment({ data }) {
   const openHole = !data.casingSize;
@@ -13,9 +13,9 @@ export default function CurveSegment({ data }) {
       <div className={classNames(classes.imgContainer, "segmentBackground")}>
         <WellboreCurve className={classes.svgIcon} transparent={data.undrilled} openHole={openHole} />
         <div className={classes.topZone}>
-          <Typography className={classes.label} variant="body1">
+          <PhaseLabel className={classes.label} phase={data.type}>
             {data.type}
-          </Typography>
+          </PhaseLabel>
           <div className={classes.kpis}>
             <KpiItem
               textClass={"whiteText"}

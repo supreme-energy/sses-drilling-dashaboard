@@ -5,8 +5,10 @@
     justify-content: center;
     height: 170px;
     .imgContainer {
+        position: absolute;
         background-color: #F2E8CA;
         width: 100%;
+        height: 100%;
         border-radius: 8px;
         .kpis {
             position: absolute;
@@ -19,7 +21,6 @@
             width: 100%;
 
             .label {
-                color: #898125;
                 margin-bottom: 10px;
             }
             .left, .right {
