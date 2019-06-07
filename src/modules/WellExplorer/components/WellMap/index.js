@@ -1,23 +1,18 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Map, TileLayer, Marker, ZoomControl } from "react-leaflet";
+import { ZoomControl } from "react-leaflet";
 import CenterControl from "../CenterControl";
-import { mapIcons, mapIconsSelected } from "../IconsByStatus";
-import L from "leaflet";
-import mapValues from "lodash/mapValues";
 import classes from "./styles.scss";
-import classNames from "classnames";
 import MapLegend from "./MapLegend";
 import "leaflet-fullscreen";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import Map from "./Map";
+import WellsLayer from "./WellsLayer";
 
-const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
-const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
-
-const MAP = "Map";
-const SATELLITE = "Satellite";
+export const MAP = "Map";
+export const SATELLITE = "Satellite";
 
 export const WellMap = ({
   mapCenter,
@@ -31,38 +26,18 @@ export const WellMap = ({
   onMarkerClick,
   ...props
 }) => {
-  const mapRef = useRef(null);
   const [selectedTiles, changeSelectedTiles] = useState(MAP);
   const [showLegend, changeShowLegend] = useState(defaultShowLegend);
   return (
     <Map
       {...props}
       center={mapCenter}
-      attributionControl={false}
-      length={4}
+      selectedTiles={selectedTiles}
       onClick={handleClickWell}
       // onfullscreenchange={handleMapFullscreenChange}
-      zoom={6}
-      ref={mapRef}
-      className={classNames(classes.map, props.className)}
+      className={props.className}
     >
-      {selectedTiles === MAP ? (
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" /> // eslint-disable-line max-len
-      ) : (
-        <TileLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-      )}
-
-      {wells.length > 0 &&
-        wells.map(well => (
-          <Marker
-            key={well.id}
-            onClick={() => onMarkerClick(well)}
-            position={well.position}
-            icon={selectedWellId === well.id ? leafletIconsSelected[well.status] : leafletIcons[well.status]}
-            className={classes.marker}
-          />
-        ))}
-
+      <WellsLayer wells={wells} onMarkerClick={onMarkerClick} selectedWellId={selectedWellId} />
       {showToggleLegend && (
         <CenterControl position={"bottomright"} defaultClassName={classes.legendButtonControl}>
           <Paper className={classes.horizontalLayout}>

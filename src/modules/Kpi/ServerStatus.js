@@ -13,8 +13,9 @@ const icons = {
 };
 
 function ServerStatus({ wellId, theme }) {
-  const { serverStatus } = useWellInfo(wellId);
-  const Icon = icons[serverStatus];
+  const [{ serverStatus }] = useWellInfo(wellId);
+
+  const Icon = icons[serverStatus || OFFLINE];
   const color = serverStatus === ONLINE ? theme.palette.success.main : theme.palette.warning.main;
 
   return (

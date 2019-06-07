@@ -62,7 +62,7 @@ export default function Kpi({ data }) {
           <KpiItem className={classes.kpi} label="Drilling Time" value={data.totalHours} measureUnit="h" />
         </div>
         <div className={classNames("layout vertical", classes.secondColumn)}>
-          <div className="layut vertical">
+          <div className="layout vertical">
             <div className="layout horizontal space-between">
               <KpiItem
                 className={classes.kpi}
