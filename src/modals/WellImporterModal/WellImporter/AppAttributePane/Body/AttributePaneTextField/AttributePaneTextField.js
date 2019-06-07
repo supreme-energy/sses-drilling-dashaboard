@@ -27,7 +27,7 @@ const AttributePaneTextField = ({
         inputRef.current.focus();
       }, 0);
     }
-  }, [inputRef, innerRef, isFocused]);
+  }, [inputRef, isFocused]);
 
   const onClickTextField = useCallback(
     event => onFocus(event, appAttributeConfig, appAttributeModel, fieldKey, sectionKey),
