@@ -5,6 +5,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "re
 import { useFilteredWellData } from "../../App/Containers";
 
 import classes from "./ComboDashboard.scss";
+import { calculateDip, getChangeInY } from "./CrossSection/formulas";
 import CrossSection from "./CrossSection/index";
 
 function singleSelectionReducer(list, i) {
@@ -22,11 +23,14 @@ function PADeltaInit(section, prevSection) {
     tcl: 0,
     tot: 0,
     tvd: 0,
-    vs: 0
+    vs: 0,
+    dip: 0
   };
 }
+
 function PADeltaReducer(state, action) {
   const op = state.op;
+  const prevOp = state.prevOp;
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
@@ -36,7 +40,8 @@ function PADeltaReducer(state, action) {
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
-        tcl: depthDelta
+        tcl: depthDelta,
+        dip: op.dip - calculateDip(action.tot - state.fault, prevOp.tot, action.vs, prevOp.vs)
       };
     case "dip_bot":
       depthDelta = action.bot - op.bot - state.fault;
@@ -45,7 +50,8 @@ function PADeltaReducer(state, action) {
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
-        tcl: depthDelta
+        tcl: depthDelta,
+        dip: op.dip - calculateDip(action.bot - state.fault, prevOp.bot, action.vs, prevOp.vs)
       };
     case "fault_tot":
       return {
@@ -62,6 +68,15 @@ function PADeltaReducer(state, action) {
         ...state,
         tvd: action.tvd - op.tvd,
         vs: action.vs - op.vs
+      };
+    case "tag_move":
+      const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
+      return {
+        ...state,
+        vs: action.vs - op.vs,
+        tot: prevOp.tot - op.tot + changeInY,
+        tcl: prevOp.tcl - op.tcl + changeInY,
+        bot: prevOp.bot - op.bot + changeInY
       };
     case "init":
       return PADeltaInit(action.section, action.prevSection);

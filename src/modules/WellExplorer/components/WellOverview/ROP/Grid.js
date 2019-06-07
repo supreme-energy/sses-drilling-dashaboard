@@ -3,9 +3,10 @@ import * as PIXI from "pixi.js";
 import { useEffect, useMemo, useImperativeHandle, forwardRef } from "react";
 import { drawGrid, defaultMakeXTickAndLine } from "../../../../ComboDashboard/components/CrossSection/drawGrid";
 
-function makeXTickAndLine(...args) {
+function topXAxis(...args) {
   const [line, label] = defaultMakeXTickAndLine(...args);
   label.rotation = 0;
+  label.anchor.set(0.5, -1);
 
   return [line, label];
 }
@@ -19,7 +20,12 @@ function Grid({ container, width, height, gridGutter, view }, ref) {
   }, [container]);
 
   const updateGrid = useMemo(() => {
-    return drawGrid(gridLayerRef.current, { gridGutter, xAxisOrientation: "top", makeXTickAndLine, maxXLines: 10 });
+    return drawGrid(gridLayerRef.current, {
+      gutter: gridGutter,
+      xAxisOrientation: "top",
+      makeXTickAndLine: topXAxis,
+      maxXLines: 10
+    });
   }, [gridGutter]);
 
   useEffect(() => {

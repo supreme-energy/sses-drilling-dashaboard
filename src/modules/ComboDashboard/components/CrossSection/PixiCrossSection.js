@@ -28,20 +28,22 @@ export default class PixiCrossSection {
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
+    this.UILayer2 = this.viewport.addChild(new PIXI.Container());
     this.stage.addChild(this.viewport);
 
     this.makeInteractive(this.stage);
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 50;
+    const gridGutter = 80;
+    this.yTicks = 12;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, props, gridGutter);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
-    this.gridUpdate = drawGrid(this.gridLayer, { gridGutter });
+    this.gridUpdate = drawGrid(this.gridLayer, { gutter: gridGutter, maxYLines: this.yTicks });
 
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.ticker.shared;
@@ -120,7 +122,7 @@ export default class PixiCrossSection {
     this.surveyUpdate(props);
     this.sectionUpdate(props);
     this.interactivePAUpdate(props);
-    this.gridUpdate(props, { maxXTicks: Math.ceil((12 * width) / height) });
+    this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;
   }
   resize(width, height) {
@@ -132,6 +134,7 @@ export default class PixiCrossSection {
     removeAllChildren(this.formationsLayer);
     removeAllChildren(this.wellPathLayer);
     removeAllChildren(this.UILayer);
+    removeAllChildren(this.UILayer2);
     removeAllChildren(this.gridLayer);
   }
 }

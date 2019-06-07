@@ -20,6 +20,7 @@ export const GET_WELL_FORMATIONS = "/formationlist.php";
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
+const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
 const options = {
   shouldSort: true,
@@ -248,4 +249,17 @@ export function useWellOverviewKPI() {
     data,
     bySegment
   };
+}
+
+export function useTimeSliderData() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_TIME_SLIDER_DATA
+    },
+
+    {
+      id: "mock"
+    }
+  );
+  return data || EMPTY_ARRAY;
 }

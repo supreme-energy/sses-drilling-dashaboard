@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createContainer } from "unstated-next";
 import memoize from "react-powertools/memoize";
 
-import { ON_SURFACE } from "../../constants/wellPathStatus";
-import { useFormations, useProjections, useSurveys, useWellPath } from "../../api";
+import { useFormations, useProjections, useSurveys, useWellPath, useWellOverviewKPI } from "../../api";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length && interval[0] && interval[1]) {
@@ -18,15 +17,20 @@ const valueIsBetweenInterval = (value, interval) => {
 };
 
 // Shared state for current time slider location
-function useTimeSliderData() {
-  const [sliderInterval, setSliderInterval] = useState([]);
-  const [drillPhase, setDrillPhase] = useState(ON_SURFACE);
-  return { sliderInterval, setSliderInterval, drillPhase, setDrillPhase };
+function useTimeSlider(initialState) {
+  const [sliderInterval, setSliderInterval] = useState(initialState);
+  return { sliderInterval, setSliderInterval };
 }
 
-export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(
-  useTimeSliderData
-);
+export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
+
+// Shared state for current drill phase
+function useDrillPhase(initialState) {
+  const [drillPhaseObj, setDrillPhase] = useState(initialState);
+  return { drillPhaseObj, setDrillPhase };
+}
+
+export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData(wellId) {
@@ -40,7 +44,6 @@ export function useFilteredWellData(wellId) {
   // Filter data and memoize
   const surveysFiltered = filterDataToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterDataToInterval(projections, sliderInterval);
-  const wellPlanFiltered = filterDataToInterval(wellPlan, sliderInterval);
   const formationsFiltered = formations.map(f => {
     return {
       ...f,
@@ -50,8 +53,29 @@ export function useFilteredWellData(wellId) {
 
   return {
     surveys: surveysFiltered,
-    wellPlan: wellPlanFiltered,
+    wellPlan,
     formations: formationsFiltered,
     projections: projectionsFiltered
   };
+}
+
+// Organize well sections into array of objects
+// TODO replace with Ioans bySegment (from useWellOverviewKPI)
+export function useWellSections() {
+  const wellOverviewSections = useWellOverviewKPI();
+  const drillPhases = useMemo(
+    () =>
+      wellOverviewSections.map((section, index) => {
+        return {
+          index,
+          phase: section.type,
+          phaseStart: section.holeDepthStart,
+          phaseEnd: section.depth,
+          inView: true
+        };
+      }),
+    [wellOverviewSections]
+  );
+
+  return drillPhases;
 }

@@ -43,12 +43,14 @@ export function drawSurveys(container) {
     redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, widePath, 6, 0x333333);
     redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, narrowPath, 2, 0xffffff);
 
+    surveyGraphics.forEach(g => (g.visible = false));
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
       surveyGraphics[i].position.x = calcSections[i].vs;
       surveyGraphics[i].position.y = calcSections[i].tvd;
       surveyGraphics[i].texture = getTexture(i, lastSurveyIdx);
+      surveyGraphics[i].visible = true;
     }
   };
 }
