@@ -8,12 +8,9 @@ import { scaleLinear, scaleThreshold } from "d3-scale";
 import { useSize } from "react-hook-size";
 import { sum } from "d3-array";
 import { useTheme } from "@material-ui/styles";
-import { format } from "d3-format";
+import { noDecimal, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/formats";
 
-const fmtPercentage = format(".2%");
-const percentage = value => (value !== undefined ? fmtPercentage(value) : "-");
-const noDecimal = format(".0f");
-
+const percentage = value => (value !== undefined ? fmtPercentage(value) : EMPTY_FIELD);
 const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
 const renderRotating = props => defaultRenderValue({ ...props, textClass: classes.rotatingLabel });
 
@@ -43,7 +40,7 @@ export default function Kpi({ data }) {
 
   const getTargetColor = useMemo(
     () =>
-      // scaleThreshold :: Number -> wargning | yellow | success
+      // getTargetColor :: Number -> wargning | yellow | success
       scaleThreshold()
         .domain([50, 80, 100])
         .range([theme.palette.warning.main, theme.palette.yellow.main, theme.palette.success.main]),
@@ -92,7 +89,7 @@ export default function Kpi({ data }) {
           </div>
           <KpiItem
             className={classes.kpi}
-            label={data.type ? `${data.type} Length` : "-"}
+            label={data.type ? `${data.type} Length` : EMPTY_FIELD}
             value={data.holeDepthStart}
             measureUnit="ft"
           />
