@@ -5,7 +5,6 @@ import classNames from "classnames";
 import PropTypes from "prop-types";
 
 const MAP = "Map";
-const SATELLITE = "Satellite";
 
 export default function Map({ selectedTiles, children, ...props }) {
   return (
