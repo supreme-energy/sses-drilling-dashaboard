@@ -213,8 +213,8 @@ export function useWellsMapPosition(wellId, wellPositions) {
       return {
         ...p,
         mapPosition: transform({
-          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocation.y),
-          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocation.x)
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
         })
       };
     }
