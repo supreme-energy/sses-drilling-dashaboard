@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import PropTypes from "prop-types";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
 import Progress from "@material-ui/core/CircularProgress";
+import plusBasicAuth from "fetch-plus-basicauth";
 
 import FetchClientProvider from "react-powertools/data/FetchClientProvider";
 import FetchCache from "react-powertools/data/FetchCache";
@@ -16,11 +17,13 @@ import DirectionalGuidanceModule from "modules/DirectionalGuidance";
 import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
-import plusBasicAuth from "fetch-plus-basicauth";
 import WellUpdate from "./WellUpdate";
 
 // Import UI State Providers
-import { TimeSliderProvider } from "./Containers";
+import { TimeSliderProvider, DrillPhaseProvider } from "./Containers";
+
+// Import Provider initialStates
+import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
 
 // Lazy load toolbars
 const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
@@ -65,19 +68,21 @@ class App extends React.Component {
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
-                      <TimeSliderProvider>
-                        <Route path="/:wellId" component={WellUpdate} />
-                        <Switch>
-                          <Route path="/:wellId?" exact component={WellExplorer} />
-                          <HeaderToolbar history={history}>
-                            <TimeSliderToolbar>
-                              <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                              <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                              <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                              <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                            </TimeSliderToolbar>
-                          </HeaderToolbar>
-                        </Switch>
+                      <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
+                        <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
+                          <Route path="/:wellId" component={WellUpdate} />
+                          <Switch>
+                            <Route path="/:wellId?" exact component={WellExplorer} />
+                            <HeaderToolbar history={history}>
+                              <TimeSliderToolbar>
+                                <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                              </TimeSliderToolbar>
+                            </HeaderToolbar>
+                          </Switch>
+                        </DrillPhaseProvider>
                       </TimeSliderProvider>
                     </PageLayout>
                   </div>

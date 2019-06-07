@@ -19,6 +19,7 @@ export const GET_WELL_FORMATIONS = "/formationlist.php";
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
+const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
 const options = {
   shouldSort: true,
@@ -227,9 +228,23 @@ export function useWellOverviewKPI() {
           drillingHours: d.D_HOURS,
           landingPoint: d.landingPoint,
           toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
-          zoneAccuracy: d.zoneAccuracy
+          zoneAccuracy: d.zoneAccuracy,
+          depthStart: d.HOLE_DEPTH_START
         }));
       }
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useTimeSliderData() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_TIME_SLIDER_DATA
+    },
+
+    {
+      id: "mock"
     }
   );
   return data || EMPTY_ARRAY;

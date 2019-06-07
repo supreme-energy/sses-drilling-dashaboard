@@ -173,8 +173,7 @@
         },
         {
             "holesize": 15.5,
-            "INTERVAL_NAME": "Intermediate",
-            
+            "INTERVAL_NAME": "Intermediate",    
             "casingSize": 13.5,
             "INTERVAL_CODE": 2,
             "DAY_NUM": 4,

@@ -1,39 +1,52 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef, useReducer, lazy, Suspense } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef, useReducer } from "react";
 import PropTypes from "prop-types";
 import { Card, Typography } from "@material-ui/core";
-import Progress from "@material-ui/core/CircularProgress";
 import classNames from "classnames";
-import get from "lodash/get";
+import _ from "lodash";
 import { useSize } from "react-hook-size";
 
-import { useTimeSliderContainer } from "../../App/Containers";
+import PixiContainer from "../../WellExplorer/components/WellOverview/ROP/PixiContainer";
+import PixiBar from "./PixiBar";
+import PixiLine from "../../WellExplorer/components/WellOverview/ROP/PixiLine";
+import { useTimeSliderContainer, useDrillPhaseContainer } from "../../App/Containers";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
+import Slider from "./Slider";
 import ZoomControls from "./ZoomControls";
 import { GlobalStartTimeControl, GlobalEndTimeControl } from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
+import { graphReducer } from "./reducers";
 import useViewport from "../../WellExplorer/components/WellOverview/ROP/useViewport";
 import { useWebGLRenderer } from "../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import { useRopData } from "../../../api";
-import { COLOR_BY_GRAPH, GRID_GUTTER } from "../../../constants/timeSlider";
-import Slider from "./Slider";
-import { computeInitialViewXScaleValue, computeInitialViewYScaleValue } from "./TimeSliderUtil";
+import { useTimeSliderData } from "../../../api";
+import { SURFACE } from "../../../constants/wellSections";
+import {
+  COLOR_BY_GRAPH,
+  COLOR_BY_PHASE_VIEWER,
+  GRID_GUTTER,
+  MAP_BY_GRAPH,
+  LINE_CHARTS
+} from "../../../constants/timeSlider";
+import {
+  computeInitialViewXScaleValue,
+  computeInitialViewYScaleValue,
+  computePhaseXScaleValue
+} from "./TimeSliderUtil";
 import classes from "./TimeSlider.scss";
 
-const Graphs = lazy(() => import(/* webpackChunkName: 'TimeSliderGraphs' */ "./Graphs"));
-
-function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }) {
+const TimeSlider = React.memo(({ wellId, expanded }) => {
   // Fetch data for Time Slider
-  const data = useRopData();
+  const data = useTimeSliderData();
 
+  // Import shared state
   const { setSliderInterval } = useTimeSliderContainer();
+  const { setDrillPhase, drillPhaseObj } = useDrillPhaseContainer();
 
+  // Create local state
   const [maxSliderStep, setMaxSliderStep] = useState(0);
   const [sliderStep, setSliderStep] = useState([0, 0]);
-  const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
-  const [isSpeeding, setIsSpeeding] = useState(false);
-  const [zoomType, setZoomType] = useState();
   const [globalDates, setGlobalDates] = useState(["", ""]);
+  const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[SURFACE].graphs);
 
   // Canvas resizing hooks
   const scaleInitialized = useRef(null);
@@ -43,7 +56,10 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
   // Determine if graph has been moved off screen by drag
   const isGraphWithinBounds = useCallback(
     (xScale, newX) => {
-      return data.length * xScale - Math.abs(newX) > width - GRID_GUTTER && sliderStep[0] <= maxSliderStep;
+      return (
+        data.length * xScale - Math.abs(newX) > width - GRID_GUTTER &&
+        Math.round(sliderStep[0]) <= Math.round(maxSliderStep)
+      );
     },
     [width, data.length, sliderStep, maxSliderStep]
   );
@@ -75,10 +91,7 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
       yScale: getInitialViewYScaleValue(height),
       xScale: getInitialViewXScaleValue(width - GRID_GUTTER)
     }));
-
-    setSliderStep(step => [data.length - 1, step[1]]);
-    setMaxSliderStep(data.length - 1);
-  }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height, data.length]);
+  }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height]);
 
   const viewportContainer = useRef(null);
 
@@ -95,22 +108,20 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
   });
 
   // set initial scale
-  useEffect(
-    function setInitialXScale() {
-      if (data && data.length && width && height && !scaleInitialized.current) {
-        onReset();
-        scaleInitialized.current = true;
-      }
-    },
-    [width, data, height, onReset]
-  );
+  useEffect(() => {
+    if (data && data.length && width && height && !scaleInitialized.current) {
+      onReset();
+      scaleInitialized.current = true;
+    }
+  }, [width, data, height, onReset]);
 
-  useEffect(
-    function refreshWebGLRenderer() {
-      refresh();
-    },
-    [refresh, stage, data, view, width, height, selectedMenuItems]
-  );
+  useEffect(() => {
+    refresh();
+  }, [refresh, stage, data, view, width, height, selectedMenuItems]);
+
+  useEffect(() => {
+    setSelectedMenuItem({ type: "CHANGE", payload: drillPhaseObj.phase });
+  }, [drillPhaseObj.phase]);
 
   useEffect(() => {
     const newMaxStep = (width - GRID_GUTTER) / view.xScale - 1;
@@ -123,27 +134,75 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
   }, [width, expanded, view.xScale]);
 
   useEffect(() => {
-    if (expanded && data && data.length && maxSliderStep > 0) {
+    if (data && data.length && expanded) {
+      const hiddenDataLength = Math.abs(view.x / view.xScale);
+      const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
+      const endDataIndex = visibleDataLength - 1 + hiddenDataLength;
+
+      const firstIndex = data.map(e => e.Hole_Depth).indexOf(drillPhaseObj.phaseStart);
+      const lastIndex = data.map(e => e.Hole_Depth).lastIndexOf(drillPhaseObj.phaseEnd);
+
+      if ((firstIndex > Math.round(hiddenDataLength) || lastIndex < endDataIndex) && drillPhaseObj.inView) {
+        setDrillPhase(drillPhase => ({
+          ...drillPhase,
+          inView: false
+        }));
+      } else if (firstIndex <= Math.round(hiddenDataLength) && lastIndex >= endDataIndex && !drillPhaseObj.inView) {
+        setDrillPhase(drillPhase => ({
+          ...drillPhase,
+          inView: true
+        }));
+      }
+    }
+  }, [data, width, view, setDrillPhase, drillPhaseObj, expanded]);
+
+  useEffect(() => {
+    if (data && data.length && expanded) {
       const stepFactor = sliderStep[0] / maxSliderStep;
       const hiddenDataLength = Math.abs(view.x) / view.xScale;
       const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
       const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength;
 
-      const beginningDate = get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
-      const endDate = get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
+      const beginningDate = _.get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
+      const endDate = _.get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
 
       setSliderInterval([
-        get(data, `[${Math.floor(hiddenDataLength)}].Hole_Depth`),
-        get(data, `[${Math.round(endDataIndex)}].Hole_Depth`)
+        _.get(data, `[${Math.floor(hiddenDataLength)}].Hole_Depth`),
+        _.get(data, `[${Math.round(endDataIndex)}].Hole_Depth`)
       ]);
 
       setGlobalDates([beginningDate, endDate]);
     }
-  }, [width, expanded, view, data, setSliderInterval, maxSliderStep, sliderStep]);
+  }, [data, width, view, sliderStep, maxSliderStep, setSliderInterval, expanded]);
 
-  // Zoom constants
-  const zoomInDisabled = maxSliderStep <= 10;
-  const zoomOutDisabled = maxSliderStep >= data.length;
+  useEffect(() => {
+    if (data && data.length && drillPhaseObj.inView) {
+      const firstIndex = data.map(e => e.Hole_Depth).indexOf(drillPhaseObj.phaseStart);
+      const lastIndex = data.map(e => e.Hole_Depth).lastIndexOf(drillPhaseObj.phaseEnd);
+      const indexDiff = lastIndex - firstIndex;
+
+      if (firstIndex > 0 || lastIndex > 0) {
+        const beginningDate = _.get(data, `[${firstIndex}].Date_Time`, "");
+        const endDate = _.get(data, `[${lastIndex}].Date_Time`, "NOW");
+
+        const xScale = computePhaseXScaleValue(indexDiff)(width - GRID_GUTTER);
+        updateView(view => ({
+          ...view,
+          x: -1 * firstIndex * xScale,
+          xScale
+        }));
+
+        setSliderInterval([
+          _.get(data, `[${Math.floor(firstIndex)}].Hole_Depth`),
+          _.get(data, `[${Math.round(lastIndex)}].Hole_Depth`)
+        ]);
+
+        setMaxSliderStep(indexDiff);
+        setSliderStep([indexDiff, 1]);
+        setGlobalDates([beginningDate, endDate]);
+      }
+    }
+  }, [data, drillPhaseObj, width, setSliderInterval]);
 
   return (
     <Card className={classNames(classes.timeSliderContainer, expanded && classes.timeSliderContainerExpanded)}>
@@ -155,10 +214,6 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
           <Legend selectedGraphs={selectedMenuItems} keys={Object.keys(COLOR_BY_GRAPH)} />
           <div className={classes.timeSliderControls}>
             <ZoomControls
-              zoomType={zoomType}
-              setZoomType={setZoomType}
-              zoomInDisabled={zoomInDisabled}
-              zoomOutDisabled={zoomOutDisabled}
               updateView={updateView}
               step={sliderStep[0]}
               maxSliderStep={maxSliderStep}
@@ -167,14 +222,7 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
               onReset={onReset}
               width={width}
             />
-            <LocalTimeControls
-              setIsPlaying={setIsPlaying}
-              setSliderStep={setSliderStep}
-              isPlaying={isPlaying}
-              isSpeeding={isSpeeding}
-              setIsSpeeding={setIsSpeeding}
-              maxSliderStep={maxSliderStep}
-            />
+            <LocalTimeControls setSliderStep={setSliderStep} maxSliderStep={maxSliderStep} />
           </div>
           <VerticalMenu
             id="time-slider-menu"
@@ -189,20 +237,51 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
       <div className={classes.timeSliderView}>
         <GlobalStartTimeControl setSliderStep={setSliderStep} expanded={expanded} date={globalDates[0]} />
         <div className={classNames(classes.timeSlider, expanded && classes.timeSliderExpanded)}>
-          <Suspense fallback={<Progress />}>
-            <div
-              className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
-              ref={canvasRef}
-            >
-              <Graphs
-                data={data}
-                viewportContainer={viewportContainer}
-                stage={stage}
-                selectedMenuItems={selectedMenuItems}
-                viewport={viewport}
-              />
-            </div>
-          </Suspense>
+          <div
+            className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
+            ref={canvasRef}
+          >
+            <PixiContainer ref={viewportContainer} container={stage} />
+            {selectedMenuItems.map(graph => {
+              if (data.length > 0) {
+                if (LINE_CHARTS.includes(graph)) {
+                  return (
+                    <PixiContainer
+                      key={graph}
+                      container={viewport}
+                      child={container => (
+                        <PixiLine
+                          container={container}
+                          data={data}
+                          mapData={MAP_BY_GRAPH[graph]}
+                          color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
+                        />
+                      )}
+                    />
+                  );
+                } else {
+                  return (
+                    <PixiContainer
+                      key={graph}
+                      container={viewport}
+                      child={container => (
+                        <PixiBar
+                          container={container}
+                          data={data}
+                          mapData={MAP_BY_GRAPH[graph]}
+                          color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
+                          width={1}
+                          height={3500}
+                          x={0}
+                          y={0}
+                        />
+                      )}
+                    />
+                  );
+                }
+              }
+            })}
+          </div>
           <Slider expanded={expanded} step={sliderStep[0]} maxStep={maxSliderStep} setStep={setSliderStep} />
         </div>
         <GlobalEndTimeControl
@@ -214,12 +293,10 @@ function TimeSlider({ expanded, selectedMenuItems, setSelectedMenuItem, wellId }
       </div>
     </Card>
   );
-}
+});
 
 TimeSlider.propTypes = {
   expanded: PropTypes.bool,
-  setSelectedMenuItem: PropTypes.func,
-  selectedMenuItems: PropTypes.arrayOf(PropTypes.string),
   wellId: PropTypes.string
 };
 

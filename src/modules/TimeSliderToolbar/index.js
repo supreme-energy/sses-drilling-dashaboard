@@ -4,57 +4,28 @@ import { Route } from "react-router-dom";
 import { Card, CardActionArea, CircularProgress } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
-import { useTimeSliderContainer } from "../App/Containers";
 import DrillPhaseViewer from "./DrillPhaseViewer";
-import { COLOR_BY_PHASE_VIEWER } from "../../constants/timeSlider";
-import { ON_SURFACE } from "../../constants/wellPathStatus";
 import classes from "./TimeSliderToolbar.scss";
 
 const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
-
-function graphReducer(state, action) {
-  switch (action.type) {
-    case "CHANGE":
-      return COLOR_BY_PHASE_VIEWER[action.payload].graphs;
-    case "ADD":
-      return [...state, action.payload];
-    case "REMOVE":
-      return state.filter(item => item !== action.payload);
-    default:
-      return state;
-  }
-}
 
 export function TimeSliderToolbar({
   match: {
     params: { wellId }
   }
 }) {
-  const { drillPhase, setDrillPhase } = useTimeSliderContainer();
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
-  const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[ON_SURFACE].graphs);
 
   return (
     <Card className={classes.timeSliderToolbar}>
-      <Card className={classes.collapseButtonContainer}>
-        <CardActionArea className={classes.collapseButton} onClick={toggleExpanded}>
-          {expanded ? <ExpandLess className={classes.expandLessIcon} /> : <ExpandMore />}
-        </CardActionArea>
-      </Card>
-      <DrillPhaseViewer
-        className={classes.noShrink}
-        expanded={expanded}
-        drillPhase={drillPhase}
-        setDrillPhase={setDrillPhase}
-        setSelectedMenuItem={setSelectedMenuItem}
-      />
       <Suspense fallback={<CircularProgress />}>
-        <TimeSlider
-          selectedMenuItems={selectedMenuItems}
-          setSelectedMenuItem={setSelectedMenuItem}
-          expanded={expanded}
-          wellId={wellId}
-        />
+        <Card className={classes.collapseButtonContainer}>
+          <CardActionArea className={classes.collapseButton} onClick={toggleExpanded}>
+            {expanded ? <ExpandLess className={classes.expandLessIcon} /> : <ExpandMore />}
+          </CardActionArea>
+        </Card>
+        <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
+        <TimeSlider expanded={expanded} wellId={wellId} />
       </Suspense>
     </Card>
   );

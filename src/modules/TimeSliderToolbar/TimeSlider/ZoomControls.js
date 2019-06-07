@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
@@ -8,10 +8,6 @@ import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../constants/timeSlider";
 
 function ZoomControls({
   className,
-  zoomType,
-  setZoomType,
-  zoomInDisabled,
-  zoomOutDisabled,
   updateView,
   width,
   maxSliderStep,
@@ -21,6 +17,11 @@ function ZoomControls({
   onReset
 }) {
   let zoomTimeout = useRef(null);
+  const [zoomType, setZoomType] = useState();
+
+  // Zoom constants
+  const zoomInDisabled = maxSliderStep <= 10;
+  const zoomOutDisabled = maxSliderStep >= dataSize;
 
   // Update view based on zoom direction
   const onZoom = useCallback(
@@ -104,10 +105,6 @@ function ZoomControls({
 
 ZoomControls.propTypes = {
   className: PropTypes.string,
-  zoomType: PropTypes.string,
-  setZoomType: PropTypes.func,
-  zoomInDisabled: PropTypes.bool,
-  zoomOutDisabled: PropTypes.bool,
   updateView: PropTypes.func,
   width: PropTypes.number,
   maxSliderStep: PropTypes.number,

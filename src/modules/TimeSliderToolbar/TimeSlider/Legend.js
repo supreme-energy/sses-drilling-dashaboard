@@ -15,7 +15,7 @@ function Legend({ className, selectedGraphs, keys }) {
           return (
             <React.Fragment key={key}>
               <div className={classes.legendKey} style={{ backgroundColor: color }} />
-              <Typography variant="caption">{key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()}</Typography>
+              <Typography variant="caption">{key}</Typography>
             </React.Fragment>
           );
         }

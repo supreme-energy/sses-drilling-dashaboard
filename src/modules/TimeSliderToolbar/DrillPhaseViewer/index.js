@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Card, Menu, MenuItem, Typography, ClickAwayListener, withStyles, CardActionArea } from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
+import _ from "lodash";
 
-import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
-import { ON_SURFACE } from "../../../constants/wellPathStatus";
+import { useDrillPhaseContainer, useWellSections } from "../../App/Containers";
+import { COLOR_BY_PHASE_VIEWER, CHOOSE } from "../../../constants/timeSlider";
 import { GRAY } from "../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
 
@@ -49,23 +50,27 @@ function DrillPhase({ phase }) {
   );
 }
 
-function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPhase, setSelectedMenuItem }) {
+const DrillPhaseViewer = React.memo(({ className, classes, expanded }) => {
+  // Fetch data
+  const drillPhases = useWellSections();
+
+  // Import shared state
+  const { drillPhaseObj, setDrillPhase } = useDrillPhaseContainer();
+  const { phase: drillPhase, inView } = drillPhaseObj;
+
+  // Create state for pop-open anchor element
   const [anchorEl, setAnchorEl] = useState(null);
-  const drillPhaseEnum = Object.keys(COLOR_BY_PHASE_VIEWER);
-  const currPhase = drillPhaseEnum.includes(drillPhase) ? drillPhase : ON_SURFACE;
-  const drillPhaseCode = currPhase.split(" ")[1];
 
-  const handleClickAway = useCallback(() => {
-    setAnchorEl(null);
-  }, []);
+  // Set drill phase when fetching complete
+  useEffect(() => {
+    if (drillPhases && drillPhases.length) {
+      setDrillPhase(drillPhases[drillPhases.length - 1]);
+    }
+  }, [drillPhases, setDrillPhase]);
 
-  const handleDrillPhaseSelect = useCallback(
-    phase => {
-      setDrillPhase(phase);
-      setSelectedMenuItem({ type: "CHANGE", payload: phase });
-    },
-    [setDrillPhase, setSelectedMenuItem]
-  );
+  // Handle Drill Phase click events
+  const handleClickAway = useCallback(() => setAnchorEl(null), []);
+  const handleDrillPhaseSelect = useCallback(phaseObj => setDrillPhase(phaseObj), [setDrillPhase]);
 
   return (
     <Card className={classNames(phaseClasses.drillPhaseCard, className)}>
@@ -82,27 +87,26 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
                 <Typography className={phaseClasses.drillPhaseButtonText} variant="subtitle1">
                   View
                 </Typography>
-                <DrillPhase phase={currPhase} />
+                <DrillPhase phase={inView ? drillPhase : CHOOSE} />
               </div>
             )}
             <div className={expanded ? phaseClasses.drillPhaseCodeContainerExpanded : phaseClasses.alignItem}>
-              <span className={phaseClasses.alignItem}>{drillPhaseCode}</span>
+              <span className={phaseClasses.alignItem}>{inView ? drillPhase : CHOOSE}</span>
               <ArrowDropDown className={phaseClasses.alignItem} />
             </div>
           </CardActionArea>
           <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
-            {drillPhaseEnum.map((phase, index) => {
-              const phaseCode = phase.split(" ")[1];
-              const selected = currPhase === phase;
+            {drillPhases.map((phaseObj, index) => {
+              const selected = _.isEqual(drillPhaseObj, phaseObj);
               return (
                 <MenuItem
-                  key={phase}
+                  key={phaseObj.phase + index}
                   className={selected ? classes.selectedMenuItem : classes.phaseMenuItem}
-                  value={phase}
-                  onClick={() => handleDrillPhaseSelect(phase)}
+                  value={phaseObj.phase}
+                  onClick={() => handleDrillPhaseSelect(phaseObj)}
                 >
-                  <DrillPhase phase={phase} />
-                  <div className={classes.phaseCodeBuffer}>{phaseCode}</div>
+                  <DrillPhase phase={phaseObj.phase} />
+                  <div className={classes.phaseCodeBuffer}>{phaseObj.phase}</div>
                   {selected ? <CheckCircle className={classes.selectedPhase} /> : null}
                 </MenuItem>
               );
@@ -112,15 +116,12 @@ function DrillPhaseViewer({ className, classes, expanded, drillPhase, setDrillPh
       </ClickAwayListener>
     </Card>
   );
-}
+});
 
 DrillPhaseViewer.propTypes = {
   className: PropTypes.string,
   classes: PropTypes.object,
-  expanded: PropTypes.bool,
-  drillPhase: PropTypes.string,
-  setDrillPhase: PropTypes.func,
-  setSelectedMenuItem: PropTypes.func
+  expanded: PropTypes.bool
 };
 
 export default withStyles(styles)(DrillPhaseViewer);
