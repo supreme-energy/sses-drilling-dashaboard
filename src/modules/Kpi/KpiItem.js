@@ -6,11 +6,23 @@ import { useKpi } from "../../api";
 import { format } from "d3-format";
 import classNames from "classnames";
 
-function KpiItem({ value, measureUnit, label, format, className, renderValue, labelClass, small, textClass, style }) {
+function KpiItem({
+  value,
+  measureUnit,
+  label,
+  format,
+  className,
+  renderValue,
+  labelClass,
+  small,
+  textClass,
+  textStyle,
+  style
+}) {
   return (
     <div className={classNames(className, classes.vertical, { [classes.small]: small })} style={style}>
       <div className={classes.horizontalTop}>
-        {renderValue({ value, format, textClass })}
+        {renderValue({ value, format, textClass, textStyle })}
         <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
           {measureUnit}
         </Typography>
@@ -26,9 +38,9 @@ function KpiItem({ value, measureUnit, label, format, className, renderValue, la
   );
 }
 
-export function defaultRenderValue({ value, format, textClass }) {
+export function defaultRenderValue({ value, format, textClass, textStyle }) {
   return (
-    <Typography className={classNames(classes.kpiValue, textClass)} variant="h5">
+    <Typography style={textStyle} className={classNames(classes.kpiValue, textClass)} variant="h5">
       {format(value)}
     </Typography>
   );
@@ -44,7 +56,8 @@ KpiItem.propTypes = {
   labelClass: PropTypes.string,
   small: PropTypes.bool,
   textClass: PropTypes.string,
-  style: PropTypes.object
+  style: PropTypes.object,
+  textStyle: PropTypes.object
 };
 
 KpiItem.defaultProps = {

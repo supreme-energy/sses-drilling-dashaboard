@@ -7,22 +7,22 @@ import PropTypes from "prop-types";
 const MAP = "Map";
 const SATELLITE = "Satellite";
 
+const tiles = {
+  [MAP]: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+  [SATELLITE]: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+};
+
 export default function Map({ selectedTiles, children, ...props }) {
   return (
     <LeafletMap
       attributionControl={false}
-      length={4}
-      // onfullscreenchange={handleMapFullscreenChange}
       zoom={6}
+      // onfullscreenchange={handleMapFullscreenChange}
+
       {...props}
       className={classNames(classes.map, props.className)}
     >
-      {selectedTiles === MAP ? (
-        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" /> // eslint-disable-line max-len
-      ) : (
-        <TileLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-      )}
-
+      <TileLayer url={tiles[selectedTiles]} />
       {children}
     </LeafletMap>
   );

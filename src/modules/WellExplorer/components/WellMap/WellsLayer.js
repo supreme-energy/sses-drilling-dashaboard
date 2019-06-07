@@ -5,8 +5,8 @@ import mapValues from "lodash/mapValues";
 import L from "leaflet";
 import classes from "./styles.scss";
 
-const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon }));
-const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon }));
+const leafletIcons = mapValues(mapIcons, icon => L.icon({ iconUrl: icon, iconAnchor: [9.5, 22] }));
+const leafletIconsSelected = mapValues(mapIconsSelected, icon => L.icon({ iconUrl: icon, iconAnchor: [9.5, 22] }));
 
 export default function WellsLayer({ wells, onMarkerClick, selectedWellId }) {
   return (
