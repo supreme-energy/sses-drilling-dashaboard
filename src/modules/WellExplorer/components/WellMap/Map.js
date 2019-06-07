@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 const MAP = "Map";
 const SATELLITE = "Satellite";
 
-const tyles = {
+const tiles = {
   [MAP]: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
   [SATELLITE]: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 };
@@ -22,7 +22,7 @@ export default function Map({ selectedTiles, children, ...props }) {
       {...props}
       className={classNames(classes.map, props.className)}
     >
-      <TileLayer url={tyles[selectedTiles]} />
+      <TileLayer url={tiles[selectedTiles]} />
       {children}
     </LeafletMap>
   );
