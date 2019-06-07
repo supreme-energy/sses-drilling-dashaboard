@@ -123,7 +123,10 @@
     }
 
     .expandedBackwardTime {
-        top: 35px;
+        top: 30px;
+        span {
+            display: block;
+        }
     }
 
     .collapsedBackwardTime {
@@ -141,8 +144,12 @@
     }
 
     .expandedForwardTime {
-        top: 35px;
+        top: 30px;
         left: 20px;
+
+        span { 
+            display: block;
+        }
     }
 
     .collapsedForwardTime {
