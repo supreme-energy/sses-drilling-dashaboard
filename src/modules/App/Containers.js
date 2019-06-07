@@ -60,22 +60,19 @@ export function useFilteredWellData(wellId) {
 }
 
 // Organize well sections into array of objects
-// TODO replace with Ioans bySegment (from useWellOverviewKPI)
 export function useWellSections() {
   const wellOverviewSections = useWellOverviewKPI();
-  const drillPhases = useMemo(
-    () =>
-      wellOverviewSections.map((section, index) => {
-        return {
-          index,
-          phase: section.type,
-          phaseStart: section.holeDepthStart,
-          phaseEnd: section.depth,
-          inView: true
-        };
-      }),
-    [wellOverviewSections]
-  );
+  const drillPhases = useMemo(() => {
+    return Array.from(wellOverviewSections.bySegment.entries()).map((value, index) => {
+      return {
+        index,
+        phase: value[0],
+        phaseStart: Math.min(value[1].map(s => s.holeDepthStart)),
+        phaseEnd: Math.max(value[1].map(s => s.depth)),
+        inView: true
+      };
+    });
+  }, [wellOverviewSections.bySegment]);
 
   return drillPhases;
 }
