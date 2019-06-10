@@ -68,7 +68,7 @@ SlidingKpi.defaultProps = {
   data: {}
 };
 
-export default function Kpi({ data }) {
+export default function Kpi({ className, data }) {
   const theme = useTheme();
 
   const getTargetColor = useMemo(
@@ -81,7 +81,7 @@ export default function Kpi({ data }) {
   );
 
   return (
-    <Card className={classNames("layout vertical", classes.container)}>
+    <Card className={classNames("layout vertical", classes.container, className)}>
       <PhaseLabel phase={data.type}>{data.type}</PhaseLabel>
       <div className="layout horizontal space-between">
         <div className={classNames("layout vertical", classes.firstColumn)}>

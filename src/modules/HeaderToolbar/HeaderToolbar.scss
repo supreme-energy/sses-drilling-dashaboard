@@ -1,6 +1,6 @@
 @import "../../styles/base";
 
-$header-height: 300px;
+$header-height: 100px;
 
 .viewport {
     height: calc(100vh - #{$header-height});

@@ -5,16 +5,12 @@ import memoize from "react-powertools/memoize";
 import { useFormations, useProjections, useSurveys, useWellPath, useWellOverviewKPI } from "../../api";
 
 const filterDataToInterval = memoize((data, interval) => {
-  if (data && data.length && interval[0] && interval[1]) {
-    return data.filter(({ md }) => valueIsBetweenInterval(md, interval));
-  } else return data;
+  if (data && data.length) {
+    return data.filter(({ md }) => interval[0] <= md && md <= interval[1]);
+  } else {
+    return [];
+  }
 });
-
-const valueIsBetweenInterval = (value, interval) => {
-  if (interval[0] && interval[1]) {
-    return interval[0] <= value && value <= interval[1];
-  } else return false;
-};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {

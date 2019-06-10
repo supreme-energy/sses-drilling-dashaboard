@@ -33,5 +33,5 @@ $header-height: 300px;
 .viewport {
     height: calc(100vh - #{$header-height});
     background-color: $backgroundColor;
-    margin-top: 10px;
+    margin-top: 5px;
   }
