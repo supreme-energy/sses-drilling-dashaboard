@@ -12,8 +12,7 @@ const selectedLastSurvey = [0x0000ff, 1];
 const selectedBitPrj = [0xff00ff, 1];
 const selectedProjection = [0xee2211, 1];
 
-function getColor(selectedSections, index, lastSurveyIdx) {
-  const isSelected = selectedSections[index];
+function getColor(isSelected, index, lastSurveyIdx) {
   const isProjection = index > lastSurveyIdx;
   const isLastSurvey = index === lastSurveyIdx;
   const isBitPrj = index === lastSurveyIdx + 1;
@@ -71,7 +70,10 @@ function drawSections(container, higherContainer, props, gutter) {
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
     section.on("click", function() {
-      props.setSelectedSections(this.sectionIndex);
+      props.setSelectedSections({
+        type: "toggle",
+        id: this.sectionId
+      });
     });
     container.addChild(section);
     return section;
@@ -92,21 +94,21 @@ function drawSections(container, higherContainer, props, gutter) {
     pixiList.forEach(p => p.clear());
     for (let i = 1; i <= calcSections.length - 1; i++) {
       if (!pixiList[i]) pixiList[i] = addSection();
-      const p1 = calcSections[i - 1].vs;
-      const p2 = calcSections[i].vs;
-      const color = getColor(selectedSections, i, lastSurveyIdx);
+      const p1 = calcSections[i - 1];
+      const p2 = calcSections[i];
+      const color = getColor(selectedSections[p2.id], i, lastSurveyIdx);
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.sectionIndex = i;
+      pixi.sectionId = p2.id;
 
-      const start = p1 * view.xScale + view.x;
-      const length = (p2 - p1) * view.xScale;
+      const start = p1.vs * view.xScale + view.x;
+      const length = (p2.vs - p1.vs) * view.xScale;
       if (start > width) continue;
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
 
-      if (selectedSections[i]) {
+      if (selectedSections[p2.id]) {
         selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);
@@ -114,9 +116,9 @@ function drawSections(container, higherContainer, props, gutter) {
 
         memoInitLabel(color[0]);
         selectedLabel.visible = true;
-        selectedLabel.position.x = p2;
+        selectedLabel.position.x = p2.vs;
         selectedLabel.position.y = height - gutter;
-        labelText.text = p2.toFixed(2);
+        labelText.text = p2.vs.toFixed(2);
       }
     }
   };

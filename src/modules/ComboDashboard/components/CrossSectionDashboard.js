@@ -8,10 +8,18 @@ import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
 import CrossSection from "./CrossSection/index";
 
-function singleSelectionReducer(list, i) {
-  const newList = [];
-  newList[i] = !list[i];
-  return newList;
+function selectionReducer(state, action) {
+  switch (action.type) {
+    // A planned feature is multiple selection, but only single is supported now
+    case "toggle":
+      return {
+        [action.id]: !state[action.id]
+      };
+    case "clear":
+      return {};
+    default:
+      throw new Error(`Unknown selected section reducer action type ${action.type}`);
+  }
 }
 function PADeltaInit(section, prevSection) {
   return {
@@ -86,12 +94,11 @@ function PADeltaReducer(state, action) {
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
 
   const lastSurveyIdx = surveys.length - 2;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [selectedSections, setSelectedSections] = useReducer(singleSelectionReducer, []);
+  const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const calcSections = useMemo(() => {
@@ -148,9 +155,10 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [formations, ghostDiff, calcSections]);
 
   useEffect(() => {
-    const i = selectedSections.findIndex(a => a === true);
-    if (i !== -1) {
-      ghostDiffDispatch({ type: "init", section: rawSections[i], prevSection: rawSections[i - 1] });
+    const id = Object.keys(selectedSections)[0];
+    const index = rawSections.findIndex(s => s.id === Number(id));
+    if (index !== -1) {
+      ghostDiffDispatch({ type: "init", section: rawSections[index], prevSection: rawSections[index - 1] });
     }
   }, [selectedSections, rawSections]);
 
