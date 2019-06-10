@@ -39,10 +39,10 @@ export function drawSurveys(container) {
 
   return function(props) {
     const { calcSections, lastSurveyIdx, scale } = props;
+    widePath.clear();
+    narrowPath.clear();
+    surveyGraphics.forEach(g => (g.visible = false));
     if (calcSections.length === 0 || lastSurveyIdx < 0) {
-      widePath.clear();
-      narrowPath.clear();
-      surveyGraphics.forEach(g => (g.visible = false));
       return;
     }
     redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, widePath, 6, 0x333333);
