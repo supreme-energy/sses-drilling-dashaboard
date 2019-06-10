@@ -1,8 +1,11 @@
+@import "../../styles/base";
+
 $header-height: 300px;
 
 .viewport {
     height: calc(100vh - #{$header-height});
     position: relative;
+    background-color: $backgroundColor;
   }
 
 .headerToolbar {

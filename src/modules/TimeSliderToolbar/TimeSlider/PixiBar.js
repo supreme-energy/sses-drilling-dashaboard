@@ -5,7 +5,9 @@ import PropTypes from "prop-types";
 
 function drawRectangle(bg, width, height, y, data) {
   data.forEach(point => {
-    bg.drawRect(point[0], y, width, height * point[1]);
+    if (point[1]) {
+      bg.drawRect(point[0], y, width, height * point[1]);
+    }
   });
 }
 

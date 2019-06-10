@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import PropTypes from "prop-types";
 import Progress from "@material-ui/core/CircularProgress";
+import DrillPhaseKPI from "../../Kpi/DrillPhaseKPI";
 import classes from "./ComboDashboard.scss";
 
 const CrossSectionDashboard = lazy(() =>
@@ -14,6 +15,7 @@ function ComboDashboard({
 }) {
   return (
     <div className={classes.comboDashboardWrapper}>
+      <DrillPhaseKPI />
       <Suspense fallback={<Progress />}>
         <CrossSectionDashboard wellId={openedWellId} />
       </Suspense>
