@@ -74,8 +74,7 @@ function PADeltaReducer(state, action) {
     case "pa":
       return {
         ...state,
-        tvd: action.tvd - op.tvd,
-        vs: action.vs - op.vs
+        tvd: action.tvd - op.tvd
       };
     case "tag_move":
       const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
@@ -107,7 +106,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
       if (i === index) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tvd,
+          tvd: p.tvd + ghostDiff.tvd + ghostDiff.fault,
           vs: p.vs + ghostDiff.vs,
           tot: p.tot + ghostDiff.tot + ghostDiff.fault,
           bot: p.bot + ghostDiff.bot + ghostDiff.fault,
