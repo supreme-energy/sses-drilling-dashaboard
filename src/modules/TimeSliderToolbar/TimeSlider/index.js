@@ -8,7 +8,7 @@ import { useSize } from "react-hook-size";
 import PixiContainer from "../../WellExplorer/components/WellOverview/ROP/PixiContainer";
 import PixiBar from "./PixiBar";
 import PixiLine from "../../WellExplorer/components/WellOverview/ROP/PixiLine";
-import { useTimeSliderContainer, useDrillPhaseContainer } from "../../App/Containers";
+import { useTimeSliderContainer, useLastIndexStateContainer, useDrillPhaseContainer } from "../../App/Containers";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
 import Slider from "./Slider";
@@ -40,6 +40,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   // Import shared state
   const { setSliderInterval } = useTimeSliderContainer();
+  const { setLastIndexState } = useLastIndexStateContainer();
   const { setDrillPhase, drillPhaseObj } = useDrillPhaseContainer();
 
   // Create local state
@@ -114,6 +115,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         _.get(data, `[${Math.round(lastIndex)}].Hole_Depth`)
       ]);
 
+      setLastIndexState(isLastDataIndex);
       setMaxSliderStep(indexDiff);
       setSliderStep([indexDiff, 1]);
       setGlobalDates([beginningDate, endDate]);
@@ -199,6 +201,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         _.get(data, `[${Math.round(endDataIndex)}].Hole_Depth`)
       ]);
 
+      setLastIndexState(isLastDataIndex);
       setGlobalDates([beginningDate, endDate]);
     }
   }, [data, view, sliderStep, maxSliderStep, setSliderInterval]);

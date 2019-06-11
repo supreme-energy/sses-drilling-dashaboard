@@ -20,6 +20,16 @@ function useTimeSlider(initialState) {
 
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 
+// Shared state for last Index of Time Slider
+function useLastIndexState(initialState) {
+  const [lastIndexState, setLastIndexState] = useState(initialState);
+  return { lastIndexState, setLastIndexState };
+}
+
+export const { Provider: LastIndexStateProvider, useContainer: useLastIndexStateContainer } = createContainer(
+  useLastIndexState
+);
+
 // Shared state for current drill phase
 function useDrillPhase(initialState) {
   const [drillPhaseObj, setDrillPhase] = useState(initialState);

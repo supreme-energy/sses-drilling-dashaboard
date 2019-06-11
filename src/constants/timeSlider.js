@@ -14,6 +14,8 @@ export const GRID_GUTTER = 1;
 // Initial State for Time Slider
 export const INITIAL_DRILL_PHASE_STATE = { index: 0, phase: SURFACE, phaseStart: 0, phaseEnd: 0, inView: true };
 export const INITIAL_TIME_SLIDER_STATE = [];
+export const INITIAL_LAST_INDEX_STATE = false;
+
 // Graphs
 export const CONNECTION = "Connections";
 export const ROP = "ROP";
