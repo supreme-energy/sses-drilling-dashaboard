@@ -35,7 +35,40 @@ const PercentageBar = ({ values }) => {
     </div>
   );
 };
-export default function Kpi({ data }) {
+
+export const SlidingKpi = ({ data }) => (
+  <div className="layout vertical">
+    <div className="layout horizontal space-between">
+      <KpiItem
+        className={classes.kpi}
+        format={noDecimals}
+        label={`Sliding ${percentage(data.slidingPct)}`}
+        value={data.avgSliding}
+        renderValue={renderSliding}
+      />
+
+      <KpiItem
+        className={classes.kpi}
+        format={noDecimals}
+        label={`Rotating ${percentage(data.rotatingPct)}`}
+        value={data.avgRotating}
+        renderValue={renderRotating}
+      />
+    </div>
+    <PercentageBar
+      values={[
+        { value: data.slidingPct, color: "#AFB42B", id: "slidingPct" },
+        { value: data.rotatingPct, color: "#827717", id: "rotatingPct" }
+      ]}
+    />
+  </div>
+);
+
+SlidingKpi.defaultProps = {
+  data: {}
+};
+
+export default function Kpi({ className, data }) {
   const theme = useTheme();
 
   const getTargetColor = useMemo(
@@ -48,7 +81,7 @@ export default function Kpi({ data }) {
   );
 
   return (
-    <Card className={classNames("layout vertical", classes.container)}>
+    <Card className={classNames("layout vertical", classes.container, className)}>
       <PhaseLabel phase={data.type}>{data.type}</PhaseLabel>
       <div className="layout horizontal space-between">
         <div className={classNames("layout vertical", classes.firstColumn)}>
@@ -62,31 +95,7 @@ export default function Kpi({ data }) {
           <KpiItem className={classes.kpi} label="Drilling Time" value={data.totalHours} measureUnit="h" />
         </div>
         <div className={classNames("layout vertical", classes.secondColumn)}>
-          <div className="layout vertical">
-            <div className="layout horizontal space-between">
-              <KpiItem
-                className={classes.kpi}
-                format={noDecimals}
-                label={`Sliding ${percentage(data.slidingPct)}`}
-                value={data.avgSliding}
-                renderValue={renderSliding}
-              />
-
-              <KpiItem
-                className={classes.kpi}
-                format={noDecimals}
-                label={`Rotating ${percentage(data.rotatingPct)}`}
-                value={data.avgRotating}
-                renderValue={renderRotating}
-              />
-            </div>
-            <PercentageBar
-              values={[
-                { value: data.slidingPct, color: "#AFB42B", id: "slidingPct" },
-                { value: data.rotatingPct, color: "#827717", id: "rotatingPct" }
-              ]}
-            />
-          </div>
+          <SlidingKpi data={data} />
           <KpiItem
             className={classes.kpi}
             label={data.type ? `${data.type} Length` : EMPTY_FIELD}

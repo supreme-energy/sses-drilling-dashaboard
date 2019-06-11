@@ -1,12 +1,13 @@
-import Progress from "@material-ui/core/CircularProgress";
+import { Typography, CircularProgress } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, Suspense, lazy } from "react";
 import { useFilteredWellData } from "../../App/Containers";
 
+import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
-import CrossSection from "./CrossSection/index";
+const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
 function selectionReducer(state, action) {
   switch (action.type) {
@@ -183,30 +184,32 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
-    <Suspense fallback={<Progress />}>
-      <h2>Cross-section</h2>
-      <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
-        {({ width, height }) => (
-          <CrossSection
-            width={width}
-            height={height}
-            view={view}
-            updateView={setView}
-            scale={scale}
-            wellPlan={wellPlan}
-            surveys={surveys}
-            formations={formations}
-            calculatedFormations={calculatedFormations}
-            projections={projections}
-            calcSections={calcSections}
-            selectedSections={selectedSections}
-            setSelectedSections={setSelectedSections}
-            firstProjectionIdx={firstProjectionIdx}
-            ghostDiffDispatch={ghostDiffDispatch}
-          />
-        )}
-      </ParentSize>
-    </Suspense>
+    <WidgetCard className={classes.crossSectionDash}>
+      <Typography variant="subtitle1">Cross Section</Typography>
+      <Suspense fallback={<CircularProgress />}>
+        <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
+          {({ width, height }) => (
+            <CrossSection
+              width={width}
+              height={height}
+              view={view}
+              updateView={setView}
+              scale={scale}
+              wellPlan={wellPlan}
+              surveys={surveys}
+              formations={formations}
+              calculatedFormations={calculatedFormations}
+              projections={projections}
+              calcSections={calcSections}
+              selectedSections={selectedSections}
+              setSelectedSections={setSelectedSections}
+              firstProjectionIdx={firstProjectionIdx}
+              ghostDiffDispatch={ghostDiffDispatch}
+            />
+          )}
+        </ParentSize>
+      </Suspense>
+    </WidgetCard>
   );
 };
 CrossSectionDashboard.propTypes = {

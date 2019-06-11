@@ -4,16 +4,12 @@ import { createContainer } from "unstated-next";
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
 
 const filterDataToInterval = memoize((data, interval) => {
-  if (data && data.length && interval[0] && interval[1]) {
-    return data.filter(({ md }) => valueIsBetweenInterval(md, interval));
-  } else return data;
+  if (data && data.length) {
+    return data.filter(({ md }) => interval[0] <= md && md <= interval[1]);
+  } else {
+    return [];
+  }
 });
-
-const valueIsBetweenInterval = (value, interval) => {
-  if (interval[0] && interval[1]) {
-    return interval[0] <= value && value <= interval[1];
-  } else return false;
-};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {
@@ -96,18 +92,18 @@ export function useFilteredWellData(wellId) {
 
 // Organize well sections into array of objects
 export function useWellSections() {
-  const wellOverviewSections = useWellOverviewKPI();
+  const { data } = useWellOverviewKPI();
   const drillPhases = useMemo(() => {
-    return Array.from(wellOverviewSections.bySegment.entries()).map((value, index) => {
+    return data.map((s, index) => {
       return {
         index,
-        phase: value[0],
-        phaseStart: Math.min(value[1].map(s => s.holeDepthStart)),
-        phaseEnd: Math.max(value[1].map(s => s.depth)),
+        phase: s.type,
+        phaseStart: s.holeDepthStart,
+        phaseEnd: s.depth,
         inView: true
       };
     });
-  }, [wellOverviewSections.bySegment]);
+  }, [data]);
 
   return drillPhases;
 }

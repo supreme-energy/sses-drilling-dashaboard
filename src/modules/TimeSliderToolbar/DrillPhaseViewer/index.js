@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Card, Menu, MenuItem, Typography, ClickAwayListener, withStyles, CardActionArea } from "@material-ui/core";
+import { makeStyles } from "@material-ui/styles";
+import { Card, Menu, MenuItem, Typography, ClickAwayListener, CardActionArea } from "@material-ui/core";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 import _ from "lodash";
@@ -10,12 +11,12 @@ import { COLOR_BY_PHASE_VIEWER, CHOOSE } from "../../../constants/timeSlider";
 import { GRAY } from "../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
 
-const styles = {
+const styles = makeStyles({
   phaseMenuItem: {
-    minWidth: 185
+    minWidth: 215
   },
   selectedMenuItem: {
-    minWidth: 185,
+    minWidth: 215,
     backgroundColor: "rgba(0, 0, 0, 0.15)"
   },
   phaseCodeBuffer: {
@@ -31,7 +32,7 @@ const styles = {
       padding: 0
     }
   }
-};
+});
 
 function DrillPhase({ phase }) {
   return (
@@ -50,7 +51,10 @@ function DrillPhase({ phase }) {
   );
 }
 
-const DrillPhaseViewer = React.memo(({ className, classes, expanded }) => {
+const DrillPhaseViewer = React.memo(({ className, expanded }) => {
+  // Get styles
+  const classes = styles();
+
   // Fetch data
   const drillPhases = useWellSections();
 
@@ -120,8 +124,7 @@ const DrillPhaseViewer = React.memo(({ className, classes, expanded }) => {
 
 DrillPhaseViewer.propTypes = {
   className: PropTypes.string,
-  classes: PropTypes.object,
   expanded: PropTypes.bool
 };
 
-export default withStyles(styles)(DrillPhaseViewer);
+export default DrillPhaseViewer;

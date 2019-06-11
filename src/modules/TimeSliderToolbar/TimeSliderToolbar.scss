@@ -1,5 +1,6 @@
-$header-height: 300px;
+@import "../../styles/base";
 
+$header-height: 300px;
 
 .timeSliderToolbar {
     display: flex;
@@ -31,4 +32,6 @@ $header-height: 300px;
 
 .viewport {
     height: calc(100vh - #{$header-height});
+    background-color: $backgroundColor;
+    margin-top: 5px;
   }

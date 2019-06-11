@@ -1,11 +1,15 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import Progress from "@material-ui/core/CircularProgress";
-import classes from "./ComboDashboard.scss";
+import classNames from "classnames";
 
-const CrossSectionDashboard = lazy(() =>
-  import(/* webpackChunkName: 'CrossSectionDashboard' */ "./CrossSectionDashboard")
-);
+import DrillPhaseKPI from "../../Kpi/DrillPhaseKPI";
+import Interpretation from "../../Interpretation";
+import WellOperation from "./WellOperation";
+import ToolFace from "./ToolFace";
+import ArialCrossSection from "./ArialCrossSection";
+import Measurements from "./Measurements";
+import CrossSectionDashboard from "./CrossSectionDashboard";
+import classes from "./ComboDashboard.scss";
 
 function ComboDashboard({
   match: {
@@ -14,9 +18,21 @@ function ComboDashboard({
 }) {
   return (
     <div className={classes.comboDashboardWrapper}>
-      <Suspense fallback={<Progress />}>
-        <CrossSectionDashboard wellId={openedWellId} />
-      </Suspense>
+      <div className={classes.kpiRows}>
+        <div className={classes.row}>
+          <DrillPhaseKPI className={classes.drillPhaseKpi} />
+          <ToolFace />
+          <WellOperation />
+          <ArialCrossSection />
+        </div>
+        <div className={classNames(classes.row, classes.graphRow)}>
+          <Interpretation />
+          <CrossSectionDashboard wellId={openedWellId} />
+        </div>
+      </div>
+      <div className={classes.kpiColumn}>
+        <Measurements />
+      </div>
     </div>
   );
 }

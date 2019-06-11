@@ -1,10 +1,28 @@
 import React from "react";
+import WidgetCard from "../../WidgetCard";
+import { useWellOverviewKPI } from "../../../api";
+import { useDrillPhaseContainer } from "../../App/Containers";
+import { SlidingKpi } from "../../Kpi/DrillPhaseKPI/Kpi";
+import { Typography } from "@material-ui/core";
 
-export const DrillingAnalytics = () => (
-  <div>
-    <h2>Drilling Analytics</h2>
-  </div>
-);
+export function DrillingAnalytics() {
+  const {
+    drillPhaseObj: { phase }
+  } = useDrillPhaseContainer();
+
+  const { data } = useWellOverviewKPI();
+  const drillingPhase = data.find(d => !d.casingSize);
+
+  const drillPhaseType = phase === "Lateral" || phase === "Curve" ? phase : "Vertical";
+  return (
+    <div>
+      <WidgetCard>
+        <Typography variant="subtitle1">{`${drillPhaseType} Overview`}</Typography>
+        <SlidingKpi data={drillingPhase} />
+      </WidgetCard>
+    </div>
+  );
+}
 
 DrillingAnalytics.propTypes = {};
 
