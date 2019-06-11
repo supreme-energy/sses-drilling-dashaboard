@@ -25,7 +25,7 @@ export function drawSurveys(container) {
   function redrawLine(surveys, scale, line, width, color) {
     line.clear().lineStyle(width, color, 1);
     line.moveTo(...scale(surveys[0].vs, surveys[0].tvd));
-    for (let i = 1; i < surveys.length - 1; i++) {
+    for (let i = 1; i < surveys.length; i++) {
       line.lineTo(...scale(surveys[i].vs, surveys[i].tvd));
     }
   }
@@ -39,14 +39,15 @@ export function drawSurveys(container) {
 
   return function(props) {
     const { calcSections, lastSurveyIdx, scale } = props;
+    console.log(lastSurveyIdx);
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
     if (calcSections.length === 0 || lastSurveyIdx < 0) {
       return;
     }
-    redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, widePath, 6, 0x333333);
-    redrawLine(calcSections.slice(0, lastSurveyIdx + 2), scale, narrowPath, 2, 0xffffff);
+    redrawLine(calcSections.slice(0, lastSurveyIdx + 1), scale, widePath, 6, 0x333333);
+    redrawLine(calcSections.slice(0, lastSurveyIdx + 1), scale, narrowPath, 2, 0xffffff);
 
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();

@@ -93,9 +93,9 @@ function PADeltaReducer(state, action) {
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
+  const { surveys, wellPlan, formations, projections, bitProjId, lastSurveyId } = useFilteredWellData(wellId);
 
-  const lastSurveyIdx = surveys.length - 2;
+  const lastSurveyIdx = surveys.findIndex(s => s.id === lastSurveyId);
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
