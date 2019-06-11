@@ -3,33 +3,6 @@ import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
 
-const survey = [0xa6a6a6, 0.5];
-const lastSurvey = [0x0000ff, 0.5];
-const bitPrj = [0xff00ff, 0.5];
-const projection = [0xee2211, 0.5];
-const selectedSurvey = [0x000000, 1];
-const selectedLastSurvey = [0x0000ff, 1];
-const selectedBitPrj = [0xff00ff, 1];
-const selectedProjection = [0xee2211, 1];
-
-function getColor(isSelected, index, lastSurveyIdx) {
-  const isProjection = index > lastSurveyIdx;
-  const isLastSurvey = index === lastSurveyIdx;
-  const isBitPrj = index === lastSurveyIdx + 1;
-  let color;
-
-  if (isBitPrj) {
-    color = isSelected ? selectedBitPrj : bitPrj;
-  } else if (isLastSurvey) {
-    color = isSelected ? selectedLastSurvey : lastSurvey;
-  } else if (isProjection) {
-    color = isSelected ? selectedProjection : projection;
-  } else {
-    color = isSelected ? selectedSurvey : survey;
-  }
-  return color;
-}
-
 function drawSections(container, higherContainer, props, gutter) {
   const { ghostDiffDispatch } = props;
   const buttonHeight = 10;
@@ -81,7 +54,7 @@ function drawSections(container, higherContainer, props, gutter) {
 
   return function update(props) {
     if (!container.transform) return;
-    const { width, height, view, lastSurveyIdx, selectedSections, calcSections } = props;
+    const { width, height, view, selectedSections, calcSections } = props;
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
@@ -96,7 +69,8 @@ function drawSections(container, higherContainer, props, gutter) {
       if (!pixiList[i]) pixiList[i] = addSection();
       const p1 = calcSections[i - 1];
       const p2 = calcSections[i];
-      const color = getColor(selectedSections[p2.id], i, lastSurveyIdx);
+      const isSelected = selectedSections[p2.id];
+      const color = isSelected ? [p2.selectedColor, p2.selectedAlpha] : [p2.color, p2.alpha];
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);

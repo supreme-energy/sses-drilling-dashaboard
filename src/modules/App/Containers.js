@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import memoize from "react-powertools/memoize";
 import { createContainer } from "unstated-next";
+import { SURVEY, PA_STATION, BIT_PROJ } from "./Constants";
 
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
 
@@ -32,6 +33,34 @@ function useDrillPhase(initialState) {
 
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 
+const annotateSurveys = memoize(fullSurveyList => {
+  const hasBitProj = fullSurveyList.some(s => s.plan === 1);
+  return fullSurveyList.map((s, i, l) => {
+    const isBitProj = i === l.length - 1 && hasBitProj;
+    if (isBitProj) console.log("bit projection found");
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    return {
+      ...s,
+      type: isBitProj ? BIT_PROJ : SURVEY,
+      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
+const annotateProjections = memoize(projections => {
+  return projections.map(p => {
+    return {
+      ...p,
+      type: PA_STATION,
+      color: 0xee2211,
+      selectedColor: 0xee2211,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
 const getBitProjId = memoize(fullSurveyList => {
   const lastEntry = fullSurveyList[fullSurveyList.length - 1];
   if (lastEntry && lastEntry.plan === 1) return lastEntry.id;
@@ -57,10 +86,12 @@ export function useFilteredWellData(wellId) {
   // Calculate some useful information from raw data
   const bitProjId = getBitProjId(surveys);
   const lastSurveyId = getLastSurveyId(surveys);
+  const annotatedSurveys = annotateSurveys(surveys);
+  const annotatedProjections = annotateProjections(projections);
 
   // Filter data and memoize
-  const surveysFiltered = filterDataToInterval(surveys, sliderInterval);
-  const projectionsFiltered = filterDataToInterval(projections, sliderInterval);
+  const surveysFiltered = filterDataToInterval(annotatedSurveys, sliderInterval);
+  const projectionsFiltered = filterDataToInterval(annotatedProjections, sliderInterval);
   const formationsFiltered = formations.map(f => {
     return {
       ...f,
