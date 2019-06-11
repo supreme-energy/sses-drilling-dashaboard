@@ -30,31 +30,34 @@ export function drawSurveys(container) {
     }
   }
 
-  function getTexture(index, lastSurveyIndex) {
-    if (index === lastSurveyIndex) return lastMarker;
-    else if (index === lastSurveyIndex + 1) return bitProjection;
-    else if (index > lastSurveyIndex + 1) return paMarker;
+  function getTexture(index, firstProjection) {
+    if (index === firstProjection - 2) return lastMarker;
+    else if (index === firstProjection - 1) return bitProjection;
+    else if (index > firstProjection - 1) return paMarker;
     else return surveyMarker;
   }
 
   return function(props) {
-    const { calcSections, lastSurveyIdx, scale } = props;
+    const { calcSections, lastSurveyIdx, firstProjectionIdx, surveys, scale } = props;
     console.log(lastSurveyIdx);
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
-    if (calcSections.length === 0 || lastSurveyIdx < 0) {
+    if (calcSections.length === 0) {
       return;
     }
-    redrawLine(calcSections.slice(0, lastSurveyIdx + 1), scale, widePath, 6, 0x333333);
-    redrawLine(calcSections.slice(0, lastSurveyIdx + 1), scale, narrowPath, 2, 0xffffff);
+    if (surveys.length > 1) {
+      const end = lastSurveyIdx !== -1 ? lastSurveyIdx + 1 : surveys.length;
+      redrawLine(calcSections.slice(0, end), scale, widePath, 6, 0x333333);
+      redrawLine(calcSections.slice(0, end), scale, narrowPath, 2, 0xffffff);
+    }
 
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
       surveyGraphics[i].position.x = calcSections[i].vs;
       surveyGraphics[i].position.y = calcSections[i].tvd;
-      surveyGraphics[i].texture = getTexture(i, lastSurveyIdx);
+      surveyGraphics[i].texture = getTexture(i, firstProjectionIdx);
       surveyGraphics[i].visible = true;
     }
   };

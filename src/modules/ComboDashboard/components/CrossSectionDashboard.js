@@ -96,6 +96,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const { surveys, wellPlan, formations, projections, bitProjId, lastSurveyId } = useFilteredWellData(wellId);
 
   const lastSurveyIdx = surveys.findIndex(s => s.id === lastSurveyId);
+  const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
@@ -198,6 +199,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             selectedSections={selectedSections}
             setSelectedSections={setSelectedSections}
             lastSurveyIdx={lastSurveyIdx}
+            firstProjectionIdx={firstProjectionIdx}
             ghostDiffDispatch={ghostDiffDispatch}
           />
         )}
