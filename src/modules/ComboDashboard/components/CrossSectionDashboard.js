@@ -75,7 +75,7 @@ function PADeltaReducer(state, action) {
     case "pa":
       return {
         ...state,
-        tvd: action.tvd - op.tvd
+        tvd: action.tvd - op.tvd - state.fault
       };
     case "tag_move":
       // We don't currently want the surveys or bit proj to be adjustable
