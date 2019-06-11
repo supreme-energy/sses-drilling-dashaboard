@@ -65,7 +65,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     (xScale, newX) => {
       return (
         data.length * xScale - Math.abs(newX) > width - GRID_GUTTER &&
-        Math.round(sliderStep[0]) <= Math.round(maxSliderStep)
+        Math.round(sliderStep[0]) <= Math.round(maxSliderStep) &&
+        newX / xScale < 0
       );
     },
     [width, data.length, sliderStep, maxSliderStep]
@@ -96,8 +97,9 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     const indexDiff = lastIndex - firstIndex;
 
     if (firstIndex > 0 && lastIndex > 0) {
+      const isLastDataIndex = data.length - 1 <= lastIndex;
       const beginningDate = _.get(data, `[${firstIndex}].Date_Time`, "");
-      const endDate = _.get(data, `[${lastIndex}].Date_Time`, "NOW");
+      const endDate = !isLastDataIndex ? _.get(data, `[${lastIndex}].Date_Time`, "") : "NOW";
 
       const xScale = computePhaseXScaleValue(indexDiff)(width - GRID_GUTTER);
       updateView(view => ({
@@ -188,8 +190,9 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const visibleDataLength = (view.xScale * maxSliderStep + GRID_GUTTER) / view.xScale;
       const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength;
 
+      const isLastDataIndex = data.length - 1 <= Math.round(endDataIndex);
       const beginningDate = _.get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
-      const endDate = _.get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
+      const endDate = !isLastDataIndex ? _.get(data, `[${Math.round(endDataIndex)}].Date_Time`, "") : "NOW";
 
       setSliderInterval([
         _.get(data, `[${Math.floor(hiddenDataLength)}].Hole_Depth`),
