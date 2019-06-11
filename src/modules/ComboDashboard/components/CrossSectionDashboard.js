@@ -77,6 +77,10 @@ function PADeltaReducer(state, action) {
         tvd: action.tvd - op.tvd
       };
     case "tag_move":
+      // We don't currently want the surveys or bit proj to be adjustable
+      if (op.isSurvey || op.isBitProj) {
+        return state;
+      }
       const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
       return {
         ...state,
