@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import memoize from "react-powertools/memoize";
 import { createContainer } from "unstated-next";
-
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
 
 const filterDataToInterval = memoize((data, interval) => {
@@ -63,18 +62,6 @@ const annotateProjections = memoize(projections => {
     };
   });
 });
-const getBitProjId = memoize(fullSurveyList => {
-  const lastEntry = fullSurveyList[fullSurveyList.length - 1];
-  if (lastEntry && lastEntry.plan === 1) return lastEntry.id;
-  return -1;
-});
-const getLastSurveyId = memoize(fullSurveyList => {
-  const secondToLastEntry = fullSurveyList[fullSurveyList.length - 2];
-  if (secondToLastEntry && secondToLastEntry.plan === 0) {
-    return secondToLastEntry.id;
-  }
-  return -1;
-});
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData(wellId) {
@@ -86,8 +73,6 @@ export function useFilteredWellData(wellId) {
   const projections = useProjections(wellId);
 
   // Calculate some useful information from raw data
-  const bitProjId = getBitProjId(surveys);
-  const lastSurveyId = getLastSurveyId(surveys);
   const annotatedSurveys = annotateSurveys(surveys);
   const annotatedProjections = annotateProjections(projections);
 
@@ -105,9 +90,7 @@ export function useFilteredWellData(wellId) {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
-    projections: projectionsFiltered,
-    bitProjId,
-    lastSurveyId
+    projections: projectionsFiltered
   };
 }
 
