@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import memoize from "react-powertools/memoize";
 import { createContainer } from "unstated-next";
-import { SURVEY, PA_STATION, BIT_PROJ } from "./Constants";
 
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
 
@@ -34,17 +33,20 @@ function useDrillPhase(initialState) {
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 
 const annotateSurveys = memoize(fullSurveyList => {
+  // Bit projection is not always in list of surveys
   const hasBitProj = fullSurveyList.some(s => s.plan === 1);
   return fullSurveyList.map((s, i, l) => {
+    // If included, bit projection is always the last item and the last survey is second to last
     const isBitProj = i === l.length - 1 && hasBitProj;
-    if (isBitProj) console.log("bit projection found");
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      type: isBitProj ? BIT_PROJ : SURVEY,
+      isBitProj: isBitProj,
+      isSurvey: !isBitProj,
+      isLastSurvey: isLastSurvey,
       color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
-      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
       alpha: 0.5,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
       selectedAlpha: 1
     };
   });
@@ -53,7 +55,7 @@ const annotateProjections = memoize(projections => {
   return projections.map(p => {
     return {
       ...p,
-      type: PA_STATION,
+      isProjection: true,
       color: 0xee2211,
       selectedColor: 0xee2211,
       alpha: 0.5,

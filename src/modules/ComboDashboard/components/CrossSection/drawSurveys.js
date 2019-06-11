@@ -30,26 +30,25 @@ export function drawSurveys(container) {
     }
   }
 
-  function getTexture(index, firstProjection) {
-    if (index === firstProjection - 2) return lastMarker;
-    else if (index === firstProjection - 1) return bitProjection;
-    else if (index > firstProjection - 1) return paMarker;
+  function getTexture(point) {
+    if (point.isLastSurvey) return lastMarker;
+    else if (point.isBitProj) return bitProjection;
+    else if (point.isProjection) return paMarker;
     else return surveyMarker;
   }
 
   return function(props) {
-    const { calcSections, lastSurveyIdx, firstProjectionIdx, surveys, scale } = props;
-    console.log(lastSurveyIdx);
+    const { calcSections, scale } = props;
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
     if (calcSections.length === 0) {
       return;
     }
+    const surveys = calcSections.filter(s => s.isSurvey);
     if (surveys.length > 1) {
-      const end = lastSurveyIdx !== -1 ? lastSurveyIdx + 1 : surveys.length;
-      redrawLine(calcSections.slice(0, end), scale, widePath, 6, 0x333333);
-      redrawLine(calcSections.slice(0, end), scale, narrowPath, 2, 0xffffff);
+      redrawLine(surveys, scale, widePath, 6, 0x333333);
+      redrawLine(surveys, scale, narrowPath, 2, 0xffffff);
     }
 
     for (let i = 0; i < calcSections.length; i++) {
@@ -57,7 +56,7 @@ export function drawSurveys(container) {
 
       surveyGraphics[i].position.x = calcSections[i].vs;
       surveyGraphics[i].position.y = calcSections[i].tvd;
-      surveyGraphics[i].texture = getTexture(i, firstProjectionIdx);
+      surveyGraphics[i].texture = getTexture(calcSections[i]);
       surveyGraphics[i].visible = true;
     }
   };
