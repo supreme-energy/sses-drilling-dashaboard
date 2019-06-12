@@ -21,11 +21,17 @@ import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 
 // Import UI State Providers
-import { TimeSliderProvider } from "./Containers";
+import { TimeSliderProvider, AppStateProvider } from "./Containers";
 
 // Lazy load header
 const PageLayout = React.lazy(() => import("layouts/PageLayout"));
 const fetchClientOptions = { mode: "cors", credentials: "include" };
+
+function filterForceRefreshProps(request) {
+  if (request.options.query) {
+    delete request.options.query.wellInfoRefreshId;
+  }
+}
 
 class App extends React.Component {
   static propTypes = {
@@ -37,7 +43,8 @@ class App extends React.Component {
     plusJsonStrict(),
     plusErrorJson(),
     plusUrlPattern(),
-    plusBasicAuth(__CONFIG__.username, __CONFIG__.password)
+    plusBasicAuth(__CONFIG__.username, __CONFIG__.password),
+    filterForceRefreshProps
   ];
 
   fetchMWMock = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
@@ -65,14 +72,16 @@ class App extends React.Component {
                     <PageLayout history={history}>
                       <MuiPickersUtilsProvider utils={MomentUtils}>
                         <TimeSliderProvider>
-                          <Route path="/:wellId" component={WellUpdate} />
-                          <Switch>
-                            <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                            <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                            <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                            <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                            <Route path="/:wellId?" component={WellExplorer} />
-                          </Switch>
+                          <AppStateProvider>
+                            <Route path="/:wellId" component={WellUpdate} />
+                            <Switch>
+                              <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                              <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                              <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                              <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                              <Route path="/:wellId?" component={WellExplorer} />
+                            </Switch>
+                          </AppStateProvider>
                         </TimeSliderProvider>
                       </MuiPickersUtilsProvider>
                     </PageLayout>

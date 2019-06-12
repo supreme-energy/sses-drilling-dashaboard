@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { createContainer } from "unstated-next";
 import memoize from "react-powertools/memoize";
 
@@ -24,9 +24,21 @@ function useTimeSliderData() {
   return { sliderInterval, setSliderInterval, drillPhase, setDrillPhase };
 }
 
+function useAppStateData() {
+  const [wellInfoRefreshId, updateWellInfoRefreshId] = useState(0);
+
+  const refreshWellInfoData = useCallback(() => {
+    const now = Date.now();
+    updateWellInfoRefreshId(now);
+  }, []);
+  return { wellInfoRefreshId, refreshWellInfoData, updateWellInfoRefreshId };
+}
+
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(
   useTimeSliderData
 );
+
+export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData(wellId) {

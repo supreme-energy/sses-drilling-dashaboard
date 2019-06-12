@@ -11,6 +11,7 @@ import { group } from "d3-array";
 import proj4 from "proj4";
 import { toWGS84 } from "../utils/projections";
 import memoize from "react-powertools/memoize";
+import { useAppState } from "../modules/App/Containers";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -36,7 +37,6 @@ const options = {
 };
 
 const EMPTY_ARRAY = [];
-const IDENTITY = d => d;
 
 function transform(data) {
   return data.map(d => _.mapValues(d, Number));
@@ -64,10 +64,12 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
+  const { wellInfoRefreshId, refreshWellInfoData: refreshStore } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch({
     path: GET_WELL_INFO,
     query: {
-      seldbname: wellId
+      seldbname: wellId,
+      wellInfoRefreshId
     }
   });
 
@@ -75,28 +77,32 @@ export function useWellInfo(wellId) {
   const wellInfo = data && data.wellinfo;
 
   const updateWell = useCallback(
-    ({ wellId, field, value }) =>
-      fetch(
-        {
-          path: SET_WELL_FIELD,
-          query: {
-            seldbname: wellId,
-            table: "wellinfo",
-            field,
-            value
-          }
-        },
-        (data, ...rest) => {
-          console.log("current data", data, rest);
-          console.log("rest", rest);
-          return data;
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        wellinfo: {
+          ...wellInfo,
+          [field]: value
         }
-      ),
-    [fetch]
+      };
+
+      return fetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId,
+          table: "wellinfo",
+          field,
+          value
+        },
+
+        optimisticResult
+      });
+    },
+    [fetch, data, wellInfo]
   );
 
   if (!wellInfo) {
-    return [{}, isLoading, updateWell];
+    return [{}, isLoading, updateWell, refreshStore];
   }
 
   const source = proj4.Proj("EPSG:32040");
@@ -129,17 +135,21 @@ export function useWellInfo(wellId) {
       wellLandingLocationLocal,
       wellPBHL,
       wellPBHLLocal,
-      wellInfo
+      wellInfo,
+      transform
     },
     isLoading,
-    updateWell
+    updateWell,
+    refreshStore
   ];
 }
 
 export function useWells() {
+  const { wellInfoRefreshId } = useAppState();
   const [wells, , , , , { fetch }] = useFetch(
     {
-      path: GET_WELL_LIST
+      path: GET_WELL_LIST,
+      query: { wellInfoRefreshId }
     },
     {
       transform: wells => {
