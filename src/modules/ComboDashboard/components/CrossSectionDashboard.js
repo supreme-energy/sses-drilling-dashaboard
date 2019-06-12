@@ -28,7 +28,7 @@ function PADeltaInit(section, prevSection) {
     op: section,
     id: section.id,
     bot: 0,
-    fault: 0,
+    prevFault: 0,
     tcl: 0,
     tot: 0,
     tvd: 0,
@@ -43,39 +43,39 @@ function PADeltaReducer(state, action) {
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
-      depthDelta = action.tot - op.tot - state.fault;
+      depthDelta = action.tot - op.tot - state.prevFault + op.fault;
       return {
         ...state,
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
         tcl: depthDelta,
-        dip: op.dip - calculateDip(action.tot - state.fault, prevOp.tot, action.vs, prevOp.vs)
+        dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
       };
     case "dip_bot":
-      depthDelta = action.bot - op.bot - state.fault;
+      depthDelta = action.bot - op.bot - state.prevFault;
       return {
         ...state,
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
         tcl: depthDelta,
-        dip: op.dip - calculateDip(action.bot - state.fault, prevOp.bot, action.vs, prevOp.vs)
+        dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
       };
     case "fault_tot":
       return {
         ...state,
-        fault: action.tot - state.prevOp.tot
+        prevFault: action.tot - prevOp.tot
       };
     case "fault_bot":
       return {
         ...state,
-        fault: action.bot - state.prevOp.bot
+        prevFault: action.bot - prevOp.bot
       };
     case "pa":
       return {
         ...state,
-        tvd: action.tvd - op.tvd - state.fault
+        tvd: action.tvd - op.tvd - state.prevFault
       };
     case "tag_move":
       // We don't currently want the surveys or bit proj to be adjustable
@@ -86,9 +86,9 @@ function PADeltaReducer(state, action) {
       return {
         ...state,
         vs: action.vs - op.vs,
-        tot: prevOp.tot - op.tot + changeInY,
-        tcl: prevOp.tcl - op.tcl + changeInY,
-        bot: prevOp.bot - op.bot + changeInY
+        tot: prevOp.tot - op.tot + changeInY + op.fault,
+        tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
+        bot: prevOp.bot - op.bot + changeInY + op.fault
       };
     case "init":
       return PADeltaInit(action.section, action.prevSection);
@@ -108,20 +108,27 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
     return rawSections.map((p, i) => {
-      if (i === index) {
+      if (i === index - 1) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tvd + ghostDiff.fault,
+          tot: p.tot + ghostDiff.prevFault,
+          bot: p.bot + ghostDiff.prevFault,
+          tcl: p.tcl + ghostDiff.prevFault,
+          fault: p.fault + ghostDiff.prevFault
+        };
+      } else if (i === index) {
+        return {
+          ...p,
+          tvd: p.tvd + ghostDiff.tvd + ghostDiff.prevFault,
           vs: p.vs + ghostDiff.vs,
-          tot: p.tot + ghostDiff.tot + ghostDiff.fault,
-          bot: p.bot + ghostDiff.bot + ghostDiff.fault,
-          tcl: p.tcl + ghostDiff.tcl + ghostDiff.fault,
-          fault: p.fault + ghostDiff.fault
+          tot: p.tot + ghostDiff.tot + ghostDiff.prevFault,
+          bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
+          tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
         };
       } else if (i > index) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.fault,
+          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault,
           vs: p.vs + ghostDiff.vs
         };
       } else {
@@ -141,15 +148,14 @@ export const CrossSectionDashboard = ({ wellId }) => {
             return {
               ...point,
               vs: point.vs + ghostDiff.vs,
-              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
-              fault: point.fault + ghostDiff.fault
+              fault: point.fault + ghostDiff.prevFault,
+              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
             };
           } else if (j > index) {
             return {
               ...point,
               vs: point.vs + ghostDiff.vs,
-              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
-              fault: point.fault
+              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
             };
           }
           return point;

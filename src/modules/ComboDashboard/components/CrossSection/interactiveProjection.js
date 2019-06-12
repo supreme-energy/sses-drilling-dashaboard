@@ -83,7 +83,7 @@ function interactiveProjection(parent, props) {
     const id = Object.keys(selectedSections)[0];
     const selectedIndex = calcSections.findIndex(s => s.id === Number(id));
     // If there isn't a selected project ahead segment, don't display the interactive component
-    if (!selectedSections[id] || selectedIndex <= 0 || !calcSections[selectedIndex].isProjection) {
+    if (!selectedSections[id] || selectedIndex <= 0) {
       container.visible = false;
       return;
     }
@@ -96,24 +96,24 @@ function interactiveProjection(parent, props) {
     const pa = calcSections[selectedIndex];
 
     prevTot.position.x = prev.vs;
-    prevTot.position.y = prev.tot + pa.fault;
+    prevTot.position.y = prev.tot;
     prevBot.position.x = prev.vs;
-    prevBot.position.y = prev.bot + pa.fault;
+    prevBot.position.y = prev.bot;
 
     currTot.position.x = pa.vs;
-    currTot.position.y = pa.tot;
+    currTot.position.y = pa.tot - pa.fault;
     currBot.position.x = pa.vs;
-    currBot.position.y = pa.bot;
+    currBot.position.y = pa.bot - pa.fault;
 
     paMarker.position.x = pa.vs;
     paMarker.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, red, 1);
-    totLine.moveTo(...scale(prev.vs, prev.tot + pa.fault)).lineTo(...scale(pa.vs, pa.tot));
+    totLine.moveTo(...scale(prev.vs, prev.tot)).lineTo(...scale(pa.vs, pa.tot - pa.fault));
     tclLine.clear().lineStyle(2, red, 1);
-    tclLine.moveTo(...scale(prev.vs, prev.tcl + pa.fault)).lineTo(...scale(pa.vs, pa.tcl));
+    tclLine.moveTo(...scale(prev.vs, prev.tcl)).lineTo(...scale(pa.vs, pa.tcl - pa.fault));
     botLine.clear().lineStyle(2, red, 1);
-    botLine.moveTo(...scale(prev.vs, prev.bot + pa.fault)).lineTo(...scale(pa.vs, pa.bot));
+    botLine.moveTo(...scale(prev.vs, prev.bot)).lineTo(...scale(pa.vs, pa.bot - pa.fault));
   };
 }
 
