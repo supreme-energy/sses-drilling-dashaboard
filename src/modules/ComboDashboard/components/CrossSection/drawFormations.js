@@ -10,8 +10,9 @@ export function drawFormations(container) {
   return update;
 
   function update(props) {
-    const { calculatedFormations: layers, lastSurveyIdx } = props;
+    const { calculatedFormations: layers, firstProjectionIdx } = props;
     if (!layers || !layers.length) return;
+    layerTiles.forEach(l => l.forEach(t => t.clear()));
     // TODO: Can optimize performance by redrawing only when data changes
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
@@ -23,7 +24,7 @@ export function drawFormations(container) {
         if (!layerTiles[layerIdx][pointIdx]) {
           layerTiles[layerIdx][pointIdx] = container.addChild(new PIXI.Graphics());
         }
-        if (pointIdx >= lastSurveyIdx) {
+        if (pointIdx >= firstProjectionIdx - 1) {
           currAlpha = 0.3;
         }
         // Each formation tile is drawn from four points arranged like this:
@@ -44,7 +45,7 @@ export function drawFormations(container) {
         const tilePath = [...a1, ...a2, ...a3, ...a4];
 
         const tile = layerTiles[layerIdx][pointIdx];
-        tile.clear().beginFill(Number(`0x${currColor}`), currAlpha);
+        tile.beginFill(Number(`0x${currColor}`), currAlpha);
         tile.drawPolygon(tilePath);
       }
     }

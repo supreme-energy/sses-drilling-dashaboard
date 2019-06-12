@@ -7,7 +7,7 @@ export function defaultMakeXTickAndLine(fontSize) {
     fill: "#999",
     fontSize: fontSize
   });
-  label.anchor.set(0.5, 0.5);
+  label.anchor.set(-0.2, 0.5);
   label.rotation = Math.PI / 2;
   label.transform.updateTransform = frozenXTransform;
 
@@ -90,9 +90,6 @@ function drawGrid(container, options = {}) {
   container.addChild(bgx);
 
   const bgy = new PIXI.Graphics();
-  // bgy.beginFill(0xffffff);
-  // bgy.lineStyle(0);
-  // bgy.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, width, gutter);
   bgy.transform.updateTransform = frozenXYTransform;
   container.addChild(bgy);
 
@@ -102,8 +99,6 @@ function drawGrid(container, options = {}) {
 
   // Corner to hide overlapping tick labels
   const corner = new PIXI.Graphics();
-  // corner.beginFill(0xffffff);
-  // corner.drawRect(0, xAxisOrientation === "top" ? 0 : height - gutter, gutter, gutter);
   corner.transform.updateTransform = frozenXYTransform;
   container.addChild(corner);
 
@@ -154,7 +149,7 @@ function drawGrid(container, options = {}) {
         const pos = bounds.xMin + bounds.xStep * i;
         xLines[i].x = pos;
         xLabels[i].x = pos;
-        xLabels[i].y = xAxisAnchor - gutter / 2;
+        xLabels[i].y = xAxisAnchor - gutter;
         xLabels[i].text = `${pos}`;
       }
 

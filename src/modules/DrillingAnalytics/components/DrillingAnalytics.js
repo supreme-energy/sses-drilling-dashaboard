@@ -1,36 +1,29 @@
-import React, { lazy, Suspense } from "react";
-import PropTypes from "prop-types";
-import Progress from "@material-ui/core/CircularProgress";
+import React from "react";
+import WidgetCard from "../../WidgetCard";
+import { useWellOverviewKPI } from "../../../api";
+import { useDrillPhaseContainer } from "../../App/Containers";
+import { SlidingKpi } from "../../Kpi/DrillPhaseKPI/Kpi";
+import { Typography } from "@material-ui/core";
 
-const HeaderToolbar = lazy(() =>
-  import(/* webpackChunkName: 'HeaderToolbar' */ "../../ComboDashboard/components/HeaderToolbar")
-);
-const TimeSliderToolbar = lazy(() =>
-  import(/* webpackChunkName: 'TimeSliderToolbar' */ "../../ComboDashboard/components/TimeSliderToolbar")
-);
+export function DrillingAnalytics() {
+  const {
+    drillPhaseObj: { phase }
+  } = useDrillPhaseContainer();
 
-export const DrillingAnalytics = ({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) => (
-  <div>
-    <Suspense fallback={<Progress />}>
-      <HeaderToolbar wellId={openedWellId} />
-    </Suspense>
-    <Suspense fallback={<Progress />}>
-      <TimeSliderToolbar />
-    </Suspense>
-    <h2>Drilling Analytics</h2>
-  </div>
-);
+  const { data } = useWellOverviewKPI();
+  const drillingPhase = data.find(d => !d.casingSize);
 
-DrillingAnalytics.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
+  const drillPhaseType = phase === "Lateral" || phase === "Curve" ? phase : "Vertical";
+  return (
+    <div>
+      <WidgetCard>
+        <Typography variant="subtitle1">{`${drillPhaseType} Overview`}</Typography>
+        <SlidingKpi data={drillingPhase} />
+      </WidgetCard>
+    </div>
+  );
+}
+
+DrillingAnalytics.propTypes = {};
 
 export default DrillingAnalytics;

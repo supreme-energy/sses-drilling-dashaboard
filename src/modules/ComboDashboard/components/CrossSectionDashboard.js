@@ -1,16 +1,26 @@
-import Progress from "@material-ui/core/CircularProgress";
+import { Typography, CircularProgress } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, Suspense, lazy } from "react";
 import { useFilteredWellData } from "../../App/Containers";
 
+import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
-import CrossSection from "./CrossSection/index";
+import { calculateDip, getChangeInY } from "./CrossSection/formulas";
+const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
-function singleSelectionReducer(list, i) {
-  const newList = [];
-  newList[i] = !list[i];
-  return newList;
+function selectionReducer(state, action) {
+  switch (action.type) {
+    // A planned feature is multiple selection, but only single is supported now
+    case "toggle":
+      return {
+        [action.id]: !state[action.id]
+      };
+    case "clear":
+      return {};
+    default:
+      throw new Error(`Unknown selected section reducer action type ${action.type}`);
+  }
 }
 function PADeltaInit(section, prevSection) {
   return {
@@ -22,11 +32,14 @@ function PADeltaInit(section, prevSection) {
     tcl: 0,
     tot: 0,
     tvd: 0,
-    vs: 0
+    vs: 0,
+    dip: 0
   };
 }
+
 function PADeltaReducer(state, action) {
   const op = state.op;
+  const prevOp = state.prevOp;
   let depthDelta = 0;
   switch (action.type) {
     case "dip_tot":
@@ -36,7 +49,8 @@ function PADeltaReducer(state, action) {
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
-        tcl: depthDelta
+        tcl: depthDelta,
+        dip: op.dip - calculateDip(action.tot - state.fault, prevOp.tot, action.vs, prevOp.vs)
       };
     case "dip_bot":
       depthDelta = action.bot - op.bot - state.fault;
@@ -45,7 +59,8 @@ function PADeltaReducer(state, action) {
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
-        tcl: depthDelta
+        tcl: depthDelta,
+        dip: op.dip - calculateDip(action.bot - state.fault, prevOp.bot, action.vs, prevOp.vs)
       };
     case "fault_tot":
       return {
@@ -60,8 +75,20 @@ function PADeltaReducer(state, action) {
     case "pa":
       return {
         ...state,
-        tvd: action.tvd - op.tvd,
-        vs: action.vs - op.vs
+        tvd: action.tvd - op.tvd
+      };
+    case "tag_move":
+      // We don't currently want the surveys or bit proj to be adjustable
+      if (op.isSurvey || op.isBitProj) {
+        return state;
+      }
+      const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
+      return {
+        ...state,
+        vs: action.vs - op.vs,
+        tot: prevOp.tot - op.tot + changeInY,
+        tcl: prevOp.tcl - op.tcl + changeInY,
+        bot: prevOp.bot - op.bot + changeInY
       };
     case "init":
       return PADeltaInit(action.section, action.prevSection);
@@ -71,12 +98,11 @@ function PADeltaReducer(state, action) {
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  // TODO: Pull data from store instead. This re-fetches on every tab switch.
   const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
 
-  const lastSurveyIdx = surveys.length - 2;
+  const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [selectedSections, setSelectedSections] = useReducer(singleSelectionReducer, []);
+  const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const calcSections = useMemo(() => {
@@ -85,7 +111,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
       if (i === index) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tvd,
+          tvd: p.tvd + ghostDiff.tvd + ghostDiff.fault,
           vs: p.vs + ghostDiff.vs,
           tot: p.tot + ghostDiff.tot + ghostDiff.fault,
           bot: p.bot + ghostDiff.bot + ghostDiff.fault,
@@ -133,9 +159,10 @@ export const CrossSectionDashboard = ({ wellId }) => {
   }, [formations, ghostDiff, calcSections]);
 
   useEffect(() => {
-    const i = selectedSections.findIndex(a => a === true);
-    if (i !== -1) {
-      ghostDiffDispatch({ type: "init", section: rawSections[i], prevSection: rawSections[i - 1] });
+    const id = Object.keys(selectedSections)[0];
+    const index = rawSections.findIndex(s => s.id === Number(id));
+    if (index !== -1) {
+      ghostDiffDispatch({ type: "init", section: rawSections[index], prevSection: rawSections[index - 1] });
     }
   }, [selectedSections, rawSections]);
 
@@ -157,30 +184,32 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
-    <Suspense fallback={<Progress />}>
-      <h2>Cross-section</h2>
-      <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
-        {({ width, height }) => (
-          <CrossSection
-            width={width}
-            height={height}
-            view={view}
-            updateView={setView}
-            scale={scale}
-            wellPlan={wellPlan}
-            surveys={surveys}
-            formations={formations}
-            calculatedFormations={calculatedFormations}
-            projections={projections}
-            calcSections={calcSections}
-            selectedSections={selectedSections}
-            setSelectedSections={setSelectedSections}
-            lastSurveyIdx={lastSurveyIdx}
-            ghostDiffDispatch={ghostDiffDispatch}
-          />
-        )}
-      </ParentSize>
-    </Suspense>
+    <WidgetCard className={classes.crossSectionDash}>
+      <Typography variant="subtitle1">Cross Section</Typography>
+      <Suspense fallback={<CircularProgress />}>
+        <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
+          {({ width, height }) => (
+            <CrossSection
+              width={width}
+              height={height}
+              view={view}
+              updateView={setView}
+              scale={scale}
+              wellPlan={wellPlan}
+              surveys={surveys}
+              formations={formations}
+              calculatedFormations={calculatedFormations}
+              projections={projections}
+              calcSections={calcSections}
+              selectedSections={selectedSections}
+              setSelectedSections={setSelectedSections}
+              firstProjectionIdx={firstProjectionIdx}
+              ghostDiffDispatch={ghostDiffDispatch}
+            />
+          )}
+        </ParentSize>
+      </Suspense>
+    </WidgetCard>
   );
 };
 CrossSectionDashboard.propTypes = {

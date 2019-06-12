@@ -1,7 +1,3 @@
-import { lazy } from "react";
-
-const StructuralGuidance = lazy(() =>
-  import(/* webpackChunkName: 'StructuralGuidance' */ "../components/StructuralGuidance")
-);
+import StructuralGuidance from "../components/StructuralGuidance";
 
 export default StructuralGuidance;

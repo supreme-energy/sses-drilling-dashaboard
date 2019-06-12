@@ -25,6 +25,7 @@ export const GET_WELL_FORMATIONS = "/formationlist.php";
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
+const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
 const options = {
   shouldSort: true,
@@ -247,8 +248,8 @@ export function useWellsMapPosition(wellId, wellPositions) {
       return {
         ...p,
         mapPosition: transform({
-          y: Number(p.ns + wellInfo.wellSurfaceLocationLocal.y),
-          x: Number(p.ew + wellInfo.wellSurfaceLocationLocal.x)
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
         })
       };
     }
@@ -321,23 +322,23 @@ export function useWellOverviewKPI() {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
           id: _.uniqueId(),
-          rop: d.ROP_AVG,
-          depth: d.HOLE_DEPTH_END,
-          depthStart: Number(d.HOLE_DEPTH_START),
-          bitSize: d.holesize,
-          casingSize: d.casingSize,
-          startTime: d.DT_START,
-          totalHours: d.TOTAL_HOURS,
-          drillingHours: d.D_HOURS,
+          rop: Number(d.ROP_AVG),
+          depth: Number(d.HOLE_DEPTH_END),
+          holeDepthStart: Number(d.HOLE_DEPTH_START),
+          bitSize: Number(d.holesize),
+          casingSize: Number(d.casingSize),
+          startTime: Number(d.DT_START),
+          totalHours: Number(d.TOTAL_HOURS),
+          drillingHours: Number(d.D_HOURS),
           landingPoint: d.landingPoint,
-          toolFaceEfficiency: d.TOOLFACE_EFFICIENCY_PCT,
+          toolFaceEfficiency: Number(d.TOOLFACE_EFFICIENCY_PCT),
           zoneAccuracy: 100, // TBD
           targetAccuracy: 98, // TBD,
-          footageDrilled: d.FOOTAGE_DRILLED,
-          avgSliding: d.ROP_AVG_SLIDING,
-          avgRotating: d.ROP_AVG_ROTATING,
-          slidingFootage: d.SLIDING_FOOTAGE,
-          rotatingFootage: d.ROTATING_FOOTAGE
+          footageDrilled: Number(d.FOOTAGE_DRILLED),
+          avgSliding: Number(d.ROP_AVG_SLIDING),
+          avgRotating: Number(d.ROP_AVG_ROTATING),
+          slidingPct: Number(d.SLIDE_PCT_D),
+          rotatingPct: Number(d.ROTATE_PCT_D)
         }));
       }
     }
@@ -350,4 +351,17 @@ export function useWellOverviewKPI() {
     data,
     bySegment
   };
+}
+
+export function useTimeSliderData() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_TIME_SLIDER_DATA
+    },
+
+    {
+      id: "mock"
+    }
+  );
+  return data || EMPTY_ARRAY;
 }

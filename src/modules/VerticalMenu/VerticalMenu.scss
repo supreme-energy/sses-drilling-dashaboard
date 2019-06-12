@@ -1,0 +1,23 @@
+@import "../../styles/base";
+
+.menuItem {
+    min-width: 185px;
+
+    &:focus {
+        background-color: white;
+    }
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.08)
+    }
+}
+
+.selectedItemIcon {
+    position: absolute;
+    right: 12px;
+    color: $gray;
+}
+
+.menuButton:focus {
+    outline: 0;
+}

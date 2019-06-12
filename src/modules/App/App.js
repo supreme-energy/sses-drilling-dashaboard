@@ -1,8 +1,9 @@
-import React, { Suspense } from "react";
+import React, { Suspense, lazy } from "react";
 import { Provider } from "react-redux";
 import PropTypes from "prop-types";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
 import Progress from "@material-ui/core/CircularProgress";
+import plusBasicAuth from "fetch-plus-basicauth";
 
 import FetchClientProvider from "react-powertools/data/FetchClientProvider";
 import FetchCache from "react-powertools/data/FetchCache";
@@ -10,21 +11,27 @@ import plusJsonStrict from "react-powertools/data/fetch-plus-strict";
 import plusErrorJson from "react-powertools/data/fetch-plus-error-json";
 import plusUrlPattern from "react-powertools/data/fetch-plus-url-pattern";
 
+import PageLayout from "layouts/PageLayout";
 import ComboDashboardModule from "modules/ComboDashboard";
 import DirectionalGuidanceModule from "modules/DirectionalGuidance";
 import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
-import plusBasicAuth from "fetch-plus-basicauth";
 import WellUpdate from "./WellUpdate";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 
 // Import UI State Providers
-import { TimeSliderProvider, AppStateProvider } from "./Containers";
+import { TimeSliderProvider, AppStateProvider, DrillPhaseProvider } from "./Containers";
+
+// Import Provider initialStates
+import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
+
+// Lazy load toolbars
+const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
+const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderToolbar' */ "modules/TimeSliderToolbar"));
 
 // Lazy load header
-const PageLayout = React.lazy(() => import("layouts/PageLayout"));
 const fetchClientOptions = { mode: "cors", credentials: "include" };
 
 function filterForceRefreshProps(request) {
@@ -71,16 +78,23 @@ class App extends React.Component {
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
                       <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <TimeSliderProvider>
+                        <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
                           <AppStateProvider>
-                            <Route path="/:wellId" component={WellUpdate} />
-                            <Switch>
-                              <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                              <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                              <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                              <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                              <Route path="/:wellId?" component={WellExplorer} />
-                            </Switch>
+                            <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
+                              <Route path="/:wellId" component={WellUpdate} />
+                              <Switch>
+                                <Route path="/:wellId?" exact component={WellExplorer} />
+                                <HeaderToolbar history={history}>
+                                  <TimeSliderToolbar>
+                                    <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                    <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                    <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                    <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                    {/* <Route path="/:wellId?" component={WellExplorer} /> */}
+                                  </TimeSliderToolbar>
+                                </HeaderToolbar>
+                              </Switch>
+                            </DrillPhaseProvider>
                           </AppStateProvider>
                         </TimeSliderProvider>
                       </MuiPickersUtilsProvider>

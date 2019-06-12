@@ -1,7 +1,3 @@
-import { lazy } from "react";
-
-const DrillingAnalytics = lazy(() =>
-  import(/* webpackChunkName: 'DrillingAnalytics' */ "../components/DrillingAnalytics")
-);
+import DrillingAnalytics from "../components/DrillingAnalytics";
 
 export default DrillingAnalytics;

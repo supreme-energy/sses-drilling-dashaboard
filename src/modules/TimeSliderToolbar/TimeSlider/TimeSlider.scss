@@ -1,0 +1,168 @@
+@import "../../../styles/base";
+
+.timeSliderContainer {
+    border-radius: 0;
+    width: 100%;
+}
+
+.timeSliderContainerExpanded {
+    padding-bottom: 15px;
+}
+
+.timeSliderGraph {    
+    canvas {
+        position: relative;
+        height: 65px;
+        width: 100%;
+        bottom: 10px;
+    }
+}
+
+.timeSliderGraphCollapsed { 
+    display: none;
+}
+
+.timeSliderHeader {
+    padding: 10px 10px 10px 15px;
+    display: flex;
+    justify-content: space-between;
+
+    .timeSliderTitle {
+        color: $gold;
+        flex-grow: 1;
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 4;
+
+
+        span {
+            margin-right: 15px;
+            margin-left: 5px;
+        }
+
+        .legendKey {
+            height: 10px;
+            width: 20px;
+        }
+
+        .slideLegendKey {
+            background-color: #A9FFFB;
+        }
+
+        .connectionLegendKey {
+            background-color: #D9AAFE;
+        }
+
+        .ropLegendKey  {
+            background-color: #08BB00;
+        }
+
+        .lengthLegendKey {
+            background-color: #967F2F;
+        }
+    }
+
+    .timeSliderControls {
+        display: flex;
+        flex-grow: 2;
+        flex: 2;
+        justify-content: flex-end;
+        margin-right: 15px;
+
+        button {
+            padding: 5px;
+            &:focus {
+                outline: 0;
+            }
+        }
+
+        .timeControls {
+            margin-left: 20px;
+        }
+    }
+}
+
+.timeSliderView {
+    display: flex;
+    min-height: 45px;
+}
+
+.timeSliderExpanded {
+        color: $gold;
+        bottom: 10px;
+        width: 100%;
+    }
+
+    .timeSliderCollapsed {
+        color: $gold;
+        top: 24px;
+        right: 5px;
+        width: 100%;
+    }
+
+
+    .globalTimeControls {
+        padding: 0;
+        &:focus {
+            outline: 0;
+        }
+    }
+
+    .backwardTime {
+        position: relative;
+        width: 45px;
+        text-align: center;
+
+        > button {
+            @extend .globalTimeControls;
+        }
+    }
+
+    .expandedBackwardTime {
+        top: 10px;
+        span {
+            display: block;
+        }
+    }
+
+    .collapsedBackwardTime {
+        top: 10px;
+    }
+
+    .forwardTime {
+        position: relative;
+        width: 30px;
+        text-align: center;
+
+        > button {
+            @extend .globalTimeControls;
+        }
+    }
+
+    .expandedForwardTime {
+        top: 10px;
+        left: 20px;
+
+        span { 
+            display: block;
+        }
+    }
+
+    .collapsedForwardTime {
+        left: 25px;
+        top: 10px;
+    }
+
+.timeSlider {
+    width: 93%;
+    position: relative;
+    left: 12px;
+}
+
+.timeSliderExpanded {
+    left: 2px;
+}
