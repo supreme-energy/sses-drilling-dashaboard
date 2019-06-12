@@ -47,6 +47,8 @@ export function useFilteredWellData(wellId) {
   const wellPlan = useWellPath(wellId);
   const projections = useProjections(wellId);
 
+  console.log(sliderInterval);
+
   // Filter data and memoize
   const surveysFiltered = filterDataToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterDataToInterval(projections, sliderInterval);
