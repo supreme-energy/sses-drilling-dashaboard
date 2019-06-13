@@ -92,6 +92,8 @@ export function useFilteredWellData(wellId) {
     };
   });
 
+  console.log("sliderinterval", sliderInterval);
+
   return {
     surveys: surveysFiltered,
     wellPlan,
