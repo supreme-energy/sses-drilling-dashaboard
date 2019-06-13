@@ -17,7 +17,9 @@ export const SET_FAV_WELL = "/set_fav_job.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
+export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
+export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 
 // mock data
@@ -261,7 +263,7 @@ export function useFormations(wellId) {
 }
 
 export function useProjections(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
       query: {
@@ -272,7 +274,19 @@ export function useProjections(wellId) {
       transform: memoizedTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  const saveProjection = (wellId, projectionId, method, fields = {}) => {
+    useFetch({
+      path: SET_WELL_PROJECTIONS,
+      query: {
+        seldbname: wellId,
+        id: projectionId,
+        method: method,
+        ...fields
+      }
+    });
+    refresh();
+  };
+  return [data || EMPTY_ARRAY, saveProjection];
 }
 
 export function useWellOverviewKPI() {

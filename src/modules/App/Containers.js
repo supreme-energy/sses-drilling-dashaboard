@@ -66,7 +66,7 @@ export function useFilteredWellData(wellId) {
   const formations = useFormations(wellId);
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
-  const projections = useProjections(wellId);
+  const [projections, saveProjection] = useProjections(wellId);
 
   // Calculate some useful information from raw data
   const annotatedSurveys = annotateSurveys(surveys);
@@ -86,7 +86,8 @@ export function useFilteredWellData(wellId) {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
-    projections: projectionsFiltered
+    projections: projectionsFiltered,
+    saveProjection: saveProjection
   };
 }
 

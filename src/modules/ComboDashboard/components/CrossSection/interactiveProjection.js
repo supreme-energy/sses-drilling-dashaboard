@@ -2,12 +2,12 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 
-function createCircle(container, lineColor, fillColor, cb) {
+function createCircle(container, lineColor, fillColor, cb, cbEnd) {
   const circle = container.addChild(new PIXI.Graphics());
   circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
   circle.drawCircle(0, 0, 10);
   circle.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(circle, cb);
+  subscribeToMoveEvents(circle, cb, cbEnd);
   return circle;
 }
 
@@ -24,7 +24,7 @@ function createCircle(container, lineColor, fillColor, cb) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { ghostDiffDispatch } = props;
+  const { ghostDiffDispatch, saveProjection } = props;
   const red = 0xee2211;
   const white = 0xffffff;
 
@@ -37,53 +37,91 @@ function interactiveProjection(parent, props) {
   const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
 
-  const prevTot = createCircle(container, red, red, function(pos) {
-    ghostDiffDispatch({
-      type: "fault_tot",
-      tot: pos.y
-    });
-  });
-  const prevBot = createCircle(container, red, red, function(pos) {
-    ghostDiffDispatch({
-      type: "fault_bot",
-      bot: pos.y
-    });
-  });
+  const prevTot = createCircle(
+    container,
+    red,
+    red,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "fault_tot",
+        tot: pos.y
+      });
+    },
+    () => {
+      ghostDiffDispatch({ type: "fault_end" });
+    }
+  );
+  const prevBot = createCircle(
+    container,
+    red,
+    red,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "fault_bot",
+        bot: pos.y
+      });
+    },
+    () => {
+      ghostDiffDispatch({ type: "fault_end" });
+    }
+  );
 
-  const currTot = createCircle(container, white, red, function(pos) {
-    ghostDiffDispatch({
-      type: "dip_tot",
-      vs: pos.x,
-      tot: pos.y
-    });
-  });
+  const currTot = createCircle(
+    container,
+    white,
+    red,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "dip_tot",
+        vs: pos.x,
+        tot: pos.y
+      });
+    },
+    () => {
+      ghostDiffDispatch({ type: "dip_end" });
+    }
+  );
 
-  const currBot = createCircle(container, white, red, function(pos) {
-    ghostDiffDispatch({
-      type: "dip_bot",
-      vs: pos.x,
-      bot: pos.y
-    });
-  });
+  const currBot = createCircle(
+    container,
+    white,
+    red,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "dip_bot",
+        vs: pos.x,
+        bot: pos.y
+      });
+    },
+    () => {
+      ghostDiffDispatch({ type: "dip_end" });
+    }
+  );
 
   const paMarker = container.addChild(new PIXI.Graphics());
   paMarker.lineStyle(2, red).beginFill(white, 0);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(paMarker, function(pos) {
-    ghostDiffDispatch({
-      type: "pa",
-      tvd: pos.y,
-      vs: pos.x
-    });
-  });
+  subscribeToMoveEvents(
+    paMarker,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "pa",
+        tvd: pos.y,
+        vs: pos.x
+      });
+    },
+    () => {
+      ghostDiffDispatch({ type: "pa_end" });
+    }
+  );
 
   return props => {
     const { selectedSections, calcSections, scale } = props;
     const id = Object.keys(selectedSections)[0];
     const selectedIndex = calcSections.findIndex(s => s.id === Number(id));
     // If there isn't a selected project ahead segment, don't display the interactive component
-    if (!selectedSections[id] || selectedIndex <= 0) {
+    if (!selectedSections[id] || selectedIndex <= 0 || !calcSections[selectedIndex].isProjection) {
       container.visible = false;
       return;
     }

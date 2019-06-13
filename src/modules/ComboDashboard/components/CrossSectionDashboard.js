@@ -62,6 +62,9 @@ function PADeltaReducer(state, action) {
         tcl: depthDelta,
         dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
       };
+    case "dip_end":
+      console.log("dip_end handler");
+      return state;
     case "fault_tot":
       return {
         ...state,
@@ -72,11 +75,17 @@ function PADeltaReducer(state, action) {
         ...state,
         prevFault: action.bot - prevOp.bot
       };
+    case "fault_end":
+      console.log("fault_end handler");
+      return state;
     case "pa":
       return {
         ...state,
         tvd: action.tvd - op.tvd - state.prevFault
       };
+    case "pa_end":
+      console.log("pa_end handler");
+      return state;
     case "tag_move":
       // We don't currently want the surveys or bit proj to be adjustable
       if (op.isSurvey || op.isBitProj) {
@@ -98,7 +107,7 @@ function PADeltaReducer(state, action) {
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
+  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
@@ -211,6 +220,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               setSelectedSections={setSelectedSections}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
+              saveProjection={(...args) => saveProjection(wellId, ...args)}
             />
           )}
         </ParentSize>
