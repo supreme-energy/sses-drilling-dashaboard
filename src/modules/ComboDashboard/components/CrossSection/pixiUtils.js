@@ -1,11 +1,12 @@
 /**
  * Add mouse and touch events to a PIXI displayObject to enable dragging
  * @param obj The PIXI displayObject
- * @param cb  Callback to set the new x and y for the object
+ * @param onMove  Callback to set the new x and y for the object
  */
-function subscribeToMoveEvents(obj, cb) {
+function subscribeToMoveEvents(obj, onMove, onEnd) {
   obj.interactive = true;
-  obj.cb = cb || (_ => {});
+  obj.onMove = onMove || (_ => {});
+  obj.dragEnd = onEnd || (_ => {});
   obj
     .on("mousedown", onDragStart)
     .on("touchstart", onDragStart)
@@ -33,6 +34,7 @@ function subscribeToMoveEvents(obj, cb) {
     if (this.dragging) {
       this.dragging = false;
       this.data = null;
+      this.dragEnd();
     }
   }
 
@@ -40,9 +42,9 @@ function subscribeToMoveEvents(obj, cb) {
     if (this.dragging) {
       event.stopPropagation();
       const newPosition = this.data.getLocalPosition(this.parent);
-      newPosition.x = newPosition.x - this.dragPoint.x;
-      newPosition.y = newPosition.y - this.dragPoint.y;
-      this.cb(newPosition);
+      newPosition.x -= this.dragPoint.x;
+      newPosition.y -= this.dragPoint.y;
+      this.onMove(newPosition);
     }
   }
 }
