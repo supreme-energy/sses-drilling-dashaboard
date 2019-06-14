@@ -240,7 +240,7 @@ export function useSurveys(wellId) {
 }
 
 export function useFormations(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -259,11 +259,11 @@ export function useFormations(wellId) {
       }
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, refresh];
 }
 
 export function useProjections(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
+  const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
       query: {
@@ -275,8 +275,10 @@ export function useProjections(wellId) {
     }
   );
   const saveProjection = (projectionId, method, fields = {}) => {
-    useFetch({
+    console.log("saveProjection called with ", projectionId, method, fields);
+    fetch({
       path: SET_WELL_PROJECTIONS,
+      method: "GET",
       query: {
         seldbname: wellId,
         id: projectionId,
@@ -284,9 +286,8 @@ export function useProjections(wellId) {
         ...fields
       }
     });
-    refresh();
   };
-  return [data || EMPTY_ARRAY, saveProjection];
+  return [data || EMPTY_ARRAY, refresh, saveProjection];
 }
 
 export function useWellOverviewKPI() {

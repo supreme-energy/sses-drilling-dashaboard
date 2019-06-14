@@ -37,82 +37,100 @@ function PADeltaInit(section, prevSection) {
   };
 }
 
-function PADeltaReducer(state, action) {
-  const op = state.op;
-  const prevOp = state.prevOp;
-  let depthDelta = 0;
-  switch (action.type) {
-    case "dip_tot":
-      depthDelta = action.tot - op.tot - state.prevFault + op.fault;
-      return {
-        ...state,
-        tot: depthDelta,
-        vs: action.vs - op.vs,
-        bot: depthDelta,
-        tcl: depthDelta,
-        dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
-      };
-    case "dip_bot":
-      depthDelta = action.bot - op.bot - state.prevFault;
-      return {
-        ...state,
-        tot: depthDelta,
-        vs: action.vs - op.vs,
-        bot: depthDelta,
-        tcl: depthDelta,
-        dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
-      };
-    case "dip_end":
-      console.log("dip_end handler");
-      return state;
-    case "fault_tot":
-      return {
-        ...state,
-        prevFault: action.tot - prevOp.tot
-      };
-    case "fault_bot":
-      return {
-        ...state,
-        prevFault: action.bot - prevOp.bot
-      };
-    case "fault_end":
-      console.log("fault_end handler");
-      return state;
-    case "pa":
-      return {
-        ...state,
-        tvd: action.tvd - op.tvd - state.prevFault
-      };
-    case "pa_end":
-      console.log("pa_end handler");
-      return state;
-    case "tag_move":
-      // We don't currently want the surveys or bit proj to be adjustable
-      if (op.isSurvey || op.isBitProj) {
+function makePAReducer(saveProjection) {
+  return function PADeltaReducer(state, action) {
+    const op = state.op;
+    const prevOp = state.prevOp;
+    let depthDelta = 0;
+    switch (action.type) {
+      case "dip_tot":
+        depthDelta = action.tot - op.tot - state.prevFault + op.fault;
+        return {
+          ...state,
+          tot: depthDelta,
+          vs: action.vs - op.vs,
+          bot: depthDelta,
+          tcl: depthDelta,
+          dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
+        };
+      case "dip_bot":
+        depthDelta = action.bot - op.bot - state.prevFault;
+        return {
+          ...state,
+          tot: depthDelta,
+          vs: action.vs - op.vs,
+          bot: depthDelta,
+          tcl: depthDelta,
+          dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
+        };
+      case "dip_end":
+        console.log("dip_end handler", op);
+        const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
+        saveProjection(op.id, 7, { tcl: op.tcl + state.tcl, pos: pos, vs: op.vs + state.vs });
         return state;
-      }
-      const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
-      return {
-        ...state,
-        vs: action.vs - op.vs,
-        tot: prevOp.tot - op.tot + changeInY + op.fault,
-        tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
-        bot: prevOp.bot - op.bot + changeInY + op.fault
-      };
-    case "init":
-      return PADeltaInit(action.section, action.prevSection);
-    default:
-      throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
-  }
+      case "fault_tot":
+        return {
+          ...state,
+          prevFault: action.tot - prevOp.tot
+        };
+      case "fault_bot":
+        return {
+          ...state,
+          prevFault: action.bot - prevOp.bot
+        };
+      case "fault_end":
+        console.log("fault_end handler");
+        console.log(prevOp.id, 8, { fault: prevOp.fault + state.prevFault });
+        return state;
+      case "pa":
+        return {
+          ...state,
+          tvd: action.tvd - op.tvd - state.prevFault
+        };
+      case "pa_end":
+        console.log("pa_end handler");
+        saveProjection(op.id, 8, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
+        return state;
+      case "tag_move":
+        // We don't currently want the surveys or bit proj to be adjustable
+        if (op.isSurvey || op.isBitProj) {
+          return state;
+        }
+        const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
+        return {
+          ...state,
+          vs: action.vs - op.vs,
+          tot: prevOp.tot - op.tot + changeInY + op.fault,
+          tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
+          bot: prevOp.bot - op.bot + changeInY + op.fault
+        };
+      case "tag_end":
+        console.log("tag_end handler");
+        saveProjection(op.id, 6, { vs: op.vs + state.vs, dip: op.dip + state.dip });
+        return state;
+      case "init":
+        return PADeltaInit(action.section, action.prevSection);
+      default:
+        throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
+    }
+  };
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
+  const {
+    surveys,
+    wellPlan,
+    formations,
+    projections,
+    saveProjection,
+    refreshFormations,
+    refreshProjections
+  } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
-  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+  const [ghostDiff, ghostDiffDispatch] = useReducer(makePAReducer(saveProjection), {}, PADeltaInit);
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
@@ -201,6 +219,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
   return (
     <WidgetCard className={classes.crossSectionDash}>
       <Typography variant="subtitle1">Cross Section</Typography>
+      <a onClick={refreshFormations}>refresh formations</a>
+      <a onClick={refreshProjections}>refresh projections</a>
       <Suspense fallback={<CircularProgress />}>
         <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
           {({ width, height }) => (

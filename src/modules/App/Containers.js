@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import memoize from "react-powertools/memoize";
 import { createContainer } from "unstated-next";
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
@@ -63,10 +63,10 @@ const annotateProjections = memoize(projections => {
 export function useFilteredWellData(wellId) {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const formations = useFormations(wellId);
+  const [formations, refreshFormations] = useFormations(wellId);
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
-  const [projections, saveProjection] = useProjections(wellId);
+  const [projections, refreshProjections, saveProjection] = useProjections(wellId);
 
   // Calculate some useful information from raw data
   const annotatedSurveys = annotateSurveys(surveys);
@@ -82,12 +82,29 @@ export function useFilteredWellData(wellId) {
     };
   });
 
+  const saveAndUpdate = useCallback(
+    (...args) => {
+      saveProjection(...args);
+      refreshProjections();
+      refreshFormations();
+    },
+    [saveProjection, refreshProjections, refreshFormations]
+  );
+
   return {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
     projections: projectionsFiltered,
-    saveProjection: saveProjection
+    saveProjection: saveAndUpdate,
+    refreshFormations: () => {
+      console.log("refreshing formations");
+      refreshFormations();
+    },
+    refreshProjections: () => {
+      console.log("refreshing projections");
+      refreshProjections();
+    }
   };
 }
 

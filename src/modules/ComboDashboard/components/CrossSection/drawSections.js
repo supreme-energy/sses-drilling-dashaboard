@@ -20,12 +20,18 @@ function drawSections(container, higherContainer, props, gutter) {
   const labelHeight = 75;
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
-  subscribeToMoveEvents(selectedLabel, function(pos) {
-    ghostDiffDispatch({
-      type: "tag_move",
-      vs: pos.x
-    });
-  });
+  subscribeToMoveEvents(
+    selectedLabel,
+    function(pos) {
+      ghostDiffDispatch({
+        type: "tag_move",
+        vs: pos.x
+      });
+    },
+    function() {
+      ghostDiffDispatch({ type: "tag_end" });
+    }
+  );
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
   const memoInitLabel = memoizeOne(color => {
