@@ -274,7 +274,7 @@ export function useProjections(wellId) {
       transform: memoizedTransform
     }
   );
-  const saveProjection = (wellId, projectionId, method, fields = {}) => {
+  const saveProjection = (projectionId, method, fields = {}) => {
     useFetch({
       path: SET_WELL_PROJECTIONS,
       query: {
