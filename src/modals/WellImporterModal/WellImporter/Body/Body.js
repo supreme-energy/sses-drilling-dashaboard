@@ -6,6 +6,7 @@ import { INPUT_TYPES } from "../constants";
 
 import AppAttributePaneBody from "../AppAttributePane/Body";
 import LASAttributePaneBody from "../LASAttributePane/Body";
+import CSVAttributePane from "../CSVAttributePane";
 
 import css from "./styles.scss";
 
@@ -19,7 +20,8 @@ const Body = ({
   className,
   highlightedRowAndColumnList,
   textHighlightedRowAndColumnList,
-  activeInput
+  activeInput,
+  extension
 }) => {
   return (
     <div className={className}>
@@ -39,14 +41,18 @@ const Body = ({
         />
       </div>
       <div className={css.lasAttributePaneBodyContainer}>
-        <LASAttributePaneBody
-          data={data}
-          highlightedRowAndColumnList={highlightedRowAndColumnList}
-          textHighlightedRowAndColumnList={textHighlightedRowAndColumnList}
-          onClickCell={onClickCell}
-          onClickAsciiHeader={onClickAsciiHeader}
-          unlocked={!isEmpty(activeInput)}
-        />
+        {extension === "las" ? (
+          <LASAttributePaneBody
+            data={data}
+            highlightedRowAndColumnList={highlightedRowAndColumnList}
+            textHighlightedRowAndColumnList={textHighlightedRowAndColumnList}
+            onClickCell={onClickCell}
+            onClickAsciiHeader={onClickAsciiHeader}
+            unlocked={!isEmpty(activeInput)}
+          />
+        ) : (
+          <CSVAttributePane data={data} />
+        )}
       </div>
     </div>
   );
@@ -68,7 +74,8 @@ Body.propTypes = {
   className: PropTypes.string,
   highlightedRowAndColumnList: PropTypes.object,
   textHighlightedRowAndColumnList: PropTypes.object,
-  activeInput: PropTypes.object
+  activeInput: PropTypes.object,
+  extension: PropTypes.string
 };
 
 export default Body;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import React, { useReducer, useMemo } from "react";
 import PropTypes from "prop-types";
 import cloneDeep from "lodash/cloneDeep";
 import intersection from "lodash/intersection";
@@ -14,40 +14,43 @@ import {
   removeHighlightedTextCellIds,
   addHighlightedTextCellIds
 } from "./state/actions";
-import reducer from "./state/reducer";
+
 import Body from "./Body";
 import Header from "./Header";
 import LAS2Parser from "../../../parsers/las/LAS2Parser";
 import { buildCellId } from "./utils";
-import { defaultAppAttributesModel } from "./models/models";
 import { appAttributesFieldMapping, sectionMapping } from "./models/mappings";
 import { INPUT_TYPES } from "./constants";
-
+import { csvParse } from "d3-dsv";
 import css from "./styles.scss";
+import { useWellImporterContainer } from ".";
 
-const initialState = {
-  activeInput: null,
-  inputToCellIds: {},
-  appAttributesModel: defaultAppAttributesModel,
-  highlightedCellIdsMap: {},
-  textHighlightedCellIdsMap: {}
-};
+function parseFile(files) {
+  if (!files || !files.length) {
+    return { data: null, extension: null };
+  }
+  const [file] = files;
+  const extension = file.file.name.split(".").pop();
+  let data = null;
+  switch (extension) {
+    case "las":
+      data = LAS2Parser.parse(file.fileText);
+      break;
+    case "csv":
+      data = csvParse(file.fileText);
+      break;
+    default:
+      data = null;
+  }
+
+  return { data, extension };
+}
 
 const WellImporter = ({ files, onClickCancel }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [data, setData] = useState(null);
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-
+  const [state, dispatch] = useWellImporterContainer();
   const { activeInput, appAttributesModel, inputToCellIds, highlightedCellIdsMap, highlightedTextCellIdsMap } = state;
 
-  useEffect(() => {
-    if (!isLoaded && files.length) {
-      const parsedData = LAS2Parser.parse(files[0].fileText);
-      setData(parsedData);
-      setIsLoaded(true);
-    }
-  }, [isLoaded, files]);
+  const { data, extension } = useMemo(() => parseFile(files), [files]);
 
   const updateSelection = (sectionName, key, rowIndex, columnIndex, cellData, inputId, cellIds, entireColumn) => {
     setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData, entireColumn);
@@ -291,9 +294,11 @@ const WellImporter = ({ files, onClickCancel }) => {
         appAttributesModel={appAttributesModel}
         sectionMapping={sectionMapping}
         activateInput={activateInput}
+        extension={extension}
       />
       <Body
         data={data}
+        extension={extension}
         onClickCell={onClickCell}
         onClickAsciiHeader={onClickAsciiHeader}
         appAttributesModel={appAttributesModel}

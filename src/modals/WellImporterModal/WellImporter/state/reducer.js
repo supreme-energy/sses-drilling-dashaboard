@@ -1,5 +1,6 @@
 import merge from "lodash/merge";
 import omit from "lodash/omit";
+import { defaultAppAttributesModel } from "../models/models";
 
 import {
   ADD_HIGHLIGHTED_CELL_IDS,
@@ -9,8 +10,18 @@ import {
   REMOVE_HIGHLIGHTED_TEXT_CELL_IDS,
   REMOVE_INPUT_TO_CELL_IDS,
   SET_ACTIVE_INPUT,
-  UPDATE_ATTRIBUTES_MODEL
+  UPDATE_ATTRIBUTES_MODEL,
+  SELECT_CSV_CELL
 } from "./actions";
+
+export const initialState = {
+  activeInput: null,
+  inputToCellIds: {},
+  appAttributesModel: defaultAppAttributesModel,
+  highlightedCellIdsMap: {},
+  textHighlightedCellIdsMap: {},
+  csvSelection: []
+};
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -80,6 +91,18 @@ const reducer = (state, action) => {
             return map;
           }, {})
         )
+      };
+
+    case SELECT_CSV_CELL:
+      return {
+        ...state,
+        csvSelection: [
+          ...state.csvSelection,
+          {
+            selectedColumn: action.column,
+            selectedRow: action.row
+          }
+        ]
       };
   }
 
