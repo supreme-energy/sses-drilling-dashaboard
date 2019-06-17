@@ -7,6 +7,8 @@ import { useFilteredWellData } from "../../App/Containers";
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
+import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/CalcMethods";
+
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
 function selectionReducer(state, action) {
@@ -67,7 +69,7 @@ function makePAReducer(saveProjection) {
       case "dip_end":
         console.log("dip_end handler", op);
         const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
-        saveProjection(op.id, 7, { tcl: op.tcl + state.tcl, pos: pos, vs: op.vs + state.vs });
+        saveProjection(op.id, TOT_POS_VS, { tcl: op.tcl + state.tcl, pos: pos, vs: op.vs + state.vs });
         return state;
       case "fault_tot":
         return {
@@ -81,7 +83,7 @@ function makePAReducer(saveProjection) {
         };
       case "fault_end":
         console.log("fault_end handler");
-        saveProjection(prevOp.id, 8, { fault: prevOp.fault + state.prevFault });
+        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
         return state;
       case "pa":
         return {
@@ -90,7 +92,7 @@ function makePAReducer(saveProjection) {
         };
       case "pa_end":
         console.log("pa_end handler");
-        saveProjection(op.id, 6, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
+        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
         return state;
       case "tag_move":
         // We don't currently want the surveys or bit proj to be adjustable
@@ -107,7 +109,7 @@ function makePAReducer(saveProjection) {
         };
       case "tag_end":
         console.log("tag_end handler");
-        saveProjection(op.id, 8, { vs: op.vs + state.vs, dip: op.dip + state.dip });
+        saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip });
         return state;
       case "init":
         return PADeltaInit(action.section, action.prevSection);
