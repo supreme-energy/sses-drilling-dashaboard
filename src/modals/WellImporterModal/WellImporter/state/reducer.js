@@ -20,7 +20,7 @@ export const initialState = {
   appAttributesModel: defaultAppAttributesModel,
   highlightedCellIdsMap: {},
   textHighlightedCellIdsMap: {},
-  csvSelection: []
+  csvSelection: {}
 };
 
 const reducer = (state, action) => {
@@ -96,13 +96,14 @@ const reducer = (state, action) => {
     case SELECT_CSV_CELL:
       return {
         ...state,
-        csvSelection: [
+        csvSelection: {
           ...state.csvSelection,
-          {
+          [action.field.fieldKey]: {
             selectedColumn: action.column,
-            selectedRow: action.row
+            selectedRow: action.row,
+            field: action.field
           }
-        ]
+        }
       };
   }
 

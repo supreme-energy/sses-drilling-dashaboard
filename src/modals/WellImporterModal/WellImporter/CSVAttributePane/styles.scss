@@ -9,6 +9,8 @@
     text-align: center;
 }
 
-.body.unlocked .cell:hover {
-    @extend %selectedState;
+.body.unlocked .cell {
+    &.selectedCell, :hover {
+        @extend %selectedState;
+      }
 }
