@@ -65,14 +65,15 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const { wellInfoRefreshId, refreshWellInfoData: refreshStore } = useAppState();
+  const { requestId, refreshRequestId: refreshStore } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch({
     path: GET_WELL_INFO,
     query: {
       seldbname: wellId,
-      wellInfoRefreshId
+      requestId
     }
   });
+  console.log("isLoading", isLoading);
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
@@ -95,7 +96,7 @@ export function useWellInfo(wellId) {
           field,
           value
         },
-
+        cache: "no-cache",
         optimisticResult
       });
     },
@@ -146,11 +147,11 @@ export function useWellInfo(wellId) {
 }
 
 export function useWells() {
-  const { wellInfoRefreshId } = useAppState();
+  const { requestId } = useAppState();
   const [wells, , , , , { fetch }] = useFetch(
     {
       path: GET_WELL_LIST,
-      query: { wellInfoRefreshId }
+      query: { requestId }
     },
     {
       transform: wells => {

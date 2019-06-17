@@ -1,14 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
-import { createContainer } from 'unstated-next';
-import memoize from 'react-powertools/memoize';
+import { useState, useCallback, useMemo } from "react";
+import { createContainer } from "unstated-next";
+import memoize from "react-powertools/memoize";
 
-import {
-  useFormations,
-  useProjections,
-  useSurveys,
-  useWellOverviewKPI,
-  useWellPath
-} from '../../api';
+import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -24,10 +18,17 @@ function useTimeSlider(initialState) {
   return { sliderInterval, setSliderInterval };
 }
 
-export const {
-  Provider: TimeSliderProvider,
-  useContainer: useTimeSliderContainer
-} = createContainer(useTimeSlider);
+export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
+
+// Shared state for last Index of Time Slider
+function useLastIndexState(initialState) {
+  const [lastIndexState, setLastIndexState] = useState(initialState);
+  return { lastIndexState, setLastIndexState };
+}
+
+export const { Provider: LastIndexStateProvider, useContainer: useLastIndexStateContainer } = createContainer(
+  useLastIndexState
+);
 
 // Shared state for current drill phase
 function useDrillPhase(initialState) {
@@ -36,19 +37,16 @@ function useDrillPhase(initialState) {
 }
 
 function useAppStateData() {
-  const [wellInfoRefreshId, updateWellInfoRefreshId] = useState(0);
+  const [requestId, updateRequestId] = useState(0);
 
-  const refreshWellInfoData = useCallback(() => {
+  const refreshRequestId = useCallback(() => {
     const now = Date.now();
-    updateWellInfoRefreshId(now);
+    updateRequestId(now);
   }, []);
-  return { wellInfoRefreshId, refreshWellInfoData, updateWellInfoRefreshId };
+  return { requestId, updateRequestId, refreshRequestId };
 }
 
-export const {
-  Provider: DrillPhaseProvider,
-  useContainer: useDrillPhaseContainer
-} = createContainer(useDrillPhase);
+export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 
 const annotateSurveys = memoize(fullSurveyList => {
   // Bit projection is not always in list of surveys
@@ -82,9 +80,7 @@ const annotateProjections = memoize(projections => {
   });
 });
 
-export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(
-  useAppStateData
-);
+export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData(wellId) {
@@ -108,6 +104,8 @@ export function useFilteredWellData(wellId) {
       data: filterDataToInterval(f.data, sliderInterval)
     };
   });
+
+  console.log("sliderinterval", sliderInterval);
 
   return {
     surveys: surveysFiltered,

@@ -76,19 +76,12 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
   const surveyData = useSurveys(selectedWellId);
   const surveyMapPositions = useWellsMapPosition(selectedWellId, surveyData);
 
-  const [bounds, updateBounds] = useState(null);
-
   const selectedWell = wellsById[selectedWellId];
 
   const mapContainer = useRef(null);
   const phasePointsRef = useRef(null);
   const { current: phasePoints } = phasePointsRef;
 
-  useEffect(() => {
-    updateBounds(phasePoints && phasePoints.getBounds());
-  }, [phasePoints]);
-
-  const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
   const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
   const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
@@ -110,6 +103,8 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
     [wellSurfaceLocation, wellLandingLocation, wellPBHL]
   );
 
+  const bounds = useMemo(() => phasePoints && phasePoints.getBounds(), [sectionMarkers]);
+  const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
   const selectedWellMarker = useMemo(() => {
     if (!wellSurfaceLocation || !selectedWell) {
       return [];
