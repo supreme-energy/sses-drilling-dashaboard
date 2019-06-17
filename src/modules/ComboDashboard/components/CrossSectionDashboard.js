@@ -117,15 +117,7 @@ function makePAReducer(saveProjection) {
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  const {
-    surveys,
-    wellPlan,
-    formations,
-    projections,
-    saveProjection,
-    refreshFormations,
-    refreshProjections
-  } = useFilteredWellData(wellId);
+  const { surveys, wellPlan, formations, projections, saveProjection, refresh } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
@@ -218,9 +210,10 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   return (
     <WidgetCard className={classes.crossSectionDash}>
-      <Typography variant="subtitle1">Cross Section</Typography>
-      <a onClick={refreshFormations}>refresh formations</a>
-      <a onClick={refreshProjections}>refresh projections</a>
+      <Typography variant="subtitle1" style={{ display: "inline-block" }}>
+        Cross Section
+      </Typography>
+      <a onClick={refresh}> refresh</a>
       <Suspense fallback={<CircularProgress />}>
         <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
           {({ width, height }) => (

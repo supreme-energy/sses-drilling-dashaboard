@@ -97,11 +97,9 @@ export function useFilteredWellData(wellId) {
     formations: formationsFiltered,
     projections: projectionsFiltered,
     saveProjection: saveAndUpdate,
-    refreshFormations: () => {
+    refresh: () => {
       console.log("refreshing formations");
       refreshFormations();
-    },
-    refreshProjections: () => {
       console.log("refreshing projections");
       refreshProjections();
     }
