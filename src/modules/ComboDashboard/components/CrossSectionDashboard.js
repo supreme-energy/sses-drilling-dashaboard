@@ -54,7 +54,7 @@ function makePAReducer(saveProjection) {
           dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
         };
       case "dip_bot":
-        depthDelta = action.bot - op.bot - state.prevFault;
+        depthDelta = action.bot - op.bot - state.prevFault + op.fault;
         return {
           ...state,
           tot: depthDelta,
