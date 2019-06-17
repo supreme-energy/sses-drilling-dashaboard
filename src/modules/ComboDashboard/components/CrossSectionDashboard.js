@@ -23,6 +23,7 @@ function selectionReducer(state, action) {
   }
 }
 function PADeltaInit(section, prevSection) {
+  console.log(prevSection, section);
   return {
     prevOp: prevSection,
     op: section,
@@ -80,7 +81,7 @@ function makePAReducer(saveProjection) {
         };
       case "fault_end":
         console.log("fault_end handler");
-        console.log(prevOp.id, 8, { fault: prevOp.fault + state.prevFault });
+        saveProjection(prevOp.id, 8, { fault: prevOp.fault + state.prevFault });
         return state;
       case "pa":
         return {
@@ -89,7 +90,7 @@ function makePAReducer(saveProjection) {
         };
       case "pa_end":
         console.log("pa_end handler");
-        saveProjection(op.id, 8, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
+        saveProjection(op.id, 6, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
         return state;
       case "tag_move":
         // We don't currently want the surveys or bit proj to be adjustable
@@ -106,7 +107,7 @@ function makePAReducer(saveProjection) {
         };
       case "tag_end":
         console.log("tag_end handler");
-        saveProjection(op.id, 6, { vs: op.vs + state.vs, dip: op.dip + state.dip });
+        saveProjection(op.id, 8, { vs: op.vs + state.vs, dip: op.dip + state.dip });
         return state;
       case "init":
         return PADeltaInit(action.section, action.prevSection);
