@@ -94,6 +94,12 @@ const reducer = (state, action) => {
       };
 
     case SELECT_CSV_CELL:
+      if (
+        (action.field.type === "cell" && action.row === null) ||
+        (action.field.type === "column" && action.row !== null)
+      ) {
+        return state;
+      }
       return {
         ...state,
         csvSelection: {

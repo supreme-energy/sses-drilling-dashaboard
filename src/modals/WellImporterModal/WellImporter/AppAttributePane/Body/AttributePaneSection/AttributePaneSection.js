@@ -22,7 +22,7 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
   const attributePaneTextFields = useMemo(() => {
     return Object.keys(model).map(key => {
       const config = mapping[key];
-      console.log("model", model[key]);
+
       const partialModel = extension === "csv" ? { value: getFieldValue(state.csvSelection, key, data) } : model[key];
 
       return (
