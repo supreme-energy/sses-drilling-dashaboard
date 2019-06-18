@@ -24,7 +24,7 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { ghostDiffDispatch, saveProjection } = props;
+  const { ghostDiffDispatch } = props;
   const red = 0xee2211;
   const white = 0xffffff;
 
