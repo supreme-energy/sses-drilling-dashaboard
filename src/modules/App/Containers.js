@@ -84,9 +84,12 @@ export function useFilteredWellData(wellId) {
 
   const saveAndUpdate = useCallback(
     (...args) => {
-      saveProjection(...args);
-      refreshProjections();
-      refreshFormations();
+      saveProjection(...args).then((data, err) => {
+        if (!err) {
+          refreshFormations();
+          refreshProjections();
+        }
+      });
     },
     [saveProjection, refreshProjections, refreshFormations]
   );

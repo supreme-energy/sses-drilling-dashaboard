@@ -276,7 +276,7 @@ export function useProjections(wellId) {
   );
   const saveProjection = (projectionId, method, fields = {}) => {
     console.log("calling API with ", projectionId, method, fields);
-    fetch({
+    return fetch({
       path: SET_WELL_PROJECTIONS,
       method: "GET",
       query: {
