@@ -25,7 +25,6 @@ function selectionReducer(state, action) {
   }
 }
 function PADeltaInit(section, prevSection) {
-  console.log(prevSection, section);
   return {
     prevOp: prevSection,
     op: section,
@@ -68,7 +67,6 @@ function makePAReducer(saveProjection) {
           dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
         };
       case "dip_end":
-        console.log("dip_end handler", op);
         saveProjection(op.id, TOT_POS_VS, { tot: op.tot + state.tot, pos: pos, vs: op.vs + state.vs });
         return state;
       case "fault_tot":
@@ -82,7 +80,6 @@ function makePAReducer(saveProjection) {
           prevFault: action.bot - prevOp.bot
         };
       case "fault_end":
-        console.log("fault_end handler");
         saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault, pos: pos });
         return state;
       case "pa":
@@ -91,7 +88,6 @@ function makePAReducer(saveProjection) {
           tvd: action.tvd - op.tvd - state.prevFault
         };
       case "pa_end":
-        console.log("pa_end handler");
         saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs, pos: pos });
         return state;
       case "tag_move":
@@ -108,7 +104,6 @@ function makePAReducer(saveProjection) {
           bot: prevOp.bot - op.bot + changeInY + op.fault
         };
       case "tag_end":
-        console.log("tag_end handler");
         saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip, pos: pos });
         return state;
       case "init":
@@ -147,7 +142,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
           bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
           tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
         };
-      } else if (i > index) {
+      } else if (i > index && index !== -1) {
         return {
           ...p,
           tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault,
