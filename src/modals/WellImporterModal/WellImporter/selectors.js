@@ -45,10 +45,21 @@ export function getFieldValue(csvSelection, key, data) {
 
 const getSelectionByColumnAndRow = memoizeOne(selectionByField => {
   const selection = Object.values(selectionByField).reduce((acc, next) => {
-    const colSelection = acc[next.selectedColumn] || {};
-    if (next.selectedRow !== null) {
+    let colSelection = acc[next.selectedColumn];
+    // check if for this column we have any selection that select it all
+    const isSelectAll = next.selectedRow === null || (colSelection && Object.values(colSelection).length === 0);
+
+    // if we don't have a column selection insert row selection
+    if (!isSelectAll && next.selectedRow !== null) {
+      if (!colSelection) {
+        colSelection = {};
+      }
       colSelection[next.selectedRow] = true;
+    } else if (isSelectAll) {
+      // ensure colSelection is initialized
+      colSelection = {};
     }
+
     acc[next.selectedColumn] = colSelection;
     return acc;
   }, {});
@@ -59,13 +70,15 @@ const getSelectionByColumnAndRow = memoizeOne(selectionByField => {
 export function isSelected(row, column, selectionByField) {
   const selectionByColumnAndRow = getSelectionByColumnAndRow(selectionByField);
   const columnSelection = selectionByColumnAndRow[column];
-  return columnSelection && ((row === null && !Object.values(columnSelection).length) || columnSelection[row]);
+  return columnSelection && (!Object.values(columnSelection).length || columnSelection[row]);
 }
 
 export function isActive(row, column, selectionByField, activeField) {
   const activeSelection = selectionByField[activeField];
+
   return (
     activeSelection &&
-    (column === activeSelection.selectedColumn && (row === activeSelection.selectedRow || row === null))
+    (column === activeSelection.selectedColumn &&
+      (row === activeSelection.selectedRow || activeSelection.selectedRow === null))
   );
 }

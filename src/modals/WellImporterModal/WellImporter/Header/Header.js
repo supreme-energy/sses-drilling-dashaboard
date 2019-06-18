@@ -14,8 +14,7 @@ const Header = ({
   sectionMapping,
   className,
   onClickCancel,
-  activateInput,
-  extension
+  activateInput
 }) => {
   return (
     <AppBar className={className} position="relative" color="inherit">
@@ -28,7 +27,7 @@ const Header = ({
         />
       </div>
       <div className={css.lasAttributePaneHeaderContainer}>
-        <LASAttributePaneHeader data={data} onClickCancel={onClickCancel} extension={extension} />
+        <LASAttributePaneHeader data={data} onClickCancel={onClickCancel} />
       </div>
     </AppBar>
   );

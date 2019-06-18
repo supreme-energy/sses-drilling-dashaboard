@@ -6,17 +6,10 @@ import AttributePaneTextField from "../AttributePaneTextField";
 
 import css from "./styles.scss";
 import { useWellImporterContainer } from "../../..";
-import { useSelector } from "react-redux";
 import { useParsedFileSelector, getFieldValue } from "../../../selectors";
 
 const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, model, activeInput }) => {
   const [state] = useWellImporterContainer();
-  // const files = useSelector(state => {
-
-  //   return state.files.files;
-  // });
-
-  console.log("useSelector", useSelector);
   const { data, extension } = useParsedFileSelector();
 
   const attributePaneTextFields = useMemo(() => {

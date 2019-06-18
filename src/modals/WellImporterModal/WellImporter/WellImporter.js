@@ -274,7 +274,6 @@ const WellImporter = ({ files, onClickCancel }) => {
         appAttributesModel={appAttributesModel}
         sectionMapping={sectionMapping}
         activateInput={activateInput}
-        extension={extension}
       />
       <Body
         data={data}

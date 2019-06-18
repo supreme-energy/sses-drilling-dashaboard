@@ -4,9 +4,10 @@ import { Button, Typography, Box } from "@material-ui/core";
 import CSVHeader from "../../CSVAttributePane/Header";
 import classNames from "classnames";
 import css from "./styles.scss";
+import { useParsedFileSelector } from "../../selectors";
 
-const Header = ({ data, className, onClickCancel, extension }) => {
-  console.log("data", data);
+const Header = ({ data, className, onClickCancel }) => {
+  const { extension } = useParsedFileSelector();
   return (
     <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>
       <div>
