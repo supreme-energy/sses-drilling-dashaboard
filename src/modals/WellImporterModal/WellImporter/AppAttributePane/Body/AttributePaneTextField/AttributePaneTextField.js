@@ -24,7 +24,7 @@ const AttributePaneTextField = ({
     // elsewhere on the page, we want to refocus the input field so it appears active
     if (isFocused) {
       setTimeout(() => {
-        inputRef.current.focus();
+        inputRef.current && inputRef.current.focus();
       }, 0);
     }
   }, [inputRef, isFocused]);

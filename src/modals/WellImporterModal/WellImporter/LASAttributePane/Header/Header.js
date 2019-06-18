@@ -6,8 +6,8 @@ import classNames from "classnames";
 import css from "./styles.scss";
 import { useParsedFileSelector } from "../../selectors";
 
-const Header = ({ data, className, onClickCancel }) => {
-  const { extension } = useParsedFileSelector();
+const Header = ({ className, onClickCancel }) => {
+  const { data, extension } = useParsedFileSelector();
   return (
     <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>
       <div>

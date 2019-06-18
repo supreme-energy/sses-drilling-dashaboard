@@ -6,6 +6,7 @@ import classnames from "classnames";
 import { buildCellId } from "../../utils";
 
 import css from "./styles.scss";
+import { useParsedFileSelector } from "../../selectors";
 
 const truncatedMessage = "-------Log data intentionally truncated. All log data will be imported-------";
 
@@ -13,13 +14,13 @@ const nonDisplayFields = ["index"];
 
 const Body = ({
   unlocked,
-  data,
   className,
   onClickCell,
   highlightedRowAndColumnList,
   textHighlightedRowAndColumnList,
   onClickAsciiHeader
 }) => {
+  const { data } = useParsedFileSelector();
   const onClick = (sectionName, key, cellData, rowIndex, columnIndex) => () => {
     onClickCell(sectionName, key, cellData, rowIndex, columnIndex);
   };
@@ -190,7 +191,6 @@ Body.defaultProps = {
 };
 
 Body.propTypes = {
-  data: PropTypes.object.isRequired,
   onClickCell: PropTypes.func.isRequired,
   onClickAsciiHeader: PropTypes.func.isRequired,
   className: PropTypes.string,

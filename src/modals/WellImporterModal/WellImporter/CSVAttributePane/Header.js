@@ -16,6 +16,7 @@ export default function Header({ fields }) {
     <Box className={classNames(css.header, { [css.unlocked]: unlocked })} display="flex" flexDirection="row">
       {fields.map(f => (
         <TableCell
+          key={f}
           size="small"
           component="div"
           className={classNames("flex", css.headCell, {
@@ -24,7 +25,9 @@ export default function Header({ fields }) {
           })}
           variant="head"
           onClick={() => {
-            dispatch({ type: SELECT_CSV_CELL, column: f, row: null, field: activeInput });
+            if (unlocked) {
+              dispatch({ type: SELECT_CSV_CELL, column: f, row: null, field: activeInput });
+            }
           }}
         >
           {f}

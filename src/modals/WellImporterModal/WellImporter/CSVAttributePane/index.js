@@ -7,9 +7,10 @@ import classNames from "classnames";
 import { useWellImporterContainer } from "..";
 import isEmpty from "lodash/isEmpty";
 import { SELECT_CSV_CELL } from "../state/actions";
-import { isSelected, isActive } from "../selectors";
+import { isSelected, isActive, useParsedFileSelector } from "../selectors";
 
-export default function CSVAttributePane({ data }) {
+export default function CSVAttributePane() {
+  const { data } = useParsedFileSelector();
   const [state, dispatch] = useWellImporterContainer();
   const { activeInput, csvSelection } = state;
   const unlocked = !isEmpty(activeInput);
@@ -27,7 +28,9 @@ export default function CSVAttributePane({ data }) {
                 [css.activeField]: isActive(index, key, csvSelection, activeInput && activeInput.fieldKey)
               })}
               onClick={() => {
-                dispatch({ type: SELECT_CSV_CELL, column: key, row: index, field: activeInput });
+                if (unlocked) {
+                  dispatch({ type: SELECT_CSV_CELL, column: key, row: index, field: activeInput });
+                }
               }}
             >
               {d[key]}

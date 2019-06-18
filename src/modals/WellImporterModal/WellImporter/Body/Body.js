@@ -11,7 +11,6 @@ import CSVAttributePane from "../CSVAttributePane";
 import css from "./styles.scss";
 
 const Body = ({
-  data,
   onClickCell,
   onClickAsciiHeader,
   appAttributesModel,
@@ -43,7 +42,6 @@ const Body = ({
       <div className={css.lasAttributePaneBodyContainer}>
         {extension === "las" ? (
           <LASAttributePaneBody
-            data={data}
             highlightedRowAndColumnList={highlightedRowAndColumnList}
             textHighlightedRowAndColumnList={textHighlightedRowAndColumnList}
             onClickCell={onClickCell}
@@ -51,7 +49,7 @@ const Body = ({
             unlocked={!isEmpty(activeInput)}
           />
         ) : (
-          <CSVAttributePane data={data} />
+          <CSVAttributePane />
         )}
       </div>
     </div>
@@ -65,7 +63,6 @@ Body.defaultProps = {
 };
 
 Body.propTypes = {
-  data: PropTypes.object.isRequired,
   onClickCell: PropTypes.func.isRequired,
   onClickAsciiHeader: PropTypes.func.isRequired,
   appAttributesModel: PropTypes.object.isRequired,

@@ -268,7 +268,6 @@ const WellImporter = ({ files, onClickCancel }) => {
   return (
     <div className={css.container}>
       <Header
-        data={data}
         onClickCancel={onClickCancel}
         appAttributesFieldMapping={appAttributesFieldMapping}
         appAttributesModel={appAttributesModel}
@@ -276,7 +275,6 @@ const WellImporter = ({ files, onClickCancel }) => {
         activateInput={activateInput}
       />
       <Body
-        data={data}
         extension={extension}
         onClickCell={onClickCell}
         onClickAsciiHeader={onClickAsciiHeader}
