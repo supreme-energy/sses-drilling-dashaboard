@@ -80,7 +80,7 @@ function makePAReducer(saveProjection) {
           prevFault: action.bot - prevOp.bot
         };
       case "fault_end":
-        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault, pos: pos });
+        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
         return state;
       case "pa":
         return {
@@ -124,6 +124,9 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
+    if (index === -1) {
+      return rawSections;
+    }
     return rawSections.map((p, i) => {
       if (i === index - 1) {
         return {
@@ -142,7 +145,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
           bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
           tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
         };
-      } else if (i > index && index !== -1) {
+      } else if (i > index) {
         return {
           ...p,
           tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault,
