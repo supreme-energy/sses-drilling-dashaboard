@@ -45,6 +45,7 @@ function makePAReducer(saveProjection) {
     const op = state.op;
     const prevOp = state.prevOp;
     let depthDelta = 0;
+    const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
     switch (action.type) {
       case "dip_tot":
         depthDelta = action.tot - op.tot - state.prevFault + op.fault;
@@ -68,8 +69,7 @@ function makePAReducer(saveProjection) {
         };
       case "dip_end":
         console.log("dip_end handler", op);
-        const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
-        saveProjection(op.id, TOT_POS_VS, { tcl: op.tcl + state.tcl, pos: pos, vs: op.vs + state.vs });
+        saveProjection(op.id, TOT_POS_VS, { tot: op.tot + state.tot, pos: pos, vs: op.vs + state.vs });
         return state;
       case "fault_tot":
         return {
@@ -83,7 +83,7 @@ function makePAReducer(saveProjection) {
         };
       case "fault_end":
         console.log("fault_end handler");
-        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
+        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault, pos: pos });
         return state;
       case "pa":
         return {
@@ -92,7 +92,7 @@ function makePAReducer(saveProjection) {
         };
       case "pa_end":
         console.log("pa_end handler");
-        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs });
+        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs, pos: pos });
         return state;
       case "tag_move":
         // We don't currently want the surveys or bit proj to be adjustable
@@ -109,7 +109,7 @@ function makePAReducer(saveProjection) {
         };
       case "tag_end":
         console.log("tag_end handler");
-        saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip });
+        saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip, pos: pos });
         return state;
       case "init":
         return PADeltaInit(action.section, action.prevSection);
