@@ -37,6 +37,33 @@ const options = {
   keys: ["name", "status"]
 };
 
+export function serializeFetch(f) {
+  let lastArgs;
+  let lastPromise;
+
+  async function runFunc(f) {
+    let result;
+    while (lastArgs !== undefined) {
+      const args = lastArgs;
+      lastArgs = undefined;
+      result = await f(...args);
+    }
+
+    lastPromise = undefined;
+    return result;
+  }
+
+  return function(...args) {
+    if (lastPromise) {
+      lastArgs = args;
+      return lastPromise;
+    }
+
+    lastArgs = args;
+    return (lastPromise = runFunc(f));
+  };
+}
+
 const EMPTY_ARRAY = [];
 
 function transform(data) {
@@ -73,7 +100,10 @@ export function useWellInfo(wellId) {
       requestId
     }
   });
+
   console.log("isLoading", isLoading);
+
+  const serializedFetch = useCallback(serializeFetch(fetch), [fetch]);
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
@@ -88,7 +118,7 @@ export function useWellInfo(wellId) {
         }
       };
 
-      return fetch({
+      return serializedFetch({
         path: SET_WELL_FIELD,
         query: {
           seldbname: wellId,
@@ -100,33 +130,50 @@ export function useWellInfo(wellId) {
         optimisticResult
       });
     },
-    [fetch, data, wellInfo]
+    [serializedFetch, data, wellInfo]
   );
 
-  if (!wellInfo) {
-    return [{}, isLoading, updateWell, refreshStore];
-  }
+  const {
+    wellSurfaceLocationLocal,
+    wellSurfaceLocation,
+    wellLandingLocation,
+    wellLandingLocationLocal,
+    wellPBHL,
+    wellPBHLLocal
+  } = useMemo(() => {
+    if (!wellInfo) {
+      return {};
+    }
+    const source = proj4.Proj("EPSG:32040");
+    const transform = toWGS84(source);
 
-  const source = proj4.Proj("EPSG:32040");
-  const transform = toWGS84(source);
+    const wellSurfaceLocationLocal = {
+      x: Number(wellInfo.survey_easting),
+      y: Number(wellInfo.survey_northing)
+    };
+    const wellLandingLocationLocal = {
+      x: Number(wellInfo.landing_easting),
+      y: Number(wellInfo.landing_northing)
+    };
 
-  const wellSurfaceLocationLocal = {
-    x: Number(wellInfo.survey_easting),
-    y: Number(wellInfo.survey_northing)
-  };
-  const wellLandingLocationLocal = {
-    x: Number(wellInfo.landing_easting),
-    y: Number(wellInfo.landing_northing)
-  };
+    const wellPBHLLocal = {
+      x: Number(wellInfo.pbhl_easting),
+      y: Number(wellInfo.pbhl_northing)
+    };
 
-  const wellPBHLLocal = {
-    x: Number(wellInfo.pbhl_easting),
-    y: Number(wellInfo.pbhl_northing)
-  };
+    const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
+    const wellLandingLocation = transform(wellLandingLocationLocal);
+    const wellPBHL = transform(wellPBHLLocal);
 
-  const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
-  const wellLandingLocation = transform(wellLandingLocationLocal);
-  const wellPBHL = transform(wellPBHLLocal);
+    return {
+      wellSurfaceLocationLocal,
+      wellSurfaceLocation,
+      wellLandingLocation,
+      wellLandingLocationLocal,
+      wellPBHL,
+      wellPBHLLocal
+    };
+  }, [wellInfo]);
 
   return [
     {
