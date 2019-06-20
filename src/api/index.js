@@ -69,12 +69,13 @@ export function useWellInfo(wellId) {
   const { requestId, refreshRequestId: refreshStore } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch();
 
-  const serializedFetch = useMemo(() => serialize(fetch), [fetch]);
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
 
   useEffect(() => {
-    serializedFetch(
+    fetch(
       {
         path: GET_WELL_INFO,
         query: {
@@ -84,7 +85,7 @@ export function useWellInfo(wellId) {
       },
       (prev, next) => next
     );
-  }, [wellId, requestId, serializedFetch]);
+  }, [wellId, requestId, fetch]);
 
   const updateWell = useCallback(
     ({ wellId, field, value, refreshStore }) => {
@@ -96,7 +97,7 @@ export function useWellInfo(wellId) {
         }
       };
 
-      return serializedFetch({
+      return serializedUpdateFetch({
         path: SET_WELL_FIELD,
         query: {
           seldbname: wellId,
@@ -108,7 +109,7 @@ export function useWellInfo(wellId) {
         optimisticResult
       });
     },
-    [serializedFetch, data, wellInfo]
+    [serializedUpdateFetch, data, wellInfo]
   );
 
   const {
