@@ -94,23 +94,32 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
   const sectionMarkers = useMemo(
     () =>
       [
-        { data: wellSurfaceLocation, icon: SurfaceIcon },
-        { data: wellLandingLocation, icon: LandingIcon },
-        { data: wellPBHL, icon: PBHLIcon }
+        { data: wellSurfaceLocation, icon: SurfaceIcon, id: "wellSurfaceLocation" },
+        { data: wellLandingLocation, icon: LandingIcon, id: "wellLandingLocation" },
+        { data: wellPBHL, icon: PBHLIcon, id: "wellPBHL" }
       ]
         .filter(d => d.data)
         .map(d => ({ ...d, position: [d.data.y, d.data.x] })),
     [wellSurfaceLocation, wellLandingLocation, wellPBHL]
   );
 
-  const bounds = useMemo(() => phasePoints && phasePoints.getBounds(), [sectionMarkers]);
+  // recompute bounds when sectionMarkers change
+  const [bounds, updateBounds] = useState(null);
+  useEffect(() => {
+    updateBounds(phasePoints && phasePoints.getBounds());
+  }, [sectionMarkers]);
+
   const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
   const selectedWellMarker = useMemo(() => {
     if (!wellSurfaceLocation || !selectedWell) {
       return [];
     }
     return [
-      { position: [wellSurfaceLocation.y, wellSurfaceLocation.x], icon: leafletMapIconsSelected[selectedWell.status] }
+      {
+        position: [wellSurfaceLocation.y, wellSurfaceLocation.x],
+        icon: leafletMapIconsSelected[selectedWell.status],
+        id: "selectedWell"
+      }
     ];
   }, [selectedWell, wellSurfaceLocation]);
 

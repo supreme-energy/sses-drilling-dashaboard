@@ -293,21 +293,19 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
 }
 
 export default function WellInfo({ wellId }) {
-  const [data, , updateWell, refreshStore] = useWellInfo(wellId);
-
+  const [data, , updateWell, refreshFetchStore] = useWellInfo(wellId);
   const wellInfo = data.wellInfo || {};
   const surfaceLocation = data.wellSurfaceLocation || {};
   const transform = data.transform;
 
   const onFieldChange = useCallback(
-    (field, value, shouldRefreshStore) => {
-      updateWell({ wellId, field, value }).then(() => {
-        if (shouldRefreshStore) {
-          refreshStore();
-        }
-      });
+    async (field, value, shouldRefreshStore) => {
+      await updateWell({ wellId, field, value });
+      if (shouldRefreshStore) {
+        refreshFetchStore();
+      }
     },
-    [updateWell, wellId, refreshStore]
+    [updateWell, wellId, refreshFetchStore]
   );
   return (
     <Box className={classes.root} display="flex" flexDirection="row" flex={1} p={1}>

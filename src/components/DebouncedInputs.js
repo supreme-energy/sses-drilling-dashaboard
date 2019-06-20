@@ -16,10 +16,10 @@ export const useDebouncedValue = ({ value, onChange, debounceInterval }) => {
   const isPending = internalState.current.isPending;
   const onChangeDebounce = useMemo(
     () =>
-      debounce(newValue => {
+      debounce(async newValue => {
+        await onChange(newValue);
         // mark that we end the pending update
         internalState.current.isPending = false;
-        onChange(newValue);
       }, debounceInterval),
     [onChange, debounceInterval]
   );

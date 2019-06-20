@@ -1,6 +1,6 @@
 import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
@@ -11,6 +11,7 @@ import { group } from "d3-array";
 import proj4 from "proj4";
 import { toWGS84 } from "../utils/projections";
 import memoize from "react-powertools/memoize";
+import serialize from "react-powertools/serialize";
 import { useAppState } from "../modules/App/Containers";
 
 export const GET_WELL_LIST = "/joblist.php";
@@ -36,33 +37,6 @@ const options = {
   minMatchCharLength: 2,
   keys: ["name", "status"]
 };
-
-export function serializeFetch(f) {
-  let lastArgs;
-  let lastPromise;
-
-  async function runFunc(f) {
-    let result;
-    while (lastArgs !== undefined) {
-      const args = lastArgs;
-      lastArgs = undefined;
-      result = await f(...args);
-    }
-
-    lastPromise = undefined;
-    return result;
-  }
-
-  return function(...args) {
-    if (lastPromise) {
-      lastArgs = args;
-      return lastPromise;
-    }
-
-    lastArgs = args;
-    return (lastPromise = runFunc(f));
-  };
-}
 
 const EMPTY_ARRAY = [];
 
@@ -93,23 +67,27 @@ export function useKpi(wellId) {
 
 export function useWellInfo(wellId) {
   const { requestId, refreshRequestId: refreshStore } = useAppState();
-  const [data, isLoading, , , , { fetch }] = useFetch({
-    path: GET_WELL_INFO,
-    query: {
-      seldbname: wellId,
-      requestId
-    }
-  });
+  const [data, isLoading, , , , { fetch }] = useFetch();
 
-  console.log("isLoading", isLoading);
-
-  const serializedFetch = useCallback(serializeFetch(fetch), [fetch]);
-
+  const serializedFetch = useMemo(() => serialize(fetch), [fetch]);
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
 
+  useEffect(() => {
+    serializedFetch(
+      {
+        path: GET_WELL_INFO,
+        query: {
+          seldbname: wellId,
+          requestId
+        }
+      },
+      (prev, next) => next
+    );
+  }, [wellId, requestId, serializedFetch]);
+
   const updateWell = useCallback(
-    ({ wellId, field, value }) => {
+    ({ wellId, field, value, refreshStore }) => {
       const optimisticResult = {
         ...data,
         wellinfo: {
