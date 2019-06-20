@@ -275,7 +275,7 @@ export function useProjections(wellId) {
     }
   );
   const saveProjection = (projectionId, method, fields = {}) => {
-    console.log("calling API with ", projectionId, method, fields);
+    // return the promise so we can refresh AFTER the API call is done
     return fetch({
       path: SET_WELL_PROJECTIONS,
       method: "GET",

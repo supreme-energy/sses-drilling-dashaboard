@@ -101,9 +101,8 @@ export function useFilteredWellData(wellId) {
     projections: projectionsFiltered,
     saveProjection: saveAndUpdate,
     refresh: () => {
-      console.log("refreshing formations");
+      // TODO: Ideally these should update simultaneously, but in reality each call returns at a different time
       refreshFormations();
-      console.log("refreshing projections");
       refreshProjections();
     }
   };
