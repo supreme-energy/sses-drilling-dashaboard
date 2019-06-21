@@ -80,7 +80,6 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
 
   const mapContainer = useRef(null);
   const phasePointsRef = useRef(null);
-  const { current: phasePoints } = phasePointsRef;
 
   const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
@@ -106,7 +105,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
   // recompute bounds when sectionMarkers change
   const [bounds, updateBounds] = useState(null);
   useEffect(() => {
-    updateBounds(phasePoints && phasePoints.getBounds());
+    updateBounds(phasePointsRef.current && phasePointsRef.current.getBounds());
   }, [sectionMarkers]);
 
   const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
