@@ -1,43 +1,33 @@
 import upperFirst from "lodash/upperFirst";
 import React from "react";
-import { Button, Typography } from "@material-ui/core";
-
+import { Button, Typography, Box } from "@material-ui/core";
+import CSVHeader from "../../CSVAttributePane/Header";
+import classNames from "classnames";
 import css from "./styles.scss";
+import { useParsedFileSelector } from "../../selectors";
 
-const Header = ({ data, className, onClickCancel }) => {
+const Header = ({ className, onClickCancel }) => {
+  const { data, extension } = useParsedFileSelector();
   return (
-    <div className={className}>
+    <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>
       <div>
-        <Typography
-          variant="h5"
-          color="primary"
-          className={css.title}
-        >
+        <Typography variant="h5" color="primary" className={css.title}>
           Import a New Well
         </Typography>
       </div>
 
       <div className={css.topButtonContainer}>
-        <Button
-          className={css.button}
-          color="primary"
-          onClick={onClickCancel}
-        >
+        <Button className={css.button} color="primary" onClick={onClickCancel}>
           Cancel
         </Button>
-        <Button
-          className={css.button}
-          variant="contained"
-          color="secondary"
-          disabled
-        >
+        <Button className={css.button} variant="contained" color="secondary" disabled>
           Import
         </Button>
       </div>
 
-      <div className={css.bottomContainer}>
-        {
-          Object.keys(data).map((sectionName) => {
+      <div className={classNames(css.bottomContainer, { [css.csv]: extension === "csv" })}>
+        {extension === "las" ? (
+          Object.keys(data).map(sectionName => {
             return (
               <Button
                 key={sectionName}
@@ -50,14 +40,16 @@ const Header = ({ data, className, onClickCancel }) => {
               </Button>
             );
           })
-        }
+        ) : (
+          <CSVHeader fields={data.columns} />
+        )}
       </div>
-    </div>
+    </Box>
   );
 };
 
 Header.defaultProps = {
-  className: css.container,
+  className: css.container
 };
 
 export default Header;
