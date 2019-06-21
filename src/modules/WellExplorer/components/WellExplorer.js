@@ -129,7 +129,12 @@ export const WellExplorer = ({
         </div>
         <span className={classes.hSpacer} />
         {selectedWellId ? (
-          <WellOverview className={classes.wellOverview} well={selectedWell} updateFavorite={updateFavorite} />
+          <WellOverview
+            className={classes.wellOverview}
+            well={selectedWell}
+            updateFavorite={updateFavorite}
+            onFilesToImportChange={onFilesToImportChange}
+          />
         ) : (
           <WelcomeCard
             className={classes.welcome}

@@ -9,6 +9,7 @@ import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
 import classNames from "classnames";
+import ImportInput from "../ImportInput";
 
 const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   const well = openedWell || lastEditedWell;
@@ -65,21 +66,14 @@ function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToIm
                 </ListItemIcon>
                 <ListItemText>Create a new Well</ListItemText>
               </ListItem>
-              <input
-                onChange={onFilesToImportChange}
-                accept=".csv, .las, .laz"
-                id="raised-button-file"
-                type="file"
-                className={classes.importNewInput}
-              />
-              <label htmlFor="raised-button-file" className={classes.listItem}>
+              <ImportInput onChange={onFilesToImportChange}>
                 <ListItem color="primary">
                   <ListItemIcon>
                     <Import color="primary" />
                   </ListItemIcon>
                   <ListItemText>Import a new Well</ListItemText>
                 </ListItem>
-              </label>
+              </ImportInput>
             </List>
           </div>
           <span className={classes.hSpacer} />

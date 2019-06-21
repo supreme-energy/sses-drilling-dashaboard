@@ -5,14 +5,17 @@ import CSVHeader from "../../CSVAttributePane/Header";
 import classNames from "classnames";
 import css from "./styles.scss";
 import { useParsedFileSelector } from "../../selectors";
+import { useSelector } from "react-redux";
 
 const Header = ({ className, onClickCancel }) => {
   const { data, extension } = useParsedFileSelector();
+  const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
+
   return (
     <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>
       <div>
         <Typography variant="h5" color="primary" className={css.title}>
-          Import a New Well
+          {selectedWellId ? "Upload Well Data" : "Import a New Well"}
         </Typography>
       </div>
 

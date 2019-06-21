@@ -70,7 +70,8 @@ const AttributePaneTextField = ({
 
 AttributePaneTextField.defaultProps = {
   isFocused: false,
-  type: INPUT_TYPES.CELL
+  type: INPUT_TYPES.CELL,
+  classes: {}
 };
 
 AttributePaneTextField.propTypes = {

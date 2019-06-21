@@ -84,7 +84,7 @@ export function useWellInfo(wellId) {
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
-    if (requestId !== stateRef.current.internalRequestId) {
+    if (wellId && requestId !== stateRef.current.internalRequestId) {
       serializedRefresh(
         {
           path: GET_WELL_INFO,

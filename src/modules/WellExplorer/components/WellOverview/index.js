@@ -8,7 +8,7 @@ import Overview from "./Overview";
 import WellInfo from "./WellInfo";
 import classNames from "classnames";
 
-function WellOverivew({ className, well, match, history, updateFavorite }) {
+function WellOverivew({ className, well, match, history, updateFavorite, onFilesToImportChange }) {
   const [currentTab, changeCurrentTab] = useState("overview");
   const onTabChange = (_, value) => {
     changeCurrentTab(value);
@@ -16,7 +16,9 @@ function WellOverivew({ className, well, match, history, updateFavorite }) {
 
   return (
     <Card className={classNames(className, "layout vertical")}>
-      {well && <OverivewKpi well={well} updateFavorite={updateFavorite} />}
+      {well && (
+        <OverivewKpi well={well} updateFavorite={updateFavorite} onFilesToImportChange={onFilesToImportChange} />
+      )}
       <Tabs value={currentTab} indicatorColor="primary" onChange={onTabChange}>
         <Tab value="overview" label="Well Overview" />
         <Tab value="info" label="Well Info" />

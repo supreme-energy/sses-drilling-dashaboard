@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AttributePaneSection from "./AttributePaneSection";
+import { useSelector } from "react-redux";
+import { useWellInfo } from "../../../../../api";
 
 const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeInput }) => {
   const { wellInfo, wellParameters, wellData } = appAttributesModel;
@@ -11,10 +13,14 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
     wellData: wellDataFieldMapping
   } = appAttributesFieldMapping;
 
+  const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
+  const [currentData] = useWellInfo(selectedWellId);
+
   return (
     <React.Fragment>
       <AttributePaneSection
         sectionTitle="Well Information"
+        currentData={currentData.wellInfo}
         onFocus={onFocus}
         mapping={wellInfoFieldMapping}
         model={wellInfo}
@@ -22,7 +28,9 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         sectionKey="wellInfo"
       />
       <AttributePaneSection
+        currentData={currentData.wellInfo}
         sectionTitle="Well Parameters"
+        wellData={wellData}
         onFocus={onFocus}
         mapping={wellParametersFieldMapping}
         model={wellParameters}
@@ -30,7 +38,9 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         sectionKey="wellParameters"
       />
       <AttributePaneSection
+        currentData={currentData.wellInfo}
         sectionTitle="Well Data"
+        wellData={wellData}
         onFocus={onFocus}
         mapping={wellDataFieldMapping}
         model={wellData}

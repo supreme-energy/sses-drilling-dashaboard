@@ -12,8 +12,10 @@ import WellStatus from "../../../../Kpi/WellStatus";
 import WellPathStatus from "../../../../Kpi/WellPathStatus";
 import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
+import ImportInput from "../../ImportInput";
+import Import from "@material-ui/icons/Input";
 
-function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
+function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImportChange }) {
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
 
   return (
@@ -24,6 +26,13 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
         </Typography>
         <span className={classes.hSpacer} />
         <div className={classes.row}>
+          <ImportInput onChange={onFilesToImportChange}>
+            <Button variant="raised" color="primary" component="span">
+              <Import color="primary" />
+              Upload Well Data
+            </Button>
+          </ImportInput>
+
           <IconButton className={classes.favoriteButton} onClick={() => updateFavorite(well.id, !well.fav)}>
             <FavIcon color="primary" className={classes.favorite} />
           </IconButton>
