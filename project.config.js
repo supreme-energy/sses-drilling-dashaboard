@@ -2,19 +2,23 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const TARGET_ENV = process.env.TARGET_ENV || NODE_ENV;
 const DEPLOY_ENV = process.env.DEPLOY_ENV || "";
 const basename = DEPLOY_ENV === "dev" ? "/dev/index.html" : "";
+const publicPath = "/" + (DEPLOY_ENV === "dev" ? "dev/" : "");
+
 const appConfigs = {
   development: {
     serverUrl: "https://2018dev.sgta.us/sses",
     username: "subsurfacegeosteering",
     password: "sgtageo2018",
-    basename
+    basename,
+    publicPath
   },
   production: {
     isProduction: true,
     serverUrl: "https://2018dev.sgta.us/sses",
     username: "subsurfacegeosteering",
     password: "sgtageo2018",
-    basename
+    basename,
+    publicPath
   }
 };
 
@@ -30,7 +34,7 @@ module.exports = {
   /** The name of the directory in which to emit compiled assets */
   outDir: "dist",
   /** The base path for all projects assets (relative to the website root) */
-  publicPath: "/" + (DEPLOY_ENV === "dev" ? "dev/" : ""),
+  publicPath,
   /** Whether to generate sourcemaps */
   sourcemaps: true,
   /** Whether to use CSS Modules in your scss files */

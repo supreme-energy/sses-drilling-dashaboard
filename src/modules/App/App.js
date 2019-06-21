@@ -68,7 +68,7 @@ class App extends React.Component {
         <Provider store={store}>
           <BrowserRouter basename={__CONFIG__.basename}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
-              <FetchClientProvider id="mock" url={`/data`} options={fetchClientOptions} middleware={this.fetchMWMock}>
+              <FetchClientProvider id="mock" url={`${__CONFIG__.publicPath}data`} options={fetchClientOptions} middleware={this.fetchMWMock}>
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
