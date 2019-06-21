@@ -13,6 +13,7 @@ import { toWGS84 } from "../utils/projections";
 import memoize from "react-powertools/memoize";
 import serialize from "react-powertools/serialize";
 import { useAppState } from "../modules/App/Containers";
+import useRef from "react-powertools/hooks/useRef";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -66,26 +67,36 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const { requestId, refreshRequestId: refreshStore } = useAppState();
+  const { requestId, updateRequestId } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch();
+  const stateRef = useRef({ internalRequestId: null });
+  const refreshStore = useCallback(() => {
+    const newRequestId = Date.now();
+    stateRef.current.internalRequestId = newRequestId;
+    updateRequestId(newRequestId);
+  }, [updateRequestId]);
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+  const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
 
   useEffect(() => {
-    fetch(
-      {
-        path: GET_WELL_INFO,
-        query: {
-          seldbname: wellId,
-          requestId
-        }
-      },
-      (prev, next) => next
-    );
-  }, [wellId, requestId, fetch]);
+    // avoid refresh on the component that trigger the update
+    if (requestId !== stateRef.current.internalRequestId) {
+      serializedRefresh(
+        {
+          path: GET_WELL_INFO,
+          query: {
+            seldbname: wellId,
+            requestId
+          }
+        },
+        (prev, next) => next
+      );
+    }
+  }, [wellId, serializedRefresh, requestId]);
 
   const updateWell = useCallback(
     ({ wellId, field, value, refreshStore }) => {

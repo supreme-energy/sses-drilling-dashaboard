@@ -9357,7 +9357,7 @@ react-lifecycles-compat@^3.0.2:
 
 react-powertools@./react-powertools-v2.0.1.tgz:
   version "1.0.4"
-  resolved "./react-powertools-v2.0.1.tgz#65c54196b68a870e48c1412a1743dd007f455f16"
+  resolved "./react-powertools-v2.0.1.tgz#63b6bfba079651496f8f3292780aa24aa956d059"
 
 react-redux@^7.1.0:
   version "7.1.0"
