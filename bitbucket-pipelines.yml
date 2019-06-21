@@ -5,10 +5,7 @@ pipelines:
     '**': #this runs as default for any branch not elsewhere defined
       - step:
           name: Build and test
-          caches:
-            - node
           script:
-            - yarn cache clean
             - yarn
             - yarn run lint
             - yarn run test
