@@ -1,0 +1,77 @@
+
+  @import '../../../../../styles/plusIcon';
+  $positionBg: #FEEAFF;
+  $surfaceBg: #EBF9FF;
+  $landingBg: #F4FBEB;
+
+  .root {
+    overflow: auto;
+    .map {
+      height: 330px
+    }
+
+    :global {
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+    }
+  
+    .pointIcon {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      
+      & .phasePointIcon {
+        position: absolute;
+     
+        &::before {
+          top: 3px;
+          left: 2px;
+          width: 8px;
+          height: 2px;
+          background-color: white;
+        }
+        &::after {
+          left: 5px;
+          width: 2px;
+          height: 8px;
+          background-color: white;
+        }
+      }
+    }
+  
+    .positionLabel {
+      height: 56px;
+      
+      .label {
+        align-self: center;
+      }
+      
+    }
+  
+    .groupFormControl {
+      .group {
+        display: flex;
+        flex-direction: row;
+      }
+    }
+    
+    .positionTextField {
+      background-color: $positionBg;
+    }
+
+    .surfaceTextField {
+      background-color: $surfaceBg;
+    }
+
+    .landingField {
+      background-color: $landingBg;
+    }
+  }
+
+
+ 

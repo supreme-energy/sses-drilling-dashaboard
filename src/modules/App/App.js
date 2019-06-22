@@ -18,9 +18,11 @@ import DrillingAnalyticsModule from "modules/DrillingAnalytics";
 import StructuralGuidanceModule from "modules/StructuralGuidance";
 import WellExplorerModule from "modules/WellExplorer";
 import WellUpdate from "./WellUpdate";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import MomentUtils from "@date-io/moment";
 
 // Import UI State Providers
-import { TimeSliderProvider, DrillPhaseProvider, LastIndexStateProvider } from "./Containers";
+import { TimeSliderProvider, DrillPhaseProvider, LastIndexStateProvider, AppStateProvider } from "./Containers";
 
 // Import Provider initialStates
 import {
@@ -36,6 +38,12 @@ const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderTool
 // Lazy load header
 const fetchClientOptions = { mode: "cors", credentials: "include" };
 
+function filterForceRefreshProps(request) {
+  if (request.options.query) {
+    delete request.options.query.wellInfoRefreshId;
+  }
+}
+
 class App extends React.Component {
   static propTypes = {
     store: PropTypes.object.isRequired,
@@ -46,7 +54,8 @@ class App extends React.Component {
     plusJsonStrict(),
     plusErrorJson(),
     plusUrlPattern(),
-    plusBasicAuth(__CONFIG__.username, __CONFIG__.password)
+    plusBasicAuth(__CONFIG__.username, __CONFIG__.password),
+    filterForceRefreshProps
   ];
 
   fetchMWMock = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
@@ -73,24 +82,28 @@ class App extends React.Component {
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
-                      <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
-                        <LastIndexStateProvider initialState={INITIAL_LAST_INDEX_STATE}>
-                          <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
-                            <Route path="/:wellId" component={WellUpdate} />
-                            <Switch>
-                              <Route path="/:wellId?" exact component={WellExplorer} />
-                              <HeaderToolbar history={history}>
-                                <TimeSliderToolbar>
-                                  <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                                  <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                  <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                                  <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                                </TimeSliderToolbar>
-                              </HeaderToolbar>
-                            </Switch>
-                          </DrillPhaseProvider>
-                        </LastIndexStateProvider>
-                      </TimeSliderProvider>
+                      <MuiPickersUtilsProvider utils={MomentUtils}>
+                        <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
+                          <AppStateProvider>
+                            <LastIndexStateProvider initialState={INITIAL_LAST_INDEX_STATE}>
+                              <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
+                                <Route path="/:wellId" component={WellUpdate} />
+                                <Switch>
+                                  <Route path="/:wellId?" exact component={WellExplorer} />
+                                  <HeaderToolbar history={history}>
+                                    <TimeSliderToolbar>
+                                      <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                      <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                      <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                      <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                    </TimeSliderToolbar>
+                                  </HeaderToolbar>
+                                </Switch>
+                              </DrillPhaseProvider>
+                            </LastIndexStateProvider>
+                          </AppStateProvider>
+                        </TimeSliderProvider>
+                      </MuiPickersUtilsProvider>
                     </PageLayout>
                   </div>
                 </FetchCache>
