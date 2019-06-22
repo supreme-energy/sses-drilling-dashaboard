@@ -9359,6 +9359,10 @@ react-powertools@./react-powertools-v2.0.1.tgz:
   version "1.0.4"
   resolved "./react-powertools-v2.0.1.tgz#63b6bfba079651496f8f3292780aa24aa956d059"
 
+react-powertools@./react-powertools_v2.0.1.tgz:
+  version "2.0.1"
+  resolved "./react-powertools_v2.0.1.tgz#53f1909394de4b8cc5faf133c1efcf61b1ec866e"
+
 react-redux@^7.1.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.1.0.tgz#72af7cf490a74acdc516ea9c1dd80e25af9ea0b2"
