@@ -21,7 +21,7 @@ function KpiItem({
 }) {
   const formatValue = useCallback(value => (value !== undefined ? format(value) : EMPTY_FIELD), [format]);
   return (
-    <div className={classNames(className, classes.vertical, { [classes.small]: small })} style={style}>
+    <div className={classNames(className, classes.vertical, classes.root, { [classes.small]: small })} style={style}>
       <div className={classes.horizontalTop}>
         {renderValue({ value, format: formatValue, textClass, textStyle })}
         <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
@@ -30,6 +30,7 @@ function KpiItem({
       </div>
       <Typography
         variant="caption"
+        component="div"
         gutterBottom
         className={classNames(classes.italicLabel, labelClass, classes.caption, textClass)}
       >
