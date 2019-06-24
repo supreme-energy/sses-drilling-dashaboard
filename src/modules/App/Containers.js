@@ -122,12 +122,7 @@ export function useFilteredWellData(wellId) {
     wellPlan,
     formations: formationsFiltered,
     projections: projectionsFiltered,
-    saveProjection: saveAndUpdate,
-    refresh: () => {
-      // TODO: Ideally these should update simultaneously, but in reality each call returns at a different time
-      refreshFormations();
-      refreshProjections();
-    }
+    saveProjection: saveAndUpdate
   };
 }
 
