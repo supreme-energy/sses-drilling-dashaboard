@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import cloneDeep from "lodash/cloneDeep";
 import intersection from "lodash/intersection";
@@ -14,40 +14,23 @@ import {
   removeHighlightedTextCellIds,
   addHighlightedTextCellIds
 } from "./state/actions";
-import reducer from "./state/reducer";
+
 import Body from "./Body";
 import Header from "./Header";
-import LAS2Parser from "../../../parsers/las/LAS2Parser";
+
 import { buildCellId } from "./utils";
-import { defaultAppAttributesModel } from "./models/models";
 import { appAttributesFieldMapping, sectionMapping } from "./models/mappings";
 import { INPUT_TYPES } from "./constants";
 
 import css from "./styles.scss";
-
-const initialState = {
-  activeInput: null,
-  inputToCellIds: {},
-  appAttributesModel: defaultAppAttributesModel,
-  highlightedCellIdsMap: {},
-  textHighlightedCellIdsMap: {}
-};
+import { useWellImporterContainer } from ".";
+import { useParsedFileSelector } from "./selectors";
 
 const WellImporter = ({ files, onClickCancel }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [data, setData] = useState(null);
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-
+  const [state, dispatch] = useWellImporterContainer();
   const { activeInput, appAttributesModel, inputToCellIds, highlightedCellIdsMap, highlightedTextCellIdsMap } = state;
 
-  useEffect(() => {
-    if (!isLoaded && files.length) {
-      const parsedData = LAS2Parser.parse(files[0].fileText);
-      setData(parsedData);
-      setIsLoaded(true);
-    }
-  }, [isLoaded, files]);
+  const { data, extension } = useParsedFileSelector();
 
   const updateSelection = (sectionName, key, rowIndex, columnIndex, cellData, inputId, cellIds, entireColumn) => {
     setHighlightedRowAndColumnListHelper(sectionName, key, rowIndex, columnIndex, cellData, entireColumn);
@@ -285,7 +268,6 @@ const WellImporter = ({ files, onClickCancel }) => {
   return (
     <div className={css.container}>
       <Header
-        data={data}
         onClickCancel={onClickCancel}
         appAttributesFieldMapping={appAttributesFieldMapping}
         appAttributesModel={appAttributesModel}
@@ -293,7 +275,7 @@ const WellImporter = ({ files, onClickCancel }) => {
         activateInput={activateInput}
       />
       <Body
-        data={data}
+        extension={extension}
         onClickCell={onClickCell}
         onClickAsciiHeader={onClickAsciiHeader}
         appAttributesModel={appAttributesModel}

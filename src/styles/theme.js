@@ -17,11 +17,17 @@ export const theme = createMuiTheme({
     primary: {
       main: "#207003"
     },
+    secondary: {
+      main: "#86863B"
+    },
     success: {
       main: "#75BA2F"
     },
     warning: {
       main: "#EE2211"
+    },
+    sectionTitle: {
+      main: "#86863B"
     },
     yellow: {
       main: "#E9CA00"

@@ -1,6 +1,6 @@
 import { DRILLING } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
@@ -11,9 +11,13 @@ import { group } from "d3-array";
 import proj4 from "proj4";
 import { toWGS84 } from "../utils/projections";
 import memoize from "react-powertools/memoize";
+import serialize from "react-powertools/serialize";
+import { useAppState } from "../modules/App/Containers";
+import useRef from "react-powertools/hooks/useRef";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
+export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
@@ -65,40 +69,103 @@ export function useKpi(wellId) {
 }
 
 export function useWellInfo(wellId) {
-  const [data, isLoading] = useFetch({
-    path: GET_WELL_INFO,
-    query: {
-      seldbname: wellId
-    }
-  });
+  const { requestId, updateRequestId } = useAppState();
+  const [data, isLoading, , , , { fetch }] = useFetch();
+  const stateRef = useRef({ internalRequestId: null });
+  const refreshStore = useCallback(() => {
+    const newRequestId = Date.now();
+    stateRef.current.internalRequestId = newRequestId;
+    updateRequestId(newRequestId);
+  }, [updateRequestId]);
+
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+  const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
 
-  if (!wellInfo) {
-    return [{}, isLoading];
-  }
+  useEffect(() => {
+    // avoid refresh on the component that trigger the update
+    if (requestId !== stateRef.current.internalRequestId) {
+      serializedRefresh(
+        {
+          path: GET_WELL_INFO,
+          query: {
+            seldbname: wellId,
+            requestId
+          }
+        },
+        (prev, next) => next
+      );
+    }
+  }, [wellId, serializedRefresh, requestId]);
 
-  const source = proj4.Proj("EPSG:32040");
-  const transform = toWGS84(source);
+  const updateWell = useCallback(
+    ({ wellId, field, value, refreshStore }) => {
+      const optimisticResult = {
+        ...data,
+        wellinfo: {
+          ...wellInfo,
+          [field]: value
+        }
+      };
 
-  const wellSurfaceLocationLocal = {
-    x: Number(wellInfo.survey_easting),
-    y: Number(wellInfo.survey_northing)
-  };
-  const wellLandingLocationLocal = {
-    x: Number(wellInfo.landing_easting),
-    y: Number(wellInfo.landing_northing)
-  };
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId,
+          table: "wellinfo",
+          field,
+          value
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, wellInfo]
+  );
 
-  const wellPBHLLocal = {
-    x: Number(wellInfo.pbhl_easting),
-    y: Number(wellInfo.pbhl_northing)
-  };
+  const {
+    wellSurfaceLocationLocal,
+    wellSurfaceLocation,
+    wellLandingLocation,
+    wellLandingLocationLocal,
+    wellPBHL,
+    wellPBHLLocal
+  } = useMemo(() => {
+    if (!wellInfo) {
+      return {};
+    }
+    const source = proj4.Proj("EPSG:32040");
+    const transform = toWGS84(source);
 
-  const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
-  const wellLandingLocation = transform(wellLandingLocationLocal);
-  const wellPBHL = transform(wellPBHLLocal);
+    const wellSurfaceLocationLocal = {
+      x: Number(wellInfo.survey_easting),
+      y: Number(wellInfo.survey_northing)
+    };
+    const wellLandingLocationLocal = {
+      x: Number(wellInfo.landing_easting),
+      y: Number(wellInfo.landing_northing)
+    };
+
+    const wellPBHLLocal = {
+      x: Number(wellInfo.pbhl_easting),
+      y: Number(wellInfo.pbhl_northing)
+    };
+
+    const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
+    const wellLandingLocation = transform(wellLandingLocationLocal);
+    const wellPBHL = transform(wellPBHLLocal);
+
+    return {
+      wellSurfaceLocationLocal,
+      wellSurfaceLocation,
+      wellLandingLocation,
+      wellLandingLocationLocal,
+      wellPBHL,
+      wellPBHLLocal
+    };
+  }, [wellInfo]);
 
   return [
     {
@@ -108,16 +175,22 @@ export function useWellInfo(wellId) {
       wellLandingLocation,
       wellLandingLocationLocal,
       wellPBHL,
-      wellPBHLLocal
+      wellPBHLLocal,
+      wellInfo,
+      transform
     },
-    isLoading
+    isLoading,
+    updateWell,
+    refreshStore
   ];
 }
 
 export function useWells() {
+  const { requestId } = useAppState();
   const [wells, , , , , { fetch }] = useFetch(
     {
-      path: GET_WELL_LIST
+      path: GET_WELL_LIST,
+      query: { requestId }
     },
     {
       transform: wells => {

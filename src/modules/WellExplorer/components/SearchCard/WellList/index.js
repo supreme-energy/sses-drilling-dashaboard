@@ -14,51 +14,47 @@ import { connect } from "react-redux";
 import { actions } from "../../../store";
 import flowRight from "lodash/flowRight";
 
-const WellItem = ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }) => {
-  const FavIcon = fav ? Favorite : FavoriteBorder;
-  const icon = listIcons[status];
-  const itemRef = useRef(null);
-  useEffect(() => {
-    if (selected && itemRef.current) {
-      itemRef.current.scrollIntoView();
-    }
-  }, [selected]);
+const WellItem = React.forwardRef(
+  ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }, ref) => {
+    const FavIcon = fav ? Favorite : FavoriteBorder;
+    const icon = listIcons[status];
 
-  return (
-    <div ref={itemRef}>
-      <ListItem button disableRipple selected={selected} className={classes.wellItem} onClick={onClick}>
-        <div className={classes.itemContent}>
-          <div>{name}</div>
-          <Typography variant="body2" gutterBottom>
-            {`${lat}  |  ${lng}`}{" "}
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            {status.toUpperCase()}
-          </Typography>
-        </div>
-        <div className={classes.buttons}>
-          {selected || opened ? (
-            <Link to={opened ? `/` : `/${id}/combo`}>
-              <Button color="primary" className={classes.button}>
-                {opened ? "Close" : "Open"}
-              </Button>
-            </Link>
-          ) : (
-            <IconButton
-              onClick={e => {
-                changeFav(id, !fav);
-                e.stopPropagation();
-              }}
-            >
-              <FavIcon className={classes.icon} />
-            </IconButton>
-          )}
-          <img src={icon} />
-        </div>
-      </ListItem>
-    </div>
-  );
-};
+    return (
+      <div ref={ref}>
+        <ListItem button disableRipple selected={selected} className={classes.wellItem} onClick={onClick}>
+          <div className={classes.itemContent}>
+            <div>{name}</div>
+            <Typography variant="body2" gutterBottom>
+              {`${lat}  |  ${lng}`}{" "}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              {status.toUpperCase()}
+            </Typography>
+          </div>
+          <div className={classes.buttons}>
+            {selected || opened ? (
+              <Link to={opened ? `/` : `/${id}/combo`}>
+                <Button color="primary" className={classes.button}>
+                  {opened ? "Close" : "Open"}
+                </Button>
+              </Link>
+            ) : (
+              <IconButton
+                onClick={e => {
+                  changeFav(id, !fav);
+                  e.stopPropagation();
+                }}
+              >
+                <FavIcon className={classes.icon} />
+              </IconButton>
+            )}
+            <img src={icon} />
+          </div>
+        </ListItem>
+      </div>
+    );
+  }
+);
 
 function WellList({
   wells,
@@ -71,13 +67,29 @@ function WellList({
   changeSelectedWell,
   ...props
 }) {
+  const listElRef = useRef(null);
+  const selectedElRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedWellId && selectedElRef.current && listElRef.current) {
+      const itemBounds = selectedElRef.current.getBoundingClientRect();
+      const listBounds = listElRef.current.getBoundingClientRect();
+      const isOutsideViewport =
+        itemBounds.top - listBounds.top < 0 || itemBounds.top - listBounds.top + itemBounds.height > listBounds.height;
+      if (isOutsideViewport) {
+        selectedElRef.current.scrollIntoView();
+      }
+    }
+  }, [selectedWellId]);
+
   return (
-    <List className={classes.list}>
+    <List className={classes.list} ref={listElRef}>
       {wells.map(well => {
         const selected = selectedWellId === well.id;
         return (
           <WellItem
             theme={theme}
+            ref={selected ? selectedElRef : null}
             key={well.id}
             selected={selected}
             opened={wellId === well.id}
