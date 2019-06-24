@@ -1,17 +1,10 @@
+@import '../../base';
+
 %table {
   font-family: 'Roboto', sans-serif;
   font-size:16px;
   color: rgba(0,0,0,0.87);
   line-height:24px;
-}
-
-%selectedState {
-  background-color: green;
-  color: white;
-}
-
-%selectedTextState {
-  color: green;
 }
 
 .importContentTable {

@@ -11,7 +11,6 @@ import css from "./styles.scss";
 const AttributePaneTextField = ({
   appAttributeConfig,
   appAttributeModel,
-  classes,
   onFocus,
   fieldKey,
   sectionKey,
@@ -25,7 +24,7 @@ const AttributePaneTextField = ({
     // elsewhere on the page, we want to refocus the input field so it appears active
     if (isFocused) {
       setTimeout(() => {
-        inputRef.current.focus();
+        inputRef.current && inputRef.current.focus();
       }, 0);
     }
   }, [inputRef, isFocused]);
@@ -56,7 +55,7 @@ const AttributePaneTextField = ({
           endAdornment:
             appAttributeModel.value !== "" && appAttributeConfig.required ? (
               <InputAdornment position="end">
-                <CheckCircleOutline className={classes.icon} />
+                <CheckCircleOutline />
               </InputAdornment>
             ) : null
         }}
@@ -76,7 +75,6 @@ AttributePaneTextField.defaultProps = {
 AttributePaneTextField.propTypes = {
   appAttributeConfig: PropTypes.object.isRequired,
   appAttributeModel: PropTypes.object.isRequired,
-  classes: PropTypes.object.isRequired,
   onFocus: PropTypes.func.isRequired,
   fieldKey: PropTypes.string.isRequired,
   sectionKey: PropTypes.string.isRequired,
