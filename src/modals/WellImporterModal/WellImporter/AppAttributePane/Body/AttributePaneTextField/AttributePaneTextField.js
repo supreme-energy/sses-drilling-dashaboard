@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { InputAdornment, TextField } from "@material-ui/core";
+import { InputAdornment } from "@material-ui/core";
+import TextField from "../../../../../../components/TextField";
 import { CheckCircleOutline } from "@material-ui/icons";
 
 import { INPUT_TYPES } from "../../../constants";
@@ -10,7 +11,6 @@ import css from "./styles.scss";
 const AttributePaneTextField = ({
   appAttributeConfig,
   appAttributeModel,
-  classes,
   onFocus,
   fieldKey,
   sectionKey,
@@ -52,21 +52,12 @@ const AttributePaneTextField = ({
         label={appAttributeConfig.labelName}
         fullWidth
         InputProps={{
-          classes: {
-            root: classes.root,
-            underline: classes.cssUnderline
-          },
           endAdornment:
             appAttributeModel.value !== "" && appAttributeConfig.required ? (
               <InputAdornment position="end">
-                <CheckCircleOutline className={classes.icon} />
+                <CheckCircleOutline />
               </InputAdornment>
             ) : null
-        }}
-        FormHelperTextProps={{
-          classes: {
-            root: classes.helperTextRoot
-          }
         }}
         helperText={isFocused ? "Choose the appropriate value from LAS file on right" : ""}
         onBlur={handleBlur}
@@ -84,7 +75,6 @@ AttributePaneTextField.defaultProps = {
 AttributePaneTextField.propTypes = {
   appAttributeConfig: PropTypes.object.isRequired,
   appAttributeModel: PropTypes.object.isRequired,
-  classes: PropTypes.object.isRequired,
   onFocus: PropTypes.func.isRequired,
   fieldKey: PropTypes.string.isRequired,
   sectionKey: PropTypes.string.isRequired,

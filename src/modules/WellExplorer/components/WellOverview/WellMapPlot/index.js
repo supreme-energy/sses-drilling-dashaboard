@@ -1,16 +1,25 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import LeafletMap from "../../WellMap/Map";
-import { useWells, useWellPath, useWellsMapPosition, useSurveys, useWellOverviewKPI } from "../../../../../api";
+import {
+  useWells,
+  useWellPath,
+  useWellsMapPosition,
+  useSurveys,
+  useWellOverviewKPI,
+  useWellInfo
+} from "../../../../../api";
 import { connect } from "react-redux";
 import classNames from "classnames";
 import classes from "./styles.scss";
-import WellsLayer from "../../WellMap/WellsLayer";
-import WellPhasePointsLayer from "./WellPhasePointsLayer";
+import MarkersLayer from "./MarkersLayer";
 import { Polyline } from "react-leaflet";
 import { group, max } from "d3-array";
 import { scaleThreshold } from "d3-scale";
 import * as wellSections from "../../../../../constants/wellSections";
 import Legend from "./Legend";
+import { leafletMapIconsSelected } from "../../IconsByStatus";
+import L from "leaflet";
 
 const colorsBySection = {
   [wellSections.INTERMEDIATE]: "#538531",
@@ -18,6 +27,10 @@ const colorsBySection = {
   [wellSections.LATERAL]: "#C39200",
   drilling: "#7500A6"
 };
+
+const SurfaceIcon = L.divIcon({ className: classes.phasePointIcon, iconAnchor: [6, 12] });
+const LandingIcon = L.divIcon({ className: classNames(classes.phasePointIcon, classes.landing), iconAnchor: [6, 12] });
+const PBHLIcon = L.divIcon({ className: classNames(classes.phasePointIcon, classes.pbhl), iconAnchor: [6, 6] });
 
 function getValidBounds(bounds) {
   // no bounds or not valid or partial no bounds
@@ -56,7 +69,7 @@ function getSurveyBySection(surveyMapPositions, wellOverviewDataBySection) {
   return groups;
 }
 
-function WellMapPlot({ className, selectedWellId }) {
+function WellMapPlot({ className, selectedWellId, showLegend }) {
   const [, wellsById] = useWells();
   const wellPathData = useWellPath(selectedWellId);
   const wellPathMapPositions = useWellsMapPosition(selectedWellId, wellPathData);
@@ -67,21 +80,53 @@ function WellMapPlot({ className, selectedWellId }) {
 
   const mapContainer = useRef(null);
   const phasePointsRef = useRef(null);
-  const { current: phasePoints } = phasePointsRef;
-  const bounds = phasePoints && phasePoints.getBounds();
-  const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
+
+  const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
   const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+
   const surveysBySection = useMemo(() => getSurveyBySection(surveyMapPositions, wellOverviewBySegment), [
     wellOverviewBySegment,
     surveyMapPositions
   ]);
 
+  const sectionMarkers = useMemo(
+    () =>
+      [
+        { data: wellSurfaceLocation, icon: SurfaceIcon, id: "wellSurfaceLocation" },
+        { data: wellLandingLocation, icon: LandingIcon, id: "wellLandingLocation" },
+        { data: wellPBHL, icon: PBHLIcon, id: "wellPBHL" }
+      ]
+        .filter(d => d.data)
+        .map(d => ({ ...d, position: [d.data.y, d.data.x] })),
+    [wellSurfaceLocation, wellLandingLocation, wellPBHL]
+  );
+
+  // recompute bounds when sectionMarkers change
+  const [bounds, updateBounds] = useState(null);
+  useEffect(() => {
+    updateBounds(phasePointsRef.current && phasePointsRef.current.getBounds());
+  }, [sectionMarkers]);
+
+  const validBounds = useMemo(() => getValidBounds(bounds), [bounds]);
+  const selectedWellMarker = useMemo(() => {
+    if (!wellSurfaceLocation || !selectedWell) {
+      return [];
+    }
+    return [
+      {
+        position: [wellSurfaceLocation.y, wellSurfaceLocation.x],
+        icon: leafletMapIconsSelected[selectedWell.status],
+        id: "selectedWell"
+      }
+    ];
+  }, [selectedWell, wellSurfaceLocation]);
+
   return (
     <div ref={mapContainer} className={classNames(className, classes.mapContainer)}>
       <LeafletMap bounds={validBounds} className={classNames(className, classes.map)} zoomControl={false}>
-        {selectedWell && <WellsLayer wells={[selectedWell]} selectedWellId={selectedWellId} />}
-        <WellPhasePointsLayer ref={phasePointsRef} wellId={selectedWellId} zIndexOffset={30} />
+        <MarkersLayer markers={selectedWellMarker} />
+        <MarkersLayer ref={phasePointsRef} markers={sectionMarkers} zIndexOffset={30} />
         <Polyline positions={wellPathMapPositions.map(d => [d.mapPosition.y, d.mapPosition.x])} color="#72B600" />
         {[...surveysBySection].map(([section, sectionData]) => (
           <Polyline
@@ -91,7 +136,7 @@ function WellMapPlot({ className, selectedWellId }) {
           />
         ))}
       </LeafletMap>
-      <Legend className={classes.legend} />
+      {showLegend && <Legend className={classes.legend} />}
     </div>
   );
 }
@@ -100,6 +145,16 @@ const mapStateToProps = state => {
   return {
     selectedWellId: state.wellExplorer.selectedWellId
   };
+};
+
+WellMapPlot.defaultProps = {
+  showLegend: true
+};
+
+WellMapPlot.propTypes = {
+  showLegend: PropTypes.bool,
+  className: PropTypes.string,
+  selectedWellId: PropTypes.string.isRequired
 };
 
 export default connect(

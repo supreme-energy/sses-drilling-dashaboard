@@ -8,7 +8,7 @@ import { useSize } from "react-hook-size";
 import PixiContainer from "../../WellExplorer/components/WellOverview/ROP/PixiContainer";
 import PixiBar from "./PixiBar";
 import PixiLine from "../../WellExplorer/components/WellOverview/ROP/PixiLine";
-import { useTimeSliderContainer, useDrillPhaseContainer } from "../../App/Containers";
+import { useTimeSliderContainer, useLastIndexStateContainer, useDrillPhaseContainer } from "../../App/Containers";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
 import Slider from "./Slider";
@@ -40,6 +40,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   // Import shared state
   const { setSliderInterval } = useTimeSliderContainer();
+  const { setLastIndexState } = useLastIndexStateContainer();
   const { setDrillPhase, drillPhaseObj } = useDrillPhaseContainer();
 
   // Create local state
@@ -51,7 +52,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   // Get Previous drill phase value
   const prevDrillPhase = useRef();
   useEffect(() => {
-    prevDrillPhase.current = drillPhaseObj.phase;
+    prevDrillPhase.current = drillPhaseObj;
   });
   const prevPhase = prevDrillPhase.current;
 
@@ -65,7 +66,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     (xScale, newX) => {
       return (
         data.length * xScale - Math.abs(newX) > width - GRID_GUTTER &&
-        Math.round(sliderStep[0]) <= Math.round(maxSliderStep)
+        Math.round(sliderStep[0]) <= Math.round(maxSliderStep) &&
+        newX / xScale < 0
       );
     },
     [width, data.length, sliderStep, maxSliderStep]
@@ -96,27 +98,41 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     const indexDiff = lastIndex - firstIndex;
 
     if (firstIndex > 0 && lastIndex > 0) {
+      const isLastDataIndex = data.length - 1 <= lastIndex;
       const beginningDate = _.get(data, `[${firstIndex}].Date_Time`, "");
-      const endDate = _.get(data, `[${lastIndex}].Date_Time`, "NOW");
+      const endDate = !isLastDataIndex ? _.get(data, `[${lastIndex}].Date_Time`, "") : "NOW";
 
-      const xScale = computePhaseXScaleValue(indexDiff)(width - GRID_GUTTER);
-      updateView(view => ({
-        x: -1 * firstIndex * xScale,
-        y: 0,
-        xScale,
-        yScale: getInitialViewYScaleValue(height)
-      }));
+      updateView(view => {
+        const w = width || maxSliderStep * view.xScale + GRID_GUTTER;
+        const xScale = computePhaseXScaleValue(indexDiff)(w - GRID_GUTTER);
+        return {
+          x: -1 * firstIndex * xScale,
+          xScale,
+          y: 0,
+          yScale: height ? getInitialViewYScaleValue(height) : view.yScale
+        };
+      });
 
       setSliderInterval([
         _.get(data, `[${Math.floor(firstIndex)}].Hole_Depth`),
         _.get(data, `[${Math.round(lastIndex)}].Hole_Depth`)
       ]);
 
+      setLastIndexState(isLastDataIndex);
       setMaxSliderStep(indexDiff);
       setSliderStep([indexDiff, 1]);
       setGlobalDates([beginningDate, endDate]);
     }
-  }, [data, drillPhaseObj, getInitialViewYScaleValue, height, width, setSliderInterval]);
+  }, [
+    data,
+    drillPhaseObj,
+    getInitialViewYScaleValue,
+    width,
+    height,
+    maxSliderStep,
+    setSliderInterval,
+    setLastIndexState
+  ]);
 
   const viewportContainer = useRef(null);
 
@@ -134,11 +150,16 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   // set initial scale
   useEffect(() => {
-    if (data && data.length && width && height && (!scaleInitialized.current || prevPhase !== drillPhaseObj.phase)) {
+    if (
+      data &&
+      data.length &&
+      ((width && height) || !expanded) &&
+      (!scaleInitialized.current || (!_.isEqual(drillPhaseObj, prevPhase) && drillPhaseObj.inView))
+    ) {
       onReset();
       scaleInitialized.current = true;
     }
-  }, [width, data, height, onReset, drillPhaseObj.phase, prevPhase]);
+  }, [width, height, expanded, data, onReset, drillPhaseObj, prevPhase]);
 
   useEffect(() => {
     refresh();
@@ -149,14 +170,14 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   }, [drillPhaseObj.phase]);
 
   useEffect(() => {
-    const newMaxStep = (width - GRID_GUTTER) / view.xScale;
-    if (expanded && newMaxStep > 0 && view.xScale) {
+    if (expanded && view.xScale) {
       setMaxSliderStep(prevMaxStep => {
+        const newMaxStep = (prevMaxStep * view.xScale) / view.xScale;
         setSliderStep(prevStep => [(newMaxStep * prevStep[0]) / prevMaxStep, prevStep[1]]);
         return newMaxStep;
       });
     }
-  }, [width, expanded, view.xScale]);
+  }, [expanded, view.xScale]);
 
   useEffect(() => {
     if (data && data.length && view.xScale) {
@@ -164,41 +185,51 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
       const endDataIndex = visibleDataLength - 1 + hiddenDataLength;
 
-      const firstIndex = data.map(e => e.Hole_Depth).indexOf(drillPhaseObj.phaseStart);
-      const lastIndex = data.map(e => e.Hole_Depth).lastIndexOf(drillPhaseObj.phaseEnd);
+      setDrillPhase(drillPhase => {
+        const firstIndex = data.map(e => e.Hole_Depth).indexOf(drillPhase.phaseStart);
+        const lastIndex = data.map(e => e.Hole_Depth).lastIndexOf(drillPhase.phaseEnd);
 
-      if ((firstIndex > Math.round(hiddenDataLength) || lastIndex < endDataIndex) && drillPhaseObj.inView) {
-        setDrillPhase(drillPhase => ({
-          ...drillPhase,
-          inView: false
-        }));
-      } else if (firstIndex <= Math.round(hiddenDataLength) && lastIndex >= endDataIndex && !drillPhaseObj.inView) {
-        setDrillPhase(drillPhase => ({
-          ...drillPhase,
-          inView: true
-        }));
-      }
+        if ((firstIndex > Math.round(hiddenDataLength) || lastIndex < endDataIndex) && drillPhase.inView) {
+          return {
+            ...drillPhase,
+            inView: false
+          };
+        } else if (firstIndex <= Math.round(hiddenDataLength) && lastIndex >= endDataIndex && !drillPhase.inView) {
+          return {
+            ...drillPhase,
+            inView: true
+          };
+        } else {
+          return drillPhase;
+        }
+      });
     }
-  }, [data, width, view, setDrillPhase, drillPhaseObj]);
+  }, [data, width, view, setDrillPhase]);
 
   useEffect(() => {
-    if (data && data.length && sliderStep[0] >= 0) {
+    if (data && data.length && sliderStep[0] >= 0 && maxSliderStep > 0) {
       const stepFactor = sliderStep[0] / maxSliderStep;
-      const hiddenDataLength = Math.abs(view.x) / view.xScale;
-      const visibleDataLength = (view.xScale * maxSliderStep + GRID_GUTTER) / view.xScale;
-      const endDataIndex = stepFactor * (visibleDataLength - 1) + hiddenDataLength;
+      const firstIndex = Math.abs(view.x) / view.xScale;
+      const visibleDataIndex = firstIndex + sliderStep[0];
+      const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
 
-      const beginningDate = _.get(data, `[${Math.floor(hiddenDataLength)}].Date_Time`, "");
-      const endDate = _.get(data, `[${Math.round(endDataIndex)}].Date_Time`, "NOW");
+      const endDataIndex = stepFactor * visibleDataLength + firstIndex + GRID_GUTTER;
 
-      setSliderInterval([
-        _.get(data, `[${Math.floor(hiddenDataLength)}].Hole_Depth`),
-        _.get(data, `[${Math.round(endDataIndex)}].Hole_Depth`)
-      ]);
+      if (firstIndex >= 0 && endDataIndex > 0) {
+        const isLastDataIndex = data.length - 1 <= Math.round(endDataIndex);
+        const beginningDate = _.get(data, `[${Math.floor(firstIndex)}].Date_Time`, "");
+        const endDate = !isLastDataIndex ? _.get(data, `[${Math.round(endDataIndex)}].Date_Time`, "") : "NOW";
 
-      setGlobalDates([beginningDate, endDate]);
+        setSliderInterval([
+          _.get(data, `[${Math.floor(firstIndex)}].Hole_Depth`),
+          _.get(data, `[${Math.round(visibleDataIndex)}].Hole_Depth`)
+        ]);
+
+        setLastIndexState(isLastDataIndex);
+        setGlobalDates([beginningDate, endDate]);
+      }
     }
-  }, [data, view, sliderStep, maxSliderStep, setSliderInterval]);
+  }, [data, view, width, sliderStep, maxSliderStep, setSliderInterval, setLastIndexState]);
 
   return (
     <Card className={classNames(classes.timeSliderContainer, expanded && classes.timeSliderContainerExpanded)}>
