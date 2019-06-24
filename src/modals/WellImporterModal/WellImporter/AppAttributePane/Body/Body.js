@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import AttributePaneSection from "./AttributePaneSection";
 import { useSelector } from "react-redux";
@@ -14,13 +14,26 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
   } = appAttributesFieldMapping;
 
   const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
-  const [currentData] = useWellInfo(selectedWellId);
+  const [data] = useWellInfo(selectedWellId);
 
+  const currentData = useMemo(
+    function getCurrentData() {
+      if (!data.wellInfo || !data.wellSurfaceLocation) {
+        return null;
+      }
+      return {
+        ...data.wellInfo,
+        latitude: data.wellSurfaceLocation.x,
+        longitude: data.wellSurfaceLocation.y
+      };
+    },
+    [data]
+  );
   return (
     <React.Fragment>
       <AttributePaneSection
         sectionTitle="Well Information"
-        currentData={currentData.wellInfo}
+        currentData={currentData}
         onFocus={onFocus}
         mapping={wellInfoFieldMapping}
         model={wellInfo}
@@ -28,7 +41,7 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         sectionKey="wellInfo"
       />
       <AttributePaneSection
-        currentData={currentData.wellInfo}
+        currentData={currentData}
         sectionTitle="Well Parameters"
         wellData={wellData}
         onFocus={onFocus}
@@ -38,7 +51,7 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         sectionKey="wellParameters"
       />
       <AttributePaneSection
-        currentData={currentData.wellInfo}
+        currentData={currentData}
         sectionTitle="Well Data"
         wellData={wellData}
         onFocus={onFocus}
