@@ -54,6 +54,7 @@ function makePAReducer(saveProjection) {
           vs: action.vs - op.vs,
           bot: depthDelta,
           tcl: depthDelta,
+          tvd: depthDelta,
           dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
         };
       case "dip_bot":
@@ -64,6 +65,7 @@ function makePAReducer(saveProjection) {
           vs: action.vs - op.vs,
           bot: depthDelta,
           tcl: depthDelta,
+          tvd: depthDelta,
           dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
         };
       case "dip_end":
@@ -148,8 +150,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
       } else if (i > index) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault,
-          vs: p.vs + ghostDiff.vs
+          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault
         };
       } else {
         return p;
@@ -174,7 +175,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
           } else if (j > index) {
             return {
               ...point,
-              vs: point.vs + ghostDiff.vs,
               tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
             };
           }
