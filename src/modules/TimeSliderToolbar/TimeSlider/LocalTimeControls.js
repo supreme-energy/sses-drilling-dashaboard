@@ -1,82 +1,35 @@
-import React, { useCallback, useState, useReducer, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
 
 import { useInterval } from "./useInterval";
-import { STEP_SIZE } from "../../../constants/timeSlider";
 import classes from "./TimeSlider.scss";
 
-const LocalTimeControls = React.memo(({ setSliderStep, maxSliderStep }) => {
+const LocalTimeControls = React.memo(({ setSliderStep, maxSliderStep, isSpeeding, isPlaying }) => {
   let speedingTimeout = useRef(null);
-  const [isPlaying, setIsPlaying] = useReducer(a => !a, false);
-  const [isSpeeding, setIsSpeeding] = useState(false);
 
   const onPlayClick = useCallback(() => {
-    setIsPlaying();
-  }, [setIsPlaying]);
+    setSliderStep({ type: "IS_PLAYING" });
+  }, [setSliderStep]);
 
   const onForwardDown = useCallback(() => {
-    setSliderStep(sliderStep => {
-      const newStep = sliderStep[0] + STEP_SIZE;
-
-      if (newStep <= maxSliderStep) return [newStep, 1];
-      return sliderStep;
-    });
-    speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
-  }, [setSliderStep, setIsSpeeding, maxSliderStep]);
+    setSliderStep({ type: "FAST_FORWARD" });
+    speedingTimeout.current = setTimeout(() => setSliderStep({ type: "UPDATE", payload: { isSpeeding: true } }), 500);
+  }, [setSliderStep]);
 
   const onRewindDown = useCallback(() => {
-    setSliderStep(sliderStep => {
-      const newStep = sliderStep[0] - STEP_SIZE;
-
-      if (sliderStep[0] && newStep >= 0) return [newStep, -1];
-      return sliderStep;
-    });
-    speedingTimeout.current = setTimeout(() => setIsSpeeding(true), 500);
-  }, [setIsSpeeding, setSliderStep]);
+    setSliderStep({ type: "REWIND" });
+    speedingTimeout.current = setTimeout(() => setSliderStep({ type: "UPDATE", payload: { isSpeeding: true } }), 500);
+  }, [setSliderStep]);
 
   const onMouseUp = useCallback(() => {
     clearTimeout(speedingTimeout.current);
-    setIsSpeeding(false);
-  }, [setIsSpeeding]);
+    setSliderStep({ type: "UPDATE", payload: { isSpeeding: false } });
+  }, [setSliderStep]);
 
-  useInterval(
-    () => {
-      setSliderStep(sliderStep => {
-        const nextStep = sliderStep[0] + STEP_SIZE * Math.ceil(maxSliderStep / 100);
-
-        // Stop playing if slider reaches max step
-        if (nextStep >= maxSliderStep) {
-          setIsPlaying(false);
-          return [maxSliderStep, 0];
-        }
-
-        // Otherwise return next slider step
-        return [nextStep, sliderStep[1]];
-      });
-    },
-    isPlaying && !isSpeeding ? 800 : null
-  );
-
-  useInterval(
-    () => {
-      setSliderStep(sliderStep => {
-        const nextStep = sliderStep[0] + STEP_SIZE * (maxSliderStep / 50) * sliderStep[1];
-
-        // If slider step is at min or max, don't move anymore
-        if (nextStep <= 0 && sliderStep[1] < 0) {
-          return [0, 0];
-        } else if (sliderStep[1] && nextStep >= maxSliderStep) {
-          return [maxSliderStep, 0];
-        }
-
-        // Otherwise return next slider step
-        return [nextStep, sliderStep[1]];
-      });
-    },
-    isSpeeding ? 100 : null
-  );
+  useInterval(() => setSliderStep({ type: "IS_PLAYING" }), isPlaying && !isSpeeding ? 800 : null);
+  useInterval(() => setSliderStep({ type: "IS_SPEEDING" }), isSpeeding ? 100 : null);
 
   useEffect(() => {
     // Stop zoom if mouseup happens outside component

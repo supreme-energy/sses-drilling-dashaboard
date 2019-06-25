@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
-import { Typography, IconButton } from "@material-ui/core";
+import { Typography, Button } from "@material-ui/core";
 import { AccessTime, Restore } from "@material-ui/icons";
 import classNames from "classnames";
 
@@ -8,21 +8,16 @@ import { transformDate } from "./TimeSliderUtil";
 import classes from "./TimeSlider.scss";
 
 export const GlobalStartTimeControl = React.memo(({ expanded, setSliderStep, date }) => {
-  const handleSetBeginning = useCallback(() => {
-    setSliderStep([0, 1]);
-  }, [setSliderStep]);
+  const handleSetBeginning = useCallback(() => setSliderStep({ type: "RESET" }), [setSliderStep]);
 
   return (
     <div
-      className={classNames(
-        classes.backwardTime,
-        expanded ? classes.expandedBackwardTime : classes.collapsedBackwardTime
-      )}
+      className={classNames(classes.globalTime, expanded ? classes.expandedGlobalTime : classes.collapsedGlobalTime)}
     >
-      <IconButton onClick={handleSetBeginning}>
+      <Button onClick={handleSetBeginning}>
         <Restore />
-      </IconButton>
-      {expanded && <Typography variant="caption">{transformDate(date)}</Typography>}
+        {expanded && <Typography variant="caption">{transformDate(date)}</Typography>}
+      </Button>
     </div>
   );
 });
@@ -33,19 +28,17 @@ GlobalStartTimeControl.propTypes = {
   date: PropTypes.string
 };
 
-export const GlobalEndTimeControl = React.memo(({ expanded, setSliderStep, date, maxSliderStep }) => {
-  const handleSetEnd = useCallback(() => {
-    setSliderStep([maxSliderStep, 1]);
-  }, [setSliderStep, maxSliderStep]);
+export const GlobalEndTimeControl = React.memo(({ expanded, setSliderStep, date }) => {
+  const handleSetEnd = useCallback(() => setSliderStep({ type: "SET_TO_MAX" }), [setSliderStep]);
 
   return (
     <div
-      className={classNames(classes.forwardTime, expanded ? classes.expandedForwardTime : classes.collapsedForwardTime)}
+      className={classNames(classes.globalTime, expanded ? classes.expandedGlobalTime : classes.collapsedGlobalTime)}
     >
-      <IconButton onClick={handleSetEnd}>
+      <Button onClick={handleSetEnd}>
         <AccessTime />
-      </IconButton>
-      {expanded && <Typography variant="caption">{transformDate(date)}</Typography>}
+        {expanded && <Typography variant="caption">{transformDate(date)}</Typography>}
+      </Button>
     </div>
   );
 });

@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useReducer } from "react";
 import { createContainer } from "unstated-next";
 import memoize from "react-powertools/memoize";
 
 import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
+import { drillPhaseReducer } from "./reducers";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -18,21 +19,9 @@ function useTimeSlider(initialState) {
   return { sliderInterval, setSliderInterval };
 }
 
-export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
-
-// Shared state for last Index of Time Slider
-function useLastIndexState(initialState) {
-  const [lastIndexState, setLastIndexState] = useState(initialState);
-  return { lastIndexState, setLastIndexState };
-}
-
-export const { Provider: LastIndexStateProvider, useContainer: useLastIndexStateContainer } = createContainer(
-  useLastIndexState
-);
-
 // Shared state for current drill phase
 function useDrillPhase(initialState) {
-  const [drillPhaseObj, setDrillPhase] = useState(initialState);
+  const [drillPhaseObj, setDrillPhase] = useReducer(drillPhaseReducer, initialState);
   return { drillPhaseObj, setDrillPhase };
 }
 
@@ -45,8 +34,6 @@ function useAppStateData() {
   }, []);
   return { requestId, updateRequestId, refreshRequestId };
 }
-
-export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 
 const annotateSurveys = memoize(fullSurveyList => {
   // Bit projection is not always in list of surveys
@@ -79,8 +66,6 @@ const annotateProjections = memoize(projections => {
     };
   });
 });
-
-export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData(wellId) {
@@ -123,10 +108,16 @@ export function useWellSections() {
         phase: s.type,
         phaseStart: s.holeDepthStart,
         phaseEnd: s.depth,
-        inView: true
+        inView: true,
+        set: false
       };
     });
   }, [data]);
 
   return drillPhases;
 }
+
+// Create containers
+export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
+export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
+export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
