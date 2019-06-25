@@ -10,6 +10,7 @@ import trippingSelected from "../assets/Tripping-Selected.svg";
 import unknownSelected from "../assets/Unknown-Selected.svg";
 import completed from "../assets/Completed.svg";
 import completedSelected from "../assets/Completed-Selected.svg";
+import completedList from "../assets/Completed-list.svg";
 import mapValues from "lodash/mapValues";
 import L from "leaflet";
 
@@ -17,7 +18,7 @@ export const listIcons = {
   [DRILLING]: drilling,
   [UNKNOWN]: unknown,
   [TRIPPING]: tripping,
-  [COMPLETED]: completed
+  [COMPLETED]: completedList
 };
 
 export const mapIcons = {
