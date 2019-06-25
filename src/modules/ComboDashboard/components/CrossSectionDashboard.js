@@ -24,9 +24,11 @@ function selectionReducer(state, action) {
       throw new Error(`Unknown selected section reducer action type ${action.type}`);
   }
 }
-function PADeltaInit(section, prevSection) {
+function PADeltaInit(options = {}) {
+  const section = options.section || {};
   return {
-    prevOp: prevSection,
+    prevOp: options.prevSection,
+    nextOp: options.nextSection,
     op: section,
     id: section.id,
     bot: 0,
@@ -41,12 +43,17 @@ function PADeltaInit(section, prevSection) {
 
 function makePAReducer(saveProjection) {
   return function PADeltaReducer(state, action) {
-    const op = state.op;
     const prevOp = state.prevOp;
+    const op = state.op;
+    const nextOp = state.nextOp;
     let depthDelta = 0;
     const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
     switch (action.type) {
       case "dip_tot":
+        // Keep the PA station within its segment
+        if (prevOp && action.vs <= prevOp.vs) return state;
+        if (nextOp && action.vs >= nextOp.vs) return state;
+
         depthDelta = action.tot - op.tot - state.prevFault + op.fault;
         return {
           ...state,
@@ -58,6 +65,10 @@ function makePAReducer(saveProjection) {
           dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
         };
       case "dip_bot":
+        // Keep the PA station within its segment
+        if (prevOp && action.vs <= prevOp.vs) return state;
+        if (nextOp && action.vs >= nextOp.vs) return state;
+
         depthDelta = action.bot - op.bot - state.prevFault + op.fault;
         return {
           ...state,
@@ -68,9 +79,6 @@ function makePAReducer(saveProjection) {
           tvd: depthDelta,
           dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
         };
-      case "dip_end":
-        saveProjection(op.id, TOT_POS_VS, { tot: op.tot + state.tot, pos: pos, vs: op.vs + state.vs });
-        return state;
       case "fault_tot":
         return {
           ...state,
@@ -81,22 +89,20 @@ function makePAReducer(saveProjection) {
           ...state,
           prevFault: action.bot - prevOp.bot
         };
-      case "fault_end":
-        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
-        return state;
       case "pa":
         return {
           ...state,
           tvd: action.tvd - op.tvd - state.prevFault
         };
-      case "pa_end":
-        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs, pos: pos });
-        return state;
       case "tag_move":
         // We don't currently want the surveys or bit proj to be adjustable
         if (op.isSurvey || op.isBitProj) {
           return state;
         }
+        // Keep the PA station within its segment
+        if (prevOp && action.vs <= prevOp.vs) return state;
+        if (nextOp && action.vs >= nextOp.vs) return state;
+
         const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
         return {
           ...state,
@@ -105,11 +111,20 @@ function makePAReducer(saveProjection) {
           tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
           bot: prevOp.bot - op.bot + changeInY + op.fault
         };
+      case "init":
+        return PADeltaInit(action);
+      case "dip_end":
+        saveProjection(op.id, TOT_POS_VS, { tot: op.tot + state.tot, pos: pos, vs: op.vs + state.vs });
+        return state;
+      case "fault_end":
+        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
+        return state;
+      case "pa_end":
+        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs, pos: pos });
+        return state;
       case "tag_end":
         saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip, pos: pos });
         return state;
-      case "init":
-        return PADeltaInit(action.section, action.prevSection);
       default:
         throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
     }
@@ -188,7 +203,12 @@ export const CrossSectionDashboard = ({ wellId }) => {
     const id = Object.keys(selectedSections)[0];
     const index = rawSections.findIndex(s => s.id === Number(id));
     if (index !== -1) {
-      ghostDiffDispatch({ type: "init", section: rawSections[index], prevSection: rawSections[index - 1] });
+      ghostDiffDispatch({
+        type: "init",
+        prevSection: rawSections[index - 1],
+        section: rawSections[index],
+        nextSection: rawSections[index + 1]
+      });
     }
   }, [selectedSections, rawSections]);
 
