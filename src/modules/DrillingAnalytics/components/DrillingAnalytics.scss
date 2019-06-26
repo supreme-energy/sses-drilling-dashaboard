@@ -1,0 +1,46 @@
+@import "../../../styles/base";
+
+.drillingAnalyticsContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    h6 {
+        color: $gold;
+    }
+
+    .row:first-child, .row:last-child {
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+
+    .row {
+        flex-grow: 1;
+        display: flex;
+        > div {
+            margin: 3px;
+        }
+    }
+
+    .extendRow {
+        flex-grow: 6;
+        > div {
+            flex: 1;
+        }
+    }
+
+    .phaseOverviewCard {
+        flex-basis: 70%;
+    }
+
+    .verticalCrossSectionCard, .performanceAnalysisCard, .footageZoneStatsCard {
+        height: 100%;
+    }
+
+    .verticalMenu {
+        position: relative;
+        float: right;
+        bottom: 35px;
+        left: 10px;
+    }
+}
