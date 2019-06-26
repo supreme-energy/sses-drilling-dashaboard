@@ -71,10 +71,10 @@ const annotateProjections = memoize(projections => {
 export function useFilteredWellData(wellId) {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const formations = useFormations(wellId);
+  const [formations, refreshFormations] = useFormations(wellId);
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
-  const projections = useProjections(wellId);
+  const [projections, refreshProjections, saveProjection] = useProjections(wellId);
 
   // Calculate some useful information from raw data
   const annotatedSurveys = annotateSurveys(surveys);
@@ -90,11 +90,24 @@ export function useFilteredWellData(wellId) {
     };
   });
 
+  const saveAndUpdate = useCallback(
+    (...args) => {
+      saveProjection(...args).then((data, err) => {
+        if (!err) {
+          refreshFormations();
+          refreshProjections();
+        }
+      });
+    },
+    [saveProjection, refreshProjections, refreshFormations]
+  );
+
   return {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
-    projections: projectionsFiltered
+    projections: projectionsFiltered,
+    saveProjection: saveAndUpdate
   };
 }
 
