@@ -9,6 +9,19 @@ import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
 import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/CalcMethods";
 import usePrevious from "react-use/lib/usePrevious";
+import {
+  DIP_BOT_MOVE,
+  DIP_TOT_MOVE,
+  FAULT_BOT_MOVE,
+  FAULT_TOT_MOVE,
+  FAULT_END,
+  PA_MOVE,
+  PA_END,
+  TAG_MOVE,
+  TAG_END,
+  INIT,
+  DIP_END
+} from "../../../constants/interactivePAStatus";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
@@ -46,7 +59,7 @@ function PADeltaReducer(state, action) {
   const { prevOp, op, nextOp } = state;
   let depthDelta = 0;
   switch (action.type) {
-    case "dip_tot":
+    case DIP_TOT_MOVE:
       // Keep the PA station within its segment
       if (prevOp && action.vs <= prevOp.vs) return state;
       if (nextOp && action.vs >= nextOp.vs) return state;
@@ -60,9 +73,10 @@ function PADeltaReducer(state, action) {
         tcl: depthDelta,
         tvd: depthDelta,
         dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs),
-        method: TOT_POS_VS
+        method: TOT_POS_VS,
+        status: action.type
       };
-    case "dip_bot":
+    case DIP_BOT_MOVE:
       // Keep the PA station within its segment
       if (prevOp && action.vs <= prevOp.vs) return state;
       if (nextOp && action.vs >= nextOp.vs) return state;
@@ -76,31 +90,33 @@ function PADeltaReducer(state, action) {
         tcl: depthDelta,
         tvd: depthDelta,
         dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs),
-        method: TOT_POS_VS
+        method: TOT_POS_VS,
+        status: action.type
       };
-    case "fault_tot":
+    case FAULT_TOT_MOVE:
       return {
         ...state,
         prevFault: action.tot - prevOp.tot,
-        prevMethod: DIP_FAULT_POS_VS
+        prevMethod: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "fault_bot":
+    case FAULT_BOT_MOVE:
       return {
         ...state,
         prevFault: action.bot - prevOp.bot,
-        prevMethod: DIP_FAULT_POS_VS
+        prevMethod: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "pa":
+    case PA_MOVE:
       return {
         ...state,
         tvd: action.tvd - op.tvd - state.prevFault,
-        method: TVD_VS
+        method: TVD_VS,
+        status: action.type
       };
-    case "tag_move":
+    case TAG_MOVE:
       // We don't currently want the surveys or bit proj to be adjustable
-      if (op.isSurvey || op.isBitProj) {
-        return state;
-      }
+      if (op.isSurvey || op.isBitProj) return state;
       // Keep the PA station within its segment
       if (prevOp && action.vs <= prevOp.vs) return state;
       if (nextOp && action.vs >= nextOp.vs) return state;
@@ -112,18 +128,19 @@ function PADeltaReducer(state, action) {
         tot: prevOp.tot - op.tot + changeInY + op.fault,
         tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
         bot: prevOp.bot - op.bot + changeInY + op.fault,
-        method: DIP_FAULT_POS_VS
+        method: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "init":
+    case INIT:
       return PADeltaInit(action);
-    case "dip_end":
-      return { ...state, lastAction: "dip_end" };
-    case "fault_end":
-      return { ...state, lastAction: "fault_end" };
-    case "pa_end":
-      return { ...state, lastAction: "pa_end" };
-    case "tag_end":
-      return { ...state, lastAction: "tag_end" };
+    case DIP_END:
+      return { ...state, status: DIP_END };
+    case FAULT_END:
+      return { ...state, status: FAULT_END };
+    case PA_END:
+      return { ...state, status: PA_END };
+    case TAG_END:
+      return { ...state, status: TAG_END };
     default:
       throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
   }
@@ -137,27 +154,27 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const prevAction = usePrevious(ghostDiff.lastAction);
+  const prevStatus = usePrevious(ghostDiff.status);
   useEffect(() => {
-    const { lastAction, op, prevOp } = ghostDiff;
+    const { status, op, prevOp } = ghostDiff;
     const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
-    if (prevAction !== lastAction) {
-      switch (lastAction) {
-        case "dip_end":
-          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, pos: pos, vs: op.vs + ghostDiff.vs });
+    if (prevStatus !== status) {
+      switch (status) {
+        case DIP_END:
+          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, vs: op.vs + ghostDiff.vs, pos: pos });
           break;
-        case "fault_end":
+        case FAULT_END:
           saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
           break;
-        case "pa_end":
+        case PA_END:
           saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
           break;
-        case "tag_end":
-          saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + ghostDiff.vs, dip: op.dip + ghostDiff.dip, pos: pos });
+        case TAG_END:
+          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip + ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
           break;
       }
     }
-  }, [ghostDiff]);
+  }, [ghostDiff, prevStatus, saveProjection]);
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
@@ -224,7 +241,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
     const index = rawSections.findIndex(s => s.id === Number(id));
     if (index !== -1) {
       ghostDiffDispatch({
-        type: "init",
+        type: INIT,
         prevSection: rawSections[index - 1],
         section: rawSections[index],
         nextSection: rawSections[index + 1]

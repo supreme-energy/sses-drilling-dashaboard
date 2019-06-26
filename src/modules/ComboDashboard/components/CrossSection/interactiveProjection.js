@@ -1,6 +1,16 @@
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
+import {
+  DIP_BOT_MOVE,
+  DIP_TOT_MOVE,
+  FAULT_BOT_MOVE,
+  FAULT_TOT_MOVE,
+  FAULT_END,
+  PA_MOVE,
+  PA_END,
+  DIP_END
+} from "../../../../constants/interactivePAStatus";
 
 function createCircle(container, lineColor, fillColor, cb, cbEnd) {
   const circle = container.addChild(new PIXI.Graphics());
@@ -43,12 +53,12 @@ function interactiveProjection(parent, props) {
     red,
     function(pos) {
       ghostDiffDispatch({
-        type: "fault_tot",
+        type: FAULT_TOT_MOVE,
         tot: pos.y
       });
     },
     () => {
-      ghostDiffDispatch({ type: "fault_end" });
+      ghostDiffDispatch({ type: FAULT_END });
     }
   );
   const prevBot = createCircle(
@@ -57,12 +67,12 @@ function interactiveProjection(parent, props) {
     red,
     function(pos) {
       ghostDiffDispatch({
-        type: "fault_bot",
+        type: FAULT_BOT_MOVE,
         bot: pos.y
       });
     },
     () => {
-      ghostDiffDispatch({ type: "fault_end" });
+      ghostDiffDispatch({ type: FAULT_END });
     }
   );
 
@@ -72,13 +82,13 @@ function interactiveProjection(parent, props) {
     red,
     function(pos) {
       ghostDiffDispatch({
-        type: "dip_tot",
+        type: DIP_TOT_MOVE,
         vs: pos.x,
         tot: pos.y
       });
     },
     () => {
-      ghostDiffDispatch({ type: "dip_end" });
+      ghostDiffDispatch({ type: DIP_END });
     }
   );
 
@@ -88,13 +98,13 @@ function interactiveProjection(parent, props) {
     red,
     function(pos) {
       ghostDiffDispatch({
-        type: "dip_bot",
+        type: DIP_BOT_MOVE,
         vs: pos.x,
         bot: pos.y
       });
     },
     () => {
-      ghostDiffDispatch({ type: "dip_end" });
+      ghostDiffDispatch({ type: DIP_END });
     }
   );
 
@@ -106,13 +116,13 @@ function interactiveProjection(parent, props) {
     paMarker,
     function(pos) {
       ghostDiffDispatch({
-        type: "pa",
+        type: PA_MOVE,
         tvd: pos.y,
         vs: pos.x
       });
     },
     () => {
-      ghostDiffDispatch({ type: "pa_end" });
+      ghostDiffDispatch({ type: PA_END });
     }
   );
 
