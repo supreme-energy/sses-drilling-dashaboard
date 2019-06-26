@@ -7,7 +7,7 @@ import { useFilteredWellData } from "../../App/Containers";
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
-import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/CalcMethods";
+import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/calcMethods";
 import usePrevious from "react-use/lib/usePrevious";
 import {
   DIP_BOT_MOVE,
