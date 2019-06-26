@@ -23,12 +23,14 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
       }
       return {
         ...data.wellInfo,
+        transform: data.transform,
         latitude: data.wellSurfaceLocation.x,
         longitude: data.wellSurfaceLocation.y
       };
     },
     [data]
   );
+
   return (
     <React.Fragment>
       <AttributePaneSection

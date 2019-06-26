@@ -123,6 +123,9 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, wellInfo]
   );
 
+  const source = proj4.Proj("EPSG:32040");
+  const transform = toWGS84(source);
+
   const {
     wellSurfaceLocationLocal,
     wellSurfaceLocation,
@@ -134,8 +137,6 @@ export function useWellInfo(wellId) {
     if (!wellInfo) {
       return {};
     }
-    const source = proj4.Proj("EPSG:32040");
-    const transform = toWGS84(source);
 
     const wellSurfaceLocationLocal = {
       x: Number(wellInfo.survey_easting),

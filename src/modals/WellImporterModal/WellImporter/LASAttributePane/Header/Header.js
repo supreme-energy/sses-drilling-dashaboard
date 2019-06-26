@@ -4,12 +4,30 @@ import { Button, Typography, Box } from "@material-ui/core";
 import CSVHeader from "../../CSVAttributePane/Header";
 import classNames from "classnames";
 import css from "./styles.scss";
-import { useParsedFileSelector } from "../../selectors";
+import { useParsedFileSelector, isValueDefined, getFieldValue } from "../../selectors";
 import { useSelector } from "react-redux";
+import { useWellImporterContainer } from "../../";
+import values from "lodash/values";
+import mapValues from "lodash/mapValues";
+import pickBy from "lodash/pickBy";
 
 const Header = ({ className, onClickCancel }) => {
   const { data, extension } = useParsedFileSelector();
   const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
+  const [state] = useWellImporterContainer();
+  const { appAttributesModel } = state;
+
+  const dataToSave = pickBy(
+    mapValues(values(appAttributesModel).reduce((acc, next) => ({ ...acc, ...next }), {}), (value, key) => {
+      const actualValue = extension === "csv" ? getFieldValue(state.csvSelection, key, data) : value.value;
+      if (isValueDefined(actualValue)) {
+        return actualValue;
+      }
+
+      return null;
+    }),
+    d => d !== null
+  );
 
   return (
     <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>

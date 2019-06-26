@@ -6,7 +6,7 @@ import AttributePaneTextField from "../AttributePaneTextField";
 
 import css from "./styles.scss";
 import { useWellImporterContainer } from "../../..";
-import { useParsedFileSelector, getFieldValue } from "../../../selectors";
+import { useParsedFileSelector, getFieldValue, isValueDefined } from "../../../selectors";
 
 const wellInfoFieldMapping = {
   api: "wellid",
@@ -29,13 +29,14 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
 
   const attributePaneTextFields = useMemo(() => {
     function getModel(model, key) {
-      if (currentData) {
-        return {
-          value: currentData[wellInfoFieldMapping[key]]
-        };
+      let value = extension === "csv" ? getFieldValue(state.csvSelection, key, data) : model[key].value;
+      const notSelected = !isValueDefined(value);
+
+      if (currentData && notSelected) {
+        value = currentData[wellInfoFieldMapping[key]];
       }
 
-      return extension === "csv" ? { value: getFieldValue(state.csvSelection, key, data) } : model[key];
+      return { value };
     }
 
     return Object.keys(model).map(key => {
