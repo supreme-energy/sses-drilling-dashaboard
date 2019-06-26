@@ -1,13 +1,14 @@
-import { Typography, CircularProgress } from "@material-ui/core";
+import { CircularProgress, Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useMemo, useReducer, Suspense, lazy } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
 import { useFilteredWellData } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
 import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/CalcMethods";
+import usePrevious from "react-use/lib/usePrevious";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
@@ -41,94 +42,91 @@ function PADeltaInit(options = {}) {
   };
 }
 
-function makePAReducer(saveProjection) {
-  return function PADeltaReducer(state, action) {
-    const prevOp = state.prevOp;
-    const op = state.op;
-    const nextOp = state.nextOp;
-    let depthDelta = 0;
-    const pos = op.tcl + state.tcl - (op.tvd + state.tvd);
-    switch (action.type) {
-      case "dip_tot":
-        // Keep the PA station within its segment
-        if (prevOp && action.vs <= prevOp.vs) return state;
-        if (nextOp && action.vs >= nextOp.vs) return state;
+function PADeltaReducer(state, action) {
+  const { prevOp, op, nextOp } = state;
+  let depthDelta = 0;
+  switch (action.type) {
+    case "dip_tot":
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
 
-        depthDelta = action.tot - op.tot - state.prevFault + op.fault;
-        return {
-          ...state,
-          tot: depthDelta,
-          vs: action.vs - op.vs,
-          bot: depthDelta,
-          tcl: depthDelta,
-          tvd: depthDelta,
-          dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs)
-        };
-      case "dip_bot":
-        // Keep the PA station within its segment
-        if (prevOp && action.vs <= prevOp.vs) return state;
-        if (nextOp && action.vs >= nextOp.vs) return state;
+      depthDelta = action.tot - op.tot - state.prevFault + op.fault;
+      return {
+        ...state,
+        tot: depthDelta,
+        vs: action.vs - op.vs,
+        bot: depthDelta,
+        tcl: depthDelta,
+        tvd: depthDelta,
+        dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs),
+        method: TOT_POS_VS
+      };
+    case "dip_bot":
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
 
-        depthDelta = action.bot - op.bot - state.prevFault + op.fault;
-        return {
-          ...state,
-          tot: depthDelta,
-          vs: action.vs - op.vs,
-          bot: depthDelta,
-          tcl: depthDelta,
-          tvd: depthDelta,
-          dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs)
-        };
-      case "fault_tot":
-        return {
-          ...state,
-          prevFault: action.tot - prevOp.tot
-        };
-      case "fault_bot":
-        return {
-          ...state,
-          prevFault: action.bot - prevOp.bot
-        };
-      case "pa":
-        return {
-          ...state,
-          tvd: action.tvd - op.tvd - state.prevFault
-        };
-      case "tag_move":
-        // We don't currently want the surveys or bit proj to be adjustable
-        if (op.isSurvey || op.isBitProj) {
-          return state;
-        }
-        // Keep the PA station within its segment
-        if (prevOp && action.vs <= prevOp.vs) return state;
-        if (nextOp && action.vs >= nextOp.vs) return state;
+      depthDelta = action.bot - op.bot - state.prevFault + op.fault;
+      return {
+        ...state,
+        tot: depthDelta,
+        vs: action.vs - op.vs,
+        bot: depthDelta,
+        tcl: depthDelta,
+        tvd: depthDelta,
+        dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs),
+        method: TOT_POS_VS
+      };
+    case "fault_tot":
+      return {
+        ...state,
+        prevFault: action.tot - prevOp.tot,
+        prevMethod: DIP_FAULT_POS_VS
+      };
+    case "fault_bot":
+      return {
+        ...state,
+        prevFault: action.bot - prevOp.bot,
+        prevMethod: DIP_FAULT_POS_VS
+      };
+    case "pa":
+      return {
+        ...state,
+        tvd: action.tvd - op.tvd - state.prevFault,
+        method: TVD_VS
+      };
+    case "tag_move":
+      // We don't currently want the surveys or bit proj to be adjustable
+      if (op.isSurvey || op.isBitProj) {
+        return state;
+      }
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
 
-        const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
-        return {
-          ...state,
-          vs: action.vs - op.vs,
-          tot: prevOp.tot - op.tot + changeInY + op.fault,
-          tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
-          bot: prevOp.bot - op.bot + changeInY + op.fault
-        };
-      case "init":
-        return PADeltaInit(action);
-      case "dip_end":
-        saveProjection(op.id, TOT_POS_VS, { tot: op.tot + state.tot, pos: pos, vs: op.vs + state.vs });
-        return state;
-      case "fault_end":
-        saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + state.prevFault });
-        return state;
-      case "pa_end":
-        saveProjection(op.id, TVD_VS, { tvd: op.tvd + state.tvd, vs: op.vs + state.vs, pos: pos });
-        return state;
-      case "tag_end":
-        saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + state.vs, dip: op.dip + state.dip, pos: pos });
-        return state;
-      default:
-        throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
-    }
-  };
+      const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
+      return {
+        ...state,
+        vs: action.vs - op.vs,
+        tot: prevOp.tot - op.tot + changeInY + op.fault,
+        tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
+        bot: prevOp.bot - op.bot + changeInY + op.fault,
+        method: DIP_FAULT_POS_VS
+      };
+    case "init":
+      return PADeltaInit(action);
+    case "dip_end":
+      return { ...state, lastAction: "dip_end" };
+    case "fault_end":
+      return { ...state, lastAction: "fault_end" };
+    case "pa_end":
+      return { ...state, lastAction: "pa_end" };
+    case "tag_end":
+      return { ...state, lastAction: "tag_end" };
+    default:
+      throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
+  }
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
@@ -137,7 +135,29 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
-  const [ghostDiff, ghostDiffDispatch] = useReducer(makePAReducer(saveProjection), {}, PADeltaInit);
+  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+
+  const prevAction = usePrevious(ghostDiff.lastAction);
+  useEffect(() => {
+    const { lastAction, op, prevOp } = ghostDiff;
+    const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
+    if (prevAction !== lastAction) {
+      switch (lastAction) {
+        case "dip_end":
+          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, pos: pos, vs: op.vs + ghostDiff.vs });
+          break;
+        case "fault_end":
+          saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
+          break;
+        case "pa_end":
+          saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
+          break;
+        case "tag_end":
+          saveProjection(op.id, DIP_FAULT_POS_VS, { vs: op.vs + ghostDiff.vs, dip: op.dip + ghostDiff.dip, pos: pos });
+          break;
+      }
+    }
+  }, [ghostDiff]);
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
@@ -251,6 +271,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               setSelectedSections={setSelectedSections}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
+              ghostDiff={ghostDiff}
               saveProjection={saveProjection}
             />
           )}
