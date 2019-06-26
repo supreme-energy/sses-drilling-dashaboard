@@ -288,8 +288,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
               setSelectedSections={setSelectedSections}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
-              ghostDiff={ghostDiff}
-              saveProjection={saveProjection}
             />
           )}
         </ParentSize>
