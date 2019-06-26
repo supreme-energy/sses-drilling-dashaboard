@@ -1,8 +1,16 @@
 import { useState, useCallback, useMemo, useReducer } from "react";
 import { createContainer } from "unstated-next";
+
 import memoize from "react-powertools/memoize";
 
-import { useFormations, useProjections, useSurveys, useWellOverviewKPI, useWellPath } from "../../api";
+import {
+  useFormations,
+  useProjections,
+  useSurveys,
+  useWellOverviewKPI,
+  useWellPath,
+  useAdditionalDataLog
+} from "../../api";
 import { drillPhaseReducer } from "./reducers";
 
 const filterDataToInterval = memoize((data, interval) => {
@@ -10,6 +18,14 @@ const filterDataToInterval = memoize((data, interval) => {
     return data.filter(({ md }) => interval[0] <= md && md <= interval[1]);
   } else {
     return [];
+  }
+});
+
+const filterDataToLast = memoize((data, lastDepth) => {
+  if (data && data.length) {
+    return data.find(({ md }) => md >= lastDepth);
+  } else {
+    return {};
   }
 });
 
@@ -108,6 +124,20 @@ export function useFilteredWellData(wellId) {
     formations: formationsFiltered,
     projections: projectionsFiltered,
     saveProjection: saveAndUpdate
+  };
+}
+
+// Uses current time slider location to filter additional data logs
+export function useFilteredAdditionalDataLogs(wellId, id) {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const { label, data, scalelo, scalehi } = useAdditionalDataLog(wellId, id);
+
+  return {
+    label,
+    scalelo,
+    scalehi,
+    ...filterDataToLast(data, sliderInterval[1])
   };
 }
 

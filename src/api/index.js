@@ -25,6 +25,8 @@ export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
+export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
@@ -416,5 +418,45 @@ export function useTimeSliderData() {
       id: "mock"
     }
   );
+  return data || EMPTY_ARRAY;
+}
+
+export function useAdditionalDataLogsList(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_ADDITIONAL_DATA_LOGS_LIST,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => _.keyBy(data, "label")
+    }
+  );
+
+  return data || {};
+}
+
+export function useAdditionalDataLog(wellId, id) {
+  const [data] = useFetch(
+    {
+      path: GET_ADDITIONAL_DATA_LOG,
+      query: {
+        seldbname: wellId,
+        id
+      }
+    },
+    {
+      transform: data => {
+        return {
+          label: data.label,
+          scalelo: data.scalelo,
+          scalehi: data.scalehi,
+          data: memoizedTransform(data.data)
+        };
+      }
+    }
+  );
+
   return data || EMPTY_ARRAY;
 }
