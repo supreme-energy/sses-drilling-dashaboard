@@ -5,20 +5,20 @@ import { useSize } from "react-hook-size";
 import { scaleLinear } from "d3-scale";
 import { max, pairs } from "d3-array";
 import { SectionsGraph } from "./SectionsGraph";
-import PixiLine from "./PixiLine";
-import PixiContainer from "./PixiContainer";
-import useViewport from "./useViewport";
-import { useWebGLRenderer } from "./useWebGLRenderer";
-import Grid from "./Grid";
+import PixiLine from "../../../../../components/PixiLine";
+import PixiContainer from "../../../../../components/PixiContainer";
+import useViewport from "../../../../../hooks/useViewport";
+import { useWebGLRenderer } from "../../../../../hooks/useWebGLRenderer";
 import classNames from "classnames";
 import classes from "./styles.scss";
 import { colorBySection } from "../../../../../constants/pixiColors";
 import { getHoursDif } from "../../../utils/time";
 import SectionsBg from "./SectionsBg";
 import { orderedSections } from "../../../../../constants/wellSections";
-import XAxis from "./XAxis";
+import XAxis from "../../../../../components/XAxis";
 import { getScaledValue } from "../../../utils/scale";
 import Legend from "./Legend";
+import Grid from "../../../../../components/Grid";
 
 function computeInitialViewYScaleValue(data) {
   if (data && data.length > 0) {

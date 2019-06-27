@@ -5,9 +5,8 @@ import classNames from "classnames";
 import _ from "lodash";
 import { useSize } from "react-hook-size";
 
-import PixiContainer from "../../WellExplorer/components/WellOverview/ROP/PixiContainer";
 import PixiBar from "./PixiBar";
-import PixiLine from "../../WellExplorer/components/WellOverview/ROP/PixiLine";
+
 import { useTimeSliderContainer, useDrillPhaseContainer } from "../../App/Containers";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
@@ -16,8 +15,8 @@ import ZoomControls from "./ZoomControls";
 import { GlobalStartTimeControl, GlobalEndTimeControl } from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
 import { graphReducer, sliderReducer } from "./reducers";
-import useViewport from "../../WellExplorer/components/WellOverview/ROP/useViewport";
-import { useWebGLRenderer } from "../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
+import useViewport from "../../../hooks/useViewport";
+import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import { useTimeSliderData } from "../../../api";
 import { SURFACE } from "../../../constants/wellSections";
 import {
@@ -34,6 +33,8 @@ import {
   computePhaseXScaleValue
 } from "./TimeSliderUtil";
 import classes from "./TimeSlider.scss";
+import PixiContainer from "../../../components/PixiContainer";
+import PixiLine from "../../../components/PixiLine";
 
 const TimeSlider = React.memo(({ wellId, expanded }) => {
   // Fetch data for Time Slider

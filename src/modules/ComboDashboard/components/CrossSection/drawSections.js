@@ -55,6 +55,7 @@ function drawSections(container, higherContainer, props, gutter) {
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections, calcSections } = props;
+    console.log("calcSections", calcSections);
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
