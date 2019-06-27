@@ -7,21 +7,7 @@ import AttributePaneTextField from "../AttributePaneTextField";
 import css from "./styles.scss";
 import { useWellImporterContainer } from "../../..";
 import { useParsedFileSelector, getFieldValue, isValueDefined } from "../../../selectors";
-
-const wellInfoFieldMapping = {
-  api: "wellid",
-  country: "country",
-  county: "county",
-  field: "field",
-  jobNumber: "jobnumber",
-  location: "location",
-  operator: "operatorname",
-  rigId: "rigid",
-  state: "stateprov",
-  well: "wellborename",
-  latitude: "latitude",
-  longitude: "longitude"
-};
+import { apiFieldMapping } from "../../../models/mappings";
 
 const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, model, activeInput, currentData }) => {
   const [state] = useWellImporterContainer();
@@ -33,7 +19,7 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
       const notSelected = !isValueDefined(value);
 
       if (currentData && notSelected) {
-        value = currentData[wellInfoFieldMapping[key]];
+        value = currentData[apiFieldMapping[key]];
       }
 
       return { value };

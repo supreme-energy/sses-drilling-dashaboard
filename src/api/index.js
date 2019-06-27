@@ -99,12 +99,16 @@ export function useWellInfo(wellId) {
   }, [wellId, serializedRefresh, requestId]);
 
   const updateWell = useCallback(
-    ({ wellId, field, value, refreshStore }) => {
+    ({ wellId, data: updatedData }) => {
+      const body = {
+        wellinfo: updatedData
+      };
+
       const optimisticResult = {
         ...data,
         wellinfo: {
           ...wellInfo,
-          [field]: value
+          ...updatedData
         }
       };
 
@@ -112,16 +116,28 @@ export function useWellInfo(wellId) {
         path: SET_WELL_FIELD,
         query: {
           seldbname: wellId,
-          table: "wellinfo",
-          field,
-          value
+          table: "wellinfo"
         },
-        cache: "no-cache",
+        method: "POST",
+        body,
         optimisticResult
       });
     },
     [serializedUpdateFetch, data, wellInfo]
   );
+
+  // const updateWellPost = ({ wellId, field, value }) => {
+  //   fetch({
+  //     path: SET_WELL_FIELD,
+  //     query: {
+  //       seldbname: wellId,
+  //       table: "wellinfo",
+  //       field,
+  //       value
+  //     },
+  //     cache: "no-cache",
+  //   });
+  // };
 
   const source = proj4.Proj("EPSG:32040");
   const transform = toWGS84(source);
@@ -164,7 +180,7 @@ export function useWellInfo(wellId) {
       wellPBHL,
       wellPBHLLocal
     };
-  }, [wellInfo]);
+  }, [wellInfo, transform]);
 
   return [
     {

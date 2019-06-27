@@ -300,7 +300,7 @@ export default function WellInfo({ wellId }) {
 
   const onFieldChange = useCallback(
     async (field, value, shouldRefreshStore) => {
-      await updateWell({ wellId, field, value });
+      await updateWell({ wellId, data: { [field]: value } });
       if (shouldRefreshStore) {
         refreshFetchStore();
       }

@@ -10,13 +10,18 @@ import { useWellImporterContainer } from "../../";
 import values from "lodash/values";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
+import { useWellInfo } from "../../../../../api";
+import { apiFieldMapping } from "../../models/mappings";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import { useWellImporterSaveContainer } from "../../../WellImporterModal";
 
 const Header = ({ className, onClickCancel }) => {
   const { data, extension } = useParsedFileSelector();
   const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
   const [state] = useWellImporterContainer();
   const { appAttributesModel } = state;
-
+  const [, , updateWell, refreshFetchStore] = useWellInfo(selectedWellId);
+  const [{ isLoading }, dispatch] = useWellImporterSaveContainer();
   const dataToSave = pickBy(
     mapValues(values(appAttributesModel).reduce((acc, next) => ({ ...acc, ...next }), {}), (value, key) => {
       const actualValue = extension === "csv" ? getFieldValue(state.csvSelection, key, data) : value.value;
@@ -28,6 +33,24 @@ const Header = ({ className, onClickCancel }) => {
     }),
     d => d !== null
   );
+
+  const importEnabled = selectedWellId && !!values(dataToSave).length;
+
+  const importClickHandler = async () => {
+    const data = Object.keys(dataToSave).reduce((acc, next) => {
+      return { ...acc, [apiFieldMapping[next]]: dataToSave[next] };
+    }, {});
+    dispatch({ type: "LOADING_START" });
+    try {
+      await updateWell({ wellId: selectedWellId, data });
+      dispatch({ type: "SAVE_SUCCESS" });
+      onClickCancel();
+    } catch (e) {
+      dispatch({ type: "SAVE_ERROR", error: "Something went wrong" });
+    }
+
+    refreshFetchStore();
+  };
 
   return (
     <Box display="flex" flexDirection="column" justifyContent="space-between" className={className}>
@@ -41,8 +64,21 @@ const Header = ({ className, onClickCancel }) => {
         <Button className={css.button} color="primary" onClick={onClickCancel}>
           Cancel
         </Button>
-        <Button className={css.button} variant="contained" color="secondary" disabled>
-          Import
+        <Button
+          className={css.button}
+          variant="contained"
+          color="secondary"
+          disabled={!importEnabled}
+          onClick={importClickHandler}
+        >
+          <div className="layout horizontal align-center">
+            {isLoading && (
+              <div className={css.butonProgressContainer}>
+                <CircularProgress color="inherit" size={16} />
+              </div>
+            )}
+            <span>Import</span>
+          </div>
         </Button>
       </div>
 
