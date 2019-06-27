@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useReducer } from "react";
+import { useState, useCallback, useMemo, useReducer, useEffect } from "react";
 import { createContainer } from "unstated-next";
 
 import memoize from "react-powertools/memoize";
@@ -117,6 +117,16 @@ export function useFilteredWellData(wellId) {
     },
     [saveProjection, refreshProjections, refreshFormations]
   );
+
+  // TODO: Remove once formations are stabilized again
+  useEffect(() => {
+    const lens = formations.map(l => l.data.length);
+    if (lens.length && Math.max(...lens) !== Math.min(...lens)) {
+      console.warn("Data arrays are not all the same!");
+      console.warn(lens);
+      console.warn(formations);
+    }
+  }, [formations]);
 
   return {
     surveys: surveysFiltered,
