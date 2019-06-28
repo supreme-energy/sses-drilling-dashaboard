@@ -5,6 +5,48 @@
     flex-direction: column;
     height: 100%;
 
+    .slidingKpiContainer {
+        margin-top: 20px;
+
+        h5 {
+            margin-right: 5px;
+            font-size: 45px;
+            font-weight: 500;
+        }
+
+        .slidingLabel {
+            color: #AFB42B;
+            margin-right: auto;
+            > span {
+                position: relative;
+                bottom: 6px;
+            }
+
+        }
+
+        span {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .rotatingLabel {
+            position: relative;
+            left: 42px;
+            color: #827717;
+
+            > span {
+                position: relative;
+                bottom: 6px;
+                text-align: right;
+            }
+        }
+
+        .slidingKpis {
+            display: flex;
+            flex-direction: row;
+        }
+    }
+
     h6 {
         color: $gold;
     }

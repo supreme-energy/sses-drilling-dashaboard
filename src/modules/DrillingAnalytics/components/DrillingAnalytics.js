@@ -27,7 +27,7 @@ export function DrillingAnalytics({
   return (
     <div className={classes.drillingAnalyticsContainer}>
       <div className={classes.row}>
-        <PhaseOverview wellId={openedWellId} drillPhase={phase} />
+        <PhaseOverview wellId={openedWellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
         <StandAnalysis wellId={openedWellId} drillPhase={drillPhaseType} />
         <SlideAnalysis drillPhase={drillPhaseType} />
       </div>
