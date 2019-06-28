@@ -84,8 +84,10 @@ const annotateProjections = memoize(projections => {
 });
 
 // Uses current time slider location to filter well Cross-Section
-export function useFilteredWellData(wellId) {
+export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
+
+  const { wellId } = useWellIdContainer();
 
   const [formations, refreshFormations] = useFormations(wellId);
   const surveys = useSurveys(wellId);
@@ -170,7 +172,13 @@ export function useWellSections() {
   return drillPhases;
 }
 
+function useWellId(initialState) {
+  const [wellId, setWellId] = useState(initialState);
+  return { wellId, setWellId };
+}
+
 // Create containers
+export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);

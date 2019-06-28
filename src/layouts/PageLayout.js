@@ -8,6 +8,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import { useSize } from "react-hook-size";
+import { WellIdProvider, useWellIdContainer } from "../modules/App/Containers";
 
 const PageTabs = ({
   match: {
@@ -15,6 +16,8 @@ const PageTabs = ({
   },
   history
 }) => {
+  const { setWellId } = useWellIdContainer();
+  setWellId(wellId);
   const actualPage = page || "explorer";
   const wellIdPath = wellId || "";
   const onTabChange = (e, value) => {
@@ -40,19 +43,21 @@ const PageTabs = ({
 export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
-      <div className={classes.container}>
-        <AppBar className={classes.appBar} color="inherit">
-          <div className={classes.header}>
-            <div className={classes.logo}>
-              <img src="/sses-logo.svg" />
+      <WellIdProvider initialState={""}>
+        <div className={classes.container}>
+          <AppBar className={classes.appBar} color="inherit">
+            <div className={classes.header}>
+              <div className={classes.logo}>
+                <img src="/sses-logo.svg" />
+              </div>
+              <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+              <span />
             </div>
-            <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-            <span />
-          </div>
-        </AppBar>
+          </AppBar>
 
-        <div className={classes.viewport}>{children}</div>
-      </div>
+          <div className={classes.viewport}>{children}</div>
+        </div>
+      </WellIdProvider>
     </MuiThemeProvider>
   );
 };
