@@ -10,6 +10,7 @@ import ArialCrossSection from "./ArialCrossSection";
 import Measurements from "./Measurements";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
+import { ComboContainerProvider } from "../containers/store";
 
 function ComboDashboard({
   match: {
@@ -17,23 +18,25 @@ function ComboDashboard({
   }
 }) {
   return (
-    <div className={classes.comboDashboardWrapper}>
-      <div className={classes.kpiRows}>
-        <div className={classes.row}>
-          <DrillPhaseKPI className={classes.drillPhaseKpi} />
-          <ToolFace />
-          <WellOperation />
-          <ArialCrossSection />
+    <ComboContainerProvider>
+      <div className={classes.comboDashboardWrapper}>
+        <div className={classes.kpiRows}>
+          <div className={classes.row}>
+            <DrillPhaseKPI className={classes.drillPhaseKpi} />
+            <ToolFace />
+            <WellOperation />
+            <ArialCrossSection />
+          </div>
+          <div className={classNames(classes.row, classes.graphRow)}>
+            <Interpretation />
+            <CrossSectionDashboard wellId={openedWellId} />
+          </div>
         </div>
-        <div className={classNames(classes.row, classes.graphRow)}>
-          <Interpretation />
-          <CrossSectionDashboard wellId={openedWellId} />
+        <div className={classes.kpiColumn}>
+          <Measurements />
         </div>
       </div>
-      <div className={classes.kpiColumn}>
-        <Measurements />
-      </div>
-    </div>
+    </ComboContainerProvider>
   );
 }
 

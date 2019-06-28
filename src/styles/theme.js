@@ -55,6 +55,13 @@ export const theme = createMuiTheme({
         }
       }
     },
+    MuiIconButton: {
+      root: {
+        "&:focus": {
+          outline: "none"
+        }
+      }
+    },
     MuiButton: {
       root: {
         padding: "8px 16px"

@@ -23,6 +23,9 @@ export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
+export const GET_WELL_LOG_LIST = "/wellloglist.php";
+export const GET_WELL_LOG_DATA = "/welllog.php";
 
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
@@ -402,4 +405,57 @@ export function useTimeSliderData() {
     }
   );
   return data || EMPTY_ARRAY;
+}
+
+export function useWellControlLog(wellId) {
+  return useFetch(
+    {
+      path: GET_WELL_CONTROL_LOG,
+      query: { seldbname: wellId, data: 1 }
+    },
+    {
+      transform: logs => {
+        return logs.map(l => ({
+          ...l,
+          data: l.data.map(d => ({ ...d, value: Number(d.value), tvd: Number(d.tvd) })),
+          md: Number(l.md)
+        }));
+      }
+    }
+  );
+}
+
+export function useWellLogList(wellId) {
+  const [list, ...rest] = useFetch({
+    path: GET_WELL_LOG_LIST,
+    query: { seldbname: wellId }
+  });
+
+  const logList = useMemo(() => list && list.map(d => ({ ...d, startmd: Number(d.startmd), endmd: Number(d.endmd) })), [
+    list
+  ]);
+  return [logList || EMPTY_ARRAY, ...rest];
+}
+
+export function useWellLogData(wellId, tableName) {
+  const transformWellLogData = useMemo(() => {
+    const sortByDepth = (a, b) => a.md - b.md;
+    return memoizeOne(data => {
+      return {
+        ...data,
+        data: data.data
+          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value) }))
+          .sort(sortByDepth)
+      };
+    });
+  }, []);
+
+  return useFetch(
+    tableName &&
+      wellId && {
+        path: GET_WELL_LOG_DATA,
+        query: { seldbname: wellId, tablename: tableName }
+      },
+    { transform: transformWellLogData }
+  );
 }

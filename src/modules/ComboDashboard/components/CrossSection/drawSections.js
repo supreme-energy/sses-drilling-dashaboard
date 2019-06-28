@@ -38,15 +38,12 @@ function drawSections(container, higherContainer, props, gutter) {
   labelText.rotation = Math.PI / 2;
   labelText.position.y = labelHeight / 2;
 
-  const addSection = function() {
+  const addSection = function(start) {
     const section = new PIXI.Graphics();
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
     section.on("click", function() {
-      props.setSelectedSections({
-        type: "toggle",
-        id: this.sectionId
-      });
+      props.setSelectedMd(start.md);
     });
     container.addChild(section);
     return section;
@@ -55,7 +52,6 @@ function drawSections(container, higherContainer, props, gutter) {
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections, calcSections } = props;
-    console.log("calcSections", calcSections);
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
@@ -67,7 +63,7 @@ function drawSections(container, higherContainer, props, gutter) {
     // Clear out all previous drawn sections
     pixiList.forEach(p => p.clear());
     for (let i = 1; i <= calcSections.length - 1; i++) {
-      if (!pixiList[i]) pixiList[i] = addSection();
+      if (!pixiList[i]) pixiList[i] = addSection(calcSections[i - 1]);
       const p1 = calcSections[i - 1];
       const p2 = calcSections[i];
       const isSelected = selectedSections[p2.id];

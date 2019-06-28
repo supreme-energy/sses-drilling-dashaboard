@@ -7,21 +7,9 @@ import { useFilteredWellData } from "../../App/Containers";
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
+import { useComboContainer } from "../containers/store";
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
-function selectionReducer(state, action) {
-  switch (action.type) {
-    // A planned feature is multiple selection, but only single is supported now
-    case "toggle":
-      return {
-        [action.id]: !state[action.id]
-      };
-    case "clear":
-      return {};
-    default:
-      throw new Error(`Unknown selected section reducer action type ${action.type}`);
-  }
-}
 function PADeltaInit(section, prevSection) {
   return {
     prevOp: prevSection,
@@ -99,13 +87,22 @@ function PADeltaReducer(state, action) {
 
 export const CrossSectionDashboard = ({ wellId }) => {
   const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
-  console.log("projections", projections);
-  console.log("surveys", surveys);
-  console.log("wellPlan", wellPlan);
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
+
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+  const [{ selectedMd }, dispatch] = useComboContainer();
+  const selectedSections = useMemo(
+    function getSelectedSections() {
+      const selected = rawSections.find((s, index) => {
+        return index > 0 && rawSections[index - 1].md <= selectedMd && s.md > selectedMd;
+      });
+
+      return selected ? { [selected.id]: true } : {};
+    },
+    [selectedMd, rawSections]
+  );
+  const setSelectedMd = md => dispatch({ type: "SELECT_MD", md });
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
@@ -204,7 +201,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               projections={projections}
               calcSections={calcSections}
               selectedSections={selectedSections}
-              setSelectedSections={setSelectedSections}
+              setSelectedMd={setSelectedMd}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
             />
