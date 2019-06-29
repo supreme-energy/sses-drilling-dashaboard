@@ -181,22 +181,22 @@ function useFormationsData(initialState) {
   const { wellId } = useWellIdContainer();
   const [formationsData, setFormations] = useState(initialState);
 
-  const [formations, refreshFormations] = useFormations(wellId);
+  const [serverFormations, refreshFormations] = useFormations(wellId);
 
   useEffect(() => {
-    if (formations && formations.length) {
-      setFormations(formations);
+    if (serverFormations && serverFormations.length) {
+      setFormations(serverFormations);
     }
-  }, [formations]);
+  }, [serverFormations]);
 
-  return { formations, setFormations, refreshFormations }
+  return { formationsData, setFormations, refreshFormations };
 }
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
   const [projectionsData, setProjections] = useState();
 
-  const [projections, refreshProjections, saveProjection] = useProjections(wellId);
+  const [projections, refreshProjections, saveProjections] = useProjections(wellId);
 
   useEffect(() => {
     if (projections && projections.length) {
@@ -204,12 +204,12 @@ function useProjectionsData() {
     }
   }, [projections]);
 
-  return { projectionsData, setProjections, saveProjections, refreshProjections }
+  return { projectionsData, setProjections, saveProjections, refreshProjections };
 }
 
 function useCustomDataHook() {
-  const { formationsData } = useFormationsContainer();
-  const { projectionsData, saveProjections } = useProjectionsContainer();
+  const { formationsData } = useFormationsDataContainer();
+  const { projectionsData, saveProjections } = useProjectionsDataContainer();
 
   // Filter data here or filter in Container before hand (is there a benefit to one over the other?)
 
@@ -217,14 +217,17 @@ function useCustomDataHook() {
     // on projectionsDataChange,
     // Change formationsData
     //
-  }, [projectionsData])
+  }, [projectionsData]);
 }
-
 
 // Create containers
 export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
-export const { Provider: FormationsProvider, useContainer: useFormationsData } = createContainer(useFormations);
-export const { Provider: ProjectionsProvider, useContainer: useProjectionsData } = createContainer(useProjections);
+export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
+  useFormationsData
+);
+export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
+  useProjectionsData
+);
