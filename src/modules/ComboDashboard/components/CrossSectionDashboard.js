@@ -26,6 +26,7 @@ import {
   DIP_END
 } from "../../../constants/interactivePAStatus";
 import Collapse from "@material-ui/core/Collapse";
+import DetailsTable from "./Details";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
@@ -270,7 +271,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   return (
     <WidgetCard className={classes.crossSectionDash}>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
@@ -317,13 +318,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             <Typography variant="subtitle1">Details</Typography>
           </div>
           <Collapse in={expanded} unmountOnExit>
-            <Typography paragraph>
-              Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet over medium-high heat. Add chicken,
-              shrimp and chorizo, and cook, stirring occasionally until lightly browned, 6 to 8 minutes. Transfer shrimp
-              to a large plate and set aside, leaving chicken and chorizo in the pan. Add pimentón, bay leaves, garlic,
-              tomatoes, onion, salt and pepper, and cook, stirring often until thickened and fragrant, about 10 minutes.
-              Add saffron broth and remaining 4 1/2 cups chicken broth; bring to a boil.
-            </Typography>
+            <DetailsTable selected={ghostDiff} />
           </Collapse>
         </div>
       </div>

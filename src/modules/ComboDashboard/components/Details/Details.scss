@@ -1,0 +1,38 @@
+
+.root {
+  width: 100%;
+  overflow-x: auto
+}
+.table {
+  min-width: 650px
+}
+.row {
+  .cell {
+    border-bottom:none;
+    border-radius: 6px;
+    border: 2px white solid;
+    background-clip: padding-box;
+    font-weight: bold;
+  }
+}
+.surveyRow {
+  .cell {
+    background-color: rgba(166, 166, 166, 0.2);
+  }
+}
+.lastSurveyRow {
+  .cell {
+    background-color: rgba(0, 167, 255, 0.1)
+  }
+}
+.bitProjRow {
+  .cell {
+    background-color: rgba(255, 0, 255, 0.1)
+  }
+}
+.PARow {
+  .cell {
+    background-color: rgba(238, 34, 17, 0.1);
+
+  }
+}
