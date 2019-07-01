@@ -6,11 +6,10 @@
     height: 100%;
 
     .slidingKpiContainer {
-        margin-top: 20px;
-
+        margin-top: 10px;
         h5 {
             margin-right: 5px;
-            font-size: 45px;
+            font-size: 40px;
             font-weight: 500;
         }
 
@@ -57,7 +56,6 @@
     }
 
     .row {
-        flex-grow: 1;
         display: flex;
         > div {
             margin: 3px;
@@ -65,7 +63,7 @@
     }
 
     .extendRow {
-        flex-grow: 6;
+        flex-grow: 2;
         > div {
             flex: 1;
         }
@@ -84,5 +82,32 @@
         float: right;
         bottom: 35px;
         left: 10px;
+    }
+
+    .standAnalysisCard, .slideAnalysisCard {
+        height: 150px;
+        .kpiContainer {
+            margin-top: 10px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            div ~ span {
+                position: relative;
+                bottom: 10px;
+                font-weight: 500;
+            }
+
+            span {
+                font-size: 14px;
+            }
+             
+            h5 {
+                font-size: 45px;
+                font-weight: 500;
+                margin-right: 8px;
+            }
+        }
     }
 }
