@@ -7,7 +7,7 @@ import Overview from "./Overview";
 import WellInfo from "./WellInfo";
 import classNames from "classnames";
 
-function WellOverivew({ className, well, history, updateFavorite }) {
+function WellOverivew({ className, well, updateFavorite }) {
   const [currentTab, changeCurrentTab] = useState("overview");
   const onTabChange = (_, value) => {
     changeCurrentTab(value);

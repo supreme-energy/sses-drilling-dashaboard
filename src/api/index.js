@@ -1,4 +1,4 @@
-import { DRILLING, COMPLETED } from "../constants/drillingStatus";
+import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
