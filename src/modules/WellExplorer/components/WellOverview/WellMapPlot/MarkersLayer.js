@@ -3,7 +3,7 @@ import { Marker, FeatureGroup } from "react-leaflet";
 
 import useRef from "react-powertools/hooks/useRef";
 
-function WellPhasePointsLayer({ zIndexOffset, markers }, ref) {
+const WellPhasePointsLayer = forwardRef(({ zIndexOffset, markers }, ref) => {
   const groupRef = useRef(null);
   const { current: group } = groupRef;
 
@@ -19,10 +19,10 @@ function WellPhasePointsLayer({ zIndexOffset, markers }, ref) {
       ))}
     </FeatureGroup>
   );
-}
+});
 
 WellPhasePointsLayer.defaultProps = {
   zIndexOffset: 0
 };
 
-export default forwardRef(WellPhasePointsLayer);
+export default WellPhasePointsLayer;

@@ -21,14 +21,10 @@ import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 
 // Import UI State Providers
-import { TimeSliderProvider, DrillPhaseProvider, LastIndexStateProvider, AppStateProvider } from "./Containers";
+import { TimeSliderProvider, DrillPhaseProvider, AppStateProvider } from "./Containers";
 
 // Import Provider initialStates
-import {
-  INITIAL_DRILL_PHASE_STATE,
-  INITIAL_TIME_SLIDER_STATE,
-  INITIAL_LAST_INDEX_STATE
-} from "../../constants/timeSlider";
+import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
 
 // Lazy load toolbars
 const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
@@ -76,29 +72,32 @@ class App extends React.Component {
         <Provider store={store}>
           <BrowserRouter basename={__CONFIG__.basename}>
             <FetchClientProvider url={`/api`} options={fetchClientOptions} middleware={this.fetchMW}>
-              <FetchClientProvider id="mock" url={`/data`} options={fetchClientOptions} middleware={this.fetchMWMock}>
+              <FetchClientProvider
+                id="mock"
+                url={`${__CONFIG__.publicPath}data`}
+                options={fetchClientOptions}
+                middleware={this.fetchMWMock}
+              >
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <PageLayout history={history}>
                       <MuiPickersUtilsProvider utils={MomentUtils}>
                         <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
                           <AppStateProvider>
-                            <LastIndexStateProvider initialState={INITIAL_LAST_INDEX_STATE}>
-                              <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
-                                <Route path="/:wellId" component={WellUpdate} />
-                                <Switch>
-                                  <Route path="/:wellId?" exact component={WellExplorer} />
-                                  <HeaderToolbar history={history}>
-                                    <TimeSliderToolbar>
-                                      <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                                      <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                      <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                                      <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                                    </TimeSliderToolbar>
-                                  </HeaderToolbar>
-                                </Switch>
-                              </DrillPhaseProvider>
-                            </LastIndexStateProvider>
+                            <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
+                              <Route path="/:wellId" component={WellUpdate} />
+                              <Switch>
+                                <Route path="/:wellId?" exact component={WellExplorer} />
+                                <HeaderToolbar history={history}>
+                                  <TimeSliderToolbar>
+                                    <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                    <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                    <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                    <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                  </TimeSliderToolbar>
+                                </HeaderToolbar>
+                              </Switch>
+                            </DrillPhaseProvider>
                           </AppStateProvider>
                         </TimeSliderProvider>
                       </MuiPickersUtilsProvider>

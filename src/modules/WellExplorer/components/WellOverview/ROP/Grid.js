@@ -10,7 +10,7 @@ function topXAxis(...args) {
 
   return [line, label];
 }
-function Grid({ container, width, height, gridGutter, view }, ref) {
+const Grid = forwardRef(({ container, width, height, gridGutter, view, fontSize }, ref) => {
   const gridLayerRef = useRef(() => new PIXI.Container());
 
   useEffect(() => {
@@ -22,11 +22,12 @@ function Grid({ container, width, height, gridGutter, view }, ref) {
   const updateGrid = useMemo(() => {
     return drawGrid(gridLayerRef.current, {
       gutter: gridGutter,
+      fontSize,
       xAxisOrientation: "top",
       makeXTickAndLine: topXAxis,
       maxXLines: 10
     });
-  }, [gridGutter]);
+  }, [gridGutter, fontSize]);
 
   useEffect(() => {
     updateGrid({ view, width, height });
@@ -37,6 +38,10 @@ function Grid({ container, width, height, gridGutter, view }, ref) {
   }));
 
   return null;
-}
+});
 
-export default forwardRef(Grid);
+Grid.defaultProps = {
+  fontSize: 13
+};
+
+export default Grid;

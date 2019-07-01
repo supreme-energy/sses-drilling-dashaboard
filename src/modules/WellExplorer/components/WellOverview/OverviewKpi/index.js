@@ -14,10 +14,20 @@ import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
 import ImportInput from "../../ImportInput";
 import Import from "@material-ui/icons/Input";
+import { withRouter } from "react-router";
+import flowRight from "lodash/flowRight";
 
-function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImportChange }) {
+function OverviewKpi({
+  onFilesToImportChange,
+  well,
+  changeSelectedWell,
+  updateFavorite,
+  match: {
+    params: { wellId: openedWellId }
+  }
+}) {
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
-
+  const opened = openedWellId && openedWellId === well.id;
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>
@@ -37,9 +47,9 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImport
             <FavIcon color="primary" className={classes.favorite} />
           </IconButton>
           <span className={classes.hSpacer} />
-          <Link to={`/${well.id}/combo`}>
-            <Button variant="contained" color="primary">
-              Open
+          <Link to={opened ? `/` : `/${well.id}/combo`}>
+            <Button className={classes.linkBtn} variant={opened ? "outlined" : "contained"} color="primary">
+              {opened ? "Close" : "Open"}
             </Button>
           </Link>
           <span className={classes.hSpacer} />
@@ -64,9 +74,14 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImport
   );
 }
 
-export default connect(
-  null,
-  {
-    changeSelectedWell
-  }
-)(OverviewKpi);
+const bindData = flowRight([
+  connect(
+    null,
+    {
+      changeSelectedWell
+    }
+  ),
+  withRouter
+]);
+
+export default bindData(OverviewKpi);

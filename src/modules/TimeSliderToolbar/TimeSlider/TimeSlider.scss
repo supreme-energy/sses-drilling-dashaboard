@@ -6,16 +6,13 @@
 }
 
 .timeSliderContainerExpanded {
-    padding-bottom: 15px;
+    padding-bottom: 10px;
 }
 
 .timeSliderGraph {    
-    canvas {
-        position: relative;
-        height: 65px;
-        width: 100%;
-        bottom: 10px;
-    }
+    position: relative;
+    height: 65px;
+    width: 100%;
 }
 
 .timeSliderGraphCollapsed { 
@@ -23,7 +20,7 @@
 }
 
 .timeSliderHeader {
-    padding: 10px 10px 10px 16px;
+    padding: 10px 10px 0px 15px;
     display: flex;
     justify-content: space-between;
 
@@ -88,81 +85,53 @@
 
 .timeSliderView {
     display: flex;
-    min-height: 45px;
 }
 
 .timeSliderExpanded {
-        color: $gold;
-        bottom: 10px;
-        width: 100%;
-    }
+    bottom: 11px;
+}
 
-    .timeSliderCollapsed {
-        color: $gold;
-        top: 24px;
-        right: 5px;
-        width: 100%;
-    }
+.timeSliderCollapsed {
+    top: 30px;
+}
 
 
-    .globalTimeControls {
-        padding: 0;
+.globalTime {
+    position: relative;
+
+    > button {
+        margin: 2px;
+        border-radius: 15px;
+        width: 40px;
+
+        svg {
+            color: rgba(0, 0, 0, 0.54);
+        }
         &:focus {
             outline: 0;
         }
     }
-
-    .backwardTime {
-        position: relative;
-        width: 45px;
-        text-align: center;
-
-        > button {
-            @extend .globalTimeControls;
-        }
-    }
-
-    .expandedBackwardTime {
-        top: 10px;
-        span {
-            display: block;
-        }
-    }
-
-    .collapsedBackwardTime {
-        top: 10px;
-    }
-
-    .forwardTime {
-        position: relative;
-        width: 30px;
-        text-align: center;
-
-        > button {
-            @extend .globalTimeControls;
-        }
-    }
-
-    .expandedForwardTime {
-        top: 10px;
-        left: 20px;
-
-        span { 
-            display: block;
-        }
-    }
-
-    .collapsedForwardTime {
-        left: 25px;
-        top: 10px;
-    }
-
-.timeSlider {
-    width: 93%;
-    position: relative;
-    left: 12px;
 }
 
-.timeSliderExpanded {
-    left: 2px;
+.expandedGlobalTime {
+    top: 30px;
+    span {
+        display: block;
+    }
+
+    > button {
+        bottom: 4px;
+    }
+}
+
+.collapsedGlobalTime {
+    > button {
+        height: 50px;
+    }
+}
+
+.timeSlider {
+    width: 90%;
+    position: relative;
+    margin: 0 5px;
 }

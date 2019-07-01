@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
+import { TAG_END, TAG_MOVE } from "../../../../constants/interactivePAStatus";
 
 function drawSections(container, higherContainer, props, gutter) {
   const { ghostDiffDispatch } = props;
@@ -20,12 +21,18 @@ function drawSections(container, higherContainer, props, gutter) {
   const labelHeight = 75;
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
-  subscribeToMoveEvents(selectedLabel, function(pos) {
-    ghostDiffDispatch({
-      type: "tag_move",
-      vs: pos.x
-    });
-  });
+  subscribeToMoveEvents(
+    selectedLabel,
+    function(pos) {
+      ghostDiffDispatch({
+        type: TAG_MOVE,
+        vs: pos.x
+      });
+    },
+    function() {
+      ghostDiffDispatch({ type: TAG_END });
+    }
+  );
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
   const memoInitLabel = memoizeOne(color => {

@@ -1,12 +1,28 @@
-import { Typography, CircularProgress } from "@material-ui/core";
+import { CircularProgress, Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useMemo, useReducer, Suspense, lazy } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
 import { useFilteredWellData } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import { calculateDip, getChangeInY } from "./CrossSection/formulas";
+import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../../constants/calcMethods";
+import usePrevious from "react-use/lib/usePrevious";
+import {
+  DIP_BOT_MOVE,
+  DIP_TOT_MOVE,
+  FAULT_BOT_MOVE,
+  FAULT_TOT_MOVE,
+  FAULT_END,
+  PA_MOVE,
+  PA_END,
+  TAG_MOVE,
+  TAG_END,
+  INIT,
+  DIP_END
+} from "../../../constants/interactivePAStatus";
+
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
 function selectionReducer(state, action) {
@@ -22,13 +38,15 @@ function selectionReducer(state, action) {
       throw new Error(`Unknown selected section reducer action type ${action.type}`);
   }
 }
-function PADeltaInit(section, prevSection) {
+function PADeltaInit(options = {}) {
+  const section = options.section || {};
   return {
-    prevOp: prevSection,
+    prevOp: options.prevSection,
+    nextOp: options.nextSection,
     op: section,
     id: section.id,
     bot: 0,
-    fault: 0,
+    prevFault: 0,
     tcl: 0,
     tot: 0,
     tvd: 0,
@@ -38,91 +56,153 @@ function PADeltaInit(section, prevSection) {
 }
 
 function PADeltaReducer(state, action) {
-  const op = state.op;
-  const prevOp = state.prevOp;
+  const { prevOp, op, nextOp } = state;
   let depthDelta = 0;
   switch (action.type) {
-    case "dip_tot":
-      depthDelta = action.tot - op.tot - state.fault;
+    case DIP_TOT_MOVE:
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
+
+      depthDelta = action.tot - op.tot - state.prevFault + op.fault;
       return {
         ...state,
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
         tcl: depthDelta,
-        dip: op.dip - calculateDip(action.tot - state.fault, prevOp.tot, action.vs, prevOp.vs)
+        tvd: depthDelta,
+        dip: op.dip - calculateDip(action.tot - state.prevFault, prevOp.tot, action.vs, prevOp.vs),
+        method: TOT_POS_VS,
+        status: action.type
       };
-    case "dip_bot":
-      depthDelta = action.bot - op.bot - state.fault;
+    case DIP_BOT_MOVE:
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
+
+      depthDelta = action.bot - op.bot - state.prevFault + op.fault;
       return {
         ...state,
         tot: depthDelta,
         vs: action.vs - op.vs,
         bot: depthDelta,
         tcl: depthDelta,
-        dip: op.dip - calculateDip(action.bot - state.fault, prevOp.bot, action.vs, prevOp.vs)
+        tvd: depthDelta,
+        dip: op.dip - calculateDip(action.bot - state.prevFault, prevOp.bot, action.vs, prevOp.vs),
+        method: TOT_POS_VS,
+        status: action.type
       };
-    case "fault_tot":
+    case FAULT_TOT_MOVE:
       return {
         ...state,
-        fault: action.tot - state.prevOp.tot
+        prevFault: action.tot - prevOp.tot,
+        prevMethod: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "fault_bot":
+    case FAULT_BOT_MOVE:
       return {
         ...state,
-        fault: action.bot - state.prevOp.bot
+        prevFault: action.bot - prevOp.bot,
+        prevMethod: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "pa":
+    case PA_MOVE:
       return {
         ...state,
-        tvd: action.tvd - op.tvd
+        tvd: action.tvd - op.tvd - state.prevFault,
+        method: TVD_VS,
+        status: action.type
       };
-    case "tag_move":
+    case TAG_MOVE:
       // We don't currently want the surveys or bit proj to be adjustable
-      if (op.isSurvey || op.isBitProj) {
-        return state;
-      }
+      if (op.isSurvey || op.isBitProj) return state;
+      // Keep the PA station within its segment
+      if (prevOp && action.vs <= prevOp.vs) return state;
+      if (nextOp && action.vs >= nextOp.vs) return state;
+
       const changeInY = getChangeInY(state.dip - op.dip, action.vs, prevOp.vs);
       return {
         ...state,
         vs: action.vs - op.vs,
-        tot: prevOp.tot - op.tot + changeInY,
-        tcl: prevOp.tcl - op.tcl + changeInY,
-        bot: prevOp.bot - op.bot + changeInY
+        tot: prevOp.tot - op.tot + changeInY + op.fault,
+        tcl: prevOp.tcl - op.tcl + changeInY + op.fault,
+        bot: prevOp.bot - op.bot + changeInY + op.fault,
+        method: DIP_FAULT_POS_VS,
+        status: action.type
       };
-    case "init":
-      return PADeltaInit(action.section, action.prevSection);
+    case INIT:
+      return PADeltaInit(action);
+    case DIP_END:
+      return { ...state, status: DIP_END };
+    case FAULT_END:
+      return { ...state, status: FAULT_END };
+    case PA_END:
+      return { ...state, status: PA_END };
+    case TAG_END:
+      return { ...state, status: TAG_END };
     default:
       throw new Error(`Unknown PA Delta reducer action type ${action.type}`);
   }
 }
 
 export const CrossSectionDashboard = ({ wellId }) => {
-  const { surveys, wellPlan, formations, projections } = useFilteredWellData(wellId);
+  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
+  const prevStatus = usePrevious(ghostDiff.status);
+  useEffect(() => {
+    const { status, op, prevOp } = ghostDiff;
+    const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
+    if (prevStatus !== status) {
+      switch (status) {
+        case DIP_END:
+          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, vs: op.vs + ghostDiff.vs, pos: pos });
+          break;
+        case FAULT_END:
+          saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
+          break;
+        case PA_END:
+          saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
+          break;
+        case TAG_END:
+          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip + ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
+          break;
+      }
+    }
+  }, [ghostDiff, prevStatus, saveProjection]);
+
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
+    if (index === -1) {
+      return rawSections;
+    }
     return rawSections.map((p, i) => {
-      if (i === index) {
+      if (i === index - 1) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tvd + ghostDiff.fault,
+          tot: p.tot + ghostDiff.prevFault,
+          bot: p.bot + ghostDiff.prevFault,
+          tcl: p.tcl + ghostDiff.prevFault,
+          fault: p.fault + ghostDiff.prevFault
+        };
+      } else if (i === index) {
+        return {
+          ...p,
+          tvd: p.tvd + ghostDiff.tvd + ghostDiff.prevFault,
           vs: p.vs + ghostDiff.vs,
-          tot: p.tot + ghostDiff.tot + ghostDiff.fault,
-          bot: p.bot + ghostDiff.bot + ghostDiff.fault,
-          tcl: p.tcl + ghostDiff.tcl + ghostDiff.fault,
-          fault: p.fault + ghostDiff.fault
+          tot: p.tot + ghostDiff.tot + ghostDiff.prevFault,
+          bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
+          tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
         };
       } else if (i > index) {
         return {
           ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.fault,
-          vs: p.vs + ghostDiff.vs
+          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault
         };
       } else {
         return p;
@@ -141,15 +221,13 @@ export const CrossSectionDashboard = ({ wellId }) => {
             return {
               ...point,
               vs: point.vs + ghostDiff.vs,
-              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
-              fault: point.fault + ghostDiff.fault
+              fault: point.fault + ghostDiff.prevFault,
+              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
             };
           } else if (j > index) {
             return {
               ...point,
-              vs: point.vs + ghostDiff.vs,
-              tot: point.tot + ghostDiff.tot + ghostDiff.fault,
-              fault: point.fault
+              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
             };
           }
           return point;
@@ -162,7 +240,12 @@ export const CrossSectionDashboard = ({ wellId }) => {
     const id = Object.keys(selectedSections)[0];
     const index = rawSections.findIndex(s => s.id === Number(id));
     if (index !== -1) {
-      ghostDiffDispatch({ type: "init", section: rawSections[index], prevSection: rawSections[index - 1] });
+      ghostDiffDispatch({
+        type: INIT,
+        prevSection: rawSections[index - 1],
+        section: rawSections[index],
+        nextSection: rawSections[index + 1]
+      });
     }
   }, [selectedSections, rawSections]);
 
@@ -205,6 +288,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
               setSelectedSections={setSelectedSections}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
+              ghostDiff={ghostDiff}
+              saveProjection={saveProjection}
             />
           )}
         </ParentSize>

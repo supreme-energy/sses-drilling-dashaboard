@@ -68,13 +68,13 @@ const DrillPhaseViewer = React.memo(({ className, expanded }) => {
   // Set drill phase when fetching complete
   useEffect(() => {
     if (drillPhases && drillPhases.length) {
-      setDrillPhase(drillPhases[drillPhases.length - 1]);
+      setDrillPhase({ type: "SET", payload: { ...drillPhases[drillPhases.length - 1], set: true } });
     }
   }, [drillPhases, setDrillPhase]);
 
   // Handle Drill Phase click events
   const handleClickAway = useCallback(() => setAnchorEl(null), []);
-  const handleDrillPhaseSelect = useCallback(phaseObj => setDrillPhase(phaseObj), [setDrillPhase]);
+  const handleDrillPhaseSelect = phaseObj => setDrillPhase({ type: "SET", payload: { ...phaseObj, set: true } });
 
   return (
     <Card className={classNames(phaseClasses.drillPhaseCard, className)}>

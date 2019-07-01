@@ -3,12 +3,11 @@ import { Card } from "@material-ui/core";
 import OverivewKpi from "./OverviewKpi";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
-import { withRouter } from "react-router-dom";
 import Overview from "./Overview";
 import WellInfo from "./WellInfo";
 import classNames from "classnames";
 
-function WellOverivew({ className, well, match, history, updateFavorite, onFilesToImportChange }) {
+function WellOverivew({ className, well, match, updateFavorite, onFilesToImportChange }) {
   const [currentTab, changeCurrentTab] = useState("overview");
   const onTabChange = (_, value) => {
     changeCurrentTab(value);
@@ -34,4 +33,4 @@ function WellOverivew({ className, well, match, history, updateFavorite, onFiles
   );
 }
 
-export default withRouter(WellOverivew);
+export default WellOverivew;

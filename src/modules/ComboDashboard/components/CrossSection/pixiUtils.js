@@ -1,11 +1,13 @@
 /**
  * Add mouse and touch events to a PIXI displayObject to enable dragging
  * @param obj The PIXI displayObject
- * @param cb  Callback to set the new x and y for the object
+ * @param onMove  Callback to set the new x and y for the object
  */
-function subscribeToMoveEvents(obj, cb) {
+function subscribeToMoveEvents(obj, onMove, onEnd) {
+  let dragging = false;
   obj.interactive = true;
-  obj.cb = cb || (_ => {});
+  obj.onMove = onMove || (_ => {});
+  obj.dragEnd = onEnd || (_ => {});
   obj
     .on("mousedown", onDragStart)
     .on("touchstart", onDragStart)
@@ -17,10 +19,10 @@ function subscribeToMoveEvents(obj, cb) {
     .on("touchmove", onDragMove);
 
   function onDragStart(event) {
-    if (!this.dragging) {
+    if (!dragging) {
       event.stopPropagation();
       this.data = event.data;
-      this.dragging = true;
+      dragging = true;
 
       // Point relative to the center of the object
       this.dragPoint = event.data.getLocalPosition(this.parent);
@@ -30,19 +32,20 @@ function subscribeToMoveEvents(obj, cb) {
   }
 
   function onDragEnd() {
-    if (this.dragging) {
-      this.dragging = false;
+    if (dragging) {
+      dragging = false;
       this.data = null;
+      this.dragEnd();
     }
   }
 
   function onDragMove(event) {
-    if (this.dragging) {
+    if (dragging) {
       event.stopPropagation();
       const newPosition = this.data.getLocalPosition(this.parent);
-      newPosition.x = newPosition.x - this.dragPoint.x;
-      newPosition.y = newPosition.y - this.dragPoint.y;
-      this.cb(newPosition);
+      newPosition.x -= this.dragPoint.x;
+      newPosition.y -= this.dragPoint.y;
+      this.onMove(newPosition);
     }
   }
 }

@@ -8,13 +8,27 @@ export const mapConnections = (d, index) => [index, Number(d.Connections)];
 export const mapAngle = (d, index) => [index, Number(d.Angle)];
 
 // Slider constants
-export const STEP_SIZE = 1;
 export const GRID_GUTTER = 1;
+export const INITIAL_SLIDER_STATE = {
+  step: 0,
+  maxStep: 0,
+  direction: 0,
+  isDragging: 0,
+  isPlaying: 0,
+  isSpeeding: 0,
+  stepSize: 1
+};
 
 // Initial State for Time Slider
-export const INITIAL_DRILL_PHASE_STATE = { index: 0, phase: SURFACE, phaseStart: 0, phaseEnd: 0, inView: true };
+export const INITIAL_DRILL_PHASE_STATE = {
+  index: 0,
+  phase: SURFACE,
+  phaseStart: 0,
+  phaseEnd: 0,
+  inView: true,
+  set: false
+};
 export const INITIAL_TIME_SLIDER_STATE = [];
-export const INITIAL_LAST_INDEX_STATE = false;
 
 // Graphs
 export const CONNECTION = "Connections";

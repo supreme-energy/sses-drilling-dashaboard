@@ -11,7 +11,6 @@ import css from "./styles.scss";
 const AttributePaneTextField = ({
   appAttributeConfig,
   appAttributeModel,
-  classes,
   onFocus,
   fieldKey,
   sectionKey,
@@ -56,7 +55,7 @@ const AttributePaneTextField = ({
           endAdornment:
             appAttributeModel.value !== "" && appAttributeConfig.required ? (
               <InputAdornment position="end">
-                <CheckCircleOutline className={classes.icon} />
+                <CheckCircleOutline />
               </InputAdornment>
             ) : null
         }}
@@ -77,7 +76,6 @@ AttributePaneTextField.defaultProps = {
 AttributePaneTextField.propTypes = {
   appAttributeConfig: PropTypes.object.isRequired,
   appAttributeModel: PropTypes.object.isRequired,
-  classes: PropTypes.object.isRequired,
   onFocus: PropTypes.func.isRequired,
   fieldKey: PropTypes.string.isRequired,
   sectionKey: PropTypes.string.isRequired,

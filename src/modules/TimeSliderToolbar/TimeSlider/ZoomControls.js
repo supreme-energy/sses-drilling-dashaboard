@@ -6,22 +6,13 @@ import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icon
 import { useInterval } from "./useInterval";
 import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../constants/timeSlider";
 
-function ZoomControls({
-  className,
-  updateView,
-  width,
-  maxSliderStep,
-  step,
-  dataSize,
-  getInitialViewXScaleValue,
-  onReset
-}) {
+function ZoomControls({ className, updateView, width, maxStep, step, dataSize, getInitialViewXScaleValue, onReset }) {
   let zoomTimeout = useRef(null);
   const [zoomType, setZoomType] = useState();
 
   // Zoom constants
-  const zoomInDisabled = maxSliderStep <= 10;
-  const zoomOutDisabled = maxSliderStep >= dataSize;
+  const zoomInDisabled = maxStep <= 10;
+  const zoomOutDisabled = maxStep >= dataSize;
 
   // Update view based on zoom direction
   const onZoom = useCallback(
@@ -29,7 +20,7 @@ function ZoomControls({
       if (type) {
         updateView(prev => {
           // Determine where slider is relative to graph
-          const stepFactor = ((step * (width + GRID_GUTTER)) / maxSliderStep).toFixed(2);
+          const stepFactor = ((step * (width + GRID_GUTTER)) / maxStep).toFixed(2);
 
           // Determine length of visible graph
           const graphVisibleLength = dataSize * prev.xScale - Math.abs(prev.x);
@@ -54,7 +45,7 @@ function ZoomControls({
         });
       }
     },
-    [getInitialViewXScaleValue, dataSize, updateView, width, maxSliderStep, step]
+    [getInitialViewXScaleValue, dataSize, updateView, width, maxStep, step]
   );
 
   const handleResetZoom = useCallback(() => {
@@ -107,7 +98,7 @@ ZoomControls.propTypes = {
   className: PropTypes.string,
   updateView: PropTypes.func,
   width: PropTypes.number,
-  maxSliderStep: PropTypes.number,
+  maxStep: PropTypes.number,
   step: PropTypes.number,
   dataSize: PropTypes.number,
   getInitialViewXScaleValue: PropTypes.func,

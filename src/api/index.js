@@ -1,4 +1,4 @@
-import { DRILLING } from "../constants/drillingStatus";
+import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
@@ -21,8 +21,12 @@ export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
+export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
+export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
+export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
@@ -217,7 +221,7 @@ export function useWells() {
           return {
             id: w.jobname,
             name: w.realjobname,
-            status: DRILLING,
+            status: COMPLETED,
             fav: Boolean(w.favorite),
             surfacePosition: [surfacePos.y, surfacePos.x]
           };
@@ -327,7 +331,7 @@ export function useSurveys(wellId) {
 }
 
 export function useFormations(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -346,11 +350,11 @@ export function useFormations(wellId) {
       }
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, refresh];
 }
 
 export function useProjections(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
       query: {
@@ -361,7 +365,20 @@ export function useProjections(wellId) {
       transform: memoizedTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  const saveProjection = (projectionId, method, fields = {}) => {
+    // return the promise so we can refresh AFTER the API call is done
+    return fetch({
+      path: SET_WELL_PROJECTIONS,
+      method: "GET",
+      query: {
+        seldbname: wellId,
+        id: projectionId,
+        method: method,
+        ...fields
+      }
+    });
+  };
+  return [data || EMPTY_ARRAY, refresh, saveProjection];
 }
 
 export function useWellOverviewKPI() {
@@ -417,5 +434,45 @@ export function useTimeSliderData() {
       id: "mock"
     }
   );
+  return data || EMPTY_ARRAY;
+}
+
+export function useAdditionalDataLogsList(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_ADDITIONAL_DATA_LOGS_LIST,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => _.keyBy(data, "label")
+    }
+  );
+
+  return data || {};
+}
+
+export function useAdditionalDataLog(wellId, id) {
+  const [data] = useFetch(
+    {
+      path: GET_ADDITIONAL_DATA_LOG,
+      query: {
+        seldbname: wellId,
+        id
+      }
+    },
+    {
+      transform: data => {
+        return {
+          label: data.label,
+          scalelo: data.scalelo,
+          scalehi: data.scalehi,
+          data: memoizedTransform(data.data)
+        };
+      }
+    }
+  );
+
   return data || EMPTY_ARRAY;
 }
