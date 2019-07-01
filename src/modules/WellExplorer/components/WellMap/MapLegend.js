@@ -2,7 +2,7 @@ import React from "react";
 import classes from "./MapLegend.scss";
 import Typography from "@material-ui/core/Typography";
 import { listIcons } from "../IconsByStatus";
-import { DRILLING, TRIPPING, UNKNOWN } from "../../../../constants/drillingStatus";
+import { DRILLING, TRIPPING, UNKNOWN, COMPLETED } from "../../../../constants/drillingStatus";
 import classNames from "classnames";
 
 const Status = ({ status }) => (
@@ -21,6 +21,7 @@ export default ({ className }) => {
       <Status status={DRILLING} />
       <Status status={TRIPPING} />
       <Status status={UNKNOWN} />
+      <Status status={COMPLETED} />
     </div>
   );
 };
