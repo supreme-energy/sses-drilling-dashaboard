@@ -8,7 +8,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import { useSize } from "react-hook-size";
-import { WellIdProvider, useWellIdContainer } from "../modules/App/Containers";
+import { WellIdProvider, useWellIdContainer, FormationsProvider } from "../modules/App/Containers";
 
 const PageTabs = ({
   match: {
@@ -44,19 +44,21 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <WellIdProvider initialState={""}>
-        <div className={classes.container}>
-          <AppBar className={classes.appBar} color="inherit">
-            <div className={classes.header}>
-              <div className={classes.logo}>
-                <img src="/sses-logo.svg" />
+        <FormationsProvider initialState={[]}>
+          <div className={classes.container}>
+            <AppBar className={classes.appBar} color="inherit">
+              <div className={classes.header}>
+                <div className={classes.logo}>
+                  <img src="/sses-logo.svg" />
+                </div>
+                <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                <span />
               </div>
-              <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-              <span />
-            </div>
-          </AppBar>
+            </AppBar>
 
-          <div className={classes.viewport}>{children}</div>
-        </div>
+            <div className={classes.viewport}>{children}</div>
+          </div>
+        </FormationsProvider>
       </WellIdProvider>
     </MuiThemeProvider>
   );

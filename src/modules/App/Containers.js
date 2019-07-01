@@ -89,7 +89,7 @@ export function useFilteredWellData() {
 
   const { wellId } = useWellIdContainer();
 
-  const [formations, refreshFormations] = useFormations(wellId);
+  const { formationsData, refreshFormations } = useFormationsDataContainer();
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
   const [projections, refreshProjections, saveProjection] = useProjections(wellId);
@@ -101,7 +101,7 @@ export function useFilteredWellData() {
   // Filter data and memoize
   const surveysFiltered = filterDataToInterval(annotatedSurveys, sliderInterval);
   const projectionsFiltered = filterDataToInterval(annotatedProjections, sliderInterval);
-  const formationsFiltered = formations.map(f => {
+  const formationsFiltered = formationsData.map(f => {
     return {
       ...f,
       data: filterDataToInterval(f.data, sliderInterval)
@@ -122,13 +122,13 @@ export function useFilteredWellData() {
 
   // TODO: Remove once formations are stabilized again
   useEffect(() => {
-    const lens = formations.map(l => l.data.length);
+    const lens = formationsData.map(l => l.data.length);
     if (lens.length && Math.max(...lens) !== Math.min(...lens)) {
       console.warn("Data arrays are not all the same!");
       console.warn(lens);
-      console.warn(formations);
+      console.warn(formationsData);
     }
-  }, [formations]);
+  }, [formationsData]);
 
   return {
     surveys: surveysFiltered,
@@ -221,10 +221,10 @@ function useCustomDataHook() {
 }
 
 // Create containers
-export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
+export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
 export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
   useFormationsData
 );
