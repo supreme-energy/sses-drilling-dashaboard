@@ -34,7 +34,7 @@ export default function DetailsTable(props) {
   return (
     <Table className={classes.table}>
       <TableHead>
-        <TableRow>
+        <TableRow className={classes.row}>
           <TableCell className={classes.cell}>Survey</TableCell>
           <TableCell className={classes.cell}>Depth</TableCell>
           <TableCell className={classes.cell}>Inclination</TableCell>
@@ -72,7 +72,7 @@ export default function DetailsTable(props) {
             <TableCell className={classes.cell}>{row.fault}</TableCell>
             <TableCell className={classes.cell}>{row.dip}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.pos}</TableCell>
+            <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
