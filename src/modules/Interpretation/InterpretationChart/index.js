@@ -49,7 +49,7 @@ export default function InterpretationChart({ className, controlLogs, logData })
   useEffect(
     function moveToCurrentLog() {
       if (logData) {
-        updateView(view => ({ ...view, y: -logData.data[0].md + 20 }));
+        updateView(view => ({ ...view, y: -logData.data[0].md * view.yScale + 20 }));
       }
     },
     [logData]

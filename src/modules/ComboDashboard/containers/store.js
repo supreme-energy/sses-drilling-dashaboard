@@ -1,5 +1,5 @@
 import { createContainer } from "unstated-next";
-import { useReducer } from "react";
+import { useReducer, useCallback } from "react";
 
 const initialState = {
   selectedMd: null
@@ -17,7 +17,10 @@ function comboStoreReducer(state, action) {
 }
 
 function useUseComboStore() {
-  return useReducer(comboStoreReducer, initialState);
+  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
+
+  const selectMd = useCallback(md => dispatch({ type: "SELECT_MD", md }), [dispatch]);
+  return [state, dispatch, { selectMd }];
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);

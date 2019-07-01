@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Typography, Box } from "@material-ui/core";
 
 import WidgetCard from "../WidgetCard";
@@ -18,7 +18,7 @@ function Interpretation({
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogList(wellId);
 
-  const [{ selectedMd }] = useComboContainer();
+  const [{ selectedMd }, , { selectMd }] = useComboContainer();
 
   const selectedWellLog = useMemo(
     function findCurrentWellLog() {
@@ -32,6 +32,35 @@ function Interpretation({
     [logList, selectedMd]
   );
 
+  useEffect(
+    function selectFirstWellLog() {
+      if (selectedMd === null && logList && logList.length) {
+        selectMd(logList[0].startmd);
+      }
+    },
+    [selectedMd, logList, selectMd]
+  );
+
+  const selectPrev = () => {
+    if (logList && logList.length) {
+      const curentIndex = logList.indexOf(selectedWellLog);
+      const prev = logList[curentIndex - 1];
+      if (prev) {
+        selectMd(prev.startmd);
+      }
+    }
+  };
+
+  const selectNext = () => {
+    if (logList && logList.length) {
+      const curentIndex = logList.indexOf(selectedWellLog);
+      const next = logList[curentIndex + 1];
+      if (next) {
+        selectMd(next.startmd);
+      }
+    }
+  };
+
   const [currentWellLogData] = useWellLogData(wellId, selectedWellLog && selectedWellLog.tablename);
 
   return (
@@ -40,10 +69,10 @@ function Interpretation({
       <Box display="flex" flexDirection="row" className="flex">
         <InterpretationChart className={css.chart} controlLogs={controlLogs} logData={currentWellLogData} />
         <Box display="flex" flexDirection="column" style={{ color: "#757575" }}>
-          <IconButton className={css.upArrow}>
+          <IconButton className={css.upArrow} onClick={selectPrev}>
             <ArrowUpward />
           </IconButton>
-          <IconButton>
+          <IconButton onClick={selectNext}>
             <ArrowDownward />
           </IconButton>
         </Box>
