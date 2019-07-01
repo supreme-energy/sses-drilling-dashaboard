@@ -1,11 +1,11 @@
-import { combineReducers } from 'redux';
-import locationReducer from './location';
-import auth0 from 'react-powertools/auth0/store';
+import { combineReducers } from "redux";
+import locationReducer from "./location";
+import filesReducer from "./files";
 
-export const makeRootReducer = (asyncReducers) => {
+export const makeRootReducer = asyncReducers => {
   return combineReducers({
     location: locationReducer,
-    ...auth0,
+    files: filesReducer,
     ...asyncReducers
   });
 };

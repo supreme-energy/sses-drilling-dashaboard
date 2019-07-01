@@ -1,0 +1,20 @@
+@import '../base';
+
+.headCell {
+    height: 48px;
+    border-bottom-style: none;
+}
+
+.body .cell, .header .headCell {
+    text-align: center;
+}
+
+.body.unlocked .cell, .unlocked .headCell {
+    &.selectedCell {
+        @extend %selectedTextState;
+    }
+
+    &.selectedCell.activeField, &:hover, &.selectedCell:hover {
+        @extend %selectedState;
+    }
+}

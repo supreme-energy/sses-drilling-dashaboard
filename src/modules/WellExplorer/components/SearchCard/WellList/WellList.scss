@@ -1,0 +1,36 @@
+.list {
+    overflow: auto;
+     flex: 1;
+    .wellItem {
+        display: flex;
+        flex-direction: row;
+        border-bottom: solid 1px #E4E4E4;
+        height: 100px;
+
+        .minichart {
+            width: 98px;
+        }
+
+        .icon {
+            width: 22px;
+            height: 22px;  
+            fill: #757575; 
+        }
+
+        .itemContent {
+            flex: 1;
+        }
+
+        .buttons {
+            .button {
+                padding: 11px;
+            }
+            width: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            align-items: center;
+        }
+    }
+}

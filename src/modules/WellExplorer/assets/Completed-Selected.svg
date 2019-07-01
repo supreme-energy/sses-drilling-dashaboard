@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Map Marker/Well/Completed-Selected</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <polygon id="path-1" points="3.75 3.75 11.25 3.75 11.25 11.25 3.75 11.25"></polygon>
+    </defs>
+    <g id="Map-Marker/Well/Completed-Selected" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Container" x="0" y="0" width="24" height="24"></rect>
+        <path d="M11.5,22.5125132 C13.2784649,17.8257795 20,14.1944204 20,9.5 C20,4.80557963 16.1944204,1 11.5,1 C6.80557963,1 3,4.80557963 3,9.5 C3,14.1944204 9.68499261,17.7367036 11.5,22.5125132 Z" id="Oval-Copy-12" stroke="#FFFFFF" fill="#FF00FF"></path>
+        <g id="icon/av/stop_24px" transform="translate(4.000000, 2.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g fill-rule="nonzero"></g>
+            <g id="✱-/-Color-/-Icons-/-Selected-/-On-Secondary-/-Active--" mask="url(#mask-2)" fill="#FFFFFF" fill-rule="evenodd">
+                <rect id="Rectangle-3" x="0" y="0" width="15" height="15"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

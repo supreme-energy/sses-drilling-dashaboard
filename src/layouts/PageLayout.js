@@ -1,114 +1,65 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import './PageLayout.scss';
-import {connect} from 'react-redux';
-import {getAuth0, getIsAuthenticated, logout} from 'react-powertools/auth0/store';
-import withFetchClient from 'react-powertools/data/withFetchClient';
+import React, { useRef } from "react";
+import PropTypes from "prop-types";
+import { Route } from "react-router-dom";
+import { MuiThemeProvider } from "@material-ui/core";
+import { theme } from "../styles/theme";
+import classes from "./PageLayout.scss";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import { useSize } from "react-hook-size";
 
-const userInfoStyles = {
-  root: {
-    position: "absolute",
-    top: "5px",
-    right: "5px",
-    display: "inline-block",
+const PageTabs = ({
+  match: {
+    params: { wellId, page }
   },
-  picture: {
-    borderRadius: "50%",
-    width: 32,
-    height: 32,
-    marginRight: 10,
-  }
-};
-
-const UserInfo = ({isAuthenticated, profile, logout}) => {
-  if (!isAuthenticated) {
-    return (
-      <div style={userInfoStyles.root}>
-        Not Logged In
-      </div>
-    );
-  }
-
+  history
+}) => {
+  const actualPage = page || "explorer";
+  const wellIdPath = wellId || "";
+  const onTabChange = (e, value) => {
+    const actualValue = value === "explorer" ? "" : value;
+    history.push(`/${wellIdPath}/${actualValue}`);
+  };
+  const tabsRef = useRef(null);
+  // trigger re-render when size changed
+  useSize(tabsRef);
   return (
-    <div style={userInfoStyles.root}>
-      <img src={profile.picture} width="32" height="32" style={userInfoStyles.picture}
-        title={`Hello ${profile.name}`} />
-      <a href="#" onClick={logout}>Logout</a>
+    <div ref={tabsRef}>
+      <Tabs value={actualPage} indicatorColor="primary" className={classes.tabs} onChange={onTabChange}>
+        <Tab value="explorer" label="Well Explorer" />
+        {wellId ? <Tab value={"combo"} label="Combo Dashboard" onChange={onTabChange} /> : null}
+        {wellId ? <Tab value={"drilling"} label="Drilling Analytics" onChange={onTabChange} /> : null}
+        {wellId ? <Tab value={"structural"} label="Structural Guidance" onChange={onTabChange} /> : null}
+        {wellId ? <Tab value={"directional"} label="Directional Guidance" onChange={onTabChange} /> : null}
+      </Tabs>
     </div>
   );
 };
 
-function getUserInfo(state) {
-  return {
-    isAuthenticated: getIsAuthenticated(state),
-    profile: getAuth0(state).profile,
-  };
-}
+export const PageLayout = ({ children, history }) => {
+  return (
+    <MuiThemeProvider theme={theme}>
+      <div className={classes.container}>
+        <AppBar className={classes.appBar} color="inherit">
+          <div className={classes.header}>
+            <div className={classes.logo}>
+              <img src="/sses-logo.svg" />
+            </div>
+            <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+            <span />
+          </div>
+        </AppBar>
 
-const userInfoActions = {
-  logout(ev) {
-    ev.preventDefault();
-    return logout();
-  }
+        <div className={classes.viewport}>{children}</div>
+      </div>
+    </MuiThemeProvider>
+  );
 };
-
-const UserInfoContainer = connect(getUserInfo, userInfoActions)(UserInfo);
-
-const serverStatusStyles = {
-  root: {
-    position: "absolute",
-    top: "5px",
-    left: "5px",
-    display: "inline-block",
-  },
-};
-
-const ServerStatus = ({data}) => {
-  const {error, loading, polling, result} = data;
-
-  let msg = "Server Status: ";
-  if (result) {
-    msg += `${result.status} Last Check: ${result.time.toISOString()}`;
-  }
-
-  if (loading) {
-    msg += " (Loading)";
-  }
-
-  if (polling) {
-    msg += " (Checking)";
-  }
-
-  if (error) {
-    msg += ` [Error: ${error.message}]`;
-  }
-
-  return <div style={serverStatusStyles.root}>{msg}</div>;
-};
-
-const ServerStatusContainer = withFetchClient("/health-check", null, {
-  pollInterval: 2000,
-  mapResult: result => ({status: result.status, time: new Date(result.time)})
-})(ServerStatus);
-
-export const PageLayout = ({ children, history }) => (
-  <div className="container text-center">
-    <UserInfoContainer />
-    <ServerStatusContainer />
-    <h1>React Redux Starter Kit</h1>
-    <NavLink to="/" exact activeClassName="page-layout__nav-item--active">Home</NavLink>
-    {' · '}
-    <NavLink to="/counter" activeClassName="page-layout__nav-item--active">Counter</NavLink>
-    <div className="page-layout__viewport">
-      {children}
-    </div>
-  </div>
-);
 
 PageLayout.propTypes = {
   children: PropTypes.node,
-  history: PropTypes.object,
+  history: PropTypes.object
 };
 
 export default PageLayout;

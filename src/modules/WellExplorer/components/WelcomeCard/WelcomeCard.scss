@@ -1,0 +1,57 @@
+.card {
+    align-self: flex-start;
+
+    .cardContent {
+        display: flex;
+        flex-direction: row;
+        @media (max-width: 1384px) {
+            flex-direction: column;
+        }
+    }
+    .hSpacer {
+        width: 10px;
+    }
+
+    .hBigSpacer {
+        width: 20px;
+    }
+
+    .list {
+        width: 380px;
+        margin-right: 25px;
+        .listItem {
+            border-bottom: solid 1px #E4E4E4;
+            cursor: pointer;
+            width: 100%;
+            .iconBg {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                > svg {
+                    font-size: 18px;
+                    color: white;
+                }
+            }
+        }
+    }
+
+    .status {
+        margin-right: 20px;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .importNewInput {
+      display: none;
+    }
+
+
+}

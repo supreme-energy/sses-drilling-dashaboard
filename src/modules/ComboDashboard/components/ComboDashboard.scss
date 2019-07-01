@@ -1,0 +1,47 @@
+@import "../../../styles/base";
+
+.responsiveWrapper {
+  height: 100%;
+  flex: 1;
+  position: relative;
+}
+
+.comboDashboardWrapper {
+  display: flex;
+  height: 100%;
+
+  h6 {
+    color: $gold;
+  }
+}
+
+.kpiColumn {
+  display: flex;
+  flex: 1;
+  margin-right: 10px;
+  flex-direction: column;
+}
+
+.kpiRows {
+  display: flex;
+  flex: 11;
+  flex-direction: column;
+
+  .row {
+    display: flex;
+  }
+
+  .graphRow {
+    flex-grow: 1;
+  }
+}
+
+.drillPhaseKpi {
+  max-height: 150px; 
+  margin: 0 3px 3px 8px;
+  padding: 12px;
+}
+
+.crossSectionDash {
+  padding-bottom: 30px;
+}

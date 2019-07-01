@@ -1,0 +1,38 @@
+image: experoinc/ci-frontend-node8
+
+pipelines:
+  pull-requests:
+    '**': #this runs as default for any branch not elsewhere defined
+      - step:
+          name: Build and test
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
+            - yarn run test
+            - yarn run build
+  branches:
+    'develop':
+      - step:
+          name: Build and deploy
+          deployment: test
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
+            - yarn run buildDev
+            - yarn run uploadDev
+    'master':
+      - step:
+          name: Build and deploy
+          deployment: staging
+          caches:
+            - node
+          script:
+            - yarn
+            - yarn run lint
+            - yarn run test
+            - yarn run buildMaster
+            - yarn run uploadMaster

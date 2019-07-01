@@ -1,8 +1,31 @@
-.page-layout__viewport {
-  padding-top: 4rem;
-}
+@import '../styles/base';
 
-.page-layout__nav-item--active {
-  font-weight: bold;
-  text-decoration: underline;
+.container {
+  width: 100vw;
+  height: 100vh;
+
+  .appBar {
+    box-shadow: none;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .viewport {
+    height: calc(100% - #{$header-height});
+    top: $header-height;
+    position: relative;
+  }
+
+  .navItemActive {
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  .logo img {
+    height: $header-height;
+  }
 }

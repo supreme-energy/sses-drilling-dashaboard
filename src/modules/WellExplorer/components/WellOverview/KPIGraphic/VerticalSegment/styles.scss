@@ -1,0 +1,92 @@
+.vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+
+.container {
+    position: relative;
+    @extend .horizontal;
+    justify-content: center;
+    min-height: 119px;
+    flex: 1;
+
+    &:not(.first) {
+        margin-top: -15px;
+    }
+
+    .content {
+        @extend .horizontal; 
+        position: relative;
+        z-index: 2;
+        .left, .right {
+            margin: 20px 0px;
+            width: 118px;
+            @extend .vertical;
+            justify-content: space-between;
+        }
+
+        .right {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-right: 8px;
+        }
+
+        .left {
+            align-items: flex-end;
+            .leftLabel {
+                align-self: flex-end;
+            }
+            padding-left: 8px;
+        }
+        
+    }
+
+    .wellbore {
+        width: 95px;
+        > svg {
+            position: absolute;
+        }
+        z-index: 2;
+        margin: 0 6px;
+        @extend .vertical;
+        justify-content: center;
+        align-items: center;
+
+        
+        .kpis {
+            margin-top: 10px;
+            position: absolute;
+            @extend .vertical;
+        }
+    }
+
+    &.surface {
+        .background {
+            background-color: #C6D3EE;
+        }
+    }
+
+    &.intermediate, &.drillout {
+        .background {
+            background-color: #CDD9C4;
+        }
+    }
+    .background {
+        width: 100%;
+        top: 10px;
+        bottom: 10px;
+        position: absolute;
+        z-index: 0;
+        border-radius: 8px;
+        max-width: 340px;
+    }
+
+    
+}

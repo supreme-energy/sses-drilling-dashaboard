@@ -7,7 +7,8 @@
   "plugins": [
     "babel",
     "react",
-    "promise"
+    "promise",
+    "react-hooks"
   ],
   "env": {
     "browser" : true
@@ -16,11 +17,13 @@
     "__DEV__"      : false,
     "__TEST__"     : false,
     "__PROD__"     : false,
-    "__COVERAGE__" : false
+    "__COVERAGE__" : false,
+    "__CONFIG__" : false
   },
   "rules": {
     "key-spacing"          : "off",
-    "brace-style"          : [2, "stroustrup", {"allowSingleLine": true}],
+    "indent"               : "off",
+    "brace-style"          : [2, "1tbs", {"allowSingleLine": true}],
     "semi"                 : [2, "always"],
     "quotes"               : "off",
     "no-return-await"      : 2,
@@ -32,6 +35,8 @@
 
     "react/jsx-space-before-closing"     : 0,
     "react/self-closing-comp"            : 0,
-    "react/prop-types": [2, { "skipUndeclared": true }]
+    "react/prop-types": [2, { "skipUndeclared": true }],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }

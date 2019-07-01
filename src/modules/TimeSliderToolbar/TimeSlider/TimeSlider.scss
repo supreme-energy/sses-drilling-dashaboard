@@ -1,0 +1,137 @@
+@import "../../../styles/base";
+
+.timeSliderContainer {
+    border-radius: 0;
+    width: 100%;
+}
+
+.timeSliderContainerExpanded {
+    padding-bottom: 10px;
+}
+
+.timeSliderGraph {    
+    position: relative;
+    height: 65px;
+    width: 100%;
+}
+
+.timeSliderGraphCollapsed { 
+    display: none;
+}
+
+.timeSliderHeader {
+    padding: 10px 10px 0px 15px;
+    display: flex;
+    justify-content: space-between;
+
+    .timeSliderTitle {
+        color: $gold;
+        flex-grow: 1;
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 4;
+
+
+        span {
+            margin-right: 15px;
+            margin-left: 5px;
+        }
+
+        .legendKey {
+            height: 10px;
+            width: 20px;
+        }
+
+        .slideLegendKey {
+            background-color: #A9FFFB;
+        }
+
+        .connectionLegendKey {
+            background-color: #D9AAFE;
+        }
+
+        .ropLegendKey  {
+            background-color: #08BB00;
+        }
+
+        .lengthLegendKey {
+            background-color: #967F2F;
+        }
+    }
+
+    .timeSliderControls {
+        display: flex;
+        flex-grow: 2;
+        flex: 2;
+        justify-content: flex-end;
+        margin-right: 15px;
+
+        button {
+            padding: 5px;
+            &:focus {
+                outline: 0;
+            }
+        }
+
+        .timeControls {
+            margin-left: 20px;
+        }
+    }
+}
+
+.timeSliderView {
+    display: flex;
+}
+
+.timeSliderExpanded {
+    bottom: 11px;
+}
+
+.timeSliderCollapsed {
+    top: 30px;
+}
+
+
+.globalTime {
+    position: relative;
+
+    > button {
+        margin: 2px;
+        border-radius: 15px;
+        width: 40px;
+
+        svg {
+            color: rgba(0, 0, 0, 0.54);
+        }
+        &:focus {
+            outline: 0;
+        }
+    }
+}
+
+.expandedGlobalTime {
+    top: 30px;
+    span {
+        display: block;
+    }
+
+    > button {
+        bottom: 4px;
+    }
+}
+
+.collapsedGlobalTime {
+    > button {
+        height: 50px;
+    }
+}
+
+.timeSlider {
+    width: 90%;
+    position: relative;
+    margin: 0 5px;
+}

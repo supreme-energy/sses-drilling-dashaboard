@@ -1,0 +1,40 @@
+.container {
+    display: flex;
+    flex: none;
+    flex-direction: row;
+    padding: 8px;
+    flex: 1;
+    overflow: auto;
+
+    .left {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        height: 100%;
+        margin-right: 8px;
+        .ropChart {
+            flex: 1;
+        
+        }
+
+        .KPIGraphic {
+            flex: 1;
+        }
+    }
+
+    .right {
+        flex: none;
+        width: 343px;
+        display: flex;
+        flex-direction: column;
+
+        .mapPlot {
+            flex: 1;
+            align-self: stretch;
+        }
+
+        .toolFace {
+            height: 128px;
+        }
+    }
+}

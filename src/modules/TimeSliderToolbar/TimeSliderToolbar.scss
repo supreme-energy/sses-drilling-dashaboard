@@ -1,0 +1,37 @@
+@import "../../styles/base";
+
+$header-height: 265px;
+
+.timeSliderToolbar {
+    display: flex;
+    border-radius: 0;
+
+    .collapseButtonContainer {
+        border-radius: 0;
+        border-right: 1px solid rgb(209, 208, 208);
+        min-width: 30px;
+
+        .collapseButton {
+            height: 100%;
+            
+            svg {
+                position: relative;
+                left: 2px;
+            }
+
+            .expandLessIcon {
+                bottom: 60px;
+            }
+        }
+    }
+
+    .noShrink {
+        flex-shrink: 0;
+    }
+}
+
+.viewport {
+    height: calc(100vh - #{$header-height});
+    background-color: $backgroundColor;
+    margin-top: 5px;
+  }

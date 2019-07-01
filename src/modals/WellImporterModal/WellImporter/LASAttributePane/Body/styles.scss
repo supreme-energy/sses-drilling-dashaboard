@@ -1,0 +1,62 @@
+@import '../../base';
+
+%table {
+  font-family: 'Roboto', sans-serif;
+  font-size:16px;
+  color: rgba(0,0,0,0.87);
+  line-height:24px;
+}
+
+.importContentTable {
+  @extend %table;
+  border-width: 1px;
+  border-spacing: 2px;
+  border-style: outset;
+  border-color: transparent transparent gray transparent;
+  border-collapse: separate;
+  background-color: white;
+  margin-bottom: 24px;
+
+  &.unlocked {
+    td {
+      border-width: 1px;
+      padding: 1px 8px 1px 1px;
+      border-style: none none solid none;
+      border-color: #eee;
+      background-color: white;
+      &.selectedCell {
+        @extend %selectedState;
+      }
+
+      &.selectedText {
+        @extend %selectedTextState;
+      }
+
+      &:hover {
+        @extend %selectedState;
+      }
+    }
+  }
+
+  td {
+    border-width: 1px;
+    padding: 1px 8px 1px 1px;
+    border-style: none none solid none;
+    border-color: #eee;
+    background-color: white;
+    &.selectedCell {
+      @extend %selectedState;
+    }
+
+    &.selectedText {
+      @extend %selectedTextState;
+    }
+  }
+}
+
+.truncationMessage {
+  text-align: center;
+}
+
+
+

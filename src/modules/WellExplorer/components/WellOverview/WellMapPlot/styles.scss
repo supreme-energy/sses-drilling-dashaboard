@@ -1,0 +1,25 @@
+@import '../../../../../styles/plusIcon';
+
+.mapContainer {
+    position: relative;
+    .map {
+        position: absolute;
+        width: 100%;
+        top: 0px;
+        bottom: 100px;
+    }
+
+    .legend {
+        bottom: 0px;
+        height: 100px;
+        position: absolute;
+        width: 100%;
+    }
+}
+
+
+
+
+
+
+

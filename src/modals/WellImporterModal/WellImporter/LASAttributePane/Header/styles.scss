@@ -1,0 +1,47 @@
+.container {
+  position: relative;
+  height: 100%;
+  padding: 4px;
+  z-index: 2;
+}
+
+.bottomContainer {
+  &.csv {
+    width: 100%;
+    bottom: 5px;
+    left: 0px;
+    position: relative;
+  }
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+}
+
+.topButtonContainer {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.title {
+  padding: 8px;
+}
+
+.button {
+  width: 100px;
+  height: 35px;
+  line-height: 10px;
+
+  &:first-of-type {
+    margin-right: 10px;
+  }
+}
+
+.skipToSectionButton {
+  margin-right: 5px;
+  border-color: rgb(224, 224, 224);
+  text-transform: none;
+  &:last-of-type {
+    margin-right: 0;
+  }
+}
