@@ -6,6 +6,37 @@
   position: relative;
 }
 
+.cardLine {
+  border-top: 1px solid #dddddd;
+  margin: 10px -10px;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+}
+
+.grow {
+  flex-grow: 1;
+}
+.shrink {
+  flex-grow: 0;
+}
+
+.expand {
+  transform: rotate(0deg);
+  outline: none;
+}
+.expand:focus {
+  outline: none;
+}
+
+.expandOpen {
+  transform: rotate(180deg)
+}
+
 .comboDashboardWrapper {
   display: flex;
   height: 100%;
@@ -37,7 +68,7 @@
 }
 
 .drillPhaseKpi {
-  max-height: 150px; 
+  max-height: 150px;
   margin: 0 3px 3px 8px;
   padding: 12px;
 }

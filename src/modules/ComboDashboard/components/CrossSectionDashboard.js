@@ -1,7 +1,10 @@
 import { CircularProgress, Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import classNames from "classnames";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import IconButton from "@material-ui/core/IconButton";
 import { useFilteredWellData } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
@@ -22,6 +25,7 @@ import {
   INIT,
   DIP_END
 } from "../../../constants/interactivePAStatus";
+import Collapse from "@material-ui/core/Collapse";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
@@ -266,32 +270,63 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
+  const [expanded, setExpanded] = useState(false);
   return (
     <WidgetCard className={classes.crossSectionDash}>
-      <Typography variant="subtitle1">Cross Section</Typography>
-      <Suspense fallback={<CircularProgress />}>
-        <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
-          {({ width, height }) => (
-            <CrossSection
-              width={width}
-              height={height}
-              view={view}
-              updateView={setView}
-              scale={scale}
-              wellPlan={wellPlan}
-              surveys={surveys}
-              formations={formations}
-              calculatedFormations={calculatedFormations}
-              projections={projections}
-              calcSections={calcSections}
-              selectedSections={selectedSections}
-              setSelectedSections={setSelectedSections}
-              firstProjectionIdx={firstProjectionIdx}
-              ghostDiffDispatch={ghostDiffDispatch}
-            />
-          )}
-        </ParentSize>
-      </Suspense>
+      <div className={classNames(classes.responsiveWrapper, classes.column)}>
+        <Typography variant="subtitle1">Cross Section</Typography>
+        <div className={classNames(classes.column, classes.grow)}>
+          <Suspense fallback={<CircularProgress />}>
+            <ParentSize debounceTime={100}>
+              {({ width, height }) => (
+                <CrossSection
+                  width={width}
+                  height={height}
+                  view={view}
+                  updateView={setView}
+                  scale={scale}
+                  wellPlan={wellPlan}
+                  surveys={surveys}
+                  formations={formations}
+                  calculatedFormations={calculatedFormations}
+                  projections={projections}
+                  calcSections={calcSections}
+                  selectedSections={selectedSections}
+                  setSelectedSections={setSelectedSections}
+                  firstProjectionIdx={firstProjectionIdx}
+                  ghostDiffDispatch={ghostDiffDispatch}
+                />
+              )}
+            </ParentSize>
+          </Suspense>
+        </div>
+        <div className={classes.cardLine} />
+        <div className={classNames(classes.column, classes.shrink)}>
+          <div className={classes.row}>
+            <IconButton
+              size="small"
+              className={classNames(classes.expand, {
+                [classes.expandOpen]: expanded
+              })}
+              onClick={() => setExpanded(!expanded)}
+              aria-expanded={expanded}
+              aria-label="Show more"
+            >
+              <ExpandMoreIcon />
+            </IconButton>
+            <Typography variant="subtitle1">Details</Typography>
+          </div>
+          <Collapse in={expanded} unmountOnExit>
+            <Typography paragraph>
+              Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet over medium-high heat. Add chicken,
+              shrimp and chorizo, and cook, stirring occasionally until lightly browned, 6 to 8 minutes. Transfer shrimp
+              to a large plate and set aside, leaving chicken and chorizo in the pan. Add pimentón, bay leaves, garlic,
+              tomatoes, onion, salt and pepper, and cook, stirring often until thickened and fragrant, about 10 minutes.
+              Add saffron broth and remaining 4 1/2 cups chicken broth; bring to a boil.
+            </Typography>
+          </Collapse>
+        </div>
+      </div>
     </WidgetCard>
   );
 };
