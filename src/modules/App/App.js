@@ -43,11 +43,6 @@ function filterForceRefreshProps(request) {
   }
 }
 
-// backend api is checking for content type to be exactly "application/json"
-function ensureContentType(request) {
-  request.options.headers["Content-Type"] = "application/json";
-}
-
 class App extends React.Component {
   static propTypes = {
     store: PropTypes.object.isRequired,
@@ -59,8 +54,7 @@ class App extends React.Component {
     plusErrorJson(),
     plusUrlPattern(),
     plusBasicAuth(__CONFIG__.username, __CONFIG__.password),
-    filterForceRefreshProps,
-    ensureContentType
+    filterForceRefreshProps
   ];
 
   fetchMWMock = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
