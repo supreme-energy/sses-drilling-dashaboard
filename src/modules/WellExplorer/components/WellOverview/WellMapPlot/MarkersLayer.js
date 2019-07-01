@@ -15,7 +15,7 @@ function WellPhasePointsLayer({ zIndexOffset, markers }, ref) {
   return (
     <FeatureGroup ref={groupRef}>
       {markers.map((m, i) => (
-        <Marker position={m.position} icon={m.icon} zIndexOffset={zIndexOffset + i} />
+        <Marker key={m.id} position={m.position} icon={m.icon} zIndexOffset={zIndexOffset + i} />
       ))}
     </FeatureGroup>
   );

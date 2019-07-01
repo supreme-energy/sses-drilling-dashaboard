@@ -115,8 +115,7 @@ export function useWellInfo(wellId) {
       return serializedUpdateFetch({
         path: SET_WELL_FIELD,
         query: {
-          seldbname: wellId,
-          table: "wellinfo"
+          seldbname: wellId
         },
         method: "POST",
         body,

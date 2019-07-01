@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
 import Progress from "@material-ui/core/CircularProgress";
 import plusBasicAuth from "fetch-plus-basicauth";
-
 import FetchClientProvider from "react-powertools/data/FetchClientProvider";
 import FetchCache from "react-powertools/data/FetchCache";
 import plusJsonStrict from "react-powertools/data/fetch-plus-strict";
@@ -44,6 +43,11 @@ function filterForceRefreshProps(request) {
   }
 }
 
+// backend api is checking for content type to be exactly "application/json"
+function ensureContentType(request) {
+  request.options.headers["Content-Type"] = "application/json";
+}
+
 class App extends React.Component {
   static propTypes = {
     store: PropTypes.object.isRequired,
@@ -55,7 +59,8 @@ class App extends React.Component {
     plusErrorJson(),
     plusUrlPattern(),
     plusBasicAuth(__CONFIG__.username, __CONFIG__.password),
-    filterForceRefreshProps
+    filterForceRefreshProps,
+    ensureContentType
   ];
 
   fetchMWMock = [plusJsonStrict(), plusErrorJson(), plusUrlPattern()];
