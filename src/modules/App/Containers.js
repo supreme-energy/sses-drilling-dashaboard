@@ -92,11 +92,11 @@ export function useFilteredWellData() {
   const { formationsData, refreshFormations } = useFormationsDataContainer();
   const surveys = useSurveys(wellId);
   const wellPlan = useWellPath(wellId);
-  const [projections, refreshProjections, saveProjection] = useProjections(wellId);
+  const { projectionsData, saveProjections, refreshProjections } = useProjectionsDataContainer();
 
   // Calculate some useful information from raw data
   const annotatedSurveys = annotateSurveys(surveys);
-  const annotatedProjections = annotateProjections(projections);
+  const annotatedProjections = annotateProjections(projectionsData);
 
   // Filter data and memoize
   const surveysFiltered = filterDataToInterval(annotatedSurveys, sliderInterval);
@@ -110,14 +110,14 @@ export function useFilteredWellData() {
 
   const saveAndUpdate = useCallback(
     (...args) => {
-      saveProjection(...args).then((data, err) => {
+      saveProjections(...args).then((data, err) => {
         if (!err) {
           refreshFormations();
           refreshProjections();
         }
       });
     },
-    [saveProjection, refreshProjections, refreshFormations]
+    [saveProjections, refreshProjections, refreshFormations]
   );
 
   // TODO: Remove once formations are stabilized again
@@ -177,24 +177,9 @@ function useWellId(initialState) {
   return { wellId, setWellId };
 }
 
-function useFormationsData(initialState) {
-  const { wellId } = useWellIdContainer();
-  const [formationsData, setFormations] = useState(initialState);
-
-  const [serverFormations, refreshFormations] = useFormations(wellId);
-
-  useEffect(() => {
-    if (serverFormations && serverFormations.length) {
-      setFormations(serverFormations);
-    }
-  }, [serverFormations]);
-
-  return { formationsData, setFormations, refreshFormations };
-}
-
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projectionsData, setProjections] = useState();
+  const [projectionsData, setProjections] = useState([]);
 
   const [projections, refreshProjections, saveProjections] = useProjections(wellId);
 
@@ -208,16 +193,31 @@ function useProjectionsData() {
 }
 
 function useCustomDataHook() {
-  const { formationsData } = useFormationsDataContainer();
   const { projectionsData, saveProjections } = useProjectionsDataContainer();
 
   // Filter data here or filter in Container before hand (is there a benefit to one over the other?)
+}
+
+function useFormationsData() {
+  const { wellId } = useWellIdContainer();
+  const { projectionsData } = useProjectionsDataContainer();
+  const [formationsData, setFormations] = useState([]);
+
+  const [serverFormations, refreshFormations] = useFormations(wellId);
 
   useEffect(() => {
-    // on projectionsDataChange,
-    // Change formationsData
+    if (serverFormations && serverFormations.length) {
+      setFormations(serverFormations);
+    }
+  }, [serverFormations]);
+
+  // If projections or surveys change, recalculate formations
+  useEffect(() => {
+    // update formationsData
     //
   }, [projectionsData]);
+
+  return { formationsData, setFormations, refreshFormations };
 }
 
 // Create containers
