@@ -9,6 +9,22 @@ import classNames from "classnames";
 import { useFilteredWellData } from "../../../App/Containers";
 import classes from "./Details.scss";
 
+function SurveyIcon({ row }) {
+  const surveyMarker = <img src="/survey.svg" />;
+  const lastSurveyMarker = <img src="/lastSurvey.svg" />;
+  const bitProjMarker = <img src="/bitProjection.svg" />;
+  const PAMarker = <img src="/projectAhead.svg" />;
+  if (row.isProjection) {
+    return PAMarker;
+  } else if (row.isBitProj) {
+    return bitProjMarker;
+  } else if (row.isLastSurvey) {
+    return lastSurveyMarker;
+  } else {
+    return surveyMarker;
+  }
+}
+
 export default function DetailsTable(props) {
   const { selected } = props;
   // const { surveys, projections } = useFilteredWellData();
@@ -44,6 +60,7 @@ export default function DetailsTable(props) {
             })}
           >
             <TableCell className={classes.cell} component="th" scope="row">
+              <SurveyIcon row={row} />
               {row.id}
             </TableCell>
             <TableCell className={classes.cell}>{row.md}</TableCell>

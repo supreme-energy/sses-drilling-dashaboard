@@ -7,12 +7,19 @@
   min-width: 650px
 }
 .row {
+  img {
+    width: 15px;
+    height: 15px;
+    display: inline;
+    margin-right: 4px;
+  }
   .cell {
     border-bottom:none;
     border-radius: 6px;
     border: 2px white solid;
     background-clip: padding-box;
     font-weight: bold;
+    white-space: nowrap;
   }
 }
 .surveyRow {
