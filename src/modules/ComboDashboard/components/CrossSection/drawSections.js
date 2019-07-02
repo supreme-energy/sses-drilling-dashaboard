@@ -38,20 +38,35 @@ function drawSections(container, higherContainer, props, gutter) {
   labelText.rotation = Math.PI / 2;
   labelText.position.y = labelHeight / 2;
 
-  const addSection = function(start) {
+  const addSection = function({ onClick }) {
     const section = new PIXI.Graphics();
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
-    section.on("click", function() {
-      props.setSelectedMd(start.md);
-    });
+    section.on("click", () => onClick(section));
     container.addChild(section);
     return section;
   };
 
+  let calcSections = props.calcSections;
+  let setSelectedMd = props.setSelectedMd;
+
   return function update(props) {
     if (!container.transform) return;
-    const { width, height, view, selectedSections, calcSections } = props;
+
+    const { width, height, view, selectedSections } = props;
+    calcSections = props.calcSections;
+    setSelectedMd = props.setSelectedMd;
+
+    const onSectionClick = section => {
+      const id = section.sectionId;
+      const sid = calcSections.findIndex(s => s.id === id);
+      const startPoint = calcSections[sid];
+
+      if (startPoint) {
+        setSelectedMd(startPoint.md);
+      }
+    };
+
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
@@ -63,15 +78,16 @@ function drawSections(container, higherContainer, props, gutter) {
     // Clear out all previous drawn sections
     pixiList.forEach(p => p.clear());
     for (let i = 1; i <= calcSections.length - 1; i++) {
-      if (!pixiList[i]) pixiList[i] = addSection(calcSections[i - 1]);
+      if (!pixiList[i]) pixiList[i] = addSection({ onClick: onSectionClick });
       const p1 = calcSections[i - 1];
       const p2 = calcSections[i];
+
       const isSelected = selectedSections[p2.id];
       const color = isSelected ? [p2.selectedColor, p2.selectedAlpha] : [p2.color, p2.alpha];
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.sectionId = p2.id;
+      pixi.sectionId = p1.id;
 
       const start = p1.vs * view.xScale + view.x;
       const length = (p2.vs - p1.vs) * view.xScale;

@@ -91,7 +91,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
-  const [{ selectedMd }, dispatch] = useComboContainer();
+  const [{ selectedMd }, , { selectMd }] = useComboContainer();
   const selectedSections = useMemo(
     function getSelectedSections() {
       const selected = rawSections.find((s, index) => {
@@ -102,7 +102,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
     },
     [selectedMd, rawSections]
   );
-  const setSelectedMd = md => dispatch({ type: "SELECT_MD", md });
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
@@ -201,7 +200,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               projections={projections}
               calcSections={calcSections}
               selectedSections={selectedSections}
-              setSelectedMd={setSelectedMd}
+              setSelectedMd={selectMd}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
             />

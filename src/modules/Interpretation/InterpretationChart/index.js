@@ -8,11 +8,12 @@ import css from "./styles.scss";
 import useViewport from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
-import PixiRectangle from "../../../components/PixiRectangle";
 import PixiLine from "../../../components/PixiLine";
 
 const gridGutter = 50;
-const mapWellLog = d => [d.value, d.md];
+const mapWellLog = d => [d.value, d.depth];
+const mapControlLog = d => [d.value, d.md];
+
 export default function InterpretationChart({ className, controlLogs, logData }) {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -49,7 +50,7 @@ export default function InterpretationChart({ className, controlLogs, logData })
   useEffect(
     function moveToCurrentLog() {
       if (logData) {
-        updateView(view => ({ ...view, y: -logData.data[0].md * view.yScale + 20 }));
+        updateView(view => ({ ...view, y: -logData.data[0].depth * view.yScale }));
       }
     },
     [logData]
@@ -59,7 +60,7 @@ export default function InterpretationChart({ className, controlLogs, logData })
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, view, width, height, controlLogs]
+    [refresh, stage, view, width, height, controlLogs, logData]
   );
 
   return (
@@ -67,7 +68,7 @@ export default function InterpretationChart({ className, controlLogs, logData })
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
       {controlLogs.map(cl => (
-        <PixiLine container={viewport} data={cl.data} mapData={mapWellLog} color={0x7e7d7e} />
+        <PixiLine container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
       ))}
       {logData && <PixiLine container={viewport} data={logData.data} mapData={mapWellLog} color={0xee2211} />}
       <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} showXAxis={false} />

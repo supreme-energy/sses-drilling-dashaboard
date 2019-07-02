@@ -431,20 +431,29 @@ export function useWellLogList(wellId) {
     query: { seldbname: wellId }
   });
 
-  const logList = useMemo(() => list && list.map(d => ({ ...d, startmd: Number(d.startmd), endmd: Number(d.endmd) })), [
-    list
-  ]);
+  const logList = useMemo(
+    () =>
+      list &&
+      list.map(d => ({
+        ...d,
+        startmd: Number(d.startmd),
+        endmd: Number(d.endmd),
+        startdepth: Number(d.startdepth),
+        enddepth: Number(d.enddepth)
+      })),
+    [list]
+  );
   return [logList || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellLogData(wellId, tableName) {
   const transformWellLogData = useMemo(() => {
-    const sortByDepth = (a, b) => a.md - b.md;
+    const sortByDepth = (a, b) => a.depth - b.depth;
     return memoizeOne(data => {
       return {
         ...data,
         data: data.data
-          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value) }))
+          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value), depth: Number(d.depth) }))
           .sort(sortByDepth)
       };
     });

@@ -55,6 +55,7 @@ function Interpretation({
     if (logList && logList.length) {
       const curentIndex = logList.indexOf(selectedWellLog);
       const next = logList[curentIndex + 1];
+
       if (next) {
         selectMd(next.startmd);
       }
