@@ -26,19 +26,6 @@ import { useComboContainer } from "../containers/store";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
-function selectionReducer(state, action) {
-  switch (action.type) {
-    // A planned feature is multiple selection, but only single is supported now
-    case "toggle":
-      return {
-        [action.id]: !state[action.id]
-      };
-    case "clear":
-      return {};
-    default:
-      throw new Error(`Unknown selected section reducer action type ${action.type}`);
-  }
-}
 function PADeltaInit(options = {}) {
   const section = options.section || {};
   return {
