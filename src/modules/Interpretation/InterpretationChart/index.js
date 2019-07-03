@@ -69,13 +69,14 @@ export default function InterpretationChart({ className, controlLogs, logData, g
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
       {controlLogs.map(cl => (
-        <PixiLine container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
+        <PixiLine key={cl.id} container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
       ))}
       {/* todo use this when add aditional logs
       {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
       {logList.map(log => (
         <LogDataLine
           log={log}
+          key={log.id}
           wellId={wellId}
           container={viewport}
           selected={selectedWellLog && log.id === selectedWellLog.id}
