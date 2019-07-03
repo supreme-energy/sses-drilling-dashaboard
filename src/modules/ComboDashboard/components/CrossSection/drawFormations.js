@@ -14,7 +14,7 @@ export function drawFormations(container) {
     if (!layers || !layers.length) return;
     layerTiles.forEach(l => l.forEach(t => t.clear()));
     // TODO: Can optimize performance by redrawing only when data changes
-    layerLoop: for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
+    for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
       let { bg_color: currColor, bg_percent: currAlpha } = currLayer;
@@ -37,7 +37,7 @@ export function drawFormations(container) {
         const p3 = nextLayer.data[pointIdx + 1];
         const p4 = nextLayer.data[pointIdx];
 
-        if (!p1 || !p2 || !p3 || !p4) continue layerLoop;
+        if (!p1 || !p2 || !p3 || !p4) continue;
         // The right side points determine the tile fault
         const a1 = [p1.vs, p1.tot + p2.fault];
         const a2 = [p2.vs, p2.tot];
