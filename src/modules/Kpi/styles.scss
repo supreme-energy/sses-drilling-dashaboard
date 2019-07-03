@@ -1,3 +1,4 @@
+
 .statusIcon {
     width: 25px;
     height: 25px;
@@ -54,6 +55,12 @@
     }
 }
 
+
+.root {
+    .caption {
+        line-height: 1;
+    }
+}
 
 .status {
     display: flex;

@@ -16,6 +16,7 @@ import memoizeOne from "memoize-one";
 import WellOverview from "./WellOverview";
 import classNames from "classnames";
 import { getWellsZoomBounds, getWellZoomBounds } from "../utils/getWellsZoomBounds";
+import Box from "@material-ui/core/Box";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -114,17 +115,19 @@ export const WellExplorer = ({
           />
           <span className={classes.vSpacer} />
           {overviewMode && (
-            <WellMap
-              selectedWellId={selectedWellId}
-              showToggleLegend
-              defaultShowLegend={false}
-              theme={theme}
-              onMarkerClick={well => changeSelectedWell(well.id)}
-              bounds={selectedWellMapBounds}
-              wells={searchResults}
-              className={classes.miniMap}
-              zoomControl={false}
-            />
+            <Box boxShadow={1} display="flex" className={classes.miniMap}>
+              <WellMap
+                selectedWellId={selectedWellId}
+                showToggleLegend
+                defaultShowLegend={false}
+                theme={theme}
+                className="flex"
+                onMarkerClick={well => changeSelectedWell(well.id)}
+                bounds={selectedWellMapBounds}
+                wells={searchResults}
+                zoomControl={false}
+              />
+            </Box>
           )}
         </div>
         <span className={classes.hSpacer} />

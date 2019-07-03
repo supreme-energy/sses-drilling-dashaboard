@@ -10,11 +10,11 @@ import { sum } from "d3-array";
 import { useTheme } from "@material-ui/styles";
 import { noDecimals, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/format";
 
-const percentage = value => (value !== undefined ? fmtPercentage(value) : EMPTY_FIELD);
-const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
-const renderRotating = props => defaultRenderValue({ ...props, textClass: classes.rotatingLabel });
+export const percentage = value => (value !== undefined ? fmtPercentage(value) : EMPTY_FIELD);
+export const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
+export const renderRotating = props => defaultRenderValue({ ...props, textClass: classes.rotatingLabel });
 
-const PercentageBar = ({ values }) => {
+export const PercentageBar = ({ values, height }) => {
   const containerRef = useRef(null);
   const { width } = useSize(containerRef);
 
@@ -28,15 +28,15 @@ const PercentageBar = ({ values }) => {
   return (
     <div className={classes.percentageBar} ref={containerRef}>
       <div className={classNames("layout horizontal flex", classes.bars)}>
-        {values.map(v => {
-          return <div key={v.id} style={{ width: `${scale(v.value)}px`, height: 5, backgroundColor: v.color }} />;
-        })}
+        {values.map(v => (
+          <div key={v.id} style={{ width: `${scale(v.value)}px`, height: height || 5, backgroundColor: v.color }} />
+        ))}
       </div>
     </div>
   );
 };
 
-export const SlidingKpi = ({ data }) => (
+const SlidingKpi = ({ data }) => (
   <div className="layout vertical">
     <div className="layout horizontal space-between">
       <KpiItem

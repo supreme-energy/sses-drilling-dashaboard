@@ -5,17 +5,54 @@ import _ from "lodash";
 
 import WidgetCard from "../../WidgetCard";
 import { useWellOverviewKPI } from "../../../api";
-import { SlidingKpi } from "../../Kpi/DrillPhaseKPI/Kpi";
-import classes from "./DrillingAnalytics.scss";
+import KpiItem from "../../Kpi/KpiItem";
+import { PercentageBar, renderRotating, renderSliding, percentage } from "../../Kpi/DrillPhaseKPI/Kpi";
+import { noDecimals } from "../../../constants/format";
 import VerticalMenu from "../../VerticalMenu";
+import classes from "./DrillingAnalytics.scss";
 
-export function PhaseOverview({ wellId, drillPhase }) {
+const SlidingKpi = ({ data }) => (
+  <div className={classes.slidingKpiContainer}>
+    <div className={classes.slidingKpis}>
+      <KpiItem
+        className={classes.slidingLabel}
+        format={noDecimals}
+        label={`Sliding ${percentage(data.slidingPct)}`}
+        value={data.avgSliding}
+        renderValue={renderSliding}
+        measureUnit={"fph"}
+      />
+
+      <KpiItem
+        className={classes.rotatingLabel}
+        format={noDecimals}
+        label={`Rotating ${percentage(data.rotatingPct)}`}
+        value={data.avgRotating}
+        renderValue={renderRotating}
+        measureUnit={"fph"}
+      />
+    </div>
+    <PercentageBar
+      values={[
+        { value: data.slidingPct, color: "#AFB42B", id: "slidingPct" },
+        { value: data.rotatingPct, color: "#827717", id: "rotatingPct" }
+      ]}
+      height={8}
+    />
+  </div>
+);
+
+SlidingKpi.defaultProps = {
+  data: {}
+};
+
+export function PhaseOverview({ wellId, drillPhase, drillPhaseType }) {
   const { data } = useWellOverviewKPI(wellId);
   const phaseData = data.find(d => d.type === drillPhase);
 
   return (
     <WidgetCard className={classes.phaseOverviewCard}>
-      <Typography variant="subtitle1">{`${drillPhase} Overview`}</Typography>
+      <Typography variant="subtitle1">{`${drillPhaseType} Overview`}</Typography>
       <VerticalMenu
         id="phase-overview-widget-menu"
         className={classes.verticalMenu}
@@ -31,7 +68,8 @@ export function PhaseOverview({ wellId, drillPhase }) {
 
 PhaseOverview.propTypes = {
   wellId: PropTypes.string,
-  drillPhase: PropTypes.string
+  drillPhase: PropTypes.string,
+  drillPhaseType: PropTypes.string
 };
 
 export default PhaseOverview;

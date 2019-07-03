@@ -46,7 +46,7 @@ const useStyles = makeStyles({
   valueLabelRight: {
     textAlign: "right",
     left: -110,
-    top: 25,
+    top: 28,
     "& *": {
       width: 100,
       color: "rgba(0,0,0,0.6)",
@@ -56,7 +56,7 @@ const useStyles = makeStyles({
   valueLabelLeft: {
     textAlign: "left",
     left: 0,
-    top: 25,
+    top: 28,
     "& *": {
       width: 100,
       color: "rgba(0,0,0,0.6)",
@@ -66,7 +66,7 @@ const useStyles = makeStyles({
   valueLabel: {
     textAlign: "center",
     left: -55,
-    top: 25,
+    top: 28,
     "& *": {
       width: 100,
       color: "rgba(0,0,0,0.6)",

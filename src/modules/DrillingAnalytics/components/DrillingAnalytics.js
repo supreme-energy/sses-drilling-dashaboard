@@ -27,8 +27,8 @@ export function DrillingAnalytics({
   return (
     <div className={classes.drillingAnalyticsContainer}>
       <div className={classes.row}>
-        <PhaseOverview wellId={openedWellId} drillPhase={phase} />
-        <StandAnalysis wellId={openedWellId} drillPhase={drillPhaseType} />
+        <PhaseOverview wellId={openedWellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
+        <StandAnalysis wellId={openedWellId} drillPhase={phase} />
         <SlideAnalysis drillPhase={drillPhaseType} />
       </div>
       <div className={classNames(classes.row, classes.extendRow)}>

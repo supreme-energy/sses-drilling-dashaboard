@@ -23,7 +23,7 @@ export function sliderReducer(state, action) {
       }
       return state;
     case "FAST_FORWARD":
-      if (step + stepSize >= 0) {
+      if (step + stepSize >= 0 && step + stepSize <= maxStep) {
         return { ...state, step: step + stepSize, direction: 1 };
       }
       return state;
