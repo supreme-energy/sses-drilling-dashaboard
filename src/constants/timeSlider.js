@@ -8,7 +8,7 @@ export const mapConnections = (d, index) => [index, Number(d.Connections)];
 export const mapAngle = (d, index) => [index, Number(d.Angle)];
 
 // Slider constants
-export const GRID_GUTTER = 1;
+export const GRID_GUTTER = 5;
 export const INITIAL_SLIDER_STATE = {
   step: 0,
   maxStep: 0,

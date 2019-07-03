@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import { Typography, Box } from "@material-ui/core";
 
 import WidgetCard from "../WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
-import { useWellControlLog, useWellLogList, useWellLogData } from "../../api";
+import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
 import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
@@ -17,6 +17,8 @@ function Interpretation({
 }) {
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogList(wellId);
+  const aditionalLogs = useAdditionalDataLogsList(wellId);
+  const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
   const [{ selectedMd }, , { selectMd }] = useComboContainer();
 
@@ -62,13 +64,18 @@ function Interpretation({
     }
   };
 
-  const [currentWellLogData] = useWellLogData(wellId, selectedWellLog && selectedWellLog.tablename);
-
   return (
     <WidgetCard className={css.interpretationContainer}>
       <Typography variant="subtitle1">Interpretation 1</Typography>
       <Box display="flex" flexDirection="row" className="flex">
-        <InterpretationChart className={css.chart} controlLogs={controlLogs} logData={currentWellLogData} />
+        <InterpretationChart
+          wellId={wellId}
+          className={css.chart}
+          controlLogs={controlLogs}
+          selectedWellLog={selectedWellLog}
+          gr={gr}
+          logList={logList}
+        />
         <Box display="flex" flexDirection="column" style={{ color: "#757575" }}>
           <IconButton className={css.upArrow} onClick={selectPrev}>
             <ArrowUpward />

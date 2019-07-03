@@ -1,4 +1,4 @@
-import { DRILLING } from "../constants/drillingStatus";
+import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
@@ -21,11 +21,15 @@ export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
+export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
+export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
+export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
+export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 
 // mock data
 const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
@@ -43,12 +47,11 @@ const options = {
 };
 
 const EMPTY_ARRAY = [];
+const EMPTY_OBJECT = {};
 
 function transform(data) {
   return data.map(d => _.mapValues(d, Number));
 }
-
-const memoizedTransform = memoizeOne(transform);
 
 export function useWellsSearch(wells) {
   const fuse = useMemo(() => new Fuse(wells, options), [wells]);
@@ -204,7 +207,7 @@ export function useWells() {
           return {
             id: w.jobname,
             name: w.realjobname,
-            status: DRILLING,
+            status: COMPLETED,
             fav: Boolean(w.favorite),
             surfacePosition: [surfacePos.y, surfacePos.x]
           };
@@ -263,6 +266,8 @@ export function useRopData() {
   return [ropData, groupBySection];
 }
 
+const wellPathTransform = memoizeOne(transform);
+
 export function useWellPath(wellId) {
   const [data] = useFetch(
     {
@@ -272,7 +277,7 @@ export function useWellPath(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: wellPathTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -298,6 +303,8 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
+const surveyTransform = memoizeOne(transform);
+
 export function useSurveys(wellId) {
   const [data] = useFetch(
     {
@@ -307,14 +314,23 @@ export function useSurveys(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: surveyTransform
     }
   );
   return data || EMPTY_ARRAY;
 }
 
+const formationsTransform = memoizeOne(formationList => {
+  return formationList.map(f => {
+    return {
+      ...f,
+      data: transform(f.data)
+    };
+  });
+});
+
 export function useFormations(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -323,21 +339,16 @@ export function useFormations(wellId) {
       }
     },
     {
-      transform: formationList => {
-        return formationList.map(f => {
-          return {
-            ...f,
-            data: memoizedTransform(f.data)
-          };
-        });
-      }
+      transform: formationsTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, refresh];
 }
 
+const projectionsTransform = memoizeOne(transform);
+
 export function useProjections(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
       query: {
@@ -345,10 +356,23 @@ export function useProjections(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: projectionsTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  const saveProjection = (projectionId, method, fields = {}) => {
+    // return the promise so we can refresh AFTER the API call is done
+    return fetch({
+      path: SET_WELL_PROJECTIONS,
+      method: "GET",
+      query: {
+        seldbname: wellId,
+        id: projectionId,
+        method: method,
+        ...fields
+      }
+    });
+  };
+  return [data || EMPTY_ARRAY, refresh, saveProjection];
 }
 
 export function useWellOverviewKPI() {
@@ -467,4 +491,47 @@ export function useWellLogData(wellId, tableName) {
       },
     { transform: transformWellLogData }
   );
+}
+
+export function useAdditionalDataLogsList(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_ADDITIONAL_DATA_LOGS_LIST,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => _.keyBy(data, "label")
+    }
+  );
+
+  return data || EMPTY_OBJECT;
+}
+
+const additionalDataLogTransform = memoizeOne(data => {
+  return {
+    label: data.label,
+    scalelo: data.scalelo,
+    scalehi: data.scalehi,
+    data: transform(data.data)
+  };
+});
+
+export function useAdditionalDataLog(wellId, id, loadLog) {
+  const [data] = useFetch(
+    id !== undefined &&
+      wellId !== undefined && {
+        path: GET_ADDITIONAL_DATA_LOG,
+        query: {
+          seldbname: wellId,
+          id
+        }
+      },
+    {
+      transform: additionalDataLogTransform
+    }
+  );
+
+  return data || EMPTY_OBJECT;
 }

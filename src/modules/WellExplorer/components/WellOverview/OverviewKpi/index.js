@@ -12,10 +12,19 @@ import WellStatus from "../../../../Kpi/WellStatus";
 import WellPathStatus from "../../../../Kpi/WellPathStatus";
 import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
+import { withRouter } from "react-router";
+import flowRight from "lodash/flowRight";
 
-function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
+function OverviewKpi({
+  well,
+  changeSelectedWell,
+  updateFavorite,
+  match: {
+    params: { wellId: openedWellId }
+  }
+}) {
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
-
+  const opened = openedWellId && openedWellId === well.id;
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>
@@ -28,9 +37,9 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
             <FavIcon color="primary" className={classes.favorite} />
           </IconButton>
           <span className={classes.hSpacer} />
-          <Link to={`/${well.id}/combo`}>
-            <Button variant="contained" color="primary">
-              Open
+          <Link to={opened ? `/` : `/${well.id}/combo`}>
+            <Button className={classes.linkBtn} variant={opened ? "outlined" : "contained"} color="primary">
+              {opened ? "Close" : "Open"}
             </Button>
           </Link>
           <span className={classes.hSpacer} />
@@ -55,9 +64,14 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
   );
 }
 
-export default connect(
-  null,
-  {
-    changeSelectedWell
-  }
-)(OverviewKpi);
+const bindData = flowRight([
+  connect(
+    null,
+    {
+      changeSelectedWell
+    }
+  ),
+  withRouter
+]);
+
+export default bindData(OverviewKpi);

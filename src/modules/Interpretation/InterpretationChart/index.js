@@ -9,12 +9,13 @@ import useViewport from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
 import PixiLine from "../../../components/PixiLine";
+import LogDataLine from "./LogDataLine";
 
 const gridGutter = 50;
-const mapWellLog = d => [d.value, d.depth];
+
 const mapControlLog = d => [d.value, d.md];
 
-export default function InterpretationChart({ className, controlLogs, logData }) {
+export default function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId, selectedWellLog }) {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
@@ -49,18 +50,18 @@ export default function InterpretationChart({ className, controlLogs, logData })
 
   useEffect(
     function moveToCurrentLog() {
-      if (logData) {
-        updateView(view => ({ ...view, y: -logData.data[0].depth * view.yScale }));
+      if (selectedWellLog) {
+        updateView(view => ({ ...view, y: -selectedWellLog.startdepth * view.yScale }));
       }
     },
-    [logData]
+    [selectedWellLog]
   );
 
   useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, view, width, height, controlLogs, logData]
+    [refresh, stage, view, width, height, controlLogs, selectedWellLog, gr]
   );
 
   return (
@@ -70,7 +71,16 @@ export default function InterpretationChart({ className, controlLogs, logData })
       {controlLogs.map(cl => (
         <PixiLine container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
       ))}
-      {logData && <PixiLine container={viewport} data={logData.data} mapData={mapWellLog} color={0xee2211} />}
+      {/* todo use this when add aditional logs
+      {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
+      {logList.map(log => (
+        <LogDataLine
+          log={log}
+          wellId={wellId}
+          container={viewport}
+          selected={selectedWellLog && log.id === selectedWellLog.id}
+        />
+      ))}
       <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} showXAxis={false} />
     </div>
   );

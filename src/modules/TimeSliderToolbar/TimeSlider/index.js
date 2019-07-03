@@ -111,7 +111,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
   const hiddenDataLength = Math.abs(view.x / view.xScale);
-  const rightBoundIndex = visibleDataLength + hiddenDataLength - 1;
+  const rightBoundIndex = visibleDataLength + hiddenDataLength;
   const leftBoundIndexMoving = Math.abs(view.x) / view.xScale;
   const stepIndex = stepFactor * visibleDataLength + leftBoundIndexMoving;
 
@@ -142,7 +142,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         const xScale = computePhaseXScaleValue(indexDiff)(w - GRID_GUTTER);
         return {
           x: -1 * holeDepthLeftIndex * xScale,
-          y: 0,
+          y: GRID_GUTTER,
           xScale,
           yScale: height ? getInitialViewYScaleValue(height) : view.yScale
         };

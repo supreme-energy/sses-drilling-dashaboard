@@ -1,0 +1,113 @@
+@import "../../../styles/base";
+
+.drillingAnalyticsContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .slidingKpiContainer {
+        margin-top: 10px;
+        h5 {
+            margin-right: 5px;
+            font-size: 40px;
+            font-weight: 500;
+        }
+
+        .slidingLabel {
+            color: #AFB42B;
+            margin-right: auto;
+            > span {
+                position: relative;
+                bottom: 6px;
+            }
+
+        }
+
+        span {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .rotatingLabel {
+            position: relative;
+            left: 42px;
+            color: #827717;
+
+            > span {
+                position: relative;
+                bottom: 6px;
+                text-align: right;
+            }
+        }
+
+        .slidingKpis {
+            display: flex;
+            flex-direction: row;
+        }
+    }
+
+    h6 {
+        color: $gold;
+    }
+
+    .row:first-child, .row:last-child {
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+
+    .row {
+        display: flex;
+        > div {
+            margin: 3px;
+        }
+    }
+
+    .extendRow {
+        flex-grow: 2;
+        > div {
+            flex: 1;
+        }
+    }
+
+    .phaseOverviewCard {
+        flex-basis: 70%;
+    }
+
+    .verticalCrossSectionCard, .performanceAnalysisCard, .footageZoneStatsCard {
+        height: 100%;
+    }
+
+    .verticalMenu {
+        position: relative;
+        float: right;
+        bottom: 35px;
+        left: 10px;
+    }
+
+    .standAnalysisCard, .slideAnalysisCard {
+        height: 150px;
+        .kpiContainer {
+            margin-top: 10px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            div ~ span {
+                position: relative;
+                bottom: 10px;
+                font-weight: 500;
+            }
+
+            span {
+                font-size: 14px;
+            }
+             
+            h5 {
+                font-size: 45px;
+                font-weight: 500;
+                margin-right: 8px;
+            }
+        }
+    }
+}

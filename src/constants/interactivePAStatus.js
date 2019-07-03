@@ -1,0 +1,11 @@
+export const DIP_TOT_MOVE = "dip_tot_move";
+export const DIP_BOT_MOVE = "dip_bot_move";
+export const FAULT_TOT_MOVE = "fault_tot_move";
+export const FAULT_BOT_MOVE = "fault_bot_move";
+export const PA_MOVE = "pa_move";
+export const TAG_MOVE = "tag_move";
+export const DIP_END = "dip_end";
+export const FAULT_END = "fault_end";
+export const PA_END = "pa_end";
+export const TAG_END = "tag_end";
+export const INIT = "init";

@@ -57,9 +57,10 @@ function drawGrid(container, options = {}) {
     makeXTickAndLine = defaultMakeXTickAndLine,
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
-    maxYLines = 12
+    maxYLines = 12,
+    fontSize = 15
   } = options;
-  const fontSize = 15;
+
   let lastBounds = {};
 
   const xLabels = [];

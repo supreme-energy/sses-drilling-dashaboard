@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="17px" height="17px" viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Map Legend/Well/Completed</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <polygon id="path-1" points="3.75 3.75 11.25 3.75 11.25 11.25 3.75 11.25"></polygon>
+    </defs>
+    <g id="Map-Legend/Well/Completed" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8.5,17 C12.75,17 17,13.1944204 17,8.5 C17,3.80557963 13.1944204,0 8.5,0 C3.80557963,0 0,3.80557963 0,8.5 C0,13.1944204 4.25,17 8.5,17 Z" id="Oval" stroke="#FFFFFF" fill="#666666"></path>
+        <g id="icon/av/stop_24px" transform="translate(1.000000, 1.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g fill-rule="nonzero"></g>
+            <g id="✱-/-Color-/-Icons-/-Selected-/-On-Secondary-/-Active--" mask="url(#mask-2)" fill="#FFFFFF" fill-rule="evenodd">
+                <rect id="Rectangle-3" x="0" y="0" width="15" height="15"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

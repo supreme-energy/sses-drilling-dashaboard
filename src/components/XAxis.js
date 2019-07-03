@@ -28,7 +28,7 @@ export default function XAxis({ container, scale, numberOfTicks, height, ...prop
               x={scale(t)}
               container={container}
               text={t}
-              fontSize={15}
+              fontSize={13}
               color={0x999999}
             />
           ))}

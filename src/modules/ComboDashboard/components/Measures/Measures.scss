@@ -1,0 +1,22 @@
+.measures {
+    height: 100%;
+
+    .kpi {
+      margin-bottom: 8px;
+    }
+
+    .measuresWidgetMenu {
+      position: relative;
+      float: right;
+      bottom: 35px;
+      left: 8px;
+
+      button {
+        padding: 8px;
+      }
+    }
+
+    .bars {
+      background: linear-gradient(to right, #E0DDC4 70%, #E0DDC4 20%, #C6C093 10%);
+    }
+  }
