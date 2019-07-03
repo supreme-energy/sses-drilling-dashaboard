@@ -299,7 +299,7 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
-export function useSurveys(wellId) {
+export function useFetchSurveys(wellId) {
   const [data] = useFetch(
     {
       path: GET_WELL_SURVEYS,
@@ -314,7 +314,7 @@ export function useSurveys(wellId) {
   return data || EMPTY_ARRAY;
 }
 
-export function useFormations(wellId) {
+export function useFetchFormations(wellId) {
   const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
@@ -337,7 +337,7 @@ export function useFormations(wellId) {
   return [data || EMPTY_ARRAY, refresh];
 }
 
-export function useProjections(wellId) {
+export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,

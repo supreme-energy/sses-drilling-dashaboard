@@ -4,9 +4,9 @@ import { createContainer } from "unstated-next";
 import memoize from "react-powertools/memoize";
 
 import {
-  useFormations,
-  useProjections,
-  useSurveys,
+  useFetchFormations,
+  useFetchProjections,
+  useFetchSurveys,
   useWellOverviewKPI,
   useWellPath,
   useAdditionalDataLog
@@ -90,12 +90,12 @@ export function useFilteredWellData() {
   const { wellId } = useWellIdContainer();
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
-  const surveys = useSurveys(wellId);
-  const wellPlan = useWellPath(wellId);
+  const { surveysData } = useSurveysDataContainer();
   const { projectionsData, saveProjections, refreshProjections } = useProjectionsDataContainer();
+  const wellPlan = useWellPath(wellId);
 
   // Calculate some useful information from raw data
-  const annotatedSurveys = annotateSurveys(surveys);
+  const annotatedSurveys = annotateSurveys(surveysData);
   const annotatedProjections = annotateProjections(projectionsData);
 
   // Filter data and memoize
@@ -177,14 +177,33 @@ function useWellId(initialState) {
   return { wellId, setWellId };
 }
 
+function useSurveysData() {
+  const { wellId } = useWellIdContainer();
+  const [surveysData, setSurveys] = useState([]);
+
+  const surveys = useFetchSurveys(wellId);
+
+  useEffect(() => {
+    // TODO Check timestamp or something to determine if we should update with server data
+    if (surveys && surveys.length) {
+      console.log("setting new surveys");
+      setSurveys(surveys);
+    }
+  }, [surveys, setSurveys]);
+
+  return { surveysData, setSurveys };
+}
+
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
   const [projectionsData, setProjections] = useState([]);
 
-  const [projections, refreshProjections, saveProjections] = useProjections(wellId);
+  const [projections, refreshProjections, saveProjections] = useFetchProjections(wellId);
 
   useEffect(() => {
+    // TODO Check timestamp or something to determine if we should update with server data
     if (projections && projections.length) {
+      console.log("setting new projections");
       setProjections(projections);
     }
   }, [projections]);
@@ -192,29 +211,25 @@ function useProjectionsData() {
   return { projectionsData, setProjections, saveProjections, refreshProjections };
 }
 
-function useCustomDataHook() {
-  const { projectionsData, saveProjections } = useProjectionsDataContainer();
-
-  // Filter data here or filter in Container before hand (is there a benefit to one over the other?)
-}
-
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
   const { projectionsData } = useProjectionsDataContainer();
   const [formationsData, setFormations] = useState([]);
 
-  const [serverFormations, refreshFormations] = useFormations(wellId);
+  const [serverFormations, refreshFormations] = useFetchFormations(wellId);
 
   useEffect(() => {
+    // TODO Check timestamp or something to determine if we should update with server data
     if (serverFormations && serverFormations.length) {
+      console.log("setting new formations");
       setFormations(serverFormations);
     }
   }, [serverFormations]);
 
   // If projections or surveys change, recalculate formations
   useEffect(() => {
-    // update formationsData
-    //
+    // TODO: calculate formations from surveys, projections, and formations
+    // https://github.com/supreme-energy/sses-main/blob/master/sses_af/calccurve.c
   }, [projectionsData]);
 
   return { formationsData, setFormations, refreshFormations };
@@ -228,6 +243,7 @@ export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = cr
 export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
   useFormationsData
 );
+export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
 export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
   useProjectionsData
 );
