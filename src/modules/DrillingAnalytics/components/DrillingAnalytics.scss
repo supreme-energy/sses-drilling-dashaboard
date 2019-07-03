@@ -15,10 +15,23 @@
 
         .slidingLabel {
             color: #AFB42B;
-            margin-right: auto;
+        }
+
+        .rotatingLabel {
+            position: relative;
+            color: #827717;
+        }
+
+        .slidingLabel, .rotatingLabel {
+            color: #AFB42B;
             > span {
                 position: relative;
                 bottom: 6px;
+            }
+
+            > div:last-child {
+                font-size: 14px;
+                font-weight: 500;
             }
 
         }
@@ -28,21 +41,11 @@
             font-weight: 500;
         }
 
-        .rotatingLabel {
-            position: relative;
-            left: 42px;
-            color: #827717;
-
-            > span {
-                position: relative;
-                bottom: 6px;
-                text-align: right;
-            }
-        }
-
         .slidingKpis {
             display: flex;
             flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 5px;
         }
     }
 

@@ -24,7 +24,7 @@ function KpiItem({
     <div className={classNames(className, classes.vertical, classes.root, { [classes.small]: small })} style={style}>
       <div className={classes.horizontalTop}>
         {renderValue({ value, format: formatValue, textClass, textStyle })}
-        <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
+        <Typography className={classNames(classes.caption, textClass)} variant="caption">
           {measureUnit}
         </Typography>
       </div>

@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { Route } from "react-router-dom";
 import { Button, Card, CardContent, Typography } from "@material-ui/core";
 
-import VerticalMenu from "../VerticalMenu";
 import { useWells } from "../../api";
 import { BitDepth, Rop } from "../Kpi/KpiItem";
 import WellStatus from "../Kpi/WellStatus";
@@ -46,7 +45,6 @@ export function HeaderToolbar({
           <Rop wellId={well.id} />
           <ServerStatus wellId={well.id} />
           <BitDepth wellId={well.id} />
-          <VerticalMenu selectedMenuItems={[]} menuItemEnum={[]} />
         </div>
       </CardContent>
     </Card>

@@ -7,7 +7,7 @@ import classes from "./ArialCrossSection.scss";
 
 function ArialCrossSection() {
   return (
-    <WidgetCard className={classes.crossSection}>
+    <WidgetCard className={classes.crossSection} hideMenu>
       <Typography variant="subtitle1">Cross Section</Typography>
       {/* <WellMapPlot className={classes.mapPlot} /> */}
     </WidgetCard>

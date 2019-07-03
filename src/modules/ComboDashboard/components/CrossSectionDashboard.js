@@ -267,7 +267,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
-    <WidgetCard className={classes.crossSectionDash}>
+    <WidgetCard className={classes.crossSectionDash} hideMenu>
       <Typography variant="subtitle1">Cross Section</Typography>
       <Suspense fallback={<CircularProgress />}>
         <ParentSize debounceTime={100} className={classes.responsiveWrapper}>

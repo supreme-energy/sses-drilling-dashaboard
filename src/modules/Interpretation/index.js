@@ -6,7 +6,7 @@ import classes from "./Interpretation.scss";
 
 function Interpretation() {
   return (
-    <WidgetCard className={classes.interpretationGraph}>
+    <WidgetCard className={classes.interpretationGraph} hideMenu>
       <Typography variant="subtitle1">Interpretation 1</Typography>
     </WidgetCard>
   );
