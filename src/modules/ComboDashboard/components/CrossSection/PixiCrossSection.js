@@ -46,7 +46,7 @@ export default class PixiCrossSection {
     this.gridUpdate = drawGrid(this.gridLayer, { gutter: gridGutter, maxYLines: this.yTicks });
 
     // The ticker is used for render timing, what's done on each frame, etc
-    this.ticker = PIXI.ticker.shared;
+    this.ticker = PIXI.Ticker.shared;
     this.newProps = true;
     this.ticker.add(() => {
       if (this.newProps) {
