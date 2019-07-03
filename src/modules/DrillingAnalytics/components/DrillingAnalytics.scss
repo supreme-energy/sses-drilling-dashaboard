@@ -51,14 +51,15 @@
     }
 
     .row:first-child, .row:last-child {
-        margin-left: 4px;
-        margin-right: 4px;
+        margin-left: 6px;
+        margin-right: 6px;
     }
 
     .row {
         display: flex;
+
         > div {
-            margin: 3px;
+        margin: 3px;
         }
     }
 

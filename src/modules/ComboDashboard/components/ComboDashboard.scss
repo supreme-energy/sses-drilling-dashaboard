@@ -19,6 +19,7 @@
   display: flex;
   flex: 1;
   margin-right: 10px;
+  margin-left: 3px;
   flex-direction: column;
 }
 
@@ -26,9 +27,15 @@
   display: flex;
   flex: 11;
   flex-direction: column;
+  margin-left: 6px;
+
 
   .row {
     display: flex;
+     
+    > div {
+      margin: 3px;
+    }
   }
 
   .graphRow {
