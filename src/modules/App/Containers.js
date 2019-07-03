@@ -12,6 +12,19 @@ import {
   useAdditionalDataLog
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
+import {
+  DIP_BOT_MOVE,
+  DIP_TOT_MOVE,
+  FAULT_BOT_MOVE,
+  FAULT_TOT_MOVE,
+  FAULT_END,
+  PA_MOVE,
+  PA_END,
+  TAG_MOVE,
+  TAG_END,
+  INIT,
+  DIP_END
+} from "../../constants/interactivePAStatus";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -196,7 +209,16 @@ function useSurveysData() {
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projectionsData, setProjections] = useState([]);
+  const [projectionsData, projectionsDispatch] = useReducer((state, action) => {
+    switch (action.type) {
+      case "serverReset":
+        return action.data;
+      case TAG_MOVE:
+        return state;
+      default:
+        throw new Error(`Unknown action type ${action.type}`);
+    }
+  }, []);
 
   const [projections, refreshProjections, saveProjections] = useFetchProjections(wellId);
 
@@ -204,11 +226,14 @@ function useProjectionsData() {
     // TODO Check timestamp or something to determine if we should update with server data
     if (projections && projections.length) {
       console.log("setting new projections");
-      setProjections(projections);
+      projectionsDispatch({
+        type: "serverReset",
+        data: projections
+      });
     }
   }, [projections]);
 
-  return { projectionsData, setProjections, saveProjections, refreshProjections };
+  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections };
 }
 
 function useFormationsData() {
