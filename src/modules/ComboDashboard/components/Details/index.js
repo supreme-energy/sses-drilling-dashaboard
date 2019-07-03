@@ -25,10 +25,11 @@ function SurveyIcon({ row }) {
 }
 
 export default function DetailsTable(props) {
-  const { selected } = props;
+  // TODO: Use containers once the ghostDiff object is replaced
+  const { ghostDiff } = props;
   // const { surveys, projections } = useFilteredWellData();
   // const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const details = selected && selected.prevOp ? [selected.prevOp, selected.op, selected.nextOp] : [];
+  const details = ghostDiff && ghostDiff.prevOp ? [ghostDiff.prevOp, ghostDiff.op, ghostDiff.nextOp] : [];
 
   return (
     <Table className={classes.table}>

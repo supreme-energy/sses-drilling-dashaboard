@@ -271,7 +271,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   return (
     <WidgetCard className={classes.crossSectionDash}>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
@@ -318,7 +318,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             <Typography variant="subtitle1">Details</Typography>
           </div>
           <Collapse in={expanded} unmountOnExit>
-            <DetailsTable selected={ghostDiff} />
+            <DetailsTable ghostDiff={ghostDiff} />
           </Collapse>
         </div>
       </div>
