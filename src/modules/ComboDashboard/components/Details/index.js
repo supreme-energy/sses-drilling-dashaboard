@@ -6,13 +6,17 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import classNames from "classnames";
 
+import surveySVG from "../../../../assets/survey.svg";
+import lastSurveySVG from "../../../../assets/lastSurvey.svg";
+import bitProjectionSVG from "../../../../assets/bitProjection.svg";
+import projectAheadSVG from "../../../../assets/projectAhead.svg";
 import classes from "./Details.scss";
 
 function SurveyIcon({ row }) {
-  const surveyMarker = <img src="/survey.svg" />;
-  const lastSurveyMarker = <img src="/lastSurvey.svg" />;
-  const bitProjMarker = <img src="/bitProjection.svg" />;
-  const PAMarker = <img src="/projectAhead.svg" />;
+  const surveyMarker = <img src={surveySVG} />;
+  const lastSurveyMarker = <img src={lastSurveySVG} />;
+  const bitProjMarker = <img src={bitProjectionSVG} />;
+  const PAMarker = <img src={projectAheadSVG} />;
   if (row.isProjection) {
     return PAMarker;
   } else if (row.isBitProj) {
