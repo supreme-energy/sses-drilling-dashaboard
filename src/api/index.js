@@ -337,6 +337,18 @@ export function useFetchFormations(wellId) {
   return [data || EMPTY_ARRAY, refresh];
 }
 
+const projectionsTransform = memoizeOne(projections => {
+  return transform(projections).map(p => {
+    return {
+      ...p,
+      isProjection: true,
+      color: 0xee2211,
+      selectedColor: 0xee2211,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
 export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
     {
@@ -346,7 +358,7 @@ export function useFetchProjections(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: projectionsTransform
     }
   );
   const saveProjection = (projectionId, method, fields = {}) => {

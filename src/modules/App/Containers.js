@@ -83,18 +83,6 @@ const annotateSurveys = memoize(fullSurveyList => {
     };
   });
 });
-const annotateProjections = memoize(projections => {
-  return projections.map(p => {
-    return {
-      ...p,
-      isProjection: true,
-      color: 0xee2211,
-      selectedColor: 0xee2211,
-      alpha: 0.5,
-      selectedAlpha: 1
-    };
-  });
-});
 
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData() {
@@ -109,11 +97,10 @@ export function useFilteredWellData() {
 
   // Calculate some useful information from raw data
   const annotatedSurveys = annotateSurveys(surveysData);
-  const annotatedProjections = annotateProjections(projectionsData);
 
   // Filter data and memoize
   const surveysFiltered = filterDataToInterval(annotatedSurveys, sliderInterval);
-  const projectionsFiltered = filterDataToInterval(annotatedProjections, sliderInterval);
+  const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
   const formationsFiltered = formationsData.map(f => {
     return {
       ...f,
