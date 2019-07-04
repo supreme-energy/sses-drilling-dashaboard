@@ -65,13 +65,7 @@ function drawSections(container, higherContainer, props, gutter) {
     setSelectedMd = props.setSelectedMd;
 
     const onSectionClick = section => {
-      const id = section.sectionId;
-      const sid = calcSections.findIndex(s => s.id === id);
-      const startPoint = calcSections[sid];
-
-      if (startPoint) {
-        setSelectedMd(startPoint.md);
-      }
+      setSelectedMd(section.startMD);
     };
 
     const y = height - gutter - buttonHeight;
@@ -94,7 +88,7 @@ function drawSections(container, higherContainer, props, gutter) {
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.sectionId = p1.id;
+      pixi.startMD = p1.md;
 
       const start = p1.vs * view.xScale + view.x;
       const length = (p2.vs - p1.vs) * view.xScale;
