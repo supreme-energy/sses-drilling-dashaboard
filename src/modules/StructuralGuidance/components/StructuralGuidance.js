@@ -1,34 +1,23 @@
 import React from "react";
-import PropTypes from "prop-types";
 import Interpretation from "../../Interpretation";
 import CrossSectionDashboard from "../../ComboDashboard/components/CrossSectionDashboard";
 import CrossSectionDataCharts from "./CrossSectionDataCharts";
 import classes from "./StructuralGuidance.scss";
+import { useWellIdContainer } from "../../App/Containers";
 
-export function StructuralGuidance({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+export function StructuralGuidance() {
+  const { wellId } = useWellIdContainer();
   return (
     <div className={classes.structuralGuidanceContainer}>
       <div className={classes.column}>
         <Interpretation />
       </div>
       <div className={classes.column}>
-        <CrossSectionDashboard wellId={openedWellId} />
+        <CrossSectionDashboard wellId={wellId} />
         <CrossSectionDataCharts />
       </div>
     </div>
   );
 }
-
-StructuralGuidance.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
 
 export default StructuralGuidance;

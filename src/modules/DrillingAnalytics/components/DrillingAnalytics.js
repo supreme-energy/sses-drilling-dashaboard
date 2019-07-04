@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 
 import FootageZoneStats from "./FootageZoneStats";
@@ -8,27 +7,24 @@ import StandAnalysis from "./StandAnalysis";
 import SlideAnalysis from "./SlideAnalysis";
 import VerticalCrossSection from "./VerticalCrossSection";
 import PerformanceAnalysis from "./PerformanceAnalysis";
-import { useDrillPhaseContainer } from "../../App/Containers";
+import { useDrillPhaseContainer, useWellIdContainer } from "../../App/Containers";
 import { LATERAL, CURVE, VERTICAL } from "../../../constants/wellSections";
 
 import classes from "./DrillingAnalytics.scss";
 
-export function DrillingAnalytics({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+export function DrillingAnalytics() {
   const {
     drillPhaseObj: { phase }
   } = useDrillPhaseContainer();
+  const { wellId } = useWellIdContainer();
 
   const drillPhaseType = phase === LATERAL || phase === CURVE ? phase : VERTICAL;
 
   return (
     <div className={classes.drillingAnalyticsContainer}>
       <div className={classes.row}>
-        <PhaseOverview wellId={openedWellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
-        <StandAnalysis wellId={openedWellId} drillPhase={phase} />
+        <PhaseOverview wellId={wellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
+        <StandAnalysis wellId={wellId} drillPhase={phase} />
         <SlideAnalysis drillPhase={drillPhaseType} />
       </div>
       <div className={classNames(classes.row, classes.extendRow)}>
@@ -39,13 +35,5 @@ export function DrillingAnalytics({
     </div>
   );
 }
-
-DrillingAnalytics.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
 
 export default DrillingAnalytics;

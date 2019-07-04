@@ -6,14 +6,12 @@ import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
 import classes from "./TimeSliderToolbar.scss";
+import { useWellIdContainer } from "../App/Containers";
 
 const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
 
-export function TimeSliderToolbar({
-  match: {
-    params: { wellId }
-  }
-}) {
+export function TimeSliderToolbar() {
+  const { wellId } = useWellIdContainer();
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
 
   return (
@@ -32,11 +30,7 @@ export function TimeSliderToolbar({
 }
 
 TimeSliderToolbar.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
+
 };
 
 export function TimeSliderToolbarWrapper({ children }) {

@@ -1,5 +1,4 @@
 import React, { Suspense, lazy } from "react";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 import Progress from "@material-ui/core/CircularProgress";
 
@@ -10,14 +9,12 @@ import ToolFace from "./ToolFace";
 import ArialCrossSection from "./ArialCrossSection";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
+import { useWellIdContainer } from "../../App/Containers";
 
 const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measures"));
 
-function ComboDashboard({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+function ComboDashboard() {
+  const { wellId } = useWellIdContainer();
   return (
     <div className={classes.comboDashboardWrapper}>
       <Suspense fallback={<Progress />}>
@@ -30,23 +27,15 @@ function ComboDashboard({
           </div>
           <div className={classNames(classes.row, classes.graphRow)}>
             <Interpretation />
-            <CrossSectionDashboard wellId={openedWellId} />
+            <CrossSectionDashboard wellId={wellId} />
           </div>
         </div>
         <div className={classes.kpiColumn}>
-          <Measures wellId={openedWellId} />
+          <Measures wellId={wellId} />
         </div>
       </Suspense>
     </div>
   );
 }
-
-ComboDashboard.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
 
 export default ComboDashboard;

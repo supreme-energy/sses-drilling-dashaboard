@@ -12,14 +12,10 @@ import WellPathStatus from "../Kpi/WellPathStatus";
 import TargetAccuracy from "../Kpi/TargetAccuracy";
 import { actions } from "../WellExplorer/store";
 import classes from "./HeaderToolbar.scss";
+import { useWellIdContainer } from "../App/Containers";
 
-export function HeaderToolbar({
-  match: {
-    params: { wellId }
-  },
-  changeSelectedWell,
-  history
-}) {
+export function HeaderToolbar({ changeSelectedWell, history }) {
+  const { wellId } = useWellIdContainer();
   // Get currently opened well
   const [, wellsById] = useWells();
   const well = wellsById[wellId] || {};
@@ -52,11 +48,6 @@ export function HeaderToolbar({
 }
 
 HeaderToolbar.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  }),
   changeSelectedWell: PropTypes.func,
   history: PropTypes.shape({
     push: PropTypes.func
