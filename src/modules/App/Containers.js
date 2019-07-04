@@ -12,19 +12,6 @@ import {
   useAdditionalDataLog
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
-import {
-  DIP_BOT_MOVE,
-  DIP_TOT_MOVE,
-  FAULT_BOT_MOVE,
-  FAULT_TOT_MOVE,
-  FAULT_END,
-  PA_MOVE,
-  PA_END,
-  TAG_MOVE,
-  TAG_END,
-  INIT,
-  DIP_END
-} from "../../constants/interactivePAStatus";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -177,8 +164,6 @@ function useProjectionsData() {
     switch (action.type) {
       case "serverReset":
         return action.data;
-      case TAG_MOVE:
-        return state;
       default:
         throw new Error(`Unknown action type ${action.type}`);
     }
