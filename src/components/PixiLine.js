@@ -52,5 +52,6 @@ PixiLine.propTypes = {
 PixiLine.defaultProps = {
   nativeLines: true,
   lineWidth: 1,
-  view: { xScale: 1, yScale: 1 }
+  view: { xScale: 1, yScale: 1 },
+  mapData: d => d
 };

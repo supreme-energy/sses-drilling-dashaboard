@@ -3,7 +3,7 @@ import useRef from "react-powertools/hooks/useRef";
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 
-function PixiText({ container, fontSize, color, x, y, text, anchor, updateTransform }, ref) {
+const PixiText = forwardRef(({ container, fontSize, color, x, y, text, anchor, updateTransform }, ref) => {
   const {
     current: { pixiText, initialUpdateTransform }
   } = useRef(() => {
@@ -49,13 +49,12 @@ function PixiText({ container, fontSize, color, x, y, text, anchor, updateTransf
   }));
 
   return null;
-}
+});
 
-const ForwardedPixiText = forwardRef(PixiText);
-ForwardedPixiText.defaultProps = {
+PixiText.defaultProps = {
   x: 0,
   y: 0,
   anchor: [0, 0],
   updateTransform: frozenScaleTransform
 };
-export default ForwardedPixiText;
+export default PixiText;
