@@ -273,7 +273,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
 
   const [expanded, setExpanded] = useState(false);
   return (
-    <WidgetCard className={classes.crossSectionDash}>
+    <WidgetCard className={classes.crossSectionDash} hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>
