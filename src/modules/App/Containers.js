@@ -64,26 +64,6 @@ function useAppStateData() {
   return { requestId, updateRequestId, refreshRequestId };
 }
 
-const annotateSurveys = memoize(fullSurveyList => {
-  // Bit projection is not always in list of surveys
-  const hasBitProj = fullSurveyList.some(s => s.plan === 1);
-  return fullSurveyList.map((s, i, l) => {
-    // If included, bit projection is always the last item and the last survey is second to last
-    const isBitProj = i === l.length - 1 && hasBitProj;
-    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
-    return {
-      ...s,
-      isBitProj: isBitProj,
-      isSurvey: !isBitProj,
-      isLastSurvey: isLastSurvey,
-      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
-      alpha: 0.5,
-      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
-      selectedAlpha: 1
-    };
-  });
-});
-
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
@@ -95,11 +75,8 @@ export function useFilteredWellData() {
   const { projectionsData, saveProjections, refreshProjections } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
-  // Calculate some useful information from raw data
-  const annotatedSurveys = annotateSurveys(surveysData);
-
   // Filter data and memoize
-  const surveysFiltered = filterDataToInterval(annotatedSurveys, sliderInterval);
+  const surveysFiltered = filterDataToInterval(surveysData, sliderInterval);
   const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
   const formationsFiltered = formationsData.map(f => {
     return {

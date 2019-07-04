@@ -299,6 +299,26 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
+const surveysTransform = memoizeOne(data => {
+  // Bit projection is not always in list of surveys
+  const surveys = transform(data);
+  const hasBitProj = surveys.some(s => s.plan === 1);
+  return surveys.map((s, i, l) => {
+    // If included, bit projection is always the last item and the last survey is second to last
+    const isBitProj = i === l.length - 1 && hasBitProj;
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    return {
+      ...s,
+      isBitProj: isBitProj,
+      isSurvey: !isBitProj,
+      isLastSurvey: isLastSurvey,
+      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
+      alpha: 0.5,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
+      selectedAlpha: 1
+    };
+  });
+});
 export function useFetchSurveys(wellId) {
   const [data] = useFetch(
     {
@@ -308,7 +328,7 @@ export function useFetchSurveys(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: surveysTransform
     }
   );
   return data || EMPTY_ARRAY;
