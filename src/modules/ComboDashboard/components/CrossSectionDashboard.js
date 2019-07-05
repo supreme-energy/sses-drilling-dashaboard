@@ -18,7 +18,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const {
     wellPlan,
     selectedSections,
-    setSelectedSections,
+    setSelectedMd,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
@@ -61,7 +61,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
                   calculatedFormations={calculatedFormations}
                   calcSections={calcSections}
                   selectedSections={selectedSections}
-                  setSelectedSections={setSelectedSections}
+                  setSelectedMd={setSelectedMd}
                   ghostDiffDispatch={ghostDiffDispatch}
                 />
               )}

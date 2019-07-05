@@ -45,23 +45,28 @@ function drawSections(container, higherContainer, props, gutter) {
   labelText.rotation = Math.PI / 2;
   labelText.position.y = labelHeight / 2;
 
-  const addSection = function() {
+  const addSection = function({ onClick }) {
     const section = new PIXI.Graphics();
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
-    section.on("click", function() {
-      props.setSelectedSections({
-        type: "toggle",
-        id: this.sectionId
-      });
-    });
+    section.on("click", () => onClick(section));
     container.addChild(section);
     return section;
   };
 
+  let calcSections = props.calcSections;
+  let setSelectedMd = props.setSelectedMd;
+
   return function update(props) {
     if (!container.transform) return;
-    const { width, height, view, selectedSections, calcSections } = props;
+    const { width, height, view, selectedSections } = props;
+
+    calcSections = props.calcSections;
+    setSelectedMd = props.setSelectedMd;
+
+    const onSectionClick = section => {
+      setSelectedMd(section.startMD);
+    };
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
@@ -73,7 +78,7 @@ function drawSections(container, higherContainer, props, gutter) {
     // Clear out all previous drawn sections
     pixiList.forEach(p => p.clear());
     for (let i = 1; i <= calcSections.length - 1; i++) {
-      if (!pixiList[i]) pixiList[i] = addSection();
+      if (!pixiList[i]) pixiList[i] = addSection({ onClick: onSectionClick });
       const p1 = calcSections[i - 1];
       const p2 = calcSections[i];
       const isSelected = selectedSections[p2.id];
@@ -81,7 +86,7 @@ function drawSections(container, higherContainer, props, gutter) {
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.sectionId = p2.id;
+      pixi.startMD = p1.md;
 
       const start = p1.vs * view.xScale + view.x;
       const length = (p2.vs - p1.vs) * view.xScale;

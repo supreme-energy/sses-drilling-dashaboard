@@ -225,26 +225,23 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
   useProjectionsData
 );
 
-function selectionReducer(state, action) {
-  switch (action.type) {
-    // A planned feature is multiple selection, but only single is supported now
-    case "toggle":
-      return {
-        [action.id]: !state[action.id]
-      };
-    case "clear":
-      return {};
-    default:
-      throw new Error(`Unknown selected section reducer action type ${action.type}`);
-  }
-}
-
 export function useComboData(wellId) {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+
+  const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
+
+  const selectedSections = useMemo(
+    function getSelectedSections() {
+      const selected = rawSections.find((s, index) => {
+        return index > 0 && rawSections[index - 1].md <= selectedMd && s.md > selectedMd;
+      });
+      return selected ? { [selected.id]: true } : {};
+    },
+    [selectedMd, rawSections]
+  );
 
   const prevStatus = usePrevious(ghostDiff.status);
   useEffect(() => {
@@ -343,10 +340,40 @@ export function useComboData(wellId) {
   return {
     wellPlan,
     selectedSections,
-    setSelectedSections,
+    setSelectedMd,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
     calculatedFormations
   };
 }
+
+const initialState = {
+  selectedMd: null
+};
+
+function comboStoreReducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_MD": {
+      if (state.selectedMd === action.md) {
+        const { selectedMd, ...rest } = state;
+        return rest;
+      } else {
+        return {
+          ...state,
+          selectedMd: action.md
+        };
+      }
+    }
+  }
+}
+
+function useUseComboStore() {
+  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
+
+  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
+
+  return [state, dispatch, { setSelectedMd }];
+}
+
+export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
