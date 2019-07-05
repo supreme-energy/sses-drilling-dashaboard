@@ -6,14 +6,13 @@ import PixiLine from "../../../components/PixiLine";
 import PixiLabel from "../../../components/PixiLabel";
 import { twoDecimals } from "../../../constants/format";
 import { useInterpretationRenderer } from ".";
+import PixiContainer from "../../../components/PixiContainer";
+import useRef from "react-powertools/hooks/useRef";
+import useDraggable from "../../../hooks/useDraggable";
 
-const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth, refresh }) => {
-  const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
-  const startLineData = useMemo(() => [[0, segment.startdepth], [totalWidth, segment.startdepth]], [
-    segment,
-    totalWidth
-  ]);
-  const endLineData = useMemo(() => [[0, segment.enddepth], [totalWidth, segment.enddepth]], [segment, totalWidth]);
+function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, segmentHeight }) {
+  const endLineData = useMemo(() => [[0, segmentHeight], [totalWidth, segmentHeight]], [segmentHeight, totalWidth]);
+  const startLineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => {
@@ -29,18 +28,34 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
     [labelWidth, labelHeight, refresh]
   );
 
+  const selectionContainerRef = useRef(null);
+
+  const onDrag = useCallback(mousePosition => {
+    console.log("on drag", mousePosition);
+  }, []);
+
+  useDraggable(
+    selectionContainerRef.current && selectionContainerRef.current.container,
+    onDrag,
+    totalWidth,
+    segmentHeight
+  );
+
   return (
-    <React.Fragment>
-      {selected && (
+    <PixiContainer
+      ref={selectionContainerRef}
+      y={segment.startdepth}
+      container={container}
+      updateTransform={frozenScaleTransform}
+      child={container => (
         <React.Fragment>
           <PixiLabel
             sizeChanged={onSizeChanged}
             container={container}
             text={twoDecimals(segment.enddepth)}
             x={-labelWidth}
-            y={view.yScale * segment.enddepth - labelHeight / 2}
-            updateTransform={frozenScaleTransform}
-            zIndex={zIndex + 1}
+            y={segmentHeight - labelHeight / 2}
+            zIndex={zIndex}
             textProps={{ fontSize: 12, color: 0xffffff }}
             backgroundProps={{ backgroundColor: 0xe80a23, radius: 5 }}
           />
@@ -48,12 +63,33 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
           <PixiLine container={container} data={endLineData} color={0xe80a23} />
         </React.Fragment>
       )}
+    />
+  );
+}
+
+const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth, refresh }) => {
+  const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
+
+  const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
+
+  return (
+    <React.Fragment>
+      {selected && (
+        <SegmentSelection
+          segment={segment}
+          totalWidth={totalWidth}
+          container={container}
+          refresh={refresh}
+          zIndex={zIndex + 1}
+          segmentHeight={segmentHeight}
+        />
+      )}
       <PixiRectangle
         onClick={onClick}
         zIndex={zIndex}
         width={10}
         updateTransform={frozenScaleTransform}
-        height={view.yScale * (segment.enddepth - segment.startdepth)}
+        height={segmentHeight}
         y={segment.startdepth}
         radius={5}
         backgroundColor={selected ? 0xe80a23 : 0xd2d2d2}
