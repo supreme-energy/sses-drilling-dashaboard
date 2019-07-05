@@ -85,7 +85,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
             <Typography variant="subtitle1">Details</Typography>
           </div>
           <Collapse in={expanded} unmountOnExit>
-            <DetailsTable ghostDiff={ghostDiff} />
+            <DetailsTable ghostDiff={ghostDiff} calcSections={calcSections} selectedSections={selectedSections} />
           </Collapse>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -30,10 +30,11 @@ function SurveyIcon({ row }) {
 
 export default function DetailsTable(props) {
   // TODO: Use containers once the ghostDiff object is replaced
-  const { ghostDiff } = props;
-  // const { surveys, projections } = useFilteredWellData();
-  // const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const details = ghostDiff && ghostDiff.prevOp ? [ghostDiff.prevOp, ghostDiff.op, ghostDiff.nextOp] : [];
+  const { calcSections, selectedSections } = props;
+  const selectedIndex = useMemo(() => {
+    return calcSections.findIndex(s => selectedSections[s.id]);
+  }, [calcSections, selectedSections]);
+  const details = calcSections.slice(selectedIndex - 1, selectedIndex + 2);
 
   return (
     <Table className={classes.table}>
