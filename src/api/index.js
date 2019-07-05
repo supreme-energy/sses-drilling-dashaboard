@@ -299,6 +299,23 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
+export function useWellsMapLength(wellId, wellPositions) {
+  const [wellInfo] = useWellInfo(wellId);
+
+  return useMemo(() => {
+    function addMapPosition(p) {
+      return {
+        ...p,
+        mapPosition: {
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
+        }
+      };
+    }
+    return wellInfo.wellSurfaceLocationLocal ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+  }, [wellPositions, wellInfo]);
+}
+
 export function useSurveys(wellId) {
   const [data] = useFetch(
     {
