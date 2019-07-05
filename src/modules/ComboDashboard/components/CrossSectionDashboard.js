@@ -5,7 +5,7 @@ import React, { lazy, Suspense, useCallback, useReducer, useState } from "react"
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
-import { useComboData } from "../../App/Containers";
+import { useCrossSectionContainer, useCrossSectionData } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
@@ -14,7 +14,7 @@ import DetailsTable from "./Details";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
-export const CrossSectionDashboard = ({ wellId }) => {
+export const CrossSectionDashboard = () => {
   const {
     wellPlan,
     selectedSections,
@@ -23,7 +23,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
     ghostDiffDispatch,
     calcSections,
     calculatedFormations
-  } = useComboData(wellId);
+  } = useCrossSectionContainer();
 
   // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
   const [view, setView] = useReducer(

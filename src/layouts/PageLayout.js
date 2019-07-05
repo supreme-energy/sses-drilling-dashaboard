@@ -14,7 +14,8 @@ import {
   ProjectionsProvider,
   FormationsProvider,
   SurveysProvider,
-  ComboContainerProvider
+  ComboContainerProvider,
+  CrossSectionProvider
 } from "../modules/App/Containers";
 
 const PageTabs = ({
@@ -55,19 +56,21 @@ export const PageLayout = ({ children, history }) => {
           <ProjectionsProvider>
             <FormationsProvider>
               <ComboContainerProvider>
-                <div className={classes.container}>
-                  <AppBar className={classes.appBar} color="inherit">
-                    <div className={classes.header}>
-                      <div className={classes.logo}>
-                        <img src="/sses-logo.svg" />
+                <CrossSectionProvider>
+                  <div className={classes.container}>
+                    <AppBar className={classes.appBar} color="inherit">
+                      <div className={classes.header}>
+                        <div className={classes.logo}>
+                          <img src="/sses-logo.svg" />
+                        </div>
+                        <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                        <span />
                       </div>
-                      <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-                      <span />
-                    </div>
-                  </AppBar>
+                    </AppBar>
 
-                  <div className={classes.viewport}>{children}</div>
-                </div>
+                    <div className={classes.viewport}>{children}</div>
+                  </div>
+                </CrossSectionProvider>
               </ComboContainerProvider>
             </FormationsProvider>
           </ProjectionsProvider>

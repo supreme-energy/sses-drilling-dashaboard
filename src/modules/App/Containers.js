@@ -87,16 +87,6 @@ export function useFilteredWellData() {
     [saveProjections, refreshProjections, refreshFormations]
   );
 
-  // TODO: Remove once formations are stabilized again
-  useEffect(() => {
-    const lens = formationsData.map(l => l.data.length);
-    if (lens.length && Math.max(...lens) !== Math.min(...lens)) {
-      console.warn("Data arrays are not all the same!");
-      console.warn(lens);
-      console.warn(formationsData);
-    }
-  }, [formationsData]);
-
   return {
     surveys: surveysFiltered,
     wellPlan,
@@ -212,21 +202,8 @@ function useFormationsData() {
   return { formationsData, setFormations, refreshFormations };
 }
 
-// Create containers
-export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
-export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
-export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
-export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
-export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
-  useFormationsData
-);
-export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
-export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
-  useProjectionsData
-);
-
-export function useComboData(wellId) {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
+export function useCrossSectionData() {
+  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
 
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
@@ -378,4 +355,20 @@ function useUseComboStore() {
   return [state, dispatch, { setSelectedMd }];
 }
 
+// Create containers
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
+export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
+export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
+export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
+export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
+// TODO: Reduce number of providers (formations, surveys, projections may not be needed)
+export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
+  useFormationsData
+);
+export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
+export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
+  useProjectionsData
+);
+export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
+  useCrossSectionData
+);
