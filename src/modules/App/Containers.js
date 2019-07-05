@@ -356,8 +356,10 @@ function comboStoreReducer(state, action) {
   switch (action.type) {
     case "TOGGLE_MD": {
       if (state.selectedMd === action.md) {
-        const { selectedMd, ...rest } = state;
-        return rest;
+        return {
+          ...state,
+          selectedMd: null
+        };
       } else {
         return {
           ...state,
