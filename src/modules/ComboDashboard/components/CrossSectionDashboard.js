@@ -17,7 +17,6 @@ const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ ".
 export const CrossSectionDashboard = ({ wellId }) => {
   const {
     wellPlan,
-    firstProjectionIdx,
     selectedSections,
     setSelectedSections,
     ghostDiff,
@@ -63,7 +62,6 @@ export const CrossSectionDashboard = ({ wellId }) => {
                   calcSections={calcSections}
                   selectedSections={selectedSections}
                   setSelectedSections={setSelectedSections}
-                  firstProjectionIdx={firstProjectionIdx}
                   ghostDiffDispatch={ghostDiffDispatch}
                 />
               )}

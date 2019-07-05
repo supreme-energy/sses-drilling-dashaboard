@@ -242,7 +242,6 @@ function selectionReducer(state, action) {
 export function useComboData(wellId) {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
-  const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
@@ -343,7 +342,6 @@ export function useComboData(wellId) {
   }, [selectedSections, rawSections]);
   return {
     wellPlan,
-    firstProjectionIdx,
     selectedSections,
     setSelectedSections,
     ghostDiff,
