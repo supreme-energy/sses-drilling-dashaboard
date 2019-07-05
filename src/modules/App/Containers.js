@@ -342,10 +342,7 @@ export function useComboData(wellId) {
     }
   }, [selectedSections, rawSections]);
   return {
-    surveys,
     wellPlan,
-    formations,
-    projections,
     firstProjectionIdx,
     selectedSections,
     setSelectedSections,

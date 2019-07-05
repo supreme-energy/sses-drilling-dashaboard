@@ -16,10 +16,7 @@ const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ ".
 
 export const CrossSectionDashboard = ({ wellId }) => {
   const {
-    surveys,
     wellPlan,
-    formations,
-    projections,
     firstProjectionIdx,
     selectedSections,
     setSelectedSections,
@@ -62,10 +59,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
                   updateView={setView}
                   scale={scale}
                   wellPlan={wellPlan}
-                  surveys={surveys}
-                  formations={formations}
                   calculatedFormations={calculatedFormations}
-                  projections={projections}
                   calcSections={calcSections}
                   selectedSections={selectedSections}
                   setSelectedSections={setSelectedSections}
