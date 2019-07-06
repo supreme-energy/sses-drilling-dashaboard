@@ -11,6 +11,7 @@ import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectAheadSVG from "../../../../assets/projectAhead.svg";
 import classes from "./Details.scss";
+import { useCrossSectionContainer } from "../../../App/Containers";
 
 function SurveyIcon({ row }) {
   const surveyMarker = <img src={surveySVG} />;
@@ -28,9 +29,9 @@ function SurveyIcon({ row }) {
   }
 }
 
-export default function DetailsTable(props) {
-  // TODO: Use containers once the ghostDiff object is replaced
-  const { calcSections, selectedSections } = props;
+export default function DetailsTable() {
+  const { selectedSections, calcSections } = useCrossSectionContainer();
+
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);

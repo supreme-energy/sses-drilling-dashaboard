@@ -1,72 +1,26 @@
-import { CircularProgress, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import PropTypes from "prop-types";
-import React, { lazy, Suspense, useCallback, useReducer, useState } from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
-import { useCrossSectionContainer, useCrossSectionData } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
-
-const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
+import CrossSection from "./CrossSection/index";
 
 export const CrossSectionDashboard = () => {
-  const {
-    wellPlan,
-    selectedSections,
-    setSelectedMd,
-    ghostDiff,
-    ghostDiffDispatch,
-    calcSections,
-    calculatedFormations
-  } = useCrossSectionContainer();
-
-  // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
-  const [view, setView] = useReducer(
-    function(state, arg) {
-      if (typeof arg === "function") {
-        return { ...state, ...arg(state) };
-      }
-      return { ...state, ...arg };
-    },
-    {
-      x: -844,
-      y: -16700,
-      xScale: 2.14,
-      yScale: 2.14
-    }
-  );
-  const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
-
   const [expanded, setExpanded] = useState(false);
   return (
     <WidgetCard className={classes.crossSectionDash} hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>
-          <Suspense fallback={<CircularProgress />}>
-            <ParentSize debounceTime={100}>
-              {({ width, height }) => (
-                <CrossSection
-                  width={width}
-                  height={height}
-                  view={view}
-                  updateView={setView}
-                  scale={scale}
-                  wellPlan={wellPlan}
-                  calculatedFormations={calculatedFormations}
-                  calcSections={calcSections}
-                  selectedSections={selectedSections}
-                  setSelectedMd={setSelectedMd}
-                  ghostDiffDispatch={ghostDiffDispatch}
-                />
-              )}
-            </ParentSize>
-          </Suspense>
+          <ParentSize debounceTime={100}>
+            {({ width, height }) => <CrossSection width={width} height={height} />}
+          </ParentSize>
         </div>
         <div className={classes.cardLine} />
         <div className={classNames(classes.column, classes.shrink)}>
@@ -85,15 +39,12 @@ export const CrossSectionDashboard = () => {
             <Typography variant="subtitle1">Details</Typography>
           </div>
           <Collapse in={expanded} unmountOnExit>
-            <DetailsTable ghostDiff={ghostDiff} calcSections={calcSections} selectedSections={selectedSections} />
+            <DetailsTable />
           </Collapse>
         </div>
       </div>
     </WidgetCard>
   );
-};
-CrossSectionDashboard.propTypes = {
-  wellId: PropTypes.string.isRequired
 };
 
 export default CrossSectionDashboard;
