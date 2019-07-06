@@ -51,12 +51,12 @@ function DrillPhase({ phase }) {
   );
 }
 
-const DrillPhaseViewer = React.memo(({ className, expanded }) => {
+const DrillPhaseViewer = React.memo(({ className, wellId, expanded }) => {
   // Get styles
   const classes = styles();
 
   // Fetch data
-  const drillPhases = useWellSections();
+  const drillPhases = useWellSections(wellId);
 
   // Import shared state
   const { drillPhaseObj, setDrillPhase } = useDrillPhaseContainer();
@@ -124,6 +124,7 @@ const DrillPhaseViewer = React.memo(({ className, expanded }) => {
 
 DrillPhaseViewer.propTypes = {
   className: PropTypes.string,
+  wellId: PropTypes.string,
   expanded: PropTypes.bool
 };
 

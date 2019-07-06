@@ -23,7 +23,7 @@ function ComboDashboard({
       <Suspense fallback={<Progress />}>
         <div className={classes.kpiRows}>
           <div className={classes.row}>
-            <DrillPhaseKPI className={classes.drillPhaseKpi} />
+            <DrillPhaseKPI className={classes.drillPhaseKpi} wellId={openedWellId} />
             <ToolFace />
             <WellOperation />
             <AerialCrossSection wellId={openedWellId} />

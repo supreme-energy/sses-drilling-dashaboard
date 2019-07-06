@@ -8,8 +8,8 @@ import KpiItem from "../../Kpi/KpiItem";
 import classes from "./DrillingAnalytics.scss";
 
 export const formatStand = value => `#${value}`;
-export function StandAnalysis({ drillPhase }) {
-  const { data } = useWellOverviewKPI();
+export function StandAnalysis({ wellId, drillPhase }) {
+  const { data } = useWellOverviewKPI(wellId);
   const filteredData = data.filter(d => d.type === drillPhase);
   const phaseData = filteredData[0] || {};
 
@@ -26,6 +26,7 @@ export function StandAnalysis({ drillPhase }) {
 }
 
 StandAnalysis.propTypes = {
+  wellId: PropTypes.string,
   drillPhase: PropTypes.string
 };
 

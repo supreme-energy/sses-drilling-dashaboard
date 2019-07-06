@@ -81,7 +81,7 @@ function AerialCrossSection({ wellId }) {
   const xValue = rotate ? yMin : xMin;
   const yValue = rotate ? xMin : yMin;
 
-  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(wellId);
 
   const surveysBySection = useMemo(() => getSurveyBySection(surveyData, wellOverviewBySegment), [
     wellOverviewBySegment,

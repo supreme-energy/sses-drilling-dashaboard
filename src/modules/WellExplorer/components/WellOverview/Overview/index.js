@@ -5,14 +5,14 @@ import KPIGraphic from "../KPIGraphic";
 import DrillPhaseKPI from "../../../../Kpi/DrillPhaseKPI";
 import WellMapPlot from "../WellMapPlot";
 
-export default function() {
+export default function(wellId) {
   return (
     <div className={classes.container}>
       <div className={classes.left}>
-        <KPIGraphic className={classes.KPIGraphic} child={<Rop className={classes.ropChart} />} />
+        <KPIGraphic className={classes.KPIGraphic} wellId={wellId} child={<Rop className={classes.ropChart} />} />
       </div>
       <div className={classes.right}>
-        <DrillPhaseKPI />
+        <DrillPhaseKPI wellId={wellId} />
         <div className={classes.toolFace} />
         <WellMapPlot className={classes.mapPlot} />
       </div>

@@ -27,9 +27,9 @@ export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
+export const GET_KPI = "/kpis.php";
 
 // mock data
-const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
@@ -382,14 +382,15 @@ export function useProjections(wellId) {
   return [data || EMPTY_ARRAY, refresh, saveProjection];
 }
 
-export function useWellOverviewKPI() {
+export function useWellOverviewKPI(wellId) {
   let [data] = useFetch(
     {
-      path: GET_MOCK_OVERVIEW_KPI
+      path: GET_KPI,
+      query: {
+        seldbname: wellId
+      }
     },
-
     {
-      id: "mock",
       transform: data => {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
