@@ -3,10 +3,10 @@ import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms"
 
 /* eslint new-cap: 0 */
 export function drawSurveys(container) {
-  const surveyMarker = new PIXI.Texture.fromImage("/survey.svg");
-  const lastMarker = new PIXI.Texture.fromImage("/lastSurvey.svg");
-  const bitProjection = new PIXI.Texture.fromImage("/bitProjection.svg");
-  const paMarker = new PIXI.Texture.fromImage("/projectAhead.svg");
+  const surveyMarker = PIXI.Texture.from("/survey.svg");
+  const lastMarker = PIXI.Texture.from("/lastSurvey.svg");
+  const bitProjection = PIXI.Texture.from("/bitProjection.svg");
+  const paMarker = PIXI.Texture.from("/projectAhead.svg");
   const surveyGraphics = [];
 
   const widePath = container.addChild(new PIXI.Graphics());

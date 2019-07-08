@@ -10,16 +10,24 @@ import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
 import PixiLine from "../../../components/PixiLine";
 import LogDataLine from "./LogDataLine";
+import Segments from "./Segments";
+import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
+import { createContainer } from "unstated-next";
 
-const gridGutter = 50;
+const gridGutter = 60;
 
 const mapControlLog = d => [d.value, d.md];
 
-export default function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId, selectedWellLog }) {
+function createGridYAxis(...args) {
+  const [line, label] = defaultMakeYTickAndLine(...args);
+  label.x = 15;
+  return [line, label];
+}
+
+function useInterpretationWebglRenderer() {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
-  const viewportContainer = useRef(null);
 
   const [view, updateView] = useState({
     x: gridGutter,
@@ -28,13 +36,32 @@ export default function InterpretationChart({ className, controlLogs, logData, g
     yScale: 1
   });
 
+  return { stage, refresh, renderer, view, updateView, canvasRef, size: { width, height } };
+}
+
+export const { Provider: WebglRendererProvider, useContainer: useInterpretationRenderer } = createContainer(
+  useInterpretationWebglRenderer
+);
+
+function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId, selectedWellLog }) {
+  const {
+    stage,
+    refresh,
+    renderer,
+    canvasRef,
+    size: { width, height },
+    view,
+    updateView
+  } = useInterpretationRenderer();
+  const viewportContainer = useRef(null);
+
   useEffect(
     function initScale() {
       const minDepth = Math.min(...controlLogs.filter(l => l.data.length).map(l => l.data[0].md));
 
       updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
     },
-    [height, controlLogs]
+    [height, controlLogs, updateView]
   );
 
   const viewport = useViewport({
@@ -49,15 +76,6 @@ export default function InterpretationChart({ className, controlLogs, logData, g
   });
 
   useEffect(
-    function moveToCurrentLog() {
-      if (selectedWellLog) {
-        updateView(view => ({ ...view, y: -selectedWellLog.startdepth * view.yScale }));
-      }
-    },
-    [selectedWellLog]
-  );
-
-  useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
@@ -68,6 +86,7 @@ export default function InterpretationChart({ className, controlLogs, logData, g
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
+
       {controlLogs.map(cl => (
         <PixiLine key={cl.id} container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
       ))}
@@ -82,7 +101,16 @@ export default function InterpretationChart({ className, controlLogs, logData, g
           selected={selectedWellLog && log.id === selectedWellLog.id}
         />
       ))}
-      <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} showXAxis={false} />
+      <Grid
+        container={viewport}
+        view={view}
+        width={width}
+        height={height}
+        gridGutter={gridGutter}
+        showXAxis={false}
+        makeYTickAndLine={createGridYAxis}
+      />
+      <Segments container={viewport} chartWidth={width} segmentsData={logList} selectedWellLog={selectedWellLog} />
     </div>
   );
 }
@@ -91,3 +119,9 @@ InterpretationChart.defaultProps = {
   controlLogs: [],
   logData: null
 };
+
+export default props => (
+  <WebglRendererProvider>
+    <InterpretationChart {...props} />
+  </WebglRendererProvider>
+);

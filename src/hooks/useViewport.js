@@ -16,7 +16,11 @@ export default function useViewport({
   isXScalingValid
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
-  const viewportRef = useRef(() => new PIXI.Container());
+  const viewportRef = useRef(() => {
+    const viewportContainer = new PIXI.Container();
+    viewportContainer.sortableChildren = true;
+    return viewportContainer;
+  });
 
   const onWheel = useCallback(
     e => {
