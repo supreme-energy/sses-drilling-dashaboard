@@ -22,22 +22,11 @@ import {
   INIT,
   DIP_END
 } from "../../../constants/interactivePAStatus";
+import { useComboContainer } from "../containers/store";
+import classNames from "classnames";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
-function selectionReducer(state, action) {
-  switch (action.type) {
-    // A planned feature is multiple selection, but only single is supported now
-    case "toggle":
-      return {
-        [action.id]: !state[action.id]
-      };
-    case "clear":
-      return {};
-    default:
-      throw new Error(`Unknown selected section reducer action type ${action.type}`);
-  }
-}
 function PADeltaInit(options = {}) {
   const section = options.section || {};
   return {
@@ -146,13 +135,24 @@ function PADeltaReducer(state, action) {
   }
 }
 
-export const CrossSectionDashboard = ({ wellId }) => {
+export const CrossSectionDashboard = ({ wellId, className }) => {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [selectedSections, setSelectedSections] = useReducer(selectionReducer, []);
+
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
+  const [{ selectedMd }, , { selectMd }] = useComboContainer();
+  const selectedSections = useMemo(
+    function getSelectedSections() {
+      const selected = rawSections.find((s, index) => {
+        return index > 0 && rawSections[index - 1].md <= selectedMd && s.md > selectedMd;
+      });
+
+      return selected ? { [selected.id]: true } : {};
+    },
+    [selectedMd, rawSections]
+  );
 
   const prevStatus = usePrevious(ghostDiff.status);
   useEffect(() => {
@@ -267,7 +267,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
-    <WidgetCard className={classes.crossSectionDash} hideMenu>
+    <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
       <Typography variant="subtitle1">Cross Section</Typography>
       <Suspense fallback={<CircularProgress />}>
         <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
@@ -285,7 +285,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
               projections={projections}
               calcSections={calcSections}
               selectedSections={selectedSections}
-              setSelectedSections={setSelectedSections}
+              setSelectedMd={selectMd}
               firstProjectionIdx={firstProjectionIdx}
               ghostDiffDispatch={ghostDiffDispatch}
               ghostDiff={ghostDiff}
@@ -298,7 +298,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
 };
 CrossSectionDashboard.propTypes = {
-  wellId: PropTypes.string.isRequired
+  wellId: PropTypes.string.isRequired,
+  className: PropTypes.string
 };
 
 export default CrossSectionDashboard;

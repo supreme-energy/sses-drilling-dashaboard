@@ -8,7 +8,7 @@ function PixiMarker({ container, x, y, url, updateTransform, rotation }, ref) {
   const {
     current: { marker, initialUpdateTransform }
   } = useRef(() => {
-    const texture = new PIXI.Texture.fromImage(url);
+    const texture = PIXI.Texture.from(url);
     const marker = new PIXI.Sprite(texture);
 
     if (rotation) {

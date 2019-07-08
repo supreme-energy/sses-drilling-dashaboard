@@ -7,10 +7,10 @@ import projectAheadSVG from "../../../../assets/projectAhead.svg";
 
 /* eslint new-cap: 0 */
 export function drawSurveys(container) {
-  const surveyMarker = new PIXI.Texture.fromImage(surveySVG);
-  const lastMarker = new PIXI.Texture.fromImage(lastSurveySVG);
-  const bitProjection = new PIXI.Texture.fromImage(bitProjectionSVG);
-  const paMarker = new PIXI.Texture.fromImage(projectAheadSVG);
+  const surveyMarker = PIXI.Texture.from(surveySVG);
+  const lastMarker = PIXI.Texture.from(lastSurveySVG);
+  const bitProjection = PIXI.Texture.from(bitProjectionSVG);
+  const paMarker = PIXI.Texture.from(projectAheadSVG);
   const surveyGraphics = [];
 
   const widePath = container.addChild(new PIXI.Graphics());

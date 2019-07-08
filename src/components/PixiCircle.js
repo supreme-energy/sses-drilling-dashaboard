@@ -1,6 +1,6 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
-import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
