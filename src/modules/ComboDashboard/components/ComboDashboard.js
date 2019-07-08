@@ -7,7 +7,7 @@ import DrillPhaseKPI from "../../Kpi/DrillPhaseKPI";
 import Interpretation from "../../Interpretation";
 import WellOperation from "./WellOperation";
 import ToolFace from "./ToolFace";
-import ArialCrossSection from "./ArialCrossSection";
+import AerialCrossSection from "./AerialCrossSection";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
 import { ComboContainerProvider } from "../containers/store";
@@ -25,14 +25,14 @@ function ComboDashboard({
         <Suspense fallback={<Progress />}>
           <div className={classes.kpiRows}>
             <div className={classes.row}>
-              <DrillPhaseKPI className={classes.drillPhaseKpi} />
+              <DrillPhaseKPI className={classes.drillPhaseKpi} wellId={openedWellId} />
               <ToolFace />
               <WellOperation />
-              <ArialCrossSection />
+              <AerialCrossSection wellId={openedWellId} />
             </div>
             <div className={classNames(classes.row, classes.graphRow)}>
-              <Interpretation />
-              <CrossSectionDashboard wellId={openedWellId} />
+              <Interpretation className={"flex"} />
+              <CrossSectionDashboard wellId={openedWellId} className={"flex-3"} />
             </div>
           </div>
           <div className={classes.kpiColumn}>

@@ -1,12 +1,16 @@
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
+import surveySVG from "../../../../assets/survey.svg";
+import lastSurveySVG from "../../../../assets/lastSurvey.svg";
+import bitProjectionSVG from "../../../../assets/bitProjection.svg";
+import projectAheadSVG from "../../../../assets/projectAhead.svg";
 
 /* eslint new-cap: 0 */
 export function drawSurveys(container) {
-  const surveyMarker = PIXI.Texture.from("/survey.svg");
-  const lastMarker = PIXI.Texture.from("/lastSurvey.svg");
-  const bitProjection = PIXI.Texture.from("/bitProjection.svg");
-  const paMarker = PIXI.Texture.from("/projectAhead.svg");
+  const surveyMarker = PIXI.Texture.from(surveySVG);
+  const lastMarker = PIXI.Texture.from(lastSurveySVG);
+  const bitProjection = PIXI.Texture.from(bitProjectionSVG);
+  const paMarker = PIXI.Texture.from(projectAheadSVG);
   const surveyGraphics = [];
 
   const widePath = container.addChild(new PIXI.Graphics());

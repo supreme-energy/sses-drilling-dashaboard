@@ -83,7 +83,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
 
   const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
-  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(selectedWellId);
 
   const surveysBySection = useMemo(() => getSurveyBySection(surveyMapPositions, wellOverviewBySegment), [
     wellOverviewBySegment,

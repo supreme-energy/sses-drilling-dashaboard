@@ -23,6 +23,7 @@ import {
   DIP_END
 } from "../../../constants/interactivePAStatus";
 import { useComboContainer } from "../containers/store";
+import classNames from "classnames";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
 
@@ -134,7 +135,7 @@ function PADeltaReducer(state, action) {
   }
 }
 
-export const CrossSectionDashboard = ({ wellId }) => {
+export const CrossSectionDashboard = ({ wellId, className }) => {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData(wellId);
 
   const firstProjectionIdx = surveys.length;
@@ -266,7 +267,7 @@ export const CrossSectionDashboard = ({ wellId }) => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   return (
-    <WidgetCard className={classes.crossSectionDash}>
+    <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
       <Typography variant="subtitle1">Cross Section</Typography>
       <Suspense fallback={<CircularProgress />}>
         <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
@@ -297,7 +298,8 @@ export const CrossSectionDashboard = ({ wellId }) => {
   );
 };
 CrossSectionDashboard.propTypes = {
-  wellId: PropTypes.string.isRequired
+  wellId: PropTypes.string.isRequired,
+  className: PropTypes.string
 };
 
 export default CrossSectionDashboard;

@@ -29,7 +29,7 @@ export function DrillingAnalytics({
       <div className={classes.row}>
         <PhaseOverview wellId={openedWellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
         <StandAnalysis wellId={openedWellId} drillPhase={phase} />
-        <SlideAnalysis drillPhase={drillPhaseType} />
+        <SlideAnalysis wellId={openedWellId} drillPhase={drillPhaseType} />
       </div>
       <div className={classNames(classes.row, classes.extendRow)}>
         <VerticalCrossSection drillPhase={drillPhaseType} />

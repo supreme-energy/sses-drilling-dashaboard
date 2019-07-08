@@ -1,14 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
-import _ from "lodash";
 
 import WidgetCard from "../../WidgetCard";
 import { useWellOverviewKPI } from "../../../api";
 import KpiItem from "../../Kpi/KpiItem";
 import { PercentageBar, renderRotating, renderSliding, percentage } from "../../Kpi/DrillPhaseKPI/Kpi";
 import { noDecimals } from "../../../constants/format";
-import VerticalMenu from "../../VerticalMenu";
 import classes from "./DrillingAnalytics.scss";
 
 const SlidingKpi = ({ data }) => (
@@ -51,16 +49,8 @@ export function PhaseOverview({ wellId, drillPhase, drillPhaseType }) {
   const phaseData = data.find(d => d.type === drillPhase);
 
   return (
-    <WidgetCard className={classes.phaseOverviewCard}>
+    <WidgetCard className={classes.phaseOverviewCard} hideMenu>
       <Typography variant="subtitle1">{`${drillPhaseType} Overview`}</Typography>
-      <VerticalMenu
-        id="phase-overview-widget-menu"
-        className={classes.verticalMenu}
-        selectedMenuItems={[]}
-        setSelectedMenuItem={_.noop}
-        menuItemEnum={[]}
-        multiSelect
-      />
       <SlidingKpi data={phaseData} />
     </WidgetCard>
   );

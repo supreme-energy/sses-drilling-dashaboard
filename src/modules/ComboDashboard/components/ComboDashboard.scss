@@ -19,16 +19,23 @@
   display: flex;
   flex: 1;
   margin-right: 10px;
+  margin-left: 3px;
   flex-direction: column;
 }
 
 .kpiRows {
   display: flex;
-  flex: 11;
+  flex: 12;
   flex-direction: column;
+  margin-left: 6px;
+
 
   .row {
     display: flex;
+     
+    > div {
+      margin: 3px;
+    }
   }
 
   .graphRow {

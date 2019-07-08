@@ -21,6 +21,7 @@ $header-height: 100px;
   .cardContent:last-child {
     padding: 3px;
     display: flex;
+    margin-right: 10px;
 
     @media (max-width: 1100px) {
       flex-wrap: wrap;
@@ -61,11 +62,6 @@ $header-height: 100px;
     }
   }
 
-  .optionsButton {
-    &:focus {
-      outline: 0;
-    }
-  }
   .status {
     margin-right: 20px;
   }

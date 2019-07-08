@@ -7,11 +7,13 @@ import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
 import { useComboContainer } from "../ComboDashboard/containers/store";
+import classNames from "classnames";
 
 function Interpretation({
   match: {
     params: { wellId }
-  }
+  },
+  className
 }) {
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogList(wellId);
@@ -42,7 +44,7 @@ function Interpretation({
   );
 
   return (
-    <WidgetCard className={css.interpretationContainer}>
+    <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
       <Typography variant="subtitle1">Interpretation 1</Typography>
       <InterpretationChart
         wellId={wellId}
