@@ -11,8 +11,7 @@ import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
 
 function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, segmentHeight }) {
-  const endLineData = useMemo(() => [[0, segmentHeight], [totalWidth, segmentHeight]], [segmentHeight, totalWidth]);
-  const startLineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
+  const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => {
@@ -29,17 +28,25 @@ function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, seg
   );
 
   const selectionContainerRef = useRef(null);
+  const startLineRef = useRef(null);
+  const endLineRef = useRef(null);
 
   const onDrag = useCallback(mousePosition => {
     console.log("on drag", mousePosition);
   }, []);
 
-  useDraggable(
-    selectionContainerRef.current && selectionContainerRef.current.container,
-    onDrag,
-    totalWidth,
-    segmentHeight
-  );
+  const onEndLineDrag = useCallback(mousePosition => {
+    console.log("end line drag", mousePosition);
+  }, []);
+
+  // useDraggable(
+  //   selectionContainerRef.current && selectionContainerRef.current.container,
+  //   onDrag,
+  //   totalWidth,
+  //   segmentHeight
+  // );
+
+  useDraggable(endLineRef.current && endLineRef.current.container, onEndLineDrag, totalWidth, 5);
 
   return (
     <PixiContainer
@@ -59,8 +66,23 @@ function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, seg
             textProps={{ fontSize: 12, color: 0xffffff }}
             backgroundProps={{ backgroundColor: 0xe80a23, radius: 5 }}
           />
-          <PixiLine container={container} data={startLineData} color={0xe80a23} />
-          <PixiLine container={container} data={endLineData} color={0xe80a23} />
+          <PixiContainer
+            ref={startLineRef}
+            container={container}
+            updateTransform={frozenScaleTransform}
+            child={container => (
+              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+            )}
+          />
+          <PixiContainer
+            ref={endLineRef}
+            container={container}
+            y={segmentHeight}
+            updateTransform={frozenScaleTransform}
+            child={container => (
+              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+            )}
+          />
         </React.Fragment>
       )}
     />

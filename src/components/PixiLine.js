@@ -1,5 +1,5 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, forwardRef, useImperativeHandle } from "react";
 import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
@@ -17,7 +17,7 @@ function draw(lineG, lineWidth, color, lineData, view, native) {
   });
 }
 
-export default function PixiLine({ container, data, mapData, color, nativeLines, view, lineWidth }) {
+const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, view, lineWidth }, ref) => {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
   const lineG = useRef(() => new PIXI.Graphics());
 
@@ -36,8 +36,12 @@ export default function PixiLine({ container, data, mapData, color, nativeLines,
     [view, nativeLines, color, lineData, lineWidth]
   );
 
+  useImperativeHandle(ref, () => ({
+    lineGraphics: lineG.current
+  }));
+
   return null;
-}
+});
 
 PixiLine.propTypes = {
   nativeLines: PropTypes.bool,
@@ -55,3 +59,5 @@ PixiLine.defaultProps = {
   view: { xScale: 1, yScale: 1 },
   mapData: d => d
 };
+
+export default PixiLine;
