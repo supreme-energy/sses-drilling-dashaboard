@@ -1,13 +1,11 @@
-import React, { useMemo, useEffect, useCallback } from "react";
-import { Typography, Box } from "@material-ui/core";
+import React, { useMemo, useEffect } from "react";
+import { Typography } from "@material-ui/core";
 
 import WidgetCard from "../WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
-import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
-import IconButton from "@material-ui/core/IconButton";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 
 function Interpretation({

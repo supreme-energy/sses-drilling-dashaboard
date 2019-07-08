@@ -73,7 +73,6 @@ const PixiRectangle = forwardRef(
 
     useEffect(
       function updateZindex() {
-        console.log("z", zIndex);
         bg.zIndex = zIndex;
       },
       [zIndex, bg]
