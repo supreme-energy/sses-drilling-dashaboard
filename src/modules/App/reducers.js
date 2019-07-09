@@ -8,3 +8,14 @@ export function drillPhaseReducer(state, action) {
       return state;
   }
 }
+
+export function selectedSectionReducer(state, action) {
+  switch (action.type) {
+    case "SELECT_MD": {
+      return {
+        ...state,
+        selectedMd: action.md
+      };
+    }
+  }
+}

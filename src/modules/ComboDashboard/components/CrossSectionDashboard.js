@@ -2,7 +2,7 @@ import { CircularProgress, Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
 import PropTypes from "prop-types";
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useReducer } from "react";
-import { useFilteredWellData } from "../../App/Containers";
+import { useFilteredWellData, useSelectedSectionContainer } from "../../App/Containers";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
@@ -22,7 +22,6 @@ import {
   INIT,
   DIP_END
 } from "../../../constants/interactivePAStatus";
-import { useComboContainer } from "../containers/store";
 import classNames from "classnames";
 
 const CrossSection = lazy(() => import(/* webpackChunkName: 'CrossSection' */ "./CrossSection/index"));
@@ -142,7 +141,7 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
-  const [{ selectedMd }, , { selectMd }] = useComboContainer();
+  const [{ selectedMd }, , { selectMd }] = useSelectedSectionContainer();
   const selectedSections = useMemo(
     function getSelectedSections() {
       const selected = rawSections.find((s, index) => {

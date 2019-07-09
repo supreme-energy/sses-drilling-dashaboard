@@ -11,7 +11,8 @@ import {
   useWellPath,
   useAdditionalDataLog
 } from "../../api";
-import { drillPhaseReducer } from "./reducers";
+import { initialState as initialSelectedSectionState } from "../../constants/selectedSections";
+import { drillPhaseReducer, selectedSectionReducer } from "./reducers";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -49,6 +50,13 @@ function useAppStateData() {
     updateRequestId(now);
   }, []);
   return { requestId, updateRequestId, refreshRequestId };
+}
+
+function useUseSelectedSectionStore() {
+  const [state, dispatch] = useReducer(selectedSectionReducer, initialSelectedSectionState);
+
+  const selectMd = useCallback(md => dispatch({ type: "SELECT_MD", md }), [dispatch]);
+  return [state, dispatch, { selectMd }];
 }
 
 const annotateSurveys = memoize(fullSurveyList => {
@@ -164,3 +172,6 @@ export function useWellSections(wellId) {
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
+export const { Provider: SelectedSectionProvider, useContainer: useSelectedSectionContainer } = createContainer(
+  useUseSelectedSectionStore
+);

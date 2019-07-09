@@ -30,6 +30,7 @@ export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
+export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
 export const GET_KPI = "/kpis.php";
 
 // mock data
@@ -449,6 +450,23 @@ export function useTimeSliderData() {
   return data || EMPTY_ARRAY;
 }
 
+const wellOperationTransform = memoizeOne(transform);
+
+export function useWellOperationHours(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_OPERATION_HOURS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: wellOperationTransform
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
 export function useWellControlLog(wellId) {
   return useFetch(
     {
@@ -550,6 +568,5 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
       transform: additionalDataLogTransform
     }
   );
-
   return data || EMPTY_OBJECT;
 }

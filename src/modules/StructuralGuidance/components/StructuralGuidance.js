@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { SelectedSectionProvider } from "../../App/Containers";
 import Interpretation from "../../Interpretation";
 import CrossSectionDashboard from "../../ComboDashboard/components/CrossSectionDashboard";
 import CrossSectionDataCharts from "./CrossSectionDataCharts";
@@ -11,15 +12,17 @@ export function StructuralGuidance({
   }
 }) {
   return (
-    <div className={classes.structuralGuidanceContainer}>
-      <div className={classes.column}>
-        <Interpretation />
+    <SelectedSectionProvider>
+      <div className={classes.structuralGuidanceContainer}>
+        <div className={classes.column}>
+          <Interpretation className={classes.interpretationChart} />
+        </div>
+        <div className={classes.column}>
+          <CrossSectionDashboard wellId={openedWellId} />
+          <CrossSectionDataCharts />
+        </div>
       </div>
-      <div className={classes.column}>
-        <CrossSectionDashboard wellId={openedWellId} />
-        <CrossSectionDataCharts />
-      </div>
-    </div>
+    </SelectedSectionProvider>
   );
 }
 

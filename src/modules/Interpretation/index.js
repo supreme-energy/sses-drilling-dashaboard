@@ -6,7 +6,7 @@ import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
-import { useComboContainer } from "../ComboDashboard/containers/store";
+import { useSelectedSectionContainer } from "../App/Containers";
 import classNames from "classnames";
 
 function Interpretation({
@@ -20,7 +20,7 @@ function Interpretation({
   const aditionalLogs = useAdditionalDataLogsList(wellId);
   const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
-  const [{ selectedMd }, , { selectMd }] = useComboContainer();
+  const [{ selectedMd }, , { selectMd }] = useSelectedSectionContainer();
 
   const selectedWellLog = useMemo(
     function findCurrentWellLog() {
