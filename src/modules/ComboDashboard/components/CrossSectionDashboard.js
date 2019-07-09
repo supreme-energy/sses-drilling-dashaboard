@@ -18,7 +18,7 @@ export const CrossSectionDashboard = () => {
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>
-          <ParentSize debounceTime={100}>
+          <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
             {({ width, height }) => <CrossSection width={width} height={height} />}
           </ParentSize>
         </div>

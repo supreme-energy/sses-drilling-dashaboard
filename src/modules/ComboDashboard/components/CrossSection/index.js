@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useReducer, useRef } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
+import OverlayUI from "../OverlayUI";
 
 const pixiApp = new PixiCrossSection();
 
@@ -88,7 +89,12 @@ const CrossSection = props => {
     scale
   ]);
 
-  return <div className={classes.crossSection} ref={canvas} />;
+  return (
+    <React.Fragment>
+      <OverlayUI width={width} height={height} view={view} />
+      <div className={classes.crossSection} ref={canvas} />
+    </React.Fragment>
+  );
 };
 
 CrossSection.propTypes = {
