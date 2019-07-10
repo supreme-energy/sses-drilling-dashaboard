@@ -14,6 +14,8 @@ export function useWebGLRenderer({ canvas, width, height }) {
       width,
       height,
       antialias: true,
+      autoResize: true,
+      resolution: devicePixelRatio,
       backgroundColor: 0xffffff
     })
   );
