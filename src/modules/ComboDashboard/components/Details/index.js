@@ -69,14 +69,14 @@ export default function DetailsTable() {
               <SurveyIcon row={row} />
               {row.id}
             </TableCell>
-            <TableCell className={classes.cell}>{row.md}</TableCell>
-            <TableCell className={classes.cell}>{row.inc}</TableCell>
-            <TableCell className={classes.cell}>{row.azm}</TableCell>
+            <TableCell className={classes.cell}>{row.md.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.inc.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.azm.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tvd.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.dl}</TableCell>
-            <TableCell className={classes.cell}>{row.vs}</TableCell>
-            <TableCell className={classes.cell}>{row.fault}</TableCell>
-            <TableCell className={classes.cell}>{row.dip}</TableCell>
+            <TableCell className={classes.cell}>{row.dl.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.vs.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.fault.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
           </TableRow>
