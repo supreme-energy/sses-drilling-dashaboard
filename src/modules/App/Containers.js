@@ -14,7 +14,7 @@ import {
 import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
-import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../constants/calcMethods";
+import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
