@@ -1,10 +1,10 @@
 import React, { useRef, useCallback, useMemo } from "react";
-import PixiText from "./PixiText";
-import PixiContainer from "./PixiContainer";
+import PixiText from "../../../../../components/PixiText";
+import PixiContainer from "../../../../../components/PixiContainer";
 import { colorBySection } from "../../../../../constants/pixiColors";
 import { getHoursDif } from "../../../utils/time";
-import PixiLine from "./PixiLine";
-import PixiCircle from "./PixiCircle";
+import PixiLine from "../../../../../components/PixiLine";
+import PixiCircle from "../../../../../components/PixiCircle";
 import { getScaledValue } from "../../../utils/scale";
 import { frozenScaleTransform } from "../../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 

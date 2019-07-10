@@ -7,10 +7,7 @@ import { max, group } from "d3-array";
 
 import PixiMarker from "./PixiMarker";
 import { useFilteredWellData } from "../../../App/Containers";
-import PixiContainer from "../../../WellExplorer/components/WellOverview/ROP/PixiContainer";
-import PixiLine from "../../../WellExplorer/components/WellOverview/ROP/PixiLine";
-import { useWebGLRenderer } from "../../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
-import useViewport from "../../../WellExplorer/components/WellOverview/ROP/useViewport";
+
 import { useWellOverviewKPI, useWellInfo, useWellsMapLength } from "../../../../api";
 import * as wellSections from "../../../../constants/wellSections";
 import SurfaceMarker from "../../assets/aerialCSMarkerBlue.svg";
@@ -20,6 +17,10 @@ import Compass from "../../assets/compass.svg";
 
 import WidgetCard from "../../../WidgetCard";
 import classes from "./AerialCrossSection.scss";
+import PixiContainer from "../../../../components/PixiContainer";
+import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
+import useViewport from "../../../../hooks/useViewport";
+import PixiLine from "../../../../components/PixiLine";
 
 // TODO export from WellExplorer, or move to const
 const colorsBySection = {
@@ -81,7 +82,7 @@ function AerialCrossSection({ wellId }) {
   const xValue = rotate ? yMin : xMin;
   const yValue = rotate ? xMin : yMin;
 
-  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(wellId);
 
   const surveysBySection = useMemo(() => getSurveyBySection(surveyData, wellOverviewBySegment), [
     wellOverviewBySegment,

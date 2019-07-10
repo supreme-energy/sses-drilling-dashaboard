@@ -1,10 +1,9 @@
 import React from "react";
 import { range, tickStep } from "d3-array";
 import PixiText from "./PixiText";
-import PixiContainer from "./PixiContainer";
 import PixiRectangle from "./PixiRectangle";
 import PropTypes from "prop-types";
-
+import PixiContainer from "./PixiContainer";
 const textAnchor = [0.5, 0.5];
 
 export default function XAxis({ container, scale, numberOfTicks, height, ...props }) {

@@ -60,7 +60,6 @@ function drawSections(container, higherContainer, props, gutter) {
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
-
     calcSections = props.calcSections;
     setSelectedMd = props.setSelectedMd;
 
@@ -81,6 +80,7 @@ function drawSections(container, higherContainer, props, gutter) {
       if (!pixiList[i]) pixiList[i] = addSection({ onClick: onSectionClick });
       const p1 = calcSections[i - 1];
       const p2 = calcSections[i];
+
       const isSelected = selectedSections[p2.id];
       const color = isSelected ? [p2.selectedColor, p2.selectedAlpha] : [p2.color, p2.alpha];
 

@@ -25,7 +25,7 @@ export function DrillingAnalytics() {
       <div className={classes.row}>
         <PhaseOverview wellId={wellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
         <StandAnalysis wellId={wellId} drillPhase={phase} />
-        <SlideAnalysis drillPhase={drillPhaseType} />
+        <SlideAnalysis wellId={wellId} drillPhase={drillPhaseType} />
       </div>
       <div className={classNames(classes.row, classes.extendRow)}>
         <VerticalCrossSection drillPhase={drillPhaseType} />

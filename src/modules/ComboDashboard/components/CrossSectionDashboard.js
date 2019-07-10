@@ -11,10 +11,10 @@ import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
 import CrossSection from "./CrossSection/index";
 
-export const CrossSectionDashboard = () => {
+export const CrossSectionDashboard = ({ className }) => {
   const [expanded, setExpanded] = useState(false);
   return (
-    <WidgetCard className={classes.crossSectionDash} hideMenu>
+    <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>

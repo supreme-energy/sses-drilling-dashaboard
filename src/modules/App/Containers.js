@@ -111,8 +111,8 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
 }
 
 // Organize well sections into array of objects
-export function useWellSections() {
-  const { data } = useWellOverviewKPI();
+export function useWellSections(wellId) {
+  const { data } = useWellOverviewKPI(wellId);
   const drillPhases = useMemo(() => {
     return data.map((s, index) => {
       return {

@@ -4,8 +4,8 @@ import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function draw(lineG, lineWidth, color, lineData, view) {
-  lineG.current.clear().lineStyle(lineWidth, color, 1);
+function draw(lineG, lineWidth, color, lineData, view, native) {
+  lineG.current.clear().lineStyle(lineWidth, color, 1, 1, native);
   // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
   // I'm picking 10k that should be safe (15k works also)
   const chunks = chunk(lineData, 10000);
@@ -19,7 +19,7 @@ function draw(lineG, lineWidth, color, lineData, view) {
 
 export default function PixiLine({ container, data, mapData, color, nativeLines, view, lineWidth }) {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
-  const lineG = useRef(() => new PIXI.Graphics(nativeLines));
+  const lineG = useRef(() => new PIXI.Graphics());
 
   useEffect(() => {
     const lineGraphic = lineG.current;
@@ -30,7 +30,7 @@ export default function PixiLine({ container, data, mapData, color, nativeLines,
   useEffect(
     function drawLine() {
       if (lineData && lineData.length) {
-        draw(lineG, lineWidth, color, lineData, view);
+        draw(lineG, lineWidth, color, lineData, view, nativeLines);
       }
     },
     [view, nativeLines, color, lineData, lineWidth]
@@ -52,5 +52,6 @@ PixiLine.propTypes = {
 PixiLine.defaultProps = {
   nativeLines: true,
   lineWidth: 1,
-  view: { xScale: 1, yScale: 1 }
+  view: { xScale: 1, yScale: 1 },
+  mapData: d => d
 };

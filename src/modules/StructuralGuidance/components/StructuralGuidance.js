@@ -10,7 +10,7 @@ export function StructuralGuidance() {
   return (
     <div className={classes.structuralGuidanceContainer}>
       <div className={classes.column}>
-        <Interpretation />
+        <Interpretation className={classes.interpretationChart} />
       </div>
       <div className={classes.column}>
         <CrossSectionDashboard wellId={wellId} />

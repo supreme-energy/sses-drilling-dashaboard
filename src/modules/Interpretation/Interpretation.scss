@@ -1,4 +1,13 @@
-.interpretationGraph {
-  flex-basis: 33%;
-  height: 100%;
+.interpretationContainer {
+  margin-left: 8px;
+  display: flex;
+  flex-direction: column;
+
+  .chart {
+    flex: 1;
+  }
+
+  .upArrow {
+    margin-bottom: 10px;
+  }
 }
