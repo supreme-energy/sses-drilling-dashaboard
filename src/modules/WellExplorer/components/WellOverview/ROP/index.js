@@ -5,20 +5,21 @@ import { useSize } from "react-hook-size";
 import { scaleLinear } from "d3-scale";
 import { max, pairs } from "d3-array";
 import { SectionsGraph } from "./SectionsGraph";
-import PixiLine from "./PixiLine";
-import PixiContainer from "./PixiContainer";
-import useViewport from "./useViewport";
-import { useWebGLRenderer } from "./useWebGLRenderer";
-import Grid from "./Grid";
+import PixiLine from "../../../../../components/PixiLine";
+import PixiContainer from "../../../../../components/PixiContainer";
+import useViewport from "../../../../../hooks/useViewport";
+import { useWebGLRenderer } from "../../../../../hooks/useWebGLRenderer";
 import classNames from "classnames";
 import classes from "./styles.scss";
 import { colorBySection } from "../../../../../constants/pixiColors";
 import { getHoursDif } from "../../../utils/time";
 import SectionsBg from "./SectionsBg";
 import { orderedSections } from "../../../../../constants/wellSections";
-import XAxis from "./XAxis";
+import XAxis from "../../../../../components/XAxis";
 import { getScaledValue } from "../../../utils/scale";
 import Legend from "./Legend";
+import Grid from "../../../../../components/Grid";
+import { defaultMakeXTickAndLine } from "../../../../ComboDashboard/components/CrossSection/drawGrid";
 
 function computeInitialViewYScaleValue(data) {
   if (data && data.length > 0) {
@@ -34,6 +35,14 @@ function computeInitialViewXScaleValue(data) {
       .domain([0, max(data, d => Math.max(d.ROP_A, d.ROP_I))])
       .range([0, 1]);
   }
+}
+
+function topXAxis(...args) {
+  const [line, label] = defaultMakeXTickAndLine(...args);
+  label.rotation = 0;
+  label.anchor.set(0.5, -1);
+
+  return [line, label];
 }
 
 const mapAverage = d => [Number(d.ROP_A), Number(d.Hole_Depth)];
@@ -182,7 +191,14 @@ export default function Rop({ className, style }) {
           )}
         />
 
-        <Grid container={viewport} view={view} width={width} height={height} gridGutter={gridGutter} />
+        <Grid
+          container={viewport}
+          view={view}
+          width={width}
+          height={height}
+          gridGutter={gridGutter}
+          makeXTickAndLine={topXAxis}
+        />
         <XAxis
           x={gridGutter}
           y={height - 30}

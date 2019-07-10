@@ -13,24 +13,24 @@ export function DirectionalGuidance() {
     <div className={classes.directionalGuidanceContainer}>
       <div className={classes.kpiRows}>
         <div className={classes.row}>
-          <WidgetCard>
+          <WidgetCard hideMenu>
             <Typography variant="subtitle1">Projection</Typography>
           </WidgetCard>
-          <WidgetCard>
+          <WidgetCard hideMenu>
             <Typography variant="subtitle1">Bottom Hole Assembly Tendency</Typography>
           </WidgetCard>
-          <WidgetCard>
+          <WidgetCard hideMenu>
             <Typography variant="subtitle1">Motor Yield</Typography>
           </WidgetCard>
         </div>
         <div className={classNames(classes.row, classes.graphRow)}>
-          <WidgetCard>
+          <WidgetCard hideMenu>
             <Typography variant="subtitle1">Well and Bottom Hole Assembly Information</Typography>
           </WidgetCard>
         </div>
       </div>
       <div className={classes.toolFaceColumn}>
-        <WidgetCard>
+        <WidgetCard hideMenu>
           <Typography variant="subtitle1">Tool Face</Typography>
         </WidgetCard>
       </div>

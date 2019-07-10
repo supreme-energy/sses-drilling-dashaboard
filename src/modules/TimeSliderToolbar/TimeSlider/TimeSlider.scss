@@ -6,7 +6,7 @@
 }
 
 .timeSliderContainerExpanded {
-    padding-bottom: 10px;
+    padding-bottom: 20px;
 }
 
 .timeSliderGraph {    
@@ -20,13 +20,15 @@
 }
 
 .timeSliderHeader {
-    padding: 10px 10px 0px 15px;
+    padding: 6px 10px 0px 15px;
     display: flex;
     justify-content: space-between;
 
     .timeSliderTitle {
         color: $gold;
         flex-grow: 1;
+        top: 5px;
+        position: relative;
     }
 
     .legend {
@@ -72,13 +74,18 @@
 
         button {
             padding: 5px;
+            background-color: transparent;
             &:focus {
                 outline: 0;
             }
         }
 
+        > div {
+            display: flex;
+        }
+
         .timeControls {
-            margin-left: 20px;
+            margin: 0 20px;
         }
     }
 }

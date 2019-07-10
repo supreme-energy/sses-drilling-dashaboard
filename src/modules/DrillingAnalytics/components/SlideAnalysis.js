@@ -9,9 +9,9 @@ import { formatStand } from "./StandAnalysis";
 import { CURVE } from "../../../constants/wellSections";
 import classes from "./DrillingAnalytics.scss";
 
-export function SlideAnalysis({ drillPhase }) {
+export function SlideAnalysis({ wellId, drillPhase }) {
   const isRotation = drillPhase === CURVE ? "/ Rotation" : "";
-  const { data } = useWellOverviewKPI();
+  const { data } = useWellOverviewKPI(wellId);
   const filteredData = data.filter(d => d.type === drillPhase);
   const phaseData = filteredData[0] || {};
   return (
@@ -27,6 +27,7 @@ export function SlideAnalysis({ drillPhase }) {
 }
 
 SlideAnalysis.propTypes = {
+  wellId: PropTypes.string,
   drillPhase: PropTypes.string
 };
 

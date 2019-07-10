@@ -24,7 +24,7 @@ function WellOverivew({ className, well, updateFavorite }) {
         <Tab value="data-server" label="Data Server" onChange={onTabChange} />
       </Tabs>
       <React.Fragment>
-        {currentTab === "overview" && <Overview />}
+        {currentTab === "overview" && <Overview wellId={well.id} />}
         {currentTab === "info" && <WellInfo wellId={well.id} />}
       </React.Fragment>
     </Card>

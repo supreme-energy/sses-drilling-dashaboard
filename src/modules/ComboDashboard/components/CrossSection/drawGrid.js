@@ -53,6 +53,7 @@ function drawGrid(container, options = {}) {
   const {
     gutter = 50,
     xAxisOrientation = "bottom",
+    showXAxis = true,
     makeXTickAndLine = defaultMakeXTickAndLine,
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
@@ -64,10 +65,12 @@ function drawGrid(container, options = {}) {
 
   const xLabels = [];
   const xLines = [];
+
   for (let i = 0; i < maxXLines; i++) {
     let [line, label] = makeXTickAndLine(fontSize, i);
     xLines.push(line);
-    xLabels.push(label);
+
+    showXAxis && xLabels.push(label);
     if (xAxisOrientation === "top") {
       label.y = 30;
     }
@@ -75,33 +78,43 @@ function drawGrid(container, options = {}) {
 
   const yLabels = [];
   const yLines = [];
+
   for (let i = 0; i < maxYLines; i++) {
     let [line, label] = makeYTickAndLine(fontSize);
     yLines.push(line);
     yLabels.push(label);
   }
+
   // Add the elements of the grid in the correct order
   // Lines are first
   xLines.forEach(l => container.addChild(l));
   yLines.forEach(l => container.addChild(l));
 
   // White background behind tick labels
+
   const bgx = new PIXI.Graphics();
   bgx.transform.updateTransform = frozenXYTransform;
   container.addChild(bgx);
+  let bgy;
 
-  const bgy = new PIXI.Graphics();
-  bgy.transform.updateTransform = frozenXYTransform;
-  container.addChild(bgy);
+  if (showXAxis) {
+    bgy = new PIXI.Graphics();
+    bgy.transform.updateTransform = frozenXYTransform;
+    container.addChild(bgy);
+  }
 
   // Tick labels go on top of the white backgrounds
   xLabels.forEach(l => container.addChild(l));
   yLabels.forEach(l => container.addChild(l));
 
   // Corner to hide overlapping tick labels
-  const corner = new PIXI.Graphics();
-  corner.transform.updateTransform = frozenXYTransform;
-  container.addChild(corner);
+  let corner;
+
+  if (showXAxis) {
+    corner = new PIXI.Graphics();
+    corner.transform.updateTransform = frozenXYTransform;
+    container.addChild(corner);
+  }
 
   const memoCalcBounds = memoizeOne((yScale, y, x, xScale, width, height, xMaxLines, yMaxLines) => {
     const xMin = Math.floor((-1 * x) / xScale);
@@ -141,22 +154,30 @@ function drawGrid(container, options = {}) {
       // Redraw the background as width or height may have changed
       bgx.clear().beginFill(0xffffff);
       bgx.drawRect(0, 0, gutter, height);
-      bgy.clear().beginFill(0xffffff);
-      bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
-      corner.clear().beginFill(0xffffff);
-      corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
+      if (bgy) {
+        bgy.clear().beginFill(0xffffff);
+        bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
+      }
+
+      if (corner) {
+        corner.clear().beginFill(0xffffff);
+        corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
+      }
 
       for (let i = 0; i < xLines.length; i++) {
         const pos = bounds.xMin + bounds.xStep * i;
         xLines[i].x = pos;
-        xLabels[i].x = pos;
-        xLabels[i].y = xAxisAnchor - gutter;
-        xLabels[i].text = `${pos}`;
+        if (showXAxis) {
+          xLabels[i].x = pos;
+          xLabels[i].y = xAxisAnchor - gutter;
+          xLabels[i].text = `${pos}`;
+        }
       }
 
       for (let i = 0; i < yLines.length; i++) {
         const pos = bounds.yMin + bounds.yStep * i;
         yLines[i].y = pos;
+
         yLabels[i].y = pos;
         yLabels[i].text = `${pos}`;
       }

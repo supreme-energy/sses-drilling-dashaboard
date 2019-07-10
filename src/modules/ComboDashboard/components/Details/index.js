@@ -35,7 +35,7 @@ export default function DetailsTable() {
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
-  const details = calcSections.slice(selectedIndex - 1, selectedIndex + 2);
+  const details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
 
   return (
     <Table className={classes.table}>
@@ -67,16 +67,16 @@ export default function DetailsTable() {
           >
             <TableCell className={classes.cell} component="th" scope="row">
               <SurveyIcon row={row} />
-              {row.id}
+              {row.name}
             </TableCell>
-            <TableCell className={classes.cell}>{row.md}</TableCell>
-            <TableCell className={classes.cell}>{row.inc}</TableCell>
-            <TableCell className={classes.cell}>{row.azm}</TableCell>
+            <TableCell className={classes.cell}>{row.md.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.inc.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.azm.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tvd.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.dl}</TableCell>
-            <TableCell className={classes.cell}>{row.vs}</TableCell>
-            <TableCell className={classes.cell}>{row.fault}</TableCell>
-            <TableCell className={classes.cell}>{row.dip}</TableCell>
+            <TableCell className={classes.cell}>{row.dl.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.vs.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.fault.toFixed(2)}</TableCell>
+            <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
           </TableRow>

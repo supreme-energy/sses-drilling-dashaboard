@@ -14,11 +14,11 @@ import {
 import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
-import { DIP_FAULT_POS_VS, TOT_POS_VS, TVD_VS } from "../../constants/calcMethods";
+import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
-    return data.filter(({ md }) => interval[0] <= md && md <= interval[1]);
+    return data.filter(({ md }) => interval.firstDepth <= md && md <= interval.lastDepth);
   } else {
     return [];
   }
@@ -106,13 +106,13 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
     label,
     scalelo,
     scalehi,
-    ...filterDataToLast(data, sliderInterval[1])
+    ...filterDataToLast(data, sliderInterval.lastDepth)
   };
 }
 
 // Organize well sections into array of objects
-export function useWellSections() {
-  const { data } = useWellOverviewKPI();
+export function useWellSections(wellId) {
+  const { data } = useWellOverviewKPI(wellId);
   const drillPhases = useMemo(() => {
     return data.map((s, index) => {
       return {
@@ -227,7 +227,7 @@ export function useCrossSectionData() {
     if (prevStatus !== status) {
       switch (status) {
         case DIP_END:
-          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, vs: op.vs + ghostDiff.vs, pos: pos });
+          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip - ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
           break;
         case FAULT_END:
           saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
