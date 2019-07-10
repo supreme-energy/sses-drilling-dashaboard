@@ -321,9 +321,28 @@ export function useWellsMapLength(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
-const surveyTransform = memoizeOne(transform);
-
-export function useSurveys(wellId) {
+const surveysTransform = memoizeOne(data => {
+  // Bit projection is not always in list of surveys
+  const surveys = transform(data);
+  const hasBitProj = surveys.some(s => s.plan === 1);
+  return surveys.map((s, i, l) => {
+    // If included, bit projection is always the last item and the last survey is second to last
+    const isBitProj = i === l.length - 1 && hasBitProj;
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    return {
+      ...s,
+      name: isBitProj ? `BPrj` : `${i}`,
+      isBitProj: isBitProj,
+      isSurvey: !isBitProj,
+      isLastSurvey: isLastSurvey,
+      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
+      alpha: 0.5,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchSurveys(wellId) {
   const [data] = useFetch(
     {
       path: GET_WELL_SURVEYS,
@@ -332,7 +351,7 @@ export function useSurveys(wellId) {
       }
     },
     {
-      transform: surveyTransform
+      transform: surveysTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -347,7 +366,7 @@ const formationsTransform = memoizeOne(formationList => {
   });
 });
 
-export function useFormations(wellId) {
+export function useFetchFormations(wellId) {
   const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
@@ -363,9 +382,20 @@ export function useFormations(wellId) {
   return [data || EMPTY_ARRAY, refresh];
 }
 
-const projectionsTransform = memoizeOne(transform);
-
-export function useProjections(wellId) {
+const projectionsTransform = memoizeOne(projections => {
+  return transform(projections).map((p, i) => {
+    return {
+      ...p,
+      name: `PA${i}`,
+      isProjection: true,
+      color: 0xee2211,
+      selectedColor: 0xee2211,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,

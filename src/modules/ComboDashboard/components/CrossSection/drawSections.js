@@ -36,7 +36,7 @@ function drawSections(container, higherContainer, props, gutter) {
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
   const memoInitLabel = memoizeOne(color => {
-    labelBG.beginFill(color, 1);
+    labelBG.clear().beginFill(color, 1);
     labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
   });
 
@@ -59,7 +59,6 @@ function drawSections(container, higherContainer, props, gutter) {
 
   return function update(props) {
     if (!container.transform) return;
-
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
     setSelectedMd = props.setSelectedMd;
@@ -67,7 +66,6 @@ function drawSections(container, higherContainer, props, gutter) {
     const onSectionClick = section => {
       setSelectedMd(section.startMD);
     };
-
     const y = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
@@ -96,7 +94,7 @@ function drawSections(container, higherContainer, props, gutter) {
       if (start + length < 0) continue;
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
 
-      if (selectedSections[p2.id]) {
+      if (isSelected) {
         selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);

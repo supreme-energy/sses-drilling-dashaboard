@@ -81,9 +81,9 @@ class App extends React.Component {
               >
                 <FetchCache>
                   <div style={{ height: "100%" }}>
-                    <PageLayout history={history}>
-                      <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
+                    <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
+                      <PageLayout history={history}>
+                        <MuiPickersUtilsProvider utils={MomentUtils}>
                           <AppStateProvider>
                             <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
                               <Route path="/:wellId" component={WellUpdate} />
@@ -100,9 +100,9 @@ class App extends React.Component {
                               </Switch>
                             </DrillPhaseProvider>
                           </AppStateProvider>
-                        </TimeSliderProvider>
-                      </MuiPickersUtilsProvider>
-                    </PageLayout>
+                        </MuiPickersUtilsProvider>
+                      </PageLayout>
+                    </TimeSliderProvider>
                   </div>
                 </FetchCache>
               </FetchClientProvider>

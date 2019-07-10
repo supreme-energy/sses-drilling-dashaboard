@@ -14,17 +14,12 @@ import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
 import { withRouter } from "react-router";
 import flowRight from "lodash/flowRight";
+import { useWellIdContainer } from "../../../../App/Containers";
 
-function OverviewKpi({
-  well,
-  changeSelectedWell,
-  updateFavorite,
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
+  const { wellId } = useWellIdContainer();
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
-  const opened = openedWellId && openedWellId === well.id;
+  const opened = wellId && wellId === well.id;
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>

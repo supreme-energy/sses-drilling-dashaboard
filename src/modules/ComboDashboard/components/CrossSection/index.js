@@ -1,55 +1,99 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { useCallback, useEffect, useReducer, useRef } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
+import { useCrossSectionContainer } from "../../../App/Containers";
 
 const pixiApp = new PixiCrossSection();
 
-// PIXI has some lowercase constructors
-/* eslint new-cap: 0 */
-class CrossSection extends Component {
-  constructor(props) {
-    super(props);
-    this.canvas = React.createRef();
-  }
+const CrossSection = props => {
+  const { width, height } = props;
+  const canvas = useRef(null);
+  const dataObj = useCrossSectionContainer();
+  const {
+    wellPlan,
+    selectedSections,
+    setSelectedMd,
+    ghostDiff,
+    ghostDiffDispatch,
+    calcSections,
+    calculatedFormations
+  } = dataObj;
 
-  componentDidMount() {
-    pixiApp.init(this.props, this.props.view, this.props.updateView);
+  const [view, updateView] = useReducer(
+    function(state, arg) {
+      if (typeof arg === "function") {
+        return { ...state, ...arg(state) };
+      }
+      return { ...state, ...arg };
+    },
+    // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
+    {
+      x: -844,
+      y: -16700,
+      xScale: 2.14,
+      yScale: 2.14
+    }
+  );
 
-    this.canvas.current.appendChild(pixiApp.renderer.view);
+  const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
-    pixiApp.update(this.props);
-  }
+  useEffect(() => {
+    console.log("Should only be called on load");
+    const currentCanvas = canvas.current;
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  }
+    pixiApp.init({ ...dataObj, ...props, view, updateView, scale }, view, updateView);
+    currentCanvas.appendChild(pixiApp.renderer.view);
+    return () => {
+      pixiApp.cleanUp();
+      currentCanvas.removeChild(pixiApp.renderer.view);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    pixiApp.resize(this.props.width, this.props.height);
-    pixiApp.update(this.props);
-  }
+  useEffect(() => {
+    pixiApp.resize(width, height);
+  }, [width, height]);
 
-  componentWillUnmount() {
-    pixiApp.cleanUp();
-    this.canvas.current.removeChild(pixiApp.renderer.view);
-  }
+  useEffect(() => {
+    pixiApp.update({
+      width,
+      height,
+      wellPlan,
+      selectedSections,
+      setSelectedMd,
+      ghostDiffDispatch,
+      ghostDiff,
+      calcSections,
+      calculatedFormations,
+      scale,
+      view,
+      updateView
+    });
+  }, [
+    view.x,
+    view.y,
+    view.xScale,
+    view.yScale,
+    view,
+    width,
+    height,
+    wellPlan,
+    selectedSections,
+    setSelectedMd,
+    ghostDiffDispatch,
+    ghostDiff,
+    calcSections,
+    calculatedFormations,
+    scale
+  ]);
 
-  render() {
-    return <div className={classes.crossSection} ref={this.canvas} />;
-  }
-}
+  return <div className={classes.crossSection} ref={canvas} />;
+};
 
-/* eslint react/no-unused-prop-types: 0 */
 CrossSection.propTypes = {
   width: PropTypes.number,
-  height: PropTypes.number,
-  view: PropTypes.object,
-  updateView: PropTypes.func,
-  formations: PropTypes.array,
-  projections: PropTypes.array,
-  wellPlan: PropTypes.array,
-  surveys: PropTypes.array
+  height: PropTypes.number
 };
 
 export default CrossSection;
