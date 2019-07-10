@@ -5,7 +5,7 @@ import KPIGraphic from "../KPIGraphic";
 import DrillPhaseKPI from "../../../../Kpi/DrillPhaseKPI";
 import WellMapPlot from "../WellMapPlot";
 
-export default function(wellId) {
+export default function({ wellId }) {
   return (
     <div className={classes.container}>
       <div className={classes.left}>

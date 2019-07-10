@@ -27,9 +27,11 @@ function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, 
     <div className={className} ref={containerRef}>
       <KpiItem value={value} measureUnit={unit} label={label} {...props} />
       <div className={classNames("layout horizontal flex", classes.bars)}>
-        <div
-          style={{ width: `${scale(value)}px`, height: 2, backgroundColor: "#66655A", top: 2, position: "relative" }}
-        />
+        {value && (
+          <div
+            style={{ width: `${scale(value)}px`, height: 2, backgroundColor: "#66655A", top: 2, position: "relative" }}
+          />
+        )}
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
-    return data.filter(({ md }) => interval[0] <= md && md <= interval[1]);
+    return data.filter(({ md }) => interval.firstDepth <= md && md <= interval.lastDepth);
   } else {
     return [];
   }
@@ -106,7 +106,7 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
     label,
     scalelo,
     scalehi,
-    ...filterDataToLast(data, sliderInterval[1])
+    ...filterDataToLast(data, sliderInterval.lastDepth)
   };
 }
 
