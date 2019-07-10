@@ -20,7 +20,6 @@ function ComboDashboard({
     params: { wellId: openedWellId }
   }
 }) {
-  console.log("opened", openedWellId);
   return (
     <SelectedSectionProvider>
       <div className={classes.comboDashboardWrapper}>

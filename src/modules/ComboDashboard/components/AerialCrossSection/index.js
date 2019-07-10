@@ -111,9 +111,8 @@ function AerialCrossSection({ wellId }) {
     height,
     view,
     updateView,
-    zoomXScale: true,
-    zoomYScale: true,
-    isXScalingValid: () => 1
+    zoomXScale: false,
+    zoomYScale: false
   });
 
   const onScale = useCallback(() => {

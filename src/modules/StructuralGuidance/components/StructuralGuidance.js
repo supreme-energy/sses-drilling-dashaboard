@@ -1,10 +1,14 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import PropTypes from "prop-types";
+import Progress from "@material-ui/core/CircularProgress";
 import { SelectedSectionProvider } from "../../App/Containers";
 import Interpretation from "../../Interpretation";
-import CrossSectionDashboard from "../../ComboDashboard/components/CrossSectionDashboard";
 import CrossSectionDataCharts from "./CrossSectionDataCharts";
 import classes from "./StructuralGuidance.scss";
+
+const CrossSectionDashboard = lazy(() =>
+  import(/* webpackChunkName: 'CrossSectionDashboard' */ "../../ComboDashboard/components/CrossSectionDashboard")
+);
 
 export function StructuralGuidance({
   match: {
@@ -14,13 +18,15 @@ export function StructuralGuidance({
   return (
     <SelectedSectionProvider>
       <div className={classes.structuralGuidanceContainer}>
-        <div className={classes.column}>
-          <Interpretation className={classes.interpretationChart} />
-        </div>
-        <div className={classes.column}>
-          <CrossSectionDashboard wellId={openedWellId} />
-          <CrossSectionDataCharts />
-        </div>
+        <Suspense fallback={<Progress />}>
+          <div className={classes.column}>
+            <Interpretation className={classes.interpretationChart} />
+          </div>
+          <div className={classes.column}>
+            <CrossSectionDashboard wellId={openedWellId} />
+            <CrossSectionDataCharts />
+          </div>
+        </Suspense>
       </div>
     </SelectedSectionProvider>
   );

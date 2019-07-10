@@ -18,6 +18,8 @@ const PixiRectangle = forwardRef(
       updateTransform,
       radius,
       onClick,
+      onMouseOver,
+      onMouseOut,
       zIndex
     },
     ref
@@ -59,6 +61,23 @@ const PixiRectangle = forwardRef(
         bg.off("click", onClick);
       };
     }, [onClick, bg]);
+
+    useEffect(() => {
+      if (onMouseOver) {
+        bg.interactive = !!onMouseOver;
+        bg.mouseover = onMouseOver;
+      }
+
+      if (onMouseOut) {
+        bg.interactive = !!onMouseOut;
+        bg.mouseout = onMouseOut;
+      }
+
+      return () => {
+        bg.mouseover = null;
+        bg.mouseout = null;
+      };
+    }, [onMouseOver, onMouseOut, bg]);
 
     useEffect(
       function changeUpdateTransform() {

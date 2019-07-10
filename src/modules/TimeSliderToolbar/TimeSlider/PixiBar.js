@@ -11,7 +11,7 @@ function drawRectangle(bg, width, height, y, data) {
   });
 }
 
-function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, updateTransform }) {
+function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, updateTransform, zIndex }) {
   const {
     current: { bg, initialUpdateTransform }
   } = useRef(() => {
@@ -49,6 +49,13 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
       }
     },
     [updateTransform, bg, initialUpdateTransform]
+  );
+
+  useEffect(
+    function updateZindex() {
+      bg.zIndex = zIndex;
+    },
+    [zIndex, bg]
   );
 
   useEffect(

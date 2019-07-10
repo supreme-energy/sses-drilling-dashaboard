@@ -7,7 +7,7 @@ import classes from "./StructuralGuidance.scss";
 
 export function CrossSectionDataCharts({ drillPhase }) {
   return (
-    <WidgetCard className={classes.crossSectionDataCard}>
+    <WidgetCard className={classes.crossSectionDataCard} hideMenu>
       <Typography variant="subtitle1">Data</Typography>
     </WidgetCard>
   );
