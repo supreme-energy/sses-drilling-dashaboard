@@ -227,7 +227,7 @@ export function useCrossSectionData() {
     if (prevStatus !== status) {
       switch (status) {
         case DIP_END:
-          saveProjection(op.id, TOT_POS_VS, { tot: op.tot + ghostDiff.tot, vs: op.vs + ghostDiff.vs, pos: pos });
+          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip - ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
           break;
         case FAULT_END:
           saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
