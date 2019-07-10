@@ -326,6 +326,7 @@ const surveysTransform = memoizeOne(data => {
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
+      name: isBitProj ? `BPrj` : `${i}`,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
@@ -375,9 +376,10 @@ export function useFetchFormations(wellId) {
 }
 
 const projectionsTransform = memoizeOne(projections => {
-  return transform(projections).map(p => {
+  return transform(projections).map((p, i) => {
     return {
       ...p,
+      name: `PA${i}`,
       isProjection: true,
       color: 0xee2211,
       selectedColor: 0xee2211,

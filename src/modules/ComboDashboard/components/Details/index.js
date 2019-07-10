@@ -67,7 +67,7 @@ export default function DetailsTable() {
           >
             <TableCell className={classes.cell} component="th" scope="row">
               <SurveyIcon row={row} />
-              {row.id}
+              {row.name}
             </TableCell>
             <TableCell className={classes.cell}>{row.md.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.inc.toFixed(2)}</TableCell>
