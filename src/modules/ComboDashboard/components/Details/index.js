@@ -35,7 +35,7 @@ export default function DetailsTable() {
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
-  const details = calcSections.slice(selectedIndex - 1, selectedIndex + 2);
+  const details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
 
   return (
     <Table className={classes.table}>
