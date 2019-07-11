@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useComboContainer } from "../../App/Containers";
 import PixiLine from "../../../components/PixiLine";
 import PixiLabel from "../../../components/PixiLabel";
 import { twoDecimals } from "../../../constants/format";
@@ -154,13 +154,13 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
 };
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
-  const { view } = useInterpretationRenderer();
-  const [, , { selectMd }] = useComboContainer();
+  const { view, refresh } = useInterpretationRenderer();
+  const [, , { setSelectedMd }] = useComboContainer();
   const onSegmentClick = useCallback(
     segment => {
-      selectMd(segment.startmd);
+      setSelectedMd(segment.startmd);
     },
-    [selectMd]
+    [setSelectedMd]
   );
   return (
     <React.Fragment>

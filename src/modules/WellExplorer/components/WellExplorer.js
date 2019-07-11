@@ -17,6 +17,7 @@ import WellOverview from "./WellOverview";
 import classNames from "classnames";
 import { getWellsZoomBounds, getWellZoomBounds } from "../utils/getWellsZoomBounds";
 import Box from "@material-ui/core/Box";
+import { useWellIdContainer } from "../../App/Containers";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -43,11 +44,9 @@ export const WellExplorer = ({
   theme,
   selectedWellId,
   history,
-  changeSelectedWell,
-  match: {
-    params: { wellId: openedWellId }
-  }
+  changeSelectedWell
 }) => {
+  const { wellId: openedWellId } = useWellIdContainer();
   const [wells, wellsById, updateFavorite] = useWells();
 
   const [searchTerm, onSearchTermChanged] = useState("");
@@ -155,9 +154,6 @@ WellExplorer.propTypes = {
   addFile: PropTypes.func.isRequired,
   selectedWellId: PropTypes.string,
   activeTab: PropTypes.oneOf([ALL_WELLS, RECENT_WELLS, FAVORITES]),
-  match: PropTypes.shape({
-    params: PropTypes.object
-  }),
   history: PropTypes.shape({
     push: PropTypes.func.isRequired
   })

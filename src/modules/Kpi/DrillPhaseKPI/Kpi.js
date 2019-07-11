@@ -45,6 +45,7 @@ const SlidingKpi = ({ data }) => (
         label={`Sliding ${percentage(data.slidingPct)}`}
         value={data.avgSliding}
         renderValue={renderSliding}
+        measureUnit="fph"
       />
 
       <KpiItem
@@ -53,6 +54,7 @@ const SlidingKpi = ({ data }) => (
         label={`Rotating ${percentage(data.rotatingPct)}`}
         value={data.avgRotating}
         renderValue={renderRotating}
+        measureUnit="fph"
       />
     </div>
     <PercentageBar

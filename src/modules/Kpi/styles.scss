@@ -18,6 +18,10 @@
 .horizontalTop {
     @extend .horizontal;
     align-content: flex-start;
+    
+    h5 {
+        margin-right: 3px;
+    }
 }
 
 .vertical {
@@ -37,10 +41,6 @@
     font-weight: bold;
 }
 
-.measure {
-    margin-left: 4px;
-}
-
 .small {
     .kpiValue {
         font-size: 16px;
@@ -48,10 +48,6 @@
 
     .caption {
         font-size: 10px;
-    }
-
-    .measure {
-        margin-left: 3px;
     }
 }
 

@@ -10,7 +10,7 @@ export function drawFormations(container) {
   return update;
 
   function update(props) {
-    const { calculatedFormations: layers, firstProjectionIdx } = props;
+    const { calculatedFormations: layers, calcSections } = props;
     if (!layers || !layers.length) return;
     layerTiles.forEach(l => l.forEach(t => t.clear()));
     // TODO: Can optimize performance by redrawing only when data changes
@@ -24,7 +24,8 @@ export function drawFormations(container) {
         if (!layerTiles[layerIdx][pointIdx]) {
           layerTiles[layerIdx][pointIdx] = container.addChild(new PIXI.Graphics());
         }
-        if (pointIdx >= firstProjectionIdx - 1) {
+        const drawEndpoint = calcSections[pointIdx + 1];
+        if (drawEndpoint && drawEndpoint.isProjection) {
           currAlpha = 0.3;
         }
         // Each formation tile is drawn from four points arranged like this:
@@ -37,6 +38,7 @@ export function drawFormations(container) {
         const p3 = nextLayer.data[pointIdx + 1];
         const p4 = nextLayer.data[pointIdx];
 
+        if (!p1 || !p2 || !p3 || !p4) continue;
         // The right side points determine the tile fault
         const a1 = [p1.vs, p1.tot + p2.fault];
         const a2 = [p2.vs, p2.tot];

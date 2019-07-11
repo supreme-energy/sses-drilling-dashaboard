@@ -46,6 +46,5 @@ export const GlobalEndTimeControl = React.memo(({ expanded, setSliderStep, date 
 GlobalEndTimeControl.propTypes = {
   expanded: PropTypes.bool,
   setSliderStep: PropTypes.func,
-  date: PropTypes.string,
-  maxSliderStep: PropTypes.number
+  date: PropTypes.string
 };

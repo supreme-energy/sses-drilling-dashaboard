@@ -3,53 +3,65 @@ import useRef from "react-powertools/hooks/useRef";
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 
-const PixiText = forwardRef(({ container, fontSize, color, x, y, text, anchor, updateTransform }, ref) => {
-  const {
-    current: { pixiText, initialUpdateTransform }
-  } = useRef(() => {
-    const pixiText = new PIXI.Text("");
-    return {
-      pixiText,
-      initialUpdateTransform: pixiText.transform.updateTransform
-    };
-  });
-  useEffect(
-    function addText() {
-      container.addChild(pixiText);
-      return () => container.removeChild(pixiText);
-    },
-    [container, pixiText]
-  );
+const PixiText = forwardRef(
+  ({ container, fontSize, color, x, y, text, anchor, updateTransform, wrap, wrapWidth, breakWords, align }, ref) => {
+    const {
+      current: { pixiText, initialUpdateTransform }
+    } = useRef(() => {
+      const pixiText = new PIXI.Text("");
+      return {
+        pixiText,
+        initialUpdateTransform: pixiText.transform.updateTransform
+      };
+    });
+    useEffect(
+      function addText() {
+        container.addChild(pixiText);
+        return () => container.removeChild(pixiText);
+      },
+      [container, pixiText]
+    );
 
-  useEffect(
-    function changeUpdateTransform() {
-      if (updateTransform) {
-        pixiText.transform.updateTransform = updateTransform;
-      } else {
-        pixiText.transform.updateTransform = initialUpdateTransform;
-      }
-    },
-    [updateTransform, pixiText, initialUpdateTransform]
-  );
+    useEffect(
+      function changeUpdateTransform() {
+        if (updateTransform) {
+          pixiText.transform.updateTransform = updateTransform;
+        } else {
+          pixiText.transform.updateTransform = initialUpdateTransform;
+        }
+      },
+      [updateTransform, pixiText, initialUpdateTransform]
+    );
 
-  useEffect(
-    function updateText() {
-      pixiText.x = x;
-      pixiText.y = y;
-      pixiText.anchor.set(...anchor);
-      pixiText.text = text;
-      pixiText.style.fontSize = fontSize;
-      pixiText.style.fill = color;
-    },
-    [x, y, text, fontSize, color, anchor, updateTransform, pixiText]
-  );
+    useEffect(
+      function updateText() {
+        pixiText.x = x;
+        pixiText.y = y;
+      },
+      [x, y, pixiText]
+    );
 
-  useImperativeHandle(ref, () => ({
-    pixiText
-  }));
+    useEffect(
+      function updateText() {
+        pixiText.anchor.set(...anchor);
+        pixiText.text = text;
+        pixiText.style.fontSize = fontSize;
+        pixiText.style.fill = color;
+        pixiText.style.wordWrap = wrap;
+        pixiText.style.wordWrapWidth = wrapWidth;
+        pixiText.style.breakWords = breakWords;
+        pixiText.style.align = align;
+      },
+      [text, fontSize, color, anchor, updateTransform, pixiText, wrap, wrapWidth, breakWords, align]
+    );
 
-  return null;
-});
+    useImperativeHandle(ref, () => ({
+      pixiText
+    }));
+
+    return null;
+  }
+);
 
 PixiText.defaultProps = {
   x: 0,

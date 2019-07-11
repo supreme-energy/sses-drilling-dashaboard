@@ -1,0 +1,42 @@
+@import "../../../styles/base";
+
+.structuralGuidanceContainer {
+    display: flex;
+        height: 100%;
+
+
+    h6 {
+        color: $gold;
+    }
+
+    .column:first-child {
+        flex-grow: 1;
+        height: 100%;
+        margin-left: 9px;
+        margin-right: 3px;
+    }
+
+    .column:last-child {
+        flex-grow: 6;
+        display: flex;
+        flex-direction: column;
+        margin-right: 12px;
+
+        div  {
+            margin: 3px;
+        }
+
+        > div:first-child {
+            flex-grow: 8;
+        }
+
+        > div:last-child {
+            flex-grow: 2;
+        }
+    }
+
+    .interpretationChart {
+        height: 100%;
+        margin-left: 0px;
+    }
+}

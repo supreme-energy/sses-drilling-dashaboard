@@ -30,9 +30,10 @@ export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
+export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
+export const GET_KPI = "/kpis.php";
 
 // mock data
-const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
@@ -303,9 +304,45 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
-const surveyTransform = memoizeOne(transform);
+export function useWellsMapLength(wellId, wellPositions) {
+  const [wellInfo] = useWellInfo(wellId);
 
-export function useSurveys(wellId) {
+  return useMemo(() => {
+    function addMapPosition(p) {
+      return {
+        ...p,
+        mapPosition: {
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
+        }
+      };
+    }
+    return wellInfo.wellSurfaceLocationLocal ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+  }, [wellPositions, wellInfo]);
+}
+
+const surveysTransform = memoizeOne(data => {
+  // Bit projection is not always in list of surveys
+  const surveys = transform(data);
+  const hasBitProj = surveys.some(s => s.plan === 1);
+  return surveys.map((s, i, l) => {
+    // If included, bit projection is always the last item and the last survey is second to last
+    const isBitProj = i === l.length - 1 && hasBitProj;
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    return {
+      ...s,
+      name: isBitProj ? `BPrj` : `${i}`,
+      isBitProj: isBitProj,
+      isSurvey: !isBitProj,
+      isLastSurvey: isLastSurvey,
+      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
+      alpha: 0.5,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchSurveys(wellId) {
   const [data] = useFetch(
     {
       path: GET_WELL_SURVEYS,
@@ -314,7 +351,7 @@ export function useSurveys(wellId) {
       }
     },
     {
-      transform: surveyTransform
+      transform: surveysTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -329,7 +366,7 @@ const formationsTransform = memoizeOne(formationList => {
   });
 });
 
-export function useFormations(wellId) {
+export function useFetchFormations(wellId) {
   const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
@@ -345,9 +382,20 @@ export function useFormations(wellId) {
   return [data || EMPTY_ARRAY, refresh];
 }
 
-const projectionsTransform = memoizeOne(transform);
-
-export function useProjections(wellId) {
+const projectionsTransform = memoizeOne(projections => {
+  return transform(projections).map((p, i) => {
+    return {
+      ...p,
+      name: `PA${i}`,
+      isProjection: true,
+      color: 0xee2211,
+      selectedColor: 0xee2211,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
@@ -375,14 +423,15 @@ export function useProjections(wellId) {
   return [data || EMPTY_ARRAY, refresh, saveProjection];
 }
 
-export function useWellOverviewKPI() {
+export function useWellOverviewKPI(wellId) {
   let [data] = useFetch(
     {
-      path: GET_MOCK_OVERVIEW_KPI
+      path: GET_KPI,
+      query: {
+        seldbname: wellId
+      }
     },
-
     {
-      id: "mock",
       transform: data => {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
@@ -426,6 +475,23 @@ export function useTimeSliderData() {
 
     {
       id: "mock"
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+const wellOperationTransform = memoizeOne(transform);
+
+export function useWellOperationHours(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_OPERATION_HOURS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: wellOperationTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -547,6 +613,5 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
       transform: additionalDataLogTransform
     }
   );
-
   return data || EMPTY_OBJECT;
 }

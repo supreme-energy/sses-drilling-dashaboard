@@ -7,7 +7,6 @@ import { scaleLinear } from "d3-scale";
 
 import { useFilteredAdditionalDataLogs } from "../../../App/Containers";
 import { useAdditionalDataLogsList } from "../../../../api";
-import VerticalMenu from "../../../VerticalMenu";
 import KpiItem from "../../../Kpi/KpiItem";
 import WidgetCard from "../../../WidgetCard";
 import classes from "./Measures.scss";
@@ -28,7 +27,11 @@ function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, 
     <div className={className} ref={containerRef}>
       <KpiItem value={value} measureUnit={unit} label={label} {...props} />
       <div className={classNames("layout horizontal flex", classes.bars)}>
-        <div style={{ width: `${scale(value)}px`, height: 5, backgroundColor: "#66655A" }} />
+        {value && (
+          <div
+            style={{ width: `${scale(value)}px`, height: 2, backgroundColor: "#66655A", top: 2, position: "relative" }}
+          />
+        )}
       </div>
     </div>
   );
@@ -57,16 +60,8 @@ function Measures({ wellId }) {
   const gtf = useFADL("GTF");
 
   return (
-    <WidgetCard className={classes.measures}>
+    <WidgetCard className={classes.measures} hideMenu>
       <Typography variant="subtitle1">Measures</Typography>
-      <VerticalMenu
-        id="measures-widget-menu"
-        className={classes.measuresWidgetMenu}
-        selectedMenuItems={[]}
-        setSelectedMenuItem={_.noop}
-        menuItemEnum={[]}
-        multiSelect
-      />
       <KpiItem className={classes.kpi} value={mDepth.value} measureUnit={"in"} label={"Hole Depth"} small />
       <KpiItem className={classes.kpi} value={bitDepth.value} measureUnit={"in"} label={"Bit Depth"} small />
       <PercentageBarKpi
