@@ -18,10 +18,14 @@ export default function useViewport({
   isXScalingValid
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
-  const viewportRef = useRef(() => {
+  const {
+    current: { viewportContainer: viewport }
+  } = useRef(() => {
     const viewportContainer = new PIXI.Container();
     viewportContainer.sortableChildren = true;
-    return viewportContainer;
+    return {
+      viewportContainer
+    };
   });
 
   const onWheel = useCallback(
@@ -55,7 +59,9 @@ export default function useViewport({
   );
 
   const onDrag = useCallback(
-    (currMouse, prevMouse) => {
+    (event, prevMouse) => {
+      const currMouse = event.data.global;
+
       updateView(prev => {
         const newX = Number(prev.x) + (currMouse.x - prevMouse.x);
 
@@ -69,7 +75,7 @@ export default function useViewport({
     [updateView, isXScalingValid, zoomYScale, zoomXScale]
   );
 
-  useDraggable(stage, onDrag, width, height);
+  useDraggable(stage, onDrag, 0, 0, width, height);
 
   useEffect(
     function enableMouseInteractions() {
@@ -83,8 +89,6 @@ export default function useViewport({
   );
 
   useEffect(() => {
-    const viewport = viewportRef.current;
-
     if (stage) {
       stage.addChild(viewport);
     }
@@ -95,17 +99,16 @@ export default function useViewport({
         viewport.destroy({ children: true });
       }
     };
-  }, [stage]);
+  }, [stage, viewport]);
 
   useEffect(
     function updateViewport() {
-      const viewport = viewportRef.current;
       viewport.position = new PIXI.Point(view.x, view.y);
       viewport.scale.x = view.xScale;
       viewport.scale.y = view.yScale;
     },
-    [view]
+    [view, viewport]
   );
 
-  return viewportRef.current;
+  return viewport;
 }

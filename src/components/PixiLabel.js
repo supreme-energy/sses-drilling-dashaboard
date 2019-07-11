@@ -11,12 +11,14 @@ const PixiLabel = forwardRef(
     const textHeight = (textRef.current && textRef.current.pixiText.height) || 0;
     const bgWidth = textWidth + padding.left + padding.right;
     const bgHeight = textHeight + padding.top + padding.bottom;
+    const containerRef = useRef(null);
 
     useImperativeHandle(
       ref,
       () => ({
         width: bgWidth,
-        height: bgHeight
+        height: bgHeight,
+        container: containerRef.current && containerRef.current.container
       }),
       [bgWidth, bgHeight]
     );
@@ -27,6 +29,7 @@ const PixiLabel = forwardRef(
 
     return (
       <PixiContainer
+        ref={containerRef}
         container={container}
         {...props}
         child={container => (

@@ -2,15 +2,15 @@ import * as PIXI from "pixi.js";
 import { useEffect, useCallback } from "react";
 import useRef from "react-powertools/hooks/useRef";
 
-export default function useDraggable(container, onDrag, width, height) {
+export default function useDraggable(container, onDrag, x, y, width, height) {
   useEffect(
     function makeContainerInteractive() {
       if (container) {
         container.interactive = true;
-        container.hitArea = new PIXI.Rectangle(0, 0, width, height);
+        container.hitArea = new PIXI.Rectangle(x, y, width, height);
       }
     },
-    [container, width, height]
+    [container, width, height, x, y]
   );
 
   const interactionStateRef = useRef({
@@ -28,16 +28,17 @@ export default function useDraggable(container, onDrag, width, height) {
   }, []);
 
   const onMouseMove = useCallback(
-    moveData => {
+    event => {
       const interactionState = interactionStateRef.current;
 
-      if (!interactionState.isDragging || interactionState.isOutside) {
+      if (!interactionState.isDragging) {
         return;
       }
+      const currMouse = event.data.global;
 
-      const currMouse = moveData.data.global;
-      onDrag(currMouse, interactionState.prevMouse);
+      // event.stopPropagation();
 
+      onDrag(event, interactionState.prevMouse);
       Object.assign(interactionState.prevMouse, currMouse);
     },
     [onDrag]

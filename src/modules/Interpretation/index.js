@@ -22,18 +22,6 @@ function Interpretation({
 
   const [{ selectedMd }, , { selectMd }] = useComboContainer();
 
-  const selectedWellLog = useMemo(
-    function findCurrentWellLog() {
-      return (
-        selectedMd &&
-        logList.find(l => {
-          return l.startmd >= selectedMd && selectedMd < l.endmd;
-        })
-      );
-    },
-    [logList, selectedMd]
-  );
-
   useEffect(
     function selectFirstWellLog() {
       if (selectedMd === null && logList && logList.length) {
@@ -46,14 +34,7 @@ function Interpretation({
   return (
     <WidgetCard className={css.interpretationContainer}>
       <Typography variant="subtitle1">Interpretation 1</Typography>
-      <InterpretationChart
-        wellId={wellId}
-        className={css.chart}
-        controlLogs={controlLogs}
-        selectedWellLog={selectedWellLog}
-        gr={gr}
-        logList={logList}
-      />
+      <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} gr={gr} logList={logList} />
     </WidgetCard>
   );
 }

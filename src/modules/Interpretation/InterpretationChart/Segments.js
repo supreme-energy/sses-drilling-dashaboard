@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect, useState } from "react";
+import React, { useCallback, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
@@ -9,9 +9,10 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
+import { useCalculateDipFromSurvey } from "../selectors";
+import { withRouter } from "react-router";
 
-function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, segmentHeight }) {
-  const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
+const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => {
@@ -20,6 +21,10 @@ function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, seg
     [updateLabelDimensions]
   );
 
+  const labelRef = useRef(null);
+
+  const { refresh } = useInterpretationRenderer();
+
   useEffect(
     function refreshWebGl() {
       refresh();
@@ -27,26 +32,45 @@ function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, seg
     [labelWidth, labelHeight, refresh]
   );
 
+  useImperativeHandle(ref, () => ({
+    container: labelRef.current && labelRef.current.container
+  }));
+
+  const labelX = -labelWidth;
+  const labelY = y - labelHeight / 2;
+
+  useDraggable(labelRef.current && labelRef.current.container, onDrag, labelX, labelY, labelWidth, labelHeight);
+
+  return (
+    <PixiLabel
+      {...props}
+      ref={labelRef}
+      y={labelY}
+      sizeChanged={onSizeChanged}
+      container={container}
+      x={labelX}
+      textProps={{ fontSize: 12, color: 0xffffff }}
+      backgroundProps={{ backgroundColor: 0xe80a23, radius: 5 }}
+    />
+  );
+});
+
+const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, segmentHeight }) => {
+  const startLineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
+  const endLineData = useMemo(() => [[0, segmentHeight], [totalWidth, segmentHeight]], [totalWidth, segmentHeight]);
   const selectionContainerRef = useRef(null);
-  const startLineRef = useRef(null);
-  const endLineRef = useRef(null);
+  const segmentRef = useRef(null);
+  const [, , { onStartSegmentDrag, onEndSegmentDrag }] = useComboContainer();
+  const { viewport } = useInterpretationRenderer();
 
-  const onDrag = useCallback(mousePosition => {
-    console.log("on drag", mousePosition);
-  }, []);
-
-  const onEndLineDrag = useCallback(mousePosition => {
-    console.log("end line drag", mousePosition);
-  }, []);
-
-  // useDraggable(
-  //   selectionContainerRef.current && selectionContainerRef.current.container,
-  //   onDrag,
-  //   totalWidth,
-  //   segmentHeight
-  // );
-
-  useDraggable(endLineRef.current && endLineRef.current.container, onEndLineDrag, totalWidth, 5);
+  const onStartSegmentDragHandler = useCallback(
+    event => onStartSegmentDrag(event.data.getLocalPosition(viewport), segment),
+    [viewport, onStartSegmentDrag, segment]
+  );
+  const onEndSegmentDragHandler = useCallback(
+    event => onEndSegmentDrag(event.data.getLocalPosition(viewport), segment),
+    [viewport, onEndSegmentDrag, segment]
+  );
 
   return (
     <PixiContainer
@@ -56,43 +80,52 @@ function SegmentSelection({ segment, totalWidth, container, refresh, zIndex, seg
       updateTransform={frozenScaleTransform}
       child={container => (
         <React.Fragment>
-          <PixiLabel
-            sizeChanged={onSizeChanged}
+          <SegmentLabel
             container={container}
-            text={twoDecimals(segment.enddepth)}
-            x={-labelWidth}
-            y={segmentHeight - labelHeight / 2}
             zIndex={zIndex}
-            textProps={{ fontSize: 12, color: 0xffffff }}
-            backgroundProps={{ backgroundColor: 0xe80a23, radius: 5 }}
+            segment={segment}
+            y={0}
+            text={twoDecimals(segment.startdepth)}
+            ref={segmentRef}
+            onDrag={onStartSegmentDragHandler}
           />
-          <PixiContainer
-            ref={startLineRef}
+          <SegmentLabel
             container={container}
-            updateTransform={frozenScaleTransform}
-            child={container => (
-              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
-            )}
-          />
-          <PixiContainer
-            ref={endLineRef}
-            container={container}
+            zIndex={zIndex}
+            segment={segment}
+            text={twoDecimals(segment.enddepth)}
             y={segmentHeight}
-            updateTransform={frozenScaleTransform}
-            child={container => (
-              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
-            )}
+            onDrag={onEndSegmentDragHandler}
+          />
+          <PixiLine container={container} data={startLineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+          <PixiLine container={container} data={endLineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+          <PixiRectangle
+            zIndex={zIndex}
+            width={10}
+            height={segmentHeight}
+            y={0}
+            x={totalWidth - 70}
+            radius={5}
+            backgroundColor={0xe80a23}
+            container={container}
           />
         </React.Fragment>
       )}
     />
   );
-}
+});
 
-const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth, refresh }) => {
+const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
 
   const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
+  const { refresh } = useInterpretationRenderer();
+  useEffect(
+    function refreshWebGl() {
+      refresh();
+    },
+    [segment.enddepth, segment.startdepth, refresh]
+  );
 
   return (
     <React.Fragment>
@@ -101,7 +134,6 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
           segment={segment}
           totalWidth={totalWidth}
           container={container}
-          refresh={refresh}
           zIndex={zIndex + 1}
           segmentHeight={segmentHeight}
         />
@@ -122,7 +154,7 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
 };
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
-  const { view, refresh } = useInterpretationRenderer();
+  const { view } = useInterpretationRenderer();
   const [, , { selectMd }] = useComboContainer();
   const onSegmentClick = useCallback(
     segment => {
@@ -140,7 +172,6 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
             segment={s}
             zIndex={selected ? 2 + segmentsData.length : 2}
             view={view}
-            refresh={refresh}
             selected={selected}
             container={container}
             onSegmentClick={onSegmentClick}

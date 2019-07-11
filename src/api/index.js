@@ -460,14 +460,22 @@ export function useWellLogList(wellId) {
       list &&
       list.map(d => ({
         ...d,
+        fault: Number(d.fault),
+        endvs: Number(d.endvs),
+        startvs: Number(d.startvs),
+        endtvd: Number(d.endtvd),
+        starttvd: Number(d.starttvd),
         startmd: Number(d.startmd),
         endmd: Number(d.endmd),
         startdepth: Number(d.startdepth),
-        enddepth: Number(d.enddepth)
+        enddepth: Number(d.enddepth),
+        sectdip: Number(d.sectdip)
       })),
     [list]
   );
-  return [logList || EMPTY_ARRAY, ...rest];
+  const logs = logList || EMPTY_ARRAY;
+  const logsById = keyBy(logs, "id");
+  return [logs, logsById, ...rest];
 }
 
 export function useWellLogData(wellId, tableName) {
@@ -476,9 +484,16 @@ export function useWellLogData(wellId, tableName) {
     return memoizeOne(data => {
       return {
         ...data,
-        data: data.data
-          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value), depth: Number(d.depth) }))
-          .sort(sortByDepth)
+        endvs: Number(data.endvs),
+        fault: Number(data.fault),
+        startvs: Number(data.startvs),
+        endtvd: Number(data.endtvd),
+        starttvd: Number(data.starttvd),
+        startmd: Number(data.startmd),
+        endmd: Number(data.endmd),
+        startdepth: Number(data.startdepth),
+        enddepth: Number(data.enddepth),
+        data: transform(data.data).sort(sortByDepth)
       };
     });
   }, []);
