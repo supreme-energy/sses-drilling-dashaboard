@@ -42,7 +42,6 @@ const CrossSection = props => {
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   useEffect(() => {
-    console.log("Should only be called on load");
     const currentCanvas = canvas.current;
 
     pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode }, view, updateView);

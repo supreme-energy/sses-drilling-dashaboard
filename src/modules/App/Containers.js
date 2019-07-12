@@ -143,7 +143,6 @@ function useSurveysData() {
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (surveys && surveys.length) {
-      console.log("setting new surveys");
       setSurveys(surveys);
     }
   }, [surveys, setSurveys]);
@@ -167,7 +166,6 @@ function useProjectionsData() {
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (projections && projections.length) {
-      console.log("setting new projections");
       projectionsDispatch({
         type: "serverReset",
         data: projections
@@ -188,7 +186,6 @@ function useFormationsData() {
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (serverFormations && serverFormations.length) {
-      console.log("setting new formations");
       setFormations(serverFormations);
     }
   }, [serverFormations]);
