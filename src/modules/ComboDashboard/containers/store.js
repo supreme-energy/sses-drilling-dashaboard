@@ -9,11 +9,19 @@ const initialState = {
 
 function comboStoreReducer(state, action) {
   switch (action.type) {
-    case "SELECT_MD":
-      return {
-        ...state,
-        selectedMd: action.md
-      };
+    case "TOGGLE_MD": {
+      if (state.selectedMd === action.md) {
+        return {
+          ...state,
+          selectedMd: null
+        };
+      } else {
+        return {
+          ...state,
+          selectedMd: action.md
+        };
+      }
+    }
     case "UPDATE_SEGMENT_PROPERTIES":
       return {
         ...state,
@@ -32,38 +40,12 @@ function comboStoreReducer(state, action) {
 
 function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
-  const { selectedMd, pendingSegmentsState } = state;
-  const selectMd = useCallback(md => dispatch({ type: "SELECT_MD", md }), [dispatch]);
+  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
   const updateSegment = useCallback((props, md) => dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props }), [
     dispatch
   ]);
 
-  const [, logsById] = useWellLogList();
-
-  const onEndSegmentDrag = useCallback(
-    (newPosition, segment) => {
-      const pendingState = pendingSegmentsState[segment.startmd];
-
-      const depth = newPosition.y;
-      //const newDip = calculateDip({ tvd: segment.endtvd, depth: depth, vs: segment.endvs });
-      //updateSegment({ dip: newDip }, segment.startmd);
-    },
-    [pendingSegmentsState, updateSegment]
-  );
-
-  // const onStartSegmentLabelDrag = useCallback(
-  //   event => {
-  //     const newPosition = event.data.getLocalPosition(viewport);
-
-  //     const fault = segment.startdepth - newPosition.y;
-  //     let dip = calculateDip({ tvd: segment.endtvd, depth: segment.enddepth + fault, vs: segment.endvs });
-
-  //     updateSegment({ fault }, selectedMd);
-  //   },
-  //   [segment, selectedMd, updateSegment, viewport, calculateDip]
-  // );
-
-  return [state, dispatch, { selectMd, updateSegment, onEndSegmentDrag }];
+  return [state, dispatch, { setSelectedMd, updateSegment }];
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);

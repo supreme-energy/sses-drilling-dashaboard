@@ -15,6 +15,7 @@ import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
+import { useComboContainer } from "../ComboDashboard/containers/store";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -325,55 +326,8 @@ export function useCrossSectionData() {
   };
 }
 
-const initialState = {
-  selectedMd: null,
-  pendingSegmentsState: {}
-};
-
-function comboStoreReducer(state, action) {
-  switch (action.type) {
-    case "TOGGLE_MD": {
-      if (state.selectedMd === action.md) {
-        return {
-          ...state,
-          selectedMd: null
-        };
-      } else {
-        return {
-          ...state,
-          selectedMd: action.md
-        };
-      }
-    }
-    case "UPDATE_SEGMENT_PROPERTIES":
-      return {
-        ...state,
-        pendingSegmentsState: {
-          ...state.pendingSegmentsState,
-          [action.md]: {
-            ...(state.pendingSegmentsState[action.md] || {}),
-            ...action.props
-          }
-        }
-      };
-    default:
-      throw new Error("action not defined for combo store reducer");
-  }
-}
-
-function useUseComboStore() {
-  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
-
-  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
-  const updateSegment = useCallback((props, md) => dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props }), [
-    dispatch
-  ]);
-
-  return [state, dispatch, { setSelectedMd, updateSegment }];
-}
-
 // Create containers
-export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
+
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);

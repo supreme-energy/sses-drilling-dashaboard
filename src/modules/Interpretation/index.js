@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Typography } from "@material-ui/core";
 
 import WidgetCard from "../WidgetCard";
@@ -6,8 +6,9 @@ import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
-import { useComboContainer } from "../App/Containers";
+
 import classNames from "classnames";
+import { useComboContainer } from "../ComboDashboard/containers/store";
 
 function Interpretation({
   match: {

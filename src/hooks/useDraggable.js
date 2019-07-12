@@ -2,7 +2,20 @@ import * as PIXI from "pixi.js";
 import { useEffect, useCallback } from "react";
 import useRef from "react-powertools/hooks/useRef";
 
-export default function useDraggable(container, onDrag, x, y, width, height) {
+const IDENTITY = d => d;
+export default function useDraggable({
+  container,
+  root,
+  onDrag,
+  x,
+  y,
+  width,
+  height,
+  onOver = IDENTITY,
+  onDragEnd = IDENTITY,
+  canvas,
+  cursor
+}) {
   useEffect(
     function makeContainerInteractive() {
       if (container) {
@@ -13,61 +26,87 @@ export default function useDraggable(container, onDrag, x, y, width, height) {
     [container, width, height, x, y]
   );
 
-  const interactionStateRef = useRef({
-    isDragging: false,
-    isOutside: false,
-    prevMouse: {}
+  const interactionStateRef = useRef(() => {
+    return {
+      isDragging: false,
+      isOutside: false,
+      prevMouse: {},
+      onMouseMove: event => {
+        const interactionState = interactionStateRef.current;
+        if (!interactionState.isDragging) {
+          return;
+        }
+        const currMouse = event.data.global;
+
+        event.stopPropagation();
+
+        interactionStateRef.current.onDrag(event, interactionState.prevMouse);
+        Object.assign(interactionState.prevMouse, currMouse);
+      }
+    };
   });
 
-  const onMouseDown = useCallback(function(e) {
-    e.stopPropagation();
-    const interactionState = interactionStateRef.current;
-    const pos = e.data.global;
-    Object.assign(interactionState.prevMouse, pos);
-    interactionState.isDragging = true;
-  }, []);
+  interactionStateRef.current.onDrag = onDrag;
 
-  const onMouseMove = useCallback(
-    event => {
+  const onMouseDown = useCallback(
+    function(e) {
       const interactionState = interactionStateRef.current;
-
-      if (!interactionState.isDragging) {
-        return;
-      }
-      const currMouse = event.data.global;
-
-      // event.stopPropagation();
-
-      onDrag(event, interactionState.prevMouse);
-      Object.assign(interactionState.prevMouse, currMouse);
+      const pos = e.data.global;
+      Object.assign(interactionState.prevMouse, pos);
+      interactionState.isDragging = true;
+      container.on("mousemove", interactionState.onMouseMove);
     },
-    [onDrag]
+    [container]
   );
 
-  const onMouseOut = useCallback(() => (interactionStateRef.current.isOutside = true), []);
-  const onMouseOver = useCallback(() => (interactionStateRef.current.isOutside = false), []);
-  const onMouseUp = useCallback(() => (interactionStateRef.current.isDragging = false), []);
+  const onMouseOut = useCallback(() => {
+    interactionStateRef.current.isOutside = true;
+    if (canvas && !interactionStateRef.current.isDragging) {
+      canvas.style.cursor = "default";
+    }
+  }, [canvas]);
+  const onMouseOver = useCallback(
+    e => {
+      interactionStateRef.current.isOutside = false;
+      if (canvas) {
+        canvas.style.cursor = cursor;
+      }
+      onOver(e);
+    },
+    [onOver, canvas, cursor]
+  );
+  const onMouseUp = useCallback(
+    e => {
+      interactionStateRef.current.isDragging = false;
+      container.off("mousemove", interactionStateRef.current.onMouseMove);
+      onDragEnd(e);
+      if (canvas) {
+        canvas.style.cursor = "default";
+      }
+    },
+    [container, onDragEnd, canvas]
+  );
 
   useEffect(
     function enableMouseInteractions() {
       if (container) {
-        container.on("pointerdown", onMouseDown);
-        container.on("mousemove", onMouseMove);
         container.on("mouseout", onMouseOut);
         container.on("mouseover", onMouseOver);
-        container.on("pointerup", onMouseUp);
+        container.on("mousedown", onMouseDown);
+        container.on("mouseup", onMouseUp);
+        container.on("mouseupoutside", onMouseUp);
       }
 
       return () => {
         if (container) {
-          container.off("pointerdown", onMouseDown);
-          container.off("mousemove", onMouseMove);
           container.off("mouseout", onMouseOut);
           container.off("mouseover", onMouseOver);
-          container.off("pointerup", onMouseUp);
+          container.on("mousedown", onMouseDown);
+          container.off("mouseup", onMouseUp);
+          container.off("mouseupoutside", onMouseUp);
         }
       };
     },
-    [container, onMouseDown, onMouseMove, onMouseOut, onMouseOver, onMouseUp]
+    [container, onMouseDown, onMouseOut, onMouseOver, onMouseUp]
   );
 }

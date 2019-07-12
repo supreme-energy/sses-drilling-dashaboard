@@ -14,10 +14,7 @@ import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
-import {
-  frozenScaleTransform,
-  frozenXYTransform
-} from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useSelectedWellLog, useComputedSegments } from "../selectors";
 
 const gridGutter = 60;
@@ -76,7 +73,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   const {
     stage,
     refresh,
-    renderer,
     viewportContainer,
     viewport,
     canvasRef,
@@ -103,7 +99,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [refresh, stage, view, width, height, controlLogs, selectedWellLog, gr]
   );
 
-  const segments = useComputedSegments(wellId);
+  const [segments] = useComputedSegments(wellId);
 
   return (
     <div className={classNames(className, css.root)}>

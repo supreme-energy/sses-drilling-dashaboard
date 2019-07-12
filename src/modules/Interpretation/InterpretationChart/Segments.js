@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useComboContainer } from "../../App/Containers";
 import PixiLine from "../../../components/PixiLine";
 import PixiLabel from "../../../components/PixiLabel";
 import { twoDecimals } from "../../../constants/format";
@@ -9,8 +8,9 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { useCalculateDipFromSurvey } from "../selectors";
 import { withRouter } from "react-router";
+import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useDragActions } from "../actions";
 
 const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -23,7 +23,7 @@ const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, re
 
   const labelRef = useRef(null);
 
-  const { refresh } = useInterpretationRenderer();
+  const { refresh, stage } = useInterpretationRenderer();
 
   useEffect(
     function refreshWebGl() {
@@ -38,8 +38,6 @@ const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, re
 
   const labelX = -labelWidth;
   const labelY = y - labelHeight / 2;
-
-  useDraggable(labelRef.current && labelRef.current.container, onDrag, labelX, labelY, labelWidth, labelHeight);
 
   return (
     <PixiLabel
@@ -56,12 +54,12 @@ const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, re
 });
 
 const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, segmentHeight }) => {
-  const startLineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
-  const endLineData = useMemo(() => [[0, segmentHeight], [totalWidth, segmentHeight]], [totalWidth, segmentHeight]);
+  const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
+
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
-  const [, , { onStartSegmentDrag, onEndSegmentDrag }] = useComboContainer();
-  const { viewport } = useInterpretationRenderer();
+  const { onStartSegmentDrag, onEndSegmentDrag, onSegmentDrag } = useDragActions();
+  const { viewport, stage, canvasRef } = useInterpretationRenderer();
 
   const onStartSegmentDragHandler = useCallback(
     event => onStartSegmentDrag(event.data.getLocalPosition(viewport), segment),
@@ -71,6 +69,55 @@ const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, s
     event => onEndSegmentDrag(event.data.getLocalPosition(viewport), segment),
     [viewport, onEndSegmentDrag, segment]
   );
+
+  const onSegmentDragHandler = useCallback(
+    (event, prevMouse) => {
+      const currMouse = event.data.global;
+      const delta = currMouse.y - prevMouse.y;
+      onSegmentDrag(event.data.getLocalPosition(viewport), delta, segment);
+    },
+    [viewport, onSegmentDrag, segment]
+  );
+
+  const startLineRef = useRef(null);
+  const endLineRef = useRef(null);
+  const segmentDragContainer = useRef(null);
+
+  useDraggable({
+    container: startLineRef.current && startLineRef.current.container,
+    root: stage,
+    canvas: canvasRef.current,
+    cursor: "row-resize",
+    onDrag: onStartSegmentDragHandler,
+    x: 0,
+    y: -3,
+    width: totalWidth,
+    height: 6
+  });
+
+  useDraggable({
+    container: endLineRef.current && endLineRef.current.container,
+    root: stage,
+    onDrag: onEndSegmentDragHandler,
+    canvas: canvasRef.current,
+    cursor: "row-resize",
+    x: 0,
+    y: -2,
+    width: totalWidth,
+    height: 4
+  });
+
+  useDraggable({
+    container: segmentDragContainer.current && segmentDragContainer.current.container,
+    root: stage,
+    onDrag: onSegmentDragHandler,
+    canvas: canvasRef.current,
+    cursor: "ns-resize",
+    x: 0,
+    y: 4,
+    width: totalWidth,
+    height: segmentHeight - 8
+  });
 
   return (
     <PixiContainer
@@ -97,8 +144,24 @@ const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, s
             y={segmentHeight}
             onDrag={onEndSegmentDragHandler}
           />
-          <PixiLine container={container} data={startLineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
-          <PixiLine container={container} data={endLineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+          <PixiContainer ref={segmentDragContainer} container={container} updateTransform={frozenScaleTransform} />
+          <PixiContainer
+            ref={startLineRef}
+            container={container}
+            updateTransform={frozenScaleTransform}
+            child={container => (
+              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+            )}
+          />
+          <PixiContainer
+            ref={endLineRef}
+            container={container}
+            y={segmentHeight}
+            updateTransform={frozenScaleTransform}
+            child={container => (
+              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+            )}
+          />
           <PixiRectangle
             zIndex={zIndex}
             width={10}
@@ -154,7 +217,7 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
 };
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
-  const { view, refresh } = useInterpretationRenderer();
+  const { view } = useInterpretationRenderer();
   const [, , { setSelectedMd }] = useComboContainer();
   const onSegmentClick = useCallback(
     segment => {

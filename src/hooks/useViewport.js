@@ -75,7 +75,15 @@ export default function useViewport({
     [updateView, isXScalingValid, zoomYScale, zoomXScale]
   );
 
-  useDraggable(stage, onDrag, 0, 0, width, height);
+  useDraggable({
+    container: stage,
+    root: stage,
+    onDrag,
+    x: 0,
+    y: 0,
+    width,
+    height
+  });
 
   useEffect(
     function enableMouseInteractions() {
