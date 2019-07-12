@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useReducer, useRef } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
+import { NORMAL, ADD_PA_STATION } from "../../../../constants/crossSectionModes";
 import OverlayUI from "../OverlayUI";
 
 const pixiApp = new PixiCrossSection();
@@ -10,6 +11,7 @@ const pixiApp = new PixiCrossSection();
 const CrossSection = props => {
   const { width, height } = props;
   const canvas = useRef(null);
+  const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
   const {
     wellPlan,
@@ -43,7 +45,7 @@ const CrossSection = props => {
     console.log("Should only be called on load");
     const currentCanvas = canvas.current;
 
-    pixiApp.init({ ...dataObj, ...props, view, updateView, scale }, view, updateView);
+    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode }, view, updateView);
     currentCanvas.appendChild(pixiApp.renderer.view);
     return () => {
       pixiApp.cleanUp();
@@ -69,7 +71,9 @@ const CrossSection = props => {
       calculatedFormations,
       scale,
       view,
-      updateView
+      updateView,
+      mode,
+      setMode
     });
   }, [
     view.x,
@@ -86,7 +90,9 @@ const CrossSection = props => {
     ghostDiff,
     calcSections,
     calculatedFormations,
-    scale
+    scale,
+    mode,
+    setMode
   ]);
 
   return (
