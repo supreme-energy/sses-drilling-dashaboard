@@ -1,9 +1,5 @@
 import React, { useMemo } from "react";
-import classNames from "classnames";
 import addCircle from "../../../../assets/addCircle.svg";
-import checkCircle from "../../../../assets/checkCircle.svg";
-import deleteForever from "../../../../assets/deleteForever.svg";
-import offlineBolt from "../../../../assets/offlineBolt.svg";
 
 import classes from "./OverlayUI.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";

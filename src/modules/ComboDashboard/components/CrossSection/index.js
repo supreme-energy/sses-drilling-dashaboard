@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from "rea
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
-import { NORMAL, ADD_PA_STATION } from "../../../../constants/crossSectionModes";
+import { NORMAL } from "../../../../constants/crossSectionModes";
 import OverlayUI from "../OverlayUI";
 
 const pixiApp = new PixiCrossSection();
