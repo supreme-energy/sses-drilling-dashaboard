@@ -60,6 +60,7 @@ function drawGrid(container, options = {}) {
     maxYLines = 12,
     fontSize = 15
   } = options;
+  let { gutterLeft = gutter, gutterBottom = gutter } = options;
 
   let lastBounds = {};
 
@@ -150,18 +151,18 @@ function drawGrid(container, options = {}) {
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {
-      const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
+      const xAxisAnchor = xAxisOrientation === "top" ? gutterBottom : height;
       // Redraw the background as width or height may have changed
       bgx.clear().beginFill(0xffffff);
-      bgx.drawRect(0, 0, gutter, height);
+      bgx.drawRect(0, 0, gutterLeft, height);
       if (bgy) {
         bgy.clear().beginFill(0xffffff);
-        bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
+        bgy.drawRect(0, xAxisAnchor - gutterBottom, width, gutterBottom);
       }
 
       if (corner) {
         corner.clear().beginFill(0xffffff);
-        corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
+        corner.drawRect(0, xAxisAnchor - gutterBottom, gutterLeft, gutterBottom);
       }
 
       for (let i = 0; i < xLines.length; i++) {
@@ -169,7 +170,7 @@ function drawGrid(container, options = {}) {
         xLines[i].x = pos;
         if (showXAxis) {
           xLabels[i].x = pos;
-          xLabels[i].y = xAxisAnchor - gutter;
+          xLabels[i].y = xAxisAnchor - gutterBottom;
           xLabels[i].text = `${pos}`;
         }
       }

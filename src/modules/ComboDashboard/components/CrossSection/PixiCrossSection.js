@@ -36,6 +36,7 @@ export default class PixiCrossSection {
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 80;
+    const gridGutterLeft = 50;
     this.yTicks = 12;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
@@ -43,7 +44,11 @@ export default class PixiCrossSection {
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
     this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
-    this.gridUpdate = drawGrid(this.gridLayer, { gutter: gridGutter, maxYLines: this.yTicks });
+    this.gridUpdate = drawGrid(this.gridLayer, {
+      gutter: gridGutter,
+      gutterLeft: gridGutterLeft,
+      maxYLines: this.yTicks
+    });
 
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.Ticker.shared;
