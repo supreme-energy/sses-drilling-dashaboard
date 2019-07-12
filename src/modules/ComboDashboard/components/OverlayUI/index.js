@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
 import classNames from "classnames";
+import addCircle from "../../../../assets/addCircle.svg";
+import checkCircle from "../../../../assets/checkCircle.svg";
+import deleteForever from "../../../../assets/deleteForever.svg";
+import offlineBolt from "../../../../assets/offlineBolt.svg";
 
 import classes from "./OverlayUI.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
@@ -13,10 +17,19 @@ export default function DetailsTable({ width, height, view }) {
   }, [calcSections, selectedSections]);
 
   return (
-    <Typography variant="subtitle1" className={classes.root}>
-      {width} by {height}{" "}
-      {selectedItem &&
-        `displaying ${selectedItem.vs.toFixed(2)} at ${(selectedItem.vs * view.xScale + view.x).toFixed(2)}`}
-    </Typography>
+    <React.Fragment>
+      <Typography variant="subtitle1" className={classes.root}>
+        {width} by {height}{" "}
+        {selectedItem &&
+          `displaying ${selectedItem.vs.toFixed(2)} at ${(selectedItem.vs * view.xScale + view.x).toFixed(2)}`}
+      </Typography>
+      {selectedItem && (
+        <img
+          src={addCircle}
+          className={classes.addIcon}
+          style={{ top: `${height - 60}px`, left: `${selectedItem.vs * view.xScale + view.x + 16}px` }}
+        />
+      )}
+    </React.Fragment>
   );
 }

@@ -3,9 +3,11 @@ import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
 import { TAG_END, TAG_MOVE } from "../../../../constants/interactivePAStatus";
+import addCircleSVG from "../../../../assets/addCircle.svg";
 
 function drawSections(container, higherContainer, props, gutter) {
   const { ghostDiffDispatch } = props;
+  const addCircleTexture = PIXI.Texture.from(addCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
   const buttonHeight = 10;
   const pixiList = [];
 
@@ -39,6 +41,12 @@ function drawSections(container, higherContainer, props, gutter) {
     labelBG.clear().beginFill(color, 1);
     labelBG.drawRoundedRect(0, 0, 20, labelHeight, 5);
   });
+  const addCircle = labelBG.addChild(new PIXI.Sprite(addCircleTexture));
+  addCircle.position.x = 25;
+  addCircle.position.y = 40;
+  addCircle.scale = new PIXI.Point(0.5, 0.5);
+  addCircle.interactive = true;
+  addCircle.cursor = "pointer";
 
   const labelText = labelBG.addChild(new PIXI.Text("", { fill: "#fff", fontSize: 16 }));
   labelText.anchor.set(0.5, 1);
