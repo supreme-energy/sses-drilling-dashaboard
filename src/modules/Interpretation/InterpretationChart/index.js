@@ -114,7 +114,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       {logList.map((log, index) => (
         <LogDataLine
           log={log}
-          prevLog={logList[index - 1]}
           key={log.id}
           wellId={wellId}
           container={viewport}

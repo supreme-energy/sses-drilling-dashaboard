@@ -103,7 +103,7 @@ export function useComputedSegments(wellId) {
   return [computedSegments, keyBy(computedSegments, "id")];
 }
 
-export function useGetComputedLogData(wellId, log, prevLog) {
+export function useGetComputedLogData(wellId, log) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
   const [computedSegments] = useComputedSegments(wellId);
   const [logList] = useWellLogList(wellId);

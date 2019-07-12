@@ -1,6 +1,5 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
-import { useWellLogList } from "../../../api";
 
 const initialState = {
   selectedMd: null,

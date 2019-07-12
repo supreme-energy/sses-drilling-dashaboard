@@ -12,7 +12,7 @@ import { withRouter } from "react-router";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useDragActions } from "../actions";
 
-const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, ref) => {
+const SegmentLabel = forwardRef(({ container, segment, y, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => {
@@ -23,7 +23,7 @@ const SegmentLabel = forwardRef(({ container, segment, y, onDrag, ...props }, re
 
   const labelRef = useRef(null);
 
-  const { refresh, stage } = useInterpretationRenderer();
+  const { refresh } = useInterpretationRenderer();
 
   useEffect(
     function refreshWebGl() {
@@ -134,7 +134,6 @@ const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, s
             y={0}
             text={twoDecimals(segment.startdepth)}
             ref={segmentRef}
-            onDrag={onStartSegmentDragHandler}
           />
           <SegmentLabel
             container={container}
@@ -142,7 +141,6 @@ const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, s
             segment={segment}
             text={twoDecimals(segment.enddepth)}
             y={segmentHeight}
-            onDrag={onEndSegmentDragHandler}
           />
           <PixiContainer ref={segmentDragContainer} container={container} updateTransform={frozenScaleTransform} />
           <PixiContainer
