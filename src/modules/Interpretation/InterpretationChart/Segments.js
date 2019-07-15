@@ -53,7 +53,7 @@ const SegmentLabel = forwardRef(({ container, segment, y, ...props }, ref) => {
   );
 });
 
-const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, segmentHeight }) => {
+const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeight }) => {
   const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
 
   const selectionContainerRef = useRef(null);
@@ -174,7 +174,7 @@ const SegmentSelection = withRouter(({ segment, totalWidth, container, zIndex, s
       )}
     />
   );
-});
+};
 
 const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
