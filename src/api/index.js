@@ -540,7 +540,7 @@ export function useWellLogList(wellId) {
     [list]
   );
   const logs = logList || EMPTY_ARRAY;
-  const logsById = keyBy(logs, "id");
+  const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
   return [logs, logsById, ...rest];
 }
 

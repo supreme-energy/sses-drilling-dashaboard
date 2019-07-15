@@ -113,7 +113,7 @@ export function useGetComputedLogData(wellId, log) {
 
   return useMemo(() => {
     if (logData && computedSegment) {
-      const calculateDepth = getCalculateDepth(computedSegment, prevComputedSegment);
+      const calculateDepth = getCalculateDepth({ ...log, fault: computedSegment.fault }, prevComputedSegment);
       return {
         ...logData,
         data: logData.data.reduce((acc, d, index) => {
@@ -132,5 +132,5 @@ export function useGetComputedLogData(wellId, log) {
     }
 
     return logData;
-  }, [logData, computedSegment, prevComputedSegment]);
+  }, [logData, computedSegment, prevComputedSegment, log]);
 }
