@@ -16,6 +16,7 @@ import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer } from "../ComboDashboard/containers/store";
+import { useComputedSurveys } from "../Interpretation/selectors";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -205,8 +206,8 @@ function useFormationsData() {
 
 export function useCrossSectionData() {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
-
-  const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
+  const computedSurverys = useComputedSurveys(surveys);
+  const rawSections = useMemo(() => computedSurverys.concat(projections), [computedSurverys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();

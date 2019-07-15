@@ -2,6 +2,8 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
 import { useWellLogList, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
+import { useWellIdContainer } from "../App/Containers";
+import find from "lodash/find";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -100,7 +102,9 @@ export function useComputedSegments(wellId) {
     [logList, pendingSegmentsState]
   );
 
-  return [computedSegments, keyBy(computedSegments, "id")];
+  const computedSegmentsById = useMemo(() => keyBy(computedSegments, "id"), [computedSegments]);
+
+  return [computedSegments, computedSegmentsById];
 }
 
 export function useGetComputedLogData(wellId, log) {
@@ -133,4 +137,70 @@ export function useGetComputedLogData(wellId, log) {
 
     return logData;
   }, [logData, computedSegment, prevComputedSegment, log]);
+}
+
+function calculateSurveys(surveys, pendingSegmentsState) {
+  return surveys.reduce((acc, s, index) => {
+    const pendingState = find(pendingSegmentsState, (ps, md) => {
+      return (index === 0 && s.md > md) || (index > 0 && surveys[index - 1].md <= md && s.md > md);
+    });
+
+    const prevSurvey = acc[index - 1];
+    const dip = pendingState && pendingState.dip !== undefined ? pendingState.dip : s.dip;
+    const fault = pendingState && pendingState.fault !== undefined ? pendingState.fault : s.fault;
+    let lastVS = s.vs;
+    let lastTVD = s.tvd;
+    let lastDepth = s.tvd;
+
+    if (prevSurvey) {
+      lastVS = prevSurvey.vs;
+      lastTVD = prevSurvey.initialTVD;
+      lastDepth = prevSurvey.depth;
+    }
+
+    const depth = calcDepth(s.tvd, dip, s.vs, lastVS, fault, lastTVD, lastDepth);
+
+    const newSurvey = {
+      ...s,
+      fault,
+      dip,
+      depth,
+      tvd: depth,
+      initialTVD: s.tvd
+    };
+    acc[index] = newSurvey;
+    return acc;
+  }, []);
+}
+
+// export function useComputedSurveys(surveys) {
+//   const [{ pendingSegmentsState }] = useComboContainer();
+//   const computedSurveys = useMemo(() => calculateSurveys(surveys, pendingSegmentsState), [
+//     surveys,
+//     pendingSegmentsState
+//   ]);
+
+//   return computedSurveys;
+// }
+
+export function useComputedSurveys(surveys) {
+  const { wellId } = useWellIdContainer();
+  const [computedSegments] = useComputedSegments(wellId);
+  const computedSurveys = useMemo(
+    () =>
+      surveys.map(s => {
+        const segment = computedSegments.find(seg => s.md >= seg.startmd && s.md <= seg.endmd);
+        if (!segment) {
+          return s;
+        }
+
+        return {
+          ...s,
+          tvd: segment.enddepth
+        };
+      }),
+    [computedSegments, surveys]
+  );
+
+  return computedSurveys;
 }
