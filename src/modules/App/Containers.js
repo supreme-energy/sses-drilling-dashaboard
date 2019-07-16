@@ -205,7 +205,7 @@ export function useCrossSectionData() {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
+  const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
 
   const selectedSections = useMemo(
     function getSelectedSections() {
@@ -315,6 +315,8 @@ export function useCrossSectionData() {
     wellPlan,
     selectedSections,
     setSelectedMd,
+    deselectMd,
+    selectedMd,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
@@ -328,6 +330,11 @@ const initialState = {
 
 function comboStoreReducer(state, action) {
   switch (action.type) {
+    case "DESELECT_ALL":
+      return {
+        ...state,
+        selectedMd: null
+      };
     case "TOGGLE_MD": {
       if (state.selectedMd === action.md) {
         return {
@@ -348,8 +355,9 @@ function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
 
   const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
+  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
 
-  return [state, dispatch, { setSelectedMd }];
+  return [state, dispatch, { setSelectedMd, deselectMd }];
 }
 
 // Create containers

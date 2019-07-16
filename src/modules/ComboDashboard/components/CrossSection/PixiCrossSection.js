@@ -6,6 +6,7 @@ import { drawGrid } from "./drawGrid.js";
 import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
+import { drawButtons } from "./drawButtons";
 
 export default class PixiCrossSection {
   constructor() {
@@ -35,14 +36,16 @@ export default class PixiCrossSection {
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 80;
+    const gridGutter = 100;
     const gridGutterLeft = 50;
+    const tagHeight = 75;
     this.yTicks = 12;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
+    this.buttonUpdate = drawButtons(this.UILayer2, props, gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     this.gridUpdate = drawGrid(this.gridLayer, {
       gutter: gridGutter,
@@ -126,6 +129,7 @@ export default class PixiCrossSection {
     this.wellPlanUpdate(props);
     this.surveyUpdate(props);
     this.sectionUpdate(props);
+    this.buttonUpdate(props);
     this.interactivePAUpdate(props);
     this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;

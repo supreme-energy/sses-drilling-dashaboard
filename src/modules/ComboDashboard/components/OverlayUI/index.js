@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import addCircle from "../../../../assets/addCircle.svg";
 
 import classes from "./OverlayUI.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
@@ -19,13 +18,6 @@ export default function DetailsTable({ width, height, view }) {
         {selectedItem &&
           `displaying ${selectedItem.vs.toFixed(2)} at ${(selectedItem.vs * view.xScale + view.x).toFixed(2)}`}
       </Typography>
-      {selectedItem && (
-        <img
-          src={addCircle}
-          className={classes.addIcon}
-          style={{ top: `${height - 60}px`, left: `${selectedItem.vs * view.xScale + view.x + 16}px` }}
-        />
-      )}
     </React.Fragment>
   );
 }
