@@ -29,7 +29,7 @@ export function useSelectedWellLog(wellId) {
   const selectedWellLog = logList[selectedWellLogIndex];
   const prevLog = logList[selectedWellLogIndex - 1];
 
-  return { selectedWellLog, prevLog };
+  return { selectedWellLog, prevLog, selectedWellLogIndex };
 }
 
 export function getCalculateDip(log, prevLog) {
@@ -74,42 +74,55 @@ export function useCalculateDipFromSurvey(wellId) {
 
 export function useComputedSegments(wellId) {
   const [logList] = useWellLogList(wellId);
-  const [{ pendingSegmentsState }] = useComboContainer();
+  const [{ pendingSegmentsState, draftMode }] = useComboContainer();
+  const { selectedWellLogIndex } = useSelectedWellLog(wellId);
   const computedSegments = useMemo(
     () =>
       logList.reduce((acc, l, index) => {
-        const pendingState = pendingSegmentsState[l.startmd];
-        let newLog = {
-          ...l
+        const isDraft = draftMode && index === selectedWellLogIndex;
+        const getNewLog = usePending => {
+          const pendingState = usePending ? pendingSegmentsState[l.startmd] : {};
+          let newLog = {
+            ...l
+          };
+
+          if (pendingState && pendingState.fault !== undefined) {
+            newLog.fault = pendingState.fault;
+          }
+
+          if (pendingState && pendingState.dip !== undefined) {
+            newLog.sectdip = pendingState.dip;
+          }
+
+          const calculateDepth = getCalculateDepth(newLog, acc[index - 1]);
+          newLog.startdepth = calculateDepth({ tvd: l.starttvd, dip: newLog.sectdip, vs: l.startvs });
+          newLog.enddepth = calculateDepth({ tvd: l.endtvd, dip: newLog.sectdip, vs: l.endvs });
+          return newLog;
         };
-
-        if (pendingState && pendingState.fault !== undefined) {
-          newLog.fault = pendingState.fault;
+        const log = getNewLog(!isDraft);
+        if (isDraft) {
+          log.draftData = getNewLog(true);
         }
-
-        if (pendingState && pendingState.dip !== undefined) {
-          newLog.sectdip = pendingState.dip;
-        }
-
-        const calculateDepth = getCalculateDepth(newLog, acc[index - 1]);
-        newLog.startdepth = calculateDepth({ tvd: l.starttvd, dip: newLog.sectdip, vs: l.startvs });
-        newLog.enddepth = calculateDepth({ tvd: l.endtvd, dip: newLog.sectdip, vs: l.endvs });
-        acc.push(newLog);
+        acc.push(log);
         return acc;
       }, []),
-    [logList, pendingSegmentsState]
+    [logList, pendingSegmentsState, selectedWellLogIndex, draftMode]
   );
 
   return [computedSegments, keyBy(computedSegments, "id")];
 }
 
-export function useGetComputedLogData(wellId, log) {
+export function useGetComputedLogData(wellId, log, draft) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
   const [computedSegments] = useComputedSegments(wellId);
   const [logList] = useWellLogList(wellId);
   const logIndex = logList.findIndex(l => l.id === log.id);
-  const computedSegment = computedSegments[logIndex];
+  let computedSegment = computedSegments[logIndex];
   const prevComputedSegment = computedSegments[logIndex - 1];
+
+  if (draft) {
+    computedSegment = computedSegment && computedSegment.draftData;
+  }
 
   return useMemo(() => {
     if (logData && computedSegment) {

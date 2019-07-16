@@ -8,11 +8,11 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { withRouter } from "react-router";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useDragActions } from "../actions";
+import { selectionColor, segmentColor, draftColor } from "../pixiColors";
 
-const SegmentLabel = forwardRef(({ container, segment, y, ...props }, ref) => {
+const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => {
@@ -48,12 +48,12 @@ const SegmentLabel = forwardRef(({ container, segment, y, ...props }, ref) => {
       container={container}
       x={labelX}
       textProps={{ fontSize: 12, color: 0xffffff }}
-      backgroundProps={{ backgroundColor: 0xe80a23, radius: 5 }}
+      backgroundProps={{ backgroundColor, radius: 5 }}
     />
   );
 });
 
-const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeight }) => {
+const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeight, isDraft }) => {
   const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
 
   const selectionContainerRef = useRef(null);
@@ -124,12 +124,13 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
       ref={selectionContainerRef}
       y={segment.startdepth}
       container={container}
+      zIndex={zIndex}
       updateTransform={frozenScaleTransform}
       child={container => (
         <React.Fragment>
           <SegmentLabel
             container={container}
-            zIndex={zIndex}
+            backgroundColor={isDraft ? draftColor : selectionColor}
             segment={segment}
             y={0}
             text={twoDecimals(segment.startdepth)}
@@ -137,7 +138,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
           />
           <SegmentLabel
             container={container}
-            zIndex={zIndex}
+            backgroundColor={isDraft ? draftColor : selectionColor}
             segment={segment}
             text={twoDecimals(segment.enddepth)}
             y={segmentHeight}
@@ -148,7 +149,13 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
             container={container}
             updateTransform={frozenScaleTransform}
             child={container => (
-              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={isDraft ? draftColor : selectionColor}
+                lineWidth={2}
+                nativeLines={false}
+              />
             )}
           />
           <PixiContainer
@@ -157,17 +164,22 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
             y={segmentHeight}
             updateTransform={frozenScaleTransform}
             child={container => (
-              <PixiLine container={container} data={lineData} color={0xe80a23} lineWidth={2} nativeLines={false} />
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={isDraft ? draftColor : selectionColor}
+                lineWidth={2}
+                nativeLines={false}
+              />
             )}
           />
           <PixiRectangle
-            zIndex={zIndex}
             width={10}
             height={segmentHeight}
             y={0}
             x={totalWidth - 70}
             radius={5}
-            backgroundColor={0xe80a23}
+            backgroundColor={isDraft ? draftColor : selectionColor}
             container={container}
           />
         </React.Fragment>
@@ -178,27 +190,13 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
 
 const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
-
+  const segmentData = (segment && segment.draftData) || segment;
+  const isDraft = segment && segment.draftData;
+  const segmentSelectionHeight = view.yScale * (segmentData.enddepth - segmentData.startdepth);
   const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
-  const { refresh } = useInterpretationRenderer();
-  useEffect(
-    function refreshWebGl() {
-      refresh();
-    },
-    [segment.enddepth, segment.startdepth, refresh]
-  );
 
   return (
     <React.Fragment>
-      {selected && (
-        <SegmentSelection
-          segment={segment}
-          totalWidth={totalWidth}
-          container={container}
-          zIndex={zIndex + 1}
-          segmentHeight={segmentHeight}
-        />
-      )}
       <PixiRectangle
         onClick={onClick}
         zIndex={zIndex}
@@ -207,9 +205,19 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
         height={segmentHeight}
         y={segment.startdepth}
         radius={5}
-        backgroundColor={selected ? 0xe80a23 : 0xd2d2d2}
+        backgroundColor={selected ? selectionColor : segmentColor}
         container={container}
       />
+      {selected && (
+        <SegmentSelection
+          segment={segmentData}
+          totalWidth={totalWidth}
+          container={container}
+          isDraft={isDraft}
+          zIndex={zIndex + 1}
+          segmentHeight={segmentSelectionHeight}
+        />
+      )}
     </React.Fragment>
   );
 };
@@ -223,6 +231,7 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
     },
     [setSelectedMd]
   );
+
   return (
     <React.Fragment>
       {segmentsData.map(s => {

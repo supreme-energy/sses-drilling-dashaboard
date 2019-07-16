@@ -1,18 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData } from "../selectors";
+import { useInterpretationRenderer } from ".";
+import PixiContainer from "../../../components/PixiContainer";
+import { draftColor, selectionColor, logColor } from "../pixiColors";
 
 const mapWellLog = d => [d.value, d.depth];
-export default function LogDataLine({ wellId, log, prevLog, container, selected }) {
-  const logData = useGetComputedLogData(wellId, log);
+export default function LogDataLine({ wellId, log, prevLog, container, bias, draft, selected, ...props }) {
+  const logData = useGetComputedLogData(wellId, log, draft);
+  const { refresh } = useInterpretationRenderer();
 
-  return logData ? (
-    <PixiLine
-      key={log.id}
+  useEffect(
+    function refreshWebGLRenderer() {
+      refresh();
+    },
+    [refresh, logData]
+  );
+
+  return (
+    <PixiContainer
+      x={bias}
+      y={0}
       container={container}
-      data={logData.data}
-      mapData={mapWellLog}
-      color={selected ? 0xee2211 : 0x0d0079}
+      child={container =>
+        logData ? (
+          <PixiLine
+            {...props}
+            key={log.id}
+            container={container}
+            data={logData.data}
+            mapData={mapWellLog}
+            color={draft ? draftColor : selected ? selectionColor : logColor}
+          />
+        ) : null
+      }
     />
-  ) : null;
+  );
 }
+
+LogDataLine.defaultProps = {
+  bias: 0
+};
