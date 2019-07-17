@@ -23,14 +23,13 @@ export default class PixiCrossSection {
     // Stage contains the draw layers and never moves. Some events are registered here.
     this.stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
-    this.viewport = new PIXI.Container();
+    this.viewport = this.stage.addChild(new PIXI.Container());
     // Set up PIXI classes for rendering and draw layers
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer2 = this.viewport.addChild(new PIXI.Container());
-    this.stage.addChild(this.viewport);
 
     this.makeInteractive(this.stage);
   }
@@ -45,7 +44,7 @@ export default class PixiCrossSection {
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
     this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
-    this.buttonUpdate = drawButtons(this.UILayer2, props, gridGutter, tagHeight);
+    this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     this.gridUpdate = drawGrid(this.gridLayer, {
       gutter: gridGutter,

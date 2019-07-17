@@ -4,7 +4,6 @@ import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
-import OverlayUI from "../OverlayUI";
 
 const pixiApp = new PixiCrossSection();
 
@@ -41,12 +40,17 @@ const CrossSection = props => {
     }
   );
 
+  const [mouse, setMouse] = useState({
+    x: 0,
+    y: 0
+  });
+
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   useEffect(() => {
     const currentCanvas = canvas.current;
 
-    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode }, view, updateView);
+    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse }, view, updateView);
     currentCanvas.appendChild(pixiApp.renderer.view);
     return () => {
       pixiApp.cleanUp();
@@ -76,7 +80,9 @@ const CrossSection = props => {
       view,
       updateView,
       mode,
-      setMode
+      setMode,
+      mouse,
+      setMouse
     });
   }, [
     view.x,
@@ -97,15 +103,12 @@ const CrossSection = props => {
     calculatedFormations,
     scale,
     mode,
-    setMode
+    setMode,
+    mouse,
+    setMouse
   ]);
 
-  return (
-    <React.Fragment>
-      <OverlayUI width={width} height={height} view={view} />
-      <div className={classes.crossSection} ref={canvas} />
-    </React.Fragment>
-  );
+  return <div className={classes.crossSection} ref={canvas} />;
 };
 
 CrossSection.propTypes = {
