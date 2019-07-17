@@ -1,0 +1,73 @@
+@import "../../../../../styles/base";
+
+.listRowContainer {
+    > div {
+        margin-right: 8px;
+    }
+
+    .controls, .controlsFirstRow {
+        padding: 15px 5px 0;
+        display: inline-block;
+        > span, button {
+            display: block;
+        }
+    }
+}
+
+.contactDialogTitle {
+    padding-bottom: 0;
+
+    h6 {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .closeButton {
+        position: relative;
+        left: 15px;
+        bottom: 7px;
+    }
+}
+
+.contactDialogContent {
+    padding-top: 0;
+
+    .allReportsButton {
+        position: relative;
+        bottom: 15px;
+        right: 20px;
+
+        > span:first-child {
+            margin-right: 20px;
+        }
+    }
+
+    .popupInputRow > div {
+        padding: 7px;
+
+        label {
+            padding-left: 5px;
+        }
+    }
+
+    .switchComponent {
+        display: flex;
+        justify-content: space-between;
+        text-align: left;
+        padding: 5px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+        > span:first-child {
+            margin-top: 7px;
+        }
+    }
+
+    .reportTitle {
+        color: $gold;
+        padding-top: 15px;
+    }
+}
+
+.reportMailingListContainer {
+    margin-top: 10px;
+}

@@ -88,6 +88,7 @@ export function useWellInfo(wellId) {
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
+  const emailInfo = data && data.emailinfo;
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
@@ -128,6 +129,31 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
+  );
+
+  const updateEmail = useCallback(
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        emailinfo: {
+          ...emailInfo,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId,
+          table: "emailinfo",
+          field,
+          value
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, emailInfo]
   );
 
   const {
@@ -182,11 +208,13 @@ export function useWellInfo(wellId) {
       wellPBHL,
       wellPBHLLocal,
       wellInfo,
+      emailInfo,
       transform
     },
     isLoading,
     updateWell,
-    refreshStore
+    refreshStore,
+    updateEmail
   ];
 }
 
