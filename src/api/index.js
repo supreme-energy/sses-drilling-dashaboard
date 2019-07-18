@@ -544,26 +544,25 @@ export function useWellLogList(wellId) {
   return [logs, logsById, ...rest];
 }
 
-export function useWellLogData(wellId, tableName) {
-  const transformWellLogData = useMemo(() => {
-    const sortByDepth = (a, b) => a.depth - b.depth;
-    return memoizeOne(data => {
-      return {
-        ...data,
-        endvs: Number(data.endvs),
-        fault: Number(data.fault),
-        startvs: Number(data.startvs),
-        endtvd: Number(data.endtvd),
-        starttvd: Number(data.starttvd),
-        startmd: Number(data.startmd),
-        endmd: Number(data.endmd),
-        startdepth: Number(data.startdepth),
-        enddepth: Number(data.enddepth),
-        data: transform(data.data).sort(sortByDepth)
-      };
-    });
-  }, []);
+const transformWellLogData = memoize(logData => {
+  const sortByDepth = (a, b) => a.depth - b.depth;
 
+  return {
+    ...logData,
+    endvs: Number(logData.endvs),
+    fault: Number(logData.fault),
+    startvs: Number(logData.startvs),
+    endtvd: Number(logData.endtvd),
+    starttvd: Number(logData.starttvd),
+    startmd: Number(logData.startmd),
+    endmd: Number(logData.endmd),
+    startdepth: Number(logData.startdepth),
+    enddepth: Number(logData.enddepth),
+    data: transform(logData.data).sort(sortByDepth)
+  };
+});
+
+export function useWellLogData(wellId, tableName) {
   return useFetch(
     tableName &&
       wellId && {

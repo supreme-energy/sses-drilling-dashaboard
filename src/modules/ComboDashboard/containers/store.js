@@ -3,8 +3,27 @@ import { useReducer, useCallback } from "react";
 
 const initialState = {
   selectedMd: null,
-  pendingSegmentsState: {}
+  pendingSegmentsState: {},
+  draftMode: false
 };
+
+const initialPendingState = {
+  scale: 1,
+  bias: 0
+};
+
+function updateSegmentProperties(state, md, p) {
+  return {
+    ...state,
+    pendingSegmentsState: {
+      ...state.pendingSegmentsState,
+      [md]: {
+        ...(state.pendingSegmentsState[md] || initialPendingState),
+        ...p
+      }
+    }
+  };
+}
 
 function comboStoreReducer(state, action) {
   switch (action.type) {
@@ -15,23 +34,47 @@ function comboStoreReducer(state, action) {
           selectedMd: null
         };
       } else {
+        const pendingSegmentsState = {
+          ...state.pendingSegmentsState,
+          [action.md]: initialPendingState
+        };
         return {
           ...state,
-          selectedMd: action.md
+          selectedMd: action.md,
+          pendingSegmentsState
         };
       }
     }
-    case "UPDATE_SEGMENT_PROPERTIES":
+    case "TOGGLE_DRAFT_MODE":
+      const draft = !state.draftMode;
+
       return {
         ...state,
-        pendingSegmentsState: {
-          ...state.pendingSegmentsState,
-          [action.md]: {
-            ...(state.pendingSegmentsState[action.md] || {}),
-            ...action.props
-          }
-        }
+        draftMode: draft
       };
+    case "UPDATE_SEGMENT_PROPERTIES":
+      return updateSegmentProperties(state, action.md, action.props);
+    case "CHANGE_SELECTED_SEGMENT_BIAS_DELTA": {
+      const selectedMd = state.selectedMd;
+      const selectionPendingState = state.pendingSegmentsState[selectedMd] || initialPendingState;
+      return updateSegmentProperties(state, selectedMd, { bias: (selectionPendingState.bias || 0) + action.delta });
+    }
+
+    case "CHANGE_SELECTED_SEGMENT_BIAS": {
+      const selectedMd = state.selectedMd;
+
+      return updateSegmentProperties(state, selectedMd, { bias: action.bias });
+    }
+
+    case "CHANGE_SELECTED_SEGMENT_SCALE": {
+      const selectedMd = state.selectedMd;
+      const props = { scale: action.scale };
+      if (action.bias !== undefined) {
+        props.bias = action.bias;
+      }
+      console.log("props", props);
+      return updateSegmentProperties(state, selectedMd, props);
+    }
     default:
       throw new Error("action not defined for combo store reducer");
   }

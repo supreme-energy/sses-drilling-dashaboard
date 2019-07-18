@@ -72,3 +72,28 @@ export function useDragActions() {
 
   return { onEndSegmentDrag, onStartSegmentDrag, onSegmentDrag };
 }
+
+export function useBiasAndScaleActions(dispatch) {
+  const changeSelectedSegmentBiasDelta = useCallback(
+    delta => {
+      dispatch({
+        type: "CHANGE_SELECTED_SEGMENT_BIAS_DELTA",
+        delta
+      });
+    },
+    [dispatch]
+  );
+
+  const changeSelectedSegmentScale = useCallback(
+    (scale, bias) => {
+      dispatch({
+        type: "CHANGE_SELECTED_SEGMENT_SCALE",
+        scale,
+        bias
+      });
+    },
+    [dispatch]
+  );
+
+  return { changeSelectedSegmentBiasDelta, changeSelectedSegmentScale };
+}
