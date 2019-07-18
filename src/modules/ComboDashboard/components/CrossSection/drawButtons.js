@@ -59,8 +59,14 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   paIndicator.transform.updateTransform = frozenXTransform;
   paIndicator.visible = false;
 
-  const selectedLeft = paIndicator.addChild(new PIXI.Graphics());
-  selectedLeft.transform.updateTransform = frozenXTransform;
+  const paLine = paIndicator.addChild(new PIXI.Graphics());
+  paLine.transform.updateTransform = frozenXTransform;
+
+  const paHintText = paIndicator.addChild(
+    new PIXI.Text("Click to add a PA station here", { fill: "#e21", fontSize: 12 })
+  );
+  paHintText.anchor.set(0.5, 0);
+  paHintText.position.x = 0;
 
   const labelBG = paIndicator.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
@@ -133,8 +139,9 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
       paIndicator.position.x = paIndicatorX;
       labelText.text = `${paIndicatorX.toFixed(2)}`;
       paIndicator.position.y = height - gutter;
-      selectedLeft.clear().lineStyle(2, 0xee2211, 0.5);
-      selectedLeft.moveTo(0, 0).lineTo(0, height - gutter);
+      paHintText.position.y = -(height - gutter);
+      paLine.clear().lineStyle(2, 0xee2211, 0.5);
+      paLine.moveTo(0, 15).lineTo(0, height - gutter);
     }
 
     lastMode = mode;
