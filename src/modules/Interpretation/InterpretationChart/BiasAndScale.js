@@ -61,13 +61,16 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
     [changeSelectedSegmentScale, width, container, xMax, gridGutter, bias]
   );
 
+  const computedWidth = width * scale;
+  const computedXMin = xMin - (computedWidth - width) / 2;
+
   useDraggable({
     container: segmentContainerRef.current && segmentContainerRef.current.container,
     root: container,
     onDrag: onRootDragHandler,
     canvas,
     cursor: "ew-resize",
-    width: width - 4,
+    width: computedWidth - 4,
     height: 8,
     x: 4,
     y: 0
@@ -97,9 +100,6 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
     height: 10
   });
 
-  const computedWidth = width * scale;
-  const computedXMin = xMin - (computedWidth - width) / 2;
-  console.log("computedXMin", computedXMin, bias, xMin, gridGutter);
   return (
     <React.Fragment>
       <PixiContainer
