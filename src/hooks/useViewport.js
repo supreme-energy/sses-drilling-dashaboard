@@ -15,7 +15,8 @@ export default function useViewport({
   view,
   zoomXScale,
   zoomYScale,
-  isXScalingValid
+  isXScalingValid,
+  refresh
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const {
@@ -114,8 +115,11 @@ export default function useViewport({
       viewport.position = new PIXI.Point(view.x, view.y);
       viewport.scale.x = view.xScale;
       viewport.scale.y = view.yScale;
+      if (refresh) {
+        refresh();
+      }
     },
-    [view, viewport]
+    [view, viewport, refresh]
   );
 
   return viewport;

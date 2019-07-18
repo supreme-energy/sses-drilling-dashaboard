@@ -59,7 +59,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
   const { onStartSegmentDrag, onEndSegmentDrag, onSegmentDrag } = useDragActions();
-  const { viewport, stage, canvasRef } = useInterpretationRenderer();
+  const { viewport, stage, canvasRef, view } = useInterpretationRenderer();
 
   const onStartSegmentDragHandler = useCallback(
     event => onStartSegmentDrag(event.data.getLocalPosition(viewport), segment),
@@ -73,10 +73,10 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const onSegmentDragHandler = useCallback(
     (event, prevMouse) => {
       const currMouse = event.data.global;
-      const delta = currMouse.y - prevMouse.y;
+      const delta = (currMouse.y - prevMouse.y) / view.yScale;
       onSegmentDrag(event.data.getLocalPosition(viewport), delta, segment);
     },
-    [viewport, onSegmentDrag, segment]
+    [viewport, onSegmentDrag, segment, view]
   );
 
   const startLineRef = useRef(null);
@@ -232,23 +232,19 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
     [setSelectedMd]
   );
 
-  return (
-    <React.Fragment>
-      {segmentsData.map(s => {
-        const selected = selectedWellLog && selectedWellLog.id === s.id;
-        return (
-          <Segment
-            totalWidth={chartWidth}
-            segment={s}
-            zIndex={selected ? 2 + segmentsData.length : 2}
-            view={view}
-            selected={selected}
-            container={container}
-            onSegmentClick={onSegmentClick}
-            key={s.id}
-          />
-        );
-      })}
-    </React.Fragment>
-  );
+  return segmentsData.map(s => {
+    const selected = selectedWellLog && selectedWellLog.id === s.id;
+    return (
+      <Segment
+        totalWidth={chartWidth}
+        segment={s}
+        zIndex={selected ? 2 + segmentsData.length : 2}
+        view={view}
+        selected={selected}
+        container={container}
+        onSegmentClick={onSegmentClick}
+        key={s.id}
+      />
+    );
+  });
 }

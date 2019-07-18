@@ -9,16 +9,16 @@ export function useWebGLRenderer({ canvas, width, height }) {
     return s;
   });
 
-  const rendererRef = useRef(() =>
-    PIXI.autoDetectRenderer({
+  const rendererRef = useRef(() => {
+    return PIXI.autoDetectRenderer({
       width,
       height,
       antialias: true,
       autoResize: true,
       resolution: devicePixelRatio,
       backgroundColor: 0xffffff
-    })
-  );
+    });
+  });
 
   useEffect(
     function resizeRenderer() {

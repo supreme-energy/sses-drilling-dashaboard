@@ -17,7 +17,7 @@ function draw(lineG, lineWidth, color, lineData, view, native) {
   });
 }
 
-const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, view, lineWidth }, ref) => {
+const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, view, lineWidth, scale, x, y }, ref) => {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
   const lineG = useRef(() => new PIXI.Graphics());
 
@@ -34,6 +34,27 @@ const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, vie
       }
     },
     [view, nativeLines, color, lineData, lineWidth]
+  );
+
+  useEffect(
+    function updateScale() {
+      if (scale) {
+        const lineGraphic = lineG.current;
+        lineGraphic.scale.set(scale.x, scale.y);
+      }
+    },
+    [scale]
+  );
+
+  useEffect(
+    function updatePosition() {
+      const lineGraphic = lineG.current;
+
+      lineGraphic.position.set(x, y);
+      lineGraphic.x = x;
+      lineGraphic.y = y;
+    },
+    [x, y]
   );
 
   useImperativeHandle(ref, () => ({
@@ -55,6 +76,8 @@ PixiLine.propTypes = {
 
 PixiLine.defaultProps = {
   nativeLines: true,
+  x: 0,
+  y: 0,
   lineWidth: 1,
   view: { xScale: 1, yScale: 1 },
   mapData: d => d

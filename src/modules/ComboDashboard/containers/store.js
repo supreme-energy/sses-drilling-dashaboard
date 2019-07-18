@@ -7,6 +7,24 @@ const initialState = {
   draftMode: false
 };
 
+const initialPendingState = {
+  scale: 1,
+  bias: 0
+};
+
+function updateSegmentProperties(state, md, p) {
+  return {
+    ...state,
+    pendingSegmentsState: {
+      ...state.pendingSegmentsState,
+      [md]: {
+        ...(state.pendingSegmentsState[md] || initialPendingState),
+        ...p
+      }
+    }
+  };
+}
+
 function comboStoreReducer(state, action) {
   switch (action.type) {
     case "TOGGLE_MD": {
@@ -16,37 +34,42 @@ function comboStoreReducer(state, action) {
           selectedMd: null
         };
       } else {
+        const pendingSegmentsState = {
+          ...state.pendingSegmentsState,
+          [action.md]: initialPendingState
+        };
         return {
           ...state,
-          selectedMd: action.md
+          selectedMd: action.md,
+          pendingSegmentsState
         };
       }
     }
     case "TOGGLE_DRAFT_MODE":
       const draft = !state.draftMode;
-      const selectedMd = state.selectedMd;
-      // reset pending state for drafted item
-      const pendingSegmentsState = {
-        ...state.pendingSegmentsState,
-        [selectedMd]: {}
-      };
 
       return {
         ...state,
-        draftMode: draft,
-        pendingSegmentsState
+        draftMode: draft
       };
     case "UPDATE_SEGMENT_PROPERTIES":
-      return {
-        ...state,
-        pendingSegmentsState: {
-          ...state.pendingSegmentsState,
-          [action.md]: {
-            ...(state.pendingSegmentsState[action.md] || {}),
-            ...action.props
-          }
-        }
-      };
+      return updateSegmentProperties(state, action.md, action.props);
+    case "CHANGE_SELECTED_SEGMENT_BIAS_DELTA": {
+      const selectedMd = state.selectedMd;
+      const selectionPendingState = state.pendingSegmentsState[selectedMd] || initialPendingState;
+      return updateSegmentProperties(state, selectedMd, { bias: (selectionPendingState.bias || 0) + action.delta });
+    }
+
+    case "CHANGE_SELECTED_SEGMENT_BIAS": {
+      const selectedMd = state.selectedMd;
+
+      return updateSegmentProperties(state, selectedMd, { bias: action.bias });
+    }
+
+    case "CHANGE_SELECTED_SEGMENT_SCALE": {
+      const selectedMd = state.selectedMd;
+      return updateSegmentProperties(state, selectedMd, { scale: action.scale });
+    }
     default:
       throw new Error("action not defined for combo store reducer");
   }
