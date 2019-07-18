@@ -72,7 +72,7 @@ function comboStoreReducer(state, action) {
       if (action.bias !== undefined) {
         props.bias = action.bias;
       }
-      console.log("props", props);
+
       return updateSegmentProperties(state, selectedMd, props);
     }
     default:

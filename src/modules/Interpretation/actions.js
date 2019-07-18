@@ -1,14 +1,29 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useWellLogList } from "../../api";
 import { useCallback } from "react";
-import { useWellIdContainer } from "../App/Containers";
+import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
 import { getCalculateDip, useComputedSegments } from "./selectors";
+import debounce from "lodash/debounce";
 
 export function useDragActions() {
   const [{ pendingSegmentsState }, , { updateSegment }] = useComboContainer();
   const { wellId } = useWellIdContainer();
   const [logs, logsById] = useWellLogList(wellId);
   const [segments] = useComputedSegments(wellId);
+  const { updateSurvey, surveys } = useSurveysDataContainer(wellId);
+
+  const saveSurvey = useCallback(
+    debounce((props, log) => {
+      const survey = surveys.find(s => s.md >= log.startmd && s.md <= log.endmd);
+
+      console.log("survey", survey);
+      if (survey) {
+        updateSurvey({ surveyId: survey.id, fields: props });
+      }
+    }, 300),
+    [wellId, updateSurvey]
+  );
+
   const onEndSegmentDrag = useCallback(
     (newPosition, segment) => {
       const log = logsById[segment.id];
@@ -21,15 +36,20 @@ export function useDragActions() {
 
       const depth = newPosition.y;
       const calculateDip = getCalculateDip(log, prevSegment);
+
       const newDip = calculateDip({
         tvd: log.endtvd,
         depth: depth,
         vs: log.endvs,
         fault: pendingState && pendingState.fault
       });
-      updateSegment({ dip: newDip }, log.startmd);
+
+      const props = { dip: newDip };
+      updateSegment(props, log.startmd);
+
+      //saveSurvey(props, log);
     },
-    [pendingSegmentsState, updateSegment, logs, logsById, segments]
+    [pendingSegmentsState, updateSegment, logs, logsById, segments, saveSurvey]
   );
 
   const onSegmentDrag = useCallback(

@@ -10,7 +10,7 @@ import AerialCrossSection from "./AerialCrossSection";
 import WellOperation from "./WellOperation";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
-import { useWellIdContainer, CrossSectionProvider } from "../../App/Containers";
+import { useWellIdContainer, CrossSectionProvider, SurveysProvider } from "../../App/Containers";
 import { ComboContainerProvider } from "../containers/store";
 
 const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measures"));
@@ -18,29 +18,31 @@ const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measure
 function ComboDashboard() {
   const { wellId } = useWellIdContainer();
   return (
-    <ComboContainerProvider>
-      <div className={classes.comboDashboardWrapper}>
-        <Suspense fallback={<Progress />}>
-          <div className={classes.kpiRows}>
-            <div className={classes.row}>
-              <DrillPhaseKPI className={classes.drillPhaseKpi} wellId={wellId} />
-              <ToolFace />
-              <WellOperation wellId={wellId} />
-              <AerialCrossSection wellId={wellId} />
+    <SurveysProvider>
+      <ComboContainerProvider>
+        <div className={classes.comboDashboardWrapper}>
+          <Suspense fallback={<Progress />}>
+            <div className={classes.kpiRows}>
+              <div className={classes.row}>
+                <DrillPhaseKPI className={classes.drillPhaseKpi} wellId={wellId} />
+                <ToolFace />
+                <WellOperation wellId={wellId} />
+                <AerialCrossSection wellId={wellId} />
+              </div>
+              <div className={classNames(classes.row, classes.graphRow)}>
+                <Interpretation className={"flex"} />
+                <CrossSectionProvider>
+                  <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
+                </CrossSectionProvider>
+              </div>
             </div>
-            <div className={classNames(classes.row, classes.graphRow)}>
-              <Interpretation className={"flex"} />
-              <CrossSectionProvider>
-                <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
-              </CrossSectionProvider>
+            <div className={classes.kpiColumn}>
+              <Measures wellId={wellId} />
             </div>
-          </div>
-          <div className={classes.kpiColumn}>
-            <Measures wellId={wellId} />
-          </div>
-        </Suspense>
-      </div>
-    </ComboContainerProvider>
+          </Suspense>
+        </div>
+      </ComboContainerProvider>
+    </SurveysProvider>
   );
 }
 

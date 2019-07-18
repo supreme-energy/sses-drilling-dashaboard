@@ -140,7 +140,7 @@ function useSurveysData() {
   const { wellId } = useWellIdContainer();
   const [surveysData, setSurveys] = useState([]);
 
-  const surveys = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
@@ -150,7 +150,7 @@ function useSurveysData() {
     }
   }, [surveys, setSurveys]);
 
-  return { surveysData, setSurveys };
+  return { surveysData, setSurveys, updateSurvey, surveys };
 }
 
 function useProjectionsData() {

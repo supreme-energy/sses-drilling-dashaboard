@@ -21,7 +21,7 @@ export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
-export const SET_WELL_SURVEYS = "/setsurveyfield.php";
+export const SET_WELL_SURVEY = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
@@ -343,7 +343,7 @@ const surveysTransform = memoizeOne(data => {
   });
 });
 export function useFetchSurveys(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { fetch }] = useFetch(
     {
       path: GET_WELL_SURVEYS,
       query: {
@@ -354,7 +354,31 @@ export function useFetchSurveys(wellId) {
       transform: surveysTransform
     }
   );
-  return data || EMPTY_ARRAY;
+
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
+  const updateSurvey = useCallback(
+    ({ surveyId, fields = {} }) => {
+      const optimisticResult = data.map(d => {
+        return d.id === surveyId ? { ...d, ...fields } : d;
+      });
+
+      return serializedUpdateFetch({
+        path: SET_WELL_SURVEY,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: surveyId,
+          ...fields
+        },
+        optimisticResult,
+        cache: "no-cache"
+      });
+    },
+    [serializedUpdateFetch, data, wellId]
+  );
+
+  return [data || EMPTY_ARRAY, { updateSurvey }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
