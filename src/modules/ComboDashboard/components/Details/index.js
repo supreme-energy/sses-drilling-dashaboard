@@ -29,13 +29,18 @@ function SurveyIcon({ row }) {
   }
 }
 
-export default function DetailsTable() {
+export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections } = useCrossSectionContainer();
+  let details;
 
-  const selectedIndex = useMemo(() => {
-    return calcSections.findIndex(s => selectedSections[s.id]);
-  }, [calcSections, selectedSections]);
-  const details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+  if (showFullTable) {
+    details = calcSections.slice().reverse();
+  } else {
+    const selectedIndex = useMemo(() => {
+      return calcSections.findIndex(s => selectedSections[s.id]);
+    }, [calcSections, selectedSections]);
+    details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+  }
 
   return (
     <Table className={classes.table}>

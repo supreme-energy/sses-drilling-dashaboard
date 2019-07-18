@@ -44,3 +44,20 @@
 
   }
 }
+
+.dialogTitle {
+  .closeButton {
+    position: relative;
+    left: 10px;
+    bottom: 5px;
+  }
+}
+
+.dialogContent {
+  display: flex;
+  justify-content: space-between;
+  .interpretationChart {
+    display: flex;
+    width: 100%;
+  }
+}
