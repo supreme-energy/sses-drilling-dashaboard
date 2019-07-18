@@ -15,7 +15,7 @@ function addButton(container, texture) {
 }
 
 function drawButtons(container, stage, props, gutter, tagHeight) {
-  const { setMouse, setMode } = props;
+  const { setMouse, setMode, deselectMd } = props;
   const addCircleTexture = PIXI.Texture.from(addCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
   const checkCircleTexture = PIXI.Texture.from(checkCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
   const trashCircleTexture = PIXI.Texture.from(trashCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
@@ -29,30 +29,22 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   const addCircle = addButton(btnStage, addCircleTexture);
   addCircle.position.x = 15;
   addCircle.position.y = tagHeight - 20;
-  const setAddCircleMemo = memoizeOne(setMode => {
-    console.log("Setting action for addCircle circle");
-    addCircle.on("click", () => {
-      setMode(ADD_PA_STATION);
-    });
+  addCircle.on("click", () => {
+    deselectMd();
+    setMode(ADD_PA_STATION);
   });
 
   const trashCircle = addButton(btnStage, trashCircleTexture);
   trashCircle.position.x = -35;
   trashCircle.position.y = tagHeight - 20;
-  const setTrashCircleMemo = memoizeOne(action => {
-    console.log("Setting action for trash circle");
-    trashCircle.on("click", action);
-  });
+  trashCircle.on("click", () => {});
 
   const checkCircle = addButton(btnStage, checkCircleTexture);
   checkCircle.position.x = -10;
   checkCircle.position.y = tagHeight + 5;
-  const setCheckActionMemo = memoizeOne((action, setMode) => {
-    console.log("Setting action for bottom circle");
-    checkCircle.on("click", () => {
-      setMode(NORMAL);
-      action();
-    });
+  checkCircle.on("click", () => {
+    setMode(NORMAL);
+    deselectMd();
   });
 
   const paIndicator = container.addChild(new PIXI.Container());
@@ -78,12 +70,16 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   labelText.rotation = Math.PI / 2;
   labelText.position.y = tagHeight / 2;
 
-  const setButtonPositions = memoizeOne(selectedPoint => {
+  const setButtonPositions = memoizeOne((selectedPoint, mode) => {
     if (!selectedPoint) {
       checkCircle.visible = false;
       trashCircle.visible = false;
-      addCircle.visible = true;
-      addCircle.position.x = -10;
+      if (mode === ADD_PA_STATION) {
+        addCircle.visible = false;
+      } else {
+        addCircle.visible = true;
+        addCircle.position.x = -10;
+      }
     } else if (selectedPoint.isProjection) {
       checkCircle.visible = true;
       trashCircle.visible = true;
@@ -109,7 +105,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   let lastMode = props.mode;
 
   return function update(props) {
-    const { width, height, mode, setMode, calcSections, selectedSections, deselectMd, mouse, view } = props;
+    const { height, mode, calcSections, selectedSections, mouse, view } = props;
 
     if (!container.transform) return;
     if (!calcSections.length) return;
@@ -122,9 +118,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const paIndicatorX = Math.max(bitProjVs, (mouse.x - view.x) / view.xScale);
     const buttonX = selectedPoint ? selectedPoint.vs : calcSections[calcSections.length - 1].vs;
 
-    setCheckActionMemo(deselectMd, setMode);
-    setAddCircleMemo(setMode);
-    setButtonPositions(selectedPoint);
+    setButtonPositions(selectedPoint, mode);
     btnStage.position.x = buttonX;
     btnStage.position.y = height - gutter;
 
