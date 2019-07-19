@@ -33,12 +33,14 @@ export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections } = useCrossSectionContainer();
   let details;
 
+  const selectedIndex = useMemo(() => {
+    return calcSections.findIndex(s => selectedSections[s.id]);
+  }, [calcSections, selectedSections]);
+  const selectedId = (calcSections[selectedIndex] || {}).id;
+
   if (showFullTable) {
     details = calcSections.slice().reverse();
   } else {
-    const selectedIndex = useMemo(() => {
-      return calcSections.findIndex(s => selectedSections[s.id]);
-    }, [calcSections, selectedSections]);
     details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
   }
 
@@ -69,7 +71,8 @@ export default function DetailsTable({ showFullTable = false }) {
               [classes.PARow]: row.isProjection,
               [classes.surveyRow]: row.isSurvey,
               [classes.lastSurveyRow]: row.isLastSurvey,
-              [classes.bitProjRow]: row.isBitProj
+              [classes.bitProjRow]: row.isBitProj,
+              [classes.selected]: selectedId === row.id
             })}
           >
             <TableCell className={classes.cell} component="th" scope="row">
