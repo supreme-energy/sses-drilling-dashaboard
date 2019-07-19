@@ -57,6 +57,8 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
           <TableCell className={classes.cell}>Pos-TCL</TableCell>
+          {showFullTable && <TableCell className={classes.cell}>TOT</TableCell>}
+          {showFullTable && <TableCell className={classes.cell}>BOT</TableCell>}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -84,6 +86,8 @@ export default function DetailsTable({ showFullTable = false }) {
             <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
+            {showFullTable && <TableCell className={classes.cell}>{row.tot.toFixed(2)}</TableCell>}
+            {showFullTable && <TableCell className={classes.cell}>{row.bot.toFixed(2)}</TableCell>}
           </TableRow>
         ))}
       </TableBody>

@@ -11,7 +11,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
     <Dialog
       PaperProps={{
         style: {
-          maxWidth: "800px"
+          maxWidth: "940px"
         }
       }}
       onClose={handleClose}
