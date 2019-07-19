@@ -224,6 +224,35 @@ export function useComputedSurveys(surveys) {
 
   return computedSurveys;
 }
+
+export function useComputedFormations(formations) {
+  console.log("formations", formations);
+  const { wellId } = useWellIdContainer();
+  const [computedSegments] = useComputedSegments(wellId);
+  const computedSurveys = useMemo(
+    () =>
+      formations.map(f => {
+        return {
+          ...f,
+          data: f.data.map(f => {
+            const segment = computedSegments.find(seg => f.md >= seg.startmd && f.md <= seg.endmd);
+            if (!segment) {
+              return f;
+            }
+
+            return {
+              ...f,
+              fault: segment.fault
+            };
+          })
+        };
+      }),
+    [computedSegments, formations]
+  );
+
+  return computedSurveys;
+}
+
 const getExtent = memoizeOne(logData => (logData ? extent(logData.data, d => d.value) : [0, 0]));
 
 export function useSelectedLogExtent() {
