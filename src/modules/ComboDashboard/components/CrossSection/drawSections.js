@@ -82,6 +82,8 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
     selectedLeft.clear();
     selectedRight.clear();
     selectedLabel.visible = false;
+    dipHintText.visible = false;
+    faultHintText.visible = false;
 
     // Clear out all previous drawn sections
     pixiList.forEach(p => p.clear());
@@ -116,7 +118,9 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
         labelText.text = p2.vs.toFixed(2);
         if (p2.isProjection) {
           dipHintText.position.x = p2.vs;
+          dipHintText.visible = true;
           faultHintText.position.x = p1.vs;
+          faultHintText.visible = true;
         }
       }
     }

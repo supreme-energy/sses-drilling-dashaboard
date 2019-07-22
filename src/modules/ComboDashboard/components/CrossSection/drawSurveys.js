@@ -42,7 +42,7 @@ export function drawSurveys(container) {
   }
 
   return function(props) {
-    const { calcSections, scale } = props;
+    const { calcSections, scale, isLastIndex } = props;
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
@@ -58,6 +58,9 @@ export function drawSurveys(container) {
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
+      if (calcSections[i].isProjection && isLastIndex) {
+        break;
+      }
       surveyGraphics[i].position.x = calcSections[i].vs;
       surveyGraphics[i].position.y = calcSections[i].tvd;
       surveyGraphics[i].texture = getTexture(calcSections[i]);

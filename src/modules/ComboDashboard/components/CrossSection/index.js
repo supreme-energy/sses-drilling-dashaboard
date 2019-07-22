@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
-import { useCrossSectionContainer } from "../../../App/Containers";
+import { useCrossSectionContainer, useTimeSliderContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
 
 const pixiApp = new PixiCrossSection();
@@ -11,6 +11,9 @@ const CrossSection = props => {
   const { width, height } = props;
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
+  const {
+    sliderInterval: { isLastIndex }
+  } = useTimeSliderContainer();
   const dataObj = useCrossSectionContainer();
   const {
     wellPlan,
@@ -50,7 +53,11 @@ const CrossSection = props => {
   useEffect(() => {
     const currentCanvas = canvas.current;
 
-    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse }, view, updateView);
+    pixiApp.init(
+      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, isLastIndex },
+      view,
+      updateView
+    );
     currentCanvas.appendChild(pixiApp.renderer.view);
     return () => {
       pixiApp.cleanUp();
@@ -82,7 +89,8 @@ const CrossSection = props => {
       mode,
       setMode,
       mouse,
-      setMouse
+      setMouse,
+      isLastIndex
     });
   }, [
     view.x,
@@ -105,7 +113,8 @@ const CrossSection = props => {
     mode,
     setMode,
     mouse,
-    setMouse
+    setMouse,
+    isLastIndex
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
