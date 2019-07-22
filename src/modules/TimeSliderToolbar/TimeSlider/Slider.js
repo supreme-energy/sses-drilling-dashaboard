@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import PropTypes from "prop-types";
 import { Slider as SliderComponent } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
@@ -91,7 +91,7 @@ const Slider = React.memo(
       setStep({ type: "UPDATE", payload: { isDragging: false } });
     }, [setStep]);
 
-    const handleLabel = useCallback(() => {
+    const labelFormat = useMemo(() => {
       if (!holeDepth) return null;
 
       return (
@@ -125,7 +125,7 @@ const Slider = React.memo(
         onChange={handleDragSlider}
         onChangeCommitted={handleMouseUp}
         step={stepSize}
-        valueLabelFormat={handleLabel}
+        valueLabelFormat={labelFormat}
         valueLabelDisplay={expanded ? "on" : "auto"}
       />
     );

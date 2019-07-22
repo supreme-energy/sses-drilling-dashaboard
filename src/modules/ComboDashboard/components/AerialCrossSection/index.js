@@ -5,7 +5,6 @@ import { useSize } from "react-hook-size";
 import { scaleThreshold } from "d3-scale";
 import { max, group } from "d3-array";
 
-import PixiMarker from "./PixiMarker";
 import { useFilteredWellData } from "../../../App/Containers";
 
 import { useWellOverviewKPI, useWellInfo, useWellsMapLength } from "../../../../api";
@@ -21,6 +20,7 @@ import PixiContainer from "../../../../components/PixiContainer";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
 import useViewport from "../../../../hooks/useViewport";
 import PixiLine from "../../../../components/PixiLine";
+import PixiMarker from "../../../../components/PixiMarker";
 
 // TODO export from WellExplorer, or move to const
 const colorsBySection = {
@@ -48,7 +48,7 @@ function getSurveyBySection(surveyMapPositions, wellOverviewDataBySection) {
 
   const drilling =
     surveyMapPositions.length > 1
-      ? [surveyMapPositions[surveyMapPositions.length - 1], surveyMapPositions[surveyMapPositions.length - 2]]
+      ? [surveyMapPositions[surveyMapPositions.length - 2], surveyMapPositions[surveyMapPositions.length - 1]]
       : [];
 
   if (groups.get(wellSections.LATERAL) && groups.get(wellSections.LATERAL).length) {
@@ -81,6 +81,9 @@ function AerialCrossSection({ wellId }) {
   const yMin = wellPlanData.length > 0 ? -wellPlanData[0].mapPosition.y : 0;
   const xValue = rotate ? yMin : xMin;
   const yValue = rotate ? xMin : yMin;
+  const selectedMap = rotate ? mapCrossSectionRotated : mapCrossSection;
+  const compassRotation = rotate ? 1.5 : 0;
+  const compassAnchor = rotate ? [0, 1] : [0];
 
   const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(wellId);
 
@@ -169,7 +172,7 @@ function AerialCrossSection({ wellId }) {
         <PixiLine
           container={viewport}
           data={wellPlanData}
-          mapData={rotate ? mapCrossSectionRotated : mapCrossSection}
+          mapData={selectedMap}
           color={0x72b600}
           lineWidth={250}
           nativeLines={false}
@@ -180,7 +183,7 @@ function AerialCrossSection({ wellId }) {
               key={section}
               container={viewport}
               data={sectionData}
-              mapData={rotate ? mapCrossSectionRotated : mapCrossSection}
+              mapData={selectedMap}
               color={colorsBySection[section]}
               lineWidth={300}
               nativeLines={false}
@@ -197,6 +200,8 @@ function AerialCrossSection({ wellId }) {
             url={Compass}
             x={-xValue - 30 / SCALE_FACTOR}
             y={-yValue + 40 / SCALE_FACTOR}
+            rotation={compassRotation}
+            anchor={compassAnchor}
           />
         )}
       </div>

@@ -62,7 +62,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   // Canvas resizing hooks
   const scaleInitialized = useRef(null);
   const canvasRef = useRef(null);
-  const { width, height } = useSize(canvasRef);
+  const sliderRef = useRef(null);
+  const { width, height } = useSize(sliderRef);
 
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
 
@@ -74,18 +75,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const getInitialViewXScaleValue = useMemo(
     () => (data && data.length ? computeInitialViewXScaleValue(data.length) : () => 1),
     [data]
-  );
-
-  // Determine if graph has been moved off screen by drag
-  const isGraphWithinBounds = useCallback(
-    (xScale, newX) => {
-      return (
-        (data.length - 1) * xScale - Math.abs(newX) > width - 6 &&
-        Math.round(step) <= Math.round(maxStep) &&
-        newX / xScale < 0
-      );
-    },
-    [width, data.length, step, maxStep]
   );
 
   const [view, updateView] = useState({
@@ -106,15 +95,29 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     data,
     drillPhaseObj.phaseEnd
   ]);
-  const w = width || maxStep * view.xScale + GRID_GUTTER;
+
+  const calcBounds = value => (data.length - 1 >= value ? value : data.length - 1);
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
-  const hiddenDataLength = Math.abs(view.x / view.xScale);
-  const rightBoundIndex = visibleDataLength + hiddenDataLength;
-  const leftBoundIndexMoving = Math.abs(view.x) / view.xScale;
-  const stepIndex = stepFactor * visibleDataLength + leftBoundIndexMoving;
+  const leftBoundIndexMoving = Math.abs(view.x / view.xScale);
+
+  const rightBoundIndex = calcBounds(visibleDataLength + leftBoundIndexMoving);
+  const stepIndex = calcBounds(stepFactor * visibleDataLength + leftBoundIndexMoving);
   const dataMin = useMemo(() => min(data, d => d.ROP_A), [data]);
   const barHeight = useMemo(() => max(data, d => d.ROP_A) - dataMin, [dataMin, data]);
+
+  const isGraphWithinBounds = useCallback(
+    (xScale, newX) => {
+      return (
+        visibleDataLength + leftBoundIndexMoving <= data.length &&
+        stepFactor * visibleDataLength + leftBoundIndexMoving <= data.length - 1 &&
+        (data.length - 1) * xScale - Math.abs(newX) > width - 6 &&
+        Math.round(step) <= Math.round(maxStep) &&
+        newX / xScale < 0
+      );
+    },
+    [width, data.length, step, maxStep, leftBoundIndexMoving, stepFactor, visibleDataLength]
+  );
 
   const sliderDate = useMemo(() => {
     return _.get(data, `[${Math.round(stepIndex)}].Date_Time`);
@@ -140,7 +143,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const indexDiff = holeDepthRightIndex - holeDepthLeftIndex;
 
       updateView(view => {
-        const xScale = computeInitialViewXScaleValue(indexDiff)(w - GRID_GUTTER);
+        const xScale = computeInitialViewXScaleValue(indexDiff)(width - GRID_GUTTER);
         return {
           x: -1 * holeDepthLeftIndex * xScale,
           y: 52,
@@ -149,6 +152,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         };
       });
 
+      setGlobalDates([beginningDate, endDate]);
+
       setSliderInterval({
         firstDepth: _.get(data, `[${Math.floor(holeDepthLeftIndex)}].Hole_Depth`),
         lastDepth: _.get(data, `[${Math.round(holeDepthRightIndex)}].Hole_Depth`),
@@ -156,8 +161,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       });
 
       setSliderStep({ type: "UPDATE", payload: { step: indexDiff, direction: 1, maxStep: indexDiff } });
-      setGlobalDates([beginningDate, endDate]);
-      setDrillPhase({ type: "SET", payload: { set: true } });
+      setDrillPhase({ type: "SET", payload: { set: false } });
     }
   }, [
     data,
@@ -165,10 +169,10 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     getInitialViewYScaleValue,
     height,
     setSliderInterval,
-    setDrillPhase,
-    w,
+    width,
     holeDepthLeftIndex,
-    holeDepthRightIndex
+    holeDepthRightIndex,
+    setDrillPhase
   ]);
 
   // set initial scale
@@ -202,12 +206,12 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   useEffect(() => {
     if (data && data.length && view.xScale) {
       if (
-        (holeDepthLeftIndex > Math.round(hiddenDataLength) || holeDepthRightIndex < rightBoundIndex) &&
+        (holeDepthLeftIndex > Math.round(leftBoundIndexMoving) || holeDepthRightIndex < rightBoundIndex) &&
         drillPhaseObj.inView
       ) {
         setDrillPhase({ type: "UPDATE_VIEW", payload: false });
       } else if (
-        holeDepthLeftIndex <= Math.round(hiddenDataLength) &&
+        holeDepthLeftIndex <= Math.round(leftBoundIndexMoving) &&
         holeDepthRightIndex >= rightBoundIndex &&
         !drillPhaseObj.inView
       ) {
@@ -220,7 +224,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     view,
     setDrillPhase,
     drillPhaseObj.inView,
-    hiddenDataLength,
+    leftBoundIndexMoving,
     holeDepthRightIndex,
     holeDepthLeftIndex,
     rightBoundIndex
@@ -234,12 +238,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
       setSliderInterval({
         firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].Hole_Depth`),
-        lastDepth: _.get(data, `[${Math.round(stepIndex)}].Hole_Depth`),
+        lastDepth: _.get(data, `[${Math.round(stepIndex)}].Hole_Depth`, data[data.length - 1].Hole_Depth),
         isLastIndex: isLastDataIndex
       });
 
       setGlobalDates([beginningDateMoving, endDateMoving]);
-      setDrillPhase({ type: "SET", payload: { set: false } });
     }
   }, [
     data,
@@ -285,7 +288,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       )}
       <div className={classes.timeSliderView}>
         <GlobalStartTimeControl setSliderStep={setSliderStep} expanded={expanded} date={globalDates[0]} />
-        <div className={classNames(classes.timeSlider)}>
+        <div className={classNames(classes.timeSlider)} ref={sliderRef}>
           <div
             className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
             ref={canvasRef}
