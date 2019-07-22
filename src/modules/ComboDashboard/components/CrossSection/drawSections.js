@@ -15,8 +15,18 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   const selectedLeft = container.addChild(new PIXI.Graphics());
   selectedLeft.transform.updateTransform = frozenXYTransform;
 
+  const dipHintText = container.addChild(new PIXI.Text("Dip", { fill: "#000", fontSize: 16 }));
+  dipHintText.anchor.set(0.5, 0.5);
+  dipHintText.transform.updateTransform = frozenXTransform;
+  dipHintText.position.y = 10;
+
   const selectedRight = container.addChild(new PIXI.Graphics());
   selectedRight.transform.updateTransform = frozenXYTransform;
+
+  const faultHintText = container.addChild(new PIXI.Text("Fault", { fill: "#000", fontSize: 16 }));
+  faultHintText.anchor.set(0.5, 0.5);
+  faultHintText.transform.updateTransform = frozenXTransform;
+  faultHintText.position.y = 10;
 
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
@@ -104,6 +114,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
         selectedLabel.position.x = p2.vs;
         selectedLabel.position.y = height - gutter;
         labelText.text = p2.vs.toFixed(2);
+        if (p2.isProjection) {
+          dipHintText.position.x = p2.vs;
+          faultHintText.position.x = p1.vs;
+        }
       }
     }
   };
