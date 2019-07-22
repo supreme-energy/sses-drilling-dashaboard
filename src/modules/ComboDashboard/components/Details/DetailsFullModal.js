@@ -21,7 +21,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
       fullWidth
     >
       <DialogTitle className={classes.dialogTitle}>
-        <span>Full Survey List</span>
+        <span>Surveys in View</span>
         <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>
           <Close />
         </IconButton>
