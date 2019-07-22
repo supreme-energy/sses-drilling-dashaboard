@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform, frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
+import { frozenScaleTransform, frozenXTransform } from "./customPixiTransforms";
 import memoizeOne from "memoize-one";
 import addCircleSVG from "../../../../assets/addCircle.svg";
 import checkCircleSVG from "../../../../assets/checkCircle.svg";
 import trashCircleSVG from "../../../../assets/deleteForever.svg";
-import { ADD_PA_STATION, HISTORY, NORMAL } from "../../../../constants/crossSectionModes";
+import { ADD_PA_STATION, NORMAL } from "../../../../constants/crossSectionModes";
 
 function addButton(container, texture) {
   const button = container.addChild(new PIXI.Sprite(texture));
@@ -96,7 +96,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     setMouse({ ...e.data.global });
   }
   function stageClick(e) {
-    console.log(e);
     setMode(NORMAL);
     mouseListener.off("mousemove", updateMouse);
     stage.off("click", stageClick);
@@ -124,7 +123,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
 
     if (mode === ADD_PA_STATION) {
       if (modeChanged) {
-        console.log("setting up mouse tracking for container");
         mouseListener.interactive = true;
         mouseListener.on("mousemove", updateMouse);
         stage.on("click", stageClick);

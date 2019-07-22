@@ -29,7 +29,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
       <DialogContent className={classes.dialogContent}>
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column">
-            <DetailsTable showFullTable={true} />
+            <DetailsTable showFullTable />
           </Box>
         </Box>
       </DialogContent>

@@ -62,7 +62,7 @@ export function useFilteredWellData() {
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
   const { surveysData } = useSurveysDataContainer();
-  const { projectionsData, saveProjections, refreshProjections } = useProjectionsDataContainer();
+  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
@@ -75,6 +75,8 @@ export function useFilteredWellData() {
     };
   });
 
+  // TODO: Remove this update method when implementing entity versions
+  //  (FE should perform same action as BE without the need to update)
   const saveAndUpdate = useCallback(
     (...args) => {
       saveProjections(...args).then((data, err) => {
@@ -86,13 +88,27 @@ export function useFilteredWellData() {
     },
     [saveProjections, refreshProjections, refreshFormations]
   );
+  // TODO: Remove this update method when implementing entity versions
+  //  (FE should perform same action as BE without the need to update)
+  const deleteAndUpdate = useCallback(
+    (...args) => {
+      deleteProjection(...args).then((data, err) => {
+        if (!err) {
+          refreshFormations();
+          refreshProjections();
+        }
+      });
+    },
+    [deleteProjection, refreshProjections, refreshFormations]
+  );
 
   return {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
     projections: projectionsFiltered,
-    saveProjection: saveAndUpdate
+    saveProjection: saveAndUpdate,
+    deleteProjection: deleteAndUpdate
   };
 }
 
@@ -161,7 +177,7 @@ function useProjectionsData() {
     }
   }, []);
 
-  const [projections, refreshProjections, saveProjections] = useFetchProjections(wellId);
+  const [projections, refreshProjections, saveProjections, deleteProjection] = useFetchProjections(wellId);
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
@@ -173,7 +189,7 @@ function useProjectionsData() {
     }
   }, [projections]);
 
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections };
+  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection };
 }
 
 function useFormationsData() {
