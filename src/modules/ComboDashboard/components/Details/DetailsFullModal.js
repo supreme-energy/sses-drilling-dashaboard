@@ -14,7 +14,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
           maxWidth: "940px"
         }
       }}
-      onClose={handleClose}
+      onClose={() => handleClose()}
       maxWidth="md"
       aria-labelledby="customized-dialog-title"
       open={isVisible}

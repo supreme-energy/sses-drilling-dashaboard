@@ -1,6 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useCallback, useState } from "react";
+import React, { useReducer } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import TableChartIcon from "../../../assets/tableChart.svg";
@@ -14,9 +14,9 @@ import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 
 export const CrossSectionDashboard = ({ className }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const handleClose = useCallback(() => setShowModal(false), [setShowModal]);
+  const [expanded, toggleExpanded] = useReducer(e => !e, false);
+  const [showModal, toggleModal] = useReducer(m => !m, false);
+
   return (
     <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
@@ -34,7 +34,7 @@ export const CrossSectionDashboard = ({ className }) => {
               className={classNames(classes.expand, {
                 [classes.expandOpen]: expanded
               })}
-              onClick={() => setExpanded(!expanded)}
+              onClick={toggleExpanded}
               aria-expanded={expanded}
               aria-label="Show more"
             >
@@ -44,7 +44,7 @@ export const CrossSectionDashboard = ({ className }) => {
             <IconButton
               size="small"
               className={classNames(classes.expand, classes.tableButton)}
-              onClick={() => setShowModal(!showModal)}
+              onClick={toggleModal}
               aria-label="Show more"
             >
               <img src={TableChartIcon} className={classes.icon} />
@@ -53,7 +53,7 @@ export const CrossSectionDashboard = ({ className }) => {
           <Collapse in={expanded} unmountOnExit>
             <DetailsTable />
           </Collapse>
-          <DetailsFullModal handleClose={handleClose} isVisible={showModal} />
+          <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
         </div>
       </div>
     </WidgetCard>
