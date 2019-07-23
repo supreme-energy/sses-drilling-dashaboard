@@ -62,7 +62,7 @@ export function useFilteredWellData() {
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
   const { surveysData } = useSurveysDataContainer();
-  const { projectionsData, saveProjections, refreshProjections } = useProjectionsDataContainer();
+  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
@@ -75,6 +75,8 @@ export function useFilteredWellData() {
     };
   });
 
+  // TODO: Remove this update method when implementing entity versions
+  //  (FE should perform same action as BE without the need to update)
   const saveAndUpdate = useCallback(
     (...args) => {
       saveProjections(...args).then((data, err) => {
@@ -86,13 +88,27 @@ export function useFilteredWellData() {
     },
     [saveProjections, refreshProjections, refreshFormations]
   );
+  // TODO: Remove this update method when implementing entity versions
+  //  (FE should perform same action as BE without the need to update)
+  const deleteAndUpdate = useCallback(
+    (...args) => {
+      deleteProjection(...args).then((data, err) => {
+        if (!err) {
+          refreshFormations();
+          refreshProjections();
+        }
+      });
+    },
+    [deleteProjection, refreshProjections, refreshFormations]
+  );
 
   return {
     surveys: surveysFiltered,
     wellPlan,
     formations: formationsFiltered,
     projections: projectionsFiltered,
-    saveProjection: saveAndUpdate
+    saveProjection: saveAndUpdate,
+    deleteProjection: deleteAndUpdate
   };
 }
 
@@ -143,7 +159,6 @@ function useSurveysData() {
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (surveys && surveys.length) {
-      console.log("setting new surveys");
       setSurveys(surveys);
     }
   }, [surveys, setSurveys]);
@@ -162,12 +177,11 @@ function useProjectionsData() {
     }
   }, []);
 
-  const [projections, refreshProjections, saveProjections] = useFetchProjections(wellId);
+  const [projections, refreshProjections, saveProjections, deleteProjection] = useFetchProjections(wellId);
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (projections && projections.length) {
-      console.log("setting new projections");
       projectionsDispatch({
         type: "serverReset",
         data: projections
@@ -175,7 +189,7 @@ function useProjectionsData() {
     }
   }, [projections]);
 
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections };
+  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection };
 }
 
 function useFormationsData() {
@@ -188,7 +202,6 @@ function useFormationsData() {
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
     if (serverFormations && serverFormations.length) {
-      console.log("setting new formations");
       setFormations(serverFormations);
     }
   }, [serverFormations]);
@@ -208,7 +221,7 @@ export function useCrossSectionData() {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
+  const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
 
   const selectedSections = useMemo(
     function getSelectedSections() {
@@ -318,6 +331,8 @@ export function useCrossSectionData() {
     wellPlan,
     selectedSections,
     setSelectedMd,
+    deselectMd,
+    selectedMd,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
@@ -331,6 +346,11 @@ const initialState = {
 
 function comboStoreReducer(state, action) {
   switch (action.type) {
+    case "DESELECT_ALL":
+      return {
+        ...state,
+        selectedMd: null
+      };
     case "TOGGLE_MD": {
       if (state.selectedMd === action.md) {
         return {
@@ -351,8 +371,9 @@ function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
 
   const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
+  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
 
-  return [state, dispatch, { setSelectedMd }];
+  return [state, dispatch, { setSelectedMd, deselectMd }];
 }
 
 // Create containers

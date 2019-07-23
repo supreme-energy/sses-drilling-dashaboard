@@ -63,7 +63,7 @@
 
   .row {
     display: flex;
-     
+
     > div {
       margin: 3px;
     }
@@ -83,3 +83,13 @@
 .crossSectionDash {
   padding-bottom: 30px;
 }
+
+.tableButton {
+  margin-left: auto;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+

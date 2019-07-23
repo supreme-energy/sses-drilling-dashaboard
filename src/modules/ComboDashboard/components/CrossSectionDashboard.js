@@ -1,24 +1,28 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import TableChartIcon from "../../../assets/tableChart.svg";
 import IconButton from "@material-ui/core/IconButton";
 
 import WidgetCard from "../../WidgetCard";
 import classes from "./ComboDashboard.scss";
 import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
+import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 
 export const CrossSectionDashboard = ({ className }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, toggleExpanded] = useReducer(e => !e, false);
+  const [showModal, toggleModal] = useReducer(m => !m, false);
+
   return (
     <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>
-          <ParentSize debounceTime={100}>
+          <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
             {({ width, height }) => <CrossSection width={width} height={height} />}
           </ParentSize>
         </div>
@@ -30,17 +34,26 @@ export const CrossSectionDashboard = ({ className }) => {
               className={classNames(classes.expand, {
                 [classes.expandOpen]: expanded
               })}
-              onClick={() => setExpanded(!expanded)}
+              onClick={toggleExpanded}
               aria-expanded={expanded}
               aria-label="Show more"
             >
               <ExpandMoreIcon />
             </IconButton>
             <Typography variant="subtitle1">Details</Typography>
+            <IconButton
+              size="small"
+              className={classNames(classes.expand, classes.tableButton)}
+              onClick={toggleModal}
+              aria-label="Show more"
+            >
+              <img src={TableChartIcon} className={classes.icon} />
+            </IconButton>
           </div>
           <Collapse in={expanded} unmountOnExit>
             <DetailsTable />
           </Collapse>
+          <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
         </div>
       </div>
     </WidgetCard>

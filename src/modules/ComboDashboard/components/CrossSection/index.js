@@ -1,19 +1,23 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useReducer, useRef } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
+import { NORMAL } from "../../../../constants/crossSectionModes";
 
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
   const { width, height } = props;
   const canvas = useRef(null);
+  const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
   const {
     wellPlan,
     selectedSections,
     setSelectedMd,
+    deselectMd,
+    selectedMd,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
@@ -36,13 +40,17 @@ const CrossSection = props => {
     }
   );
 
+  const [mouse, setMouse] = useState({
+    x: 0,
+    y: 0
+  });
+
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
   useEffect(() => {
-    console.log("Should only be called on load");
     const currentCanvas = canvas.current;
 
-    pixiApp.init({ ...dataObj, ...props, view, updateView, scale }, view, updateView);
+    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse }, view, updateView);
     currentCanvas.appendChild(pixiApp.renderer.view);
     return () => {
       pixiApp.cleanUp();
@@ -62,13 +70,19 @@ const CrossSection = props => {
       wellPlan,
       selectedSections,
       setSelectedMd,
+      deselectMd,
+      selectedMd,
       ghostDiffDispatch,
       ghostDiff,
       calcSections,
       calculatedFormations,
       scale,
       view,
-      updateView
+      updateView,
+      mode,
+      setMode,
+      mouse,
+      setMouse
     });
   }, [
     view.x,
@@ -81,11 +95,17 @@ const CrossSection = props => {
     wellPlan,
     selectedSections,
     setSelectedMd,
+    deselectMd,
+    selectedMd,
     ghostDiffDispatch,
     ghostDiff,
     calcSections,
     calculatedFormations,
-    scale
+    scale,
+    mode,
+    setMode,
+    mouse,
+    setMouse
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

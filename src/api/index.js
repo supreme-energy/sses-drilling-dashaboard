@@ -24,6 +24,7 @@ export const GET_WELL_SURVEYS = "/surveys.php";
 export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
+export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
@@ -448,7 +449,17 @@ export function useFetchProjections(wellId) {
       }
     });
   };
-  return [data || EMPTY_ARRAY, refresh, saveProjection];
+  const deleteProjection = projectionId => {
+    return fetch({
+      path: DELETE_WELL_PROJECTIONS,
+      method: "GET",
+      query: {
+        seldbname: wellId,
+        id: projectionId
+      }
+    });
+  };
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection];
 }
 
 export function useWellOverviewKPI(wellId) {

@@ -29,13 +29,20 @@ function SurveyIcon({ row }) {
   }
 }
 
-export default function DetailsTable() {
+export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections } = useCrossSectionContainer();
+  let details;
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
-  const details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+  const selectedId = (calcSections[selectedIndex] || {}).id;
+
+  if (showFullTable) {
+    details = calcSections.slice().reverse();
+  } else {
+    details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+  }
 
   return (
     <Table className={classes.table}>
@@ -52,6 +59,8 @@ export default function DetailsTable() {
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
           <TableCell className={classes.cell}>Pos-TCL</TableCell>
+          {showFullTable && <TableCell className={classes.cell}>TOT</TableCell>}
+          {showFullTable && <TableCell className={classes.cell}>BOT</TableCell>}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -62,7 +71,8 @@ export default function DetailsTable() {
               [classes.PARow]: row.isProjection,
               [classes.surveyRow]: row.isSurvey,
               [classes.lastSurveyRow]: row.isLastSurvey,
-              [classes.bitProjRow]: row.isBitProj
+              [classes.bitProjRow]: row.isBitProj,
+              [classes.selected]: selectedId === row.id
             })}
           >
             <TableCell className={classes.cell} component="th" scope="row">
@@ -79,6 +89,8 @@ export default function DetailsTable() {
             <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
+            {showFullTable && <TableCell className={classes.cell}>{row.tot.toFixed(2)}</TableCell>}
+            {showFullTable && <TableCell className={classes.cell}>{row.bot.toFixed(2)}</TableCell>}
           </TableRow>
         ))}
       </TableBody>

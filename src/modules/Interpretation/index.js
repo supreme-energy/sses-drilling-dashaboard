@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import { Typography } from "@material-ui/core";
 
 import WidgetCard from "../WidgetCard";
@@ -20,7 +20,7 @@ function Interpretation({
   const aditionalLogs = useAdditionalDataLogsList(wellId);
   const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
-  const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
+  const [{ selectedMd }] = useComboContainer();
 
   const selectedWellLog = useMemo(
     function findCurrentWellLog() {
@@ -32,15 +32,6 @@ function Interpretation({
       );
     },
     [logList, selectedMd]
-  );
-
-  useEffect(
-    function selectFirstWellLog() {
-      if (selectedMd === null && logList && logList.length) {
-        setSelectedMd(logList[0].startmd);
-      }
-    },
-    [selectedMd, logList, setSelectedMd]
   );
 
   return (
