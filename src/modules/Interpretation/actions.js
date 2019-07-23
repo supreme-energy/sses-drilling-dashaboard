@@ -1,27 +1,26 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useWellLogList } from "../../api";
 import { useCallback } from "react";
 import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
 import { getCalculateDip, useComputedSegments } from "./selectors";
 import debounce from "lodash/debounce";
+import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 export function useDragActions() {
-  const [{ pendingSegmentsState }, , { updateSegment }] = useComboContainer();
+  const [{ pendingSegmentsState }, dispatch, { updateSegment }] = useComboContainer();
   const { wellId } = useWellIdContainer();
-  const [logs, logsById] = useWellLogList(wellId);
+  const [logs, logsById, { updateWellLog }] = useWellLogsContainer();
   const [segments] = useComputedSegments(wellId);
-  const { updateSurvey, surveys } = useSurveysDataContainer(wellId);
 
-  const saveSurvey = useCallback(
-    debounce((props, log) => {
-      const survey = surveys.find(s => s.md >= log.startmd && s.md <= log.endmd);
-
-      console.log("survey", survey);
-      if (survey) {
-        updateSurvey({ surveyId: survey.id, fields: props });
-      }
+  const saveWellLog = useCallback(
+    debounce((fields, log) => {
+      updateWellLog({ id: log.id, fields }).then(() => {
+        dispatch({
+          type: "RESET_SEGMENT_PENDING_STATE",
+          md: log.startmd
+        });
+      });
     }, 300),
-    [wellId, updateSurvey]
+    [wellId, updateWellLog, dispatch]
   );
 
   const onEndSegmentDrag = useCallback(
@@ -44,12 +43,11 @@ export function useDragActions() {
         fault: pendingState && pendingState.fault
       });
 
-      const props = { dip: newDip };
-      updateSegment(props, log.startmd);
+      updateSegment({ dip: newDip }, log.startmd);
 
-      //saveSurvey(props, log);
+      saveWellLog({ sectdip: newDip }, log);
     },
-    [pendingSegmentsState, updateSegment, logs, logsById, segments, saveSurvey]
+    [pendingSegmentsState, updateSegment, logs, logsById, segments, saveWellLog]
   );
 
   const onSegmentDrag = useCallback(
@@ -60,9 +58,13 @@ export function useDragActions() {
         return;
       }
 
-      updateSegment({ fault: segment.fault - delta }, log.startmd);
+      let fault = segment.fault - delta;
+
+      updateSegment({ fault }, log.startmd);
+
+      saveWellLog({ fault }, log);
     },
-    [updateSegment, logsById]
+    [updateSegment, logsById, saveWellLog]
   );
 
   const onStartSegmentDrag = useCallback(
@@ -78,16 +80,20 @@ export function useDragActions() {
       const calculateDip = getCalculateDip(log, prevSegment);
 
       // calculate reverse dip so that all segments does not move down
-      const newDip = calculateDip({
+      const dip = calculateDip({
         tvd: log.endtvd,
-        depth: segment.enddepth - segment.startdepth + segment.startdepth,
+        depth: segment.enddepth,
         vs: log.endvs,
         fault: segment.fault + faultDelta
       });
 
-      updateSegment({ dip: newDip, fault: segment.fault + faultDelta }, log.startmd);
+      const fault = segment.fault + faultDelta;
+
+      updateSegment({ fault, dip }, log.startmd);
+
+      saveWellLog({ dip, fault }, log);
     },
-    [updateSegment, logs, logsById, segments]
+    [updateSegment, logs, logsById, segments, saveWellLog]
   );
 
   return { onEndSegmentDrag, onStartSegmentDrag, onSegmentDrag };

@@ -32,6 +32,7 @@ export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
 export const GET_KPI = "/kpis.php";
+export const UPDATE_WELL_LOG = "welllog/update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -47,7 +48,7 @@ const options = {
   keys: ["name", "status"]
 };
 
-const EMPTY_ARRAY = [];
+export const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
 
 function transform(data) {
@@ -537,35 +538,6 @@ export function useWellControlLog(wellId) {
       }
     }
   );
-}
-
-export function useWellLogList(wellId) {
-  const [list, ...rest] = useFetch({
-    path: GET_WELL_LOG_LIST,
-    query: { seldbname: wellId }
-  });
-
-  const logList = useMemo(
-    () =>
-      list &&
-      list.map(d => ({
-        ...d,
-        fault: Number(d.fault),
-        endvs: Number(d.endvs),
-        startvs: Number(d.startvs),
-        endtvd: Number(d.endtvd),
-        starttvd: Number(d.starttvd),
-        startmd: Number(d.startmd),
-        endmd: Number(d.endmd),
-        startdepth: Number(d.startdepth),
-        enddepth: Number(d.enddepth),
-        sectdip: Number(d.sectdip)
-      })),
-    [list]
-  );
-  const logs = logList || EMPTY_ARRAY;
-  const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
-  return [logs, logsById, ...rest];
 }
 
 const transformWellLogData = memoize(logData => {

@@ -12,15 +12,17 @@ const initialPendingState = {
   bias: 0
 };
 
-function updateSegmentProperties(state, md, p) {
+function updateSegmentProperties(state, md, p, reset) {
   return {
     ...state,
     pendingSegmentsState: {
       ...state.pendingSegmentsState,
-      [md]: {
-        ...(state.pendingSegmentsState[md] || initialPendingState),
-        ...p
-      }
+      [md]: reset
+        ? initialPendingState
+        : {
+            ...(state.pendingSegmentsState[md] || initialPendingState),
+            ...p
+          }
     }
   };
 }
@@ -54,6 +56,8 @@ function comboStoreReducer(state, action) {
       };
     case "UPDATE_SEGMENT_PROPERTIES":
       return updateSegmentProperties(state, action.md, action.props);
+    case "RESET_SEGMENT_PENDING_STATE":
+      return updateSegmentProperties(state, action.md, {}, true);
     case "CHANGE_SELECTED_SEGMENT_BIAS_DELTA": {
       const selectedMd = state.selectedMd;
       const selectionPendingState = state.pendingSegmentsState[selectedMd] || initialPendingState;
