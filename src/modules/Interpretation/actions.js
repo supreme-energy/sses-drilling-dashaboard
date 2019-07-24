@@ -1,27 +1,16 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback } from "react";
-import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
-import { getCalculateDip, useComputedSegments } from "./selectors";
+import { useWellIdContainer } from "../App/Containers";
+import { getCalculateDip, useComputedSegments, useSelectedWellLog } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
+import pickBy from "lodash/pickBy";
 
 export function useDragActions() {
-  const [{ pendingSegmentsState }, dispatch, { updateSegment }] = useComboContainer();
+  const [{ pendingSegmentsState }, , { updateSegment }] = useComboContainer();
   const { wellId } = useWellIdContainer();
-  const [logs, logsById, { updateWellLog }] = useWellLogsContainer();
+  const [logs, logsById] = useWellLogsContainer();
   const [segments] = useComputedSegments(wellId);
-
-  const saveWellLog = useCallback(
-    debounce((fields, log) => {
-      updateWellLog({ id: log.id, fields }).then(() => {
-        dispatch({
-          type: "RESET_SEGMENT_PENDING_STATE",
-          md: log.startmd
-        });
-      });
-    }, 300),
-    [wellId, updateWellLog, dispatch]
-  );
 
   const onEndSegmentDrag = useCallback(
     (newPosition, segment) => {
@@ -44,10 +33,8 @@ export function useDragActions() {
       });
 
       updateSegment({ dip: newDip }, log.startmd);
-
-      saveWellLog({ sectdip: newDip }, log);
     },
-    [pendingSegmentsState, updateSegment, logs, logsById, segments, saveWellLog]
+    [pendingSegmentsState, updateSegment, logs, logsById, segments]
   );
 
   const onSegmentDrag = useCallback(
@@ -61,10 +48,8 @@ export function useDragActions() {
       let fault = segment.fault - delta;
 
       updateSegment({ fault }, log.startmd);
-
-      saveWellLog({ fault }, log);
     },
-    [updateSegment, logsById, saveWellLog]
+    [updateSegment, logsById]
   );
 
   const onStartSegmentDrag = useCallback(
@@ -90,21 +75,19 @@ export function useDragActions() {
       const fault = segment.fault + faultDelta;
 
       updateSegment({ fault, dip }, log.startmd);
-
-      saveWellLog({ dip, fault }, log);
     },
-    [updateSegment, logs, logsById, segments, saveWellLog]
+    [updateSegment, logs, logsById, segments]
   );
 
   return { onEndSegmentDrag, onStartSegmentDrag, onSegmentDrag };
 }
 
 export function useBiasAndScaleActions(dispatch) {
-  const changeSelectedSegmentBiasDelta = useCallback(
-    delta => {
+  const changeSelectedSegmentBias = useCallback(
+    bias => {
       dispatch({
-        type: "CHANGE_SELECTED_SEGMENT_BIAS_DELTA",
-        delta
+        type: "CHANGE_SELECTED_SEGMENT_BIAS",
+        bias
       });
     },
     [dispatch]
@@ -121,5 +104,36 @@ export function useBiasAndScaleActions(dispatch) {
     [dispatch]
   );
 
-  return { changeSelectedSegmentBiasDelta, changeSelectedSegmentScale };
+  return { changeSelectedSegmentScale, changeSelectedSegmentBias };
+}
+
+export function useSaveWellLogActions() {
+  const { selectedWellLog } = useSelectedWellLog();
+  const [{ pendingSegmentsState }, dispatch] = useComboContainer();
+  const [, , { updateWellLog }] = useWellLogsContainer();
+  const pendingState = selectedWellLog && pendingSegmentsState[selectedWellLog.startmd];
+  const saveWellLog = useCallback(
+    debounce(() => {
+      const values = {
+        dip: pendingState.dip,
+        fault: pendingState.fault,
+        scalebias: pendingState.bias,
+        scalefactor: pendingState.scale
+      };
+      const fields = pickBy(values, value => value !== undefined);
+
+      updateWellLog({
+        id: selectedWellLog.id,
+        fields
+      }).then(() => {
+        dispatch({
+          type: "RESET_SEGMENT_PENDING_STATE",
+          md: selectedWellLog.startmd
+        });
+      });
+    }, 300),
+    [updateWellLog, dispatch, pendingState, selectedWellLog]
+  );
+
+  return { saveWellLog };
 }

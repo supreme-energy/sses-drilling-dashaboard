@@ -34,7 +34,7 @@ export function useGetLogByMd(md) {
   return { wellLog, prevLog, logIndex };
 }
 
-export function useSelectedWellLog(wellId) {
+export function useSelectedWellLog() {
   const [{ selectedMd }] = useComboContainer();
   const { wellLog, prevLog, logIndex } = useGetLogByMd(selectedMd);
   return { selectedWellLog: wellLog, prevLog, selectedWellLogIndex: logIndex };
@@ -102,6 +102,14 @@ export function useComputedSegments(wellId) {
 
           if (pendingState && pendingState.dip !== undefined) {
             newLog.sectdip = pendingState.dip;
+          }
+
+          if (pendingState && pendingState.bias !== undefined) {
+            newLog.scalebias = pendingState.bias;
+          }
+
+          if (pendingState && pendingState.scale !== undefined) {
+            newLog.scalefactor = pendingState.scale;
           }
 
           const calculateDepth = getCalculateDepth(newLog, acc[index - 1]);
@@ -199,7 +207,10 @@ export function useGetLogExtent(log) {
   return getExtent(logData);
 }
 
-export function useGetSelectedSegmentPendingState(state) {
-  const { selectedMd, pendingSegmentsState } = state;
-  return useMemo(() => pendingSegmentsState[selectedMd] || { bias: 0, scale: 1 }, [pendingSegmentsState, selectedMd]);
+export function useSelectedSegmentState() {
+  const { wellId } = useWellIdContainer();
+  const [, computedSegmentsById] = useComputedSegments(wellId);
+  const { selectedWellLog } = useSelectedWellLog();
+
+  return (selectedWellLog && computedSegmentsById[selectedWellLog.id]) || {};
 }

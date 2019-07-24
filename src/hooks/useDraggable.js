@@ -46,7 +46,11 @@ export default function useDraggable({
     };
   });
 
+  // we save this on interactionState because we can't provide them as  input to hooks, if they change while
+  // drag opertion is pending the interaction will be broken
+
   interactionStateRef.current.onDrag = onDrag;
+  interactionStateRef.current.onDragEnd = onDragEnd;
 
   const onMouseDown = useCallback(
     function(e) {
@@ -77,14 +81,15 @@ export default function useDraggable({
   );
   const onMouseUp = useCallback(
     e => {
-      interactionStateRef.current.isDragging = false;
-      container.off("mousemove", interactionStateRef.current.onMouseMove);
-      onDragEnd(e);
+      const interactionState = interactionStateRef.current;
+      interactionState.isDragging = false;
+      container.off("mousemove", interactionState.onMouseMove);
+      interactionState.onDragEnd(e);
       if (canvas) {
         canvas.style.cursor = "default";
       }
     },
-    [container, onDragEnd, canvas]
+    [container, canvas]
   );
 
   useEffect(

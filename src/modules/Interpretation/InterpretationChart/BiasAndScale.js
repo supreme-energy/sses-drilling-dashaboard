@@ -2,20 +2,24 @@ import React, { useEffect, useCallback } from "react";
 import { draftColor, selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedLogExtent, useGetSelectedSegmentPendingState } from "../selectors";
+import { useSelectedLogExtent, useSelectedSegmentState } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useBiasAndScaleActions } from "../actions";
+import { useBiasAndScaleActions, useSaveWellLogActions } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 
 const lineData = [[0, 10], [0, 0]];
-export default function BiasAndScale({ container, isDraft, y, gridGutter, refresh, canvas }) {
+export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
   const [xMin, xMax] = useSelectedLogExtent();
   const width = xMax - xMin;
-  const [state, dispatch] = useComboContainer();
-  const { bias, scale } = useGetSelectedSegmentPendingState(state);
-  const { changeSelectedSegmentBiasDelta, changeSelectedSegmentScale } = useBiasAndScaleActions(dispatch);
+  const [, dispatch] = useComboContainer();
+  const segmentData = useSelectedSegmentState();
+  const isDraft = !!segmentData.draftData;
+  // if we are in draft mode, we will have some draftData defined
+  const { scalebias: bias, scalefactor: scale } = segmentData.draftData || segmentData;
+
+  const { changeSelectedSegmentBias, changeSelectedSegmentScale } = useBiasAndScaleActions(dispatch);
 
   useEffect(
     function redraw() {
@@ -32,9 +36,10 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
     (event, prevMouse) => {
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
-      changeSelectedSegmentBiasDelta(delta);
+
+      changeSelectedSegmentBias(bias + delta);
     },
-    [changeSelectedSegmentBiasDelta]
+    [changeSelectedSegmentBias, bias]
   );
 
   const onStartDragHandler = useCallback(
@@ -65,11 +70,13 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
 
   const computedWidth = width * scale;
   const computedXMin = xMin - (computedWidth - width) / 2;
-
+  const { saveWellLog } = useSaveWellLogActions();
+  console.log("isDraft", isDraft);
   useDraggable({
     container: segmentContainerRef.current && segmentContainerRef.current.container,
     root: container,
     onDrag: onRootDragHandler,
+    onDragEnd: !isDraft ? saveWellLog : undefined,
     canvas,
     cursor: "ew-resize",
     width: computedWidth - 4,
@@ -82,6 +89,7 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
     container: startLineRef.current && startLineRef.current.container,
     root: container,
     onDrag: onStartDragHandler,
+    onDragEnd: !isDraft ? saveWellLog : undefined,
     canvas,
     cursor: "col-resize",
     width: 3,
@@ -94,6 +102,7 @@ export default function BiasAndScale({ container, isDraft, y, gridGutter, refres
     container: endLineRef.current && endLineRef.current.container,
     root: container,
     onDrag: onEndDragHandler,
+    onDragEnd: !isDraft ? saveWellLog : undefined,
     canvas,
     cursor: "col-resize",
     width: 3,

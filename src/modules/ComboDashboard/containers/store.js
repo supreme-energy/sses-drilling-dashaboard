@@ -7,10 +7,7 @@ const initialState = {
   draftMode: false
 };
 
-const initialPendingState = {
-  scale: 1,
-  bias: 0
-};
+const initialPendingState = {};
 
 function updateSegmentProperties(state, md, p, reset) {
   return {
@@ -49,20 +46,21 @@ function comboStoreReducer(state, action) {
     }
     case "TOGGLE_DRAFT_MODE":
       const draft = !state.draftMode;
+      const selectedMd = state.selectedMd;
+      return updateSegmentProperties(
+        {
+          ...state,
+          draftMode: draft
+        },
+        selectedMd,
+        {},
+        true
+      );
 
-      return {
-        ...state,
-        draftMode: draft
-      };
     case "UPDATE_SEGMENT_PROPERTIES":
       return updateSegmentProperties(state, action.md, action.props);
     case "RESET_SEGMENT_PENDING_STATE":
       return updateSegmentProperties(state, action.md, {}, true);
-    case "CHANGE_SELECTED_SEGMENT_BIAS_DELTA": {
-      const selectedMd = state.selectedMd;
-      const selectionPendingState = state.pendingSegmentsState[selectedMd] || initialPendingState;
-      return updateSegmentProperties(state, selectedMd, { bias: (selectionPendingState.bias || 0) + action.delta });
-    }
 
     case "CHANGE_SELECTED_SEGMENT_BIAS": {
       const selectedMd = state.selectedMd;

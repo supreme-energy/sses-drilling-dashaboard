@@ -19,6 +19,8 @@ const mapLogList = d => ({
   startdepth: Number(d.startdepth),
   enddepth: Number(d.enddepth),
   sectdip: Number(d.sectdip),
+  scalebias: Number(d.scalebias),
+  scalefactor: Number(d.scalefactor),
   id: Number(d.id) // UPDATE_WELL_LOG fetch action come with id string, GET_WELL_LOG_LIST return id as number
 });
 

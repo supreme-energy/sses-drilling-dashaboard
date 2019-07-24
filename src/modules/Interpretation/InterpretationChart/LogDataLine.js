@@ -1,15 +1,21 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import PixiLine from "../../../components/PixiLine";
-import { useGetComputedLogData, useSelectedLogExtent, useGetSelectedSegmentPendingState } from "../selectors";
+import { useGetComputedLogData, useSelectedLogExtent, useSelectedSegmentState } from "../selectors";
 import { draftColor, selectionColor, logColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useBiasAndScaleActions } from "../actions";
 
 const mapWellLog = d => [d.value, d.depth];
 
 function SelectedLogData(props) {
-  const [state, dispatch] = useComboContainer();
-  const { bias, scale } = useGetSelectedSegmentPendingState(state);
+  const [, dispatch] = useComboContainer();
+
+  const segmentData = useSelectedSegmentState();
+  // if we are in draft mode, we will have some draftData defined
+  const { scalebias: bias, scalefactor: scale } = segmentData.draftData || segmentData;
+
   const [xMin, xMax] = useSelectedLogExtent();
+  const { changeSelectedSegmentBias } = useBiasAndScaleActions(dispatch);
   const width = xMax - xMin;
 
   const internalState = useRef({ prevLogData: null });
@@ -23,15 +29,12 @@ function SelectedLogData(props) {
         props.draft &&
         width
       ) {
-        console.log("CHANGE_SELECTED_SEGMENT_BIAS", width);
-        dispatch({
-          type: "CHANGE_SELECTED_SEGMENT_BIAS",
-          bias: width + 10
-        });
+        changeSelectedSegmentBias(width + 10);
+
         internalState.current.prevLogData = props.logData;
       }
     },
-    [props.logData, props.draft, dispatch, xMin, width]
+    [props.logData, props.draft, changeSelectedSegmentBias, xMin, width]
   );
 
   const computedWidth = width * scale;
