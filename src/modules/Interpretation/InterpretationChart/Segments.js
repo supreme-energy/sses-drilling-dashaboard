@@ -119,6 +119,8 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     height: segmentHeight - 8
   });
 
+  const backgroundColor = isDraft ? draftColor : selectionColor;
+
   return (
     <PixiContainer
       ref={selectionContainerRef}
@@ -130,7 +132,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
         <React.Fragment>
           <SegmentLabel
             container={container}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             segment={segment}
             y={0}
             text={twoDecimals(segment.startdepth)}
@@ -138,7 +140,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
           />
           <SegmentLabel
             container={container}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             segment={segment}
             text={twoDecimals(segment.enddepth)}
             y={segmentHeight}
@@ -179,7 +181,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
             y={0}
             x={totalWidth - 70}
             radius={5}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             container={container}
           />
         </React.Fragment>
