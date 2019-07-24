@@ -66,6 +66,7 @@ export function useFilteredWellData() {
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
+  const wellPlanFiltered = filterDataToInterval(wellPlan, sliderInterval);
   const surveysFiltered = filterDataToInterval(surveysData, sliderInterval);
   const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
   const formationsFiltered = formationsData.map(f => {
@@ -105,6 +106,7 @@ export function useFilteredWellData() {
   return {
     surveys: surveysFiltered,
     wellPlan,
+    wellPlanFiltered,
     formations: formationsFiltered,
     projections: projectionsFiltered,
     saveProjection: saveAndUpdate,
