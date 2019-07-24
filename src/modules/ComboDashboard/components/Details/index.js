@@ -10,8 +10,10 @@ import surveySVG from "../../../../assets/survey.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectAheadSVG from "../../../../assets/projectAhead.svg";
+import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
+import IconButton from "@material-ui/core/IconButton";
 
 function SurveyIcon({ row }) {
   const surveyMarker = <img src={surveySVG} />;
@@ -91,6 +93,17 @@ export default function DetailsTable({ showFullTable = false }) {
             <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
             {showFullTable && <TableCell className={classes.cell}>{row.tot.toFixed(2)}</TableCell>}
             {showFullTable && <TableCell className={classes.cell}>{row.bot.toFixed(2)}</TableCell>}
+            <TableCell className={classNames(classes.cell, classes.actions)}>
+              <IconButton
+                size="small"
+                aria-label="Delete row"
+                onClick={() => {
+                  console.log(row.name);
+                }}
+              >
+                <img src={trashcanIcon} />
+              </IconButton>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

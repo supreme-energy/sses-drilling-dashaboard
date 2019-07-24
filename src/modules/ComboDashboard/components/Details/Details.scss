@@ -14,6 +14,10 @@
     margin-right: 4px;
   }
   .cell {
+    &.actions {
+      background: none !important;
+      padding-right: 0px;
+    }
     &:first-child:before {
       width: 4px;
       height: 95%;
@@ -107,4 +111,9 @@ $black: rgb(0, 0, 0);
     display: flex;
     width: 100%;
   }
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
 }
