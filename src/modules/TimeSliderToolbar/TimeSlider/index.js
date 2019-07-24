@@ -7,9 +7,9 @@ import { useSize } from "react-hook-size";
 import { max, min } from "d3-array";
 
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import PixiBar from "./PixiBar";
 import PixiContainer from "../../../components/PixiContainer";
 import PixiLine from "../../../components/PixiLine";
+import PixiBar from "../../../components/PixiBar";
 import { useTimeSliderContainer, useDrillPhaseContainer, useWellSections } from "../../App/Containers";
 import VerticalMenu from "../../VerticalMenu";
 import Legend from "./Legend";
