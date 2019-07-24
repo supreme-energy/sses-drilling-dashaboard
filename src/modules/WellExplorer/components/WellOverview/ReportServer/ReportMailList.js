@@ -59,7 +59,7 @@ function MailingListRow({ data, onChange, isFirstRow }) {
     <div className={classes.listRowContainer}>
       <TextField
         label={label(PERSONNEL.label)}
-        value={reportMailingInput.personnel}
+        value={reportMailingInput[PERSONNEL.field]}
         onChange={handleInputChange(PERSONNEL.field)}
         margin="normal"
         onBlur={onBlur}
@@ -67,7 +67,7 @@ function MailingListRow({ data, onChange, isFirstRow }) {
       />
       <TextField
         label={label(NAME.label)}
-        value={reportMailingInput.name}
+        value={reportMailingInput[NAME.field]}
         onChange={handleInputChange(NAME.field)}
         margin="normal"
         onBlur={onBlur}
@@ -75,7 +75,7 @@ function MailingListRow({ data, onChange, isFirstRow }) {
       />
       <TextField
         label={label(EMAIL.label)}
-        value={reportMailingInput.email_address}
+        value={reportMailingInput[EMAIL.field]}
         onChange={handleInputChange(EMAIL.field)}
         margin="normal"
         onBlur={onBlur}
@@ -83,7 +83,7 @@ function MailingListRow({ data, onChange, isFirstRow }) {
       />
       <TextField
         label={label(PHONE.label)}
-        value={reportMailingInput.phone}
+        value={reportMailingInput[PHONE.field]}
         onChange={handleInputChange(PHONE.field)}
         margin="normal"
         onBlur={onBlur}
@@ -91,7 +91,7 @@ function MailingListRow({ data, onChange, isFirstRow }) {
       />
       <TextField
         label={label(REPORTS.label)}
-        value={reportMailingInput.reports}
+        value={reportMailingInput[REPORTS.field]}
         margin="normal"
         InputLabelProps={{ shrink: true }}
         disabled

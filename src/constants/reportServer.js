@@ -4,8 +4,8 @@ export const PERSONNEL = {
 };
 
 export const NAME = {
-  field: "Name",
-  label: "name"
+  field: "name",
+  label: "Name"
 };
 
 export const EMAIL = {

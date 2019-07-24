@@ -11,7 +11,7 @@ import PixiContainer from "../../../components/PixiContainer";
 import PixiLine from "../../../components/PixiLine";
 import PixiBar from "../../../components/PixiBar";
 import { useTimeSliderContainer, useDrillPhaseContainer, useWellSections } from "../../App/Containers";
-import VerticalMenu from "../../VerticalMenu";
+import VerticalMenu from "../../../components/VerticalMenu";
 import Legend from "./Legend";
 import Slider from "./Slider";
 import ZoomControls from "./ZoomControls";
