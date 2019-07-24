@@ -168,7 +168,7 @@ function drawGrid(container, options = {}) {
 
       if (corner && showYAxis) {
         corner.clear().beginFill(0xffffff);
-        corner.drawRect(0, xAxisAnchor - gutter, gutterLeft, gutter);
+        corner.drawRect(0, xAxisAnchor - gutterBottom, gutterLeft, gutterBottom);
       }
 
       for (let i = 0; i < xLines.length; i++) {
