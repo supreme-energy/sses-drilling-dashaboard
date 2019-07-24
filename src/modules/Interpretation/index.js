@@ -9,6 +9,8 @@ import { withRouter } from "react-router";
 
 import classNames from "classnames";
 
+import InterpretationSettings from "./InterpretationSettings";
+
 function Interpretation({
   match: {
     params: { wellId }
@@ -22,8 +24,9 @@ function Interpretation({
 
   return (
     <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
-      <Typography variant="subtitle1">Interpretation 1</Typography>
+      <Typography variant="subtitle1">Interpretation</Typography>
       <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} gr={gr} logList={logList} />
+      <InterpretationSettings className={css.settings} />
     </WidgetCard>
   );
 }

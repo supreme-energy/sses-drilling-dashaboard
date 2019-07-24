@@ -3,7 +3,8 @@ import { useReducer, useCallback } from "react";
 
 const initialState = {
   selectedMd: null,
-  pendingSegmentsState: {}
+  pendingSegmentsState: {},
+  draftMode: false
 };
 
 function comboStoreReducer(state, action) {
@@ -21,6 +22,20 @@ function comboStoreReducer(state, action) {
         };
       }
     }
+    case "TOGGLE_DRAFT_MODE":
+      const draft = !state.draftMode;
+      const selectedMd = state.selectedMd;
+      // reset pending state for drafted item
+      const pendingSegmentsState = {
+        ...state.pendingSegmentsState,
+        [selectedMd]: {}
+      };
+
+      return {
+        ...state,
+        draftMode: draft,
+        pendingSegmentsState
+      };
     case "UPDATE_SEGMENT_PROPERTIES":
       return {
         ...state,
