@@ -68,6 +68,24 @@
     }
 }
 
+.contactDialogActions {
+    button {
+        outline: none;
+    }
+}
+
 .reportMailingListContainer {
     margin-top: 10px;
+
+    .addContactButton {
+        outline: none;
+
+        span, svg {
+            color: #757575;
+        }
+
+        svg {
+            margin-right: 5px;
+        }
+    }
 }
