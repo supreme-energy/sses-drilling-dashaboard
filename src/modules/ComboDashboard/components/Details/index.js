@@ -14,6 +14,7 @@ import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import IconButton from "@material-ui/core/IconButton";
+import TextField from "@material-ui/core/TextField";
 
 function SurveyIcon({ row }) {
   const surveyMarker = <img src={surveySVG} />;
@@ -57,6 +58,7 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>TVD</TableCell>
           <TableCell className={classes.cell}>Dog Leg</TableCell>
           <TableCell className={classes.cell}>VS</TableCell>
+          <TableCell className={classes.cell}>Example</TableCell>
           <TableCell className={classes.cell}>Fault</TableCell>
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
@@ -87,6 +89,16 @@ export default function DetailsTable({ showFullTable = false }) {
             <TableCell className={classes.cell}>{row.tvd.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.dl.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.vs.toFixed(2)}</TableCell>
+            <TextField
+              id={`${row.id}vs`}
+              value={row.vs}
+              // onChange={handleChange("age")}
+              type="number"
+              className={classNames(classes.textField, classes.cell)}
+              InputLabelProps={{
+                shrink: true
+              }}
+            />
             <TableCell className={classes.cell}>{row.fault.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
             <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
