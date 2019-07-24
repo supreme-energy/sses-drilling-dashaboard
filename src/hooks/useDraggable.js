@@ -101,7 +101,7 @@ export default function useDraggable({
         if (container) {
           container.off("mouseout", onMouseOut);
           container.off("mouseover", onMouseOver);
-          container.on("mousedown", onMouseDown);
+          container.off("mousedown", onMouseDown);
           container.off("mouseup", onMouseUp);
           container.off("mouseupoutside", onMouseUp);
         }
