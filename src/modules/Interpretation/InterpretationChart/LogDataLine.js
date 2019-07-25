@@ -52,6 +52,11 @@ export default function LogDataLine({ wellId, log, prevLog, container, draft, se
   const logData = useGetComputedLogData(wellId, log, draft);
   const logDataNonDraft = useGetComputedLogData(wellId, log, false);
 
+  // we need to call refresh after log data is loaded to redraw
+  useEffect(() => {
+    refresh();
+  }, [logData, refresh]);
+
   return (
     <React.Fragment>
       {(draft || !selected) && (
