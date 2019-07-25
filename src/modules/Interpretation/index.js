@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
-import { Typography } from "@material-ui/core";
 
-import WidgetCard from "../WidgetCard";
+import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
@@ -17,7 +16,7 @@ function Interpretation({
 }) {
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogList(wellId);
-  const aditionalLogs = useAdditionalDataLogsList(wellId);
+  const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
   const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
   const [{ selectedMd }] = useComboContainer();
@@ -35,8 +34,7 @@ function Interpretation({
   );
 
   return (
-    <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
-      <Typography variant="subtitle1">Interpretation 1</Typography>
+    <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
       <InterpretationChart
         wellId={wellId}
         className={css.chart}

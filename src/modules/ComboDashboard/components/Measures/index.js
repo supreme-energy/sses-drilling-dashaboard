@@ -1,5 +1,4 @@
 import React, { useMemo, useRef } from "react";
-import { Typography } from "@material-ui/core";
 import classNames from "classnames";
 import _ from "lodash";
 import { useSize } from "react-hook-size";
@@ -8,7 +7,7 @@ import { scaleLinear } from "d3-scale";
 import { useFilteredAdditionalDataLogs } from "../../../App/Containers";
 import { useAdditionalDataLogsList } from "../../../../api";
 import KpiItem from "../../../Kpi/KpiItem";
-import WidgetCard from "../../../WidgetCard";
+import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./Measures.scss";
 
 function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, ...props }) {
@@ -38,7 +37,7 @@ function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, 
 }
 
 function Measures({ wellId }) {
-  const additionalDataLogKeys = useAdditionalDataLogsList(wellId);
+  const { dataBySection: additionalDataLogKeys = {} } = useAdditionalDataLogsList(wellId);
   const getFieldId = field => _.get(additionalDataLogKeys, `${field}.id`);
   const useFADL = field => useFilteredAdditionalDataLogs(wellId, getFieldId(field));
 
@@ -60,8 +59,7 @@ function Measures({ wellId }) {
   const gtf = useFADL("GTF");
 
   return (
-    <WidgetCard className={classes.measures} hideMenu>
-      <Typography variant="subtitle1">Measures</Typography>
+    <WidgetCard className={classes.measures} title="Measures" hideMenu>
       <KpiItem className={classes.kpi} value={mDepth.value} measureUnit={"in"} label={"Hole Depth"} small />
       <KpiItem className={classes.kpi} value={bitDepth.value} measureUnit={"in"} label={"Bit Depth"} small />
       <PercentageBarKpi

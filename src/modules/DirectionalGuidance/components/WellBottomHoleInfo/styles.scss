@@ -1,0 +1,28 @@
+.graphRowContainer {
+    height: 100%;
+}
+.wellHoleGraphContainer {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    padding: 20px 10px 5px;
+
+    .wellHolePlot {
+        z-index: 1;
+        align-self: stretch;
+        flex: 1;
+        position: relative;
+        > canvas {
+            position: absolute;
+            max-height: 95%;
+        }
+    }
+
+    span {
+        font-weight: bold;
+        font-size: 14px;
+    }
+}

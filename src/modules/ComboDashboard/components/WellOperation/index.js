@@ -1,5 +1,4 @@
 import React, { useRef, useMemo, useState, useEffect, useCallback } from "react";
-import { Typography } from "@material-ui/core";
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
 import { useSize } from "react-hook-size";
@@ -10,7 +9,7 @@ import PixiRectangle from "../../../../components/PixiRectangle";
 import PixiText from "../../../../components/PixiText";
 import useViewport from "../../../../hooks/useViewport";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
-import WidgetCard from "../../../WidgetCard";
+import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./WellOperation.scss";
 
 const gridGutter = 10;
@@ -103,8 +102,7 @@ function WellOperation({ wellId }) {
   );
 
   return (
-    <WidgetCard className={classes.wellOperation} hideMenu>
-      <Typography variant="subtitle1">Hours of Well Operation</Typography>
+    <WidgetCard className={classes.wellOperation} title="Hours of Well Operation" hideMenu>
       <div className={classes.wellOperationCanvas} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
         {data.map((d, index) => {

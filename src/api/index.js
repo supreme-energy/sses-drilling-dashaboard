@@ -607,7 +607,9 @@ export function useAdditionalDataLogsList(wellId) {
       }
     },
     {
-      transform: data => _.keyBy(data, "label")
+      transform: data => {
+        return { data: data || EMPTY_ARRAY, dataBySection: keyBy(data, "label") };
+      }
     }
   );
 
@@ -619,6 +621,8 @@ const additionalDataLogTransform = memoizeOne(data => {
     label: data.label,
     scalelo: data.scalelo,
     scalehi: data.scalehi,
+    color: data.color,
+    count: data.data_count,
     data: transform(data.data)
   };
 });

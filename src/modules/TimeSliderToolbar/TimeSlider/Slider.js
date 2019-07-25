@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { Slider as SliderComponent } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
@@ -91,7 +91,7 @@ const Slider = React.memo(
       setStep({ type: "UPDATE", payload: { isDragging: false } });
     }, [setStep]);
 
-    const labelFormat = useMemo(() => {
+    const labelFormat = useCallback(() => {
       if (!holeDepth) return null;
 
       return (

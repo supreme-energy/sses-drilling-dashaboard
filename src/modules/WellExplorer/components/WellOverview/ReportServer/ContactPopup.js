@@ -16,39 +16,41 @@ import {
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
 
+import { PERSONNEL, EMAIL, NAME, PHONE } from "../../../../../constants/reportServer";
 import { stateReducer } from "./reducer";
 import classes from "./styles.scss";
 
-const VIEW_REPORTS = {
+const REPORTS = {
   "Combo Dashboard": false,
-  "Structural Guidance": true,
+  "Structural Guidance": false,
   "Drilling Analytics": false,
-  "Directional Guidance": true,
-  "Key Performance Indicator": true,
-  "Survey Sheet": true,
-  "Lateral Plot (Only)": true,
-  "Horizontal Plot (Only)": false
-};
-
-const DATA_REPORTS = {
-  "LAS Data": true,
-  '1" MD Logs': true,
-  '2" MD Logs': true,
+  "Directional Guidance": false,
+  "Key Performance Indicator": false,
+  "Survey Sheet": false,
+  "Lateral Plot (Only)": false,
+  "Horizontal Plot (Only)": false,
+  "LAS Data": false,
+  '1" MD Logs': false,
+  '2" MD Logs': false,
   '5" MD Logs': false,
-  '1" TVD Logs': true,
+  '1" TVD Logs': false,
   '2" TVD Logs': false,
-  '5" TVD Logs': true
+  '5" TVD Logs': false,
+  allReportsSelected: false
 };
 
 function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEditing }) {
   const type = isEditing ? "Edit " : "Add ";
-  const [allReports, setAllReports] = useReducer(a => !a, false);
-  const [reports, setReport] = useReducer(stateReducer, { ...VIEW_REPORTS, ...DATA_REPORTS });
-  const isChecked = value => (!isEditing ? false : allReports || value);
+  const [reports, setReport] = useReducer(stateReducer, REPORTS);
+  const isChecked = value => reports.allReportsSelected || value;
 
-  const handleAllReports = useCallback(() => setAllReports(), []);
+  const handleAllReports = useCallback(e => setReport({ allReportsSelected: e.target.checked }), []);
   const handleReportChange = useCallback(e => setReport({ [e.target.value]: e.target.checked }), []);
   const handleSave = useCallback(() => handleClose(), [handleClose]);
+
+  const reportKeys = Object.keys(REPORTS);
+  const viewReports = reportKeys.slice(0, 8);
+  const dataReports = reportKeys.slice(8, reportKeys.length - 1);
 
   return (
     <Dialog
@@ -72,40 +74,36 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
       <DialogContent className={classes.contactDialogContent}>
         <Box className={classes.popupInputRow} display="flex" flexDirection="row" flex={1} justifyContent="start">
           <TextField
-            id="personnel"
             className={classes.textField}
-            label={"Personnel"}
+            label={PERSONNEL.label}
             value={values.personnel}
-            onChange={handleInputChange}
+            onChange={handleInputChange(PERSONNEL.field)}
             margin="normal"
             fullWidth
           />
           <TextField
-            id="name"
             className={classes.textField}
-            label={"Name"}
+            label={NAME.label}
             value={values.name}
-            onChange={handleInputChange}
+            onChange={handleInputChange(NAME.field)}
             margin="normal"
             fullWidth
           />
         </Box>
         <Box className={classes.popupInputRow} display="flex" flexDirection="row" flex={1} justifyContent="start">
           <TextField
-            id="email_address"
             className={classes.textField}
-            label={"Email Address"}
+            label={EMAIL.label}
             value={values.email_address}
-            onChange={handleInputChange}
+            onChange={handleInputChange(EMAIL.field)}
             margin="normal"
             fullWidth
           />
           <TextField
-            id="phone"
             className={classes.textField}
-            label={"Phone"}
+            label={PHONE.label}
             value={values.phone}
-            onChange={handleInputChange}
+            onChange={handleInputChange(PHONE.field)}
             margin="normal"
             helperText="ex: 123-456-7890"
             fullWidth
@@ -119,12 +117,12 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
           <DialogContentText>Select reports that this contact will receive via email.</DialogContentText>
           <div className={classNames(classes.switchComponent, classes.allReportsButton)}>
             <span>All Reports</span>
-            <Switch color="primary" checked={allReports} onChange={handleAllReports} />
+            <Switch color="primary" checked={reports.allReportsSelected} onChange={handleAllReports} />
           </div>
         </Box>
         <Box display="flex" flexDirection="row" flex={1} p={1}>
           <Box display="flex" flexDirection="column" flex={1} p={1}>
-            {Object.keys(VIEW_REPORTS).map(key => (
+            {viewReports.map(key => (
               <div key={key} className={classes.switchComponent}>
                 <span>{key}</span>
                 <Switch color="primary" value={key} checked={isChecked(reports[key])} onChange={handleReportChange} />
@@ -132,7 +130,7 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
             ))}
           </Box>
           <Box display="flex" flexDirection="column" flex={1} p={1}>
-            {Object.keys(DATA_REPORTS).map(key => (
+            {dataReports.map(key => (
               <div key={key} className={classes.switchComponent}>
                 <span>{key}</span>
                 <Switch color="primary" value={key} checked={isChecked(reports[key])} onChange={handleReportChange} />
@@ -141,7 +139,7 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
           </Box>
         </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions className={classes.contactDialogActions}>
         <Button onClick={handleClose}>Cancel</Button>
         <Button onClick={handleSave} variant="contained" color="primary">
           Save
