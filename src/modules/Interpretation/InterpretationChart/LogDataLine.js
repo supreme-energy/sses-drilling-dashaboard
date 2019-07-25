@@ -20,7 +20,7 @@ function DraftLineInit({ logData, width, xMin, bias }) {
       const prevLogData = internalState.current.prevLogData;
       if (logData && (!prevLogData || logData.tablename !== prevLogData.tablename) && width) {
         changeSelectedSegmentBias(bias + width + 10);
-        console.log("here");
+
         internalState.current.prevLogData = logData;
       }
     },
