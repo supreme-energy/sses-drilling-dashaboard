@@ -105,7 +105,6 @@ const PixiRectangle = forwardRef(
           bg.beginFill(backgroundColor);
         }
         bg.lineStyle(borderThickness, borderColor);
-
         radius ? bg.drawRoundedRect(0, 0, width, height, radius) : bg.drawRect(0, 0, width, height);
       },
       [width, height, backgroundColor, borderColor, borderThickness, alpha, updateTransform, bg, radius]
