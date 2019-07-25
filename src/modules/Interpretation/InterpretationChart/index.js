@@ -17,6 +17,8 @@ import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useSelectedWellLog, useComputedSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
+import BiasAndScale from "./BiasAndScale";
+import * as PIXI from "pixi.js";
 
 const gridGutter = 60;
 
@@ -50,7 +52,8 @@ function useInterpretationWebglRenderer() {
     view,
     updateView,
     zoomXScale: false,
-    zoomYScale: true
+    zoomYScale: true,
+    updateViewport: false
   });
 
   return {
@@ -82,7 +85,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     updateView
   } = useInterpretationRenderer();
 
-  const { selectedWellLog } = useSelectedWellLog(wellId);
+  const { selectedWellLog } = useSelectedWellLog();
 
   useEffect(
     function initScale() {
@@ -94,15 +97,25 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   );
 
   const [{ draftMode }] = useComboContainer();
+  const [segments] = useComputedSegments(wellId);
+
+  useEffect(
+    function updateViewport() {
+      if (updateView) {
+        viewport.position = new PIXI.Point(view.x, view.y);
+        viewport.scale.x = view.xScale;
+        viewport.scale.y = view.yScale;
+      }
+    },
+    [view, viewport, updateView]
+  );
 
   useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, view, width, height, controlLogs, selectedWellLog, gr, draftMode]
+    [refresh, stage, width, height, controlLogs, selectedWellLog, gr, draftMode, segments, view, viewport]
   );
-
-  const [segments] = useComputedSegments(wellId);
 
   return (
     <div className={classNames(className, css.root)}>
@@ -116,22 +129,17 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
       {logList.map((log, index) => {
         const selected = selectedWellLog && log.id === selectedWellLog.id;
-        const getLine = draft => (
+
+        return (
           <LogDataLine
+            refresh={refresh}
             log={log}
-            key={`${log.id}-${draft ? "draft" : ""}`}
-            draft={draft}
+            key={`${log.id}`}
+            draft={draftMode && selected}
             selected={selected}
             wellId={wellId}
             container={viewport}
-            bias={draft ? 100 : 0}
           />
-        );
-        return (
-          <React.Fragment>
-            {getLine()}
-            {draftMode && selected && getLine(true)}
-          </React.Fragment>
         );
       })}
 
@@ -154,6 +162,15 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         container={viewport}
       />
       <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
+      <BiasAndScale
+        container={stage}
+        y={height - 10}
+        gridGutter={gridGutter}
+        refresh={refresh}
+        totalWidth={width}
+        canvas={canvasRef.current}
+      />
     </div>
   );
 }
