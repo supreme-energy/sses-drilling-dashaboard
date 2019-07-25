@@ -32,6 +32,25 @@ function SurveyIcon({ row }) {
   }
 }
 
+function Cell(value, editable, changeHandler, field) {
+  if (editable) {
+    return (
+      <TextField
+        id={field}
+        value={value}
+        onChange={e => changeHandler(e.target.value)}
+        type="number"
+        className={classNames(classes.textField, classes.cell)}
+        InputLabelProps={{
+          shrink: true
+        }}
+      />
+    );
+  } else {
+    return <TableCell className={classes.cell}>{value}</TableCell>;
+  }
+}
+
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections } = useCrossSectionContainer();
   let details;
@@ -58,7 +77,6 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>TVD</TableCell>
           <TableCell className={classes.cell}>Dog Leg</TableCell>
           <TableCell className={classes.cell}>VS</TableCell>
-          <TableCell className={classes.cell}>Example</TableCell>
           <TableCell className={classes.cell}>Fault</TableCell>
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
@@ -68,56 +86,49 @@ export default function DetailsTable({ showFullTable = false }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {details.map(row => (
-          <TableRow
-            key={row.id}
-            className={classNames(classes.row, {
-              [classes.PARow]: row.isProjection,
-              [classes.surveyRow]: row.isSurvey,
-              [classes.lastSurveyRow]: row.isLastSurvey,
-              [classes.bitProjRow]: row.isBitProj,
-              [classes.selected]: selectedId === row.id
-            })}
-          >
-            <TableCell className={classes.cell} component="th" scope="row">
-              <SurveyIcon row={row} />
-              {row.name}
-            </TableCell>
-            <TableCell className={classes.cell}>{row.md.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.inc.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.azm.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.tvd.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.dl.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.vs.toFixed(2)}</TableCell>
-            <TextField
-              id={`${row.id}vs`}
-              value={row.vs}
-              // onChange={handleChange("age")}
-              type="number"
-              className={classNames(classes.textField, classes.cell)}
-              InputLabelProps={{
-                shrink: true
-              }}
-            />
-            <TableCell className={classes.cell}>{row.fault.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.dip.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{row.tcl.toFixed(2)}</TableCell>
-            <TableCell className={classes.cell}>{(row.tcl - row.tvd).toFixed(2)}</TableCell>
-            {showFullTable && <TableCell className={classes.cell}>{row.tot.toFixed(2)}</TableCell>}
-            {showFullTable && <TableCell className={classes.cell}>{row.bot.toFixed(2)}</TableCell>}
-            <TableCell className={classNames(classes.cell, classes.actions)}>
-              <IconButton
-                size="small"
-                aria-label="Delete row"
-                onClick={() => {
-                  console.log(row.name);
-                }}
-              >
-                <img src={trashcanIcon} />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        ))}
+        {details.map(row => {
+          const editable = selectedId === row.id && !showFullTable;
+          return (
+            <TableRow
+              key={row.id}
+              className={classNames(classes.row, {
+                [classes.PARow]: row.isProjection,
+                [classes.surveyRow]: row.isSurvey,
+                [classes.lastSurveyRow]: row.isLastSurvey,
+                [classes.bitProjRow]: row.isBitProj,
+                [classes.selected]: selectedId === row.id
+              })}
+            >
+              <TableCell className={classes.cell} component="th" scope="row">
+                <SurveyIcon row={row} />
+                {row.name}
+              </TableCell>
+              {Cell(row.md.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.inc.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.azm.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.tvd.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.dl.toFixed(2), false)}
+              {Cell(row.vs.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.fault.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.dip.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.tcl.toFixed(2), editable, v => console.log(v))}
+              {Cell((row.tcl - row.tvd).toFixed(2), editable, v => console.log(v))}
+              {showFullTable && Cell(row.tot.toFixed(2), false)}
+              {showFullTable && Cell(row.bot.toFixed(2), false)}
+              <TableCell className={classNames(classes.cell, classes.actions)}>
+                <IconButton
+                  size="small"
+                  aria-label="Delete row"
+                  onClick={() => {
+                    console.log(row.name);
+                  }}
+                >
+                  <img src={trashcanIcon} />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );
