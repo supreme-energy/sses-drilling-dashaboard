@@ -57,11 +57,7 @@ export function useWellLogList(wellId) {
           cache: "no-cache"
         },
         (original, newResult) => {
-          console.log("original, new", original, newResult);
           return original.map(l => {
-            if (Number(l.id) === Number(newResult.welllog.id)) {
-              console.log("found", { ...mapLogList(newResult.welllog), test: "new stuff" });
-            }
             return String(l.id) === String(newResult.welllog.id)
               ? { ...mapLogList(newResult.welllog), test: "new stuff" }
               : l;

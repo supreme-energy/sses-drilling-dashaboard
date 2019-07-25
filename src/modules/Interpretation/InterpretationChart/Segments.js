@@ -83,6 +83,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const startLineRef = useRef(null);
   const endLineRef = useRef(null);
   const segmentDragContainer = useRef(null);
+  const onDragEnd = !isDraft ? saveWellLog : undefined;
 
   useDraggable({
     container: startLineRef.current && startLineRef.current.container,
@@ -90,7 +91,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     canvas: canvasRef.current,
     cursor: "row-resize",
     onDrag: onStartSegmentDragHandler,
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     x: 0,
     y: -3,
     width: totalWidth,
@@ -103,7 +104,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     onDrag: onEndSegmentDragHandler,
     canvas: canvasRef.current,
     cursor: "row-resize",
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     x: 0,
     y: -2,
     width: totalWidth,
@@ -115,7 +116,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     root: stage,
     onDrag: onSegmentDragHandler,
     canvas: canvasRef.current,
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     cursor: "ns-resize",
     x: 0,
     y: 4,

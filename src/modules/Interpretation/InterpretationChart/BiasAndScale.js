@@ -71,12 +71,13 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   const computedWidth = width * scale;
   const computedXMin = xMin - (computedWidth - width) / 2;
   const { saveWellLog } = useSaveWellLogActions();
-  console.log("isDraft", isDraft);
+  const onDragEnd = !isDraft ? saveWellLog : undefined;
+
   useDraggable({
     container: segmentContainerRef.current && segmentContainerRef.current.container,
     root: container,
     onDrag: onRootDragHandler,
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     canvas,
     cursor: "ew-resize",
     width: computedWidth - 4,
@@ -89,7 +90,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     container: startLineRef.current && startLineRef.current.container,
     root: container,
     onDrag: onStartDragHandler,
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     canvas,
     cursor: "col-resize",
     width: 3,
@@ -102,7 +103,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     container: endLineRef.current && endLineRef.current.container,
     root: container,
     onDrag: onEndDragHandler,
-    onDragEnd: !isDraft ? saveWellLog : undefined,
+    onDragEnd,
     canvas,
     cursor: "col-resize",
     width: 3,
