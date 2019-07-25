@@ -18,6 +18,7 @@ import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/
 import { useSelectedWellLog, useComputedSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
+import * as PIXI from "pixi.js";
 
 const gridGutter = 60;
 
@@ -52,7 +53,7 @@ function useInterpretationWebglRenderer() {
     updateView,
     zoomXScale: false,
     zoomYScale: true,
-    refresh
+    updateViewport: false
   });
 
   return {
@@ -99,10 +100,21 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   const [segments] = useComputedSegments(wellId);
 
   useEffect(
+    function updateViewport() {
+      if (updateView) {
+        viewport.position = new PIXI.Point(view.x, view.y);
+        viewport.scale.x = view.xScale;
+        viewport.scale.y = view.yScale;
+      }
+    },
+    [view, viewport, updateView]
+  );
+
+  useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, width, height, controlLogs, selectedWellLog, gr, draftMode, segments]
+    [refresh, stage, width, height, controlLogs, selectedWellLog, gr, draftMode, segments, view, viewport]
   );
 
   return (
