@@ -90,7 +90,7 @@ export function useComputedSegments(wellId) {
         const isDraft = draftMode && index === selectedWellLogIndex;
         const getNewLog = usePending => {
           const pendingState = usePending ? pendingSegmentsState[l.startmd] : {};
-          let newLog = {
+          const newLog = {
             ...l
           };
 
@@ -140,7 +140,7 @@ export function useGetComputedLogData(wellId, log, draft) {
         data: logData.data.reduce((acc, d, index) => {
           const { vs, tvd } = d;
 
-          let newLog = { ...d };
+          const newLog = { ...d };
 
           const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
           newLog.depth = depth;
