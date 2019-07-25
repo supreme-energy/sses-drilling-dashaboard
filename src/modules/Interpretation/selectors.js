@@ -150,6 +150,8 @@ export function useGetComputedLogData(wellId, log, draft) {
       const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
       return {
         ...logData,
+        scalebias: computedSegment.scalebias,
+        scalefactor: computedSegment.scalefactor,
         data: logData.data.reduce((acc, d, index) => {
           const { vs, tvd } = d;
 
@@ -190,21 +192,17 @@ export function useComputedSurveys(surveys) {
 
   return computedSurveys;
 }
-const getExtent = memoizeOne(logData => (logData ? extent(logData.data, d => d.value) : [0, 0]));
+export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : [0, 0]);
+
+export function useLogExtent(log, wellId) {
+  const [logData] = useWellLogData(wellId, log && log.tablename);
+  return useMemo(() => getExtent(logData), [logData]);
+}
 
 export function useSelectedLogExtent() {
   const { wellId } = useWellIdContainer();
   const { selectedWellLog } = useSelectedWellLog();
-  const [logData] = useWellLogData(wellId, selectedWellLog && selectedWellLog.tablename);
-
-  return getExtent(logData);
-}
-
-export function useGetLogExtent(log) {
-  const { wellId } = useWellIdContainer();
-  const [logData] = useWellLogData(wellId, log && log.tablename);
-
-  return getExtent(logData);
+  return useLogExtent(selectedWellLog, wellId);
 }
 
 export function useSelectedSegmentState() {

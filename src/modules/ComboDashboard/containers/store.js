@@ -33,10 +33,16 @@ function comboStoreReducer(state, action) {
           selectedMd: null
         };
       } else {
+        const prevSelectedMd = state.selectedMd;
         const pendingSegmentsState = {
           ...state.pendingSegmentsState,
           [action.md]: initialPendingState
         };
+
+        if (prevSelectedMd) {
+          pendingSegmentsState[prevSelectedMd] = initialPendingState;
+        }
+
         return {
           ...state,
           selectedMd: action.md,
