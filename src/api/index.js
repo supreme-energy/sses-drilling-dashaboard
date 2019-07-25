@@ -24,6 +24,7 @@ export const GET_WELL_SURVEYS = "/surveys.php";
 export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
+export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
@@ -231,6 +232,7 @@ export function useWells() {
         // TODO get map source projection name from backend
         const source = proj4.Proj("EPSG:32040");
         const transform = toWGS84(source);
+
         return wells.map(w => {
           const surfacePos = transform({ x: Number(w.survey_easting), y: Number(w.survey_northing) });
 
@@ -449,6 +451,27 @@ export function useFetchProjections(wellId) {
       }
     });
   };
+
+  const addProjection = newProjection => {
+    const optimisticResult = [...(data || EMPTY_ARRAY), { ...newProjection, pendingProjection: true }];
+    return fetch(
+      {
+        path: ADD_WELL_PROJECTION,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+
+          ...newProjection
+        },
+        cache: "no-cache",
+        optimisticResult
+      },
+      (currentProjections, result) => {
+        return [...currentProjections, result.projection];
+      }
+    );
+  };
+
   const deleteProjection = projectionId => {
     return fetch({
       path: DELETE_WELL_PROJECTIONS,
@@ -459,7 +482,8 @@ export function useFetchProjections(wellId) {
       }
     });
   };
-  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection];
+
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection];
 }
 
 export function useWellOverviewKPI(wellId) {

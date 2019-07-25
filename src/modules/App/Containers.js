@@ -62,7 +62,13 @@ export function useFilteredWellData() {
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
   const { surveysData } = useSurveysDataContainer();
-  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
+  const {
+    projectionsData,
+    saveProjections,
+    refreshProjections,
+    deleteProjection,
+    addProjection
+  } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
@@ -104,6 +110,7 @@ export function useFilteredWellData() {
   );
 
   return {
+    addProjection,
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
@@ -179,7 +186,9 @@ function useProjectionsData() {
     }
   }, []);
 
-  const [projections, refreshProjections, saveProjections, deleteProjection] = useFetchProjections(wellId);
+  const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
+    wellId
+  );
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
@@ -191,7 +200,7 @@ function useProjectionsData() {
     }
   }, [projections]);
 
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection };
+  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
 }
 
 function useFormationsData() {
@@ -218,7 +227,7 @@ function useFormationsData() {
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections, saveProjection, addProjection } = useFilteredWellData();
 
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
@@ -330,6 +339,7 @@ export function useCrossSectionData() {
     }
   }, [selectedSections, rawSections]);
   return {
+    addProjection,
     wellPlan,
     selectedSections,
     setSelectedMd,
