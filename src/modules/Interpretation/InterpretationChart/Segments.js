@@ -9,7 +9,7 @@ import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useDragActions } from "../actions";
+import { useDragActions, useSaveWellLogActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
@@ -59,6 +59,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
   const { onStartSegmentDrag, onEndSegmentDrag, onSegmentDrag } = useDragActions();
+  const { saveWellLog } = useSaveWellLogActions();
   const { viewport, stage, canvasRef, view } = useInterpretationRenderer();
 
   const onStartSegmentDragHandler = useCallback(
@@ -82,6 +83,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const startLineRef = useRef(null);
   const endLineRef = useRef(null);
   const segmentDragContainer = useRef(null);
+  const onDragEnd = !isDraft ? saveWellLog : undefined;
 
   useDraggable({
     container: startLineRef.current && startLineRef.current.container,
@@ -89,6 +91,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     canvas: canvasRef.current,
     cursor: "row-resize",
     onDrag: onStartSegmentDragHandler,
+    onDragEnd,
     x: 0,
     y: -3,
     width: totalWidth,
@@ -101,6 +104,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     onDrag: onEndSegmentDragHandler,
     canvas: canvasRef.current,
     cursor: "row-resize",
+    onDragEnd,
     x: 0,
     y: -2,
     width: totalWidth,
@@ -112,12 +116,15 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
     root: stage,
     onDrag: onSegmentDragHandler,
     canvas: canvasRef.current,
+    onDragEnd,
     cursor: "ns-resize",
     x: 0,
     y: 4,
     width: totalWidth,
     height: segmentHeight - 8
   });
+
+  const backgroundColor = isDraft ? draftColor : selectionColor;
 
   return (
     <PixiContainer
@@ -130,7 +137,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
         <React.Fragment>
           <SegmentLabel
             container={container}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             segment={segment}
             y={0}
             text={twoDecimals(segment.startdepth)}
@@ -138,7 +145,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
           />
           <SegmentLabel
             container={container}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             segment={segment}
             text={twoDecimals(segment.enddepth)}
             y={segmentHeight}
@@ -179,7 +186,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
             y={0}
             x={totalWidth - 70}
             radius={5}
-            backgroundColor={isDraft ? draftColor : selectionColor}
+            backgroundColor={backgroundColor}
             container={container}
           />
         </React.Fragment>

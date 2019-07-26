@@ -73,7 +73,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
   const [, wellsById] = useWells();
   const wellPathData = useWellPath(selectedWellId);
   const wellPathMapPositions = useWellsMapPosition(selectedWellId, wellPathData);
-  const surveyData = useFetchSurveys(selectedWellId);
+  const [surveyData] = useFetchSurveys(selectedWellId);
   const surveyMapPositions = useWellsMapPosition(selectedWellId, surveyData);
 
   const selectedWell = wellsById[selectedWellId];

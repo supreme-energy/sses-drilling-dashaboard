@@ -13,8 +13,11 @@ import {
   useWellIdContainer,
   ProjectionsProvider,
   FormationsProvider,
-  SurveysProvider
+  SurveysProvider,
+  useTimeSliderContainer
 } from "../modules/App/Containers";
+import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
+import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
 
 const PageTabs = ({
   match: {
@@ -50,25 +53,29 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <WellIdProvider initialState={""}>
-        <SurveysProvider>
-          <ProjectionsProvider>
-            <FormationsProvider>
-              <div className={classes.container}>
-                <AppBar className={classes.appBar} color="inherit">
-                  <div className={classes.header}>
-                    <div className={classes.logo}>
-                      <img src="/sses-logo.svg" />
-                    </div>
-                    <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-                    <span />
-                  </div>
-                </AppBar>
+        <WellLogsProvider>
+          <ComboContainerProvider>
+            <SurveysProvider>
+              <ProjectionsProvider>
+                <FormationsProvider>
+                  <div className={classes.container}>
+                    <AppBar className={classes.appBar} color="inherit">
+                      <div className={classes.header}>
+                        <div className={classes.logo}>
+                          <img src="/sses-logo.svg" />
+                        </div>
+                        <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                        <span />
+                      </div>
+                    </AppBar>
 
-                <div className={classes.viewport}>{children}</div>
-              </div>
-            </FormationsProvider>
-          </ProjectionsProvider>
-        </SurveysProvider>
+                    <div className={classes.viewport}>{children}</div>
+                  </div>
+                </FormationsProvider>
+              </ProjectionsProvider>
+            </SurveysProvider>
+          </ComboContainerProvider>
+        </WellLogsProvider>
       </WellIdProvider>
     </MuiThemeProvider>
   );
