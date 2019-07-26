@@ -4,39 +4,42 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import IconButton from "@material-ui/core/IconButton";
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import classNames from "classnames";
 
+import { useCrossSectionContainer } from "../../../App/Containers";
+import Knob from "./knob";
 import surveySVG from "../../../../assets/survey.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectAheadSVG from "../../../../assets/projectAhead.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
-import { useCrossSectionContainer } from "../../../App/Containers";
-import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
 
 function SurveyIcon({ row }) {
-  const surveyMarker = <img src={surveySVG} />;
-  const lastSurveyMarker = <img src={lastSurveySVG} />;
-  const bitProjMarker = <img src={bitProjectionSVG} />;
-  const PAMarker = <img src={projectAheadSVG} />;
+  let sourceType;
   if (row.isProjection) {
-    return PAMarker;
+    sourceType = projectAheadSVG;
   } else if (row.isBitProj) {
-    return bitProjMarker;
+    sourceType = bitProjectionSVG;
   } else if (row.isLastSurvey) {
-    return lastSurveyMarker;
+    sourceType = lastSurveySVG;
   } else {
-    return surveyMarker;
+    sourceType = surveySVG;
   }
+  return <img className={classes.marker} src={sourceType} alt="survey type icon" />;
 }
 
-function Cell(value, editable, changeHandler, field) {
+const iconStyle = {
+  marginRight: 0
+};
+
+function Cell(value, editable, changeHandler, Icon) {
   if (editable) {
     return (
       <TextField
-        id={field}
         value={value}
         onChange={e => changeHandler(e.target.value)}
         type="number"
@@ -44,6 +47,15 @@ function Cell(value, editable, changeHandler, field) {
         InputLabelProps={{
           shrink: true
         }}
+        InputProps={
+          Icon && {
+            startAdornment: (
+              <InputAdornment position="start" style={iconStyle}>
+                <Icon className={classes.icon} />
+              </InputAdornment>
+            )
+          }
+        }
       />
     );
   } else {
@@ -109,8 +121,23 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.tvd.toFixed(2), editable, v => console.log(v))}
               {Cell(row.dl.toFixed(2), false)}
               {Cell(row.vs.toFixed(2), editable, v => console.log(v))}
-              {Cell(row.fault.toFixed(2), editable, v => console.log(v))}
-              {Cell(row.dip.toFixed(2), editable, v => console.log(v))}
+              {Cell(
+                row.fault.toFixed(2),
+                editable,
+                v => console.log(v),
+                a =>
+                  Knob({
+                    ...a,
+                    fill: `#${row.color.toString(16).padStart(6, 0)}`,
+                    outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
+                  })
+              )}
+              {Cell(
+                row.dip.toFixed(2),
+                editable,
+                v => console.log(v),
+                a => Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
+              )}
               {Cell(row.tcl.toFixed(2), editable, v => console.log(v))}
               {Cell((row.tcl - row.tvd).toFixed(2), editable, v => console.log(v))}
               {showFullTable && Cell(row.tot.toFixed(2), false)}

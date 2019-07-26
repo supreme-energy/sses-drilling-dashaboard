@@ -11,7 +11,13 @@
     width: 15px;
     height: 15px;
     display: inline;
+  }
+  .marker {
     margin-right: 4px;
+  }
+  .icon {
+    position: relative;
+    left: 5px;
   }
   .cell {
     &.actions {
