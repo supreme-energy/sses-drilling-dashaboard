@@ -21,8 +21,6 @@ function drawCircle(circle, lineColor, fillColor) {
 function createCircle(container, lineColor, fillColor, cb, cbEnd) {
   const circle = container.addChild(new PIXI.Graphics());
   drawCircle(circle, lineColor, fillColor);
-  // circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
-  // circle.drawCircle(0, 0, 10);
   circle.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(circle, cb, cbEnd);
   return circle;
