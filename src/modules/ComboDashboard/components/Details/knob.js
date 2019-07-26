@@ -10,7 +10,7 @@ export default function({ fill, outline, className }) {
       version="1"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="4" cy="4" r="4" transform="translate(1 1)" fill={fill} stroke={outline} fill-rule="evenodd" />
+      <circle cx="4" cy="4" r="4" transform="translate(1 1)" fill={fill} stroke={outline} fillRule="evenodd" />
     </svg>
   );
 }
