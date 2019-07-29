@@ -50,16 +50,17 @@
   flex-direction: column;
 }
 
+.row {
+  display: flex;
+}
+
 .kpiRows {
   display: flex;
   flex: 12;
   flex-direction: column;
   margin-left: 6px;
 
-
   .row {
-    display: flex;
-
     > div {
       margin: 3px;
     }
@@ -78,10 +79,6 @@
 
 .crossSectionDash {
   padding-bottom: 30px;
-}
-
-.detailsHeader{
-  display: flex;
 }
 
 .tableButton {
