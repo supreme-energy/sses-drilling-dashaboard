@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { frozenXYTransform } from "./customPixiTransforms";
 
 /**
  * Add formation layers calculated from the formation data
@@ -8,10 +9,8 @@ export function drawFormations(container) {
   const layerTiles = [];
   const layerLines = [];
 
-  return update;
-
-  function update(props) {
-    const { calculatedFormations: layers, calcSections } = props;
+  return function update(props) {
+    const { calculatedFormations: layers, calcSections, scale } = props;
     if (!layers || !layers.length) return;
     layerTiles.forEach(l => l.forEach(t => t.clear()));
     layerLines.forEach(l => l.clear());
@@ -24,9 +23,10 @@ export function drawFormations(container) {
 
       if (!layerLines[layerIdx]) {
         layerLines[layerIdx] = container.addChild(new PIXI.Graphics());
+        layerLines[layerIdx].transform.updateTransform = frozenXYTransform;
       }
       layerLines[layerIdx].clear();
-      layerLines[layerIdx].lineStyle(2, parseInt(lineColor, 16), 1);
+      layerLines[layerIdx].lineStyle(1, parseInt(lineColor, 16), 1);
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
         if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
@@ -61,10 +61,10 @@ export function drawFormations(container) {
 
         if (showLine) {
           const line = layerLines[layerIdx];
-          line.moveTo(p1.vs, p1.tot + p2.fault);
-          line.lineTo(p2.vs, p2.tot);
+          line.moveTo(...scale(p1.vs, p1.tot + p2.fault));
+          line.lineTo(...scale(p2.vs, p2.tot));
         }
       }
     }
-  }
+  };
 }
