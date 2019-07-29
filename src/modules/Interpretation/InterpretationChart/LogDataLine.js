@@ -72,7 +72,7 @@ export default props => {
 
   return (
     <React.Fragment>
-      <LogDataLine {...props} draft={false} key={"line"} />{" "}
+      <LogDataLine {...props} draft={false} key={"line"} />
       {draft && <LogDataLine {...props} draft key={"draftLine"} />}
     </React.Fragment>
   );
