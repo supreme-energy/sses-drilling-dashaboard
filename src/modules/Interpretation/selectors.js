@@ -2,9 +2,8 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
 import { useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
-import { useWellIdContainer } from "../App/Containers";
+import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
-import memoizeOne from "memoize-one";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
@@ -15,6 +14,12 @@ export function calcDepth(tvd, dip, vs, lastvs, fault, lasttvd, lastdepth) {
   return tvd - -Math.tan(dip / 57.29578) * Math.abs(vs - lastvs) - fault - (lasttvd - lastdepth);
 }
 
+export function calcTot(pTot, dip, vs, pVs, fault) {
+  let tot = pTot + -Math.tan(dip / 57.29578) * Math.abs(vs - pVs);
+  tot += fault;
+  return tot;
+}
+
 export function findCurrentWellLog(logList, md) {
   return (
     md &&
@@ -22,6 +27,12 @@ export function findCurrentWellLog(logList, md) {
       return l.startmd >= md && md < l.endmd;
     })
   );
+}
+
+function recalculateFormations(pTot, dip, vs, pVs, fault, thickness) {
+  let tot = calcTot(pTot, dip, vs, pVs, fault);
+  tot += thickness;
+  return tot;
 }
 
 export function useGetLogByMd(md) {
@@ -171,23 +182,41 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-export function useComputedSurveys(surveys) {
+export function useComputedFormations(formations) {
   const { wellId } = useWellIdContainer();
   const [computedSegments] = useComputedSegments(wellId);
+  const { surveysData } = useSurveysDataContainer();
+  const segmentByEndMd = useMemo(() => keyBy(computedSegments, "endmd"), [computedSegments]);
+
   const computedSurveys = useMemo(
     () =>
-      surveys.map(s => {
-        const segment = computedSegments.find(seg => s.md >= seg.startmd && s.md <= seg.endmd);
-        if (!segment) {
-          return s;
-        }
-
+      formations.map(f => {
         return {
-          ...s,
-          tvd: segment.enddepth
+          ...f,
+          data: f.data.map((item, index) => {
+            const segment = segmentByEndMd[item.md];
+
+            const surveyItem = surveysData[index];
+            const prevSurveyItem = surveysData[index - 1] || surveyItem;
+            if (!segment || !surveyItem) {
+              return item;
+            }
+
+            return {
+              ...item,
+              tot: recalculateFormations(
+                prevSurveyItem.tot,
+                segment.sectdip,
+                surveyItem.vs,
+                prevSurveyItem.vs,
+                segment.fault,
+                item.thickness
+              )
+            };
+          })
         };
       }),
-    [computedSegments, surveys]
+    [formations, segmentByEndMd, surveysData]
   );
 
   return computedSurveys;

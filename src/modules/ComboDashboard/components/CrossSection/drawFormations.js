@@ -40,10 +40,10 @@ export function drawFormations(container) {
 
         if (!p1 || !p2 || !p3 || !p4) continue;
         // The right side points determine the tile fault
-        const a1 = [p1.vs, p1.tot + p2.fault];
+        const a1 = [p1.vs, p1.tot];
         const a2 = [p2.vs, p2.tot];
         const a3 = [p3.vs, p3.tot];
-        const a4 = [p4.vs, p4.tot + p3.fault];
+        const a4 = [p4.vs, p4.tot];
         const tilePath = [...a1, ...a2, ...a3, ...a4];
 
         const tile = layerTiles[layerIdx][pointIdx];
