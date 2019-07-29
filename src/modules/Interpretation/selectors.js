@@ -4,7 +4,6 @@ import { useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
-import memoizeOne from "memoize-one";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
@@ -162,6 +161,8 @@ export function useGetComputedLogData(wellId, log, draft) {
       const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
       return {
         ...logData,
+        scalebias: computedSegment.scalebias,
+        scalefactor: computedSegment.scalefactor,
         data: logData.data.reduce((acc, d, index) => {
           const { vs, tvd } = d;
 
@@ -220,22 +221,17 @@ export function useComputedFormations(formations) {
 
   return computedSurveys;
 }
+export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : [0, 0]);
 
-const getExtent = memoizeOne(logData => (logData ? extent(logData.data, d => d.value) : [0, 0]));
+export function useLogExtent(log, wellId) {
+  const [logData] = useWellLogData(wellId, log && log.tablename);
+  return useMemo(() => getExtent(logData), [logData]);
+}
 
 export function useSelectedLogExtent() {
   const { wellId } = useWellIdContainer();
   const { selectedWellLog } = useSelectedWellLog();
-  const [logData] = useWellLogData(wellId, selectedWellLog && selectedWellLog.tablename);
-
-  return getExtent(logData);
-}
-
-export function useGetLogExtent(log) {
-  const { wellId } = useWellIdContainer();
-  const [logData] = useWellLogData(wellId, log && log.tablename);
-
-  return getExtent(logData);
+  return useLogExtent(selectedWellLog, wellId);
 }
 
 export function useSelectedSegmentState() {

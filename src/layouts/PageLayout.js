@@ -13,8 +13,7 @@ import {
   useWellIdContainer,
   ProjectionsProvider,
   FormationsProvider,
-  SurveysProvider,
-  useTimeSliderContainer
+  SurveysProvider
 } from "../modules/App/Containers";
 import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
 import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
