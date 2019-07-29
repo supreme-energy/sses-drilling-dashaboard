@@ -25,7 +25,6 @@ export function drawFormations(container) {
         layerLines[layerIdx] = container.addChild(new PIXI.Graphics());
         layerLines[layerIdx].transform.updateTransform = frozenXYTransform;
       }
-      layerLines[layerIdx].clear();
       layerLines[layerIdx].lineStyle(1, parseInt(lineColor, 16), 1);
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
