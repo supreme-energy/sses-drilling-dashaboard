@@ -27,7 +27,7 @@ export const CrossSectionDashboard = ({ className }) => {
         </div>
         <div className={classes.cardLine} />
         <div className={classNames(classes.column, classes.shrink)}>
-          <div className={classNames(classes.row)}>
+          <div className={classes.row}>
             <IconButton
               size="small"
               className={classNames(classes.expand, {
