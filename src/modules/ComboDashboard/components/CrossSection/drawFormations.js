@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 
 /**
  * Add formation layers calculated from the formation data
