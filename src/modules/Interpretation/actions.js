@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback } from "react";
-import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
+import { useWellIdContainer } from "../App/Containers";
 import { getCalculateDip, useComputedSegments, useSelectedWellLog } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";

@@ -16,7 +16,7 @@ import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useComputedFormations, useComputedSurveys } from "../Interpretation/selectors";
+import { useComputedFormations } from "../Interpretation/selectors";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
