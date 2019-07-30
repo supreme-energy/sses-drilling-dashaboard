@@ -24,15 +24,9 @@ export function findCurrentWellLog(logList, md) {
   return (
     md &&
     logList.findIndex(l => {
-      return l.startmd >= md && md < l.endmd;
+      return md === l.endmd;
     })
   );
-}
-
-function recalculateFormations(pTot, dip, vs, pVs, fault, thickness) {
-  let tot = calcTot(pTot, dip, vs, pVs, fault);
-  tot += thickness;
-  return tot;
 }
 
 export function useGetLogByMd(md) {
@@ -49,14 +43,6 @@ export function useSelectedWellLog() {
   const [{ selectedMd }] = useComboContainer();
   const { wellLog, prevLog, logIndex } = useGetLogByMd(selectedMd);
   return { selectedWellLog: wellLog, prevLog, selectedWellLogIndex: logIndex };
-}
-
-export function useSelectedSurvey() {
-  const [{ selectedMd }] = useComboContainer();
-
-  const { surveys } = useSurveysDataContainer();
-
-  return useMemo(() => surveys.find(s => s.md === selectedMd), [selectedMd, surveys]);
 }
 
 export function getCalculateDip(log, prevLog) {
@@ -110,7 +96,7 @@ export function useComputedSegments(wellId) {
       logList.reduce((acc, l, index) => {
         const isDraft = draftMode && index === selectedWellLogIndex;
         const getNewLog = usePending => {
-          const pendingState = usePending ? pendingSegmentsState[l.startmd] : {};
+          const pendingState = usePending ? pendingSegmentsState[l.endmd] : {};
           const newLog = {
             ...l
           };
@@ -190,44 +176,65 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-export function useComputedFormations(formations) {
-  const { wellId } = useWellIdContainer();
-  const [computedSegments] = useComputedSegments(wellId);
-  const { surveysData } = useSurveysDataContainer();
-  const segmentByEndMd = useMemo(() => keyBy(computedSegments, "endmd"), [computedSegments]);
+export function useComputedSurveys() {
+  const { surveys } = useSurveysDataContainer();
+  const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
 
-  const computedSurveys = useMemo(
+  return useMemo(
+    () =>
+      surveys.reduce((acc, next, index) => {
+        const prevItem = acc[index - 1] || next;
+        const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
+
+        const dipPending = pendingState.dip !== undefined;
+        const faultPending = pendingState.fault !== undefined;
+        const dip = dipPending ? pendingState.dip : next.dip;
+        const fault = faultPending ? pendingState.fault : next.fault;
+
+        const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * (next.vs - prevItem.vs) + fault;
+
+        acc[index] = { ...next, tcl };
+
+        return acc;
+      }, []),
+    [surveys, draftMode, pendingSegmentsState, selectedMd]
+  );
+}
+
+export function useSelectedSurvey() {
+  const [{ selectedMd }] = useComboContainer();
+
+  const computedSurveys = useComputedSurveys();
+
+  return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
+}
+
+export function useComputedFormations(formations) {
+  const computedSurveys = useComputedSurveys();
+
+  const computedFormations = useMemo(
     () =>
       formations.map(f => {
         return {
           ...f,
           data: f.data.map((item, index) => {
-            const segment = segmentByEndMd[item.md];
+            const survey = computedSurveys[index];
 
-            const surveyItem = surveysData[index];
-            const prevSurveyItem = surveysData[index - 1] || surveyItem;
-            if (!segment || !surveyItem) {
+            if (!survey) {
               return item;
             }
 
             return {
               ...item,
-              tot: recalculateFormations(
-                prevSurveyItem.tot,
-                segment.sectdip,
-                surveyItem.vs,
-                prevSurveyItem.vs,
-                segment.fault,
-                item.thickness
-              )
+              tot: survey.tcl + item.thickness
             };
           })
         };
       }),
-    [formations, segmentByEndMd, surveysData]
+    [formations, computedSurveys]
   );
 
-  return computedSurveys;
+  return computedFormations;
 }
 export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : [0, 0]);
 

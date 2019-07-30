@@ -20,7 +20,7 @@ export function useDragActions() {
       if (!log) {
         return;
       }
-      const pendingState = pendingSegmentsState[segment.startmd];
+      const pendingState = pendingSegmentsState[segment.endmd];
 
       const depth = newPosition.y;
       const calculateDip = getCalculateDip(log, prevSegment);
@@ -32,7 +32,7 @@ export function useDragActions() {
         fault: pendingState && pendingState.fault
       });
 
-      updateSegment({ dip: newDip }, log.startmd);
+      updateSegment({ dip: newDip }, log.endmd);
     },
     [pendingSegmentsState, updateSegment, logs, logsById, segments]
   );
@@ -47,7 +47,7 @@ export function useDragActions() {
 
       let fault = segment.fault - delta;
 
-      updateSegment({ fault }, log.startmd);
+      updateSegment({ fault }, log.endmd);
     },
     [updateSegment, logsById]
   );
@@ -74,7 +74,7 @@ export function useDragActions() {
 
       const fault = segment.fault + faultDelta;
 
-      updateSegment({ fault, dip }, log.startmd);
+      updateSegment({ fault, dip }, log.endmd);
     },
     [updateSegment, logs, logsById, segments]
   );
@@ -111,7 +111,7 @@ export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
   const [{ pendingSegmentsState }, dispatch] = useComboContainer();
   const [, , { updateWellLog }] = useWellLogsContainer();
-  const pendingState = selectedWellLog && pendingSegmentsState[selectedWellLog.startmd];
+  const pendingState = selectedWellLog && pendingSegmentsState[selectedWellLog.endmd];
   const saveWellLog = useCallback(
     debounce(() => {
       const values = {
@@ -128,7 +128,7 @@ export function useSaveWellLogActions() {
       }).then(() => {
         dispatch({
           type: "RESET_SEGMENT_PENDING_STATE",
-          md: selectedWellLog.startmd
+          md: selectedWellLog.endmd
         });
       });
     }, 300),
@@ -136,21 +136,4 @@ export function useSaveWellLogActions() {
   );
 
   return { saveWellLog };
-}
-
-export function useSelectInterpretationSegment() {
-  const [, , { setSelectedMd }] = useComboContainer();
-  const { surveys } = useSurveysDataContainer();
-  return useCallback(
-    segment => {
-      const survey = surveys.find(
-        s => segment.startmd - 1 === s.md || (segment.startmd <= s.md && s.md < segment.endmd)
-      );
-
-      if (survey) {
-        setSelectedMd(survey.md);
-      }
-    },
-    [surveys, setSelectedMd]
-  );
 }

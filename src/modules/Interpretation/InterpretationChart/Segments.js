@@ -8,8 +8,9 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { useDragActions, useSaveWellLogActions, useSelectInterpretationSegment } from "../actions";
+import { useDragActions, useSaveWellLogActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
+import { useComboContainer } from "../../ComboDashboard/containers/store";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -230,7 +231,8 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
   const { view } = useInterpretationRenderer();
-  const onSegmentClick = useSelectInterpretationSegment();
+  const [, , { setSelectedMd }] = useComboContainer();
+  const onSegmentClick = useCallback(segment => setSelectedMd(segment.endmd), [setSelectedMd]);
 
   return segmentsData.map(s => {
     const selected = selectedWellLog && selectedWellLog.id === s.id;
