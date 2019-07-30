@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback } from "react";
-import { useWellIdContainer } from "../App/Containers";
+import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
 import { getCalculateDip, useComputedSegments, useSelectedWellLog } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -136,4 +136,21 @@ export function useSaveWellLogActions() {
   );
 
   return { saveWellLog };
+}
+
+export function useSelectInterpretationSegment() {
+  const [, , { setSelectedMd }] = useComboContainer();
+  const { surveys } = useSurveysDataContainer();
+  return useCallback(
+    segment => {
+      const survey = surveys.find(
+        s => segment.startmd - 1 === s.md || (segment.startmd <= s.md && s.md < segment.endmd)
+      );
+
+      if (survey) {
+        setSelectedMd(survey.md);
+      }
+    },
+    [surveys, setSelectedMd]
+  );
 }

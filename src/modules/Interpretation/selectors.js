@@ -51,6 +51,14 @@ export function useSelectedWellLog() {
   return { selectedWellLog: wellLog, prevLog, selectedWellLogIndex: logIndex };
 }
 
+export function useSelectedSurvey() {
+  const [{ selectedMd }] = useComboContainer();
+
+  const { surveys } = useSurveysDataContainer();
+
+  return useMemo(() => surveys.find(s => s.md === selectedMd), [selectedMd, surveys]);
+}
+
 export function getCalculateDip(log, prevLog) {
   let { startvs: lastVS, starttvd: lastTVD } = log;
   let lastDepth = log.starttvd;

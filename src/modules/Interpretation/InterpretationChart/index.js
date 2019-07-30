@@ -19,6 +19,7 @@ import { useSelectedWellLog, useComputedSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
+import TCLLine from "./TCLLine";
 
 const gridGutter = 60;
 
@@ -162,6 +163,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         container={viewport}
       />
       <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      <TCLLine container={viewport} width={width} />
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       <BiasAndScale
         container={stage}
