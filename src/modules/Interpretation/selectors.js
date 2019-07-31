@@ -191,7 +191,7 @@ export function useComputedSurveys() {
         const dip = dipPending ? pendingState.dip : next.dip;
         const fault = faultPending ? pendingState.fault : next.fault;
 
-        const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * (next.vs - prevItem.vs) + fault;
+        const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * Math.abs(next.vs - prevItem.vs) + fault;
 
         acc[index] = { ...next, tcl };
 
