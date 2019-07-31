@@ -2,12 +2,7 @@
 
 .structuralGuidanceContainer {
     display: flex;
-        height: 100%;
-
-
-    h6 {
-        color: $gold;
-    }
+    height: 100%;
 
     .column:first-child {
         flex-grow: 1;

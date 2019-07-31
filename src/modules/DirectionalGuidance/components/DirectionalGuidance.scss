@@ -1,12 +1,8 @@
-@import "../../../styles/base";
-
 .directionalGuidanceContainer {
     display: flex;
     flex-direction: row;
 
-    h6 {
-        color: $gold;
-    }
+
 
     .measuresColumn, .toolFaceColumn {
         display: flex;
@@ -29,10 +25,10 @@
         flex: 8;
         flex-direction: column;
 
-        .row {
+        .row, .graphRow {
             display: flex;
-            flex-grow: 2;
             margin-left: 7px;
+            flex: 1;
 
             > div {
                 margin: 3px;
@@ -40,7 +36,7 @@
         }
 
         .graphRow {
-            flex-grow: 4;
+            min-height: 600px;
         }
     }
 }

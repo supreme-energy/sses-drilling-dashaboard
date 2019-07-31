@@ -1,17 +1,9 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useEffect, useMemo } from "react";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function drawRectangle(bg, width, height, y, data) {
-  data.forEach(point => {
-    if (point[1]) {
-      bg.drawRect(point[0], y, width, height * point[1]);
-    }
-  });
-}
-
-function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, updateTransform, zIndex }) {
+function PixiPolygon({ container, path, alpha, x, y, backgroundColor, updateTransform }, ref) {
   const {
     current: { bg, initialUpdateTransform }
   } = useRef(() => {
@@ -21,8 +13,13 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
       initialUpdateTransform: bg.transform.updateTransform
     };
   });
-
-  const barData = useMemo(() => data.map(mapData), [data, mapData]);
+  useEffect(
+    function addBackground() {
+      container.addChild(bg);
+      return () => container.removeChild(bg);
+    },
+    [container, bg]
+  );
 
   useEffect(
     function reposition() {
@@ -30,14 +27,6 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
       bg.y = y;
     },
     [x, y, bg]
-  );
-
-  useEffect(
-    function addBackground() {
-      container.addChild(bg);
-      return () => container.removeChild(bg);
-    },
-    [container, bg]
   );
 
   useEffect(
@@ -52,41 +41,43 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
   );
 
   useEffect(
-    function updateZindex() {
-      bg.zIndex = zIndex;
-    },
-    [zIndex, bg]
-  );
-
-  useEffect(
     function redraw() {
       bg.clear();
       bg.alpha = alpha;
-      if (color) {
-        bg.beginFill(color);
+      if (backgroundColor) {
+        bg.beginFill(backgroundColor);
       }
-      drawRectangle(bg, width, height, y, barData);
+      bg.drawPolygon(path);
     },
-    [width, color, barData, alpha, bg, y, height]
+    [backgroundColor, alpha, path, updateTransform, bg]
   );
+
+  useImperativeHandle(ref, () => ({
+    graphics: bg
+  }));
 
   return null;
 }
 
-PixiBar.propTypes = {
+const ForwardedPixiPolygon = forwardRef(PixiPolygon);
+
+ForwardedPixiPolygon.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   alpha: PropTypes.number,
   updateTransform: PropTypes.func,
-  height: PropTypes.number,
+  xIndex: PropTypes.number,
   width: PropTypes.number,
-  color: PropTypes.number
+  height: PropTypes.number,
+  backgroundColor: PropTypes.number,
+  borderColor: PropTypes.number,
+  borderThickness: PropTypes.number
 };
 
-PixiBar.defaultProps = {
+ForwardedPixiPolygon.defaultProps = {
   x: 0,
   y: 0,
   alpha: 1
 };
 
-export default PixiBar;
+export default ForwardedPixiPolygon;

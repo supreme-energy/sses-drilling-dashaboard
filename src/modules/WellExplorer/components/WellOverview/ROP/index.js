@@ -173,8 +173,6 @@ export default function Rop({ className, style }) {
           )}
         />
 
-        <PixiLine container={viewport} data={data} mapData={mapInstant} color={0xffffff} />
-        <PixiLine container={viewport} data={data} mapData={mapAverage} color={0xca221d} />
         <PixiContainer
           container={viewport}
           child={container => (
@@ -188,6 +186,16 @@ export default function Rop({ className, style }) {
               mapData={mapInstant}
               width={width - gridGutter}
             />
+          )}
+        />
+
+        <PixiContainer
+          container={viewport}
+          child={container => (
+            <React.Fragment>
+              <PixiLine container={container} data={data} mapData={mapAverage} color={0xca221d} />
+              <PixiLine container={container} data={data} mapData={mapInstant} color={0xffffff} />
+            </React.Fragment>
           )}
         />
 

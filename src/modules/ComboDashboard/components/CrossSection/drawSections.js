@@ -4,7 +4,7 @@ import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
 import { TAG_END, TAG_MOVE } from "../../../../constants/interactivePAStatus";
 
-function drawSections(container, higherContainer, props, gutter) {
+function drawSections(container, higherContainer, props, gutter, labelHeight) {
   const { ghostDiffDispatch } = props;
   const buttonHeight = 10;
   const pixiList = [];
@@ -15,10 +15,19 @@ function drawSections(container, higherContainer, props, gutter) {
   const selectedLeft = container.addChild(new PIXI.Graphics());
   selectedLeft.transform.updateTransform = frozenXYTransform;
 
+  const dipHintText = container.addChild(new PIXI.Text("Dip", { fill: "#000", fontSize: 16 }));
+  dipHintText.anchor.set(0.5, 0.5);
+  dipHintText.transform.updateTransform = frozenXTransform;
+  dipHintText.position.y = 10;
+
   const selectedRight = container.addChild(new PIXI.Graphics());
   selectedRight.transform.updateTransform = frozenXYTransform;
 
-  const labelHeight = 75;
+  const faultHintText = container.addChild(new PIXI.Text("Fault", { fill: "#000", fontSize: 16 }));
+  faultHintText.anchor.set(0.5, 0.5);
+  faultHintText.transform.updateTransform = frozenXTransform;
+  faultHintText.position.y = 10;
+
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
   subscribeToMoveEvents(
@@ -73,6 +82,8 @@ function drawSections(container, higherContainer, props, gutter) {
     selectedLeft.clear();
     selectedRight.clear();
     selectedLabel.visible = false;
+    dipHintText.visible = false;
+    faultHintText.visible = false;
 
     // Clear out all previous drawn sections
     pixiList.forEach(p => p.clear());
@@ -105,6 +116,10 @@ function drawSections(container, higherContainer, props, gutter) {
         selectedLabel.position.x = p2.vs;
         selectedLabel.position.y = height - gutter;
         labelText.text = p2.vs.toFixed(2);
+        dipHintText.position.x = p2.vs;
+        dipHintText.visible = true;
+        faultHintText.position.x = p1.vs;
+        faultHintText.visible = true;
       }
     }
   };

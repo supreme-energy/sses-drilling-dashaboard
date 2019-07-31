@@ -1,0 +1,16 @@
+@import "../../styles/base";
+
+.widgetCardContainer { 
+    padding: 10px;
+    width: 100%;
+
+    .widgetTitle {
+        color: $gold;
+    }
+
+    .verticalMenu {
+        position: relative;
+        float: right;
+        bottom: 30px;
+    }
+}

@@ -4,11 +4,12 @@ import PixiRectangle from "../../../components/PixiRectangle";
 import PixiLabel from "../../../components/PixiLabel";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
+import { stateReducer } from "./reducers";
 
 const HEIGHT = 6;
 const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view, refresh }) => {
   // Create state for component
-  const [isTooltipVisible, setVisible] = useReducer(a => !a, false);
+  const [{ isTooltipVisible, xPos }, setVisible] = useReducer(stateReducer, { isTooltipVisible: false, xPos: 0 });
   const [labelDimensions, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
 
   // Define constants
@@ -23,7 +24,12 @@ const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view
     () => setDrillPhase({ type: "SET", payload: { ...phaseObj, set: true, inView: true } }),
     [phaseObj, setDrillPhase]
   );
-  const onMouseOver = useCallback(() => setVisible(), []);
+  const onMouseOver = useCallback(e => {
+    setVisible({ isTooltipVisible: true, xPos: e.data.originalEvent.clientX });
+  }, []);
+
+  const onMouseOut = useCallback(e => setVisible({ isTooltipVisible: false }), []);
+
   const onSizeChanged = useCallback(
     (labelWidth, labelHeight) => updateLabelDimensions({ labelWidth, labelHeight }),
     []
@@ -45,14 +51,14 @@ const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view
         backgroundColor={COLOR_BY_PHASE_VIEWER[phase].quickFilter}
         onClick={onClickPhaseSegment}
         onMouseOver={onMouseOver}
-        onMouseOut={onMouseOver}
+        onMouseOut={onMouseOut}
       />
       {isTooltipVisible && (
         <PixiLabel
           sizeChanged={onSizeChanged}
           container={container}
           text={phase}
-          x={startingX + filterWidth / 2 - 20}
+          x={xPos - view.x - 270}
           y={-40}
           updateTransform={frozenScaleTransform}
           zIndex={100}

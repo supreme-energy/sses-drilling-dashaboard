@@ -4,7 +4,10 @@ import { useEffect, useMemo, useImperativeHandle, forwardRef } from "react";
 import { drawGrid } from "../modules/ComboDashboard/components/CrossSection/drawGrid";
 
 const Grid = forwardRef(
-  ({ container, width, height, gridGutter, view, fontSize, showXAxis, makeXTickAndLine, makeYTickAndLine }, ref) => {
+  (
+    { container, width, height, gridGutter, view, fontSize, showXAxis, showYAxis, makeXTickAndLine, makeYTickAndLine },
+    ref
+  ) => {
     const gridLayerRef = useRef(() => new PIXI.Container());
 
     useEffect(() => {
@@ -21,9 +24,10 @@ const Grid = forwardRef(
         makeXTickAndLine,
         makeYTickAndLine,
         showXAxis,
+        showYAxis,
         maxXLines: 10
       });
-    }, [gridGutter, showXAxis, fontSize, makeXTickAndLine, makeYTickAndLine]);
+    }, [gridGutter, showXAxis, showYAxis, fontSize, makeXTickAndLine, makeYTickAndLine]);
 
     useEffect(() => {
       updateGrid({ view, width, height });

@@ -91,7 +91,7 @@ const Slider = React.memo(
       setStep({ type: "UPDATE", payload: { isDragging: false } });
     }, [setStep]);
 
-    const handleLabel = useCallback(() => {
+    const labelFormat = useCallback(() => {
       if (!holeDepth) return null;
 
       return (
@@ -125,7 +125,7 @@ const Slider = React.memo(
         onChange={handleDragSlider}
         onChangeCommitted={handleMouseUp}
         step={stepSize}
-        valueLabelFormat={handleLabel}
+        valueLabelFormat={labelFormat}
         valueLabelDisplay={expanded ? "on" : "auto"}
       />
     );

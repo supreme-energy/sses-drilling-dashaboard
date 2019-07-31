@@ -5,6 +5,7 @@ import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
 import Overview from "./Overview";
 import WellInfo from "./WellInfo";
+import ReportServer from "./ReportServer";
 import classNames from "classnames";
 
 function WellOverivew({ className, well, updateFavorite }) {
@@ -26,6 +27,7 @@ function WellOverivew({ className, well, updateFavorite }) {
       <React.Fragment>
         {currentTab === "overview" && <Overview wellId={well.id} />}
         {currentTab === "info" && <WellInfo wellId={well.id} />}
+        {currentTab === "report-server" && <ReportServer wellId={well.id} />}
       </React.Fragment>
     </Card>
   );

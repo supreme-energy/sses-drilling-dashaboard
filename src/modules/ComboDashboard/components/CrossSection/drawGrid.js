@@ -54,12 +54,14 @@ function drawGrid(container, options = {}) {
     gutter = 50,
     xAxisOrientation = "bottom",
     showXAxis = true,
+    showYAxis = true,
     makeXTickAndLine = defaultMakeXTickAndLine,
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
     maxYLines = 12,
     fontSize = 15
   } = options;
+  let { gutterLeft = gutter, gutterBottom = gutter } = options;
 
   let lastBounds = {};
 
@@ -82,7 +84,7 @@ function drawGrid(container, options = {}) {
   for (let i = 0; i < maxYLines; i++) {
     let [line, label] = makeYTickAndLine(fontSize);
     yLines.push(line);
-    yLabels.push(label);
+    showYAxis && yLabels.push(label);
   }
 
   // Add the elements of the grid in the correct order
@@ -91,11 +93,13 @@ function drawGrid(container, options = {}) {
   yLines.forEach(l => container.addChild(l));
 
   // White background behind tick labels
+  let bgx, bgy;
 
-  const bgx = new PIXI.Graphics();
-  bgx.transform.updateTransform = frozenXYTransform;
-  container.addChild(bgx);
-  let bgy;
+  if (showYAxis) {
+    bgx = new PIXI.Graphics();
+    bgx.transform.updateTransform = frozenXYTransform;
+    container.addChild(bgx);
+  }
 
   if (showXAxis) {
     bgy = new PIXI.Graphics();
@@ -149,18 +153,21 @@ function drawGrid(container, options = {}) {
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {
-      const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
+      const xAxisAnchor = xAxisOrientation === "top" ? gutterBottom : height;
       // Redraw the background as width or height may have changed
-      bgx.clear().beginFill(0xffffff);
-      bgx.drawRect(0, 0, gutter, height);
-      if (bgy) {
-        bgy.clear().beginFill(0xffffff);
-        bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
+      if (bgx) {
+        bgx.clear().beginFill(0xffffff);
+        bgx.drawRect(0, 0, gutterLeft, height);
       }
 
-      if (corner) {
+      if (bgy) {
+        bgy.clear().beginFill(0xffffff);
+        bgy.drawRect(0, xAxisAnchor - gutterBottom, width, gutterBottom);
+      }
+
+      if (corner && showYAxis) {
         corner.clear().beginFill(0xffffff);
-        corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
+        corner.drawRect(0, xAxisAnchor - gutterBottom, gutterLeft, gutterBottom);
       }
 
       for (let i = 0; i < xLines.length; i++) {
@@ -168,7 +175,7 @@ function drawGrid(container, options = {}) {
         xLines[i].x = pos;
         if (showXAxis) {
           xLabels[i].x = pos;
-          xLabels[i].y = xAxisAnchor - gutter;
+          xLabels[i].y = xAxisAnchor - gutterBottom;
           xLabels[i].text = `${pos}`;
         }
       }
@@ -177,8 +184,10 @@ function drawGrid(container, options = {}) {
         const pos = bounds.yMin + bounds.yStep * i;
         yLines[i].y = pos;
 
-        yLabels[i].y = pos;
-        yLabels[i].text = `${pos}`;
+        if (showYAxis) {
+          yLabels[i].y = pos;
+          yLabels[i].text = `${pos}`;
+        }
       }
       lastBounds = bounds;
     }

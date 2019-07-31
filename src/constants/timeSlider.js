@@ -13,9 +13,9 @@ export const INITIAL_SLIDER_STATE = {
   step: 0,
   maxStep: 0,
   direction: 0,
-  isDragging: 0,
-  isPlaying: 0,
-  isSpeeding: 0,
+  isDragging: false,
+  isPlaying: false,
+  isSpeeding: false,
   stepSize: 1
 };
 
