@@ -9,6 +9,7 @@ function Formation({ y, height, label, width, container, backgroundAlpha, backgr
       <PixiRectangle
         backgroundColor={backgroundColor}
         backgroundAlpha={backgroundAlpha}
+        x={12}
         y={y}
         width={width}
         height={height}
