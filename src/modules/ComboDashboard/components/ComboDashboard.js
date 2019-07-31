@@ -1,52 +1,42 @@
 import React, { Suspense, lazy } from "react";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 import Progress from "@material-ui/core/CircularProgress";
 
 import DrillPhaseKPI from "../../Kpi/DrillPhaseKPI";
 import Interpretation from "../../Interpretation";
-import WellOperation from "./WellOperation";
+
 import ToolFace from "./ToolFace";
-import ArialCrossSection from "./ArialCrossSection";
+import AerialCrossSection from "./AerialCrossSection";
+import WellOperation from "./WellOperation";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
+import { useWellIdContainer } from "../../App/Containers";
 
 const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measures"));
 
-function ComboDashboard({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+function ComboDashboard() {
+  const { wellId } = useWellIdContainer();
   return (
     <div className={classes.comboDashboardWrapper}>
       <Suspense fallback={<Progress />}>
         <div className={classes.kpiRows}>
           <div className={classes.row}>
-            <DrillPhaseKPI className={classes.drillPhaseKpi} />
+            <DrillPhaseKPI className={classes.drillPhaseKpi} wellId={wellId} />
             <ToolFace />
-            <WellOperation />
-            <ArialCrossSection />
+            <WellOperation wellId={wellId} />
+            <AerialCrossSection wellId={wellId} />
           </div>
           <div className={classNames(classes.row, classes.graphRow)}>
-            <Interpretation />
-            <CrossSectionDashboard wellId={openedWellId} />
+            <Interpretation className={"flex"} />
+            <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
           </div>
         </div>
         <div className={classes.kpiColumn}>
-          <Measures wellId={openedWellId} />
+          <Measures wellId={wellId} />
         </div>
       </Suspense>
     </div>
   );
 }
-
-ComboDashboard.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
 
 export default ComboDashboard;

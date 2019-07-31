@@ -10,8 +10,8 @@ import { sum } from "d3-array";
 import KpiItem from "../../../../Kpi/KpiItem";
 import PropTypes from "prop-types";
 
-function KPIGraphic({ className, child }) {
-  const { data, bySegment } = useWellOverviewKPI();
+function KPIGraphic({ className, wellId, child }) {
+  const { data, bySegment } = useWellOverviewKPI(wellId);
 
   const segments = useMemo(() => {
     return wellSections.orderedSections.reduce((acc, segmentType) => {
@@ -73,6 +73,7 @@ function KPIGraphic({ className, child }) {
 
 KPIGraphic.propTypes = {
   className: PropTypes.string,
+  wellId: PropTypes.string,
   child: PropTypes.node
 };
 

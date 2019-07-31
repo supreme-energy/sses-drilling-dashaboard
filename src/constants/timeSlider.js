@@ -13,9 +13,9 @@ export const INITIAL_SLIDER_STATE = {
   step: 0,
   maxStep: 0,
   direction: 0,
-  isDragging: 0,
-  isPlaying: 0,
-  isSpeeding: 0,
+  isDragging: false,
+  isPlaying: false,
+  isSpeeding: false,
   stepSize: 1
 };
 
@@ -28,7 +28,11 @@ export const INITIAL_DRILL_PHASE_STATE = {
   inView: true,
   set: false
 };
-export const INITIAL_TIME_SLIDER_STATE = [];
+export const INITIAL_TIME_SLIDER_STATE = {
+  firstDepth: 0,
+  lastDepth: 0,
+  isLastIndex: false
+};
 
 // Graphs
 export const CONNECTION = "Connections";
@@ -49,31 +53,36 @@ export const COLOR_BY_PHASE_VIEWER = {
     top: GREEN,
     curve: GRAY,
     lateral: GRAY,
-    graphs: [CONNECTION, ROP]
+    graphs: [CONNECTION, ROP],
+    quickFilter: 0x5989d4
   },
   [INTERMEDIATE]: {
     top: GREEN,
     curve: GRAY,
     lateral: GRAY,
-    graphs: [CONNECTION, ROP]
+    graphs: [CONNECTION, ROP],
+    quickFilter: 0x6e9852
   },
   [DRILLOUT]: {
     top: GREEN,
     curve: GRAY,
     lateral: GRAY,
-    graphs: [CONNECTION, ROP]
+    graphs: [CONNECTION, ROP],
+    quickFilter: 0x5989d4
   },
   [CURVE]: {
     top: GRAY,
     curve: GREEN,
     lateral: GRAY,
-    graphs: [SLIDE, CONNECTION, PLANNED_ANGLE, ROP]
+    graphs: [SLIDE, CONNECTION, PLANNED_ANGLE, ROP],
+    quickFilter: 0x909090
   },
   [LATERAL]: {
     top: GRAY,
     curve: GRAY,
     lateral: GREEN,
-    graphs: [SLIDE, CONNECTION, ROP]
+    graphs: [SLIDE, CONNECTION, ROP],
+    quickFilter: 0xd2b04a
   },
   [CHOOSE]: {
     top: GRAY,

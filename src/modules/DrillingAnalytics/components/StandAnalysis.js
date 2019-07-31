@@ -1,29 +1,30 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Typography } from "@material-ui/core";
-import _ from "lodash";
 
-import WidgetCard from "../../WidgetCard";
-import VerticalMenu from "../../VerticalMenu";
+import { useWellOverviewKPI } from "../../../api";
+import WidgetCard from "../../../components/WidgetCard";
+import KpiItem from "../../Kpi/KpiItem";
 import classes from "./DrillingAnalytics.scss";
 
-export function StandAnalysis({ drillPhase }) {
+export const formatStand = value => `#${value}`;
+export function StandAnalysis({ wellId, drillPhase }) {
+  const { data } = useWellOverviewKPI(wellId);
+  const filteredData = data.filter(d => d.type === drillPhase);
+  const phaseData = filteredData[0] || {};
+
   return (
-    <WidgetCard className={classes.standAnalysisCard}>
-      <Typography variant="subtitle1">Stand Analysis</Typography>
-      <VerticalMenu
-        id="stand-analysis-widget-menu"
-        className={classes.verticalMenu}
-        selectedMenuItems={[]}
-        setSelectedMenuItem={_.noop}
-        menuItemEnum={[]}
-        multiSelect
-      />
+    <WidgetCard className={classes.standAnalysisCard} title="Stand Analysis" hideMenu>
+      <div className={classes.kpiContainer}>
+        <KpiItem className={classes.kpi} label="Stand" value={0} format={formatStand} />
+        <KpiItem className={classes.kpi} label="Footage Range" value={0} measureUnit="ft" />
+        <KpiItem className={classes.kpi} label="Average Rate of Penetration" value={phaseData.rop} measureUnit="fph" />
+      </div>
     </WidgetCard>
   );
 }
 
 StandAnalysis.propTypes = {
+  wellId: PropTypes.string,
   drillPhase: PropTypes.string
 };
 

@@ -1,0 +1,42 @@
+.directionalGuidanceContainer {
+    display: flex;
+    flex-direction: row;
+
+
+
+    .measuresColumn, .toolFaceColumn {
+        display: flex;
+        margin: 3px;
+    }
+
+    .measuresColumn {
+        margin-right: 9px;
+    }
+
+    .toolFaceColumn {
+        flex-grow: 2;
+         > div:first-child {
+            flex-grow: 2;
+        }
+    }
+
+    .kpiRows {
+        display: flex;
+        flex: 8;
+        flex-direction: column;
+
+        .row, .graphRow {
+            display: flex;
+            margin-left: 7px;
+            flex: 1;
+
+            > div {
+                margin: 3px;
+            }
+        }
+
+        .graphRow {
+            min-height: 600px;
+        }
+    }
+}

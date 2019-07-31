@@ -13,6 +13,7 @@ import { listIcons } from "../../IconsByStatus";
 import { connect } from "react-redux";
 import { actions } from "../../../store";
 import flowRight from "lodash/flowRight";
+import { useWellIdContainer } from "../../../../App/Containers";
 
 const WellItem = React.forwardRef(
   ({ name, theme, lat, lng, status, id, fav, changeFav, opened, selected, onClick }, ref) => {
@@ -56,17 +57,8 @@ const WellItem = React.forwardRef(
   }
 );
 
-function WellList({
-  wells,
-  theme,
-  onFavoriteChanged,
-  match: {
-    params: { wellId }
-  },
-  selectedWellId,
-  changeSelectedWell,
-  ...props
-}) {
+function WellList({ wells, theme, onFavoriteChanged, selectedWellId, changeSelectedWell, ...props }) {
+  const { wellId } = useWellIdContainer();
   const listElRef = useRef(null);
   const selectedElRef = useRef(null);
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="27px" height="27px" viewBox="0 0 27 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.1 (78136) - https://sketchapp.com -->
+    <title>Compass</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Compass" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="Oval" fill-opacity="0.4" fill="#000000" cx="13.5" cy="13.5" r="13.5"></circle>
+        <polygon id="Triangle" fill="#FFFFFF" points="13.5 2 17 13.5 13.5 25 10 13.5"></polygon>
+        <polygon id="Path" fill="#FF0000" points="13.5 2 17 13.5 10 13.5"></polygon>
+    </g>
+</svg>

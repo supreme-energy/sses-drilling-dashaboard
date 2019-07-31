@@ -6,6 +6,7 @@ import { drawGrid } from "./drawGrid.js";
 import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
+import { drawButtons } from "./drawButtons";
 
 export default class PixiCrossSection {
   constructor() {
@@ -22,31 +23,37 @@ export default class PixiCrossSection {
     // Stage contains the draw layers and never moves. Some events are registered here.
     this.stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
-    this.viewport = new PIXI.Container();
+    this.viewport = this.stage.addChild(new PIXI.Container());
     // Set up PIXI classes for rendering and draw layers
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer2 = this.viewport.addChild(new PIXI.Container());
-    this.stage.addChild(this.viewport);
 
     this.makeInteractive(this.stage);
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 80;
+    const gridGutter = 100;
+    const gridGutterLeft = 50;
+    const tagHeight = 75;
     this.yTicks = 12;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
+    this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
-    this.gridUpdate = drawGrid(this.gridLayer, { gutter: gridGutter, maxYLines: this.yTicks });
+    this.gridUpdate = drawGrid(this.gridLayer, {
+      gutter: gridGutter,
+      gutterLeft: gridGutterLeft,
+      maxYLines: this.yTicks
+    });
 
     // The ticker is used for render timing, what's done on each frame, etc
-    this.ticker = PIXI.ticker.shared;
+    this.ticker = PIXI.Ticker.shared;
     this.newProps = true;
     this.ticker.add(() => {
       if (this.newProps) {
@@ -121,6 +128,7 @@ export default class PixiCrossSection {
     this.wellPlanUpdate(props);
     this.surveyUpdate(props);
     this.sectionUpdate(props);
+    this.buttonUpdate(props);
     this.interactivePAUpdate(props);
     this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;

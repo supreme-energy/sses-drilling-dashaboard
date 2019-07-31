@@ -1,51 +1,45 @@
 import React from "react";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 
 import FootageZoneStats from "./FootageZoneStats";
 import PhaseOverview from "./PhaseOverview";
 import StandAnalysis from "./StandAnalysis";
 import SlideAnalysis from "./SlideAnalysis";
-import VerticalCrossSection from "./VerticalCrossSection";
+import VerticalCrossSection from "./VerticalCrossSection/index";
 import PerformanceAnalysis from "./PerformanceAnalysis";
-import { useDrillPhaseContainer } from "../../App/Containers";
+import { useDrillPhaseContainer, useWellIdContainer } from "../../App/Containers";
 import { LATERAL, CURVE, VERTICAL } from "../../../constants/wellSections";
 
 import classes from "./DrillingAnalytics.scss";
 
-export function DrillingAnalytics({
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+export function DrillingAnalytics() {
   const {
-    drillPhaseObj: { phase }
+    drillPhaseObj: { phase, inView }
   } = useDrillPhaseContainer();
+  const { wellId } = useWellIdContainer();
 
   const drillPhaseType = phase === LATERAL || phase === CURVE ? phase : VERTICAL;
+  const isVertical = drillPhaseType === VERTICAL;
 
   return (
     <div className={classes.drillingAnalyticsContainer}>
       <div className={classes.row}>
-        <PhaseOverview wellId={openedWellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
-        <StandAnalysis wellId={openedWellId} drillPhase={drillPhaseType} />
-        <SlideAnalysis drillPhase={drillPhaseType} />
+        <PhaseOverview wellId={wellId} drillPhase={phase} drillPhaseType={drillPhaseType} />
+        <StandAnalysis wellId={wellId} drillPhase={phase} />
+        <SlideAnalysis wellId={wellId} drillPhase={drillPhaseType} />
       </div>
       <div className={classNames(classes.row, classes.extendRow)}>
-        <VerticalCrossSection drillPhase={drillPhaseType} />
+        <VerticalCrossSection
+          className={classNames({ [classes.verticalView]: isVertical })}
+          wellId={wellId}
+          drillPhase={phase}
+          inView={inView}
+        />
         <PerformanceAnalysis drillPhase={drillPhaseType} />
-        {drillPhaseType === VERTICAL && <FootageZoneStats drillPhase={drillPhaseType} />}
+        {isVertical && <FootageZoneStats drillPhase={drillPhaseType} />}
       </div>
     </div>
   );
 }
-
-DrillingAnalytics.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
 
 export default DrillingAnalytics;

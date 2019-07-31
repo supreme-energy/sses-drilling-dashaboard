@@ -5,7 +5,7 @@ import {
   useWells,
   useWellPath,
   useWellsMapPosition,
-  useSurveys,
+  useFetchSurveys,
   useWellOverviewKPI,
   useWellInfo
 } from "../../../../../api";
@@ -73,7 +73,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
   const [, wellsById] = useWells();
   const wellPathData = useWellPath(selectedWellId);
   const wellPathMapPositions = useWellsMapPosition(selectedWellId, wellPathData);
-  const surveyData = useSurveys(selectedWellId);
+  const surveyData = useFetchSurveys(selectedWellId);
   const surveyMapPositions = useWellsMapPosition(selectedWellId, surveyData);
 
   const selectedWell = wellsById[selectedWellId];
@@ -83,7 +83,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
 
   const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
-  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(selectedWellId);
 
   const surveysBySection = useMemo(() => getSurveyBySection(surveyMapPositions, wellOverviewBySegment), [
     wellOverviewBySegment,

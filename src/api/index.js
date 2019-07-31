@@ -24,12 +24,17 @@ export const GET_WELL_SURVEYS = "/surveys.php";
 export const SET_WELL_SURVEYS = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
+export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
+export const GET_WELL_LOG_LIST = "/wellloglist.php";
+export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
+export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
+export const GET_KPI = "/kpis.php";
 
 // mock data
-const GET_MOCK_OVERVIEW_KPI = "/wellOverviewKPI.json";
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
@@ -44,12 +49,11 @@ const options = {
 };
 
 const EMPTY_ARRAY = [];
+const EMPTY_OBJECT = {};
 
 function transform(data) {
   return data.map(d => _.mapValues(d, Number));
 }
-
-const memoizedTransform = memoizeOne(transform);
 
 export function useWellsSearch(wells) {
   const fuse = useMemo(() => new Fuse(wells, options), [wells]);
@@ -85,6 +89,7 @@ export function useWellInfo(wellId) {
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
+  const emailInfo = data && data.emailinfo;
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
@@ -125,6 +130,31 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
+  );
+
+  const updateEmail = useCallback(
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        emailinfo: {
+          ...emailInfo,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId,
+          table: "emailinfo",
+          field,
+          value
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, emailInfo]
   );
 
   const {
@@ -179,11 +209,13 @@ export function useWellInfo(wellId) {
       wellPBHL,
       wellPBHLLocal,
       wellInfo,
+      emailInfo,
       transform
     },
     isLoading,
     updateWell,
-    refreshStore
+    refreshStore,
+    updateEmail
   ];
 }
 
@@ -264,6 +296,8 @@ export function useRopData() {
   return [ropData, groupBySection];
 }
 
+const wellPathTransform = memoizeOne(transform);
+
 export function useWellPath(wellId) {
   const [data] = useFetch(
     {
@@ -273,7 +307,7 @@ export function useWellPath(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: wellPathTransform
     }
   );
   return data || EMPTY_ARRAY;
@@ -299,7 +333,45 @@ export function useWellsMapPosition(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
-export function useSurveys(wellId) {
+export function useWellsMapLength(wellId, wellPositions) {
+  const [wellInfo] = useWellInfo(wellId);
+
+  return useMemo(() => {
+    function addMapPosition(p) {
+      return {
+        ...p,
+        mapPosition: {
+          y: Number(p.ns) + Number(wellInfo.wellSurfaceLocationLocal.y),
+          x: Number(p.ew) + Number(wellInfo.wellSurfaceLocationLocal.x)
+        }
+      };
+    }
+    return wellInfo.wellSurfaceLocationLocal ? wellPositions.map(addMapPosition) : EMPTY_ARRAY;
+  }, [wellPositions, wellInfo]);
+}
+
+const surveysTransform = memoizeOne(data => {
+  // Bit projection is not always in list of surveys
+  const surveys = transform(data);
+  const hasBitProj = surveys.some(s => s.plan === 1);
+  return surveys.map((s, i, l) => {
+    // If included, bit projection is always the last item and the last survey is second to last
+    const isBitProj = i === l.length - 1 && hasBitProj;
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    return {
+      ...s,
+      name: isBitProj ? `BPrj` : `${i}`,
+      isBitProj: isBitProj,
+      isSurvey: !isBitProj,
+      isLastSurvey: isLastSurvey,
+      color: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0xa6a6a6,
+      alpha: 0.5,
+      selectedColor: isBitProj ? 0xff00ff : isLastSurvey ? 0x0000ff : 0x000000,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchSurveys(wellId) {
   const [data] = useFetch(
     {
       path: GET_WELL_SURVEYS,
@@ -308,13 +380,22 @@ export function useSurveys(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: surveysTransform
     }
   );
   return data || EMPTY_ARRAY;
 }
 
-export function useFormations(wellId) {
+const formationsTransform = memoizeOne(formationList => {
+  return formationList.map(f => {
+    return {
+      ...f,
+      data: transform(f.data)
+    };
+  });
+});
+
+export function useFetchFormations(wellId) {
   const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
@@ -324,20 +405,26 @@ export function useFormations(wellId) {
       }
     },
     {
-      transform: formationList => {
-        return formationList.map(f => {
-          return {
-            ...f,
-            data: memoizedTransform(f.data)
-          };
-        });
-      }
+      transform: formationsTransform
     }
   );
   return [data || EMPTY_ARRAY, refresh];
 }
 
-export function useProjections(wellId) {
+const projectionsTransform = memoizeOne(projections => {
+  return transform(projections).map((p, i) => {
+    return {
+      ...p,
+      name: `PA${i}`,
+      isProjection: true,
+      color: 0xee2211,
+      selectedColor: 0xee2211,
+      alpha: 0.5,
+      selectedAlpha: 1
+    };
+  });
+});
+export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
@@ -346,7 +433,7 @@ export function useProjections(wellId) {
       }
     },
     {
-      transform: memoizedTransform
+      transform: projectionsTransform
     }
   );
   const saveProjection = (projectionId, method, fields = {}) => {
@@ -362,17 +449,28 @@ export function useProjections(wellId) {
       }
     });
   };
-  return [data || EMPTY_ARRAY, refresh, saveProjection];
+  const deleteProjection = projectionId => {
+    return fetch({
+      path: DELETE_WELL_PROJECTIONS,
+      method: "GET",
+      query: {
+        seldbname: wellId,
+        id: projectionId
+      }
+    });
+  };
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection];
 }
 
-export function useWellOverviewKPI() {
+export function useWellOverviewKPI(wellId) {
   let [data] = useFetch(
     {
-      path: GET_MOCK_OVERVIEW_KPI
+      path: GET_KPI,
+      query: {
+        seldbname: wellId
+      }
     },
-
     {
-      id: "mock",
       transform: data => {
         return data.data.map(d => ({
           type: d.INTERVAL_NAME,
@@ -421,6 +519,85 @@ export function useTimeSliderData() {
   return data || EMPTY_ARRAY;
 }
 
+const wellOperationTransform = memoizeOne(transform);
+
+export function useWellOperationHours(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_WELL_OPERATION_HOURS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: wellOperationTransform
+    }
+  );
+  return data || EMPTY_ARRAY;
+}
+
+export function useWellControlLog(wellId) {
+  return useFetch(
+    {
+      path: GET_WELL_CONTROL_LOG,
+      query: { seldbname: wellId, data: 1 }
+    },
+    {
+      transform: logs => {
+        return logs.map(l => ({
+          ...l,
+          data: l.data.map(d => ({ ...d, value: Number(d.value), tvd: Number(d.tvd) })),
+          md: Number(l.md)
+        }));
+      }
+    }
+  );
+}
+
+export function useWellLogList(wellId) {
+  const [list, ...rest] = useFetch({
+    path: GET_WELL_LOG_LIST,
+    query: { seldbname: wellId }
+  });
+
+  const logList = useMemo(
+    () =>
+      list &&
+      list.map(d => ({
+        ...d,
+        startmd: Number(d.startmd),
+        endmd: Number(d.endmd),
+        startdepth: Number(d.startdepth),
+        enddepth: Number(d.enddepth)
+      })),
+    [list]
+  );
+  return [logList || EMPTY_ARRAY, ...rest];
+}
+
+export function useWellLogData(wellId, tableName) {
+  const transformWellLogData = useMemo(() => {
+    const sortByDepth = (a, b) => a.depth - b.depth;
+    return memoizeOne(data => {
+      return {
+        ...data,
+        data: data.data
+          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value), depth: Number(d.depth) }))
+          .sort(sortByDepth)
+      };
+    });
+  }, []);
+
+  return useFetch(
+    tableName &&
+      wellId && {
+        path: GET_WELL_LOG_DATA,
+        query: { seldbname: wellId, tablename: tableName }
+      },
+    { transform: transformWellLogData }
+  );
+}
+
 export function useAdditionalDataLogsList(wellId) {
   const [data] = useFetch(
     {
@@ -430,33 +607,39 @@ export function useAdditionalDataLogsList(wellId) {
       }
     },
     {
-      transform: data => _.keyBy(data, "label")
+      transform: data => {
+        return { data: data || EMPTY_ARRAY, dataBySection: keyBy(data, "label") };
+      }
     }
   );
 
-  return data || {};
+  return data || EMPTY_OBJECT;
 }
 
-export function useAdditionalDataLog(wellId, id) {
+const additionalDataLogTransform = memoizeOne(data => {
+  return {
+    label: data.label,
+    scalelo: data.scalelo,
+    scalehi: data.scalehi,
+    color: data.color,
+    count: data.data_count,
+    data: transform(data.data)
+  };
+});
+
+export function useAdditionalDataLog(wellId, id, loadLog) {
   const [data] = useFetch(
+    id !== undefined &&
+      wellId !== undefined && {
+        path: GET_ADDITIONAL_DATA_LOG,
+        query: {
+          seldbname: wellId,
+          id
+        }
+      },
     {
-      path: GET_ADDITIONAL_DATA_LOG,
-      query: {
-        seldbname: wellId,
-        id
-      }
-    },
-    {
-      transform: data => {
-        return {
-          label: data.label,
-          scalelo: data.scalelo,
-          scalehi: data.scalehi,
-          data: memoizedTransform(data.data)
-        };
-      }
+      transform: additionalDataLogTransform
     }
   );
-
-  return data || EMPTY_ARRAY;
+  return data || EMPTY_OBJECT;
 }

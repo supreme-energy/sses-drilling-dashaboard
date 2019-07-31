@@ -1,5 +1,4 @@
 import React, { useMemo, useRef } from "react";
-import { Typography } from "@material-ui/core";
 import classNames from "classnames";
 import _ from "lodash";
 import { useSize } from "react-hook-size";
@@ -7,9 +6,8 @@ import { scaleLinear } from "d3-scale";
 
 import { useFilteredAdditionalDataLogs } from "../../../App/Containers";
 import { useAdditionalDataLogsList } from "../../../../api";
-import VerticalMenu from "../../../VerticalMenu";
 import KpiItem from "../../../Kpi/KpiItem";
-import WidgetCard from "../../../WidgetCard";
+import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./Measures.scss";
 
 function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, ...props }) {
@@ -28,14 +26,18 @@ function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, 
     <div className={className} ref={containerRef}>
       <KpiItem value={value} measureUnit={unit} label={label} {...props} />
       <div className={classNames("layout horizontal flex", classes.bars)}>
-        <div style={{ width: `${scale(value)}px`, height: 5, backgroundColor: "#66655A" }} />
+        {value && (
+          <div
+            style={{ width: `${scale(value)}px`, height: 2, backgroundColor: "#66655A", top: 2, position: "relative" }}
+          />
+        )}
       </div>
     </div>
   );
 }
 
 function Measures({ wellId }) {
-  const additionalDataLogKeys = useAdditionalDataLogsList(wellId);
+  const { dataBySection: additionalDataLogKeys = {} } = useAdditionalDataLogsList(wellId);
   const getFieldId = field => _.get(additionalDataLogKeys, `${field}.id`);
   const useFADL = field => useFilteredAdditionalDataLogs(wellId, getFieldId(field));
 
@@ -57,16 +59,7 @@ function Measures({ wellId }) {
   const gtf = useFADL("GTF");
 
   return (
-    <WidgetCard className={classes.measures}>
-      <Typography variant="subtitle1">Measures</Typography>
-      <VerticalMenu
-        id="measures-widget-menu"
-        className={classes.measuresWidgetMenu}
-        selectedMenuItems={[]}
-        setSelectedMenuItem={_.noop}
-        menuItemEnum={[]}
-        multiSelect
-      />
+    <WidgetCard className={classes.measures} title="Measures" hideMenu>
       <KpiItem className={classes.kpi} value={mDepth.value} measureUnit={"in"} label={"Hole Depth"} small />
       <KpiItem className={classes.kpi} value={bitDepth.value} measureUnit={"in"} label={"Bit Depth"} small />
       <PercentageBarKpi

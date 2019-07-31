@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { Route } from "react-router-dom";
 import { Button, Card, CardContent, Typography } from "@material-ui/core";
 
-import VerticalMenu from "../VerticalMenu";
 import { useWells } from "../../api";
 import { BitDepth, Rop } from "../Kpi/KpiItem";
 import WellStatus from "../Kpi/WellStatus";
@@ -13,14 +12,10 @@ import WellPathStatus from "../Kpi/WellPathStatus";
 import TargetAccuracy from "../Kpi/TargetAccuracy";
 import { actions } from "../WellExplorer/store";
 import classes from "./HeaderToolbar.scss";
+import { useWellIdContainer } from "../App/Containers";
 
-export function HeaderToolbar({
-  match: {
-    params: { wellId }
-  },
-  changeSelectedWell,
-  history
-}) {
+export function HeaderToolbar({ changeSelectedWell, history }) {
+  const { wellId } = useWellIdContainer();
   // Get currently opened well
   const [, wellsById] = useWells();
   const well = wellsById[wellId] || {};
@@ -46,7 +41,6 @@ export function HeaderToolbar({
           <Rop wellId={well.id} />
           <ServerStatus wellId={well.id} />
           <BitDepth wellId={well.id} />
-          <VerticalMenu selectedMenuItems={[]} menuItemEnum={[]} />
         </div>
       </CardContent>
     </Card>
@@ -54,11 +48,6 @@ export function HeaderToolbar({
 }
 
 HeaderToolbar.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  }),
   changeSelectedWell: PropTypes.func,
   history: PropTypes.shape({
     push: PropTypes.func
