@@ -75,8 +75,10 @@ export default function useViewport({
     [updateView, isXScalingValid, zoomYScale, zoomXScale]
   );
 
+  const getContainer = useCallback(() => stage, [stage]);
+
   useDraggable({
-    container: stage,
+    getContainer,
     root: stage,
     onDrag,
     x: 0,

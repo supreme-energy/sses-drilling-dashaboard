@@ -72,9 +72,10 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   const computedXMin = xMin - (computedWidth - width) / 2;
   const { saveWellLog } = useSaveWellLogActions();
   const onDragEnd = !isDraft ? saveWellLog : undefined;
+  const getSegment = useCallback(() => segmentContainerRef.current && segmentContainerRef.current.container, []);
 
   useDraggable({
-    container: segmentContainerRef.current && segmentContainerRef.current.container,
+    getContainer: getSegment,
     root: container,
     onDrag: onRootDragHandler,
     onDragEnd,
@@ -86,8 +87,10 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     y: 0
   });
 
+  const getSegmentStart = useCallback(() => startLineRef.current && startLineRef.current.container, []);
+
   useDraggable({
-    container: startLineRef.current && startLineRef.current.container,
+    getContainer: getSegmentStart,
     root: container,
     onDrag: onStartDragHandler,
     onDragEnd,
@@ -98,9 +101,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     y: 0,
     height: 10
   });
-
+  const getSegmentEnd = useCallback(() => endLineRef.current && endLineRef.current.container, []);
   useDraggable({
-    container: endLineRef.current && endLineRef.current.container,
+    getContainer: getSegmentEnd,
     root: container,
     onDrag: onEndDragHandler,
     onDragEnd,

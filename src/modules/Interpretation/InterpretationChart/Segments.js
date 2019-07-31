@@ -84,12 +84,24 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const endLineRef = useRef(null);
   const segmentDragContainer = useRef(null);
   const onDragEnd = !isDraft ? saveWellLog : undefined;
+  const { refresh } = useInterpretationRenderer();
+  const onOver = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const getStartLine = useCallback(() => startLineRef.current && startLineRef.current.container, []);
+  const getEndLine = useCallback(() => endLineRef.current && endLineRef.current.container, []);
+  const getSegmentContainer = useCallback(
+    () => segmentDragContainer.current && segmentDragContainer.current.container,
+    []
+  );
 
   useDraggable({
-    container: startLineRef.current && startLineRef.current.container,
+    getContainer: getStartLine,
     root: stage,
     canvas: canvasRef.current,
     cursor: "row-resize",
+    onOver,
     onDrag: onStartSegmentDragHandler,
     onDragEnd,
     x: 0,
@@ -99,10 +111,11 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   });
 
   useDraggable({
-    container: endLineRef.current && endLineRef.current.container,
+    getContainer: getEndLine,
     root: stage,
     onDrag: onEndSegmentDragHandler,
     canvas: canvasRef.current,
+    onOver,
     cursor: "row-resize",
     onDragEnd,
     x: 0,
@@ -112,10 +125,11 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   });
 
   useDraggable({
-    container: segmentDragContainer.current && segmentDragContainer.current.container,
+    getContainer: getSegmentContainer,
     root: stage,
     onDrag: onSegmentDragHandler,
     canvas: canvasRef.current,
+    onOver,
     onDragEnd,
     cursor: "ns-resize",
     x: 0,
