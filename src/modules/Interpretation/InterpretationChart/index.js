@@ -20,6 +20,7 @@ import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
 import TCLLine from "./TCLLine";
+import Formations from "./Formations";
 
 const gridGutter = 60;
 
@@ -122,6 +123,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
+      <Formations container={viewport} width={width} />
 
       {controlLogs.map(cl => (
         <PixiLine key={cl.id} container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />

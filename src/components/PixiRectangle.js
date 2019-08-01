@@ -10,6 +10,7 @@ const PixiRectangle = forwardRef(
       width,
       height,
       backgroundColor,
+      backgroundAlpha,
       borderColor,
       borderThickness,
       x,
@@ -102,12 +103,23 @@ const PixiRectangle = forwardRef(
         bg.clear();
         bg.alpha = alpha;
         if (backgroundColor) {
-          bg.beginFill(backgroundColor);
+          bg.beginFill(backgroundColor, backgroundAlpha);
         }
         bg.lineStyle(borderThickness, borderColor);
         radius ? bg.drawRoundedRect(0, 0, width, height, radius) : bg.drawRect(0, 0, width, height);
       },
-      [width, height, backgroundColor, borderColor, borderThickness, alpha, updateTransform, bg, radius]
+      [
+        width,
+        height,
+        backgroundColor,
+        backgroundAlpha,
+        borderColor,
+        borderThickness,
+        alpha,
+        updateTransform,
+        bg,
+        radius
+      ]
     );
 
     useImperativeHandle(ref, () => ({
@@ -130,14 +142,16 @@ PixiRectangle.propTypes = {
   borderThickness: PropTypes.number,
   radius: PropTypes.number,
   onClick: PropTypes.func,
-  zIndex: PropTypes.number
+  zIndex: PropTypes.number,
+  backgroundAlpha: PropTypes.number
 };
 
 PixiRectangle.defaultProps = {
   x: 0,
   y: 0,
   alpha: 1,
-  radius: 0
+  radius: 0,
+  backgroundAlpha: 1
 };
 
 export default PixiRectangle;
