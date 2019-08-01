@@ -203,15 +203,12 @@ export function useComputedSurveys() {
 
 export function useSelectedSurvey() {
   const [{ selectedMd }] = useComboContainer();
-
   const computedSurveys = useComputedSurveys();
-
   return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
 }
 
 export function useComputedFormations(formations) {
   const computedSurveys = useComputedSurveys();
-
   const computedFormations = useMemo(
     () =>
       formations.map(f => {
