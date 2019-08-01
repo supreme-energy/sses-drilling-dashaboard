@@ -24,6 +24,7 @@ export const GET_WELL_SURVEYS = "/surveys.php";
 export const SET_WELL_SURVEY = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
+export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
@@ -89,6 +90,7 @@ export function useWellInfo(wellId) {
 
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
+  const emailInfo = data && data.emailinfo;
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
@@ -129,6 +131,31 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
+  );
+
+  const updateEmail = useCallback(
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        emailinfo: {
+          ...emailInfo,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId,
+          table: "emailinfo",
+          field,
+          value
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, emailInfo]
   );
 
   const {
@@ -183,11 +210,13 @@ export function useWellInfo(wellId) {
       wellPBHL,
       wellPBHLLocal,
       wellInfo,
+      emailInfo,
       transform
     },
     isLoading,
     updateWell,
-    refreshStore
+    refreshStore,
+    updateEmail
   ];
 }
 
@@ -445,7 +474,17 @@ export function useFetchProjections(wellId) {
       }
     });
   };
-  return [data || EMPTY_ARRAY, refresh, saveProjection];
+  const deleteProjection = projectionId => {
+    return fetch({
+      path: DELETE_WELL_PROJECTIONS,
+      method: "GET",
+      query: {
+        seldbname: wellId,
+        id: projectionId
+      }
+    });
+  };
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection];
 }
 
 export function useWellOverviewKPI(wellId) {
@@ -578,7 +617,9 @@ export function useAdditionalDataLogsList(wellId) {
       }
     },
     {
-      transform: data => _.keyBy(data, "label")
+      transform: data => {
+        return { data: data || EMPTY_ARRAY, dataBySection: keyBy(data, "label") };
+      }
     }
   );
 
@@ -590,6 +631,8 @@ const additionalDataLogTransform = memoizeOne(data => {
     label: data.label,
     scalelo: data.scalelo,
     scalehi: data.scalehi,
+    color: data.color,
+    count: data.data_count,
     data: transform(data.data)
   };
 });

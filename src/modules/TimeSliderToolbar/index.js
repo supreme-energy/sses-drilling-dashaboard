@@ -29,9 +29,7 @@ export function TimeSliderToolbar() {
   );
 }
 
-TimeSliderToolbar.propTypes = {
-
-};
+TimeSliderToolbar.propTypes = {};
 
 export function TimeSliderToolbarWrapper({ children }) {
   return (

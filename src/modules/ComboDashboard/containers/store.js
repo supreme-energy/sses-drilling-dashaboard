@@ -50,6 +50,11 @@ function comboStoreReducer(state, action) {
         };
       }
     }
+    case "DESELECT_ALL":
+      return {
+        ...state,
+        selectedMd: null
+      };
     case "TOGGLE_DRAFT_MODE":
       const draft = !state.draftMode;
       const selectedMd = state.selectedMd;
@@ -91,11 +96,12 @@ function comboStoreReducer(state, action) {
 function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
   const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
+  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
   const updateSegment = useCallback((props, md) => dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props }), [
     dispatch
   ]);
 
-  return [state, dispatch, { setSelectedMd, updateSegment }];
+  return [state, dispatch, { setSelectedMd, updateSegment, deselectMd }];
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);

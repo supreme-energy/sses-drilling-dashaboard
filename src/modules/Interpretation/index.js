@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "@material-ui/core";
 
-import WidgetCard from "../WidgetCard";
+import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
@@ -20,7 +20,7 @@ function Interpretation({
 }) {
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogsContainer();
-  const aditionalLogs = useAdditionalDataLogsList(wellId);
+  const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
   const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
   return (

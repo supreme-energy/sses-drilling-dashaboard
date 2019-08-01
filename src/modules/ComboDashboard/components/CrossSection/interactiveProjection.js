@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import memoizeOne from "memoize-one";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import {
@@ -12,10 +13,14 @@ import {
   DIP_END
 } from "../../../../constants/interactivePAStatus";
 
-function createCircle(container, lineColor, fillColor, cb, cbEnd) {
-  const circle = container.addChild(new PIXI.Graphics());
+function drawCircle(circle, lineColor, fillColor) {
+  circle.clear();
   circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
   circle.drawCircle(0, 0, 10);
+}
+function createCircle(container, lineColor, fillColor, cb, cbEnd) {
+  const circle = container.addChild(new PIXI.Graphics());
+  drawCircle(circle, lineColor, fillColor);
   circle.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(circle, cb, cbEnd);
   return circle;
@@ -108,6 +113,13 @@ function interactiveProjection(parent, props) {
     }
   );
 
+  const memoSetKnobColor = memoizeOne(color => {
+    drawCircle(prevTot, color, color);
+    drawCircle(prevBot, color, color);
+    drawCircle(currTot, white, color);
+    drawCircle(currBot, white, color);
+  });
+
   const paMarker = container.addChild(new PIXI.Graphics());
   paMarker.lineStyle(2, red).beginFill(white, 0);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
@@ -131,7 +143,7 @@ function interactiveProjection(parent, props) {
     const id = Object.keys(selectedSections)[0];
     const selectedIndex = calcSections.findIndex(s => s.id === Number(id));
     // If there isn't a selected project ahead segment, don't display the interactive component
-    if (!selectedSections[id] || selectedIndex <= 0 || !calcSections[selectedIndex].isProjection) {
+    if (!selectedSections[id] || selectedIndex <= 0) {
       container.visible = false;
       return;
     }
@@ -143,6 +155,7 @@ function interactiveProjection(parent, props) {
     const prev = calcSections[selectedIndex - 1];
     const pa = calcSections[selectedIndex];
 
+    memoSetKnobColor(pa.selectedColor);
     prevTot.position.x = prev.vs;
     prevTot.position.y = prev.tot;
     prevBot.position.x = prev.vs;
@@ -156,11 +169,11 @@ function interactiveProjection(parent, props) {
     paMarker.position.x = pa.vs;
     paMarker.position.y = pa.tvd;
 
-    totLine.clear().lineStyle(2, red, 1);
+    totLine.clear().lineStyle(2, pa.selectedColor, 1);
     totLine.moveTo(...scale(prev.vs, prev.tot)).lineTo(...scale(pa.vs, pa.tot - pa.fault));
-    tclLine.clear().lineStyle(2, red, 1);
+    tclLine.clear().lineStyle(2, pa.selectedColor, 1);
     tclLine.moveTo(...scale(prev.vs, prev.tcl)).lineTo(...scale(pa.vs, pa.tcl - pa.fault));
-    botLine.clear().lineStyle(2, red, 1);
+    botLine.clear().lineStyle(2, pa.selectedColor, 1);
     botLine.moveTo(...scale(prev.vs, prev.bot)).lineTo(...scale(pa.vs, pa.bot - pa.fault));
   };
 }

@@ -49,10 +49,6 @@
         }
     }
 
-    h6 {
-        color: $gold;
-    }
-
     .row:first-child, .row:last-child {
         margin-left: 6px;
         margin-right: 6px;
@@ -67,10 +63,24 @@
     }
 
     .extendRow {
-        flex-grow: 2;
+        flex-grow: 6;
+        height: 100%;
         > div {
             flex: 1;
+            flex-grow: 4;
         }
+
+        > div:first-child {
+            flex-grow: 2;
+        }
+
+        > div:last-child {
+            flex-grow: 3;
+        }
+    }
+
+    .verticalView {
+        flex-grow: 1;
     }
 
     .phaseOverviewCard {
@@ -79,6 +89,46 @@
 
     .verticalCrossSectionCard, .performanceAnalysisCard, .footageZoneStatsCard {
         height: 100%;
+    }
+
+    .verticalCrossSectionCard {
+        padding: 10px;
+
+        .drilloutKpis {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 4;
+
+
+            span {
+                margin-right: 15px;
+                margin-left: 5px;
+            }
+
+            .legendKey {
+                height: 10px;
+                width: 20px;
+            }
+        }
+
+        .tvdGraphContainerMin {
+            height: 40%;
+            margin-bottom: 20px;
+        }
+
+        .tvdGraphContainer {
+            height: 100%;
+        }
+
+        .depthGraphContainer {
+            height: 40%;
+        }
     }
 
     .verticalMenu {

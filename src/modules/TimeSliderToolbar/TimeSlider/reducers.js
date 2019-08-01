@@ -1,5 +1,9 @@
 import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
 
+export function stateReducer(state, newState) {
+  return { ...state, ...newState };
+}
+
 export function graphReducer(state, action) {
   switch (action.type) {
     case "CHANGE":

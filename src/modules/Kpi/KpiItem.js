@@ -50,7 +50,7 @@ export function defaultRenderValue({ value, format, textClass, textStyle }) {
 
 KpiItem.propTypes = {
   format: PropTypes.func,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   measureUnit: PropTypes.string,
   label: PropTypes.string,
   className: PropTypes.string,

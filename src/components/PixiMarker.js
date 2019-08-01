@@ -1,19 +1,16 @@
 import { useEffect, useImperativeHandle, forwardRef } from "react";
 import useRef from "react-powertools/hooks/useRef";
 import * as PIXI from "pixi.js";
-import { frozenScaleTransform } from "../CrossSection/customPixiTransforms";
+import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 
 /* eslint new-cap: 0 */
-function PixiMarker({ container, x, y, url, updateTransform, rotation }, ref) {
+function PixiMarker({ container, x, y, url, updateTransform, rotation, anchor }, ref) {
   const {
     current: { marker, initialUpdateTransform }
   } = useRef(() => {
     const texture = PIXI.Texture.from(url);
     const marker = new PIXI.Sprite(texture);
 
-    if (rotation) {
-      marker.rotation = rotation;
-    }
     return {
       marker,
       initialUpdateTransform: marker.transform.updateTransform
@@ -40,10 +37,16 @@ function PixiMarker({ container, x, y, url, updateTransform, rotation }, ref) {
 
   useEffect(
     function updateMarker() {
+      marker.anchor.set(...anchor);
+
+      if (rotation) {
+        marker.rotation = rotation;
+      }
+
       marker.x = x;
       marker.y = y;
     },
-    [x, y, marker]
+    [x, y, anchor, rotation, marker]
   );
 
   useImperativeHandle(ref, () => ({

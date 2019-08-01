@@ -1,9 +1,8 @@
 import React from "react";
-import classNames from "classnames";
-import { Typography } from "@material-ui/core";
 
 import Measures from "../../ComboDashboard/components/Measures";
-import WidgetCard from "../../WidgetCard";
+import WellBottomHoleInfo from "./WellBottomHoleInfo";
+import WidgetCard from "../../../components/WidgetCard";
 import classes from "./DirectionalGuidance.scss";
 import { useWellIdContainer } from "../../App/Containers";
 
@@ -13,26 +12,16 @@ export function DirectionalGuidance() {
     <div className={classes.directionalGuidanceContainer}>
       <div className={classes.kpiRows}>
         <div className={classes.row}>
-          <WidgetCard hideMenu>
-            <Typography variant="subtitle1">Projection</Typography>
-          </WidgetCard>
-          <WidgetCard hideMenu>
-            <Typography variant="subtitle1">Bottom Hole Assembly Tendency</Typography>
-          </WidgetCard>
-          <WidgetCard hideMenu>
-            <Typography variant="subtitle1">Motor Yield</Typography>
-          </WidgetCard>
+          <WidgetCard title="Projection" hideMenu />
+          <WidgetCard title="Bottom Hole Assembly Tendency" hideMenu />
+          <WidgetCard title="Motor Yield" hideMenu />
         </div>
-        <div className={classNames(classes.row, classes.graphRow)}>
-          <WidgetCard hideMenu>
-            <Typography variant="subtitle1">Well and Bottom Hole Assembly Information</Typography>
-          </WidgetCard>
+        <div className={classes.graphRow}>
+          <WellBottomHoleInfo />
         </div>
       </div>
       <div className={classes.toolFaceColumn}>
-        <WidgetCard hideMenu>
-          <Typography variant="subtitle1">Tool Face</Typography>
-        </WidgetCard>
+        <WidgetCard title="Tool Face" hideMenu />
       </div>
       <div className={classes.measuresColumn}>
         <Measures wellId={wellId} />
