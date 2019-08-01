@@ -7,6 +7,7 @@ import trashCircleSVG from "../../../../assets/deleteForever.svg";
 import { ADD_PA_STATION, NORMAL } from "../../../../constants/crossSectionModes";
 import pick from "lodash/pick";
 import mapKeys from "lodash/mapKeys";
+import { calcMd } from "../../../../hooks/useCalculations";
 
 function addButton(container, texture) {
   const button = container.addChild(new PIXI.Sprite(texture));
@@ -104,9 +105,17 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const lastSection = calcSections[calcSections.length - 1];
     const prevSection = calcSections[calcSections.length - 2];
 
+    const newMd = calcMd(
+      lastSection,
+      lastSection.tvd - prevSection.tvd,
+      lastSection.ew - prevSection.ew,
+      lastSection.ns - prevSection.ns
+    );
+
     latestProps.addProjection({
-      ...pick(lastSection, ["method", "inc", "md", "azm", "dip", "fault", "tvd", "tot", "bot"]),
+      ...pick(lastSection, ["method", "inc", "azm", "dip", "fault", "tvd", "tot", "bot"]),
       id: "pendingAddPA",
+      md: newMd,
       vs: (latestProps.mouse.x - latestProps.view.x) / latestProps.view.xScale,
       ...mapKeys(pick(prevSection, ["md", "inc", "azm", "tvd", "ca", "cd"]), (value, key) => `p${key}`)
     });

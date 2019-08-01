@@ -54,6 +54,7 @@ function drawGrid(container, options = {}) {
     gutter = 50,
     xAxisOrientation = "bottom",
     showXAxis = true,
+    showYAxis = true,
     makeXTickAndLine = defaultMakeXTickAndLine,
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
@@ -83,7 +84,7 @@ function drawGrid(container, options = {}) {
   for (let i = 0; i < maxYLines; i++) {
     let [line, label] = makeYTickAndLine(fontSize);
     yLines.push(line);
-    yLabels.push(label);
+    showYAxis && yLabels.push(label);
   }
 
   // Add the elements of the grid in the correct order
@@ -92,11 +93,13 @@ function drawGrid(container, options = {}) {
   yLines.forEach(l => container.addChild(l));
 
   // White background behind tick labels
+  let bgx, bgy;
 
-  const bgx = new PIXI.Graphics();
-  bgx.transform.updateTransform = frozenXYTransform;
-  container.addChild(bgx);
-  let bgy;
+  if (showYAxis) {
+    bgx = new PIXI.Graphics();
+    bgx.transform.updateTransform = frozenXYTransform;
+    container.addChild(bgx);
+  }
 
   if (showXAxis) {
     bgy = new PIXI.Graphics();
@@ -147,20 +150,22 @@ function drawGrid(container, options = {}) {
     const { width, height, view } = props;
     const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
-
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {
       const xAxisAnchor = xAxisOrientation === "top" ? gutterBottom : height;
       // Redraw the background as width or height may have changed
-      bgx.clear().beginFill(0xffffff);
-      bgx.drawRect(0, 0, gutterLeft, height);
+      if (bgx) {
+        bgx.clear().beginFill(0xffffff);
+        bgx.drawRect(0, 0, gutterLeft, height);
+      }
+
       if (bgy) {
         bgy.clear().beginFill(0xffffff);
         bgy.drawRect(0, xAxisAnchor - gutterBottom, width, gutterBottom);
       }
 
-      if (corner) {
+      if (corner && showYAxis) {
         corner.clear().beginFill(0xffffff);
         corner.drawRect(0, xAxisAnchor - gutterBottom, gutterLeft, gutterBottom);
       }
@@ -179,8 +184,10 @@ function drawGrid(container, options = {}) {
         const pos = bounds.yMin + bounds.yStep * i;
         yLines[i].y = pos;
 
-        yLabels[i].y = pos;
-        yLabels[i].text = `${pos}`;
+        if (showYAxis) {
+          yLabels[i].y = pos;
+          yLabels[i].text = `${pos}`;
+        }
       }
       lastBounds = bounds;
     }

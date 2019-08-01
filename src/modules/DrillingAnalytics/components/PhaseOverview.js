@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Typography } from "@material-ui/core";
 
-import WidgetCard from "../../WidgetCard";
+import WidgetCard from "../../../components/WidgetCard";
 import { useWellOverviewKPI } from "../../../api";
 import KpiItem from "../../Kpi/KpiItem";
 import { PercentageBar, renderRotating, renderSliding, percentage } from "../../Kpi/DrillPhaseKPI/Kpi";
@@ -49,8 +48,7 @@ export function PhaseOverview({ wellId, drillPhase, drillPhaseType }) {
   const phaseData = data.find(d => d.type === drillPhase);
 
   return (
-    <WidgetCard className={classes.phaseOverviewCard} hideMenu>
-      <Typography variant="subtitle1">{`${drillPhaseType} Overview`}</Typography>
+    <WidgetCard className={classes.phaseOverviewCard} title={`${drillPhaseType} Overview`} hideMenu>
       <SlidingKpi data={phaseData} />
     </WidgetCard>
   );

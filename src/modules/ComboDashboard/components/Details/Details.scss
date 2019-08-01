@@ -11,9 +11,35 @@
     width: 15px;
     height: 15px;
     display: inline;
+  }
+  .marker {
     margin-right: 4px;
   }
+  .icon {
+    position: relative;
+    left: 5px;
+  }
   .cell {
+    &.actions {
+      background: none !important;
+      padding-right: 0px;
+    }
+    &.textField {
+      input {
+        font-size: 0.875rem;
+        padding: 0.63rem 0.4rem;
+        &[type=number]::-webkit-inner-spin-button,
+        &[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+      }
+      font-size: 0.875rem;
+      margin-left: 0;
+      margin-right: 0;
+      padding: 0;
+      max-width: 4em;
+    }
     &:first-child:before {
       width: 4px;
       height: 95%;
@@ -23,6 +49,7 @@
       left: -6px;
       top: 1px
     }
+    display: table-cell;
     position: relative;
     border-radius: 6px 6px 0px 0px;
     border: 2px white solid;
@@ -107,4 +134,9 @@ $black: rgb(0, 0, 0);
     display: flex;
     width: 100%;
   }
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
 }

@@ -1,43 +1,73 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, forwardRef, useImperativeHandle } from "react";
 import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function draw(lineG, lineWidth, color, lineData, view, native) {
-  lineG.current.clear().lineStyle(lineWidth, color, 1, 1, native);
+const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, view, lineWidth, scale, x, y }, ref) => {
+  const lineData = useMemo(() => data.map(mapData), [data, mapData]);
   // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
   // I'm picking 10k that should be safe (15k works also)
-  const chunks = chunk(lineData, 10000);
-  chunks.forEach(chunk => {
-    lineG.current.moveTo(chunk[0][0] * view.xScale, chunk[0][1] * view.yScale);
-    chunk.forEach(point => {
-      lineG.current.lineTo(point[0] * view.xScale, point[1] * view.yScale);
-    });
-  });
-}
+  const chunks = useMemo(() => chunk(lineData, 10000), [lineData]);
+  const { current: lines } = useRef([]);
 
-export default function PixiLine({ container, data, mapData, color, nativeLines, view, lineWidth }) {
-  const lineData = useMemo(() => data.map(mapData), [data, mapData]);
   const lineG = useRef(() => new PIXI.Graphics());
+  const { current: lineGraphic } = lineG;
 
   useEffect(() => {
-    const lineGraphic = lineG.current;
     container.addChild(lineGraphic);
     return () => container.removeChild(lineGraphic);
-  }, [container]);
+  }, [container, lineGraphic]);
+
+  useEffect(() => {
+    for (let i = 0; i <= chunks.length - 1; i++) {
+      lines.push(lineGraphic.addChild(new PIXI.Graphics()));
+    }
+    return () => lines.forEach(line => lineGraphic.removeChild(line));
+  }, [lineGraphic, chunks.length, lines]);
 
   useEffect(
     function drawLine() {
       if (lineData && lineData.length) {
-        draw(lineG, lineWidth, color, lineData, view, nativeLines);
+        for (let i = 0; i <= lines.length - 1; i++) {
+          lines[i].clear().lineStyle(lineWidth, color, 1, 1, nativeLines);
+        }
+
+        chunks.forEach((chunk, i) => {
+          lines[i].moveTo(chunk[0][0] * view.xScale, chunk[0][1] * view.yScale);
+          chunk.forEach(point => {
+            lines[i].lineTo(point[0] * view.xScale, point[1] * view.yScale);
+          });
+        });
       }
     },
-    [view, nativeLines, color, lineData, lineWidth]
+    [view, lines, chunks, nativeLines, color, lineData, lineWidth]
   );
 
+  useEffect(
+    function updateScale() {
+      if (scale) {
+        lineGraphic.scale.set(scale.x, scale.y);
+      }
+    },
+    [scale, lineGraphic]
+  );
+
+  useEffect(
+    function updatePosition() {
+      lineGraphic.position.set(x, y);
+      lineGraphic.x = x;
+      lineGraphic.y = y;
+    },
+    [x, y, lineGraphic]
+  );
+
+  useImperativeHandle(ref, () => ({
+    lineGraphics: lineG.current
+  }));
+
   return null;
-}
+});
 
 PixiLine.propTypes = {
   nativeLines: PropTypes.bool,
@@ -51,7 +81,11 @@ PixiLine.propTypes = {
 
 PixiLine.defaultProps = {
   nativeLines: true,
+  x: 0,
+  y: 0,
   lineWidth: 1,
   view: { xScale: 1, yScale: 1 },
   mapData: d => d
 };
+
+export default PixiLine;

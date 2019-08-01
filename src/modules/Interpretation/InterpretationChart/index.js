@@ -13,6 +13,13 @@ import LogDataLine from "./LogDataLine";
 import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
+import PixiRectangle from "../../../components/PixiRectangle";
+import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import { useSelectedWellLog, useComputedSegments } from "../selectors";
+import { useComboContainer } from "../../ComboDashboard/containers/store";
+import BiasAndScale from "./BiasAndScale";
+import * as PIXI from "pixi.js";
+import TCLLine from "./TCLLine";
 
 const gridGutter = 60;
 
@@ -36,24 +43,50 @@ function useInterpretationWebglRenderer() {
     yScale: 1
   });
 
-  return { stage, refresh, renderer, view, updateView, canvasRef, size: { width, height } };
+  const viewportContainer = useRef(null);
+
+  const viewport = useViewport({
+    renderer,
+    stage: viewportContainer.current && viewportContainer.current.container,
+    width,
+    height,
+    view,
+    updateView,
+    zoomXScale: false,
+    zoomYScale: true,
+    updateViewport: false
+  });
+
+  return {
+    stage,
+    refresh,
+    renderer,
+    view,
+    updateView,
+    canvasRef,
+    size: { width, height },
+    viewport,
+    viewportContainer
+  };
 }
 
 export const { Provider: WebglRendererProvider, useContainer: useInterpretationRenderer } = createContainer(
   useInterpretationWebglRenderer
 );
 
-function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId, selectedWellLog }) {
+function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId }) {
   const {
     stage,
     refresh,
-    renderer,
+    viewportContainer,
+    viewport,
     canvasRef,
     size: { width, height },
     view,
     updateView
   } = useInterpretationRenderer();
-  const viewportContainer = useRef(null);
+
+  const { selectedWellLog } = useSelectedWellLog();
 
   useEffect(
     function initScale() {
@@ -64,22 +97,25 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [height, controlLogs, updateView]
   );
 
-  const viewport = useViewport({
-    renderer,
-    stage: viewportContainer.current && viewportContainer.current.container,
-    width,
-    height,
-    view,
-    updateView,
-    zoomXScale: false,
-    zoomYScale: true
-  });
+  const [{ draftMode }] = useComboContainer();
+  const [segments] = useComputedSegments(wellId);
+
+  useEffect(
+    function updateViewport() {
+      if (updateView) {
+        viewport.position = new PIXI.Point(view.x, view.y);
+        viewport.scale.x = view.xScale;
+        viewport.scale.y = view.yScale;
+      }
+    },
+    [view, viewport, updateView]
+  );
 
   useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, view, width, height, controlLogs, selectedWellLog, gr]
+    [refresh, stage, width, height, controlLogs, selectedWellLog, gr, draftMode, segments, view, viewport]
   );
 
   return (
@@ -92,15 +128,22 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       ))}
       {/* todo use this when add aditional logs
       {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
-      {logList.map(log => (
-        <LogDataLine
-          log={log}
-          key={log.id}
-          wellId={wellId}
-          container={viewport}
-          selected={selectedWellLog && log.id === selectedWellLog.id}
-        />
-      ))}
+      {logList.map((log, index) => {
+        const selected = selectedWellLog && log.id === selectedWellLog.id;
+
+        return (
+          <LogDataLine
+            refresh={refresh}
+            log={log}
+            key={`${log.id}`}
+            draft={draftMode && selected}
+            selected={selected}
+            wellId={wellId}
+            container={viewport}
+          />
+        );
+      })}
+
       <Grid
         container={viewport}
         view={view}
@@ -110,7 +153,26 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         showXAxis={false}
         makeYTickAndLine={createGridYAxis}
       />
-      <Segments container={viewport} chartWidth={width} segmentsData={logList} selectedWellLog={selectedWellLog} />
+      <PixiRectangle
+        width={10}
+        height={height}
+        updateTransform={frozenXYTransform}
+        y={0}
+        x={width - 10}
+        backgroundColor={0xffffff}
+        container={viewport}
+      />
+      <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      <TCLLine container={viewport} width={width} />
+      <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
+      <BiasAndScale
+        container={stage}
+        y={height - 10}
+        gridGutter={gridGutter}
+        refresh={refresh}
+        totalWidth={width}
+        canvas={canvasRef.current}
+      />
     </div>
   );
 }

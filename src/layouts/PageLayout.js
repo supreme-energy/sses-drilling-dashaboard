@@ -13,10 +13,10 @@ import {
   useWellIdContainer,
   ProjectionsProvider,
   FormationsProvider,
-  SurveysProvider,
-  ComboContainerProvider,
-  CrossSectionProvider
+  SurveysProvider
 } from "../modules/App/Containers";
+import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
+import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
 
 const PageTabs = ({
   match: {
@@ -52,11 +52,11 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <WellIdProvider initialState={""}>
-        <SurveysProvider>
-          <ProjectionsProvider>
-            <FormationsProvider>
-              <ComboContainerProvider>
-                <CrossSectionProvider>
+        <WellLogsProvider>
+          <ComboContainerProvider>
+            <SurveysProvider>
+              <ProjectionsProvider>
+                <FormationsProvider>
                   <div className={classes.container}>
                     <AppBar className={classes.appBar} color="inherit">
                       <div className={classes.header}>
@@ -70,11 +70,11 @@ export const PageLayout = ({ children, history }) => {
 
                     <div className={classes.viewport}>{children}</div>
                   </div>
-                </CrossSectionProvider>
-              </ComboContainerProvider>
-            </FormationsProvider>
-          </ProjectionsProvider>
-        </SurveysProvider>
+                </FormationsProvider>
+              </ProjectionsProvider>
+            </SurveysProvider>
+          </ComboContainerProvider>
+        </WellLogsProvider>
       </WellIdProvider>
     </MuiThemeProvider>
   );

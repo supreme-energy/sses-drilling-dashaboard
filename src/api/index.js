@@ -21,7 +21,7 @@ export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
 export const GET_WELL_PLAN = "/wellplan.php";
 export const GET_WELL_SURVEYS = "/surveys.php";
-export const SET_WELL_SURVEYS = "/setsurveyfield.php";
+export const SET_WELL_SURVEY = "/setsurveyfield.php";
 export const GET_WELL_PROJECTIONS = "/projections.php";
 export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const ADD_WELL_PROJECTION = "/projection/add.php";
@@ -34,6 +34,7 @@ export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
 export const GET_KPI = "/kpis.php";
+export const UPDATE_WELL_LOG = "welllog/update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -49,7 +50,7 @@ const options = {
   keys: ["name", "status"]
 };
 
-const EMPTY_ARRAY = [];
+export const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
 
 function transform(data) {
@@ -374,7 +375,7 @@ const surveysTransform = memoizeOne(data => {
   });
 });
 export function useFetchSurveys(wellId) {
-  const [data] = useFetch(
+  const [data, , , , , { fetch }] = useFetch(
     {
       path: GET_WELL_SURVEYS,
       query: {
@@ -385,7 +386,31 @@ export function useFetchSurveys(wellId) {
       transform: surveysTransform
     }
   );
-  return data || EMPTY_ARRAY;
+
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
+  const updateSurvey = useCallback(
+    ({ surveyId, fields = {} }) => {
+      const optimisticResult = data.map(d => {
+        return d.id === surveyId ? { ...d, ...fields } : d;
+      });
+
+      return serializedUpdateFetch({
+        path: SET_WELL_SURVEY,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: surveyId,
+          ...fields
+        },
+        optimisticResult,
+        cache: "no-cache"
+      });
+    },
+    [serializedUpdateFetch, data, wellId]
+  );
+
+  return [data || EMPTY_ARRAY, { updateSurvey }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -578,40 +603,25 @@ export function useWellControlLog(wellId) {
   );
 }
 
-export function useWellLogList(wellId) {
-  const [list, ...rest] = useFetch({
-    path: GET_WELL_LOG_LIST,
-    query: { seldbname: wellId }
-  });
+const transformWellLogData = memoize(logData => {
+  const sortByDepth = (a, b) => a.depth - b.depth;
 
-  const logList = useMemo(
-    () =>
-      list &&
-      list.map(d => ({
-        ...d,
-        startmd: Number(d.startmd),
-        endmd: Number(d.endmd),
-        startdepth: Number(d.startdepth),
-        enddepth: Number(d.enddepth)
-      })),
-    [list]
-  );
-  return [logList || EMPTY_ARRAY, ...rest];
-}
+  return {
+    ...logData,
+    endvs: Number(logData.endvs),
+    fault: Number(logData.fault),
+    startvs: Number(logData.startvs),
+    endtvd: Number(logData.endtvd),
+    starttvd: Number(logData.starttvd),
+    startmd: Number(logData.startmd),
+    endmd: Number(logData.endmd),
+    startdepth: Number(logData.startdepth),
+    enddepth: Number(logData.enddepth),
+    data: transform(logData.data).sort(sortByDepth)
+  };
+});
 
 export function useWellLogData(wellId, tableName) {
-  const transformWellLogData = useMemo(() => {
-    const sortByDepth = (a, b) => a.depth - b.depth;
-    return memoizeOne(data => {
-      return {
-        ...data,
-        data: data.data
-          .map(d => ({ ...d, md: Number(d.md), tvd: Number(d.tvd), value: Number(d.value), depth: Number(d.depth) }))
-          .sort(sortByDepth)
-      };
-    });
-  }, []);
-
   return useFetch(
     tableName &&
       wellId && {
@@ -631,7 +641,9 @@ export function useAdditionalDataLogsList(wellId) {
       }
     },
     {
-      transform: data => _.keyBy(data, "label")
+      transform: data => {
+        return { data: data || EMPTY_ARRAY, dataBySection: keyBy(data, "label") };
+      }
     }
   );
 
@@ -643,6 +655,8 @@ const additionalDataLogTransform = memoizeOne(data => {
     label: data.label,
     scalelo: data.scalelo,
     scalehi: data.scalehi,
+    color: data.color,
+    count: data.data_count,
     data: transform(data.data)
   };
 });

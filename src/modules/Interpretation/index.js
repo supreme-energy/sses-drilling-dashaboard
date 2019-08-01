@@ -1,13 +1,16 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Typography } from "@material-ui/core";
 
-import WidgetCard from "../WidgetCard";
+import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
-import { useWellControlLog, useWellLogList, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
+import { useWellControlLog, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
-import { useComboContainer } from "../App/Containers";
+
 import classNames from "classnames";
+
+import InterpretationSettings from "./InterpretationSettings";
+import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 function Interpretation({
   match: {
@@ -16,35 +19,15 @@ function Interpretation({
   className
 }) {
   const [controlLogs] = useWellControlLog(wellId);
-  const [logList] = useWellLogList(wellId);
+  const [logList] = useWellLogsContainer();
   const aditionalLogs = useAdditionalDataLogsList(wellId);
   const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
 
-  const [{ selectedMd }] = useComboContainer();
-
-  const selectedWellLog = useMemo(
-    function findCurrentWellLog() {
-      return (
-        selectedMd &&
-        logList.find(l => {
-          return l.startmd >= selectedMd && selectedMd < l.endmd;
-        })
-      );
-    },
-    [logList, selectedMd]
-  );
-
   return (
     <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
-      <Typography variant="subtitle1">Interpretation 1</Typography>
-      <InterpretationChart
-        wellId={wellId}
-        className={css.chart}
-        controlLogs={controlLogs}
-        selectedWellLog={selectedWellLog}
-        gr={gr}
-        logList={logList}
-      />
+      <Typography variant="subtitle1">Interpretation</Typography>
+      <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} gr={gr} logList={logList} />
+      <InterpretationSettings className={css.settings} />
     </WidgetCard>
   );
 }

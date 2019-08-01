@@ -1,6 +1,5 @@
 import React, { useRef, useMemo, useEffect, useCallback, useState } from "react";
 import PropTypes from "prop-types";
-import { Typography } from "@material-ui/core";
 import { useSize } from "react-hook-size";
 import { scaleThreshold } from "d3-scale";
 import { max, group } from "d3-array";
@@ -14,7 +13,7 @@ import LandingMarker from "../../assets/aerialCSMarkerGreen.svg";
 import PbhlMarker from "../../assets/aerialCSMarkerPink.svg";
 import Compass from "../../assets/compass.svg";
 
-import WidgetCard from "../../../WidgetCard";
+import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./AerialCrossSection.scss";
 import PixiContainer from "../../../../components/PixiContainer";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
@@ -164,8 +163,7 @@ function AerialCrossSection({ wellId }) {
   };
 
   return (
-    <WidgetCard className={classes.crossSection} hideMenu>
-      <Typography variant="subtitle1">Cross Section</Typography>
+    <WidgetCard className={classes.crossSection} title="Horizontal Cross Section" hideMenu>
       <div className={classes.aerialCrossSectionCanvas} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
 

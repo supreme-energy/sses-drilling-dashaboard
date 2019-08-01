@@ -5,8 +5,7 @@ import classNames from "classnames";
 
 import { useFilteredWellData } from "../../../App/Containers";
 import { crossSectionMenuReducer } from "../reducer";
-import WidgetCard from "../../../WidgetCard";
-import VerticalMenu from "../../../VerticalMenu";
+import WidgetCard from "../../../../components/WidgetCard";
 import CrossSectionGraph from "./CrossSectionGraph";
 import AerialGraph from "./AerialGraph";
 import { LATERAL, DRILLOUT } from "../../../../constants/wellSections";
@@ -39,16 +38,14 @@ export function VerticalCrossSection({ className, wellId, drillPhase, inView }) 
   const hasPhaseChanged = prevPhase !== drillPhase || prevViewState !== inView;
 
   return (
-    <WidgetCard className={classNames(className, classes.verticalCrossSectionCard)} hideMenu>
-      <Typography variant="subtitle1">{`Vertical ${title}`}</Typography>
-      <VerticalMenu
-        id="vertical-cross-section-widget-menu"
-        className={classes.verticalMenu}
-        selectedMenuItems={selectedMenuItems}
-        setSelectedMenuItem={setSelectedMenuItem}
-        menuItemEnum={menuItems}
-        multiSelect
-      />
+    <WidgetCard
+      className={classNames(className, classes.verticalCrossSectionCard)}
+      title={`Vertical ${title}`}
+      selectedMenuItems={selectedMenuItems}
+      setSelectedMenuItem={setSelectedMenuItem}
+      menuItemEnum={menuItems}
+      multiSelect
+    >
       {isDrillout && (
         <div className={classes.drilloutKpis}>
           <KpiItem className={classes.kpi} label="Current Formation" value="Upson" format={value => value} />
@@ -88,7 +85,7 @@ VerticalCrossSection.propTypes = {
   className: PropTypes.string,
   wellId: PropTypes.string,
   drillPhase: PropTypes.string,
-  inView: PropTypes.boolean
+  inView: PropTypes.bool
 };
 
 export default VerticalCrossSection;

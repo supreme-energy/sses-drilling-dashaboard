@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { frozenXYTransform } from "./customPixiTransforms";
 
 /**
  * Add formation layers calculated from the formation data
@@ -6,18 +7,25 @@ import * as PIXI from "pixi.js";
  */
 export function drawFormations(container) {
   const layerTiles = [];
+  const layerLines = [];
 
-  return update;
-
-  function update(props) {
-    const { calculatedFormations: layers, calcSections } = props;
+  return function update(props) {
+    const { calculatedFormations: layers, calcSections, scale } = props;
     if (!layers || !layers.length) return;
     layerTiles.forEach(l => l.forEach(t => t.clear()));
+    layerLines.forEach(l => l.clear());
     // TODO: Can optimize performance by redrawing only when data changes
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
-      let { bg_color: currColor, bg_percent: currAlpha } = currLayer;
+      let { bg_color: currColor, bg_percent: currAlpha, show_line: showLineYN, color: lineColor } = currLayer;
+      const showLine = showLineYN.toUpperCase() === "YES";
+
+      if (!layerLines[layerIdx]) {
+        layerLines[layerIdx] = container.addChild(new PIXI.Graphics());
+        layerLines[layerIdx].transform.updateTransform = frozenXYTransform;
+      }
+      layerLines[layerIdx].lineStyle(1, parseInt(lineColor, 16), 1);
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
         if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
@@ -40,16 +48,22 @@ export function drawFormations(container) {
 
         if (!p1 || !p2 || !p3 || !p4) continue;
         // The right side points determine the tile fault
-        const a1 = [p1.vs, p1.tot + p2.fault];
+        const a1 = [p1.vs, p1.tot];
         const a2 = [p2.vs, p2.tot];
         const a3 = [p3.vs, p3.tot];
-        const a4 = [p4.vs, p4.tot + p3.fault];
+        const a4 = [p4.vs, p4.tot];
         const tilePath = [...a1, ...a2, ...a3, ...a4];
 
         const tile = layerTiles[layerIdx][pointIdx];
         tile.beginFill(Number(`0x${currColor}`), currAlpha);
         tile.drawPolygon(tilePath);
+
+        if (showLine) {
+          const line = layerLines[layerIdx];
+          line.moveTo(...scale(p1.vs, p1.tot + p2.fault));
+          line.lineTo(...scale(p2.vs, p2.tot));
+        }
       }
     }
-  }
+  };
 }

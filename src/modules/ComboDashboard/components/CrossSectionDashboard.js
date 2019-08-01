@@ -6,7 +6,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import TableChartIcon from "../../../assets/tableChart.svg";
 import IconButton from "@material-ui/core/IconButton";
 
-import WidgetCard from "../../WidgetCard";
+import WidgetCard from "../../../components/WidgetCard";
 import classes from "./ComboDashboard.scss";
 import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
@@ -18,9 +18,8 @@ export const CrossSectionDashboard = ({ className }) => {
   const [showModal, toggleModal] = useReducer(m => !m, false);
 
   return (
-    <WidgetCard className={classNames(classes.crossSectionDash, className)} hideMenu>
+    <WidgetCard className={classNames(classes.crossSectionDash, className)} title="Cross Section" hideMenu>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
-        <Typography variant="subtitle1">Cross Section</Typography>
         <div className={classNames(classes.column, classes.grow)}>
           <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
             {({ width, height }) => <CrossSection width={width} height={height} />}
