@@ -15,6 +15,8 @@ import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
+import { useComboContainer } from "../ComboDashboard/containers/store";
+import { useComputedFormations } from "../Interpretation/selectors";
 
 const filterDataToInterval = memoize((data, interval) => {
   if (data && data.length) {
@@ -156,7 +158,7 @@ function useSurveysData() {
   const { wellId } = useWellIdContainer();
   const [surveysData, setSurveys] = useState([]);
 
-  const surveys = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
@@ -165,7 +167,7 @@ function useSurveysData() {
     }
   }, [surveys, setSurveys]);
 
-  return { surveysData, setSurveys };
+  return { surveysData, setSurveys, updateSurvey, surveys };
 }
 
 function useProjectionsData() {
@@ -196,30 +198,16 @@ function useProjectionsData() {
 
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
-  const { projectionsData } = useProjectionsDataContainer();
-  const [formationsData, setFormations] = useState([]);
 
   const [serverFormations, refreshFormations] = useFetchFormations(wellId);
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (serverFormations && serverFormations.length) {
-      setFormations(serverFormations);
-    }
-  }, [serverFormations]);
+  const computedFormations = useComputedFormations(serverFormations);
 
-  // If projections or surveys change, recalculate formations
-  useEffect(() => {
-    // TODO: calculate formations from surveys, projections, and formations
-    // https://github.com/supreme-energy/sses-main/blob/master/sses_af/calccurve.c
-  }, [projectionsData]);
-
-  return { formationsData, setFormations, refreshFormations };
+  return { formationsData: computedFormations, refreshFormations };
 }
 
 export function useCrossSectionData() {
   const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
-
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
@@ -228,7 +216,7 @@ export function useCrossSectionData() {
   const selectedSections = useMemo(
     function getSelectedSections() {
       const selected = rawSections.find((s, index) => {
-        return index > 0 && rawSections[index - 1].md <= selectedMd && s.md > selectedMd;
+        return s.md === selectedMd;
       });
       return selected ? { [selected.id]: true } : {};
     },
@@ -342,44 +330,8 @@ export function useCrossSectionData() {
   };
 }
 
-const initialState = {
-  selectedMd: null
-};
-
-function comboStoreReducer(state, action) {
-  switch (action.type) {
-    case "DESELECT_ALL":
-      return {
-        ...state,
-        selectedMd: null
-      };
-    case "TOGGLE_MD": {
-      if (state.selectedMd === action.md) {
-        return {
-          ...state,
-          selectedMd: null
-        };
-      } else {
-        return {
-          ...state,
-          selectedMd: action.md
-        };
-      }
-    }
-  }
-}
-
-function useUseComboStore() {
-  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
-
-  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
-  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-
-  return [state, dispatch, { setSelectedMd, deselectMd }];
-}
-
 // Create containers
-export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
+
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);

@@ -1,8 +1,10 @@
 import useRef from "react-powertools/hooks/useRef";
 import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
+import useDraggable from "./useDraggable";
 
 const globalMouse = { x: 0, y: 0 };
+
 // enable mouse wheel and drag
 export default function useViewport({
   renderer,
@@ -16,10 +18,14 @@ export default function useViewport({
   isXScalingValid
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
-  const viewportRef = useRef(() => {
+  const {
+    current: { viewportContainer: viewport }
+  } = useRef(() => {
     const viewportContainer = new PIXI.Container();
     viewportContainer.sortableChildren = true;
-    return viewportContainer;
+    return {
+      viewportContainer
+    };
   });
 
   const onWheel = useCallback(
@@ -52,73 +58,47 @@ export default function useViewport({
     [updateView, zoomXScale, zoomYScale, isXScalingValid]
   );
 
-  const interactionStateRef = useRef({
-    isDragging: false,
-    isOutside: false,
-    prevMouse: {}
-  });
+  const onDrag = useCallback(
+    (event, prevMouse) => {
+      const currMouse = event.data.global;
 
-  const onMouseDown = useCallback(function(moveData) {
-    const interactionState = interactionStateRef.current;
-    const pos = moveData.data.global;
-    Object.assign(interactionState.prevMouse, pos);
-    interactionState.isDragging = true;
-  }, []);
-
-  const onMouseMove = useCallback(
-    moveData => {
-      const interactionState = interactionStateRef.current;
-      if (!interactionState.isDragging || interactionState.isOutside) {
-        return;
-      }
-
-      const currMouse = moveData.data.global;
       updateView(prev => {
-        const newX = Number(prev.x) + (currMouse.x - interactionState.prevMouse.x);
+        const newX = Number(prev.x) + (currMouse.x - prevMouse.x);
 
         return {
           ...prev,
-          y: zoomYScale ? Number(prev.y) + (currMouse.y - interactionState.prevMouse.y) : prev.y,
+          y: zoomYScale ? Number(prev.y) + (currMouse.y - prevMouse.y) : prev.y,
           x: zoomXScale && isXScalingValid(prev.xScale, newX) ? newX : prev.x
         };
       });
-
-      Object.assign(interactionState.prevMouse, currMouse);
     },
-    [updateView, zoomXScale, zoomYScale, isXScalingValid]
+    [updateView, isXScalingValid, zoomYScale, zoomXScale]
   );
 
-  useEffect(
-    function makeStageInteractive() {
-      if (stage) {
-        stage.interactive = true;
-        stage.hitArea = new PIXI.Rectangle(0, 0, width, height);
-      }
-    },
-    [stage, width, height]
-  );
+  const getContainer = useCallback(() => stage, [stage]);
+
+  useDraggable({
+    getContainer,
+    root: stage,
+    onDrag,
+    x: 0,
+    y: 0,
+    width,
+    height
+  });
 
   useEffect(
     function enableMouseInteractions() {
-      if (stage) {
-        stage.mousedown = onMouseDown;
-        stage.mousemove = onMouseMove;
-        stage.mouseout = () => (interactionStateRef.current.isOutside = true);
-        stage.mouseover = () => (interactionStateRef.current.isOutside = false);
-        stage.mouseup = stage.mouseupoutside = () => (interactionStateRef.current.isDragging = false);
-      }
       renderer.view.addEventListener("wheel", onWheel, false);
 
       return () => {
         renderer.view.removeEventListener("wheel", onWheel, false);
       };
     },
-    [renderer, onWheel, stage, onMouseDown, onMouseMove]
+    [renderer, onWheel, stage]
   );
 
   useEffect(() => {
-    const viewport = viewportRef.current;
-
     if (stage) {
       stage.addChild(viewport);
     }
@@ -129,17 +109,16 @@ export default function useViewport({
         viewport.destroy({ children: true });
       }
     };
-  }, [stage]);
+  }, [stage, viewport]);
 
   useEffect(
     function updateViewport() {
-      const viewport = viewportRef.current;
       viewport.position = new PIXI.Point(view.x, view.y);
       viewport.scale.x = view.xScale;
       viewport.scale.y = view.yScale;
     },
-    [view]
+    [view, viewport]
   );
 
-  return viewportRef.current;
+  return viewport;
 }

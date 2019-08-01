@@ -150,7 +150,6 @@ function drawGrid(container, options = {}) {
     const { width, height, view } = props;
     const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
-
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {

@@ -10,7 +10,7 @@ import AerialCrossSection from "./AerialCrossSection";
 import WellOperation from "./WellOperation";
 import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
-import { useWellIdContainer } from "../../App/Containers";
+import { useWellIdContainer, CrossSectionProvider } from "../../App/Containers";
 
 const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measures"));
 
@@ -28,7 +28,10 @@ function ComboDashboard() {
           </div>
           <div className={classNames(classes.row, classes.graphRow)}>
             <Interpretation className={"flex"} />
-            <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
+
+            <CrossSectionProvider>
+              <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
+            </CrossSectionProvider>
           </div>
         </div>
         <div className={classes.kpiColumn}>

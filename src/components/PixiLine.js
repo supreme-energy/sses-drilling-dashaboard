@@ -1,22 +1,30 @@
 import useRef from "react-powertools/hooks/useRef";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, forwardRef, useImperativeHandle } from "react";
 import chunk from "lodash/chunk";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-export default function PixiLine({ container, data, mapData, color, nativeLines, view, lineWidth }) {
+const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, view, lineWidth, scale, x, y }, ref) => {
   const lineData = useMemo(() => data.map(mapData), [data, mapData]);
   // pixi only draw a maximum number of points on subsequent lineTo that is machine dependent.
   // I'm picking 10k that should be safe (15k works also)
   const chunks = useMemo(() => chunk(lineData, 10000), [lineData]);
   const { current: lines } = useRef([]);
 
+  const lineG = useRef(() => new PIXI.Graphics());
+  const { current: lineGraphic } = lineG;
+
+  useEffect(() => {
+    container.addChild(lineGraphic);
+    return () => container.removeChild(lineGraphic);
+  }, [container, lineGraphic]);
+
   useEffect(() => {
     for (let i = 0; i <= chunks.length - 1; i++) {
-      lines.push(container.addChild(new PIXI.Graphics()));
+      lines.push(lineGraphic.addChild(new PIXI.Graphics()));
     }
-    return () => lines.forEach(line => container.removeChild(line));
-  }, [container, chunks.length, lines]);
+    return () => lines.forEach(line => lineGraphic.removeChild(line));
+  }, [lineGraphic, chunks.length, lines]);
 
   useEffect(
     function drawLine() {
@@ -36,8 +44,30 @@ export default function PixiLine({ container, data, mapData, color, nativeLines,
     [view, lines, chunks, nativeLines, color, lineData, lineWidth]
   );
 
+  useEffect(
+    function updateScale() {
+      if (scale) {
+        lineGraphic.scale.set(scale.x, scale.y);
+      }
+    },
+    [scale, lineGraphic]
+  );
+
+  useEffect(
+    function updatePosition() {
+      lineGraphic.position.set(x, y);
+      lineGraphic.x = x;
+      lineGraphic.y = y;
+    },
+    [x, y, lineGraphic]
+  );
+
+  useImperativeHandle(ref, () => ({
+    lineGraphics: lineG.current
+  }));
+
   return null;
-}
+});
 
 PixiLine.propTypes = {
   nativeLines: PropTypes.bool,
@@ -51,7 +81,11 @@ PixiLine.propTypes = {
 
 PixiLine.defaultProps = {
   nativeLines: true,
+  x: 0,
+  y: 0,
   lineWidth: 1,
   view: { xScale: 1, yScale: 1 },
   mapData: d => d
 };
+
+export default PixiLine;
