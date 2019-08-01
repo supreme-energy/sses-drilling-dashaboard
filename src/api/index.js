@@ -478,7 +478,12 @@ export function useFetchProjections(wellId) {
   };
 
   const addProjection = newProjection => {
-    const optimisticResult = [...(data || EMPTY_ARRAY), { ...newProjection, pendingProjection: true }];
+    // we can mark here the newProjection as pending with an isPending property but
+    // synce we want to control the pending state
+    // untill formations and other things are reloaded or recalculated
+    // I've added pendingProjectionsByMD state in cross section store
+
+    const optimisticResult = [...(data || EMPTY_ARRAY), newProjection];
     return fetch(
       {
         path: ADD_WELL_PROJECTION,
@@ -492,7 +497,7 @@ export function useFetchProjections(wellId) {
         optimisticResult
       },
       (currentProjections, result) => {
-        return [...currentProjections, result.projection];
+        return [...currentProjections, newProjection];
       }
     );
   };

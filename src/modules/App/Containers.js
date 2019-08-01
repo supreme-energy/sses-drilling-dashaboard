@@ -15,7 +15,7 @@ import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
-import { useComboContainer } from "../ComboDashboard/containers/store";
+import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations } from "../Interpretation/selectors";
 
 const filterDataToInterval = memoize((data, interval) => {
@@ -64,13 +64,7 @@ export function useFilteredWellData() {
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
   const { surveysData } = useSurveysDataContainer();
-  const {
-    projectionsData,
-    saveProjections,
-    refreshProjections,
-    deleteProjection,
-    addProjection
-  } = useProjectionsDataContainer();
+  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
@@ -112,7 +106,6 @@ export function useFilteredWellData() {
   );
 
   return {
-    addProjection,
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
@@ -216,7 +209,7 @@ function useFormationsData() {
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, saveProjection, addProjection } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
@@ -326,6 +319,9 @@ export function useCrossSectionData() {
       });
     }
   }, [selectedSections, rawSections]);
+
+  const addProjection = useAddProjection();
+
   return {
     addProjection,
     wellPlan,

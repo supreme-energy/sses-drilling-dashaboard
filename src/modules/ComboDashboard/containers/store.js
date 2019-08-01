@@ -1,10 +1,12 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
+import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
 
 const initialState = {
   selectedMd: null,
   pendingSegmentsState: {},
-  draftMode: false
+  draftMode: false,
+  pendingProjectionsByMD: {}
 };
 
 const initialPendingState = {};
@@ -63,6 +65,12 @@ function comboStoreReducer(state, action) {
         true
       );
 
+    case "DESELECT_ALL":
+      return {
+        ...state,
+        selectedMd: null
+      };
+
     case "UPDATE_SEGMENT_PROPERTIES":
       return updateSegmentProperties(state, action.md, action.props);
     case "RESET_SEGMENT_PENDING_STATE":
@@ -83,6 +91,23 @@ function comboStoreReducer(state, action) {
 
       return updateSegmentProperties(state, selectedMd, props);
     }
+    case "ADD_PENDING_PROJECTION": {
+      return {
+        ...state,
+        pendingProjectionsByMD: {
+          ...state.pendingProjectionsByMD,
+          [action.projection.md]: action.projection
+        }
+      };
+    }
+    case "RESET_PENDING_PROJECTION": {
+      const pendingProjectionsByMD = { ...state.pendingProjectionsByMD };
+      delete pendingProjectionsByMD[action.projection.md];
+      return {
+        ...state,
+        pendingProjectionsByMD
+      };
+    }
     default:
       throw new Error("action not defined for combo store reducer");
   }
@@ -91,11 +116,34 @@ function comboStoreReducer(state, action) {
 function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
   const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
+  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
+
   const updateSegment = useCallback((props, md) => dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props }), [
     dispatch
   ]);
 
-  return [state, dispatch, { setSelectedMd, updateSegment }];
+  return [state, dispatch, { setSelectedMd, updateSegment, deselectMd }];
+}
+
+export function useAddProjection() {
+  const [state, dispatch] = useUseComboStore();
+  const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
+  const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
+    dispatch
+  ]);
+  const { addProjection: saveProjection } = useProjectionsDataContainer();
+  console.log("pending", state.pendingProjectionsByMD);
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      addProjection(projection);
+      saveProjection(projection)
+        .then(refreshFormations)
+        .then(() => resetPendingProjection(projection));
+    },
+    [addProjection, saveProjection, resetPendingProjection, refreshFormations]
+  );
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
