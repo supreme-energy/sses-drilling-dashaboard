@@ -8,9 +8,9 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useDragActions } from "../actions";
+import { useDragActions, useSaveWellLogActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
+import { useComboContainer } from "../../ComboDashboard/containers/store";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -59,6 +59,7 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
   const { onStartSegmentDrag, onEndSegmentDrag, onSegmentDrag } = useDragActions();
+  const { saveWellLog } = useSaveWellLogActions();
   const { viewport, stage, canvasRef, view } = useInterpretationRenderer();
 
   const onStartSegmentDragHandler = useCallback(
@@ -82,13 +83,27 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   const startLineRef = useRef(null);
   const endLineRef = useRef(null);
   const segmentDragContainer = useRef(null);
+  const onDragEnd = !isDraft ? saveWellLog : undefined;
+  const { refresh } = useInterpretationRenderer();
+  const onOver = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const getStartLine = useCallback(() => startLineRef.current && startLineRef.current.container, []);
+  const getEndLine = useCallback(() => endLineRef.current && endLineRef.current.container, []);
+  const getSegmentContainer = useCallback(
+    () => segmentDragContainer.current && segmentDragContainer.current.container,
+    []
+  );
 
   useDraggable({
-    container: startLineRef.current && startLineRef.current.container,
+    getContainer: getStartLine,
     root: stage,
     canvas: canvasRef.current,
     cursor: "row-resize",
+    onOver,
     onDrag: onStartSegmentDragHandler,
+    onDragEnd,
     x: 0,
     y: -3,
     width: totalWidth,
@@ -96,11 +111,13 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   });
 
   useDraggable({
-    container: endLineRef.current && endLineRef.current.container,
+    getContainer: getEndLine,
     root: stage,
     onDrag: onEndSegmentDragHandler,
     canvas: canvasRef.current,
+    onOver,
     cursor: "row-resize",
+    onDragEnd,
     x: 0,
     y: -2,
     width: totalWidth,
@@ -108,10 +125,12 @@ const SegmentSelection = ({ segment, totalWidth, container, zIndex, segmentHeigh
   });
 
   useDraggable({
-    container: segmentDragContainer.current && segmentDragContainer.current.container,
+    getContainer: getSegmentContainer,
     root: stage,
     onDrag: onSegmentDragHandler,
     canvas: canvasRef.current,
+    onOver,
+    onDragEnd,
     cursor: "ns-resize",
     x: 0,
     y: 4,
@@ -227,12 +246,7 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
   const { view } = useInterpretationRenderer();
   const [, , { setSelectedMd }] = useComboContainer();
-  const onSegmentClick = useCallback(
-    segment => {
-      setSelectedMd(segment.startmd);
-    },
-    [setSelectedMd]
-  );
+  const onSegmentClick = useCallback(segment => setSelectedMd(segment.endmd), [setSelectedMd]);
 
   return segmentsData.map(s => {
     const selected = selectedWellLog && selectedWellLog.id === s.id;

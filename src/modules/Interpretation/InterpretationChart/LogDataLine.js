@@ -1,78 +1,79 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import PixiLine from "../../../components/PixiLine";
-import { useGetComputedLogData, useSelectedLogExtent, useGetSelectedSegmentPendingState } from "../selectors";
+import { useGetComputedLogData, getExtent } from "../selectors";
 import { draftColor, selectionColor, logColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useBiasAndScaleActions } from "../actions";
 
 const mapWellLog = d => [d.value, d.depth];
 
-function SelectedLogData(props) {
-  const [state, dispatch] = useComboContainer();
-  const { bias, scale } = useGetSelectedSegmentPendingState(state);
-  const [xMin, xMax] = useSelectedLogExtent();
-  const width = xMax - xMin;
+// this is a component to work around conditinal hooks limitation, it will be renderer only for draft and
+// will init draft position to not overlap with normal line
+function DraftLineInit({ logData, width, xMin, bias }) {
+  const [, dispatch] = useComboContainer();
 
+  const { changeSelectedSegmentBias } = useBiasAndScaleActions(dispatch);
   const internalState = useRef({ prevLogData: null });
 
   useEffect(
     function setInitialBias() {
       const prevLogData = internalState.current.prevLogData;
-      if (
-        props.logData &&
-        (!prevLogData || props.logData.tablename !== prevLogData.tablename) &&
-        props.draft &&
-        width
-      ) {
-        console.log("CHANGE_SELECTED_SEGMENT_BIAS", width);
-        dispatch({
-          type: "CHANGE_SELECTED_SEGMENT_BIAS",
-          bias: width + 10
-        });
-        internalState.current.prevLogData = props.logData;
+      if (logData && (!prevLogData || logData.tablename !== prevLogData.tablename) && width) {
+        changeSelectedSegmentBias(bias + width + 10);
+
+        internalState.current.prevLogData = logData;
       }
     },
-    [props.logData, props.draft, dispatch, xMin, width]
+    [logData, changeSelectedSegmentBias, xMin, width, bias]
   );
+  return null;
+}
+
+function LogData({ logData, draft, ...props }) {
+  const { scalebias: bias, scalefactor: scale } = logData.draftData || logData;
+
+  const [xMin, xMax] = useMemo(() => getExtent(logData), [logData]);
+
+  const width = xMax - xMin;
 
   const computedWidth = width * scale;
   const x = bias + xMin - (computedWidth - width) / 2 - xMin * scale;
   const pixiScale = useMemo(() => ({ y: 1, x: scale || 1 }), [scale]);
 
-  return <LogData {...props} x={x} scale={pixiScale} />;
-}
-
-function LogData({ container, logData, width, pivot, selected, draft, ...props }) {
-  return logData ? <PixiLine {...props} container={container} data={logData.data} mapData={mapWellLog} /> : null;
-}
-
-export default function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, ...props }) {
-  const logData = useGetComputedLogData(wellId, log, draft);
-  const logDataNonDraft = useGetComputedLogData(wellId, log, false);
-
   return (
     <React.Fragment>
-      {(draft || !selected) && (
-        <LogData
-          color={draft ? selectionColor : logColor}
-          logData={logDataNonDraft}
-          container={container}
-          selected={selected}
-        />
-      )}
-
-      {(draft || selected) && (
-        <SelectedLogData
-          selected={selected}
-          color={!draft && selected ? selectionColor : draftColor}
-          draft={draft}
-          logData={logData}
-          container={container}
-        />
-      )}
+      <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={logData.data} />
+      {draft && <DraftLineInit logData={logData} width={width} xMin={xMin} bias={bias} />}
     </React.Fragment>
   );
 }
 
-LogDataLine.defaultProps = {
-  bias: 0
+function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, ...props }) {
+  const logData = useGetComputedLogData(wellId, log, draft);
+
+  // we need to call refresh after log data is loaded to redraw
+  useEffect(() => {
+    refresh();
+  }, [logData, refresh]);
+
+  return logData ? (
+    <LogData
+      color={draft ? draftColor : selected ? selectionColor : logColor}
+      draft={draft}
+      logData={logData}
+      container={container}
+      selected={selected}
+    />
+  ) : null;
+}
+
+export default props => {
+  const { draft } = props;
+
+  return (
+    <React.Fragment>
+      <LogDataLine {...props} draft={false} key={"line"} />
+      {draft && <LogDataLine {...props} draft key={"draftLine"} />}
+    </React.Fragment>
+  );
 };

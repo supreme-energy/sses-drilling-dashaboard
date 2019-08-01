@@ -4,7 +4,7 @@ import useRef from "react-powertools/hooks/useRef";
 
 const IDENTITY = d => d;
 export default function useDraggable({
-  container,
+  getContainer,
   root,
   onDrag,
   x,
@@ -18,12 +18,13 @@ export default function useDraggable({
 }) {
   useEffect(
     function makeContainerInteractive() {
+      const container = getContainer();
       if (container) {
         container.interactive = true;
         container.hitArea = new PIXI.Rectangle(x, y, width, height);
       }
     },
-    [container, width, height, x, y]
+    [getContainer, width, height, x, y]
   );
 
   const interactionStateRef = useRef(() => {
@@ -46,17 +47,22 @@ export default function useDraggable({
     };
   });
 
+  // we save this on interactionState because we can't provide them as  input to hooks, if they change while
+  // drag opertion is pending the interaction will be broken
+
   interactionStateRef.current.onDrag = onDrag;
+  interactionStateRef.current.onDragEnd = onDragEnd;
 
   const onMouseDown = useCallback(
     function(e) {
+      const container = getContainer();
       const interactionState = interactionStateRef.current;
       const pos = e.data.global;
       Object.assign(interactionState.prevMouse, pos);
       interactionState.isDragging = true;
       container.on("mousemove", interactionState.onMouseMove);
     },
-    [container]
+    [getContainer]
   );
 
   const onMouseOut = useCallback(() => {
@@ -68,6 +74,7 @@ export default function useDraggable({
   const onMouseOver = useCallback(
     e => {
       interactionStateRef.current.isOutside = false;
+
       if (canvas) {
         canvas.style.cursor = cursor;
       }
@@ -75,22 +82,27 @@ export default function useDraggable({
     },
     [onOver, canvas, cursor]
   );
+
   const onMouseUp = useCallback(
     e => {
-      interactionStateRef.current.isDragging = false;
-      container.off("mousemove", interactionStateRef.current.onMouseMove);
-      onDragEnd(e);
+      const container = getContainer();
+      const interactionState = interactionStateRef.current;
+      interactionState.isDragging = false;
+      container.off("mousemove", interactionState.onMouseMove);
+      interactionState.onDragEnd(e);
       if (canvas) {
         canvas.style.cursor = "default";
       }
     },
-    [container, onDragEnd, canvas]
+    [getContainer, canvas]
   );
 
   useEffect(
     function enableMouseInteractions() {
+      const container = getContainer();
       if (container) {
         container.on("mouseout", onMouseOut);
+
         container.on("mouseover", onMouseOver);
         container.on("mousedown", onMouseDown);
         container.on("mouseup", onMouseUp);
@@ -107,6 +119,6 @@ export default function useDraggable({
         }
       };
     },
-    [container, onMouseDown, onMouseOut, onMouseOver, onMouseUp]
+    [getContainer, onMouseDown, onMouseOut, onMouseOver, onMouseUp, canvas]
   );
 }

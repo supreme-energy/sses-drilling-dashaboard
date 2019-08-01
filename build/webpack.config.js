@@ -81,7 +81,7 @@ config.module.rules.push({
             "babel-preset-env",
             {
               modules: false,
-              targets: Object.assign({}, project.targetEnvironments, { uglify: true })
+              targets: Object.assign({}, project.targetEnvironments, { uglify: false })
             }
           ]
         ]
