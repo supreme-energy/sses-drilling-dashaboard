@@ -193,7 +193,7 @@ export function useComputedSurveys() {
 
         const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * Math.abs(next.vs - prevItem.vs) + fault;
 
-        acc[index] = { ...next, tcl };
+        acc[index] = { ...next, tcl, fault, dip };
 
         return acc;
       }, []),
@@ -203,9 +203,7 @@ export function useComputedSurveys() {
 
 export function useSelectedSurvey() {
   const [{ selectedMd }] = useComboContainer();
-
   const computedSurveys = useComputedSurveys();
-
   return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
 }
 
@@ -229,6 +227,8 @@ export function useComputedFormations(formations) {
 
             return {
               ...item,
+              fault: survey.fault,
+              dip: survey.dip,
               tot: survey.tcl + item.thickness
             };
           })
