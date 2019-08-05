@@ -14,6 +14,7 @@ import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
+import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 
 export const CrossSectionDashboard = ({ className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -28,9 +29,10 @@ export const CrossSectionDashboard = ({ className }) => {
         onChange={(e, v) => setViewDirection(v)}
         indicatorColor="primary"
         textColor="primary"
+        aria-label="Cross Section view direction"
       >
-        <Tab label="Vertical" className={classes.tab} />
-        <Tab label="Horizontal" className={classes.tab} />
+        <Tab label="Vertical" value={VERTICAL} className={classes.tab} />
+        <Tab label="Horizontal" value={HORIZONTAL} className={classes.tab} />
       </Tabs>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <div className={classNames(classes.column, classes.grow)}>
