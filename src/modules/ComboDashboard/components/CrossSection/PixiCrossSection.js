@@ -41,7 +41,7 @@ export default class PixiCrossSection {
     const gridGutter = 100;
     const gridGutterLeft = 50;
     const tagHeight = 75;
-    this.yTicks = 12;
+    this.yTicks = 30;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
