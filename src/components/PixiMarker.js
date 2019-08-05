@@ -4,7 +4,7 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 
 /* eslint new-cap: 0 */
-function PixiMarker({ container, x, y, url, updateTransform, rotation, anchor }, ref) {
+function PixiMarker({ container, x, y, url, updateTransform, rotation, anchor, scale }, ref) {
   const {
     current: { marker, initialUpdateTransform }
   } = useRef(() => {
@@ -41,6 +41,10 @@ function PixiMarker({ container, x, y, url, updateTransform, rotation, anchor },
 
       if (rotation) {
         marker.rotation = rotation;
+      }
+      if (scale) {
+        marker.scale.x = scale;
+        marker.scale.y = scale;
       }
 
       marker.x = x;
