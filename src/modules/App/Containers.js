@@ -14,6 +14,7 @@ import {
 import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
 import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
+import { ALL } from "../../constants/wellSections";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useComputedFormations } from "../Interpretation/selectors";
@@ -133,8 +134,9 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
 // Organize well sections into array of objects
 export function useWellSections(wellId) {
   const { data } = useWellOverviewKPI(wellId);
+
   const drillPhases = useMemo(() => {
-    return data.map((s, index) => {
+    const drillPhaseArr = data.map((s, index) => {
       return {
         index,
         phase: s.type,
@@ -144,6 +146,16 @@ export function useWellSections(wellId) {
         set: false
       };
     });
+
+    drillPhaseArr.unshift({
+      phase: ALL,
+      phaseStart: 0,
+      phaseEnd: Infinity,
+      inView: true,
+      set: false
+    });
+
+    return drillPhaseArr;
   }, [data]);
 
   return drillPhases;
