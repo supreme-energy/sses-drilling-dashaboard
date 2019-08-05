@@ -33,6 +33,10 @@ export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
 export const GET_KPI = "/kpis.php";
+export const GET_EMAIL_CONTACTS = "/email_contacts/list.php";
+export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
+export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
+export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
 
 // mock data
@@ -121,10 +125,13 @@ export function useWellInfo(wellId) {
       return serializedUpdateFetch({
         path: SET_WELL_FIELD,
         query: {
-          seldbname: wellId,
-          table: "wellinfo",
-          field,
-          value
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          wellinfo: {
+            [field]: value
+          }
         },
         cache: "no-cache",
         optimisticResult
@@ -146,10 +153,13 @@ export function useWellInfo(wellId) {
       return serializedUpdateFetch({
         path: SET_WELL_FIELD,
         query: {
-          seldbname: wellId,
-          table: "emailinfo",
-          field,
-          value
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          emailinfo: {
+            [field]: value
+          }
         },
         cache: "no-cache",
         optimisticResult
@@ -652,4 +662,63 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
     }
   );
   return data || EMPTY_OBJECT;
+}
+
+export function useEmailContacts(wellId) {
+  const [data, , , , , { fetch, refresh }] = useFetch({
+    path: GET_EMAIL_CONTACTS,
+    query: {
+      seldbname: wellId
+    }
+  });
+
+  const addEmailContact = useCallback(
+    body => {
+      return fetch({
+        path: ADD_EMAIL_CONTACT,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch, wellId]
+  );
+
+  const deleteEmailContact = useCallback(
+    id => {
+      return fetch({
+        path: DELETE_EMAIL_CONTACT,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id
+        }
+      });
+    },
+    [fetch, wellId]
+  );
+
+  const updateEmailContact = useCallback(
+    body => {
+      return fetch({
+        path: SET_EMAIL_CONTACT,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch, wellId]
+  );
+
+  return {
+    data: data || EMPTY_ARRAY,
+    addEmailContact,
+    deleteEmailContact,
+    updateEmailContact,
+    refresh
+  };
 }
