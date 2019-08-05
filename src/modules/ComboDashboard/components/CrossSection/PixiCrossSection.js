@@ -7,7 +7,7 @@ import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 import { drawButtons } from "./drawButtons";
-import { HORIZONTAL, VERTICAL } from "../../../../constants/crossSectionViewDirection";
+import { VERTICAL } from "../../../../constants/crossSectionViewDirection";
 
 export default class PixiCrossSection {
   constructor() {
