@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { VerticalAlignTop as TopEnd, VerticalAlignBottom as BottomEnd, ArrowRightAlt } from "@material-ui/icons";
 import css from "./styles.scss";
@@ -7,29 +7,32 @@ import { Box, IconButton, Typography } from "@material-ui/core";
 import { useSelectedWellLog } from "../selectors";
 import { useWellIdContainer } from "../../App/Containers";
 import { useWellLogList } from "../../ComboDashboard/containers/wellLogs";
-import findLast from "lodash/findLast";
 
 export default function NavigationSettings(props) {
   const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
   const { selectedWellLog } = useSelectedWellLog();
   const { wellId } = useWellIdContainer();
   const [logs] = useWellLogList(wellId);
+  const selectedWellIndex = useMemo(() => selectedWellLog && logs.findIndex(l => l.id === selectedWellLog.id), [
+    selectedWellLog,
+    logs
+  ]);
 
   const selectNext = useCallback(() => {
-    const next = logs.find(l => l.endmd > selectedWellLog.endmd);
+    const next = logs[selectedWellIndex + 1];
 
     if (next) {
       setSelectedMd(next.endmd);
     }
-  }, [setSelectedMd, logs, selectedWellLog]);
+  }, [logs, selectedWellIndex, setSelectedMd]);
 
   const selectPrev = useCallback(() => {
-    const prev = findLast(logs, l => l.endmd < selectedWellLog.endmd);
+    const prev = logs[selectedWellIndex - 1];
 
     if (prev) {
       setSelectedMd(prev.endmd);
     }
-  }, [setSelectedMd, logs, selectedWellLog]);
+  }, [logs, selectedWellIndex, setSelectedMd]);
 
   const selectFirst = useCallback(() => {
     const first = logs[0];
