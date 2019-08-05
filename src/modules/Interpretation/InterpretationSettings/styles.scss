@@ -24,4 +24,12 @@
         margin: 0; 
        }
     }
+
+    .arrowBottom {
+        transform: rotate(90deg);
+    }
+
+    .arrowTop {
+        transform: rotate(-90deg);
+    }
 }

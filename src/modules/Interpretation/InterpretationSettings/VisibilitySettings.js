@@ -1,7 +1,6 @@
 import React from "react";
 import { Typography, Tabs, Tab, Box, TextField } from "@material-ui/core";
 import css from "./styles.scss";
-import classNames from "classnames";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../../ComboDashboard/containers/store";
 
 function PreviousInput({ onClick, test, surveyVisibility, surveyPrevVisibility, dispatch }) {
@@ -26,13 +25,13 @@ function PreviousInput({ onClick, test, surveyVisibility, surveyPrevVisibility, 
     </Box>
   );
 }
-export default function VisibilitySettings({ className }) {
+export default function VisibilitySettings(props) {
   const [{ surveyVisibility, surveyPrevVisibility }, dispatch] = useComboContainer();
 
   const propsFromStore = { surveyVisibility, surveyPrevVisibility, dispatch };
 
   return (
-    <Box display="flex" flexDirection="column" className={classNames(className, css.root)}>
+    <Box display="flex" flexDirection="column" {...props}>
       <Typography className={css.title} variant="subtitle1">
         Survey Visibility
       </Typography>

@@ -4,6 +4,7 @@ import css from "./styles.scss";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import VisibilitySettings from "./VisibilitySettings";
 import classNames from "classnames";
+import NavigationSettings from "./NavigationSettings";
 
 export default function InterpretationSettings({ className }) {
   const [state, dispatch] = useComboContainer();
@@ -22,8 +23,9 @@ export default function InterpretationSettings({ className }) {
           labelPlacement="end"
         />
       </Box>
-      <Box display="flex" flexDirection="row" justifyContent="space-between">
-        <VisibilitySettings className="flex" />
+      <Box display="flex" flexDirection="row">
+        <VisibilitySettings mr={3} />
+        <NavigationSettings />
       </Box>
     </Box>
   );
