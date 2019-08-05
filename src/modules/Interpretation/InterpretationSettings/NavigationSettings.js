@@ -24,10 +24,10 @@ export default function NavigationSettings(props) {
   }, [setSelectedMd, logs, selectedWellLog]);
 
   const selectPrev = useCallback(() => {
-    const next = findLast(logs, l => l.endmd < selectedWellLog.endmd);
+    const prev = findLast(logs, l => l.endmd < selectedWellLog.endmd);
 
-    if (next) {
-      setSelectedMd(next.endmd);
+    if (prev) {
+      setSelectedMd(prev.endmd);
     }
   }, [setSelectedMd, logs, selectedWellLog]);
 
