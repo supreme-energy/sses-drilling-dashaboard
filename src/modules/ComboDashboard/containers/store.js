@@ -1,10 +1,18 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
 
+export const surveyVisibility = {
+  ALL: "all",
+  CURRENT: "current",
+  PREVIOUS_MD: "previousMd"
+};
+
 const initialState = {
   selectedMd: null,
   pendingSegmentsState: {},
-  draftMode: false
+  draftMode: false,
+  surveyVisibility: surveyVisibility.ALL,
+  surveyPrevVisibility: 500
 };
 
 const initialPendingState = {};
@@ -87,6 +95,19 @@ function comboStoreReducer(state, action) {
       }
 
       return updateSegmentProperties(state, selectedMd, props);
+    }
+    case "CHANGE_INTERPRETATION_SURVEY_VISIBILITY": {
+      return {
+        ...state,
+        surveyVisibility: action.surveyVisibility
+      };
+    }
+
+    case "CHANGE_INTERPRETATION_SURVEY_PREV_VISIBILITY": {
+      return {
+        ...state,
+        surveyPrevVisibility: action.surveyPrevVisibility
+      };
     }
     default:
       throw new Error("action not defined for combo store reducer");

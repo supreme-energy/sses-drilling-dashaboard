@@ -29,7 +29,7 @@ function DraftLineInit({ logData, width, xMin, bias }) {
   return null;
 }
 
-function LogData({ logData, draft, ...props }) {
+function LogData({ logData, draft, range, ...props }) {
   const { scalebias: bias, scalefactor: scale } = logData.draftData || logData;
 
   const [xMin, xMax] = useMemo(() => getExtent(logData), [logData]);
@@ -40,15 +40,30 @@ function LogData({ logData, draft, ...props }) {
   const x = bias + xMin - (computedWidth - width) / 2 - xMin * scale;
   const pixiScale = useMemo(() => ({ y: 1, x: scale || 1 }), [scale]);
 
+  const filteredLogData = useMemo(() => {
+    if (!range) {
+      return logData.data;
+    }
+    const [startMd, endMd] = range;
+
+    // some logs start after or before our range so we don't include them and not filter either
+    const shouldBeIncluded = logData.endmd >= startMd && logData.startmd <= endMd;
+    return range
+      ? shouldBeIncluded
+        ? logData.data.filter(d => d.md >= range[0] && d.md <= range[1])
+        : []
+      : logData.data;
+  }, [logData, range]);
+
   return (
     <React.Fragment>
-      <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={logData.data} />
+      <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} />
       {draft && <DraftLineInit logData={logData} width={width} xMin={xMin} bias={bias} />}
     </React.Fragment>
   );
 }
 
-function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, ...props }) {
+function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, range }) {
   const logData = useGetComputedLogData(wellId, log, draft);
 
   // we need to call refresh after log data is loaded to redraw
@@ -58,6 +73,7 @@ function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh
 
   return logData ? (
     <LogData
+      range={range}
       color={draft ? draftColor : selected ? selectionColor : logColor}
       draft={draft}
       logData={logData}

@@ -26,7 +26,7 @@ export default function Formations({ container, width }) {
   const formations = useMemo(
     () =>
       formationsData.reduce((acc, item, index) => {
-        if (index <= formationsData.length - 2) {
+        if (item.data && item.data.length && index <= formationsData.length - 2) {
           const nextItem = formationsData[index + 1];
           acc.push({
             y: item.data[0].tot,
@@ -43,5 +43,6 @@ export default function Formations({ container, width }) {
       }, []),
     [formationsData]
   );
+
   return formations.map(f => <Formation container={container} width={width} {...f} key={f.id} />);
 }
