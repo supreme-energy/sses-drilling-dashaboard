@@ -8,7 +8,8 @@ import { NORMAL } from "../../../../constants/crossSectionModes";
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
-  const { width, height } = props;
+  const { width, height, viewDirection } = props;
+  console.log(viewDirection);
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
@@ -82,7 +83,8 @@ const CrossSection = props => {
       mode,
       setMode,
       mouse,
-      setMouse
+      setMouse,
+      viewDirection
     });
   }, [
     view.x,
@@ -105,7 +107,8 @@ const CrossSection = props => {
     mode,
     setMode,
     mouse,
-    setMouse
+    setMouse,
+    viewDirection
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

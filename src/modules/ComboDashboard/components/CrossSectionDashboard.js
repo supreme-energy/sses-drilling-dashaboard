@@ -1,10 +1,12 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import TableChartIcon from "../../../assets/tableChart.svg";
 import IconButton from "@material-ui/core/IconButton";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import TableChartIcon from "../../../assets/tableChart.svg";
 
 import WidgetCard from "../../../components/WidgetCard";
 import classes from "./ComboDashboard.scss";
@@ -16,13 +18,24 @@ import CrossSection from "./CrossSection/index";
 export const CrossSectionDashboard = ({ className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
+  const [viewDirection, setViewDirection] = useState(0);
 
   return (
     <WidgetCard className={classNames(classes.crossSectionDash, className)} title="Cross Section" hideMenu>
+      <Tabs
+        className={classes.tabs}
+        value={viewDirection}
+        onChange={(e, v) => setViewDirection(v)}
+        indicatorColor="primary"
+        textColor="primary"
+      >
+        <Tab label="Vertical" className={classes.tab} />
+        <Tab label="Horizontal" className={classes.tab} />
+      </Tabs>
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <div className={classNames(classes.column, classes.grow)}>
           <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
-            {({ width, height }) => <CrossSection width={width} height={height} />}
+            {({ width, height }) => <CrossSection width={width} height={height} viewDirection={viewDirection} />}
           </ParentSize>
         </div>
         <div className={classes.cardLine} />
