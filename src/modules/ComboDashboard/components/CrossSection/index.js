@@ -25,6 +25,18 @@ const CrossSection = props => {
     calculatedFormations
   } = dataObj;
 
+  const [xField, yField] = useMemo(() => {
+    if (viewDirection === HORIZONTAL) {
+      return ["ew", "ns"];
+    } else {
+      return ["vs", "tvd"];
+    }
+  }, [viewDirection]);
+
+  const yAxisDirection = useMemo(() => {
+    return viewDirection ? -1 : 1;
+  }, [viewDirection]);
+
   const [view, updateView] = useReducer(
     function(state, arg) {
       if (typeof arg === "function") {
@@ -41,6 +53,11 @@ const CrossSection = props => {
     }
   );
 
+  useEffect(() => {
+    // TODO: Calculate the x/y and zoom to fit the new data view
+    updateView({});
+  }, [xField, yField]);
+
   const [mouse, setMouse] = useState({
     x: 0,
     y: 0
@@ -48,19 +65,11 @@ const CrossSection = props => {
 
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
-  const [xField, yField] = useMemo(() => {
-    if (viewDirection === HORIZONTAL) {
-      return ["ew", "ns"];
-    } else {
-      return ["vs", "tvd"];
-    }
-  }, [viewDirection]);
-
   useEffect(() => {
     const currentCanvas = canvas.current;
 
     pixiApp.init(
-      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, xField, yField },
+      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, xField, yField, yAxisDirection },
       view,
       updateView
     );
@@ -98,7 +107,8 @@ const CrossSection = props => {
       setMouse,
       xField,
       yField,
-      viewDirection
+      viewDirection,
+      yAxisDirection
     });
   }, [
     view.x,
@@ -124,7 +134,8 @@ const CrossSection = props => {
     setMouse,
     xField,
     yField,
-    viewDirection
+    viewDirection,
+    yAxisDirection
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

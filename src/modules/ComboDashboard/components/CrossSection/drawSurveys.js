@@ -42,7 +42,7 @@ export function drawSurveys(container) {
   }
 
   return function(props) {
-    const { calcSections, scale, xField, yField } = props;
+    const { calcSections, scale, xField, yField, yAxisDirection } = props;
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
@@ -51,15 +51,15 @@ export function drawSurveys(container) {
     }
     const surveys = calcSections.filter(s => s.isSurvey);
     if (surveys.length > 1) {
-      redrawLine(surveys, scale, widePath, 6, 0x333333, xField, yField);
-      redrawLine(surveys, scale, narrowPath, 2, 0xffffff, xField, yField);
+      redrawLine(surveys, scale, widePath, 6, 0x333333, xField, yField * yAxisDirection);
+      redrawLine(surveys, scale, narrowPath, 2, 0xffffff, xField, yField * yAxisDirection);
     }
 
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
       surveyGraphics[i].position.x = calcSections[i][xField];
-      surveyGraphics[i].position.y = calcSections[i][yField];
+      surveyGraphics[i].position.y = calcSections[i][yField] * yAxisDirection;
       surveyGraphics[i].texture = getTexture(calcSections[i]);
       surveyGraphics[i].visible = true;
     }
