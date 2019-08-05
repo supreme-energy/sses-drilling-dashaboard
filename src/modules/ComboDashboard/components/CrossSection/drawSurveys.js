@@ -26,11 +26,11 @@ export function drawSurveys(container) {
     return icon;
   };
 
-  function redrawLine(surveys, scale, line, width, color) {
+  function redrawLine(surveys, scale, line, width, color, xField, yField) {
     line.clear().lineStyle(width, color, 1);
-    line.moveTo(...scale(surveys[0].vs, surveys[0].tvd));
+    line.moveTo(...scale(surveys[0][xField], surveys[0][yField]));
     for (let i = 1; i < surveys.length; i++) {
-      line.lineTo(...scale(surveys[i].vs, surveys[i].tvd));
+      line.lineTo(...scale(surveys[i][xField], surveys[i][yField]));
     }
   }
 
@@ -42,7 +42,7 @@ export function drawSurveys(container) {
   }
 
   return function(props) {
-    const { calcSections, scale } = props;
+    const { calcSections, scale, xField, yField } = props;
     widePath.clear();
     narrowPath.clear();
     surveyGraphics.forEach(g => (g.visible = false));
@@ -51,15 +51,15 @@ export function drawSurveys(container) {
     }
     const surveys = calcSections.filter(s => s.isSurvey);
     if (surveys.length > 1) {
-      redrawLine(surveys, scale, widePath, 6, 0x333333);
-      redrawLine(surveys, scale, narrowPath, 2, 0xffffff);
+      redrawLine(surveys, scale, widePath, 6, 0x333333, xField, yField);
+      redrawLine(surveys, scale, narrowPath, 2, 0xffffff, xField, yField);
     }
 
     for (let i = 0; i < calcSections.length; i++) {
       if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
 
-      surveyGraphics[i].position.x = calcSections[i].vs;
-      surveyGraphics[i].position.y = calcSections[i].tvd;
+      surveyGraphics[i].position.x = calcSections[i][xField];
+      surveyGraphics[i].position.y = calcSections[i][yField];
       surveyGraphics[i].texture = getTexture(calcSections[i]);
       surveyGraphics[i].visible = true;
     }

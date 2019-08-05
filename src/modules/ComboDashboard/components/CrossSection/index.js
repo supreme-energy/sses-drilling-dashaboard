@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
+import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
 
 const pixiApp = new PixiCrossSection();
 
@@ -47,10 +48,22 @@ const CrossSection = props => {
 
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
+  const [xField, yField] = useMemo(() => {
+    if (viewDirection === HORIZONTAL) {
+      return ["ew", "ns"];
+    } else {
+      return ["vs", "tvd"];
+    }
+  }, [viewDirection]);
+
   useEffect(() => {
     const currentCanvas = canvas.current;
 
-    pixiApp.init({ ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse }, view, updateView);
+    pixiApp.init(
+      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, xField, yField },
+      view,
+      updateView
+    );
     currentCanvas.appendChild(pixiApp.renderer.view);
     return () => {
       pixiApp.cleanUp();
@@ -83,6 +96,8 @@ const CrossSection = props => {
       setMode,
       mouse,
       setMouse,
+      xField,
+      yField,
       viewDirection
     });
   }, [
@@ -107,6 +122,8 @@ const CrossSection = props => {
     setMode,
     mouse,
     setMouse,
+    xField,
+    yField,
     viewDirection
   ]);
 
@@ -115,7 +132,8 @@ const CrossSection = props => {
 
 CrossSection.propTypes = {
   width: PropTypes.number,
-  height: PropTypes.number
+  height: PropTypes.number,
+  viewDirection: PropTypes.number
 };
 
 export default CrossSection;

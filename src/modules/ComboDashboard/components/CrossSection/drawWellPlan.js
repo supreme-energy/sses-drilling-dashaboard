@@ -9,12 +9,12 @@ export function drawWellPlan(container) {
   return update;
 
   function update(props) {
-    const { wellPlan, scale } = props;
+    const { wellPlan, scale, xField, yField } = props;
     if (wellPlan.length === 0 || !line.transform) return;
     line.clear().lineStyle(3, 0x44ff44, 1);
-    line.moveTo(...scale(wellPlan[0].vs, wellPlan[0].tvd));
+    line.moveTo(...scale(wellPlan[0][xField], wellPlan[0][yField]));
     for (let i = 1; i < wellPlan.length; i++) {
-      line.lineTo(...scale(wellPlan[i].vs, wellPlan[i].tvd));
+      line.lineTo(...scale(wellPlan[i][xField], wellPlan[i][yField]));
     }
   }
 }

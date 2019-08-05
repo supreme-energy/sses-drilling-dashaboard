@@ -7,6 +7,7 @@ import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 import { drawButtons } from "./drawButtons";
+import { HORIZONTAL, VERTICAL } from "../../../../constants/crossSectionViewDirection";
 
 export default class PixiCrossSection {
   constructor() {
@@ -120,16 +121,27 @@ export default class PixiCrossSection {
     );
   }
   update(props) {
-    const { width, height, view } = props;
+    const { width, height, view, viewDirection } = props;
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-    this.formationsUpdate(props);
+    if (viewDirection === VERTICAL) {
+      this.formationsLayer.visible = true;
+      this.UILayer.visible = true;
+      this.UILayer2.visible = true;
+
+      this.formationsUpdate(props);
+      this.sectionUpdate(props);
+      this.buttonUpdate(props);
+      this.interactivePAUpdate(props);
+    } else {
+      this.formationsLayer.visible = false;
+      this.UILayer.visible = false;
+      this.UILayer2.visible = false;
+    }
+
     this.wellPlanUpdate(props);
     this.surveyUpdate(props);
-    this.sectionUpdate(props);
-    this.buttonUpdate(props);
-    this.interactivePAUpdate(props);
     this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;
   }
