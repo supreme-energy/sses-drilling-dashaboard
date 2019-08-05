@@ -8,6 +8,7 @@ import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 import { drawButtons } from "./drawButtons";
 import { VERTICAL } from "../../../../constants/crossSectionViewDirection";
+import { drawCompass } from "./drawCompass";
 
 export default class PixiCrossSection {
   constructor() {
@@ -31,6 +32,7 @@ export default class PixiCrossSection {
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer2 = this.viewport.addChild(new PIXI.Container());
+    this.compassLayer = this.viewport.addChild(new PIXI.Container());
 
     this.makeInteractive(this.stage);
   }
@@ -52,6 +54,7 @@ export default class PixiCrossSection {
       gutterLeft: gridGutterLeft,
       maxYLines: this.yTicks
     });
+    this.compassUpdate = drawCompass(this.compassLayer);
 
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.Ticker.shared;
@@ -129,6 +132,7 @@ export default class PixiCrossSection {
       this.formationsLayer.visible = true;
       this.UILayer.visible = true;
       this.UILayer2.visible = true;
+      this.compassLayer.visible = false;
 
       this.formationsUpdate(props);
       this.sectionUpdate(props);
@@ -138,6 +142,9 @@ export default class PixiCrossSection {
       this.formationsLayer.visible = false;
       this.UILayer.visible = false;
       this.UILayer2.visible = false;
+      this.compassLayer.visible = true;
+
+      this.compassUpdate(props);
     }
 
     this.wellPlanUpdate(props);
@@ -156,5 +163,6 @@ export default class PixiCrossSection {
     removeAllChildren(this.UILayer);
     removeAllChildren(this.UILayer2);
     removeAllChildren(this.gridLayer);
+    removeAllChildren(this.compassLayer);
   }
 }
