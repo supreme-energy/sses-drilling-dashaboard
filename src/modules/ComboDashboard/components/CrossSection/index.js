@@ -9,7 +9,6 @@ const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
   const { width, height, viewDirection } = props;
-  console.log(viewDirection);
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
