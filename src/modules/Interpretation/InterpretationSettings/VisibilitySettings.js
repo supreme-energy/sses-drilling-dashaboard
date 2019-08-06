@@ -1,9 +1,9 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Typography, Tabs, Tab, Box, TextField } from "@material-ui/core";
 import css from "./styles.scss";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../../ComboDashboard/containers/store";
 
-function PreviousInput({ onClick, test, surveyVisibility, surveyPrevVisibility, dispatch }) {
+const PreviousInput = forwardRef(({ onClick, test, surveyVisibility, surveyPrevVisibility, dispatch }, _) => {
   const selected = surveyVisibility === visibilityOptions.PREVIOUS_MD;
 
   return (
@@ -24,7 +24,8 @@ function PreviousInput({ onClick, test, surveyVisibility, surveyPrevVisibility, 
       />
     </Box>
   );
-}
+});
+
 export default function VisibilitySettings(props) {
   const [{ surveyVisibility, surveyPrevVisibility }, dispatch] = useComboContainer();
 
