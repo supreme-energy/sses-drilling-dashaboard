@@ -39,9 +39,9 @@ export default class PixiCrossSection {
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 100;
-    const gridGutterLeft = 50;
+    const gridGutterLeft = 40;
     const tagHeight = 75;
-    this.yTicks = 30;
+    this.yTicks = 20;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
@@ -52,7 +52,8 @@ export default class PixiCrossSection {
     this.gridUpdate = drawGrid(this.gridLayer, {
       gutter: gridGutter,
       gutterLeft: gridGutterLeft,
-      maxYLines: this.yTicks
+      maxYLines: this.yTicks,
+      fontSize: 13
     });
     this.compassUpdate = drawCompass(this.compassLayer);
 
