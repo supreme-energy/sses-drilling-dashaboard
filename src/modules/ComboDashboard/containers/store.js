@@ -123,7 +123,7 @@ function useUseComboStore() {
 }
 
 export function useAddProjection() {
-  const [state, dispatch] = useUseComboStore();
+  const [, dispatch] = useUseComboStore();
   const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
   const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
     dispatch
