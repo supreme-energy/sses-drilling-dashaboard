@@ -26,11 +26,11 @@ export function drawSurveys(container) {
     return icon;
   };
 
-  function redrawLine(surveys, scale, line, width, color, xField, yField) {
+  function redrawLine(surveys, scale, line, width, color, xField, yField, yDirection) {
     line.clear().lineStyle(width, color, 1);
-    line.moveTo(...scale(surveys[0][xField], surveys[0][yField]));
+    line.moveTo(...scale(surveys[0][xField], surveys[0][yField] * yDirection));
     for (let i = 1; i < surveys.length; i++) {
-      line.lineTo(...scale(surveys[i][xField], surveys[i][yField]));
+      line.lineTo(...scale(surveys[i][xField], surveys[i][yField] * yDirection));
     }
   }
 
@@ -51,8 +51,8 @@ export function drawSurveys(container) {
     }
     const surveys = calcSections.filter(s => s.isSurvey);
     if (surveys.length > 1) {
-      redrawLine(surveys, scale, widePath, 6, 0x333333, xField, yField * yAxisDirection);
-      redrawLine(surveys, scale, narrowPath, 2, 0xffffff, xField, yField * yAxisDirection);
+      redrawLine(surveys, scale, widePath, 6, 0x333333, xField, yField, yAxisDirection);
+      redrawLine(surveys, scale, narrowPath, 2, 0xffffff, xField, yField, yAxisDirection);
     }
 
     for (let i = 0; i < calcSections.length; i++) {
