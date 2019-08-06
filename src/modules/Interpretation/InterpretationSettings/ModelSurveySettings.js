@@ -4,14 +4,14 @@ import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
 import { useSelectedSegmentState } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { EMPTY_FIELD } from "../../../constants/format";
+import { EMPTY_FIELD, twoDecimals } from "../../../constants/format";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
     <Box display="flex" flexDirection="row" mr={2}>
       <TextField
         disabled={disabled}
-        value={Number.isNaN(value) ? EMPTY_FIELD : value}
+        value={Number.isNaN(value) ? EMPTY_FIELD : twoDecimals(value)}
         onChange={e => onChange(e.target.value)}
         type="number"
         placeholder={EMPTY_FIELD}
