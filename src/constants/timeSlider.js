@@ -1,4 +1,4 @@
-import { SURFACE, CURVE, INTERMEDIATE, LATERAL, DRILLOUT } from "./wellSections";
+import { SURFACE, CURVE, INTERMEDIATE, LATERAL, DRILLOUT, ALL } from "./wellSections";
 import { GREEN, GRAY } from "./colors";
 
 // Map callbacks for graphs
@@ -49,6 +49,12 @@ export const ZOOM_IN = "ZOOM IN";
 export const ZOOM_OUT = "ZOOM OUT";
 
 export const COLOR_BY_PHASE_VIEWER = {
+  [ALL]: {
+    top: GREEN,
+    curve: GREEN,
+    lateral: GREEN,
+    graphs: [SLIDE, CONNECTION, ROP]
+  },
   [SURFACE]: {
     top: GREEN,
     curve: GRAY,

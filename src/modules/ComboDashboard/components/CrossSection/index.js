@@ -22,7 +22,8 @@ const CrossSection = props => {
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
-    calculatedFormations
+    calculatedFormations,
+    addProjection
   } = dataObj;
 
   const [xField, yField] = useMemo(() => {
@@ -108,7 +109,8 @@ const CrossSection = props => {
       xField,
       yField,
       viewDirection,
-      yAxisDirection
+      yAxisDirection,
+      addProjection
     });
   }, [
     view.x,
@@ -135,7 +137,8 @@ const CrossSection = props => {
     xField,
     yField,
     viewDirection,
-    yAxisDirection
+    yAxisDirection,
+    addProjection
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
