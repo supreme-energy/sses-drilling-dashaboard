@@ -17,7 +17,7 @@
   .viewport {
     display: flex;
     flex-direction: column;
-    height: calc(100% - #{$header-height});
+    height: calc(100% - #{$header-height} - 10px);
     top: $header-height;
     position: relative;
   }
