@@ -50,7 +50,7 @@ function PixiMarker({ container, x, y, url, updateTransform, rotation, anchor, s
       marker.x = x;
       marker.y = y;
     },
-    [x, y, anchor, rotation, marker]
+    [x, y, anchor, rotation, marker, scale]
   );
 
   useImperativeHandle(ref, () => ({
