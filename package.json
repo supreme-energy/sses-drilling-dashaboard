@@ -12,7 +12,7 @@
     "start": "cross-env NODE_ENV=development node build/scripts/start",
     "test": "jest",
     "uploadDev": "node scripts/s3-deploy dist expero sses-drilling-dashboard.experolabs.com 'dev' false",
-    "uploadMaster": "node scripts/s3-deploy dist expero sses-drilling-dashboard.experolabs.com 'master' false",
+    "uploadMaster": "node scripts/s3-deploy dist expero sses-drilling-dashboard.experolabs.com '' false",
     "deploy": "npm run build && npm run upload",
     "test:watch": "npm test -- --watch",
     "lint": "eslint .",

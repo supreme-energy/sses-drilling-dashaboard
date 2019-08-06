@@ -209,6 +209,10 @@ export function useSelectedSurvey() {
 
 export function useComputedFormations(formations) {
   const computedSurveys = useComputedSurveys();
+
+  // todo if we want formations to appear right after user click to add PA point we need to
+  // compute formations for pending projections here
+
   const computedFormations = useMemo(
     () =>
       formations.map(f => {

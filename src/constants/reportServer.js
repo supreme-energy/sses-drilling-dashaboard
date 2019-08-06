@@ -1,5 +1,5 @@
 export const PERSONNEL = {
-  field: "personnel",
+  field: "cat",
   label: "Personnel"
 };
 
@@ -9,7 +9,7 @@ export const NAME = {
 };
 
 export const EMAIL = {
-  field: "email_address",
+  field: "email",
   label: "Email Address"
 };
 
@@ -29,4 +29,23 @@ export const INITIAL_MAILING_LIST_STATE = {
   [PHONE.field]: "",
   [EMAIL.field]: "",
   [REPORTS.field]: ""
+};
+
+export const REPORT_LIST = {
+  "Combo Dashboard": false,
+  "Structural Guidance": false,
+  "Drilling Analytics": false,
+  "Directional Guidance": false,
+  "Key Performance Indicator": false,
+  "Survey Sheet": false,
+  "Lateral Plot (Only)": false,
+  "Horizontal Plot (Only)": false,
+  "LAS Data": false,
+  '1" MD Logs': false,
+  '2" MD Logs': false,
+  '5" MD Logs': false,
+  '1" TVD Logs': false,
+  '2" TVD Logs': false,
+  '5" TVD Logs': false,
+  allReportsSelected: false
 };
