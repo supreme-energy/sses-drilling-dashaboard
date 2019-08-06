@@ -21,7 +21,8 @@ const CrossSection = props => {
     ghostDiff,
     ghostDiffDispatch,
     calcSections,
-    calculatedFormations
+    calculatedFormations,
+    addProjection
   } = dataObj;
 
   const [view, updateView] = useReducer(
@@ -82,7 +83,8 @@ const CrossSection = props => {
       mode,
       setMode,
       mouse,
-      setMouse
+      setMouse,
+      addProjection
     });
   }, [
     view.x,
@@ -105,7 +107,8 @@ const CrossSection = props => {
     mode,
     setMode,
     mouse,
-    setMouse
+    setMouse,
+    addProjection
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

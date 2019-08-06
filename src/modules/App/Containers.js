@@ -16,7 +16,7 @@ import usePrevious from "react-use/lib/usePrevious";
 import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
 import { ALL } from "../../constants/wellSections";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
-import { useComboContainer } from "../ComboDashboard/containers/store";
+import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations } from "../Interpretation/selectors";
 
 const filterDataToInterval = memoize((data, interval) => {
@@ -193,7 +193,9 @@ function useProjectionsData() {
     }
   }, []);
 
-  const [projections, refreshProjections, saveProjections, deleteProjection] = useFetchProjections(wellId);
+  const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
+    wellId
+  );
 
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
@@ -205,7 +207,7 @@ function useProjectionsData() {
     }
   }, [projections]);
 
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection };
+  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
 }
 
 function useFormationsData() {
@@ -329,7 +331,11 @@ export function useCrossSectionData() {
       });
     }
   }, [selectedSections, rawSections]);
+
+  const addProjection = useAddProjection();
+
   return {
+    addProjection,
     wellPlan,
     selectedSections,
     setSelectedMd,

@@ -5,6 +5,8 @@ import addCircleSVG from "../../../../assets/addCircle.svg";
 import checkCircleSVG from "../../../../assets/checkCircle.svg";
 import trashCircleSVG from "../../../../assets/deleteForever.svg";
 import { ADD_PA_STATION, NORMAL } from "../../../../constants/crossSectionModes";
+import pick from "lodash/pick";
+import mapKeys from "lodash/mapKeys";
 
 function addButton(container, texture) {
   const button = container.addChild(new PIXI.Sprite(texture));
@@ -95,7 +97,22 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   function updateMouse(e) {
     setMouse({ ...e.data.global });
   }
+
+  let latestProps = props;
   function stageClick(e) {
+    const { calcSections } = latestProps;
+    const lastSection = calcSections[calcSections.length - 1];
+    const prevSection = calcSections[calcSections.length - 2];
+    // we need to figure out how to compute next PA point md, the way is computed bellow is not correct
+    const newMd = lastSection.md + lastSection.md - prevSection.md;
+
+    latestProps.addProjection({
+      ...pick(lastSection, ["method", "inc", "azm", "dip", "fault", "tvd", "tot", "bot"]),
+      id: "pendingAddPA",
+      md: newMd,
+      vs: (latestProps.mouse.x - latestProps.view.x) / latestProps.view.xScale,
+      ...mapKeys(pick(prevSection, ["md", "inc", "azm", "tvd", "ca", "cd"]), (value, key) => `p${key}`)
+    });
     setMode(NORMAL);
     mouseListener.off("mousemove", updateMouse);
     stage.off("click", stageClick);
@@ -105,7 +122,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
 
   return function update(props) {
     const { height, mode, calcSections, selectedSections, mouse, view } = props;
-
+    latestProps = props;
     if (!container.transform) return;
     if (!calcSections.length) return;
 
