@@ -129,7 +129,6 @@ export function useAddProjection() {
     dispatch
   ]);
   const { addProjection: saveProjection } = useProjectionsDataContainer();
-  console.log("pending", state.pendingProjectionsByMD);
   const { refreshFormations } = useFormationsDataContainer();
 
   return useCallback(
