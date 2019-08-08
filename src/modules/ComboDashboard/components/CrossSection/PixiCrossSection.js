@@ -7,6 +7,8 @@ import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
 import { drawButtons } from "./drawButtons";
+import { VERTICAL } from "../../../../constants/crossSectionViewDirection";
+import { drawCompass } from "./drawCompass";
 
 export default class PixiCrossSection {
   constructor() {
@@ -30,15 +32,16 @@ export default class PixiCrossSection {
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer2 = this.viewport.addChild(new PIXI.Container());
+    this.compassLayer = this.viewport.addChild(new PIXI.Container());
 
     this.makeInteractive(this.stage);
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
     const gridGutter = 100;
-    const gridGutterLeft = 50;
+    const gridGutterLeft = 40;
     const tagHeight = 75;
-    this.yTicks = 12;
+    this.yTicks = 20;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
@@ -49,8 +52,10 @@ export default class PixiCrossSection {
     this.gridUpdate = drawGrid(this.gridLayer, {
       gutter: gridGutter,
       gutterLeft: gridGutterLeft,
-      maxYLines: this.yTicks
+      maxYLines: this.yTicks,
+      fontSize: 13
     });
+    this.compassUpdate = drawCompass(this.compassLayer);
 
     // The ticker is used for render timing, what's done on each frame, etc
     this.ticker = PIXI.Ticker.shared;
@@ -120,16 +125,31 @@ export default class PixiCrossSection {
     );
   }
   update(props) {
-    const { width, height, view } = props;
+    const { width, height, view, viewDirection } = props;
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-    this.formationsUpdate(props);
+    if (viewDirection === VERTICAL) {
+      this.formationsLayer.visible = true;
+      this.UILayer.visible = true;
+      this.UILayer2.visible = true;
+      this.compassLayer.visible = false;
+
+      this.formationsUpdate(props);
+      this.sectionUpdate(props);
+      this.buttonUpdate(props);
+      this.interactivePAUpdate(props);
+    } else {
+      this.formationsLayer.visible = false;
+      this.UILayer.visible = false;
+      this.UILayer2.visible = false;
+      this.compassLayer.visible = true;
+
+      this.compassUpdate(props);
+    }
+
     this.wellPlanUpdate(props);
     this.surveyUpdate(props);
-    this.sectionUpdate(props);
-    this.buttonUpdate(props);
-    this.interactivePAUpdate(props);
     this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;
   }
@@ -144,5 +164,6 @@ export default class PixiCrossSection {
     removeAllChildren(this.UILayer);
     removeAllChildren(this.UILayer2);
     removeAllChildren(this.gridLayer);
+    removeAllChildren(this.compassLayer);
   }
 }

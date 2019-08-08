@@ -152,7 +152,7 @@ function drawGrid(container, options = {}) {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
-    const { width, height, view } = props;
+    const { width, height, view, yAxisDirection = 1 } = props;
     const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
@@ -204,7 +204,7 @@ function drawGrid(container, options = {}) {
 
         if (showYAxis) {
           yLabels[i].y = pos;
-          yLabels[i].text = `${pos}`;
+          yLabels[i].text = `${yAxisDirection * pos}`;
           yLabels[i].visible = true;
         }
       }
