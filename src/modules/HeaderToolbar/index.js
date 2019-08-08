@@ -56,7 +56,7 @@ HeaderToolbar.propTypes = {
 
 export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) {
   return (
-    <div>
+    <React.Fragment>
       <Route
         path="/:wellId/:page"
         exact
@@ -64,7 +64,7 @@ export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) 
         history={history}
       />
       <div className={classes.viewport}>{children}</div>
-    </div>
+    </React.Fragment>
   );
 }
 
