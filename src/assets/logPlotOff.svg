@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 55.2 (78181) - https://sketchapp.com -->
+    <title>AB9D6E86-32C8-4A13-9125-11E6AA088CA0</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <path d="M10.5712512,10.7524618 L11.1777232,11.1026086 L16.4077035,14.122139 L21.160254,16.8660254 L20.160254,18.5980762 L13.5194086,14.7639823 L11.8059566,15.1447495 L16.6919572,16.7734163 L12.75,19.4013878 L12.75,22 L11.25,22 L11.25,18.5986122 L13.3080428,17.2265837 L6.19404338,14.8552505 L11.5976433,13.6544506 L9.25724129,12.3032189 L2.06920966,11.1052136 L5.76119101,10.2847733 L1.97372056,8.09807621 L2.97372056,6.3660254 L8.64948582,9.64293 L10.5712512,10.7524618 Z M16.8010329,12.0398268 L21.9307903,12.8947864 L19.2959983,13.4802958 L16.8010329,12.0398268 Z M11.5377806,9.00108671 L12.1940434,8.85525054 L10.0436613,8.13845651 L7.84464097,6.86885154 L11.25,4.59861218 L11.25,2 L12.75,2 L12.75,5.40138782 L10.6919572,6.77341633 L17.8059566,9.14474946 L13.459546,10.1106185 L11.5377806,9.00108671 Z" id="path-1"></path>
+    </defs>
+    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-74.000000, -495.000000)" id="Icon-/-Log-Plot-Off">
+            <g transform="translate(72.000000, 493.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Combined-Shape" fill-rule="nonzero"></g>
+                <g id="↳-Icon-Color" mask="url(#mask-2)" fill="#000000" fill-opacity="0.54">
+                    <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

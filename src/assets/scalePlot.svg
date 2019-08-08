@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="6px" viewBox="0 0 22 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 55.2 (78181) - https://sketchapp.com -->
+    <title>1B1F711A-BDEA-4D9D-A64A-3FA752F5A9CD</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <path d="M1,9 L3,9 L3,15 L1,15 L1,9 Z M6.5,9.5 L17.5,9.5 C18.8807119,9.5 20,10.6192881 20,12 C20,13.3807119 18.8807119,14.5 17.5,14.5 L6.5,14.5 C5.11928813,14.5 4,13.3807119 4,12 C4,10.6192881 5.11928813,9.5 6.5,9.5 Z M21,9 L23,9 L23,15 L21,15 L21,9 Z" id="path-1"></path>
+    </defs>
+    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-110.000000, -502.000000)" id="Icon-/-Scale-Plot">
+            <g transform="translate(109.000000, 493.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Combined-Path" fill-rule="nonzero"></g>
+                <g id="↳-Color" mask="url(#mask-2)" fill="#000000" fill-opacity="0.54">
+                    <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

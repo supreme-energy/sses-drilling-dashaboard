@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 55.2 (78181) - https://sketchapp.com -->
+    <title>00218A5C-8799-4483-9062-F528C369A6AB</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <polygon id="path-1" points="11.25 4.59861218 7.30804277 7.22658367 12.1940434 8.85525054 2.06920966 11.1052136 14.0692097 13.1052136 6.19404338 14.8552505 13.3080428 17.2265837 11.25 18.5986122 11.25 22 12.75 22 12.75 19.4013878 16.6919572 16.7734163 11.8059566 15.1447495 21.9307903 12.8947864 9.93079034 10.8947864 17.8059566 9.14474946 10.6919572 6.77341633 12.75 5.40138782 12.75 2 11.25 2"></polygon>
+    </defs>
+    <g id="SSES-Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-38.000000, -495.000000)" id="Icon-/-Log-Plot">
+            <g transform="translate(36.000000, 493.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Path" fill-rule="nonzero"></g>
+                <g id="↳-Icon-Color" mask="url(#mask-2)" fill="#000000" fill-opacity="0.54">
+                    <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
