@@ -180,13 +180,13 @@ function projtma(proposedAzm, survey, prevSurveys) {
   }
 }
 
-function projtva(proposedAzm, prevSurveys, survey, method) {
+function projtva(proposedAzm, prevSurveys, survey) {
   const otherInputs = {};
 
   let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
     ...prevSurveys[prevSurveys.length - 1]
   };
-  let { tvd, azm, vs, tot, pos, dip, fault } = {
+  let { tvd, azm, vs, tot, pos, dip, fault, method } = {
     ...survey
   };
 
@@ -342,7 +342,7 @@ function calcLastDogleg(proposedAzm, surveys, surveyIndex, prevSurveys, project)
 
 /* **************** Method Calculations ***************** */
 // Caculates
-export function useMethodCalculations(method, selectedSurveyIndex) {
+export function useMethodCalculations(selectedSurveyIndex) {
   // Not sure that this project const is needed anymore
   const project = "ahead";
   let proposedAzm = 0;
@@ -361,7 +361,7 @@ export function useMethodCalculations(method, selectedSurveyIndex) {
 
   return surveysToRecalculate.reduce((acc, survey, index) => {
     let result;
-    switch (method) {
+    switch (survey.method) {
       case "0":
         // last dogleg
         result = calcLastDogleg(proposedAzm, survey, index, acc, project);
@@ -386,15 +386,15 @@ export function useMethodCalculations(method, selectedSurveyIndex) {
         break;
       case "6":
         // Input TVD/VS
-        result = projtva(proposedAzm, acc, survey, method);
+        result = projtva(proposedAzm, acc, survey);
         break;
       case "7":
         // Input TOT/POS/VS
-        result = projtva(proposedAzm, acc, survey, method);
+        result = projtva(proposedAzm, acc, survey);
         break;
       case "8":
         // Input DIP/FAULT/POS/VS
-        result = projtva(proposedAzm, acc, survey, method);
+        result = projtva(proposedAzm, acc, survey);
         break;
     }
     // Merge survey with result
