@@ -64,13 +64,13 @@ export function useFilteredWellData() {
   const { wellId } = useWellIdContainer();
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
-  const { surveysData } = useSurveysDataContainer();
+  const { surveys } = useSurveysDataContainer();
   const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
   const wellPlanFiltered = filterDataToInterval(wellPlan, sliderInterval);
-  const surveysFiltered = filterDataToInterval(surveysData, sliderInterval);
+  const surveysFiltered = filterDataToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
   const formationsFiltered = formationsData.map(f => {
     return {
@@ -168,18 +168,10 @@ function useWellId(initialState) {
 
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
-  const [surveysData, setSurveys] = useState([]);
 
   const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (surveys && surveys.length) {
-      setSurveys(surveys);
-    }
-  }, [surveys, setSurveys]);
-
-  return { surveysData, setSurveys, updateSurvey, surveys };
+  return { updateSurvey, surveys };
 }
 
 function useProjectionsData() {
