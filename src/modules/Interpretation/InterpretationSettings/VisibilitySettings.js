@@ -49,7 +49,6 @@ export default function VisibilitySettings({ className }) {
           <Tab label={"CURR"} value={visibilityOptions.CURRENT} className={css.tab} />
           <Tab
             label={"CURR"}
-            test="lala"
             value={visibilityOptions.PREVIOUS_MD}
             component={PreviousInput}
             className={css.tab}
