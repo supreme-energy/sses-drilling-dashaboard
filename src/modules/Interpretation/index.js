@@ -10,6 +10,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import { useComboContainer } from "../ComboDashboard/containers/store";
+import SelectionStatsContainer from "./SelectionStats";
 
 function Interpretation({
   match: {
@@ -27,6 +28,7 @@ function Interpretation({
   return (
     <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
       <Typography variant="subtitle1">Interpretation</Typography>
+      <SelectionStatsContainer />
       <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle2">Draft Current</Typography>
         <FormControlLabel

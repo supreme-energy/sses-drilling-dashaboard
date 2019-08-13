@@ -201,12 +201,13 @@ export function useComputedSegments() {
   return getComputedSegments(logList, pendingSegmentsState, draftMode);
 }
 
-export function useGetComputedLogData(wellId, log, draft) {
+export function useGetComputedLogData(log, draft) {
+  const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, log && log.tablename);
   const { byId: draftLogsById } = useComputedDraftSegments();
   const [computedSegments] = useComputedSegments();
   const [logList] = useWellLogsContainer();
-  const logIndex = logList.findIndex(l => l.id === log.id);
+  const logIndex = log ? logList.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 

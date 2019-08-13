@@ -38,8 +38,8 @@ function LogData({ logData, draft, range, ...props }) {
   );
 }
 
-function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, range }) {
-  const logData = useGetComputedLogData(wellId, log, draft);
+function LogDataLine({ log, prevLog, container, draft, selected, refresh, range }) {
+  const logData = useGetComputedLogData(log, draft);
 
   // we need to call refresh after log data is loaded to redraw
   useEffect(() => {
