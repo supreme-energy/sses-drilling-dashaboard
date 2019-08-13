@@ -1,8 +1,9 @@
-import React, { useCallback, useReducer, useEffect } from "react";
+import React, { useCallback, useReducer, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import { TextField } from "@material-ui/core";
+import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 
+import { useWellInfo } from "../../../../../api";
 import { stateReducer } from "./reducer";
 import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
@@ -14,27 +15,43 @@ const initialState = {
   smtp_from: ""
 };
 
-function OutgoingServer({ emailInfo, onChange }) {
+function OutgoingServer({ wellId }) {
+  const [data, , , refreshFetchStore, updateEmail] = useWellInfo(wellId);
+  const emailInfo = data.emailInfo || {};
   const [smtpInput, setSmtpInput] = useReducer(stateReducer, initialState);
+
+  const differenceKey = useMemo(() => Object.keys(smtpInput).filter(k => smtpInput[k] !== emailInfo[k]), [
+    emailInfo,
+    smtpInput
+  ]);
+
+  const handleChange = e => setSmtpInput({ [e.target.id]: e.target.value });
+
+  const onFieldChange = useCallback(
+    async (field, value, shouldRefreshStore) => {
+      await updateEmail({ wellId, field, value });
+      if (shouldRefreshStore) {
+        refreshFetchStore();
+      }
+    },
+    [updateEmail, wellId, refreshFetchStore]
+  );
+
+  const onBlur = useCallback(
+    e => {
+      if (differenceKey.length) {
+        e.returnValue = "Changes you made may not be saved.";
+        if (!document.activeElement.id) {
+          onFieldChange(differenceKey, smtpInput[differenceKey[0]]);
+        }
+      }
+    },
+    [onFieldChange, smtpInput, differenceKey]
+  );
 
   useEffect(() => {
     setSmtpInput(emailInfo);
   }, [emailInfo]);
-
-  const handleChange = useCallback(e => setSmtpInput({ [e.target.id]: e.target.value }), []);
-
-  const onBlur = useCallback(
-    e => {
-      e.returnValue = "Changes you made may not be saved.";
-      if (!document.activeElement.id) {
-        const differenceKey = Object.keys(smtpInput).filter(k => smtpInput[k] !== emailInfo[k]);
-        if (differenceKey.length) {
-          onChange(differenceKey, smtpInput[differenceKey]);
-        }
-      }
-    },
-    [onChange, smtpInput, emailInfo]
-  );
 
   useEffect(() => {
     window.addEventListener("beforeunload", onBlur);
@@ -90,8 +107,7 @@ function OutgoingServer({ emailInfo, onChange }) {
 }
 
 OutgoingServer.propTypes = {
-  emailInfo: PropTypes.object,
-  onChange: PropTypes.func
+  wellId: PropTypes.string
 };
 
 export default OutgoingServer;

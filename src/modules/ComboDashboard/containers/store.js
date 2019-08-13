@@ -5,6 +5,7 @@ import { useWellLogsContainer } from "./wellLogs";
 import { getPendingSegments } from "../../Interpretation/selectors";
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
+import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -18,7 +19,8 @@ const initialState = {
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500
+  surveyPrevVisibility: 500,
+  pendingProjectionsByMd: {}
 };
 
 const initialPendingState = {};
@@ -154,6 +156,22 @@ function nrPrevSurveysToDraftReduce(nrPrevSurveysToDraft, action) {
   }
 }
 
+function pendingProjectionsByMdReducer(pendingProjectionsByMd, action) {
+  switch (action.type) {
+    case "ADD_PENDING_PROJECTION": {
+      return {
+        ...pendingProjectionsByMd,
+        [action.projection.md]: action.projection
+      };
+    }
+    case "RESET_PENDING_PROJECTION": {
+      const newState = { ...pendingProjectionsByMd };
+      delete newState[action.projection.md];
+      return newState;
+    }
+  }
+}
+
 const comboStoreReducer = logs => (state, action) => {
   return {
     ...state,
@@ -162,7 +180,8 @@ const comboStoreReducer = logs => (state, action) => {
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReduce(state.nrPrevSurveysToDraft, action)
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReduce(state.nrPrevSurveysToDraft, action),
+    pendingProjectionsByMd: pendingProjectionsByMdReducer(state.pendingProjectionsByMd, action)
   };
 };
 
@@ -177,6 +196,26 @@ function useUseComboStore() {
   ]);
 
   return [state, dispatch, { setSelectedMd, updateSegments, deselectMd }];
+}
+
+export function useAddProjection() {
+  const [, dispatch] = useUseComboStore();
+  const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
+  const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
+    dispatch
+  ]);
+  const { addProjection: saveProjection } = useProjectionsDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      addProjection(projection);
+      saveProjection(projection)
+        .then(refreshFormations)
+        .then(() => resetPendingProjection(projection));
+    },
+    [addProjection, saveProjection, resetPendingProjection, refreshFormations]
+  );
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);

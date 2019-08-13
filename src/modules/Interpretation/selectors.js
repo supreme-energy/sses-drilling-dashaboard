@@ -279,6 +279,7 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
 
 export function useComputedFormations(formations) {
   const computedSurveys = useComputedSurveysAndProjections();
+
   const computedFormations = useMemo(
     () =>
       formations.map(f => {
