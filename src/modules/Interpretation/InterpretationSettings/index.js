@@ -5,6 +5,7 @@ import { useComboContainer } from "../../ComboDashboard/containers/store";
 import VisibilitySettings from "./VisibilitySettings";
 import classNames from "classnames";
 import NavigationSettings from "./NavigationSettings";
+import ModelSurveySettings from "./ModelSurveySettings";
 
 export default function InterpretationSettings({ className }) {
   const [state, dispatch] = useComboContainer();
@@ -27,6 +28,7 @@ export default function InterpretationSettings({ className }) {
         <VisibilitySettings mr={3} />
         <NavigationSettings />
       </Box>
+      <ModelSurveySettings mt={2} />
     </Box>
   );
 }
