@@ -1,13 +1,15 @@
 import React, { Suspense, lazy } from "react";
 import Progress from "@material-ui/core/CircularProgress";
-import Interpretation from "../../Interpretation";
-import CrossSectionDataCharts from "./CrossSectionDataCharts";
-import classes from "./StructuralGuidance.scss";
+
 import { useWellIdContainer } from "../../App/Containers";
+import Interpretation from "../../Interpretation";
+import LogDataCharts from "./LogDataCharts";
+import classes from "./StructuralGuidance.scss";
 
 const CrossSectionDashboard = lazy(() =>
   import(/* webpackChunkName: 'CrossSectionDashboard' */ "../../ComboDashboard/components/CrossSectionDashboard")
 );
+
 export function StructuralGuidance() {
   const { wellId } = useWellIdContainer();
   return (
@@ -18,7 +20,7 @@ export function StructuralGuidance() {
         </div>
         <div className={classes.column}>
           <CrossSectionDashboard wellId={wellId} />
-          <CrossSectionDataCharts />
+          <LogDataCharts wellId={wellId} />
         </div>
       </Suspense>
     </div>

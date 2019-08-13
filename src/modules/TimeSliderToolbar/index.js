@@ -33,10 +33,10 @@ TimeSliderToolbar.propTypes = {};
 
 export function TimeSliderToolbarWrapper({ children }) {
   return (
-    <div>
+    <React.Fragment>
       <Route path="/:wellId/:page" exact component={TimeSliderToolbar} />
       <div className={classes.viewport}>{children}</div>
-    </div>
+    </React.Fragment>
   );
 }
 

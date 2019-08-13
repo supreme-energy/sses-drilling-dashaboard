@@ -22,7 +22,7 @@ import { graphReducer, sliderReducer } from "./reducers";
 import useViewport from "../../../hooks/useViewport";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import { useTimeSliderData } from "../../../api";
-import { SURFACE } from "../../../constants/wellSections";
+import { SURFACE, ALL } from "../../../constants/wellSections";
 import {
   COLOR_BY_GRAPH,
   COLOR_BY_PHASE_VIEWER,
@@ -87,14 +87,14 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const viewportContainer = useRef(null);
 
   // Memoized selectors for Time Slider
-  const holeDepthLeftIndex = useMemo(() => data.map(e => e.Hole_Depth).indexOf(drillPhaseObj.phaseStart), [
-    data,
-    drillPhaseObj.phaseStart
-  ]);
-  const holeDepthRightIndex = useMemo(() => data.map(e => e.Hole_Depth).lastIndexOf(drillPhaseObj.phaseEnd), [
-    data,
-    drillPhaseObj.phaseEnd
-  ]);
+  const holeDepthLeftIndex = useMemo(() => {
+    const index = data.findIndex(d => d.Hole_Depth === drillPhaseObj.phaseStart);
+    return index > 0 ? index : 0;
+  }, [data, drillPhaseObj.phaseStart]);
+  const holeDepthRightIndex = useMemo(() => {
+    const index = data.findIndex(d => d.Hole_Depth === drillPhaseObj.phaseEnd);
+    return index > 0 ? index : data.length - 1;
+  }, [data, drillPhaseObj.phaseEnd]);
 
   const calcBounds = value => (data.length - 1 >= value ? value : data.length - 1);
   const stepFactor = step / maxStep;
@@ -136,11 +136,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   });
 
   const onReset = useCallback(() => {
-    if (holeDepthLeftIndex > 0 && holeDepthRightIndex > 0) {
+    if (holeDepthLeftIndex >= 0 && holeDepthRightIndex > 0) {
       const isLastIndex = data.length - 1 <= holeDepthRightIndex;
       const beginningDate = _.get(data, `[${holeDepthLeftIndex}].Date_Time`, "");
       const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].Date_Time`, "") : "NOW";
-      const indexDiff = holeDepthRightIndex - holeDepthLeftIndex;
+      const indexDiff = holeDepthRightIndex - holeDepthLeftIndex + 1;
 
       updateView(view => {
         const xScale = computeInitialViewXScaleValue(indexDiff)(width - GRID_GUTTER);
@@ -204,33 +204,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   }, [expanded, view.xScale, width]);
 
   useEffect(() => {
-    if (data && data.length && view.xScale) {
-      if (
-        (holeDepthLeftIndex > Math.round(leftBoundIndexMoving) || holeDepthRightIndex < rightBoundIndex) &&
-        drillPhaseObj.inView
-      ) {
-        setDrillPhase({ type: "UPDATE_VIEW", payload: false });
-      } else if (
-        holeDepthLeftIndex <= Math.round(leftBoundIndexMoving) &&
-        holeDepthRightIndex >= rightBoundIndex &&
-        !drillPhaseObj.inView
-      ) {
-        setDrillPhase({ type: "UPDATE_VIEW", payload: true });
-      }
-    }
-  }, [
-    data,
-    width,
-    view,
-    setDrillPhase,
-    drillPhaseObj.inView,
-    leftBoundIndexMoving,
-    holeDepthRightIndex,
-    holeDepthLeftIndex,
-    rightBoundIndex
-  ]);
-
-  useEffect(() => {
     if (data && data.length && step >= 0 && maxStep > 0 && leftBoundIndexMoving >= 0 && rightBoundIndex > 0) {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
       const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].Date_Time`, "");
@@ -255,6 +228,31 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     leftBoundIndexMoving,
     rightBoundIndex,
     stepIndex
+  ]);
+
+  useEffect(() => {
+    if (!drillPhaseObj.set) {
+      for (let i = 0; i < wellSections.length; i++) {
+        const { phaseStart, phaseEnd } = wellSections[i];
+        if (sliderInterval.firstDepth >= phaseStart && sliderInterval.lastDepth <= phaseEnd) {
+          if (wellSections[i].phase !== ALL || maxStep >= data.length - 1) {
+            setDrillPhase({ type: "SET", payload: { ...wellSections[i], inView: true } });
+            break;
+          } else {
+            setDrillPhase({ type: "UPDATE_VIEW", payload: false });
+          }
+        }
+      }
+    }
+  }, [
+    setDrillPhase,
+    sliderInterval.firstDepth,
+    sliderInterval.lastDepth,
+    wellSections,
+    drillPhaseObj.phase,
+    drillPhaseObj.set,
+    data.length,
+    maxStep
   ]);
 
   return (

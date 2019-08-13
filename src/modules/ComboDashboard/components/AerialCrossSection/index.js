@@ -200,6 +200,7 @@ function AerialCrossSection({ wellId }) {
             y={-yValue + 40 / SCALE_FACTOR}
             rotation={compassRotation}
             anchor={compassAnchor}
+            scale={0.25}
           />
         )}
       </div>

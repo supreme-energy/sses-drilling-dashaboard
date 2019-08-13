@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useEffect, useState, useRef } from "react";
+import React, { useCallback, useReducer, useEffect, useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { Button, TextField, IconButton, Typography } from "@material-ui/core";
 import Edit from "@material-ui/icons/Edit";
@@ -6,9 +6,11 @@ import Cancel from "@material-ui/icons/Cancel";
 import AddCircle from "@material-ui/icons/AddCircle";
 import classNames from "classnames";
 import _ from "lodash";
+import usePrevious from "react-use/lib/usePrevious";
 
+import { useEmailContacts } from "../../../../../api";
 import ContactPopup from "./ContactPopup";
-import { mailingListReducer, stateReducer } from "./reducer";
+import { stateReducer } from "./reducer";
 import Title from "../../../../../components/Title";
 import {
   PERSONNEL,
@@ -16,42 +18,55 @@ import {
   NAME,
   PHONE,
   REPORTS,
-  INITIAL_MAILING_LIST_STATE
+  INITIAL_MAILING_LIST_STATE,
+  REPORT_LIST
 } from "../../../../../constants/reportServer";
 import classes from "./styles.scss";
 
-function MailingListRow({ data, onChange, isFirstRow }) {
+function MailingListRow({ data, isFirstRow, handleSave, deleteContact, refresh }) {
   const label = field => (isFirstRow ? field : "");
-  const [reportMailingInput, setReportMailing] = useReducer(mailingListReducer, INITIAL_MAILING_LIST_STATE);
+  const [reportMailingInput, setReportMailing] = useReducer(stateReducer, INITIAL_MAILING_LIST_STATE);
   const [{ isVisible, isEditing }, setPopupMode] = useReducer(stateReducer, {
     isVisible: false,
     isEditing: false
   });
-  const dataInitialized = useRef(false);
+  const [reports, setReport] = useReducer(stateReducer, REPORT_LIST);
+  const differenceKeys = useMemo(
+    () => Object.keys(reportMailingInput).filter(k => k !== "reports" && reportMailingInput[k] !== data[k]),
+    [data, reportMailingInput]
+  );
+
+  const handleAllReports = e => setReport({ allReportsSelected: e.target.checked });
+  const handleReportChange = e => setReport({ [e.target.value]: e.target.checked });
 
   const handleEdit = useCallback(() => setPopupMode({ isVisible: true, isEditing: true }), [setPopupMode]);
   const handleClose = useCallback(() => setPopupMode({ isVisible: false }), [setPopupMode]);
-  const handleDelete = useCallback(() => setReportMailing({ type: "DELETE" }), []);
+  const handleDelete = async () => {
+    await deleteContact(reportMailingInput.id);
+    refresh();
+  };
 
-  const handleInputChange = id => e => setReportMailing({ type: "UPDATE", payload: { [id]: e.target.value } });
+  const handleInputChange = id => e => setReportMailing({ [id]: e.target.value });
 
-  const onBlur = useCallback(
-    e => {
+  const onSave = () => {
+    if (differenceKeys.length) {
+      handleSave(reportMailingInput);
+      setPopupMode({ isVisible: false });
+    }
+  };
+
+  const onBlur = e => {
+    if (differenceKeys.length) {
       e.returnValue = "Changes you made may not be saved.";
       if (!document.activeElement.id) {
-        const differenceKey = Object.keys(reportMailingInput).filter(k => reportMailingInput[k] !== data[k]);
-        if (differenceKey.length) {
-          onChange(differenceKey, reportMailingInput[differenceKey]);
-        }
+        onSave(differenceKeys);
       }
-    },
-    [onChange, reportMailingInput, data]
-  );
+    }
+  };
 
   useEffect(() => {
-    if (data && !_.isEmpty(data) && !dataInitialized.current) {
-      setReportMailing({ type: "UPDATE", payload: data });
-      dataInitialized.current = true;
+    if (data && !_.isEmpty(data)) {
+      setReportMailing(data);
     }
   }, [data, setReportMailing]);
 
@@ -114,26 +129,58 @@ function MailingListRow({ data, onChange, isFirstRow }) {
         values={reportMailingInput}
         handleClose={handleClose}
         isEditing={isEditing}
+        handleSave={onSave}
+        reports={reports}
+        handleAllReports={handleAllReports}
+        handleReportChange={handleReportChange}
       />
     </div>
   );
 }
 
-function ReportMailingList({ mailListData, onChange }) {
+function ReportMailingList({ wellId }) {
+  const { data, updateEmailContact, addEmailContact, deleteEmailContact, refresh } = useEmailContacts(wellId);
+  const [reports, setReport] = useReducer(stateReducer, REPORT_LIST);
+
   const [isVisible, setPopupVisibility] = useState(false);
-  const [addContactInput, setAddContact] = useReducer(mailingListReducer, INITIAL_MAILING_LIST_STATE);
+  const [addContactInput, setAddContact] = useReducer(stateReducer, INITIAL_MAILING_LIST_STATE);
+  const wasVisible = usePrevious(isVisible);
 
   const handleClickAdd = useCallback(() => setPopupVisibility(true), []);
   const handleClose = useCallback(() => setPopupVisibility(false), []);
-  const handleInputChange = id => e => setAddContact({ type: "UPDATE", payload: { [id]: e.target.value } });
+  const handleAllReports = e => setReport({ allReportsSelected: e.target.checked });
+  const handleReportChange = e => setReport({ [e.target.value]: e.target.checked });
+  const handleInputChange = id => e => setAddContact({ [id]: e.target.value });
+  const handleUpdateContact = useCallback(body => updateEmailContact(body), [updateEmailContact]);
+
+  const handleAddContact = async () => {
+    await addEmailContact(addContactInput);
+    refresh();
+    handleClose();
+  };
+
+  useEffect(() => {
+    if (wasVisible && !isVisible) {
+      setAddContact(INITIAL_MAILING_LIST_STATE);
+    }
+  }, [wasVisible, isVisible]);
 
   return (
     <div className={classes.reportMailingListContainer}>
       <Title>Report Mailing List</Title>
       <form>
-        {mailListData.map((dataObj, index) => {
+        {data.map((dataObj, index) => {
           const isFirstRow = index === 0;
-          return <MailingListRow key={index} data={dataObj} onChange={onChange} isFirstRow={isFirstRow} />;
+          return (
+            <MailingListRow
+              key={index}
+              data={dataObj}
+              isFirstRow={isFirstRow}
+              deleteContact={deleteEmailContact}
+              handleSave={handleUpdateContact}
+              refresh={refresh}
+            />
+          );
         })}
       </form>
       <Button color="secondary" className={classes.addContactButton} onClick={handleClickAdd} aria-label="edit">
@@ -145,14 +192,17 @@ function ReportMailingList({ mailListData, onChange }) {
         isVisible={isVisible}
         values={addContactInput}
         handleClose={handleClose}
+        handleSave={handleAddContact}
+        reports={reports}
+        handleAllReports={handleAllReports}
+        handleReportChange={handleReportChange}
       />
     </div>
   );
 }
 
 ReportMailingList.propTypes = {
-  mailListData: PropTypes.arrayOf(PropTypes.object),
-  onChange: PropTypes.func
+  wellId: PropTypes.string
 };
 
 export default ReportMailingList;

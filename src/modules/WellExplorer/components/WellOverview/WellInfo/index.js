@@ -238,7 +238,6 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
             groupName={"correction"}
             value={wellInfo.correction}
             onChange={value => {
-              console.log("on change", value);
               onChange("correction", value);
             }}
             data={correctionData}
@@ -248,7 +247,6 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
             groupName={"coordinateSystem"}
             value={wellInfo.coordsys}
             onChange={value => {
-              console.log("on coordys change", value);
               onChange("coordsys", value);
             }}
             data={coordSystemData}

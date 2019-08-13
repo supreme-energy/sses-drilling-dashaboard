@@ -1,5 +1,6 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
+import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -12,7 +13,8 @@ const initialState = {
   pendingSegmentsState: {},
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500
+  surveyPrevVisibility: 500,
+  pendingProjectionsByMD: {}
 };
 
 const initialPendingState = {};
@@ -75,7 +77,6 @@ function comboStoreReducer(state, action) {
         {},
         true
       );
-
     case "UPDATE_SEGMENT_PROPERTIES":
       return updateSegmentProperties(state, action.md, action.props);
     case "RESET_SEGMENT_PENDING_STATE":
@@ -109,6 +110,23 @@ function comboStoreReducer(state, action) {
         surveyPrevVisibility: action.surveyPrevVisibility
       };
     }
+    case "ADD_PENDING_PROJECTION": {
+      return {
+        ...state,
+        pendingProjectionsByMD: {
+          ...state.pendingProjectionsByMD,
+          [action.projection.md]: action.projection
+        }
+      };
+    }
+    case "RESET_PENDING_PROJECTION": {
+      const pendingProjectionsByMD = { ...state.pendingProjectionsByMD };
+      delete pendingProjectionsByMD[action.projection.md];
+      return {
+        ...state,
+        pendingProjectionsByMD
+      };
+    }
     default:
       throw new Error("action not defined for combo store reducer");
   }
@@ -123,6 +141,26 @@ function useUseComboStore() {
   ]);
 
   return [state, dispatch, { setSelectedMd, updateSegment, deselectMd }];
+}
+
+export function useAddProjection() {
+  const [, dispatch] = useUseComboStore();
+  const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
+  const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
+    dispatch
+  ]);
+  const { addProjection: saveProjection } = useProjectionsDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      addProjection(projection);
+      saveProjection(projection)
+        .then(refreshFormations)
+        .then(() => resetPendingProjection(projection));
+    },
+    [addProjection, saveProjection, resetPendingProjection, refreshFormations]
+  );
 }
 
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
