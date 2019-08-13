@@ -1,10 +1,10 @@
-import React, { useState, useReducer } from "react";
+import React, { useReducer } from "react";
 import { Box, Typography, TextField, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
 import { useSelectedSegmentState, usePendingSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { EMPTY_FIELD, twoDecimals } from "../../../constants/format";
+import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
 import { useSaveWellLogActions } from "../actions";
 
@@ -45,7 +45,7 @@ const FAULT_DIP_MODE = "Fault /Dip";
 const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
-  const [{ selectedMd, draftMode, pendingSegmentsState }, , { updateSegments }] = useComboContainer();
+  const [{ selectedMd, draftMode }, , { updateSegments }] = useComboContainer();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
     FAULT_DIP_MODE

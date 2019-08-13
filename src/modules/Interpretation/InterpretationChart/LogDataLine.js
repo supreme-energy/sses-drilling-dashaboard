@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent } from "../selectors";
 import { draftColor, selectionColor, logColor } from "../pixiColors";
-import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useBiasAndScaleActions } from "../actions";
 
 const mapWellLog = d => [d.value, d.depth];
 

@@ -2,7 +2,6 @@ import memoizeOne from "memoize-one";
 import useFetch from "react-powertools/data/useFetch";
 import { GET_WELL_LOG_LIST, UPDATE_WELL_LOG, EMPTY_ARRAY } from "../../../api";
 import { useMemo, useCallback } from "react";
-import serialize from "react-powertools/serialize";
 import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
 import { useWellIdContainer } from "../../App/Containers";

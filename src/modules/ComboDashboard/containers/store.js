@@ -23,23 +23,6 @@ const initialState = {
 
 const initialPendingState = {};
 
-function updateSegmentProperties(state, md, segmentProps, reset, resetMap) {
-  return {
-    ...state,
-    pendingSegmentsState: {
-      ...state.pendingSegmentsState,
-      [md]: reset
-        ? resetMap
-          ? mapValues(state.pendingSegmentsState[md], (value, key) => (resetMap[key] ? undefined : value))
-          : initialPendingState
-        : {
-            ...(state.pendingSegmentsState[md] || initialPendingState),
-            ...segmentProps
-          }
-    }
-  };
-}
-
 function selectedMdReducer(selectedMd, action) {
   switch (action.type) {
     case "TOGGLE_MD": {
