@@ -2,11 +2,12 @@ import React, { useMemo } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
+import { getIsDraft } from "./selectors";
 
-export default function LogLines({ logList, wellId, selectedWellLog, container }) {
-  const [{ surveyVisibility, surveyPrevVisibility }] = useComboContainer();
+export default function LogLines({ logList, wellId, selectedWellLogIndex, container }) {
+  const [{ surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft }] = useComboContainer();
   const { refresh } = useInterpretationRenderer();
-
+  const selectedWellLog = logList[selectedWellLogIndex];
   const range = useMemo(() => {
     if (
       surveyVisibility === visibilityOptions.ALL ||
@@ -29,17 +30,21 @@ export default function LogLines({ logList, wellId, selectedWellLog, container }
 
   return (
     <React.Fragment>
-      {filteredLogList.map(log => (
-        <LogDataLine
-          range={range}
-          refresh={refresh}
-          log={log}
-          key={log.id}
-          wellId={wellId}
-          container={container}
-          selected={selectedWellLog && log.id === selectedWellLog.id}
-        />
-      ))}
+      {filteredLogList.map((log, index) => {
+        const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
+        return (
+          <LogDataLine
+            draft={draft}
+            range={range}
+            refresh={refresh}
+            log={log}
+            key={log.id}
+            wellId={wellId}
+            container={container}
+            selected={selectedWellLog && log.id === selectedWellLog.id}
+          />
+        );
+      })}
     </React.Fragment>
   );
 }

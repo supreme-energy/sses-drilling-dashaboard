@@ -1,25 +1,53 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { draftColor, selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedLogExtent, useSelectedSegmentState } from "../selectors";
+import { useSelectedSegmentState, useLogExtent, usePendingSegments } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
 import { useBiasAndScaleActions, useSaveWellLogActions } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useWellIdContainer } from "../../App/Containers";
 
 const lineData = [[0, 10], [0, 0]];
+
+// this is more a workaround for hooks looping limitation, useLogExtent working with only one log
+const LogExtent = ({ log, wellId, updateExtent }) => {
+  const [min, max] = useLogExtent(log, wellId);
+  useEffect(() => {
+    updateExtent(([currentMin, currentMax]) => [Math.min(currentMin, min), Math.max(currentMax, max)]);
+  }, [updateExtent, min, max]);
+  return null;
+};
+
 export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
-  const [xMin, xMax] = useSelectedLogExtent();
-  const width = xMax - xMin;
-  const [, dispatch] = useComboContainer();
+  const [{ draftMode, selectedMd }, dispatch] = useComboContainer();
+  const internalStateRef = useRef({ prevSelectedMd: null });
   const segmentData = useSelectedSegmentState();
-  const isDraft = !!segmentData.draftData;
-  // if we are in draft mode, we will have some draftData defined
-  const { scalebias: bias, scalefactor: scale } = segmentData.draftData || segmentData;
+  const bias = Number(segmentData.scalebias);
+  const scale = Number(segmentData.scalefactor);
+  const pendingSegments = usePendingSegments();
+  const [[xMin, xMax], updateExtent] = useState([0, 0]);
+
+  if (selectedMd !== internalStateRef.current.prevSelectedMd) {
+    updateExtent([0, 0]);
+    internalStateRef.current.prevSelectedMd = selectedMd;
+  }
+
+  const width = xMax - xMin;
+  const { wellId } = useWellIdContainer();
 
   const { changeSelectedSegmentBias, changeSelectedSegmentScale } = useBiasAndScaleActions(dispatch);
+
+  useEffect(
+    function setInitialBias() {
+      if (draftMode) {
+        changeSelectedSegmentBias(xMax + 10);
+      }
+    },
+    [xMax, changeSelectedSegmentBias, draftMode]
+  );
 
   useEffect(
     function redraw() {
@@ -70,8 +98,8 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
 
   const computedWidth = width * scale;
   const computedXMin = xMin - (computedWidth - width) / 2;
-  const { saveWellLog } = useSaveWellLogActions();
-  const onDragEnd = !isDraft ? saveWellLog : undefined;
+  const { saveSelectedWellLog } = useSaveWellLogActions();
+  const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog(), [saveSelectedWellLog, draftMode]);
   const getSegment = useCallback(() => segmentContainerRef.current && segmentContainerRef.current.container, []);
 
   useDraggable({
@@ -117,6 +145,10 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
 
   return (
     <React.Fragment>
+      {pendingSegments.map(s => (
+        <LogExtent log={s} key={s.id} updateExtent={updateExtent} wellId={wellId} />
+      ))}
+      {/* {draftMode && <DraftLineInit xMax={xMax} />} */}
       <PixiContainer
         container={container}
         x={gridGutter + computedXMin + bias}
@@ -132,7 +164,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
                 <PixiLine
                   container={container}
                   data={lineData}
-                  color={isDraft ? draftColor : selectionColor}
+                  color={draftMode ? draftColor : selectionColor}
                   nativeLines={false}
                   lineWidth={2}
                 />
@@ -147,7 +179,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
                 <PixiLine
                   container={container}
                   data={lineData}
-                  color={isDraft ? draftColor : selectionColor}
+                  color={draftMode ? draftColor : selectionColor}
                   nativeLines={false}
                   lineWidth={2}
                 />
@@ -164,7 +196,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
                   width={computedWidth - 2}
                   height={8}
                   radius={5}
-                  backgroundColor={isDraft ? draftColor : selectionColor}
+                  backgroundColor={draftMode ? draftColor : selectionColor}
                   container={container}
                 />
               )}

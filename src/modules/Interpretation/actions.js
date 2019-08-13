@@ -1,40 +1,75 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useCallback } from "react";
-import { useWellIdContainer } from "../App/Containers";
-import { getCalculateDip, useComputedSegments, useSelectedWellLog } from "./selectors";
+import { useCallback, useMemo } from "react";
+
+import {
+  getCalculateDip,
+  useSelectedWellLog,
+  usePendingSegments,
+  useComputedDraftSegmentsOnly,
+  useComputedDraftSegments,
+  useComputedSegments
+} from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import pickBy from "lodash/pickBy";
+import reduce from "lodash/reduce";
+import keyBy from "lodash/keyBy";
+import mapValues from "lodash/mapValues";
+
+// compute dip for each segments from segments group in order to sadisfy depthChange
+function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
+  return pendingSegments.reduce((acc, segment, index) => {
+    const logIndex = computedSegments.findIndex(s => s.id === segment.id);
+    const prevComputedSegment = computedSegments[logIndex - 1];
+    const computedSegment = computedSegments[logIndex];
+    const segmentPercentage = (segment.enddepth - segment.startdepth) / totalSegmentsHeight;
+    const actualDepth = computedSegment.enddepth + segmentPercentage * depthChange;
+    const calculateDip = getCalculateDip(computedSegment, prevComputedSegment);
+
+    const dip = calculateDip({
+      tvd: segment.endtvd,
+      depth: actualDepth,
+      vs: segment.endvs
+    });
+
+    acc[segment.endmd] = { dip };
+    return acc;
+  }, {});
+}
 
 export function useDragActions() {
-  const [{ pendingSegmentsState }, , { updateSegment }] = useComboContainer();
-  const { wellId } = useWellIdContainer();
-  const [logs, logsById] = useWellLogsContainer();
-  const [segments] = useComputedSegments(wellId);
+  const [{ draftMode }, , { updateSegments }] = useComboContainer();
+  const [, logsById] = useWellLogsContainer();
+  const { segments: computedDraftSegments } = useComputedDraftSegments();
+  const [cs] = useComputedSegments();
+  const computedSegments = draftMode ? computedDraftSegments : cs;
+  const { selectedWellLog } = useSelectedWellLog();
 
+  const pendingSegments = usePendingSegments();
+  const computedDraftPendingSegments = useComputedDraftSegmentsOnly();
+  const computedPendingSegments = useMemo(
+    () =>
+      draftMode
+        ? computedDraftPendingSegments
+        : selectedWellLog
+        ? [computedSegments.find(s => s.id === selectedWellLog.id)]
+        : [],
+    [selectedWellLog, computedDraftPendingSegments, computedSegments, draftMode]
+  );
+
+  const totalSegmentsHeight = pendingSegments.reduce((sum, segment) => sum + segment.enddepth - segment.startdepth, 0);
   const onEndSegmentDrag = useCallback(
-    (newPosition, segment) => {
-      const log = logsById[segment.id];
-      const logIndex = logs.indexOf(log);
-      const prevSegment = segments[logIndex - 1];
-      if (!log) {
-        return;
-      }
-      const pendingState = pendingSegmentsState[segment.endmd];
-
-      const depth = newPosition.y;
-      const calculateDip = getCalculateDip(log, prevSegment);
-
-      const newDip = calculateDip({
-        tvd: log.endtvd,
-        depth: depth,
-        vs: log.endvs,
-        fault: pendingState && pendingState.fault
-      });
-
-      updateSegment({ dip: newDip }, log.endmd);
+    (newPosition, endSegment) => {
+      const depthChange = newPosition.y - computedPendingSegments[pendingSegments.length - 1].enddepth;
+      const dipsByMd = getSegmentsDipChangeProperties(
+        pendingSegments,
+        depthChange,
+        computedSegments,
+        totalSegmentsHeight
+      );
+      updateSegments(dipsByMd);
     },
-    [pendingSegmentsState, updateSegment, logs, logsById, segments]
+    [updateSegments, computedSegments, pendingSegments, totalSegmentsHeight, computedPendingSegments]
   );
 
   const onSegmentDrag = useCallback(
@@ -47,36 +82,35 @@ export function useDragActions() {
 
       let fault = segment.fault - delta;
 
-      updateSegment({ fault }, log.endmd);
+      updateSegments({ [log.endmd]: { fault } });
     },
-    [updateSegment, logsById]
+    [updateSegments, logsById]
   );
 
   const onStartSegmentDrag = useCallback(
     (newPosition, segment) => {
       const log = logsById[segment.id];
-      const logIndex = logs.indexOf(log);
-      const prevSegment = segments[logIndex - 1];
+
       if (!log) {
         return;
       }
 
       const faultDelta = segment.startdepth - newPosition.y;
-      const calculateDip = getCalculateDip(log, prevSegment);
 
-      // calculate reverse dip so that all segments does not move down
-      const dip = calculateDip({
-        tvd: log.endtvd,
-        depth: segment.enddepth,
-        vs: log.endvs,
-        fault: segment.fault + faultDelta
-      });
+      const depthChange = computedPendingSegments[0].startdepth - newPosition.y;
+      const propsByMd = getSegmentsDipChangeProperties(
+        pendingSegments,
+        depthChange,
+        computedSegments,
+        totalSegmentsHeight
+      );
 
       const fault = segment.fault + faultDelta;
+      propsByMd[segment.endmd].fault = fault;
 
-      updateSegment({ fault, dip }, log.endmd);
+      updateSegments(propsByMd);
     },
-    [updateSegment, logs, logsById, segments]
+    [updateSegments, logsById, computedPendingSegments, pendingSegments, totalSegmentsHeight, computedSegments]
   );
 
   return { onEndSegmentDrag, onStartSegmentDrag, onSegmentDrag };
@@ -109,31 +143,87 @@ export function useBiasAndScaleActions(dispatch) {
 
 export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
-  const [{ pendingSegmentsState }, dispatch] = useComboContainer();
-  const [, , { updateWellLog }] = useWellLogsContainer();
-  const pendingState = selectedWellLog && pendingSegmentsState[selectedWellLog.endmd];
-  const saveWellLog = useCallback(
-    debounce(() => {
-      const values = {
-        dip: pendingState.dip,
-        fault: pendingState.fault,
-        scalebias: pendingState.bias,
-        scalefactor: pendingState.scale
-      };
-      const fields = pickBy(values, value => value !== undefined);
+  const [{ pendingSegmentsState }, dispatch, { updateSegments }] = useComboContainer();
+  const [logs, , { updateWellLogs }] = useWellLogsContainer();
 
-      updateWellLog({
-        id: selectedWellLog.id,
-        fields
-      }).then(() => {
-        dispatch({
-          type: "RESET_SEGMENT_PENDING_STATE",
-          md: selectedWellLog.endmd
-        });
-      });
-    }, 300),
-    [updateWellLog, dispatch, pendingState, selectedWellLog]
+  const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
+
+  const saveWellLogs = useCallback(
+    (logs, pendingSegmentsState, fieldsToSave) => {
+      const data = logs
+        .map(log => {
+          console.log("hmm", pendingSegmentsState);
+          const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
+          const values = {
+            dip: pendingState.dip,
+            fault: pendingState.fault,
+            scalebias: pendingState.bias,
+            scalefactor: pendingState.scale
+          };
+          const fields = pickBy(values, (value, key) => {
+            return value !== undefined && (!fieldsToSave || fieldsToSave[key]);
+          });
+
+          if (!Object.keys(fields).length) {
+            return null;
+          }
+
+          return {
+            id: log.id,
+            ...fields
+          };
+        })
+        .filter(Boolean);
+
+      const resetProps = fieldsToSave
+        ? mapValues(fieldsToSave, v => undefined)
+        : {
+            dip: undefined,
+            fault: undefined,
+            scalebias: undefined,
+            scalefactor: undefined
+          };
+
+      const result = updateWellLogs(data);
+      const resetLogProps = logs.reduce((acc, log) => {
+        acc[log.endmd] = resetProps;
+        return acc;
+      }, {});
+
+      updateSegments(resetLogProps);
+
+      return result;
+    },
+    [updateWellLogs, updateSegments]
+  );
+  const saveSelectedWellLog = useCallback(
+    debounce(fieldsToSave => {
+      saveWellLogs([selectedWellLog], pendingSegmentsState, fieldsToSave);
+    }, 500),
+    [dispatch, pendingSegmentsState, selectedWellLog, saveWellLogs]
   );
 
-  return { saveWellLog };
+  const saveAllPendingLogs = useCallback(
+    fieldsToSave => {
+      const logsToSave = reduce(
+        pendingSegmentsState,
+        (acc, pendingState, key) => {
+          if (logsByEndMd[key]) {
+            acc.push(logsByEndMd[key]);
+          }
+
+          return acc;
+        },
+        []
+      );
+      return saveWellLogs(logsToSave, pendingSegmentsState, fieldsToSave);
+    },
+    [pendingSegmentsState, saveWellLogs, logsByEndMd]
+  );
+
+  // const saveAll = fieldsToSave => {
+  //   const
+  // }
+
+  return { saveSelectedWellLog, saveAllPendingLogs };
 }

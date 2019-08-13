@@ -6,6 +6,7 @@ import serialize from "react-powertools/serialize";
 import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
 import { useWellIdContainer } from "../../App/Containers";
+import mapKeys from "lodash/mapKeys";
 
 const mapLogList = d => ({
   ...d,
@@ -36,42 +37,45 @@ export function useWellLogList(wellId) {
 
   const logList = transformLogs(list);
 
-  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
-
-  const updateWellLog = useCallback(
-    ({ id, fields = {} }) => {
+  const updateWellLogs = useCallback(
+    data => {
+      const dataById = keyBy(data, "id");
       const optimisticResult = list.map(d => {
-        return d.id === id ? { ...d, ...fields } : d;
+        return dataById[d.id]
+          ? { ...d, ...mapKeys(dataById[d.id], (value, key) => (key === "dip" ? "sectdip" : key)) }
+          : d;
       });
 
-      return serializedUpdateFetch(
-        {
-          path: UPDATE_WELL_LOG,
-          method: "POST",
-          body: {
-            seldbname: wellId,
-            id: String(id),
-            ...fields
-          },
-          optimisticResult,
-          cache: "no-cache"
-        },
-        (original, newResult) => {
-          return original.map(l => {
-            return String(l.id) === String(newResult.welllog.id)
-              ? { ...mapLogList(newResult.welllog), test: "new stuff" }
-              : l;
-          });
-        }
+      return Promise.all(
+        data.map(dataToSave => {
+          return fetch(
+            {
+              path: UPDATE_WELL_LOG,
+              method: "POST",
+              body: {
+                seldbname: wellId,
+                ...dataToSave,
+                id: String(dataToSave.id)
+              },
+              optimisticResult,
+              cache: "no-cache"
+            },
+            (original, newResult) => {
+              return original.map(l => {
+                return String(l.id) === String(newResult.welllog.id) ? { ...mapLogList(newResult.welllog) } : l;
+              });
+            }
+          );
+        })
       );
     },
-    [serializedUpdateFetch, list, wellId]
+    [fetch, list, wellId]
   );
 
   const logs = logList || EMPTY_ARRAY;
 
   const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
-  return [logs, logsById, { updateWellLog }];
+  return [logs, logsById, { updateWellLogs }];
 }
 
 function useWellLogs() {

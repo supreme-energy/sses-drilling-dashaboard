@@ -7,30 +7,8 @@ import { useBiasAndScaleActions } from "../actions";
 
 const mapWellLog = d => [d.value, d.depth];
 
-// this is a component to work around conditinal hooks limitation, it will be renderer only for draft and
-// will init draft position to not overlap with normal line
-function DraftLineInit({ logData, width, xMin, bias }) {
-  const [, dispatch] = useComboContainer();
-
-  const { changeSelectedSegmentBias } = useBiasAndScaleActions(dispatch);
-  const internalState = useRef({ prevLogData: null });
-
-  useEffect(
-    function setInitialBias() {
-      const prevLogData = internalState.current.prevLogData;
-      if (logData && (!prevLogData || logData.tablename !== prevLogData.tablename) && width) {
-        changeSelectedSegmentBias(bias + width + 10);
-
-        internalState.current.prevLogData = logData;
-      }
-    },
-    [logData, changeSelectedSegmentBias, xMin, width, bias]
-  );
-  return null;
-}
-
 function LogData({ logData, draft, range, ...props }) {
-  const { scalebias: bias, scalefactor: scale } = logData.draftData || logData;
+  const { scalebias: bias, scalefactor: scale } = logData;
 
   const [xMin, xMax] = useMemo(() => getExtent(logData), [logData]);
 
@@ -58,7 +36,6 @@ function LogData({ logData, draft, range, ...props }) {
   return (
     <React.Fragment>
       <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} />
-      {draft && <DraftLineInit logData={logData} width={width} xMin={xMin} bias={bias} />}
     </React.Fragment>
   );
 }
