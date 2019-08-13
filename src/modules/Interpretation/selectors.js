@@ -2,7 +2,7 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
 import { useWellLogData, EMPTY_ARRAY } from "../../api";
 import keyBy from "lodash/keyBy";
-import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
+import { useWellIdContainer, useSurveysDataContainer, useProjectionsDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
@@ -35,6 +35,10 @@ export const getPendingSegments = memoizeOne((selectedMd, logs, nrPrevSurveysToD
     return EMPTY_ARRAY;
   }
   const selectedIndex = logs.findIndex(l => l.endmd === selectedMd);
+
+  if (selectedIndex === -1) {
+    return EMPTY_ARRAY;
+  }
 
   if (!draftMode) {
     return [logs[selectedIndex]];
@@ -238,13 +242,13 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-export function useComputedSurveys() {
+export function useComputedSurveysAndProjections() {
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
-
+  const { projectionsData } = useProjectionsDataContainer();
   return useMemo(
     () =>
-      surveys.reduce((acc, next, index) => {
+      surveys.concat(projectionsData).reduce((acc, next, index) => {
         const prevItem = acc[index - 1] || next;
         const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
 
@@ -259,13 +263,13 @@ export function useComputedSurveys() {
 
         return acc;
       }, []),
-    [surveys, draftMode, pendingSegmentsState, selectedMd]
+    [surveys, draftMode, pendingSegmentsState, selectedMd, projectionsData]
   );
 }
 
 export function useSelectedSurvey() {
   const [{ selectedMd }] = useComboContainer();
-  const computedSurveys = useComputedSurveys();
+  const computedSurveys = useComputedSurveysAndProjections();
   return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
 }
 
@@ -274,7 +278,7 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
 }
 
 export function useComputedFormations(formations) {
-  const computedSurveys = useComputedSurveys();
+  const computedSurveys = useComputedSurveysAndProjections();
   const computedFormations = useMemo(
     () =>
       formations.map(f => {

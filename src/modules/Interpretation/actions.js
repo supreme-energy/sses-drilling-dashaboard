@@ -152,7 +152,6 @@ export function useSaveWellLogActions() {
     (logs, pendingSegmentsState, fieldsToSave) => {
       const data = logs
         .map(log => {
-          console.log("hmm", pendingSegmentsState);
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
           const values = {
             dip: pendingState.dip,
