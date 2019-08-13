@@ -2,10 +2,18 @@ import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
 import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
 
+export const surveyVisibility = {
+  ALL: "all",
+  CURRENT: "current",
+  PREVIOUS_MD: "previousMd"
+};
+
 const initialState = {
   selectedMd: null,
   pendingSegmentsState: {},
   draftMode: false,
+  surveyVisibility: surveyVisibility.ALL,
+  surveyPrevVisibility: 500,
   pendingProjectionsByMD: {}
 };
 
@@ -88,6 +96,19 @@ function comboStoreReducer(state, action) {
       }
 
       return updateSegmentProperties(state, selectedMd, props);
+    }
+    case "CHANGE_INTERPRETATION_SURVEY_VISIBILITY": {
+      return {
+        ...state,
+        surveyVisibility: action.surveyVisibility
+      };
+    }
+
+    case "CHANGE_INTERPRETATION_SURVEY_PREV_VISIBILITY": {
+      return {
+        ...state,
+        surveyPrevVisibility: action.surveyPrevVisibility
+      };
     }
     case "ADD_PENDING_PROJECTION": {
       return {
