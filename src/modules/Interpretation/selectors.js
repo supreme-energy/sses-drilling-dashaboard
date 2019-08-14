@@ -184,7 +184,7 @@ export function useComputedDraftSegmentsOnly() {
 
 const getComputedSegmentsNoPending = memoizeOne(logList => logList.reduce(reduceComputedSegment({}), []));
 
-const getCurentComputedSegments = memoizeOne((logList, computedSegments, pendingSegmentsState, draftMode) => {
+const getCurentComputedSegments = memoizeOne((logList, computedSegments, draftMode) => {
   // when not in draft mode we can't just return logList
   // because dip/fault changed need to be recalculated while request is pending
   const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(logList);
@@ -196,8 +196,8 @@ const getCurentComputedSegments = memoizeOne((logList, computedSegments, pending
 export function useCurrentComputedSegments() {
   const { segments: computedSegments } = useComputedSegments();
   const [logList] = useWellLogsContainer();
-  const [{ pendingSegmentsState, draftMode }] = useComboContainer();
-  return getCurentComputedSegments(logList, computedSegments, pendingSegmentsState, draftMode);
+  const [{ draftMode }] = useComboContainer();
+  return getCurentComputedSegments(logList, computedSegments, draftMode);
 }
 
 export function useGetComputedLogData(wellId, log, draft) {
