@@ -6,8 +6,8 @@ import {
   useSelectedWellLog,
   usePendingSegments,
   useComputedDraftSegmentsOnly,
-  useComputedDraftSegments,
-  useComputedSegments
+  useComputedSegments,
+  useCurrentComputedSegments
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -40,8 +40,8 @@ function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSe
 export function useDragActions() {
   const [{ draftMode }, , { updateSegments }] = useComboContainer();
   const [, logsById] = useWellLogsContainer();
-  const { segments: computedDraftSegments } = useComputedDraftSegments();
-  const [cs] = useComputedSegments();
+  const { segments: computedDraftSegments } = useComputedSegments();
+  const [cs] = useCurrentComputedSegments();
   const computedSegments = draftMode ? computedDraftSegments : cs;
   const { selectedWellLog } = useSelectedWellLog();
 
@@ -57,7 +57,10 @@ export function useDragActions() {
     [selectedWellLog, computedDraftPendingSegments, computedSegments, draftMode]
   );
 
-  const totalSegmentsHeight = pendingSegments.reduce((sum, segment) => sum + segment.enddepth - segment.startdepth, 0);
+  const totalSegmentsHeight = useMemo(
+    () => pendingSegments.reduce((sum, segment) => sum + segment.enddepth - segment.startdepth, 0),
+    [pendingSegments]
+  );
   const onEndSegmentDrag = useCallback(
     (newPosition, endSegment) => {
       const depthChange = newPosition.y - computedPendingSegments[pendingSegments.length - 1].enddepth;

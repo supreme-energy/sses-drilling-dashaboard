@@ -14,7 +14,7 @@ import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSe
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useSelectedWellLog, useComputedSegments } from "../selectors";
+import { useSelectedWellLog, useCurrentComputedSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
@@ -93,7 +93,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   const {
     current: { scaleInitialized }
   } = internalStateRef;
-  const [segments] = useComputedSegments(wellId);
+  const [segments] = useCurrentComputedSegments(wellId);
 
   useEffect(
     function initScale() {

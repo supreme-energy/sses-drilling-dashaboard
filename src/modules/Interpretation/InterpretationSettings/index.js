@@ -29,13 +29,15 @@ export default function InterpretationSettings({ className }) {
         <NavigationSettings />
       </Box>
       <ModelSurveySettings mt={2} />
-      {draftMode && <ApplyDraftButtons />}
       {draftMode && (
-        <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
-          <Button color="primary" onClick={resetPendingState}>
-            RESET FAULT/DIP
-          </Button>
-        </Box>
+        <React.Fragment>
+          <ApplyDraftButtons />}
+          <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
+            <Button color="primary" onClick={resetPendingState}>
+              RESET FAULT/DIP
+            </Button>
+          </Box>
+        </React.Fragment>
       )}
     </Box>
   );

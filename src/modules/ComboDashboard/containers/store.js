@@ -87,13 +87,11 @@ function pendingSegmentState(pendingState, action, key) {
 function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) {
   switch (action.type) {
     case "TOGGLE_MD": {
-      if (state.selectedMd !== action.md) {
-        return state.draftMode ? {} : pendingSegmentsState;
-      }
-
-      return pendingSegmentsState;
+      const resetPendingState = state.draftMode && state.selectedMd !== action.md;
+      return resetPendingState ? {} : pendingSegmentState;
     }
     case "TOGGLE_DRAFT_MODE": {
+      // reset pending segments state to initialPendingState
       return mapValues(pendingSegmentsState, (pendingState, md) => pendingSegmentState(pendingState, action, md));
     }
     case "UPDATE_SEGMENTS_PROPERTIES":
@@ -146,7 +144,7 @@ function surveyPrevVisibilityReducer(prevVisibility, action) {
   }
 }
 
-function nrPrevSurveysToDraftReduce(nrPrevSurveysToDraft, action) {
+function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   switch (action.type) {
     case "CHANGE_PREV_SURVEYS_DRAFT": {
       return action.nrSurveys;
@@ -180,7 +178,7 @@ const comboStoreReducer = logs => (state, action) => {
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReduce(state.nrPrevSurveysToDraft, action),
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
     pendingProjectionsByMd: pendingProjectionsByMdReducer(state.pendingProjectionsByMd, action)
   };
 };

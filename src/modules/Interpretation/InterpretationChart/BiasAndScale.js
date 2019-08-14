@@ -12,7 +12,8 @@ import { useWellIdContainer } from "../../App/Containers";
 
 const lineData = [[0, 10], [0, 0]];
 
-// this is more a workaround for hooks looping limitation, useLogExtent working with only one log
+// this is more a workaround for hooks looping limitation
+// useLogExtent is only working with one log
 const LogExtent = ({ log, wellId, updateExtent }) => {
   const [min, max] = useLogExtent(log, wellId);
   useEffect(() => {

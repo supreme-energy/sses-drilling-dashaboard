@@ -11,7 +11,7 @@ import useDraggable from "../../../hooks/useDraggable";
 import { useDragActions, useSaveWellLogActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { getIsDraft, useComputedDraftSegments, useComputedDraftSegmentsOnly } from "../selectors";
+import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly } from "../selectors";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -55,7 +55,7 @@ const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...pr
 });
 
 function RightSegments({ allSegments, container, view, totalWidth, nrPrevSurveysToDraft, selectedIndex }) {
-  const { byId } = useComputedDraftSegments();
+  const { byId } = useComputedSegments();
   return allSegments.map((s, index) => {
     const isDraft = getIsDraft(index, selectedIndex, nrPrevSurveysToDraft);
     const backgroundAlpha = isDraft ? 1 : 0.5;

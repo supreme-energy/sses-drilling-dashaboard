@@ -62,7 +62,7 @@ export default function ModelSurveySettings(props) {
   const scale = selectedSegment && selectedSegment.scalefactor;
   const bias = selectedSegment && selectedSegment.scalebias;
 
-  // hide dip and fault if they re not all equal
+  // hide dip value if on draftMode pending segments have different dip values
   const hideDipValue = useMemo(() => draftMode && pendingSegments.some(s => s.sectdip !== pendingSegments[0].sectdip), [
     pendingSegments,
     draftMode
