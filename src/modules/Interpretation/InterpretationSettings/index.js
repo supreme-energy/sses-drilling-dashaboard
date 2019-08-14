@@ -31,7 +31,7 @@ export default function InterpretationSettings({ className }) {
       <ModelSurveySettings mt={2} />
       {draftMode && (
         <React.Fragment>
-          <ApplyDraftButtons />}
+          <ApplyDraftButtons />
           <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
             <Button color="primary" onClick={resetPendingState}>
               RESET FAULT/DIP
