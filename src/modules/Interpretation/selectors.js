@@ -153,7 +153,7 @@ const reduceComputedSegment = pendingSegmentsState => (acc, l, index) => {
   return acc;
 };
 
-const getComputedDraftSegments = memoizeOne((logList, pendingSegmentsState) => {
+const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
   const segments = logList.reduce(reduceComputedSegment(pendingSegmentsState), []);
   const byId = keyBy(segments, "id");
   return { segments, byId };
@@ -164,7 +164,7 @@ export function useComputedSegments() {
   const [logList] = useWellLogsContainer();
   const [{ pendingSegmentsState }] = useComboContainer();
 
-  return getComputedDraftSegments(logList, pendingSegmentsState);
+  return getComputedSegments(logList, pendingSegmentsState);
 }
 
 // return only segments that are in draft mode
@@ -184,20 +184,20 @@ export function useComputedDraftSegmentsOnly() {
 
 const getComputedSegmentsNoPending = memoizeOne(logList => logList.reduce(reduceComputedSegment({}), []));
 
-const getComputedSegments = memoizeOne((logList, currentComputedSegments, pendingSegmentsState, draftMode) => {
+const getCurentComputedSegments = memoizeOne((logList, computedSegments, pendingSegmentsState, draftMode) => {
   // when not in draft mode we can't just return logList
   // because dip/fault changed need to be recalculated while request is pending
   const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(logList);
-  const computedSegments = draftMode ? recomputedSegmentsWithNoPendingState : currentComputedSegments;
-  const computedSegmentsById = keyBy(computedSegments, "id");
-  return [computedSegments, computedSegmentsById];
+  const currentComputedSegments = draftMode ? recomputedSegmentsWithNoPendingState : computedSegments;
+  const computedSegmentsById = keyBy(currentComputedSegments, "id");
+  return [currentComputedSegments, computedSegmentsById];
 });
 
 export function useCurrentComputedSegments() {
   const { segments: computedSegments } = useComputedSegments();
   const [logList] = useWellLogsContainer();
   const [{ pendingSegmentsState, draftMode }] = useComboContainer();
-  return getComputedSegments(logList, computedSegments, pendingSegmentsState, draftMode);
+  return getCurentComputedSegments(logList, computedSegments, pendingSegmentsState, draftMode);
 }
 
 export function useGetComputedLogData(wellId, log, draft) {

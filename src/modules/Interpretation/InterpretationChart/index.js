@@ -117,7 +117,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [view, viewport, updateView]
   );
 
-  const [{ surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState }] = useComboContainer();
+  const [
+    { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
+  ] = useComboContainer();
 
   useEffect(
     function refreshWebGLRenderer() {
@@ -137,6 +139,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       viewport,
       surveyVisibility,
       surveyPrevVisibility,
+      nrPrevSurveysToDraft,
       draftMode,
       pendingSegmentsState
     ]
