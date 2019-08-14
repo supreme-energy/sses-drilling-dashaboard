@@ -241,34 +241,53 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
+const recomputeSurveysAndProjections = memoizeOne(
+  (surveys, projections, draftMode, selectedMd, pendingSegmentsState) => {
+    return surveys.concat(projections).reduce((acc, next, index) => {
+      const prevItem = acc[index - 1] || next;
+      const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
+
+      const dipPending = pendingState.dip !== undefined;
+      const faultPending = pendingState.fault !== undefined;
+      const dip = dipPending ? pendingState.dip : next.dip;
+      const fault = faultPending ? pendingState.fault : next.fault;
+      const diff = calcTot(0, dip, next.vs, prevItem.vs, fault);
+      const tcl = prevItem.tcl + diff;
+      const tot = prevItem.tot + diff;
+      const bot = prevItem.bot + diff;
+
+      acc[index] = { ...next, tcl, fault, dip, tot, bot };
+
+      return acc;
+    }, []);
+  }
+);
+
 export function useComputedSurveysAndProjections() {
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
-  return useMemo(
-    () =>
-      surveys.concat(projectionsData).reduce((acc, next, index) => {
-        const prevItem = acc[index - 1] || next;
-        const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
-
-        const dipPending = pendingState.dip !== undefined;
-        const faultPending = pendingState.fault !== undefined;
-        const dip = dipPending ? pendingState.dip : next.dip;
-        const fault = faultPending ? pendingState.fault : next.fault;
-
-        const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * Math.abs(next.vs - prevItem.vs) + fault;
-
-        acc[index] = { ...next, tcl, fault, dip };
-
-        return acc;
-      }, []),
-    [surveys, draftMode, pendingSegmentsState, selectedMd, projectionsData]
+  const surveysAndProjections = recomputeSurveysAndProjections(
+    surveys,
+    projectionsData,
+    draftMode,
+    selectedMd,
+    pendingSegmentsState
   );
+  const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
+    surveysAndProjections,
+    surveys
+  ]);
+  const computedProjections = useMemo(() => surveysAndProjections.slice(surveys.length), [
+    surveysAndProjections,
+    surveys
+  ]);
+  return [surveysAndProjections, computedSurveys, computedProjections];
 }
 
 export function useSelectedSurvey() {
   const [{ selectedMd }] = useComboContainer();
-  const computedSurveys = useComputedSurveysAndProjections();
+  const [, computedSurveys] = useComputedSurveysAndProjections();
   return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
 }
 
@@ -277,7 +296,7 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
 }
 
 export function useComputedFormations(formations) {
-  const computedSurveys = useComputedSurveysAndProjections();
+  const [surveysAndProjections] = useComputedSurveysAndProjections();
 
   const computedFormations = useMemo(
     () =>
@@ -285,7 +304,7 @@ export function useComputedFormations(formations) {
         return {
           ...f,
           data: f.data.map((item, index) => {
-            const survey = computedSurveys[index];
+            const survey = surveysAndProjections[index];
 
             if (!survey) {
               return item;
@@ -300,7 +319,7 @@ export function useComputedFormations(formations) {
           })
         };
       }),
-    [formations, computedSurveys]
+    [formations, surveysAndProjections]
   );
 
   return computedFormations;
