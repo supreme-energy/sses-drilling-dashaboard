@@ -115,9 +115,13 @@ function useUseComboStore() {
   const [state, dispatch] = useReducer(comboStoreReducer, initialState);
   const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
   const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-  const updateSegment = useCallback((props, md) => dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props }), [
-    dispatch
-  ]);
+  const updateSegment = useCallback(
+    (props, md) => {
+      console.log("updating with", props, md);
+      return dispatch({ type: "UPDATE_SEGMENT_PROPERTIES", md, props });
+    },
+    [dispatch]
+  );
 
   return [state, dispatch, { setSelectedMd, updateSegment, deselectMd }];
 }
