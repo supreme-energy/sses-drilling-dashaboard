@@ -77,9 +77,8 @@ export function useFilteredWellData() {
 
   const { wellId } = useWellIdContainer();
 
-  const { formationsData, refreshFormations } = useFormationsDataContainer();
+  const { formationsData } = useFormationsDataContainer();
 
-  const { saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const [, surveys, projections] = useComputedSurveysAndProjections();
   const wellPlan = useWellPath(wellId);
 
@@ -89,41 +88,12 @@ export function useFilteredWellData() {
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
   const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
 
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const saveAndUpdate = useCallback(
-    (...args) => {
-      saveProjections(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [saveProjections, refreshProjections, refreshFormations]
-  );
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const deleteAndUpdate = useCallback(
-    (...args) => {
-      deleteProjection(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [deleteProjection, refreshProjections, refreshFormations]
-  );
-
   return {
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
     formations: formationsFiltered,
-    projections: projectionsFiltered,
-    saveProjection: saveAndUpdate,
-    deleteProjection: deleteAndUpdate
+    projections: projectionsFiltered
   };
 }
 
@@ -223,7 +193,7 @@ function useFormationsData() {
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
@@ -238,28 +208,6 @@ export function useCrossSectionData() {
     },
     [selectedMd, rawSections]
   );
-
-  const prevStatus = usePrevious(ghostDiff.status);
-  useEffect(() => {
-    const { status, op, prevOp } = ghostDiff;
-    const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
-    if (prevStatus !== status) {
-      switch (status) {
-        case DIP_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip - ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case FAULT_END:
-          saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
-          break;
-        case PA_END:
-          saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case TAG_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip + ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-      }
-    }
-  }, [ghostDiff, prevStatus, saveProjection]);
 
   const calcSections = useMemo(() => {
     const index = rawSections.findIndex(p => p.id === ghostDiff.id);
