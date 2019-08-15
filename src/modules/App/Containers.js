@@ -17,15 +17,16 @@ import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/inter
 import { ALL } from "../../constants/wellSections";
 import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
-import { useComputedFormations } from "../Interpretation/selectors";
+import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
+import memoizeOne from "memoize-one";
 
-const filterDataToInterval = memoize((data, interval) => {
+const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
     return data.filter(({ md }) => interval.firstDepth <= md && md <= interval.lastDepth);
   } else {
     return [];
   }
-});
+};
 
 const filterDataToLast = memoize((data, lastDepth) => {
   if (data && data.length) {
@@ -57,6 +58,19 @@ function useAppStateData() {
   return { requestId, updateRequestId, refreshRequestId };
 }
 
+const filterFormationsMem = memoizeOne((formationsData, sliderInterval) => {
+  return formationsData.map(f => {
+    return {
+      ...f,
+      data: filterDataToInterval(f.data, sliderInterval)
+    };
+  });
+});
+
+const filterSurveysToInterval = memoizeOne(filterDataToInterval);
+const filterProjectionsToInterval = memoizeOne(filterDataToInterval);
+const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
+
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
@@ -64,20 +78,16 @@ export function useFilteredWellData() {
   const { wellId } = useWellIdContainer();
 
   const { formationsData, refreshFormations } = useFormationsDataContainer();
-  const { surveys } = useSurveysDataContainer();
-  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
+
+  const { saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
+  const [, surveys, projections] = useComputedSurveysAndProjections();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
-  const wellPlanFiltered = filterDataToInterval(wellPlan, sliderInterval);
-  const surveysFiltered = filterDataToInterval(surveys, sliderInterval);
-  const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
-  const formationsFiltered = formationsData.map(f => {
-    return {
-      ...f,
-      data: filterDataToInterval(f.data, sliderInterval)
-    };
-  });
+  const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
+  const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
+  const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
+  const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
 
   // TODO: Remove this update method when implementing entity versions
   //  (FE should perform same action as BE without the need to update)
