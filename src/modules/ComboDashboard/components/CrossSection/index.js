@@ -14,7 +14,7 @@ const CrossSection = props => {
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
-  const [, , { updateSegment }] = useComboContainer();
+  const [, , { updateSegments }] = useComboContainer();
   const {
     wellPlan,
     selectedSections,
@@ -85,7 +85,7 @@ const CrossSection = props => {
         xField,
         yField,
         yAxisDirection,
-        updateSegment
+        updateSegments
       },
       view,
       updateView
@@ -127,7 +127,7 @@ const CrossSection = props => {
       viewDirection,
       yAxisDirection,
       addProjection,
-      updateSegment
+      updateSegments
     });
   }, [
     view.x,
@@ -156,7 +156,7 @@ const CrossSection = props => {
     viewDirection,
     yAxisDirection,
     addProjection,
-    updateSegment
+    updateSegments
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

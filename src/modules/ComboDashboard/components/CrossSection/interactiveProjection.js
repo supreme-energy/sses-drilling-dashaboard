@@ -29,7 +29,7 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { updateSegment } = props;
+  const { updateSegments } = props;
   const red = 0xee2211;
   const white = 0xffffff;
   let prevMd, selectedMd;
@@ -44,18 +44,18 @@ function interactiveProjection(parent, props) {
   botLine.transform.updateTransform = frozenXYTransform;
 
   const prevTot = createCircle(container, red, red, function(pos) {
-    updateSegment({ tot: pos.y }, prevMd);
+    updateSegments({ [prevMd]: { tot: pos.y } });
   });
   const prevBot = createCircle(container, red, red, function(pos) {
-    updateSegment({ bot: pos.y }, prevMd);
+    updateSegments({ [prevMd]: { bot: pos.y } });
   });
 
   const currTot = createCircle(container, white, red, function(pos) {
-    updateSegment({ tot: pos.y, vs: pos.x }, selectedMd);
+    updateSegments({ [selectedMd]: { tot: pos.y, vs: pos.x } });
   });
 
   const currBot = createCircle(container, white, red, function(pos) {
-    updateSegment({ bot: pos.y, vs: pos.x }, selectedMd);
+    updateSegments({ [selectedMd]: { bot: pos.y, vs: pos.x } });
   });
 
   const memoSetKnobColor = memoizeOne(color => {
@@ -70,7 +70,7 @@ function interactiveProjection(parent, props) {
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(paMarker, function(pos) {
-    updateSegment({ tvd: pos.y, vs: pos.x }, selectedMd);
+    updateSegments({ [selectedMd]: { tvd: pos.y, vs: pos.x } });
   });
 
   return props => {

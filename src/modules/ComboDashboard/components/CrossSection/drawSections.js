@@ -4,7 +4,7 @@ import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
 
 function drawSections(container, higherContainer, props, gutter, labelHeight) {
-  const { updateSegment } = props;
+  const { updateSegments } = props;
   const buttonHeight = 10;
   const pixiList = [];
 
@@ -30,7 +30,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
   subscribeToMoveEvents(selectedLabel, function(pos) {
-    updateSegment({ vs: pos.x }, selectedLabelPointId);
+    updateSegments({ [selectedLabelPointId]: { vs: pos.x } });
   });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;

@@ -1,10 +1,12 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
-import { useWellLogData } from "../../api";
+import { useWellLogData, EMPTY_ARRAY } from "../../api";
 import keyBy from "lodash/keyBy";
-import { useWellIdContainer, useSurveysDataContainer } from "../App/Containers";
+import { useWellIdContainer, useSurveysDataContainer, useProjectionsDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
+import memoizeOne from "memoize-one";
+import reduce from "lodash/reduce";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -21,13 +23,28 @@ export function calcTot(pTot, dip, vs, pVs, fault) {
 }
 
 export function findCurrentWellLog(logList, md) {
-  return (
-    md &&
-    logList.findIndex(l => {
-      return md === l.endmd;
-    })
-  );
+  return md
+    ? logList.findIndex(l => {
+        return md === l.endmd;
+      })
+    : -1;
 }
+
+export const getPendingSegments = memoizeOne((selectedMd, logs, nrPrevSurveysToDraft, draftMode) => {
+  if (!selectedMd || !logs) {
+    return EMPTY_ARRAY;
+  }
+  const selectedIndex = logs.findIndex(l => l.endmd === selectedMd);
+
+  if (selectedIndex === -1) {
+    return EMPTY_ARRAY;
+  }
+
+  if (!draftMode) {
+    return [logs[selectedIndex]];
+  }
+  return logs.slice(Math.max(selectedIndex - nrPrevSurveysToDraft, 0), selectedIndex + 1);
+});
 
 export function useGetLogByMd(md) {
   const [logList] = useWellLogsContainer();
@@ -87,66 +104,114 @@ export function useCalculateDipFromSurvey(wellId) {
   return useCallback(getCalculateDip(selectedWellLog, prevLog), [selectedWellLog, prevLog]);
 }
 
-export function useComputedSegments(wellId) {
+export function useDraftSegmentsByEndMd(segment) {
+  const { selectedWellLogIndex } = useSelectedWellLog();
+  const [{ nrPrevSurveysToDraft }] = useComboContainer();
+  const [logList] = useWellLogsContainer();
+  return useMemo(
+    () =>
+      keyBy(
+        logList.slice(Math.max(selectedWellLogIndex - nrPrevSurveysToDraft, 0), selectedWellLogIndex + 1),
+        d => d.endmd
+      ),
+    [logList, selectedWellLogIndex, nrPrevSurveysToDraft]
+  );
+}
+
+const reduceComputedSegment = pendingSegmentsState => (acc, l, index) => {
+  const getNewLog = () => {
+    const pendingState = pendingSegmentsState[l.endmd];
+    const newLog = {
+      ...l
+    };
+
+    if (pendingState && pendingState.fault !== undefined) {
+      newLog.fault = pendingState.fault;
+    }
+
+    if (pendingState && pendingState.dip !== undefined) {
+      newLog.sectdip = pendingState.dip;
+    }
+
+    if (pendingState && pendingState.bias !== undefined) {
+      newLog.scalebias = pendingState.bias;
+    }
+
+    if (pendingState && pendingState.scale !== undefined) {
+      newLog.scalefactor = pendingState.scale;
+    }
+    const prevItem = acc[index - 1];
+
+    const calculateDepth = getCalculateDepth(newLog, prevItem);
+    newLog.startdepth = calculateDepth({ tvd: l.starttvd, dip: newLog.sectdip, vs: l.startvs });
+    newLog.enddepth = calculateDepth({ tvd: l.endtvd, dip: newLog.sectdip, vs: l.endvs });
+    return newLog;
+  };
+  const log = getNewLog();
+
+  acc.push(log);
+  return acc;
+};
+
+const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
+  const segments = logList.reduce(reduceComputedSegment(pendingSegmentsState), []);
+  const byId = keyBy(segments, "id");
+  return { segments, byId };
+});
+
+// return all segment with computed properties
+export function useComputedSegments() {
+  const [logList] = useWellLogsContainer();
+  const [{ pendingSegmentsState }] = useComboContainer();
+
+  return getComputedSegments(logList, pendingSegmentsState);
+}
+
+// return only segments that are in draft mode
+export function useComputedDraftSegmentsOnly() {
+  const { segments } = useComputedSegments();
+  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+  const { selectedWellLogIndex } = useSelectedWellLog();
+
+  return useMemo(
+    () =>
+      draftMode
+        ? segments.slice(Math.max(selectedWellLogIndex - nrPrevSurveysToDraft, 0), selectedWellLogIndex + 1)
+        : EMPTY_ARRAY,
+    [selectedWellLogIndex, nrPrevSurveysToDraft, segments, draftMode]
+  );
+}
+
+const getComputedSegmentsNoPending = memoizeOne(logList => logList.reduce(reduceComputedSegment({}), []));
+
+const getCurentComputedSegments = memoizeOne((logList, computedSegments, pendingSegmentsState, draftMode) => {
+  // when not in draft mode we can't just return logList
+  // because dip/fault changed need to be recalculated while request is pending
+  const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(logList);
+  const currentComputedSegments = draftMode ? recomputedSegmentsWithNoPendingState : computedSegments;
+  const computedSegmentsById = keyBy(currentComputedSegments, "id");
+  return [currentComputedSegments, computedSegmentsById];
+});
+
+export function useCurrentComputedSegments() {
+  const { segments: computedSegments } = useComputedSegments();
   const [logList] = useWellLogsContainer();
   const [{ pendingSegmentsState, draftMode }] = useComboContainer();
-  const { selectedWellLogIndex } = useSelectedWellLog(wellId);
-  const computedSegments = useMemo(
-    () =>
-      logList.reduce((acc, l, index) => {
-        const isDraft = draftMode && index === selectedWellLogIndex;
-        const getNewLog = usePending => {
-          const pendingState = usePending ? pendingSegmentsState[l.endmd] : {};
-          const newLog = {
-            ...l
-          };
-
-          if (pendingState && pendingState.fault !== undefined) {
-            newLog.fault = pendingState.fault;
-          }
-
-          if (pendingState && pendingState.dip !== undefined) {
-            newLog.sectdip = pendingState.dip;
-          }
-
-          if (pendingState && pendingState.bias !== undefined) {
-            newLog.scalebias = pendingState.bias;
-          }
-
-          if (pendingState && pendingState.scale !== undefined) {
-            newLog.scalefactor = pendingState.scale;
-          }
-
-          const calculateDepth = getCalculateDepth(newLog, acc[index - 1]);
-          newLog.startdepth = calculateDepth({ tvd: l.starttvd, dip: newLog.sectdip, vs: l.startvs });
-          newLog.enddepth = calculateDepth({ tvd: l.endtvd, dip: newLog.sectdip, vs: l.endvs });
-          return newLog;
-        };
-        const log = getNewLog(!isDraft);
-        if (isDraft) {
-          log.draftData = getNewLog(true);
-        }
-        acc.push(log);
-        return acc;
-      }, []),
-    [logList, pendingSegmentsState, selectedWellLogIndex, draftMode]
-  );
-
-  const computedSegmentsById = useMemo(() => keyBy(computedSegments, "id"), [computedSegments]);
-
-  return [computedSegments, computedSegmentsById];
+  return getCurentComputedSegments(logList, computedSegments, pendingSegmentsState, draftMode);
 }
 
 export function useGetComputedLogData(wellId, log, draft) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  const [computedSegments] = useComputedSegments(wellId);
+  const { byId: draftLogsById } = useComputedSegments();
+  const [computedSegments] = useCurrentComputedSegments();
   const [logList] = useWellLogsContainer();
   const logIndex = logList.findIndex(l => l.id === log.id);
   let computedSegment = computedSegments[logIndex];
-  const prevComputedSegment = computedSegments[logIndex - 1];
+  let prevComputedSegment = computedSegments[logIndex - 1];
 
   if (draft) {
-    computedSegment = computedSegment && computedSegment.draftData;
+    computedSegment = draftLogsById[computedSegment.id];
+    prevComputedSegment = prevComputedSegment && draftLogsById[prevComputedSegment.id];
   }
 
   return useMemo(() => {
@@ -176,13 +241,13 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-export function useComputedSurveys() {
+export function useComputedSurveysAndProjections() {
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
-
+  const { projectionsData } = useProjectionsDataContainer();
   return useMemo(
     () =>
-      surveys.reduce((acc, next, index) => {
+      surveys.concat(projectionsData).reduce((acc, next, index) => {
         const prevItem = acc[index - 1] || next;
         const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
 
@@ -197,21 +262,22 @@ export function useComputedSurveys() {
 
         return acc;
       }, []),
-    [surveys, draftMode, pendingSegmentsState, selectedMd]
+    [surveys, draftMode, pendingSegmentsState, selectedMd, projectionsData]
   );
 }
 
 export function useSelectedSurvey() {
   const [{ selectedMd }] = useComboContainer();
-  const computedSurveys = useComputedSurveys();
+  const computedSurveys = useComputedSurveysAndProjections();
   return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
 }
 
-export function useComputedFormations(formations) {
-  const computedSurveys = useComputedSurveys();
+export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
+  return index <= selectedIndex && index >= selectedIndex - nrPrevSurveysToDraft;
+}
 
-  // todo if we want formations to appear right after user click to add PA point we need to
-  // compute formations for pending projections here
+export function useComputedFormations(formations) {
+  const computedSurveys = useComputedSurveysAndProjections();
 
   const computedFormations = useMemo(
     () =>
@@ -252,10 +318,41 @@ export function useSelectedLogExtent() {
   return useLogExtent(selectedWellLog, wellId);
 }
 
-export function useSelectedSegmentState() {
-  const { wellId } = useWellIdContainer();
-  const [, computedSegmentsById] = useComputedSegments(wellId);
-  const { selectedWellLog } = useSelectedWellLog();
+export function usePendingSegments() {
+  const [logs] = useWellLogsContainer();
 
-  return (selectedWellLog && computedSegmentsById[selectedWellLog.id]) || {};
+  const [{ selectedMd, nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+
+  const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
+
+  return pendingSegments;
+}
+
+export function useSelectedSegmentState() {
+  const [{ draftMode }] = useComboContainer();
+  const [, computedSegmentsById] = useCurrentComputedSegments();
+  const { byId: draftSegmentsById } = useComputedSegments();
+  const { selectedWellLog } = useSelectedWellLog();
+  const map = draftMode ? draftSegmentsById : computedSegmentsById;
+  return (selectedWellLog && map[selectedWellLog.id]) || {};
+}
+
+export function useGetChangedPendingStateFields() {
+  const [{ pendingSegmentsState }] = useComboContainer();
+
+  return reduce(
+    pendingSegmentsState,
+    (acc, pendingState) => {
+      if (pendingState.dip !== undefined) {
+        acc.dip = true;
+      }
+
+      if (pendingState.fault !== undefined) {
+        acc.fault = true;
+      }
+
+      return acc;
+    },
+    { dip: false, fault: false }
+  );
 }
