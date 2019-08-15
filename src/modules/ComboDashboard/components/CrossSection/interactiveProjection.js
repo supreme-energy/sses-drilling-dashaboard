@@ -126,23 +126,12 @@ function interactiveProjection(parent, props) {
   });
 
   const paMarker = container.addChild(new PIXI.Graphics());
-  paMarker.lineStyle(2, red).beginFill(white, 0);
+  paMarker.lineStyle(2, red).beginFill(white, 0.01);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(
-    paMarker,
-    function(pos) {
-      updateSegment({ tvd: pos.y, vs: pos.x }, selectedMd);
-      // ghostDiffDispatch({
-      //   type: PA_MOVE,
-      //   tvd: pos.y,
-      //   vs: pos.x
-      // });
-    },
-    () => {
-      ghostDiffDispatch({ type: PA_END });
-    }
-  );
+  subscribeToMoveEvents(paMarker, function(pos) {
+    updateSegment({ tvd: pos.y, vs: pos.x }, selectedMd);
+  });
 
   return props => {
     const { selectedSections, calcSections, scale } = props;
