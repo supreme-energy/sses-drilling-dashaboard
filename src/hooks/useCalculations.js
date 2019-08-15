@@ -342,24 +342,16 @@ function calcLastDogleg(proposedAzm, surveys, surveyIndex, prevSurveys, project)
 
 /* **************** Method Calculations ***************** */
 // Caculates
-export function useMethodCalculations(selectedSurveyIndex) {
+export function useMethodCalculations(projections) {
   // Not sure that this project const is needed anymore
   const project = "ahead";
   let proposedAzm = 0;
   if (proposedAzm > 180) proposedAzm -= 360;
   proposedAzm *= degreesToRadians;
 
-  // Determine if we want to set surveys/projections after calculations,
-  // Or return mutations to component
-  const { surveys } = useSurveysDataContainer();
-  const { projections } = useProjectionsDataContainer();
+  if (!projections) return [];
 
-  const surveysAndProjections = [...surveys, ...projections];
-
-  // Get surveys to recalculate (index should be of survey before the one that was deleted/added/changed)
-  const surveysToRecalculate = surveysAndProjections.slice(selectedSurveyIndex, surveysAndProjections.length);
-
-  return surveysToRecalculate.reduce((acc, survey, index) => {
+  return projections.reduce((acc, survey, index) => {
     let result;
     switch (survey.method) {
       case "0":
