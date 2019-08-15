@@ -2,10 +2,9 @@ import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
-import { TAG_END, TAG_MOVE } from "../../../../constants/interactivePAStatus";
 
 function drawSections(container, higherContainer, props, gutter, labelHeight) {
-  const { ghostDiffDispatch, updateSegment } = props;
+  const { updateSegment } = props;
   const buttonHeight = 10;
   const pixiList = [];
 
@@ -32,10 +31,6 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   selectedLabel.transform.updateTransform = frozenXTransform;
   subscribeToMoveEvents(selectedLabel, function(pos) {
     updateSegment({ vs: pos.x }, selectedLabelPointId);
-    // ghostDiffDispatch({
-    //   type: TAG_MOVE,
-    //   vs: pos.x
-    // });
   });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;

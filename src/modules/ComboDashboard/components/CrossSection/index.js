@@ -14,7 +14,7 @@ const CrossSection = props => {
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
-  const [{}, , { updateSegment }] = useComboContainer();
+  const [, , { updateSegment }] = useComboContainer();
   const {
     wellPlan,
     selectedSections,

@@ -2,16 +2,6 @@ import * as PIXI from "pixi.js";
 import memoizeOne from "memoize-one";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
-import {
-  DIP_BOT_MOVE,
-  DIP_TOT_MOVE,
-  FAULT_BOT_MOVE,
-  FAULT_TOT_MOVE,
-  FAULT_END,
-  PA_MOVE,
-  PA_END,
-  DIP_END
-} from "../../../../constants/interactivePAStatus";
 
 function drawCircle(circle, lineColor, fillColor) {
   circle.clear();
@@ -39,7 +29,7 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { ghostDiffDispatch, updateSegment } = props;
+  const { updateSegment } = props;
   const red = 0xee2211;
   const white = 0xffffff;
   let prevMd, selectedMd;
@@ -53,70 +43,20 @@ function interactiveProjection(parent, props) {
   const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
 
-  const prevTot = createCircle(
-    container,
-    red,
-    red,
-    function(pos) {
-      updateSegment({ tot: pos.y }, prevMd);
-      // ghostDiffDispatch({
-      //   type: FAULT_TOT_MOVE,
-      //   tot: pos.y
-      // });
-    },
-    () => {
-      ghostDiffDispatch({ type: FAULT_END });
-    }
-  );
-  const prevBot = createCircle(
-    container,
-    red,
-    red,
-    function(pos) {
-      updateSegment({ bot: pos.y }, prevMd);
-      // ghostDiffDispatch({
-      //   type: FAULT_BOT_MOVE,
-      //   bot: pos.y
-      // });
-    },
-    () => {
-      ghostDiffDispatch({ type: FAULT_END });
-    }
-  );
+  const prevTot = createCircle(container, red, red, function(pos) {
+    updateSegment({ tot: pos.y }, prevMd);
+  });
+  const prevBot = createCircle(container, red, red, function(pos) {
+    updateSegment({ bot: pos.y }, prevMd);
+  });
 
-  const currTot = createCircle(
-    container,
-    white,
-    red,
-    function(pos) {
-      updateSegment({ tot: pos.y, vs: pos.x }, selectedMd);
-      // ghostDiffDispatch({
-      //   type: DIP_TOT_MOVE,
-      //   vs: pos.x,
-      //   tot: pos.y
-      // });
-    },
-    () => {
-      ghostDiffDispatch({ type: DIP_END });
-    }
-  );
+  const currTot = createCircle(container, white, red, function(pos) {
+    updateSegment({ tot: pos.y, vs: pos.x }, selectedMd);
+  });
 
-  const currBot = createCircle(
-    container,
-    white,
-    red,
-    function(pos) {
-      updateSegment({ bot: pos.y, vs: pos.x }, selectedMd);
-      // ghostDiffDispatch({
-      //   type: DIP_BOT_MOVE,
-      //   vs: pos.x,
-      //   bot: pos.y
-      // });
-    },
-    () => {
-      ghostDiffDispatch({ type: DIP_END });
-    }
-  );
+  const currBot = createCircle(container, white, red, function(pos) {
+    updateSegment({ bot: pos.y, vs: pos.x }, selectedMd);
+  });
 
   const memoSetKnobColor = memoizeOne(color => {
     drawCircle(prevTot, color, color);
