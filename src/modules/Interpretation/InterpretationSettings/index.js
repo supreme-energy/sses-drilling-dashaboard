@@ -2,12 +2,16 @@ import React from "react";
 import { Box, FormControlLabel, Switch, Typography } from "@material-ui/core";
 import css from "./styles.scss";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
+import VisibilitySettings from "./VisibilitySettings";
+import classNames from "classnames";
+import NavigationSettings from "./NavigationSettings";
+import ModelSurveySettings from "./ModelSurveySettings";
 
 export default function InterpretationSettings({ className }) {
   const [state, dispatch] = useComboContainer();
   const { draftMode } = state;
   return (
-    <Box display="flex" flexDirection="column" className={className}>
+    <Box display="flex" flexDirection="column" className={classNames(className, css.root)}>
       <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle2">Draft Current</Typography>
         <FormControlLabel
@@ -20,6 +24,11 @@ export default function InterpretationSettings({ className }) {
           labelPlacement="end"
         />
       </Box>
+      <Box display="flex" flexDirection="row">
+        <VisibilitySettings mr={3} />
+        <NavigationSettings />
+      </Box>
+      <ModelSurveySettings mt={2} />
     </Box>
   );
 }

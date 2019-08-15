@@ -9,7 +9,6 @@ import useViewport from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
 import PixiLine from "../../../components/PixiLine";
-import LogDataLine from "./LogDataLine";
 import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
@@ -21,6 +20,7 @@ import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
 import TCLLine from "./TCLLine";
 import Formations from "./Formations";
+import LogLines from "../LogLines";
 
 const gridGutter = 60;
 
@@ -98,7 +98,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [height, controlLogs, updateView]
   );
 
-  const [{ draftMode }] = useComboContainer();
   const [segments] = useComputedSegments(wellId);
 
   useEffect(
@@ -112,11 +111,28 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [view, viewport, updateView]
   );
 
+  const [{ surveyVisibility, surveyPrevVisibility, draftMode }] = useComboContainer();
+
   useEffect(
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, width, height, controlLogs, selectedWellLog, gr, draftMode, segments, view, viewport]
+    [
+      refresh,
+      stage,
+      width,
+      height,
+      controlLogs,
+      selectedWellLog,
+      gr,
+      draftMode,
+      segments,
+      view,
+      viewport,
+      surveyVisibility,
+      surveyPrevVisibility,
+      draftMode
+    ]
   );
 
   return (
@@ -130,21 +146,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       ))}
       {/* todo use this when add aditional logs
       {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
-      {logList.map((log, index) => {
-        const selected = selectedWellLog && log.id === selectedWellLog.id;
-
-        return (
-          <LogDataLine
-            refresh={refresh}
-            log={log}
-            key={`${log.id}`}
-            draft={draftMode && selected}
-            selected={selected}
-            wellId={wellId}
-            container={viewport}
-          />
-        );
-      })}
+      <LogLines wellId={wellId} logList={logList} container={viewport} selectedWellLog={selectedWellLog} />
 
       <Grid
         container={viewport}

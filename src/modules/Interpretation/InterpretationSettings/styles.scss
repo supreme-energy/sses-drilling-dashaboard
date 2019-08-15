@@ -1,3 +1,40 @@
-.label {
-    font-size: 14px;
+@import "../../../styles/base";
+
+.root {
+    .label {
+        font-size: 14px;
+    }
+    
+    .title {
+        color: $gold;
+    }
+
+    .tab {
+        min-width: auto;
+    }
+
+    .borderedInput {
+        margin-top: 0px;
+        width: 60px;
+       input {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        width: auto;
+        -webkit-appearance: none; 
+        margin: 0; 
+       }
+    }
+
+    .arrowBottom {
+        transform: rotate(90deg);
+    }
+
+    .arrowTop {
+        transform: rotate(-90deg);
+    }
+
+    .valueInput {
+        width: 60px;
+        padding: 0px;
+    }
 }

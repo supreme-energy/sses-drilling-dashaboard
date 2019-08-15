@@ -23,7 +23,10 @@ const PixiLine = forwardRef(({ container, data, mapData, color, nativeLines, vie
     for (let i = 0; i <= chunks.length - 1; i++) {
       lines.push(lineGraphic.addChild(new PIXI.Graphics()));
     }
-    return () => lines.forEach(line => lineGraphic.removeChild(line));
+    return () => {
+      lines.forEach(line => lineGraphic.removeChild(line));
+      lines.length = 0;
+    };
   }, [lineGraphic, chunks.length, lines]);
 
   useEffect(
