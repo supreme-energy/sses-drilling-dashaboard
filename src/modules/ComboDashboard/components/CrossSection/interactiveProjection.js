@@ -39,9 +39,10 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { ghostDiffDispatch } = props;
+  const { ghostDiffDispatch, updateSegment } = props;
   const red = 0xee2211;
   const white = 0xffffff;
+  let prevMd, selectedMd;
 
   const totLine = container.addChild(new PIXI.Graphics());
   totLine.transform.updateTransform = frozenXYTransform;
@@ -57,10 +58,11 @@ function interactiveProjection(parent, props) {
     red,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: FAULT_TOT_MOVE,
-        tot: pos.y
-      });
+      updateSegment({ tot: pos.y }, prevMd);
+      // ghostDiffDispatch({
+      //   type: FAULT_TOT_MOVE,
+      //   tot: pos.y
+      // });
     },
     () => {
       ghostDiffDispatch({ type: FAULT_END });
@@ -71,10 +73,11 @@ function interactiveProjection(parent, props) {
     red,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: FAULT_BOT_MOVE,
-        bot: pos.y
-      });
+      updateSegment({ bot: pos.y }, prevMd);
+      // ghostDiffDispatch({
+      //   type: FAULT_BOT_MOVE,
+      //   bot: pos.y
+      // });
     },
     () => {
       ghostDiffDispatch({ type: FAULT_END });
@@ -86,11 +89,12 @@ function interactiveProjection(parent, props) {
     white,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: DIP_TOT_MOVE,
-        vs: pos.x,
-        tot: pos.y
-      });
+      updateSegment({ tot: pos.y, vs: pos.x }, selectedMd);
+      // ghostDiffDispatch({
+      //   type: DIP_TOT_MOVE,
+      //   vs: pos.x,
+      //   tot: pos.y
+      // });
     },
     () => {
       ghostDiffDispatch({ type: DIP_END });
@@ -102,11 +106,12 @@ function interactiveProjection(parent, props) {
     white,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: DIP_BOT_MOVE,
-        vs: pos.x,
-        bot: pos.y
-      });
+      updateSegment({ bot: pos.y, vs: pos.x }, selectedMd);
+      // ghostDiffDispatch({
+      //   type: DIP_BOT_MOVE,
+      //   vs: pos.x,
+      //   bot: pos.y
+      // });
     },
     () => {
       ghostDiffDispatch({ type: DIP_END });
@@ -127,11 +132,12 @@ function interactiveProjection(parent, props) {
   subscribeToMoveEvents(
     paMarker,
     function(pos) {
-      ghostDiffDispatch({
-        type: PA_MOVE,
-        tvd: pos.y,
-        vs: pos.x
-      });
+      updateSegment({ tvd: pos.y, vs: pos.x }, selectedMd);
+      // ghostDiffDispatch({
+      //   type: PA_MOVE,
+      //   tvd: pos.y,
+      //   vs: pos.x
+      // });
     },
     () => {
       ghostDiffDispatch({ type: PA_END });
@@ -154,6 +160,8 @@ function interactiveProjection(parent, props) {
     }
     const prev = calcSections[selectedIndex - 1];
     const pa = calcSections[selectedIndex];
+    prevMd = prev.md;
+    selectedMd = pa.md;
 
     memoSetKnobColor(pa.selectedColor);
     prevTot.position.x = prev.vs;

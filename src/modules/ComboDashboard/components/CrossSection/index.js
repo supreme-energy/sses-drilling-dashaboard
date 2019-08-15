@@ -5,6 +5,7 @@ import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
+import { useComboContainer } from "../../containers/store";
 
 const pixiApp = new PixiCrossSection();
 
@@ -13,6 +14,7 @@ const CrossSection = props => {
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
+  const [{}, , { updateSegment }] = useComboContainer();
   const {
     wellPlan,
     selectedSections,
@@ -70,7 +72,21 @@ const CrossSection = props => {
     const currentCanvas = canvas.current;
 
     pixiApp.init(
-      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, xField, yField, yAxisDirection },
+      {
+        ...dataObj,
+        ...props,
+        view,
+        updateView,
+        scale,
+        mode,
+        setMode,
+        mouse,
+        setMouse,
+        xField,
+        yField,
+        yAxisDirection,
+        updateSegment
+      },
       view,
       updateView
     );
@@ -110,7 +126,8 @@ const CrossSection = props => {
       yField,
       viewDirection,
       yAxisDirection,
-      addProjection
+      addProjection,
+      updateSegment
     });
   }, [
     view.x,
@@ -138,7 +155,8 @@ const CrossSection = props => {
     yField,
     viewDirection,
     yAxisDirection,
-    addProjection
+    addProjection,
+    updateSegment
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
