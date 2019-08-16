@@ -452,7 +452,7 @@ const projectionsTransform = memoizeOne(projections => {
   return transform(projections).map((p, i) => {
     return {
       ...p,
-      name: `PA${i}`,
+      name: `PA${i + 1}`,
       isProjection: true,
       color: 0xee2211,
       selectedColor: 0xee2211,
