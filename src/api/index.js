@@ -14,6 +14,7 @@ import memoize from "react-powertools/memoize";
 import serialize from "react-powertools/serialize";
 import { useAppState } from "../modules/App/Containers";
 import useRef from "react-powertools/hooks/useRef";
+import { CURVE } from "../constants/wellSections";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -32,8 +33,8 @@ export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
-export const GET_WELL_OPERATION_HOURS = "/welloperationhours.php";
-export const GET_KPI = "/kpis.php";
+export const GET_WELL_OPERATION_HOURS = "/analytics/rig_states.php";
+export const GET_KPI = "/analytics/overview.php";
 export const GET_EMAIL_CONTACTS = "/email_contacts/list.php";
 export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
 export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
@@ -536,27 +537,33 @@ export function useWellOverviewKPI(wellId) {
     },
     {
       transform: data => {
-        return data.data.map(d => ({
-          type: d.INTERVAL_NAME,
-          id: _.uniqueId(),
-          rop: Number(d.ROP_AVG),
-          depth: Number(d.HOLE_DEPTH_END),
-          holeDepthStart: Number(d.HOLE_DEPTH_START),
-          bitSize: Number(d.holesize),
-          casingSize: Number(d.casingSize),
-          startTime: Number(d.DT_START),
-          totalHours: Number(d.TOTAL_HOURS),
-          drillingHours: Number(d.D_HOURS),
-          landingPoint: d.landingPoint,
-          toolFaceEfficiency: Number(d.TOOLFACE_EFFICIENCY_PCT),
-          zoneAccuracy: 100, // TBD
-          targetAccuracy: 98, // TBD,
-          footageDrilled: Number(d.FOOTAGE_DRILLED),
-          avgSliding: Number(d.ROP_AVG_SLIDING),
-          avgRotating: Number(d.ROP_AVG_ROTATING),
-          slidingPct: Number(d.SLIDE_PCT_D),
-          rotatingPct: Number(d.ROTATE_PCT_D)
-        }));
+        // Take the first job, which is the default for now
+        const job = data[0];
+        const phases = Object.keys(job).filter(p => p !== "id" && p !== "uid" && p !== "job" && job[p].interval_name);
+        return phases.map(phase => {
+          const phaseObj = job[phase];
+
+          return {
+            type: phaseObj.interval_name,
+            id: _.uniqueId(),
+            rop: Number(phaseObj.rop_avg),
+            depth: Number(phaseObj.hole_depth_end),
+            holeDepthStart: Number(phaseObj.hole_depth_start),
+            bitSize: Number(phaseObj.holesize),
+            casingSize: Number(phaseObj.casing_size),
+            startTime: Number(phaseObj.dt_start),
+            totalHours: Number(phaseObj.total_hours),
+            drillingHours: Number(phaseObj.drill_hours),
+            landingPoint: phaseObj.interval_name === CURVE ? phaseObj.hole_depth_end : 0,
+            toolFaceEfficiency: Number(phaseObj.tool_face_effeciency),
+            zoneAccuracy: 100, // TBD
+            targetAccuracy: 98, // TBD,
+            avgSliding: Number(phaseObj.rop_avg_sliding),
+            avgRotating: Number(phaseObj.rop_avg_rotating),
+            slidingPct: Number(phaseObj.slide_pct_d),
+            rotatingPct: Number(phaseObj.rotate_pct_d)
+          };
+        });
       }
     }
   );
@@ -564,6 +571,7 @@ export function useWellOverviewKPI(wellId) {
   data = data || EMPTY_ARRAY;
 
   const bySegment = useMemo(() => group(data, d => d.type), [data]);
+
   return {
     data,
     bySegment
@@ -583,20 +591,13 @@ export function useTimeSliderData() {
   return data || EMPTY_ARRAY;
 }
 
-const wellOperationTransform = memoizeOne(transform);
-
 export function useWellOperationHours(wellId) {
-  const [data] = useFetch(
-    {
-      path: GET_WELL_OPERATION_HOURS,
-      query: {
-        seldbname: wellId
-      }
-    },
-    {
-      transform: wellOperationTransform
+  const [data] = useFetch({
+    path: GET_WELL_OPERATION_HOURS,
+    query: {
+      seldbname: wellId
     }
-  );
+  });
   return data || EMPTY_ARRAY;
 }
 

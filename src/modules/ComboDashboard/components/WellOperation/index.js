@@ -2,6 +2,7 @@ import React, { useRef, useMemo, useState, useEffect, useCallback } from "react"
 import { scaleLinear } from "d3-scale";
 import { max } from "d3-array";
 import { useSize } from "react-hook-size";
+import _ from "lodash";
 
 import { useWellOperationHours } from "../../../../api";
 import PixiContainer from "../../../../components/PixiContainer";
@@ -15,22 +16,39 @@ import classes from "./WellOperation.scss";
 const gridGutter = 10;
 const barWidth = 10;
 const spacingFactor = 1.3;
-const textAnchor = [0, 1];
+const textAnchor = [0.2, 1];
 
-function computeInitialViewYScaleValue(data) {
-  if (data && data.length > 0) {
+function computeInitialViewYScaleValue(rigStateValues) {
+  if (rigStateValues && rigStateValues.length > 0) {
     return scaleLinear()
-      .domain([0, max(data, d => d.value)])
+      .domain([0, max(rigStateValues)])
       .range([0, 1]);
   }
 }
 
-function computeInitialViewXScaleValue(data) {
-  if (data && data.length > 0) {
+function computeInitialViewXScaleValue(rigStateValues) {
+  if (rigStateValues && rigStateValues.length > 0) {
     return scaleLinear()
-      .domain([0, data.length * barWidth * spacingFactor])
+      .domain([0, rigStateValues.length * barWidth * spacingFactor])
       .range([0, 1]);
   }
+}
+
+function toTitleCase(text) {
+  let string;
+
+  string = text.toLowerCase();
+
+  if (text.includes("_")) {
+    let multiWord = string.split("_");
+    for (var i = 0; i < multiWord.length; i++) {
+      multiWord[i] = multiWord[i].charAt(0).toUpperCase() + multiWord[i].slice(1);
+    }
+
+    return multiWord.join(" ");
+  }
+
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function WellOperation({ wellId }) {
@@ -39,16 +57,19 @@ function WellOperation({ wellId }) {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
-  const maxValue = useMemo(() => max(data, d => d.value), [data]);
+  const rigState = _.get(data, "[0].rigstates", {});
+  const rigStateArray = useMemo(() => _.map(rigState, (value, key) => ({ [key]: value })), [rigState]);
+  const rigStateValues = useMemo(() => Object.values(rigState), [rigState]);
+  const maxValue = useMemo(() => max(rigStateValues), [rigStateValues]);
 
   const getInitialViewYScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
-    [data]
+    () => (rigStateValues && rigStateValues.length ? computeInitialViewYScaleValue(rigStateValues) : () => 1),
+    [rigStateValues]
   );
 
   const getInitialViewXScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
-    [data]
+    () => (rigStateValues && rigStateValues.length ? computeInitialViewXScaleValue(rigStateValues) : () => 1),
+    [rigStateValues]
   );
 
   const [view, updateView] = useState({
@@ -57,8 +78,6 @@ function WellOperation({ wellId }) {
     xScale: 1,
     yScale: 1
   });
-
-  const scaleInitialized = useRef(false);
 
   const viewportContainer = useRef(null);
 
@@ -86,9 +105,8 @@ function WellOperation({ wellId }) {
   // set initial scale
   useEffect(
     function setInitialXScale() {
-      if (data && data.length && width && height && !scaleInitialized.current) {
+      if (data && data.length && width && height) {
         onReset();
-        scaleInitialized.current = true;
       }
     },
     [width, data, height, onReset]
@@ -101,14 +119,18 @@ function WellOperation({ wellId }) {
     [refresh, stage, data, view, width, height]
   );
 
+  console.log(view, width, gridGutter, data.length);
   return (
     <WidgetCard className={classes.wellOperation} title="Hours of Well Operation" hideMenu>
       <div className={classes.wellOperationCanvas} ref={canvasRef}>
         <PixiContainer ref={viewportContainer} container={stage} />
-        {data.map((d, index) => {
+        {rigStateArray.map((obj, index) => {
+          const key = Object.keys(obj)[0];
           const xValue = spacingFactor * index * barWidth;
+          const title = toTitleCase(key);
+          const space = title.length <= 6 ? 0.6 : 0;
           return (
-            <React.Fragment key={d.type}>
+            <React.Fragment key={key}>
               <PixiRectangle
                 updateTransform={null}
                 container={viewport}
@@ -121,7 +143,7 @@ function WellOperation({ wellId }) {
                 updateTransform={null}
                 container={viewport}
                 width={barWidth}
-                height={d.value}
+                height={obj[key]}
                 x={xValue}
                 backgroundColor={0xd4d1af}
               />
@@ -130,18 +152,17 @@ function WellOperation({ wellId }) {
                 anchor={textAnchor}
                 container={viewport}
                 x={xValue + 3.5}
-                text={d.value}
+                text={obj[key]}
                 color={0x000000}
                 fontSize={12}
               />
               <PixiText
                 ref={textRef}
                 container={viewport}
-                x={xValue}
-                text={d.type}
+                x={xValue + space}
+                text={title}
                 color={0x000000}
                 fontSize={11}
-                align="center"
                 wrapWidth={42}
                 breakWords
                 wrap

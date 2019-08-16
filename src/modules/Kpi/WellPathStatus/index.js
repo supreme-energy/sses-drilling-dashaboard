@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { line, curveBundle } from "d3-shape";
-import { ON_VERTICAL, ON_CURVE, ON_LATERAL } from "../../../constants/wellPathStatus";
+import _ from "lodash";
+import { ON_VERTICAL, ON_CURVE, ON_LATERAL, ON_LOAD } from "../../../constants/wellPathStatus";
 import { RED, BLUE, GRAY } from "../../../constants/colors";
-import { useKpi } from "../../../api";
+import { useKpi, useWellOverviewKPI } from "../../../api";
 import KpiItem from "../KpiItem";
 
 import classes from "./styles.scss";
@@ -34,6 +35,11 @@ const colorByStatus = {
     top: BLUE,
     curve: BLUE,
     lateral: RED
+  },
+  [ON_LOAD]: {
+    top: GRAY,
+    curve: GRAY,
+    lateral: GRAY
   }
 };
 
@@ -54,7 +60,7 @@ const WellPathStatus = ({ status }) => {
 };
 
 WellPathStatus.propTypes = {
-  status: PropTypes.oneOf([ON_VERTICAL, ON_CURVE, ON_LATERAL])
+  status: PropTypes.oneOf([ON_VERTICAL, ON_CURVE, ON_LATERAL, ON_LOAD])
 };
 
 WellPathStatus.defaultProps = {
@@ -62,10 +68,14 @@ WellPathStatus.defaultProps = {
 };
 
 export default function Status({ wellId }) {
-  const { wellPathStatus, depth, wellRemaining } = useKpi(wellId);
+  const { wellRemaining } = useKpi(wellId);
+  const { data } = useWellOverviewKPI(wellId);
+  const phase = _.get(data, `[${data.length - 1}].type`);
+  const depth = _.get(data, `[${data.length - 1}].depth`);
+
   return (
     <div className={classes.container}>
-      <span className={classes.status}>{wellPathStatus}</span>
+      <span className={classes.status}>{phase ? `On ${phase}` : "-"}</span>
       <KpiItem
         label={`Remaining ${percentage(wellRemaining)}`}
         renderValue={renderValue}
@@ -74,7 +84,7 @@ export default function Status({ wellId }) {
         format={noDecimals}
         className={classes.kpi}
       />
-      <WellPathStatus status={wellPathStatus} />
+      <WellPathStatus status={phase ? `On ${phase}` : ON_LOAD} />
     </div>
   );
 }
