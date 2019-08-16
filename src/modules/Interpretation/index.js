@@ -6,6 +6,8 @@ import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
 import classNames from "classnames";
+import CloudServerModal from "./components/CloudServerModal";
+
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -23,8 +25,8 @@ function Interpretation({
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
 
   return (
-    <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
-      <Typography variant="subtitle1">Interpretation</Typography>
+    <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
+      <CloudServerModal wellId={wellId} />
       <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} gr={gr} logList={logList} />
       <div className="layout horizontal">
         <IconButton

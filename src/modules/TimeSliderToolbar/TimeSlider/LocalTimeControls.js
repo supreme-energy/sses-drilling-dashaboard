@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
 
-import { useInterval } from "./useInterval";
+import useInterval from "../../../hooks/useInterval";
 import classes from "./TimeSlider.scss";
 
 const LocalTimeControls = React.memo(({ setSliderStep, isSpeeding, isPlaying }) => {

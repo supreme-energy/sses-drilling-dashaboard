@@ -44,6 +44,7 @@ export const UPDATE_WELL_LOG = "welllog/update.php";
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
+const GET_MOCK_SURVEY_CHECK = "/newSurveyCheck.json";
 
 const options = {
   shouldSort: true,
@@ -97,6 +98,7 @@ export function useWellInfo(wellId) {
   const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
+  const appInfo = data && data.appinfo;
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
@@ -170,6 +172,32 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, emailInfo]
   );
 
+  const updateNotificationAlarm = useCallback(
+    ({ wellId, body }) => {
+      const optimisticResult = {
+        ...data,
+        appinfo: {
+          ...appInfo,
+          ...body
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          appinfo: body
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, appInfo]
+  );
+
   const {
     wellSurfaceLocationLocal,
     wellSurfaceLocation,
@@ -223,12 +251,14 @@ export function useWellInfo(wellId) {
       wellPBHLLocal,
       wellInfo,
       emailInfo,
+      appInfo,
       transform
     },
     isLoading,
     updateWell,
     refreshStore,
-    updateEmail
+    updateEmail,
+    updateNotificationAlarm
   ];
 }
 
@@ -689,6 +719,21 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
       },
     {
       transform: additionalDataLogTransform
+    }
+  );
+  return data || EMPTY_OBJECT;
+}
+
+export function useSurveyCheck(wellId) {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_SURVEY_CHECK,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      id: "mock"
     }
   );
   return data || EMPTY_OBJECT;
