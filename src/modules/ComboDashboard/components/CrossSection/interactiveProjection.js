@@ -103,6 +103,7 @@ function interactiveProjection(parent, props) {
     currBot.position.x = pa.vs;
     currBot.position.y = pa.bot - pa.fault;
 
+    paMarker.visible = pa.isProjection;
     paMarker.position.x = pa.vs;
     paMarker.position.y = pa.tvd;
 
