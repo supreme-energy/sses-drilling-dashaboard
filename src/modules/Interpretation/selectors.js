@@ -247,36 +247,37 @@ const recomputeSurveysAndProjections = memoizeOne(
     return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const pendingState = (draftMode && selectedMd === currSvy.md ? {} : pendingSegmentsState[currSvy.md]) || {};
+      const combinedSvy = { ...currSvy, ...pendingState };
 
       if (index === 0) {
         let ca = Math.PI / 2;
-        if (currSvy.ns !== 0) {
-          ca = Math.atan2(currSvy.ew, currSvy.ns);
+        if (combinedSvy.ns !== 0) {
+          ca = Math.atan2(combinedSvy.ew, combinedSvy.ns);
         }
-        let cd = currSvy.ns;
+        let cd = combinedSvy.ns;
         if (ca !== 0.0) {
-          cd = Math.abs(currSvy.ew / Math.sin(ca));
+          cd = Math.abs(combinedSvy.ew / Math.sin(ca));
         }
         ca = toDegrees(ca);
         if (ca < 0.0) ca += 360.0;
         acc[index] = {
-          ...currSvy,
+          ...combinedSvy,
           ca,
           cd
         };
       } else {
         let dogLegSeverity = 0;
-        const courseLength = prevSvy.md - currSvy.md;
+        const courseLength = combinedSvy.md - prevSvy.md;
         const pInc = toRadians(prevSvy.inc);
-        const cInc = toRadians(currSvy.inc);
+        const cInc = toRadians(combinedSvy.inc);
         const pAzm = toRadians(prevSvy.azm);
-        let cAzm = toRadians(currSvy.azm);
+        let cAzm = toRadians(combinedSvy.azm);
         let dogleg = Math.acos(
           Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
         );
         if (isNaN(dogleg)) {
-          currSvy.azm += 0.01;
-          cAzm = toRadians(currSvy.azm);
+          combinedSvy.azm += 0.01;
+          cAzm = toRadians(combinedSvy.azm);
           dogleg = Math.acos(Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm));
         }
         if (courseLength > 0) {
@@ -284,12 +285,13 @@ const recomputeSurveysAndProjections = memoizeOne(
           //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
           dogLegSeverity = (dogleg * 100.0) / courseLength;
         }
+        // Radius also called curvature factor
         let radius = 1;
         if (dogleg !== 0.0) {
           radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
         }
 
-        const tvd = prevSvy.tvd - (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
+        const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
         if (!tvd) {
           console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
         }
@@ -310,23 +312,23 @@ const recomputeSurveysAndProjections = memoizeOne(
           cd = ew / Math.sin(ca);
         }
 
-        const vs = Math.cos(ca - propazm) * cd;
+        const vs = Math.cos(ca - toRadians(propazm)) * cd;
 
         const dipPending = pendingState.dip !== undefined;
         const faultPending = pendingState.fault !== undefined;
         const dip = dipPending ? pendingState.dip : currSvy.dip;
         const fault = faultPending ? pendingState.fault : currSvy.fault;
-        const diff = calcTot(0, dip, currSvy.vs, prevSvy.vs, fault);
-        const tcl = prevSvy.tcl + diff;
-        const tot = prevSvy.tot + diff;
-        const bot = prevSvy.bot + diff;
+        const totDiff = calcTot(0, dip, currSvy.vs, prevSvy.vs, fault);
+        const tcl = prevSvy.tcl + totDiff;
+        const tot = prevSvy.tot + totDiff;
+        const bot = prevSvy.bot + totDiff;
 
         const caDeg = toDegrees(ca);
 
         acc[index] = {
-          ...currSvy,
+          ...combinedSvy,
           tvd,
-          // vs,
+          vs,
           dl: toDegrees(dogLegSeverity),
           cl: courseLength,
           ca: caDeg < 0 ? caDeg + 360 : ca,
@@ -348,7 +350,7 @@ const recomputeSurveysAndProjections = memoizeOne(
 
 export function useComputedSurveysAndProjections() {
   const { wellId } = useWellIdContainer();
-  // const [{ wellInfo }] = useWellInfo(wellId);
+  const [{ wellInfo }] = useWellInfo(wellId);
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
@@ -358,7 +360,7 @@ export function useComputedSurveysAndProjections() {
     draftMode,
     selectedMd,
     pendingSegmentsState,
-    300 // TODO: replace this garbage with the actual propazm
+    wellInfo ? wellInfo.propazm : 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
