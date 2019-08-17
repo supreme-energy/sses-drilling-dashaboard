@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import AddCircle from "@material-ui/icons/AddCircle";
@@ -14,13 +14,21 @@ import Chart from "./Chart";
 import classes from "./styles.scss";
 
 function LogData({ wellId }) {
-  const [selectedGraphs, setSelectedGraph] = useState({ GR: true });
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
+  const [selectedGraphs, setSelectedGraph] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
+  const graphInitialized = useRef(false);
 
+  const currentGraphs = useMemo(() => _.keys(_.pickBy(selectedGraphs, "checked")), [selectedGraphs]);
   const availableGraphs = useMemo(() => {
-    return data.filter(l => l.data_count > 0).map(l => l.label);
+    return data
+      .filter(l => l.data_count > 0)
+      .map(({ label, color }) => {
+        return { label, color };
+      });
   }, [data]);
+  const menuItems = useMemo(() => availableGraphs.map(({ label }) => label), [availableGraphs]);
+  const areGraphsSelected = useMemo(() => _.some(selectedGraphs, "checked"), [selectedGraphs]);
 
   const handleAddChart = event => {
     setAnchorEl(event.currentTarget);
@@ -35,6 +43,13 @@ function LogData({ wellId }) {
   };
 
   const handleImport = () => {};
+
+  useEffect(() => {
+    if (!graphInitialized.current && menuItems.length) {
+      setSelectedGraph({ [menuItems[0]]: { checked: true } });
+      graphInitialized.current = true;
+    }
+  }, [menuItems]);
 
   if (!availableGraphs.length) {
     return (
@@ -51,11 +66,10 @@ function LogData({ wellId }) {
     );
   }
 
-  console.log(_.filter(selectedGraphs, (value, key) => value).length);
   return (
     <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
-      {_.map(selectedGraphs, (value, graph) => {
-        if (value && !_.isEmpty(dataBySection)) {
+      {currentGraphs.map(graph => {
+        if (!_.isEmpty(dataBySection)) {
           const logId = dataBySection[graph].id;
           return (
             <Chart
@@ -72,7 +86,7 @@ function LogData({ wellId }) {
       })}
       <Button
         className={classNames(classes.addChartButton, {
-          [classes.addChartButtonInitial]: !_.filter(selectedGraphs, (value, key) => value).length
+          [classes.addChartButtonInitial]: !areGraphsSelected
         })}
         color="secondary"
         onClick={handleAddChart}
@@ -81,11 +95,12 @@ function LogData({ wellId }) {
         Add Chart
       </Button>
       <LogMenu
-        menuItems={availableGraphs}
+        menuItems={menuItems}
         selectedGraphs={selectedGraphs}
         setSelectedGraph={setSelectedGraph}
         handleClose={handleCloseMenu}
         anchorEl={anchorEl}
+        availableGraphs={availableGraphs}
       />
     </WidgetCard>
   );

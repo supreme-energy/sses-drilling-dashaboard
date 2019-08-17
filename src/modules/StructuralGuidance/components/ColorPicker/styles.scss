@@ -1,0 +1,50 @@
+@import "../../../../styles/base";
+
+.colorPicker {
+    width: 350px;
+
+    button {
+        outline: none;
+    }
+
+    .saturation {
+        height: 200px; 
+        width: 100%; 
+        margin-bottom: 10px;
+        position: relative; 
+    }
+
+    .alpha, .hue {
+        height: 10px;
+        width: 250px; 
+        position: relative;
+        margin: 10px 5px 0px 10px;
+    }
+
+    .input {
+        margin: 5px;
+        align-items: flex-start;
+
+        span {
+            color: $gray;
+        }
+    }
+
+    .button {
+        margin-right: 10px;
+    }
+}
+
+.slider {
+    height: 15px;
+    width: 15px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    display: inline-block;
+    -moz-box-shadow:    0 1px 1px 1px #ccc;
+    -webkit-box-shadow: 0 1px 1px 1px #ccc;
+    box-shadow:         0 1px 1px 1px #ccc;
+    position: relative;
+    bottom: 6px;
+    right: 8px;
+}

@@ -29,7 +29,9 @@ const mapValue = d => [Number(d.value), Number(d.md)];
 const gridGutter = 40;
 
 function GraphComponent({ wellId, logId, isFirstGraph }) {
-  const { label, color, data = [] } = useAdditionalDataLog(wellId, logId);
+  const {
+    data: { label, color, data = [] }
+  } = useAdditionalDataLog(wellId, logId);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);

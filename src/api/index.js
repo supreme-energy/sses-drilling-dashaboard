@@ -40,6 +40,7 @@ export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
 export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
 export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
+export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -708,7 +709,7 @@ const additionalDataLogTransform = memoizeOne(data => {
 });
 
 export function useAdditionalDataLog(wellId, id, loadLog) {
-  const [data] = useFetch(
+  const [data, , , , , { fetch }] = useFetch(
     id !== undefined &&
       wellId !== undefined && {
         path: GET_ADDITIONAL_DATA_LOG,
@@ -721,7 +722,22 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
       transform: additionalDataLogTransform
     }
   );
-  return data || EMPTY_OBJECT;
+
+  const updateAdditionalLogDetails = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPDATE_ADDITIONAL_LOG,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, updateAdditionalLogDetails };
 }
 
 export function useSurveyCheck(wellId) {

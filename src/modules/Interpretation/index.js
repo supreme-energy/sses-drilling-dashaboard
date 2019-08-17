@@ -21,7 +21,7 @@ function Interpretation({
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogsContainer();
   const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
-  const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
+  const { data: gr } = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
 
   return (

@@ -4,7 +4,10 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform } from "../modules/ComboDashboard/components/CrossSection/customPixiTransforms";
 
 const PixiText = forwardRef(
-  ({ container, fontSize, color, x, y, text, anchor, updateTransform, wrap, wrapWidth, breakWords, align }, ref) => {
+  (
+    { container, fontSize, color, x, y, text, anchor, updateTransform, wrap, wrapWidth, breakWords, align, rotation },
+    ref
+  ) => {
     const {
       current: { pixiText, initialUpdateTransform }
     } = useRef(() => {
@@ -39,6 +42,13 @@ const PixiText = forwardRef(
         pixiText.y = y;
       },
       [x, y, pixiText]
+    );
+
+    useEffect(
+      function rotateText() {
+        pixiText.rotation = rotation || 0;
+      },
+      [rotation, pixiText]
     );
 
     useEffect(
