@@ -94,25 +94,25 @@ function interactiveProjection(parent, props) {
 
     memoSetKnobColor(pa.selectedColor);
     prevTot.position.x = prev.vs;
-    prevTot.position.y = prev.tot;
+    prevTot.position.y = prev.tot + pa.fault;
     prevBot.position.x = prev.vs;
-    prevBot.position.y = prev.bot;
+    prevBot.position.y = prev.bot + pa.fault;
 
     currTot.position.x = pa.vs;
-    currTot.position.y = pa.tot - pa.fault;
+    currTot.position.y = pa.tot;
     currBot.position.x = pa.vs;
-    currBot.position.y = pa.bot - pa.fault;
+    currBot.position.y = pa.bot;
 
     paMarker.visible = pa.isProjection;
     paMarker.position.x = pa.vs;
     paMarker.position.y = pa.tvd;
 
     totLine.clear().lineStyle(2, pa.selectedColor, 1);
-    totLine.moveTo(...scale(prev.vs, prev.tot)).lineTo(...scale(pa.vs, pa.tot - pa.fault));
+    totLine.moveTo(...scale(prev.vs, prev.tot + pa.fault)).lineTo(...scale(pa.vs, pa.tot));
     tclLine.clear().lineStyle(2, pa.selectedColor, 1);
-    tclLine.moveTo(...scale(prev.vs, prev.tcl)).lineTo(...scale(pa.vs, pa.tcl - pa.fault));
+    tclLine.moveTo(...scale(prev.vs, prev.tcl + pa.fault)).lineTo(...scale(pa.vs, pa.tcl));
     botLine.clear().lineStyle(2, pa.selectedColor, 1);
-    botLine.moveTo(...scale(prev.vs, prev.bot)).lineTo(...scale(pa.vs, pa.bot - pa.fault));
+    botLine.moveTo(...scale(prev.vs, prev.bot + pa.fault)).lineTo(...scale(pa.vs, pa.bot));
   };
 }
 
