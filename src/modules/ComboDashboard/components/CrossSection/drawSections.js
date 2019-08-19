@@ -7,6 +7,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   const { updateSegments } = props;
   const buttonHeight = 10;
   const pixiList = [];
+  let currSelected;
 
   const bg = container.addChild(new PIXI.Graphics());
   bg.transform.updateTransform = frozenXYTransform;
@@ -30,7 +31,9 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
   subscribeToMoveEvents(selectedLabel, function(pos) {
-    updateSegments({ [selectedLabelPointId]: { vs: pos.x } });
+    if (currSelected.isProjection) {
+      updateSegments({ [currSelected.md]: { vs: pos.x } });
+    }
   });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
@@ -55,7 +58,6 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
   let calcSections = props.calcSections;
   let setSelectedMd = props.setSelectedMd;
-  let selectedLabelPointId;
 
   return function update(props) {
     if (!container.transform) return;
@@ -97,7 +99,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
       pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
 
       if (isSelected) {
-        selectedLabelPointId = p2.md;
+        currSelected = p2;
         selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);
