@@ -123,9 +123,9 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.md.toFixed(2), editable, update("md"))}
               {Cell(row.inc.toFixed(2), editable, update("inc"))}
               {Cell(row.azm.toFixed(2), editable, update("azm"))}
-              {Cell(row.tvd.toFixed(2), editable, update("tvd"))}
+              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"))}
               {Cell(row.dl.toFixed(2), false)}
-              {Cell(row.vs.toFixed(2), editable, update("vs"))}
+              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"))}
               {Cell(row.fault.toFixed(2), editable, update("fault"), a =>
                 Knob({
                   ...a,
@@ -136,8 +136,8 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.dip.toFixed(2), editable, update("dip"), a =>
                 Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
-              {Cell(row.tcl.toFixed(2), editable, update("tcl"))}
-              {Cell((row.tcl - row.tvd).toFixed(2), editable, console.log)}
+              {Cell(row.tcl.toFixed(2), editable && row.isProjection, update("tcl"))}
+              {Cell((row.tcl - row.tvd).toFixed(2), editable && row.isProjection, console.log)}
               {showFullTable && Cell(row.tot.toFixed(2), false)}
               {showFullTable && Cell(row.bot.toFixed(2), false)}
               <TableCell className={classNames(classes.cell, classes.actions)}>
