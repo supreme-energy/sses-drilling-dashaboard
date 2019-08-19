@@ -195,92 +195,16 @@ function useFormationsData() {
 export function useCrossSectionData() {
   const { surveys, wellPlan, formations, projections } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
 
   const selectedSections = useMemo(
     function getSelectedSections() {
-      const selected = rawSections.find((s, index) => {
-        return s.md === selectedMd;
-      });
+      const selected = rawSections.find(s => s.md === selectedMd);
       return selected ? { [selected.id]: true } : {};
     },
     [selectedMd, rawSections]
   );
-
-  const calcSections = useMemo(() => {
-    const index = rawSections.findIndex(p => p.id === ghostDiff.id);
-    if (index === -1) {
-      return rawSections;
-    }
-    return rawSections.map((p, i) => {
-      if (i === index - 1) {
-        return {
-          ...p,
-          tot: p.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.prevFault,
-          fault: p.fault + ghostDiff.prevFault
-        };
-      } else if (i === index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tvd + ghostDiff.prevFault,
-          vs: p.vs + ghostDiff.vs,
-          tot: p.tot + ghostDiff.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
-        };
-      } else if (i > index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault
-        };
-      } else {
-        return p;
-      }
-    });
-  }, [rawSections, ghostDiff]);
-
-  const calculatedFormations = useMemo(() => {
-    const index = calcSections.findIndex(p => p.id === ghostDiff.id);
-
-    return formations.map(layer => {
-      return {
-        ...layer,
-        data: layer.data.map((point, j) => {
-          if (j === index) {
-            return {
-              ...point,
-              vs: point.vs + ghostDiff.vs,
-              fault: point.fault + ghostDiff.prevFault,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          } else if (j > index) {
-            return {
-              ...point,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          }
-          return point;
-        })
-      };
-    });
-  }, [formations, ghostDiff, calcSections]);
-
-  useEffect(() => {
-    const id = Object.keys(selectedSections)[0];
-    const index = rawSections.findIndex(s => s.id === Number(id));
-    if (index !== -1) {
-      ghostDiffDispatch({
-        type: INIT,
-        prevSection: rawSections[index - 1],
-        section: rawSections[index],
-        nextSection: rawSections[index + 1]
-      });
-    }
-  }, [selectedSections, rawSections]);
 
   const addProjection = useAddProjection();
 
@@ -291,10 +215,8 @@ export function useCrossSectionData() {
     setSelectedMd,
     deselectMd,
     selectedMd,
-    ghostDiff,
-    ghostDiffDispatch,
-    calcSections,
-    calculatedFormations
+    calcSections: rawSections,
+    calculatedFormations: formations
   };
 }
 
