@@ -48,11 +48,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   labelText.position.y = labelHeight / 2;
 
   const addSection = function({ onClick }) {
-    const section = new PIXI.Graphics();
+    const section = container.addChild(new PIXI.Graphics());
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
     section.on("click", () => onClick(section));
-    container.addChild(section);
     return section;
   };
 
