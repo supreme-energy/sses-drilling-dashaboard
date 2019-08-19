@@ -67,10 +67,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
     const onSectionClick = section => {
       setSelectedMd(section.endMD);
     };
-    const y = height - gutter - buttonHeight;
+    const adjustedY = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
-    bg.drawRect(0, y - 2, width, buttonHeight + 2);
+    bg.drawRect(0, adjustedY - 2, width, buttonHeight + 2);
     selectedLeft.clear();
     selectedRight.clear();
     selectedLabel.visible = false;
@@ -95,7 +95,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
       const length = (p2.vs - p1.vs) * view.xScale;
       if (start > width) continue;
       if (start + length < 0) continue;
-      pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
+      pixi.drawRoundedRect(start + 2, adjustedY, length - 4, buttonHeight, buttonHeight / 2);
 
       if (isSelected) {
         currSelected = p2;
