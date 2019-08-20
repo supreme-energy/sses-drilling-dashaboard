@@ -23,7 +23,8 @@ const CrossSection = props => {
     selectedMd,
     calcSections,
     calculatedFormations,
-    addProjection
+    addProjection,
+    deleteProjection
   } = dataObj;
 
   const [xField, yField] = useMemo(() => {
@@ -123,6 +124,7 @@ const CrossSection = props => {
       viewDirection,
       yAxisDirection,
       addProjection,
+      deleteProjection,
       updateSegments
     });
   }, [
@@ -150,6 +152,7 @@ const CrossSection = props => {
     viewDirection,
     yAxisDirection,
     addProjection,
+    deleteProjection,
     updateSegments
   ]);
 

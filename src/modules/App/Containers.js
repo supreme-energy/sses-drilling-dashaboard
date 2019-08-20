@@ -169,15 +169,31 @@ function useProjectionsData() {
     wellId
   );
 
+  const augmentedProjections = useMemo(
+    () =>
+      projections.map((p, i) => {
+        return {
+          ...p,
+          name: `PA${i + 1}`,
+          isProjection: true,
+          color: 0xee2211,
+          selectedColor: 0xee2211,
+          alpha: 0.5,
+          selectedAlpha: 1
+        };
+      }),
+    [projections]
+  );
+
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
-    if (projections && projections.length) {
+    if (augmentedProjections && augmentedProjections.length) {
       projectionsDispatch({
         type: "serverReset",
-        data: projections
+        data: augmentedProjections
       });
     }
-  }, [projections]);
+  }, [augmentedProjections]);
 
   return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
 }

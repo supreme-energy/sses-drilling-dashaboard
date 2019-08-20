@@ -449,17 +449,7 @@ export function useFetchFormations(wellId) {
 }
 
 const projectionsTransform = memoizeOne(projections => {
-  return transform(projections).map((p, i) => {
-    return {
-      ...p,
-      name: `PA${i + 1}`,
-      isProjection: true,
-      color: 0xee2211,
-      selectedColor: 0xee2211,
-      alpha: 0.5,
-      selectedAlpha: 1
-    };
-  });
+  return transform(projections);
 });
 export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
@@ -489,8 +479,8 @@ export function useFetchProjections(wellId) {
 
   const addProjection = newProjection => {
     // we can mark here the newProjection as pending with an isPending property but
-    // synce we want to control the pending state
-    // untill formations and other things are reloaded or recalculated
+    // since we want to control the pending state
+    // until formations and other things are reloaded or recalculated
     // I've added pendingProjectionsByMD state in cross section store
 
     const optimisticResult = [...(data || EMPTY_ARRAY), newProjection];
@@ -507,7 +497,11 @@ export function useFetchProjections(wellId) {
         optimisticResult
       },
       (currentProjections, result) => {
-        return [...currentProjections, newProjection];
+        return [...currentProjections, newProjection].sort((a, b) => {
+          if (a.md < b.md) return -1;
+          if (a.md > b.md) return 1;
+          return 0;
+        });
       }
     );
   };
