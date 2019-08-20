@@ -11,11 +11,8 @@ import {
   useWellOverviewKPI,
   useWellPath
 } from "../../api";
-import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
-import usePrevious from "react-use/lib/usePrevious";
-import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
+import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
-import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";

@@ -3,7 +3,6 @@ import memoizeOne from "memoize-one";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import { calculateDip } from "./formulas";
-import { calcDIP } from "../../../Interpretation/selectors";
 
 function drawCircle(circle, lineColor, fillColor) {
   circle.clear();
