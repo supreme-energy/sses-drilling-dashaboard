@@ -1,5 +1,5 @@
 import React, { useReducer } from "react";
-import { Typography, Collapse, IconButton } from "@material-ui/core";
+import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from "@material-ui/core";
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
@@ -11,6 +11,7 @@ import CloudServerModal from "./components/CloudServerModal";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
+import { useComboContainer } from "../ComboDashboard/containers/store";
 
 function Interpretation({
   match: {
@@ -23,10 +24,23 @@ function Interpretation({
   const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
   const { data: gr } = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
-
+  const [state, dispatch] = useComboContainer();
+  const { draftMode } = state;
   return (
     <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
       <CloudServerModal wellId={wellId} />
+      <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+        <Typography variant="subtitle2">Draft Current</Typography>
+        <FormControlLabel
+          classes={{ root: css.label }}
+          value="Toggle Layer (L)"
+          control={
+            <Switch color="secondary" checked={draftMode} onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })} />
+          }
+          label="Toggle Layer (L)"
+          labelPlacement="end"
+        />
+      </Box>
       <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} gr={gr} logList={logList} />
       <div className="layout horizontal">
         <IconButton
@@ -41,9 +55,9 @@ function Interpretation({
         >
           <ExpandMoreIcon />
         </IconButton>
-        <Typography variant="subtitle1">Modeling Controls</Typography>
+        <Typography variant="subtitle1">{draftMode ? "Drafting Controls" : "Modeling Controls"}</Typography>
       </div>
-      <Collapse in={expanded} unmountOnExit>
+      <Collapse in={expanded}>
         <InterpretationSettings className={css.settings} />
       </Collapse>
     </WidgetCard>

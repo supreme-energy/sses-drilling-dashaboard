@@ -14,7 +14,7 @@ import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSe
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useSelectedWellLog, useComputedSegments } from "../selectors";
+import { useSelectedWellLog, useCurrentComputedSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
@@ -87,18 +87,24 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     updateView
   } = useInterpretationRenderer();
 
-  const { selectedWellLog } = useSelectedWellLog();
+  const { selectedWellLog, selectedWellLogIndex } = useSelectedWellLog();
+
+  const internalStateRef = useRef({ scaleInitialized: false });
+  const {
+    current: { scaleInitialized }
+  } = internalStateRef;
+  const [segments] = useCurrentComputedSegments(wellId);
 
   useEffect(
     function initScale() {
-      const minDepth = Math.min(...controlLogs.filter(l => l.data.length).map(l => l.data[0].md));
-
-      updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
+      if (!scaleInitialized && segments && segments.length) {
+        const minDepth = segments[0].startdepth;
+        updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
+        internalStateRef.current.scaleInitialized = true;
+      }
     },
-    [height, controlLogs, updateView]
+    [height, segments, updateView, scaleInitialized]
   );
-
-  const [segments] = useComputedSegments(wellId);
 
   useEffect(
     function updateViewport() {
@@ -111,7 +117,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [view, viewport, updateView]
   );
 
-  const [{ surveyVisibility, surveyPrevVisibility, draftMode }] = useComboContainer();
+  const [
+    { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
+  ] = useComboContainer();
 
   useEffect(
     function refreshWebGLRenderer() {
@@ -131,7 +139,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       viewport,
       surveyVisibility,
       surveyPrevVisibility,
-      draftMode
+      nrPrevSurveysToDraft,
+      draftMode,
+      pendingSegmentsState
     ]
   );
 
@@ -146,7 +156,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       ))}
       {/* todo use this when add aditional logs
       {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
-      <LogLines wellId={wellId} logList={logList} container={viewport} selectedWellLog={selectedWellLog} />
+      <LogLines wellId={wellId} logList={logList} container={viewport} selectedWellLogIndex={selectedWellLogIndex} />
 
       <Grid
         container={viewport}

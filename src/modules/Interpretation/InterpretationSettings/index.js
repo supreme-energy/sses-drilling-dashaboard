@@ -1,34 +1,44 @@
-import React from "react";
-import { Box, FormControlLabel, Switch, Typography } from "@material-ui/core";
+import React, { useCallback } from "react";
+import { Box, Button } from "@material-ui/core";
 import css from "./styles.scss";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import VisibilitySettings from "./VisibilitySettings";
 import classNames from "classnames";
 import NavigationSettings from "./NavigationSettings";
 import ModelSurveySettings from "./ModelSurveySettings";
+import DraftSurveys from "./DraftSurveys";
+import ApplyDraftButtons from "./ApplyDraftButtons";
+import { usePendingSegments } from "../selectors";
 
 export default function InterpretationSettings({ className }) {
-  const [state, dispatch] = useComboContainer();
-  const { draftMode } = state;
+  const [{ draftMode }, , { updateSegments }] = useComboContainer();
+  const pendingSegments = usePendingSegments();
+  const resetPendingState = useCallback(() => {
+    const resetArgs = pendingSegments.reduce((acc, ps) => {
+      acc[ps.endmd] = { dip: undefined, fault: undefined };
+      return acc;
+    }, {});
+
+    updateSegments(resetArgs);
+  }, [pendingSegments, updateSegments]);
+
   return (
     <Box display="flex" flexDirection="column" className={classNames(className, css.root)}>
-      <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
-        <Typography variant="subtitle2">Draft Current</Typography>
-        <FormControlLabel
-          classes={{ root: css.label }}
-          value="Toggle Layer (L)"
-          control={
-            <Switch color="secondary" checked={draftMode} onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })} />
-          }
-          label="Toggle Layer (L)"
-          labelPlacement="end"
-        />
-      </Box>
       <Box display="flex" flexDirection="row">
-        <VisibilitySettings mr={3} />
+        {draftMode ? <DraftSurveys mr={3} className="flex-none" /> : <VisibilitySettings mr={3} />}
         <NavigationSettings />
       </Box>
       <ModelSurveySettings mt={2} />
+      {draftMode && (
+        <React.Fragment>
+          <ApplyDraftButtons />
+          <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
+            <Button color="primary" onClick={resetPendingState}>
+              RESET FAULT/DIP
+            </Button>
+          </Box>
+        </React.Fragment>
+      )}
     </Box>
   );
 }

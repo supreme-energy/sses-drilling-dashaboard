@@ -37,4 +37,57 @@
         width: 60px;
         padding: 0px;
     }
+    
+    .noWrap {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .applyLabel {
+        margin-right: 10px;
+    }
+
+    .applyButton {
+        margin-right: 10px;
+    }
+
+    .segmentIcon {
+        width: 18px;
+        height: 5px;
+        background-color: #757575;
+        border-radius: 5px;
+        position: relative;
+        left: 0px;
+
+        &.rotated {
+            margin-bottom: 10px;
+            transform: rotate(90deg);
+        }
+
+        &::after {
+            display: block;
+            content: "";
+            position: absolute;
+            left: 20px;
+            width: 2px;
+            height: 5px;
+            background-color: #757575;
+        }
+
+        &::before {
+            display: block;
+            content: "";
+            position: absolute;
+            right: 20px;
+            width: 2px;
+            height: 5px;
+            background-color: #757575;
+        }
+    }
+
+    .switchButton {
+        cursor: pointer;
+        width: 22px;
+        margin: 0 10px;
+    }
 }

@@ -119,7 +119,6 @@ function WellOperation({ wellId }) {
     [refresh, stage, data, view, width, height]
   );
 
-  console.log(view, width, gridGutter, data.length);
   return (
     <WidgetCard className={classes.wellOperation} title="Hours of Well Operation" hideMenu>
       <div className={classes.wellOperationCanvas} ref={canvasRef}>
