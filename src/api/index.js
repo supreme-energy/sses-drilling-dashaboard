@@ -15,6 +15,7 @@ import serialize from "react-powertools/serialize";
 import { useAppState } from "../modules/App/Containers";
 import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
+import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -523,7 +524,7 @@ export function useFetchProjections(wellId) {
         query: {
           seldbname: wellId,
           ...newProjection,
-          method: 8
+          method: DIP_FAULT_POS_VS
         },
         cache: "no-cache",
         optimisticResult
