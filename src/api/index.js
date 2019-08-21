@@ -477,13 +477,13 @@ export function useFetchProjections(wellId) {
     });
   };
 
+  function sortByMD(a, b) {
+    if (a.md < b.md) return -1;
+    if (a.md > b.md) return 1;
+    return 0;
+  }
   const addProjection = newProjection => {
-    // we can mark here the newProjection as pending with an isPending property but
-    // since we want to control the pending state
-    // until formations and other things are reloaded or recalculated
-    // I've added pendingProjectionsByMD state in cross section store
-
-    const optimisticResult = [...(data || EMPTY_ARRAY), newProjection];
+    const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
         path: ADD_WELL_PROJECTION,
@@ -491,17 +491,21 @@ export function useFetchProjections(wellId) {
         query: {
           seldbname: wellId,
 
-          ...newProjection
+          ...newProjection,
+          method: 8
         },
         cache: "no-cache",
         optimisticResult
       },
       (currentProjections, result) => {
-        return [...currentProjections, newProjection].sort((a, b) => {
-          if (a.md < b.md) return -1;
-          if (a.md > b.md) return 1;
-          return 0;
-        });
+        if (result && result.status === "success" && result.projection) {
+          return currentProjections.map(p => {
+            if (p.id === newProjection.id) return _.mapValues(result.projection, Number);
+            return p;
+          });
+        } else {
+          return currentProjections.filter(p => p.id !== newProjection.id);
+        }
       }
     );
   };
