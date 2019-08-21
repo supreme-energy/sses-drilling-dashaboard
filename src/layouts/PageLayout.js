@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Route } from "react-router-dom";
 import { MuiThemeProvider } from "@material-ui/core";
@@ -15,6 +15,9 @@ import {
   FormationsProvider,
   SurveysProvider
 } from "../modules/App/Containers";
+import useAudio from "../hooks/useAudio";
+import { useWellInfo, useSurveyCheck } from "../api";
+
 import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
 import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
 
@@ -35,8 +38,37 @@ const PageTabs = ({
   const tabsRef = useRef(null);
   // trigger re-render when size changed
   useSize(tabsRef);
+
+  const { cleanup_occured: hasConflict, next_survey: newSurvey } = useSurveyCheck(wellId);
+  const [{ appInfo = {} }] = useWellInfo(wellId);
+  // TODO: Get this value from BE DD-276
+  const serverEnabled = false;
+  const [playing, handleAlarmOn, handleAlarmOff] = useAudio(`/${appInfo.import_alarm}`);
+  const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = appInfo;
+  const hasUpdate = hasConflict || newSurvey;
+  const hasPlayed = useRef(false);
+
+  useEffect(() => {
+    let stopped;
+    function turnOff() {
+      if (!stopped) {
+        stopped = true;
+        handleAlarmOff();
+      }
+    }
+
+    if (alarm && alarmEnabled && hasUpdate && !hasPlayed.current && serverEnabled) {
+      handleAlarmOn();
+      hasPlayed.current = true;
+      setTimeout(turnOff, 5000);
+      return turnOff;
+    }
+  }, [handleAlarmOn, handleAlarmOff, playing, alarm, alarmEnabled, hasUpdate, serverEnabled]);
+
   return (
     <div ref={tabsRef}>
+      <iframe src="/silence.mp3" allow="autoplay" id="audio" className={classes.alarmNotification} />
+
       <Tabs value={actualPage} indicatorColor="primary" className={classes.tabs} onChange={onTabChange}>
         <Tab value="explorer" label="Well Explorer" />
         {wellId ? <Tab value={"combo"} label="Combo Dashboard" onChange={onTabChange} /> : null}

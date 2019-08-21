@@ -82,9 +82,9 @@ class App extends React.Component {
                 <FetchCache>
                   <div style={{ height: "100%" }}>
                     <TimeSliderProvider initialState={INITIAL_TIME_SLIDER_STATE}>
-                      <PageLayout history={history}>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                          <AppStateProvider>
+                      <AppStateProvider>
+                        <PageLayout history={history}>
+                          <MuiPickersUtilsProvider utils={MomentUtils}>
                             <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
                               <CrossSectionProvider>
                                 <Route path="/:wellId" component={WellUpdate} />
@@ -101,9 +101,9 @@ class App extends React.Component {
                                 </Switch>
                               </CrossSectionProvider>
                             </DrillPhaseProvider>
-                          </AppStateProvider>
-                        </MuiPickersUtilsProvider>
-                      </PageLayout>
+                          </MuiPickersUtilsProvider>
+                        </PageLayout>
+                      </AppStateProvider>
                     </TimeSliderProvider>
                   </div>
                 </FetchCache>

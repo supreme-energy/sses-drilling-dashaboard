@@ -131,7 +131,9 @@ export function useFilteredWellData() {
 export function useFilteredAdditionalDataLogs(wellId, id) {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { label, data, scalelo, scalehi } = useAdditionalDataLog(wellId, id);
+  const {
+    data: { label, data, scalelo, scalehi }
+  } = useAdditionalDataLog(wellId, id);
 
   return {
     label,

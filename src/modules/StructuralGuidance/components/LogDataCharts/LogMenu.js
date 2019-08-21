@@ -8,14 +8,19 @@ import LogPlotIcon from "../../../../assets/logPlot.svg";
 import _ from "lodash";
 import classes from "./styles.scss";
 
-function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anchorEl }) {
+function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anchorEl, availableGraphs }) {
   const handleCheckbox = name => event => {
     // Limit to 4 checks (i.e. graphs)
-    const count = _.reduce(selectedGraphs, (result, value) => (value ? (result += 1) : result), 0);
+    const count = _.reduce(selectedGraphs, (result, value) => (value.checked ? (result += 1) : result), 0);
+    const selectedGraph = availableGraphs.filter(({ label }) => label === name)[0];
+
     if (count >= 4) {
-      setSelectedGraph({ ...selectedGraphs, [name]: false });
+      setSelectedGraph({ ...selectedGraphs, [name]: { color: selectedGraph.color, checked: false } });
     } else {
-      setSelectedGraph({ ...selectedGraphs, [name]: event.target.checked });
+      setSelectedGraph({
+        ...selectedGraphs,
+        [name]: { color: selectedGraph.color, checked: event.target.checked }
+      });
     }
   };
 
@@ -31,7 +36,7 @@ function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anc
                 <span className={classes.logMenuLabel}>{graph}</span>
                 <Checkbox
                   className={classes.logMenuCheckboxes}
-                  checked={selectedGraphs[graph] || false}
+                  checked={_.get(selectedGraphs, `[${graph}].checked`, false)}
                   onChange={handleCheckbox(graph)}
                   value={graph}
                   color="secondary"
@@ -50,7 +55,13 @@ LogMenu.propTypes = {
   selectedGraphs: PropTypes.object,
   setSelectedGraph: PropTypes.func,
   anchorEl: PropTypes.object,
-  handleClose: PropTypes.func
+  handleClose: PropTypes.func,
+  availableGraphs: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string,
+      color: PropTypes.color
+    })
+  )
 };
 
 export default LogMenu;

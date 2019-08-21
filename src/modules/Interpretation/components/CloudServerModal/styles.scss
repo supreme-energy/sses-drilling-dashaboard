@@ -1,0 +1,81 @@
+@import "../../../../styles/base";
+
+.cloudServerButton {
+    position: relative;
+    left: 200px;
+    bottom: 35px;
+
+    .badgeGreen span {
+        background-color: green;
+    }
+
+    .badgeRed span {
+        background-color: $conflictRed;
+    }
+
+    button {
+        outline: none;
+        span {
+            margin-left: 5px;
+        }
+    }
+}
+
+.importDialogTitle, .notificationDialogTitle {
+    .closeButton {
+        float: right;
+        position: relative;
+        left: 10px;
+        bottom: 10px;
+    }
+}
+
+.importDialogContent {
+    .conflictText {
+        color: $conflictRed;
+    }
+
+    h6 {
+        color: $gold;
+    }
+}
+
+.importDialogActions {
+    button {
+        outline: none;
+    }
+    .conflictButton {
+        background-color: $conflictRed;
+    }
+    .conflictButton:hover {
+        background-color: #BC0143;
+    }
+}
+
+.notificationButton {
+    outline: none !important;
+    top: 8px;
+    left: 10px;
+    height: 40px;
+}
+
+.notificationContent {
+    > div, button {
+        margin: 10px 20px;
+        outline: none;
+    }
+
+    .intervalDropdown, .alarmDropdown {
+        width: 300px;
+    }
+}
+
+.notificationFlag {
+    top: 15px;
+    left: 15px;
+    position: relative;
+    
+    span {
+        margin-left: 10px;
+    }
+}
