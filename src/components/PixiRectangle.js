@@ -2,6 +2,7 @@ import useRef from "react-powertools/hooks/useRef";
 import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
+import isNumber from "lodash/isNumber";
 
 const PixiRectangle = forwardRef(
   (
@@ -21,7 +22,8 @@ const PixiRectangle = forwardRef(
       onClick,
       onMouseOver,
       onMouseOut,
-      zIndex
+      zIndex,
+      rotation
     },
     ref
   ) => {
@@ -102,7 +104,7 @@ const PixiRectangle = forwardRef(
       function redraw() {
         bg.clear();
         bg.alpha = alpha;
-        if (backgroundColor) {
+        if (isNumber(backgroundColor)) {
           bg.beginFill(backgroundColor, backgroundAlpha);
         }
         bg.lineStyle(borderThickness, borderColor);

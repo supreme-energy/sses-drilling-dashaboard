@@ -4,8 +4,7 @@ import PropTypes from "prop-types";
 import WidgetCard from "../../../components/WidgetCard";
 import { useWellOverviewKPI } from "../../../api";
 import KpiItem from "../../Kpi/KpiItem";
-import { PercentageBar, renderRotating, renderSliding, percentage } from "../../Kpi/DrillPhaseKPI/Kpi";
-import { noDecimals } from "../../../constants/format";
+import { PercentageBar, renderRotating, renderSliding, noDecimals } from "../../Kpi/DrillPhaseKPI/Kpi";
 import classes from "./DrillingAnalytics.scss";
 
 const SlidingKpi = ({ data }) => (
@@ -14,7 +13,7 @@ const SlidingKpi = ({ data }) => (
       <KpiItem
         className={classes.slidingLabel}
         format={noDecimals}
-        label={`Sliding ${percentage(data.slidingPct)}`}
+        label={`Sliding ${noDecimals(data.slidingPct)}%`}
         value={data.avgSliding}
         renderValue={renderSliding}
         measureUnit={"fph"}
@@ -23,7 +22,7 @@ const SlidingKpi = ({ data }) => (
       <KpiItem
         className={classes.rotatingLabel}
         format={noDecimals}
-        label={`Rotating ${percentage(data.rotatingPct)}`}
+        label={`Rotating ${noDecimals(data.rotatingPct)}%`}
         value={data.avgRotating}
         renderValue={renderRotating}
         measureUnit={"fph"}

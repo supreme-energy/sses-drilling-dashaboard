@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { AddCircleOutline, Adjust, RemoveCircleOutline } from "@material-ui/icons";
 
-import { useInterval } from "./useInterval";
+import useInterval from "../../../hooks/useInterval";
 import { GRID_GUTTER, ZOOM_IN, ZOOM_OUT } from "../../../constants/timeSlider";
 
 function ZoomControls({ className, updateView, width, maxStep, step, dataSize, getInitialViewXScaleValue, onReset }) {

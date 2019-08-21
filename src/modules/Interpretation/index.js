@@ -6,6 +6,8 @@ import InterpretationChart from "./InterpretationChart";
 import { useWellControlLog, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
 import { withRouter } from "react-router";
 import classNames from "classnames";
+import CloudServerModal from "./components/CloudServerModal";
+
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -20,13 +22,13 @@ function Interpretation({
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogsContainer();
   const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
-  const gr = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
+  const { data: gr } = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [state, dispatch] = useComboContainer();
   const { draftMode } = state;
   return (
-    <WidgetCard className={classNames(css.interpretationContainer, className)} hideMenu>
-      <Typography variant="subtitle1">Interpretation</Typography>
+    <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
+      <CloudServerModal wellId={wellId} />
       <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle2">Draft Current</Typography>
         <FormControlLabel
