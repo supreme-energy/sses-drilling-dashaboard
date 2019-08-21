@@ -67,18 +67,19 @@ function Cell(value, editable, changeHandler, Icon) {
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections } = useCrossSectionContainer();
   const [, , { updateSegments }] = useComboContainer();
-  let details;
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
-  const selectedId = (calcSections[selectedIndex] || {}).id;
+  const selectedId = useMemo(() => (calcSections[selectedIndex] || {}).id, [calcSections, selectedIndex]);
 
-  if (showFullTable) {
-    details = calcSections.slice().reverse();
-  } else {
-    details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
-  }
+  const details = useMemo(() => {
+    if (showFullTable) {
+      return calcSections.slice().reverse();
+    } else {
+      return calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+    }
+  }, [calcSections, showFullTable, selectedIndex]);
 
   return (
     <Table className={classes.table}>
@@ -100,14 +101,14 @@ export default function DetailsTable({ showFullTable = false }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {details.map(row => {
+        {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
           const update = field => {
             return value => updateSegments({ [row.md]: { [field]: Number(value) } });
           };
           return (
             <TableRow
-              key={row.id}
+              key={`${row.id}${index}`}
               className={classNames(classes.row, {
                 [classes.PARow]: row.isProjection,
                 [classes.surveyRow]: row.isSurvey,
