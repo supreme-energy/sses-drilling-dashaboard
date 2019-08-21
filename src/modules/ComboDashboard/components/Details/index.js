@@ -65,7 +65,7 @@ function Cell(value, editable, changeHandler, Icon) {
 }
 
 export default function DetailsTable({ showFullTable = false }) {
-  const { selectedSections, calcSections } = useCrossSectionContainer();
+  const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const [, , { updateSegments }] = useComboContainer();
 
   const selectedIndex = useMemo(() => {
@@ -146,7 +146,7 @@ export default function DetailsTable({ showFullTable = false }) {
                   size="small"
                   aria-label="Delete row"
                   onClick={() => {
-                    console.log(row.name);
+                    deleteProjection(row.id);
                   }}
                 >
                   <img src={trashcanIcon} />

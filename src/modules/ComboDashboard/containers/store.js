@@ -194,4 +194,16 @@ export function useAddProjection() {
   );
 }
 
+export function useDeleteProjection() {
+  const { deleteProjection } = useProjectionsDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      deleteProjection(projection).then(refreshFormations);
+    },
+    [deleteProjection, refreshFormations]
+  );
+}
+
 export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);

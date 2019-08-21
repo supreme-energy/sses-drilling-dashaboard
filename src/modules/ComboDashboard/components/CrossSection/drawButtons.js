@@ -43,9 +43,9 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   trashCircle.position.y = tagHeight - 20;
   trashCircle.on("click", () => {
     const { deleteProjection, calcSections, selectedSections } = latestProps;
-    console.log(deleteProjection, calcSections, selectedSections);
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
     deleteProjection(selectedPoint.id);
+    deselectMd();
   });
 
   const checkCircle = addButton(btnStage, checkCircleTexture);

@@ -490,7 +490,6 @@ export function useFetchProjections(wellId) {
         method: "GET",
         query: {
           seldbname: wellId,
-
           ...newProjection,
           method: 8
         },
@@ -511,14 +510,24 @@ export function useFetchProjections(wellId) {
   };
 
   const deleteProjection = projectionId => {
-    return fetch({
-      path: DELETE_WELL_PROJECTIONS,
-      method: "GET",
-      query: {
-        seldbname: wellId,
-        id: projectionId
+    return fetch(
+      {
+        path: DELETE_WELL_PROJECTIONS,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: projectionId
+        },
+        cache: "no-cache",
+        optimisticResult: data.filter(p => p.id !== projectionId)
+      },
+      (currentProjections, result) => {
+        if (result && result.status === "success") {
+          return currentProjections.filter(p => p.id !== projectionId);
+        }
+        return data;
       }
-    });
+    );
   };
 
   return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection];

@@ -13,7 +13,7 @@ import {
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
-import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
+import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
 
@@ -220,9 +220,11 @@ export function useCrossSectionData() {
   );
 
   const addProjection = useAddProjection();
+  const deleteProjection = useDeleteProjection();
 
   return {
     addProjection,
+    deleteProjection,
     wellPlan,
     selectedSections,
     setSelectedMd,
