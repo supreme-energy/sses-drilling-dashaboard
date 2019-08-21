@@ -111,7 +111,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const prev = _.findLast(calcSections, s => s.vs < vs) || calcSections[calcSections.length - 1];
     const newMd = prev.md + (vs - prev.vs) / Math.sin(toRadians(prev.inc));
     const newId = "newPA" + calcSections.length;
-    console.log(vs, newMd, newId);
 
     latestProps.addProjection({
       ..._.pick(prev, ["method", "inc", "azm", "dip", "fault", "tvd", "tot", "bot"]),
