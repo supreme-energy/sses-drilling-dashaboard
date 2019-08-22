@@ -1,6 +1,16 @@
 /* PREFIXES: p  = Previous, c = Current, d = Delta (except for dl or dip) */
 
 /* ************** Utility Constants ************** */
+import {
+  DIP_FAULT_POS_VS,
+  INC_SOLVE,
+  LAST_DOGLEG,
+  MD_INC_AZ,
+  MD_SOLVE,
+  TOT_POS_VS,
+  TVD_VS
+} from "../constants/calcMethods";
+
 const radiansToDegrees = 180.0 / Math.PI;
 let degreesToRadians = Math.PI / 180.0;
 
@@ -58,11 +68,11 @@ export function calcTot(pTot, dip, vs, pVs, fault) {
 // PA Position from TCL
 
 /* ************* Survey Method Functions ************* */
-function cc(proposedAzm, survey, prevSurveys, values = {}) {
+function cc(proposedAzm, survey, prevSurvey, values = {}) {
   let ca = 0.0;
   let cd = 0.0;
   let radius = 0.0;
-  let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevSurveys[prevSurveys.length - 1] };
+  let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevSurvey };
   let { md, inc, azm, tvd, vs, dl } = { ...survey };
 
   if (md <= pmd) {
@@ -125,8 +135,8 @@ function cc(proposedAzm, survey, prevSurveys, values = {}) {
   };
 }
 
-function projtia(proposedAzm, survey, prevSurveys) {
-  const { md: pmd, tvd: ptvd, inc: pinc } = { ...prevSurveys[prevSurveys.length - 1] };
+function projtia(proposedAzm, survey, prevSurvey) {
+  const { md: pmd, tvd: ptvd, inc: pinc } = { ...prevSurvey };
   const { tvd, inc } = { ...survey };
 
   const dtvd = tvd - ptvd;
@@ -134,11 +144,11 @@ function projtia(proposedAzm, survey, prevSurveys) {
   const prevSvyInc = toRadians(pinc);
   const md = pmd + (dtvd * (svyInc - prevSvyInc)) / (Math.sin(svyInc) - Math.sin(prevSvyInc));
 
-  return cc(proposedAzm, survey, prevSurveys, { md });
+  return cc(proposedAzm, survey, prevSurvey, { md });
 }
 
-function projtma(proposedAzm, survey, prevSurveys) {
-  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm } = { ...prevSurveys[prevSurveys.length - 1] };
+function projtma(proposedAzm, survey, prevSurvey) {
+  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm } = { ...prevSurvey };
   let { tvd, azm, md } = { ...survey };
   const dtvd = tvd - ptvd;
   const dmd = md - pmd;
@@ -177,14 +187,14 @@ function projtma(proposedAzm, survey, prevSurveys) {
     // TODO: How should calculations be handled if the inclination is out of range?
     //  https://experoinc.atlassian.net/browse/DD-286
   }
-  return cc(proposedAzm, survey, { inc });
+  return cc(proposedAzm, survey, prevSurvey, { inc });
 }
 
-function projtva(proposedAzm, prevSurveys, survey) {
+function projtva(proposedAzm, survey, prevSurvey) {
   const otherInputs = {};
 
   let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
-    ...prevSurveys[prevSurveys.length - 1]
+    ...prevSurvey
   };
   let { tvd, azm, vs, tot, pos, dip, fault, method } = {
     ...survey
@@ -318,85 +328,53 @@ function projtva(proposedAzm, prevSurveys, survey) {
   }
 }
 
-function calcLastDogleg(proposedAzm, survey, surveyIndex, prevSurveys, project) {
-  if (surveyIndex > 1) {
-    const { inc: pInc, azm: pAzm, md: pMd } = prevSurveys[surveyIndex - 1];
-    const { md } = { ...survey };
-    const dmd = md - pMd;
-    if (dmd > 0.0) {
-      // fetch the previous dl
-      const { md: md1, inc: inc1, azm: azm1 } = prevSurveys[surveyIndex - 2];
-      const cl = pMd - md1;
-      const dinc = (pInc - inc1) / cl;
-      const dazm = (pAzm - azm1) / cl;
-      const otherValues = {};
-      otherValues.svyinc = pInc + dinc * dmd;
-      otherValues.svyazm = pAzm + dazm * dmd;
+function calcLastDogleg(proposedAzm, survey, projections, index) {
+  const prevSurvey = projections[index - 1];
+  const secondPrevSurvey = projections[index - 2];
 
-      // Not sure where this is coming from
-      if (project !== "ahead") {
-        otherValues.bitoffset = dmd;
-      }
-      return cc(proposedAzm, survey, surveyIndex, otherValues);
-    } else {
-      return survey;
-    }
+  const { inc: pInc, azm: pAzm, md: pMd } = prevSurvey;
+  const { md } = { ...survey };
+  const dmd = md - pMd;
+  if (dmd > 0.0 || !secondPrevSurvey) {
+    // fetch the previous dl
+    const { md: md1, inc: inc1, azm: azm1 } = secondPrevSurvey;
+    const cl = pMd - md1;
+    const dinc = (pInc - inc1) / cl;
+    const dazm = (pAzm - azm1) / cl;
+    const otherValues = {};
+    otherValues.svyinc = pInc + dinc * dmd;
+    otherValues.svyazm = pAzm + dazm * dmd;
+    otherValues.bitoffset = dmd;
+
+    return cc(proposedAzm, survey, prevSurvey, otherValues);
+  } else {
+    return survey;
   }
 }
 
 /* **************** Method Calculations ***************** */
-// Caculates
-export function useMethodCalculations(projections) {
-  // Not sure that this project const is needed anymore
-  const project = "ahead";
-  let proposedAzm = 0;
+export function calculateProjection(survey, projections, index, proposedAzm) {
   if (proposedAzm > 180) proposedAzm -= 360;
   proposedAzm *= degreesToRadians;
 
-  if (!projections) return [];
+  if (!projections) return survey;
 
-  return projections.reduce((acc, survey, index) => {
-    let result;
-    switch (survey.method) {
-      case "0":
-        // last dogleg
-        result = calcLastDogleg(proposedAzm, survey, index, acc, project);
-        break;
-      case "1":
-        // baker inc and az projections (not used)
-        break;
-      case "2":
-        // baker inc and az projections (not used)
-        break;
-      case "3":
-        // Input MD/INC/AZ
-        result = cc(proposedAzm, acc);
-        break;
-      case "4":
-        // Solve for MD
-        result = projtia(proposedAzm, survey, acc);
-        break;
-      case "5":
-        // Solve for inc
-        result = projtma(proposedAzm, survey, acc);
-        break;
-      case "6":
-        // Input TVD/VS
-        result = projtva(proposedAzm, acc, survey);
-        break;
-      case "7":
-        // Input TOT/POS/VS
-        result = projtva(proposedAzm, acc, survey);
-        break;
-      case "8":
-        // Input DIP/FAULT/POS/VS
-        result = projtva(proposedAzm, acc, survey);
-        break;
-    }
-    // Merge survey with result
-    acc.push({ ...survey, ...result });
-    return acc;
-  }, []);
+  switch (survey.method) {
+    case LAST_DOGLEG:
+      return calcLastDogleg(proposedAzm, survey, projections, index);
+    case MD_INC_AZ:
+      return cc(proposedAzm, survey, projections[index - 1]);
+    case MD_SOLVE:
+      return projtia(proposedAzm, survey, projections[index - 1]);
+    case INC_SOLVE:
+      return projtma(proposedAzm, survey, projections[index - 1]);
+    case TVD_VS:
+      return projtva(proposedAzm, survey, projections[index - 1]);
+    case TOT_POS_VS:
+      return projtva(proposedAzm, survey, projections[index - 1]);
+    case DIP_FAULT_POS_VS:
+      return projtva(proposedAzm, survey, projections[index - 1]);
+  }
 }
 
 export function useFormationCalculations(pTot, dip, vs, pVs, fault, thickness) {
