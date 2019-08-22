@@ -134,7 +134,7 @@ function projtia(proposedAzm, survey, prevSurveys) {
   const prevSvyInc = toRadians(pinc);
   const md = pmd + (dtvd * (svyInc - prevSvyInc)) / (Math.sin(svyInc) - Math.sin(prevSvyInc));
 
-  cc(proposedAzm, survey, prevSurveys, { md });
+  return cc(proposedAzm, survey, prevSurveys, { md });
 }
 
 function projtma(proposedAzm, survey, prevSurveys) {
@@ -173,9 +173,11 @@ function projtma(proposedAzm, survey, prevSurveys) {
     }
   }
 
-  if (inc <= 180.0) {
-    cc(proposedAzm, survey, { inc });
+  if (inc > 180.0) {
+    // TODO: How should calculations be handled if the inclination is out of range?
+    //  https://experoinc.atlassian.net/browse/DD-286
   }
+  return cc(proposedAzm, survey, { inc });
 }
 
 function projtva(proposedAzm, prevSurveys, survey) {
@@ -310,14 +312,16 @@ function projtva(proposedAzm, prevSurveys, survey) {
       otherInputs.vs = vs;
 
       return { newMd, newInc, ns, ew, cd, ca, dl, cl, ...otherInputs };
+    } else {
+      return survey;
     }
   }
 }
 
-function calcLastDogleg(proposedAzm, surveys, surveyIndex, prevSurveys, project) {
+function calcLastDogleg(proposedAzm, survey, surveyIndex, prevSurveys, project) {
   if (surveyIndex > 1) {
     const { inc: pInc, azm: pAzm, md: pMd } = prevSurveys[surveyIndex - 1];
-    let { md } = { ...surveys[surveyIndex] };
+    const { md } = { ...survey };
     const dmd = md - pMd;
     if (dmd > 0.0) {
       // fetch the previous dl
@@ -333,7 +337,9 @@ function calcLastDogleg(proposedAzm, surveys, surveyIndex, prevSurveys, project)
       if (project !== "ahead") {
         otherValues.bitoffset = dmd;
       }
-      cc(proposedAzm, surveys, surveyIndex, otherValues);
+      return cc(proposedAzm, survey, surveyIndex, otherValues);
+    } else {
+      return survey;
     }
   }
 }
