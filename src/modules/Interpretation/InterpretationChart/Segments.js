@@ -8,7 +8,7 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { useDragActions, useSaveWellLogActions } from "../actions";
+import { useDragActions, useSaveWellLogActions, useSelectionActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly } from "../selectors";
@@ -280,8 +280,9 @@ const Segment = React.memo(({ segment, view, selected, container, onSegmentClick
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
   const { view } = useInterpretationRenderer();
-  const [{ nrPrevSurveysToDraft, draftMode }, , { setSelectedMd }] = useComboContainer();
-  const onSegmentClick = useCallback(segment => setSelectedMd(segment.endmd), [setSelectedMd]);
+  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+  const { toggleMdSelection } = useSelectionActions();
+  const onSegmentClick = useCallback(segment => toggleMdSelection(segment.endmd), [toggleMdSelection]);
   const selectedIndex = useMemo(() => selectedWellLog && segmentsData.findIndex(s => s.id === selectedWellLog.id), [
     segmentsData,
     selectedWellLog

@@ -64,16 +64,16 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   };
 
   let calcSections = props.calcSections;
-  let setSelectedMd = props.setSelectedMd;
+  let toggleMdSelection = props.toggleMdSelection;
 
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
-    setSelectedMd = props.setSelectedMd;
+    toggleMdSelection = props.toggleMdSelection;
 
     const onSectionClick = section => {
-      setSelectedMd(section.endMD);
+      toggleMdSelection(section.endMD);
     };
     const y = height - gutter - buttonHeight;
 

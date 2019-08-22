@@ -7,9 +7,11 @@ import { Box, IconButton, Typography } from "@material-ui/core";
 import { useSelectedWellLog } from "../selectors";
 import { useWellIdContainer } from "../../App/Containers";
 import { useWellLogList } from "../../ComboDashboard/containers/wellLogs";
+import { useSelectionActions } from "../actions";
 
 export default function NavigationSettings(props) {
-  const [{ selectedMd }, , { setSelectedMd }] = useComboContainer();
+  const [{ selectedMd }] = useComboContainer();
+  const { toggleMdSelection } = useSelectionActions();
   const { selectedWellLog } = useSelectedWellLog();
   const { wellId } = useWellIdContainer();
   const [logs] = useWellLogList(wellId);
@@ -22,31 +24,31 @@ export default function NavigationSettings(props) {
     const next = logs[selectedWellIndex + 1];
 
     if (next) {
-      setSelectedMd(next.endmd);
+      toggleMdSelection(next.endmd);
     }
-  }, [logs, selectedWellIndex, setSelectedMd]);
+  }, [logs, selectedWellIndex, toggleMdSelection]);
 
   const selectPrev = useCallback(() => {
     const prev = logs[selectedWellIndex - 1];
 
     if (prev) {
-      setSelectedMd(prev.endmd);
+      toggleMdSelection(prev.endmd);
     }
-  }, [logs, selectedWellIndex, setSelectedMd]);
+  }, [logs, selectedWellIndex, toggleMdSelection]);
 
   const selectFirst = useCallback(() => {
     const first = logs[0];
     if (first && first.endmd !== selectedMd) {
-      setSelectedMd(first.endmd);
+      toggleMdSelection(first.endmd);
     }
-  }, [logs, setSelectedMd, selectedMd]);
+  }, [logs, toggleMdSelection, selectedMd]);
 
   const selectLast = useCallback(() => {
     const last = logs[logs.length - 1];
     if (last && last.endmd !== selectedMd) {
-      setSelectedMd(last.endmd);
+      toggleMdSelection(last.endmd);
     }
-  }, [logs, setSelectedMd, selectedMd]);
+  }, [logs, toggleMdSelection, selectedMd]);
 
   return (
     <Box display="flex" flexDirection="column" {...props}>

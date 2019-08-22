@@ -19,6 +19,7 @@ import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
 import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
+import { useSelectionActions } from "../Interpretation/actions";
 
 const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
@@ -237,17 +238,8 @@ export function useCrossSectionData() {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
-
-  const selectedSections = useMemo(
-    function getSelectedSections() {
-      const selected = rawSections.find((s, index) => {
-        return s.md === selectedMd;
-      });
-      return selected ? { [selected.id]: true } : {};
-    },
-    [selectedMd, rawSections]
-  );
+  const [{ selectionById: selectedSections }] = useComboContainer();
+  const { toggleMdSelection, deselectAll } = useSelectionActions();
 
   const prevStatus = usePrevious(ghostDiff.status);
   useEffect(() => {
@@ -350,9 +342,8 @@ export function useCrossSectionData() {
     addProjection,
     wellPlan,
     selectedSections,
-    setSelectedMd,
-    deselectMd,
-    selectedMd,
+    toggleMdSelection,
+    deselectAll,
     ghostDiff,
     ghostDiffDispatch,
     calcSections,

@@ -7,7 +7,8 @@ import {
   usePendingSegments,
   useComputedDraftSegmentsOnly,
   useComputedSegments,
-  useCurrentComputedSegments
+  useCurrentComputedSegments,
+  useComputedSurveysAndProjections
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -15,6 +16,7 @@ import pickBy from "lodash/pickBy";
 import reduce from "lodash/reduce";
 import keyBy from "lodash/keyBy";
 import mapValues from "lodash/mapValues";
+import mapKeys from "lodash/mapKeys";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -38,7 +40,8 @@ function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSe
 }
 
 export function useDragActions() {
-  const [{ draftMode }, , { updateSegments }] = useComboContainer();
+  const [{ draftMode }] = useComboContainer();
+  const updateSegments = useUpdateSegments();
   const [, logsById] = useWellLogsContainer();
   const { segments: computedDraftSegments } = useComputedSegments();
   const [cs] = useCurrentComputedSegments();
@@ -70,6 +73,7 @@ export function useDragActions() {
         computedSegments,
         totalSegmentsHeight
       );
+
       updateSegments(dipsByMd);
     },
     [updateSegments, computedSegments, pendingSegments, totalSegmentsHeight, computedPendingSegments]
@@ -146,7 +150,8 @@ export function useBiasAndScaleActions(dispatch) {
 
 export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
-  const [{ pendingSegmentsState }, dispatch, { updateSegments }] = useComboContainer();
+  const [{ pendingSegmentsState }, dispatch] = useComboContainer();
+  const updateSegments = useUpdateSegments();
   const [logs, , { updateWellLogs }] = useWellLogsContainer();
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
@@ -228,4 +233,43 @@ export function useSaveWellLogActions() {
   // }
 
   return { saveSelectedWellLog, saveAllPendingLogs };
+}
+
+export function useSelectionActions() {
+  const [, , , itemsByMd] = useComputedSurveysAndProjections();
+
+  const [, dispatch] = useComboContainer();
+  const toggleMdSelection = useCallback(
+    md => {
+      const item = itemsByMd[md];
+      if (item) {
+        dispatch({ type: "TOGGLE_SELECTION", id: item.id });
+      }
+    },
+    [dispatch, itemsByMd]
+  );
+  const deselectAll = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
+
+  return {
+    toggleMdSelection,
+    deselectAll
+  };
+}
+
+export function useUpdateSegments() {
+  const [, , , itemsByMd] = useComputedSurveysAndProjections();
+  const [, dispatch] = useComboContainer();
+  const updateSegments = useCallback(
+    propsByMd =>
+      dispatch({
+        type: "UPDATE_SEGMENTS_PROPERTIES",
+        propsById: mapKeys(propsByMd, (value, md) => {
+          const item = itemsByMd[md];
+          return item && item.id;
+        })
+      }),
+    [dispatch, itemsByMd]
+  );
+
+  return updateSegments;
 }

@@ -23,17 +23,17 @@ const LogExtent = ({ log, wellId, updateExtent }) => {
 };
 
 export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
-  const [{ draftMode, selectedMd }, dispatch] = useComboContainer();
-  const internalStateRef = useRef({ prevSelectedMd: null });
+  const [{ draftMode, selectionById }, dispatch] = useComboContainer();
+  const internalStateRef = useRef({ prevSelection: null });
   const segmentData = useSelectedSegmentState();
   const bias = Number(segmentData.scalebias);
   const scale = Number(segmentData.scalefactor);
   const pendingSegments = usePendingSegments();
   const [[xMin, xMax], updateExtent] = useState([0, 0]);
-
-  if (selectedMd !== internalStateRef.current.prevSelectedMd) {
+  const currentSelection = Object.keys(selectionById)[0]; // only consider single selection
+  if (currentSelection !== internalStateRef.current.prevSelection) {
     updateExtent([0, 0]);
-    internalStateRef.current.prevSelectedMd = selectedMd;
+    internalStateRef.current.prevSelection = currentSelection;
   }
 
   const width = xMax - xMin;
