@@ -9,11 +9,11 @@ import ModelSurveySettings from "./ModelSurveySettings";
 import DraftSurveys from "./DraftSurveys";
 import ApplyDraftButtons from "./ApplyDraftButtons";
 import { usePendingSegments } from "../selectors";
-import { useUpdateSegments } from "../actions";
+import { useUpdateSegmentsByMd } from "../actions";
 
 export default function InterpretationSettings({ className }) {
   const [{ draftMode }] = useComboContainer();
-  const updateSegments = useUpdateSegments();
+  const updateSegments = useUpdateSegmentsByMd();
   const pendingSegments = usePendingSegments();
   const resetPendingState = useCallback(() => {
     const resetArgs = pendingSegments.reduce((acc, ps) => {
@@ -21,7 +21,7 @@ export default function InterpretationSettings({ className }) {
       return acc;
     }, {});
 
-    updateSegments({ propsByMd: resetArgs });
+    updateSegments(resetArgs);
   }, [pendingSegments, updateSegments]);
 
   return (

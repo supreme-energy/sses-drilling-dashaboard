@@ -11,12 +11,9 @@ import {
   useWellOverviewKPI,
   useWellPath
 } from "../../api";
-import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
-import usePrevious from "react-use/lib/usePrevious";
-import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
+import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
-import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
-import { useComboContainer, useAddProjection } from "../ComboDashboard/containers/store";
+import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
 import { useSelectionActions } from "../Interpretation/actions";
@@ -78,9 +75,8 @@ export function useFilteredWellData() {
 
   const { wellId } = useWellIdContainer();
 
-  const { formationsData, refreshFormations } = useFormationsDataContainer();
+  const { formationsData } = useFormationsDataContainer();
 
-  const { saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
   const [, surveys, projections] = useComputedSurveysAndProjections();
   const wellPlan = useWellPath(wellId);
 
@@ -90,41 +86,12 @@ export function useFilteredWellData() {
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
   const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
 
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const saveAndUpdate = useCallback(
-    (...args) => {
-      saveProjections(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [saveProjections, refreshProjections, refreshFormations]
-  );
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const deleteAndUpdate = useCallback(
-    (...args) => {
-      deleteProjection(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [deleteProjection, refreshProjections, refreshFormations]
-  );
-
   return {
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
     formations: formationsFiltered,
-    projections: projectionsFiltered,
-    saveProjection: saveAndUpdate,
-    deleteProjection: deleteAndUpdate
+    projections: projectionsFiltered
   };
 }
 
@@ -181,18 +148,10 @@ function useWellId(initialState) {
 
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
-  const [surveysData, setSurveys] = useState([]);
 
   const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (surveys && surveys.length) {
-      setSurveys(surveys);
-    }
-  }, [surveys, setSurveys]);
-
-  return { surveysData, setSurveys, updateSurvey, surveys };
+  return { updateSurvey, surveys };
 }
 
 function useProjectionsData() {
@@ -210,15 +169,31 @@ function useProjectionsData() {
     wellId
   );
 
+  const augmentedProjections = useMemo(
+    () =>
+      projections.map((p, i) => {
+        return {
+          ...p,
+          name: `PA${i + 1}`,
+          isProjection: true,
+          color: 0xee2211,
+          selectedColor: 0xee2211,
+          alpha: 0.5,
+          selectedAlpha: 1
+        };
+      }),
+    [projections]
+  );
+
   useEffect(() => {
     // TODO Check timestamp or something to determine if we should update with server data
-    if (projections && projections.length) {
+    if (augmentedProjections && augmentedProjections.length) {
       projectionsDispatch({
         type: "serverReset",
-        data: projections
+        data: augmentedProjections
       });
     }
-  }, [projections]);
+  }, [augmentedProjections]);
 
   return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
 }
@@ -234,120 +209,24 @@ function useFormationsData() {
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
   const { toggleSegmentSelection, deselectAll } = useSelectionActions();
 
-  const prevStatus = usePrevious(ghostDiff.status);
-  useEffect(() => {
-    const { status, op, prevOp } = ghostDiff;
-    const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
-    if (prevStatus !== status) {
-      switch (status) {
-        case DIP_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip - ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case FAULT_END:
-          saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
-          break;
-        case PA_END:
-          saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case TAG_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip + ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-      }
-    }
-  }, [ghostDiff, prevStatus, saveProjection]);
-
-  const calcSections = useMemo(() => {
-    const index = rawSections.findIndex(p => p.id === ghostDiff.id);
-    if (index === -1) {
-      return rawSections;
-    }
-    return rawSections.map((p, i) => {
-      if (i === index - 1) {
-        return {
-          ...p,
-          tot: p.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.prevFault,
-          fault: p.fault + ghostDiff.prevFault
-        };
-      } else if (i === index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tvd + ghostDiff.prevFault,
-          vs: p.vs + ghostDiff.vs,
-          tot: p.tot + ghostDiff.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
-        };
-      } else if (i > index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault
-        };
-      } else {
-        return p;
-      }
-    });
-  }, [rawSections, ghostDiff]);
-
-  const calculatedFormations = useMemo(() => {
-    const index = calcSections.findIndex(p => p.id === ghostDiff.id);
-
-    return formations.map(layer => {
-      return {
-        ...layer,
-        data: layer.data.map((point, j) => {
-          if (j === index) {
-            return {
-              ...point,
-              vs: point.vs + ghostDiff.vs,
-              fault: point.fault + ghostDiff.prevFault,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          } else if (j > index) {
-            return {
-              ...point,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          }
-          return point;
-        })
-      };
-    });
-  }, [formations, ghostDiff, calcSections]);
-
-  useEffect(() => {
-    const id = Object.keys(selectedSections)[0];
-    const index = rawSections.findIndex(s => s.id === Number(id));
-    if (index !== -1) {
-      ghostDiffDispatch({
-        type: INIT,
-        prevSection: rawSections[index - 1],
-        section: rawSections[index],
-        nextSection: rawSections[index + 1]
-      });
-    }
-  }, [selectedSections, rawSections]);
-
   const addProjection = useAddProjection();
+  const deleteProjection = useDeleteProjection();
 
   return {
     addProjection,
+    deleteProjection,
     wellPlan,
     selectedSections,
     toggleSegmentSelection,
     deselectAll,
-    ghostDiff,
-    ghostDiffDispatch,
-    calcSections,
-    calculatedFormations
+    calcSections: rawSections,
+    calculatedFormations: formations
   };
 }
 

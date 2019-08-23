@@ -6,6 +6,8 @@ import { useCrossSectionContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
 
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
@@ -13,16 +15,17 @@ const CrossSection = props => {
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
+  const updateSegments = useUpdateSegmentsById();
+
   const {
     wellPlan,
     selectedSections,
     toggleSegmentSelection,
     deselectAll,
-    ghostDiff,
-    ghostDiffDispatch,
     calcSections,
     calculatedFormations,
-    addProjection
+    addProjection,
+    deleteProjection
   } = dataObj;
 
   const [xField, yField] = useMemo(() => {
@@ -69,7 +72,21 @@ const CrossSection = props => {
     const currentCanvas = canvas.current;
 
     pixiApp.init(
-      { ...dataObj, ...props, view, updateView, scale, mode, setMode, mouse, setMouse, xField, yField, yAxisDirection },
+      {
+        ...dataObj,
+        ...props,
+        view,
+        updateView,
+        scale,
+        mode,
+        setMode,
+        mouse,
+        setMouse,
+        xField,
+        yField,
+        yAxisDirection,
+        updateSegments
+      },
       view,
       updateView
     );
@@ -93,8 +110,6 @@ const CrossSection = props => {
       selectedSections,
       toggleSegmentSelection,
       deselectAll,
-      ghostDiffDispatch,
-      ghostDiff,
       calcSections,
       calculatedFormations,
       scale,
@@ -108,7 +123,9 @@ const CrossSection = props => {
       yField,
       viewDirection,
       yAxisDirection,
-      addProjection
+      addProjection,
+      deleteProjection,
+      updateSegments
     });
   }, [
     view.x,
@@ -122,8 +139,6 @@ const CrossSection = props => {
     selectedSections,
     toggleSegmentSelection,
     deselectAll,
-    ghostDiffDispatch,
-    ghostDiff,
     calcSections,
     calculatedFormations,
     scale,
@@ -135,7 +150,9 @@ const CrossSection = props => {
     yField,
     viewDirection,
     yAxisDirection,
-    addProjection
+    addProjection,
+    deleteProjection,
+    updateSegments
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

@@ -2,12 +2,12 @@ import * as PIXI from "pixi.js";
 import { frozenXTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import memoizeOne from "memoize-one";
-import { TAG_END, TAG_MOVE } from "../../../../constants/interactivePAStatus";
 
 function drawSections(container, higherContainer, props, gutter, labelHeight) {
-  const { ghostDiffDispatch } = props;
+  const { updateSegments } = props;
   const buttonHeight = 10;
   const pixiList = [];
+  let currSelected;
 
   const bg = container.addChild(new PIXI.Graphics());
   bg.transform.updateTransform = frozenXYTransform;
@@ -30,18 +30,11 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
-  subscribeToMoveEvents(
-    selectedLabel,
-    function(pos) {
-      ghostDiffDispatch({
-        type: TAG_MOVE,
-        vs: pos.x
-      });
-    },
-    function() {
-      ghostDiffDispatch({ type: TAG_END });
+  subscribeToMoveEvents(selectedLabel, function(pos) {
+    if (currSelected.isProjection) {
+      updateSegments({ [currSelected.id]: { vs: pos.x } });
     }
-  );
+  });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
   const memoInitLabel = memoizeOne(color => {
@@ -55,11 +48,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   labelText.position.y = labelHeight / 2;
 
   const addSection = function({ onClick }) {
-    const section = new PIXI.Graphics();
+    const section = container.addChild(new PIXI.Graphics());
     section.transform.updateTransform = frozenXYTransform;
     section.interactive = true;
     section.on("click", () => onClick(section));
-    container.addChild(section);
     return section;
   };
 
@@ -75,10 +67,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
     const onSectionClick = section => {
       toggleSegmentSelection(section.entityId);
     };
-    const y = height - gutter - buttonHeight;
+    const adjustedY = height - gutter - buttonHeight;
 
     bg.clear().beginFill(0xffffff);
-    bg.drawRect(0, y - 2, width, buttonHeight + 2);
+    bg.drawRect(0, adjustedY - 2, width, buttonHeight + 2);
     selectedLeft.clear();
     selectedRight.clear();
     selectedLabel.visible = false;
@@ -103,9 +95,10 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
       const length = (p2.vs - p1.vs) * view.xScale;
       if (start > width) continue;
       if (start + length < 0) continue;
-      pixi.drawRoundedRect(start + 2, y, length - 4, buttonHeight, buttonHeight / 2);
+      pixi.drawRoundedRect(start + 2, adjustedY, length - 4, buttonHeight, buttonHeight / 2);
 
       if (isSelected) {
+        currSelected = p2;
         selectedLeft.lineStyle(2, color[0], 0.5);
         selectedLeft.moveTo(start, 0).lineTo(start, height);
         selectedRight.lineStyle(2, color[0], 0.5);

@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
-import { useWellLogData, EMPTY_ARRAY } from "../../api";
+import { useWellLogData, EMPTY_ARRAY, useWellInfo } from "../../api";
 import keyBy from "lodash/keyBy";
 import { useWellIdContainer, useSurveysDataContainer, useProjectionsDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
@@ -8,6 +8,7 @@ import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
+import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -270,22 +271,107 @@ export function getSelectedId(selectionById) {
 }
 
 const recomputeSurveysAndProjections = memoizeOne(
-  (surveys, projections, draftMode, selectionById, pendingSegmentsState) => {
-    return surveys.concat(projections).reduce((acc, next, index) => {
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm) => {
+    return surveys.concat(projections).reduce((acc, currSvy, index) => {
+      const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
-      const prevItem = acc[index - 1] || next;
-      const pendingState = (draftMode && selectedId === next.id ? {} : pendingSegmentsState[next.id]) || {};
-      const dipPending = pendingState.dip !== undefined;
-      const faultPending = pendingState.fault !== undefined;
-      const dip = dipPending ? pendingState.dip : next.dip;
-      const fault = faultPending ? pendingState.fault : next.fault;
-      const diff = calcTot(0, dip, next.vs, prevItem.vs, fault);
-      const tcl = prevItem.tcl + diff;
-      const tot = prevItem.tot + diff;
-      const bot = prevItem.bot + diff;
+      const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
+      const combinedSvy = { ...currSvy, ...pendingState };
 
-      acc[index] = { ...next, tcl, fault, dip, tot, bot };
+      if (index === 0) {
+        let ca = Math.PI / 2;
+        if (combinedSvy.ns !== 0) {
+          ca = Math.atan2(combinedSvy.ew, combinedSvy.ns);
+        }
+        let cd = combinedSvy.ns;
+        if (ca !== 0.0) {
+          cd = Math.abs(combinedSvy.ew / Math.sin(ca));
+        }
+        ca = toDegrees(ca);
+        if (ca < 0.0) ca += 360.0;
+        acc[index] = {
+          ...combinedSvy,
+          ca,
+          cd
+        };
+      } else {
+        let dogLegSeverity = 0;
+        const courseLength = combinedSvy.md - prevSvy.md;
+        const pInc = toRadians(prevSvy.inc);
+        const cInc = toRadians(combinedSvy.inc);
+        const pAzm = toRadians(prevSvy.azm);
+        let cAzm = toRadians(combinedSvy.azm);
+        let dogleg = Math.acos(
+          Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+        );
+        if (isNaN(dogleg)) {
+          combinedSvy.azm += 0.01;
+          cAzm = toRadians(combinedSvy.azm);
+          dogleg = Math.acos(Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm));
+        }
+        if (courseLength > 0) {
+          // TODO: include check for "depth units"
+          //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
+          dogLegSeverity = (dogleg * 100.0) / courseLength;
+        }
+        // Radius also called curvature factor
+        let radius = 1;
+        if (dogleg !== 0.0) {
+          radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
+        }
 
+        const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
+        if (!tvd) {
+          console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
+        }
+        let ns =
+          prevSvy.ns +
+          (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
+        const ew =
+          prevSvy.ew +
+          (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
+
+        let ca = Math.PI / 2;
+        if (ns !== 0.0) {
+          ca = Math.atan2(ew, ns);
+        }
+
+        let cd = ns;
+        if (ca !== 0.0) {
+          cd = ew / Math.sin(ca);
+        }
+
+        const vs = Math.cos(ca - toRadians(propazm)) * cd;
+
+        const dipPending = pendingState.dip !== undefined;
+        const faultPending = pendingState.fault !== undefined;
+        const dip = dipPending ? pendingState.dip : currSvy.dip;
+        const fault = faultPending ? pendingState.fault : currSvy.fault;
+        const totDiff = calcTot(0, dip, currSvy.vs, prevSvy.vs, fault);
+        const tcl = prevSvy.tcl + totDiff;
+        const tot = prevSvy.tot + totDiff;
+        const bot = prevSvy.bot + totDiff;
+
+        const caDeg = toDegrees(ca);
+
+        acc[index] = {
+          ...combinedSvy,
+          tvd,
+          vs,
+          dl: toDegrees(dogLegSeverity),
+          cl: courseLength,
+          ca: caDeg < 0 ? caDeg + 360 : ca,
+          ns,
+          ew,
+          build: ((cInc - pInc) * 100) / courseLength,
+          turn: ((cAzm - pAzm) * 100) / courseLength,
+          tcl,
+          fault,
+          dip,
+          tot,
+          bot
+        };
+      }
       return acc;
     }, []);
   }
@@ -295,6 +381,8 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
+  const { wellId } = useWellIdContainer();
+  const [{ wellInfo }] = useWellInfo(wellId);
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
@@ -303,7 +391,8 @@ export function useComputedSurveysAndProjections() {
     projectionsData,
     draftMode,
     selectionById,
-    pendingSegmentsState
+    pendingSegmentsState,
+    wellInfo ? wellInfo.propazm : 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,

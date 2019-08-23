@@ -9,7 +9,7 @@ import classNames from "classnames";
 import debounce from "lodash/debounce";
 import mapKeys from "lodash/mapKeys";
 import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
-import { useUpdateSegments } from "../actions";
+import { useUpdateSegmentsByMd } from "../actions";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
@@ -49,7 +49,7 @@ const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
   const [{ selectedMd, draftMode }] = useComboContainer();
-  const updateSegments = useUpdateSegments();
+  const updateSegments = useUpdateSegmentsByMd();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
     FAULT_DIP_MODE
@@ -79,7 +79,7 @@ export default function ModelSurveySettings(props) {
       return { ...acc, [md]: props };
     }, {});
 
-    updateSegments({ propsByMd: segmentsProps });
+    updateSegments(segmentsProps);
 
     if (!draftMode) {
       debouncedSaveWellLog([

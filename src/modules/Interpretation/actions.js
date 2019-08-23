@@ -41,7 +41,7 @@ function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSe
 
 export function useDragActions() {
   const [{ draftMode }] = useComboContainer();
-  const updateSegments = useUpdateSegments();
+  const updateSegments = useUpdateSegmentsByMd();
   const [, logsById] = useWellLogsContainer();
   const { segments: computedDraftSegments } = useComputedSegments();
   const [cs] = useCurrentComputedSegments();
@@ -74,7 +74,7 @@ export function useDragActions() {
         totalSegmentsHeight
       );
 
-      updateSegments({ propsByMd: dipsByMd });
+      updateSegments(dipsByMd);
     },
     [updateSegments, computedSegments, pendingSegments, totalSegmentsHeight, computedPendingSegments]
   );
@@ -89,7 +89,7 @@ export function useDragActions() {
 
       let fault = segment.fault - delta;
 
-      updateSegments({ propsByMd: { [log.endmd]: { fault } } });
+      updateSegments({ [log.endmd]: { fault } });
     },
     [updateSegments, logsById]
   );
@@ -115,7 +115,7 @@ export function useDragActions() {
       const fault = segment.fault + faultDelta;
       propsByMd[segment.endmd].fault = fault;
 
-      updateSegments({ propsByMd });
+      updateSegments(propsByMd);
     },
     [updateSegments, logsById, computedPendingSegments, pendingSegments, totalSegmentsHeight, computedSegments]
   );
@@ -152,7 +152,7 @@ export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
   const [, dispatch] = useComboContainer();
   const pendingSegmentsState = usePendingSegmentsStateByMd();
-  const updateSegments = useUpdateSegments();
+  const updateSegments = useUpdateSegmentsByMd();
   const [logs, , { updateWellLogs }] = useWellLogsContainer();
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
@@ -198,7 +198,7 @@ export function useSaveWellLogActions() {
         return acc;
       }, {});
 
-      updateSegments({ propsByMd: resetLogProps });
+      updateSegments(resetLogProps);
 
       return result;
     },
@@ -256,21 +256,39 @@ export function useSelectionActions() {
   };
 }
 
-export function useUpdateSegments() {
+// it will update updateSegments each time surveys changed so that it is up to date with surveys md
+// Recommended to be used by components that does not have dirrectly access to surveys/PA
+export function useUpdateSegmentsByMd() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
   const [, dispatch] = useComboContainer();
   const updateSegments = useCallback(
-    ({ propsByMd, propsById }) =>
+    propsByMd =>
       dispatch({
         type: "UPDATE_SEGMENTS_PROPERTIES",
-        propsById:
-          propsById ||
-          mapKeys(propsByMd, (value, md) => {
-            const item = itemsByMd[md];
-            return item && item.id;
-          })
+        propsById: mapKeys(propsByMd, (value, md) => {
+          const item = itemsByMd[md];
+          return item && item.id;
+        })
       }),
     [dispatch, itemsByMd]
+  );
+
+  return updateSegments;
+}
+
+// useUpdateSegmentsByMd can recreate updateSegments very often when state is updated as result of drag operations.
+// updateSegments created by useUpdateSegmentsById as opposite will only be created once
+// so it will not trigger unnecessary updates further.
+// Good to use for components that have directly access to surveys like cross section
+export function useUpdateSegmentsById() {
+  const [, dispatch] = useComboContainer();
+  const updateSegments = useCallback(
+    propsById =>
+      dispatch({
+        type: "UPDATE_SEGMENTS_PROPERTIES",
+        propsById
+      }),
+    [dispatch]
   );
 
   return updateSegments;

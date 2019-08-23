@@ -15,6 +15,7 @@ import serialize from "react-powertools/serialize";
 import { useAppState } from "../modules/App/Containers";
 import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
+import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -481,17 +482,7 @@ export function useFetchFormations(wellId) {
 }
 
 const projectionsTransform = memoizeOne(projections => {
-  return transform(projections).map((p, i) => {
-    return {
-      ...p,
-      name: `PA${i}`,
-      isProjection: true,
-      color: 0xee2211,
-      selectedColor: 0xee2211,
-      alpha: 0.5,
-      selectedAlpha: 1
-    };
-  });
+  return transform(projections);
 });
 export function useFetchProjections(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch(
@@ -519,40 +510,57 @@ export function useFetchProjections(wellId) {
     });
   };
 
+  function sortByMD(a, b) {
+    if (a.md < b.md) return -1;
+    if (a.md > b.md) return 1;
+    return 0;
+  }
   const addProjection = newProjection => {
-    // we can mark here the newProjection as pending with an isPending property but
-    // synce we want to control the pending state
-    // untill formations and other things are reloaded or recalculated
-    // I've added pendingProjectionsByMD state in cross section store
-
-    const optimisticResult = [...(data || EMPTY_ARRAY), newProjection];
+    const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
         path: ADD_WELL_PROJECTION,
         method: "GET",
         query: {
           seldbname: wellId,
-
-          ...newProjection
+          ...newProjection,
+          method: DIP_FAULT_POS_VS
         },
         cache: "no-cache",
         optimisticResult
       },
       (currentProjections, result) => {
-        return [...currentProjections, newProjection];
+        if (result && result.status === "success" && result.projection) {
+          return currentProjections.map(p => {
+            if (p.id === newProjection.id) return _.mapValues(result.projection, Number);
+            return p;
+          });
+        } else {
+          return currentProjections.filter(p => p.id !== newProjection.id);
+        }
       }
     );
   };
 
   const deleteProjection = projectionId => {
-    return fetch({
-      path: DELETE_WELL_PROJECTIONS,
-      method: "GET",
-      query: {
-        seldbname: wellId,
-        id: projectionId
+    return fetch(
+      {
+        path: DELETE_WELL_PROJECTIONS,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: projectionId
+        },
+        cache: "no-cache",
+        optimisticResult: data.filter(p => p.id !== projectionId)
+      },
+      (currentProjections, result) => {
+        if (result && result.status === "success") {
+          return currentProjections.filter(p => p.id !== projectionId);
+        }
+        return data;
       }
-    });
+    );
   };
 
   return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection];

@@ -18,8 +18,7 @@ const initialState = {
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500,
-  pendingProjectionsByMd: {}
+  surveyPrevVisibility: 500
 };
 
 const initialPendingState = {};
@@ -147,22 +146,6 @@ function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   }
 }
 
-function pendingProjectionsByMdReducer(pendingProjectionsByMd, action) {
-  switch (action.type) {
-    case "ADD_PENDING_PROJECTION": {
-      return {
-        ...pendingProjectionsByMd,
-        [action.projection.md]: action.projection
-      };
-    }
-    case "RESET_PENDING_PROJECTION": {
-      const newState = { ...pendingProjectionsByMd };
-      delete newState[action.projection.md];
-      return newState;
-    }
-  }
-}
-
 const comboStoreReducer = logs => (state, action) => {
   return {
     ...state,
@@ -171,8 +154,7 @@ const comboStoreReducer = logs => (state, action) => {
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
-    pendingProjectionsByMd: pendingProjectionsByMdReducer(state.pendingProjectionsByMd, action)
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action)
   };
 };
 
@@ -186,22 +168,26 @@ function useUseComboStore() {
 }
 
 export function useAddProjection() {
-  const [, dispatch] = useUseComboStore();
-  const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
-  const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
-    dispatch
-  ]);
-  const { addProjection: saveProjection } = useProjectionsDataContainer();
+  const { addProjection } = useProjectionsDataContainer();
   const { refreshFormations } = useFormationsDataContainer();
 
   return useCallback(
     projection => {
-      addProjection(projection);
-      saveProjection(projection)
-        .then(refreshFormations)
-        .then(() => resetPendingProjection(projection));
+      addProjection(projection).then(refreshFormations);
     },
-    [addProjection, saveProjection, resetPendingProjection, refreshFormations]
+    [addProjection, refreshFormations]
+  );
+}
+
+export function useDeleteProjection() {
+  const { deleteProjection } = useProjectionsDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      deleteProjection(projection).then(refreshFormations);
+    },
+    [deleteProjection, refreshFormations]
   );
 }
 

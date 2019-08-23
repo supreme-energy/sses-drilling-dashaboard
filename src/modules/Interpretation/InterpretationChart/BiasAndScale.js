@@ -6,7 +6,7 @@ import { useSelectedSegmentState, useLogExtent, usePendingSegments, getSelectedI
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useSaveWellLogActions, useUpdateSegments } from "../actions";
+import { useSaveWellLogActions, useUpdateSegments, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useWellIdContainer } from "../../App/Containers";
 
@@ -40,7 +40,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     internalStateRef.current.prevSelection = currentSelection;
   }
 
-  const updateSegments = useUpdateSegments();
+  const updateSegments = useUpdateSegmentsByMd();
 
   const width = xMax - xMin;
   const { wellId } = useWellIdContainer();
@@ -50,7 +50,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
         acc[s.endmd] = props;
         return acc;
       }, {});
-      updateSegments({ propsByMd });
+      updateSegments(propsByMd);
     },
     [pendingSegments, updateSegments]
   );
