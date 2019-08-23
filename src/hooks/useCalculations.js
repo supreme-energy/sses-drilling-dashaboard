@@ -68,12 +68,12 @@ export function calcTot(pTot, dip, vs, pVs, fault) {
 // PA Position from TCL
 
 /* ************* Survey Method Functions ************* */
-function cc(proposedAzm, survey, prevSurvey, values = {}) {
+function cc(proposedAzm, projection, prevProjection, values = {}) {
   let ca = 0.0;
   let cd = 0.0;
   let radius = 0.0;
-  let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevSurvey };
-  let { md, inc, azm, tvd, vs, dl } = { ...survey };
+  let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevProjection };
+  let { md, inc, azm, tvd, vs, dl } = { ...projection };
 
   if (md <= pmd) {
     throw new Error(
@@ -123,7 +123,7 @@ function cc(proposedAzm, survey, prevSurvey, values = {}) {
   if (ca < 0.0) ca += 360.0;
 
   return {
-    ...survey,
+    ...projection,
     tvd,
     vs,
     ns,
@@ -136,21 +136,21 @@ function cc(proposedAzm, survey, prevSurvey, values = {}) {
   };
 }
 
-function projtia(proposedAzm, survey, prevSurvey) {
-  const { md: pmd, tvd: ptvd, inc: pinc } = { ...prevSurvey };
-  const { tvd, inc } = { ...survey };
+function projtia(proposedAzm, projection, prevProjection) {
+  const { md: pmd, tvd: ptvd, inc: pinc } = { ...prevProjection };
+  const { tvd, inc } = { ...projection };
 
   const dtvd = tvd - ptvd;
   const svyInc = toRadians(inc);
   const prevSvyInc = toRadians(pinc);
   const md = pmd + (dtvd * (svyInc - prevSvyInc)) / (Math.sin(svyInc) - Math.sin(prevSvyInc));
 
-  return cc(proposedAzm, survey, prevSurvey, { md });
+  return cc(proposedAzm, projection, prevProjection, { md });
 }
 
-function projtma(proposedAzm, survey, prevSurvey) {
-  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm } = { ...prevSurvey };
-  let { tvd, azm, md } = { ...survey };
+function projtma(proposedAzm, projection, prevProjection) {
+  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm } = { ...prevProjection };
+  let { tvd, azm, md } = { ...projection };
   const dtvd = tvd - ptvd;
   const dmd = md - pmd;
 
@@ -188,17 +188,17 @@ function projtma(proposedAzm, survey, prevSurvey) {
     // TODO: How should calculations be handled if the inclination is out of range?
     //  https://experoinc.atlassian.net/browse/DD-286
   }
-  return cc(proposedAzm, survey, prevSurvey, { inc });
+  return cc(proposedAzm, projection, prevProjection, { inc });
 }
 
-function projtva(proposedAzm, survey, prevSurvey) {
+function projtva(proposedAzm, projection, prevProjection) {
   const otherInputs = {};
 
   let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
-    ...prevSurvey
+    ...prevProjection
   };
   let { tvd, azm, vs, tot, pos, dip, fault, method } = {
-    ...survey
+    ...projection
   };
 
   if (method === 8 || method === 7 || method === 6) {
@@ -324,17 +324,17 @@ function projtva(proposedAzm, survey, prevSurvey) {
 
       return { md: newMd, inc: newInc, azm, ns, ew, cd, ca, dl, cl, ...otherInputs };
     } else {
-      return survey;
+      return projection;
     }
   }
 }
 
-function calcLastDogleg(proposedAzm, survey, projections, index) {
+function calcLastDogleg(proposedAzm, projection, projections, index) {
   const prevSurvey = projections[index - 1];
   const secondPrevSurvey = projections[index - 2];
 
   const { inc: pInc, azm: pAzm, md: pMd } = prevSurvey;
-  const { md } = { ...survey };
+  const { md } = { ...projection };
   const dmd = md - pMd;
   if (dmd > 0.0 || !secondPrevSurvey) {
     // fetch the previous dl
@@ -347,34 +347,34 @@ function calcLastDogleg(proposedAzm, survey, projections, index) {
     otherValues.svyazm = pAzm + dazm * dmd;
     otherValues.bitoffset = dmd;
 
-    return cc(proposedAzm, survey, prevSurvey, otherValues);
+    return cc(proposedAzm, projection, prevSurvey, otherValues);
   } else {
-    return survey;
+    return projection;
   }
 }
 
 /* **************** Method Calculations ***************** */
-export function calculateProjection(survey, projections, index, proposedAzm) {
+export function calculateProjection(projection, projections, index, proposedAzm) {
   if (proposedAzm > 180) proposedAzm -= 360;
   proposedAzm *= degreesToRadians;
 
-  if (!projections) return survey;
+  if (!projections) return projection;
 
-  switch (survey.method) {
+  switch (projection.method) {
     case LAST_DOGLEG:
-      return calcLastDogleg(proposedAzm, survey, projections, index);
+      return calcLastDogleg(proposedAzm, projection, projections, index);
     case MD_INC_AZ:
-      return cc(proposedAzm, survey, projections[index - 1]);
+      return cc(proposedAzm, projection, projections[index - 1]);
     case MD_SOLVE:
-      return projtia(proposedAzm, survey, projections[index - 1]);
+      return projtia(proposedAzm, projection, projections[index - 1]);
     case INC_SOLVE:
-      return projtma(proposedAzm, survey, projections[index - 1]);
+      return projtma(proposedAzm, projection, projections[index - 1]);
     case TVD_VS:
-      return projtva(proposedAzm, survey, projections[index - 1]);
+      return projtva(proposedAzm, projection, projections[index - 1]);
     case TOT_POS_VS:
-      return projtva(proposedAzm, survey, projections[index - 1]);
+      return projtva(proposedAzm, projection, projections[index - 1]);
     case DIP_FAULT_POS_VS:
-      return projtva(proposedAzm, survey, projections[index - 1]);
+      return projtva(proposedAzm, projection, projections[index - 1]);
   }
 }
 
