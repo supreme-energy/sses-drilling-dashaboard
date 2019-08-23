@@ -123,6 +123,7 @@ function cc(proposedAzm, survey, prevSurvey, values = {}) {
   if (ca < 0.0) ca += 360.0;
 
   return {
+    ...survey,
     tvd,
     vs,
     ns,
@@ -321,7 +322,7 @@ function projtva(proposedAzm, survey, prevSurvey) {
       otherInputs.tvd = tvd;
       otherInputs.vs = vs;
 
-      return { newMd, newInc, ns, ew, cd, ca, dl, cl, ...otherInputs };
+      return { md: newMd, inc: newInc, azm, ns, ew, cd, ca, dl, cl, ...otherInputs };
     } else {
       return survey;
     }
