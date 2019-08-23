@@ -532,7 +532,9 @@ export function useFetchProjections(wellId) {
       (currentProjections, result) => {
         if (result && result.status === "success" && result.projection) {
           return currentProjections.map(p => {
-            if (p.id === newProjection.id) return _.mapValues(result.projection, Number);
+            if (p.id === newProjection.id) {
+              return _.mapValues(result.projection, Number);
+            }
             return p;
           });
         } else {
@@ -543,6 +545,7 @@ export function useFetchProjections(wellId) {
   };
 
   const deleteProjection = projectionId => {
+    const pendingDeletedProjection = data.find(p => p.id === projectionId);
     return fetch(
       {
         path: DELETE_WELL_PROJECTIONS,
@@ -556,9 +559,9 @@ export function useFetchProjections(wellId) {
       },
       (currentProjections, result) => {
         if (result && result.status === "success") {
-          return currentProjections.filter(p => p.id !== projectionId);
+          return currentProjections;
         }
-        return data;
+        return [...currentProjections, pendingDeletedProjection].sort(sortByMD);
       }
     );
   };

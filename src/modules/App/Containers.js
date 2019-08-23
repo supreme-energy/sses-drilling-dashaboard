@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState } from "react";
 import { createContainer } from "unstated-next";
 
 import memoize from "react-powertools/memoize";
