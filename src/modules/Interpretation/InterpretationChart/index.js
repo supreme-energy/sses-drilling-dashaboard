@@ -37,6 +37,13 @@ function useInterpretationWebglRenderer() {
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
 
+  useEffect(
+    function refreshWebGLRenderer() {
+      refresh();
+    },
+    [refresh, width, height]
+  );
+
   const [view, updateView] = useState({
     x: gridGutter,
     y: 0,
@@ -128,8 +135,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     [
       refresh,
       stage,
-      width,
-      height,
       controlLogs,
       selectedWellLog,
       gr,
