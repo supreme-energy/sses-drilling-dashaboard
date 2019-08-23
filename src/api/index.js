@@ -407,6 +407,7 @@ const surveysTransform = memoizeOne(data => {
     return {
       ...s,
       name: isBitProj ? `BPrj` : `${i}`,
+      pos: s.pos || s.tot - s.tvd,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,

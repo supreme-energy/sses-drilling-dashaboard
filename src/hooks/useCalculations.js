@@ -16,7 +16,8 @@ let degreesToRadians = Math.PI / 180.0;
 
 /* ************** Utility Functions ************** */
 function toRadians(aDegrees) {
-  return (Math.PI / 180.0) * aDegrees;
+  if (aDegrees > 180.0) return (aDegrees - 360.0) * degreesToRadians;
+  return degreesToRadians * aDegrees;
 }
 
 function toDegrees(a) {
@@ -197,9 +198,12 @@ function projtva(proposedAzm, projection, prevProjection) {
   let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
     ...prevProjection
   };
+  pinc = toRadians(pinc);
+  pazm = toRadians(pazm);
   let { tvd, azm, vs, tot, pos, dip, fault, method } = {
     ...projection
   };
+  azm = toRadians(azm);
 
   if (method === 8 || method === 7 || method === 6) {
     if (method === 8) {
@@ -322,7 +326,7 @@ function projtva(proposedAzm, projection, prevProjection) {
       otherInputs.tvd = tvd;
       otherInputs.vs = vs;
 
-      return { md: newMd, inc: newInc, azm, ns, ew, cd, ca, dl, cl, ...otherInputs };
+      return { ...projection, md: newMd, inc: newInc, ns, ew, cd, ca, dl, cl, ...otherInputs };
     } else {
       return projection;
     }
