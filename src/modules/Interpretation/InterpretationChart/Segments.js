@@ -210,7 +210,12 @@ const SegmentSelection = ({
             text={twoDecimals(lastSegment.enddepth)}
             y={segmentHeight}
           />
-          <PixiContainer ref={segmentDragContainer} container={container} updateTransform={frozenScaleTransform} />
+          <PixiContainer
+            x={10}
+            ref={segmentDragContainer}
+            container={container}
+            updateTransform={frozenScaleTransform}
+          />
           <PixiContainer
             ref={startLineRef}
             container={container}
