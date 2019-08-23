@@ -8,6 +8,8 @@ import { useGetComputedLogData } from "../selectors.js";
 const lastValue = array => array[array.length - 1];
 const formatValue = (item, prop) => (item ? twoDecimals(item[prop]) : EMPTY_FIELD);
 
+function useGetGameExtent(selection) {}
+
 export default function SelectionStats({ draft, selection, ...boxProps }) {
   const [startWellLog] = selection;
   const endWellLog = lastValue(selection);

@@ -2,24 +2,16 @@ import React, { useEffect, useCallback, useState } from "react";
 import { draftColor, selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedSegmentState, useLogExtent, usePendingSegments } from "../selectors";
+import { useSelectedSegmentState, usePendingSegments } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
 import { useBiasAndScaleActions, useSaveWellLogActions } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useWellIdContainer } from "../../App/Containers";
+import LogExtent from "./LogExtent";
 
 const lineData = [[0, 10], [0, 0]];
-
-// this is more a workaround for hooks looping limitation, useLogExtent working with only one log
-const LogExtent = ({ log, wellId, updateExtent }) => {
-  const [min, max] = useLogExtent(log, wellId);
-  useEffect(() => {
-    updateExtent(([currentMin, currentMax]) => [Math.min(currentMin, min), Math.max(currentMax, max)]);
-  }, [updateExtent, min, max]);
-  return null;
-};
 
 export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
   const [{ draftMode, selectedMd }, dispatch] = useComboContainer();
