@@ -62,7 +62,7 @@ export function useSelectedMd() {
   const [, , , , byId] = useComputedSurveysAndProjections();
   const [{ selectionById }] = useComboContainer();
   return useMemo(() => {
-    const selectedId = Object.keys(selectionById)[0];
+    const selectedId = getSelectedId(selectionById);
     const selectedItem = byId[selectedId];
     return selectedItem && selectedItem.md;
   }, [byId, selectionById]);
@@ -265,12 +265,16 @@ export function useGetComputedLogData(wellId, log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-const recomputeSurveysAndProjections = memoizeOne(
-  (surveys, projections, draftMode, selectedMd, pendingSegmentsState) => {
-    return surveys.concat(projections).reduce((acc, next, index) => {
-      const prevItem = acc[index - 1] || next;
-      const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
+export function getSelectedId(selectionById) {
+  return Object.keys(selectionById)[0];
+}
 
+const recomputeSurveysAndProjections = memoizeOne(
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState) => {
+    return surveys.concat(projections).reduce((acc, next, index) => {
+      const selectedId = getSelectedId(selectionById);
+      const prevItem = acc[index - 1] || next;
+      const pendingState = (draftMode && selectedId === next.id ? {} : pendingSegmentsState[next.id]) || {};
       const dipPending = pendingState.dip !== undefined;
       const faultPending = pendingState.fault !== undefined;
       const dip = dipPending ? pendingState.dip : next.dip;
@@ -292,23 +296,25 @@ const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
   const { surveys } = useSurveysDataContainer();
-  const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
+  const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
   const surveysAndProjections = recomputeSurveysAndProjections(
     surveys,
     projectionsData,
     draftMode,
-    selectedMd,
+    selectionById,
     pendingSegmentsState
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
     surveys
   ]);
+
   const computedProjections = useMemo(() => surveysAndProjections.slice(surveys.length), [
     surveysAndProjections,
     surveys
   ]);
+
   return [
     surveysAndProjections,
     computedSurveys,
@@ -322,7 +328,7 @@ export function useSelectedSurvey() {
   const [{ selectionById }] = useComboContainer();
   const [, , , , byId] = useComputedSurveysAndProjections();
   return useMemo(() => {
-    const selectedId = Object.keys(selectionById)[0];
+    const selectedId = getSelectedId(selectionById);
     return byId[selectedId];
   }, [selectionById, byId]);
 }
@@ -360,17 +366,11 @@ export function useComputedFormations(formations) {
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : [0, 0]);
+export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
   return useMemo(() => getExtent(logData), [logData]);
-}
-
-export function useSelectedLogExtent() {
-  const { wellId } = useWellIdContainer();
-  const { selectedWellLog } = useSelectedWellLog();
-  return useLogExtent(selectedWellLog, wellId);
 }
 
 export function usePendingSegments() {
@@ -380,6 +380,17 @@ export function usePendingSegments() {
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
 
   const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
+
+  return pendingSegments;
+}
+
+export function useComputedPendingSegments() {
+  const { segments } = useComputedSegments();
+  const selectedMd = useSelectedMd();
+
+  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+
+  const pendingSegments = getPendingSegments(selectedMd, segments, nrPrevSurveysToDraft, draftMode);
 
   return pendingSegments;
 }

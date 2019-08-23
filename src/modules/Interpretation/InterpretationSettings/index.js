@@ -21,7 +21,7 @@ export default function InterpretationSettings({ className }) {
       return acc;
     }, {});
 
-    updateSegments(resetArgs);
+    updateSegments({ propsByMd: resetArgs });
   }, [pendingSegments, updateSegments]);
 
   return (

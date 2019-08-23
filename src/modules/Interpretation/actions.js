@@ -1,6 +1,5 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-
 import {
   getCalculateDip,
   useSelectedWellLog,
@@ -8,7 +7,8 @@ import {
   useComputedDraftSegmentsOnly,
   useComputedSegments,
   useCurrentComputedSegments,
-  useComputedSurveysAndProjections
+  useComputedSurveysAndProjections,
+  usePendingSegmentsStateByMd
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -74,7 +74,7 @@ export function useDragActions() {
         totalSegmentsHeight
       );
 
-      updateSegments(dipsByMd);
+      updateSegments({ propsByMd: dipsByMd });
     },
     [updateSegments, computedSegments, pendingSegments, totalSegmentsHeight, computedPendingSegments]
   );
@@ -89,7 +89,7 @@ export function useDragActions() {
 
       let fault = segment.fault - delta;
 
-      updateSegments({ [log.endmd]: { fault } });
+      updateSegments({ propsByMd: { [log.endmd]: { fault } } });
     },
     [updateSegments, logsById]
   );
@@ -115,7 +115,7 @@ export function useDragActions() {
       const fault = segment.fault + faultDelta;
       propsByMd[segment.endmd].fault = fault;
 
-      updateSegments(propsByMd);
+      updateSegments({ propsByMd });
     },
     [updateSegments, logsById, computedPendingSegments, pendingSegments, totalSegmentsHeight, computedSegments]
   );
@@ -150,7 +150,8 @@ export function useBiasAndScaleActions(dispatch) {
 
 export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
-  const [{ pendingSegmentsState }, dispatch] = useComboContainer();
+  const [, dispatch] = useComboContainer();
+  const pendingSegmentsState = usePendingSegmentsStateByMd();
   const updateSegments = useUpdateSegments();
   const [logs, , { updateWellLogs }] = useWellLogsContainer();
 
@@ -197,7 +198,7 @@ export function useSaveWellLogActions() {
         return acc;
       }, {});
 
-      updateSegments(resetLogProps);
+      updateSegments({ propsByMd: resetLogProps });
 
       return result;
     },
@@ -228,10 +229,6 @@ export function useSaveWellLogActions() {
     [pendingSegmentsState, saveWellLogs, logsByEndMd]
   );
 
-  // const saveAll = fieldsToSave => {
-  //   const
-  // }
-
   return { saveSelectedWellLog, saveAllPendingLogs };
 }
 
@@ -248,10 +245,13 @@ export function useSelectionActions() {
     },
     [dispatch, itemsByMd]
   );
+
+  const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", id }), [dispatch]);
   const deselectAll = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
 
   return {
     toggleMdSelection,
+    toggleSegmentSelection,
     deselectAll
   };
 }
@@ -260,13 +260,15 @@ export function useUpdateSegments() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
   const [, dispatch] = useComboContainer();
   const updateSegments = useCallback(
-    propsByMd =>
+    ({ propsByMd, propsById }) =>
       dispatch({
         type: "UPDATE_SEGMENTS_PROPERTIES",
-        propsById: mapKeys(propsByMd, (value, md) => {
-          const item = itemsByMd[md];
-          return item && item.id;
-        })
+        propsById:
+          propsById ||
+          mapKeys(propsByMd, (value, md) => {
+            const item = itemsByMd[md];
+            return item && item.id;
+          })
       }),
     [dispatch, itemsByMd]
   );

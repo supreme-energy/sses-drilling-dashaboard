@@ -64,16 +64,16 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   };
 
   let calcSections = props.calcSections;
-  let toggleMdSelection = props.toggleMdSelection;
+  let toggleSegmentSelection = props.toggleSegmentSelection;
 
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
-    toggleMdSelection = props.toggleMdSelection;
+    toggleSegmentSelection = props.toggleSegmentSelection;
 
     const onSectionClick = section => {
-      toggleMdSelection(section.endMD);
+      toggleSegmentSelection(section.entityId);
     };
     const y = height - gutter - buttonHeight;
 
@@ -97,7 +97,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.endMD = p2.md;
+      pixi.entityId = p2.id;
 
       const start = p1.vs * view.xScale + view.x;
       const length = (p2.vs - p1.vs) * view.xScale;

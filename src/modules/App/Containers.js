@@ -239,7 +239,7 @@ export function useCrossSectionData() {
   const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
-  const { toggleMdSelection, deselectAll } = useSelectionActions();
+  const { toggleSegmentSelection, deselectAll } = useSelectionActions();
 
   const prevStatus = usePrevious(ghostDiff.status);
   useEffect(() => {
@@ -342,7 +342,7 @@ export function useCrossSectionData() {
     addProjection,
     wellPlan,
     selectedSections,
-    toggleMdSelection,
+    toggleSegmentSelection,
     deselectAll,
     ghostDiff,
     ghostDiffDispatch,

@@ -2,7 +2,6 @@ import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
 import { useWellLogsContainer } from "./wellLogs";
 
-import { getPendingSegments } from "../../Interpretation/selectors";
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
 import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
@@ -45,18 +44,6 @@ function selectionByIdReducer(selectionById, action) {
       return selectionById;
   }
 }
-
-// function updatePendingSegments(pendingSegmentsState, state, logs, action) {
-//   const { selectionById, nrPrevSurveysToDraft, draftMode } = state;
-//   const selectedMd =
-//   const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
-//   return pendingSegments.reduce((acc, segment) => {
-//     return {
-//       ...acc,
-//       [segment.endmd]: pendingSegmentState(acc[segment.endmd], action, segment.endmd)
-//     };
-//   }, pendingSegmentsState);
-// }
 
 function pendingSegmentState(pendingState, action, key) {
   switch (action.type) {

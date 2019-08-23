@@ -79,7 +79,7 @@ export default function ModelSurveySettings(props) {
       return { ...acc, [md]: props };
     }, {});
 
-    updateSegments(segmentsProps);
+    updateSegments({ propsByMd: segmentsProps });
 
     if (!draftMode) {
       debouncedSaveWellLog([

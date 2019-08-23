@@ -2,11 +2,11 @@ import React, { useEffect, useCallback, useState } from "react";
 import { draftColor, selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedSegmentState, useLogExtent, usePendingSegments } from "../selectors";
+import { useSelectedSegmentState, useLogExtent, usePendingSegments, getSelectedId } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useBiasAndScaleActions, useSaveWellLogActions } from "../actions";
+import { useSaveWellLogActions, useUpdateSegments } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useWellIdContainer } from "../../App/Containers";
 
@@ -15,39 +15,53 @@ const lineData = [[0, 10], [0, 0]];
 // this is more a workaround for hooks looping limitation
 // useLogExtent is only working with one log
 const LogExtent = ({ log, wellId, updateExtent }) => {
-  const [min, max] = useLogExtent(log, wellId);
+  const extent = useLogExtent(log, wellId);
   useEffect(() => {
-    updateExtent(([currentMin, currentMax]) => [Math.min(currentMin, min), Math.max(currentMax, max)]);
-  }, [updateExtent, min, max]);
+    if (extent) {
+      const [min, max] = extent;
+      updateExtent(([currentMin, currentMax]) => [Math.min(currentMin, min), Math.max(currentMax, max)]);
+    }
+  }, [updateExtent, extent]);
   return null;
 };
 
 export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
-  const [{ draftMode, selectionById }, dispatch] = useComboContainer();
+  const [{ draftMode, selectionById }] = useComboContainer();
   const internalStateRef = useRef({ prevSelection: null });
   const segmentData = useSelectedSegmentState();
   const bias = Number(segmentData.scalebias);
   const scale = Number(segmentData.scalefactor);
   const pendingSegments = usePendingSegments();
-  const [[xMin, xMax], updateExtent] = useState([0, 0]);
-  const currentSelection = Object.keys(selectionById)[0]; // only consider single selection
+  const [[xMin, xMax], updateExtent] = useState([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+  const currentSelection = getSelectedId(selectionById);
+
   if (currentSelection !== internalStateRef.current.prevSelection) {
-    updateExtent([0, 0]);
+    updateExtent([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
     internalStateRef.current.prevSelection = currentSelection;
   }
 
+  const updateSegments = useUpdateSegments();
+
   const width = xMax - xMin;
   const { wellId } = useWellIdContainer();
-
-  const { changeSelectedSegmentBias, changeSelectedSegmentScale } = useBiasAndScaleActions(dispatch);
+  const updatePendingSegments = useCallback(
+    props => {
+      const propsByMd = pendingSegments.reduce((acc, s) => {
+        acc[s.endmd] = props;
+        return acc;
+      }, {});
+      updateSegments({ propsByMd });
+    },
+    [pendingSegments, updateSegments]
+  );
 
   useEffect(
     function setInitialBias() {
       if (draftMode) {
-        changeSelectedSegmentBias(xMax + 10);
+        updatePendingSegments({ bias: xMax - 10 });
       }
     },
-    [xMax, changeSelectedSegmentBias, draftMode]
+    [xMax, draftMode]
   );
 
   useEffect(
@@ -65,10 +79,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     (event, prevMouse) => {
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
-
-      changeSelectedSegmentBias(bias + delta);
+      updatePendingSegments({ bias: bias + delta });
     },
-    [changeSelectedSegmentBias, bias]
+    [updatePendingSegments, bias]
   );
 
   const onStartDragHandler = useCallback(
@@ -79,9 +92,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
       const newWidth = width * scale - delta;
       const newScale = newWidth / width;
 
-      changeSelectedSegmentScale(newScale, bias + delta / 2);
+      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
     },
-    [changeSelectedSegmentScale, width, bias, scale]
+    [updatePendingSegments, width, bias, scale]
   );
 
   const onEndDragHandler = useCallback(
@@ -92,9 +105,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
       const newWidth = width * scale + delta;
       const newScale = newWidth / width;
 
-      changeSelectedSegmentScale(newScale, bias + delta / 2);
+      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
     },
-    [changeSelectedSegmentScale, width, bias, scale]
+    [updatePendingSegments, width, bias, scale]
   );
 
   const computedWidth = width * scale;
@@ -130,7 +143,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     y: 0,
     height: 10
   });
+
   const getSegmentEnd = useCallback(() => endLineRef.current && endLineRef.current.container, []);
+
   useDraggable({
     getContainer: getSegmentEnd,
     root: container,
