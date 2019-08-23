@@ -8,27 +8,46 @@ import {
   ListItem,
   ListItemText,
   List,
-  ListItemIcon
+  ListItemIcon,
+  Paper
 } from "@material-ui/core";
 import ArrowForward from "@material-ui/icons/ArrowForward";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import RemoveCircle from "@material-ui/icons/RemoveCircle";
-import ColorPicker from "./ColorPicker";
+import _ from "lodash";
+
+import { useAdditionalDataLog, useAdditionalDataLogsList } from "../../../../api";
+import { useWellIdContainer } from "../../../App/Containers";
+import ColorPicker from "../ColorPicker";
 import DataTable from "./DataTable";
 import ScalePlotIcon from "../../../../assets/scalePlot.svg";
 import TableChartIcon from "../../../../assets/tableChart.svg";
 
 import classes from "./styles.scss";
 
-import { MD, VS } from "../../../../constants/structuralGuidance";
-
-function SettingsMenu({ isVisible, view, setMenu, handleRemoveGraph, graph, data }) {
-  const [color, setPickerColor] = useState("#7F7F7F");
+function SettingsMenu({
+  isVisible,
+  view,
+  setMenu,
+  handleRemoveGraph,
+  graph,
+  data,
+  setSelectedGraph,
+  selectedGraphs,
+  currentGraphs
+}) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isDataTableVisible, handleDataTable] = useState(false);
+  const { wellId } = useWellIdContainer();
+  const { dataBySection = {} } = useAdditionalDataLogsList(wellId);
+  const { updateAdditionalLogDetails } = useAdditionalDataLog(wellId);
 
-  const handleColorChange = ({ hex }) => {
-    setPickerColor(hex);
+  const handleSaveColor = hex => {
+    const id = dataBySection[view].id;
+    const color = hex.substring(1);
+    setSelectedGraph({ ...selectedGraphs, [view]: { ...selectedGraphs[view], color } });
+    updateAdditionalLogDetails(wellId, { id, color });
+    handleClosePicker();
   };
 
   const handleCloseModal = () => {
@@ -37,9 +56,28 @@ function SettingsMenu({ isVisible, view, setMenu, handleRemoveGraph, graph, data
     });
   };
 
-  const handleArrowClick = () =>
+  const handleArrowClickBack = () =>
     setMenu(d => {
-      return { ...d, settingsView: view === MD ? VS : MD };
+      const currentIndex = currentGraphs.findIndex(graph => graph === d.settingsView);
+      if (currentIndex === 0) {
+        return { ...d, settingsView: graph };
+      } else if (currentIndex < 0) {
+        return { ...d, settingsView: currentGraphs[currentGraphs.length - 1] };
+      } else {
+        return { ...d, settingsView: currentGraphs[currentIndex - 1] };
+      }
+    });
+
+  const handleArrowClickForward = () =>
+    setMenu(d => {
+      const currentIndex = currentGraphs.findIndex(graph => graph === d.settingsView);
+      if (currentIndex === currentGraphs.length - 1) {
+        return { ...d, settingsView: graph };
+      } else if (currentIndex < 0) {
+        return { ...d, settingsView: currentGraphs[0] };
+      } else {
+        return { ...d, settingsView: currentGraphs[currentIndex + 1] };
+      }
     });
 
   const handleOpenPicker = event => {
@@ -66,11 +104,11 @@ function SettingsMenu({ isVisible, view, setMenu, handleRemoveGraph, graph, data
   return (
     <Dialog onClose={handleCloseModal} open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
-        <IconButton aria-label="arrow-back" onClick={handleArrowClick}>
+        <IconButton aria-label="arrow-back" onClick={handleArrowClickBack}>
           <ArrowBack />
         </IconButton>
         <span>{view}</span>
-        <IconButton aria-label="arrow-forward" onClick={handleArrowClick}>
+        <IconButton aria-label="arrow-forward" onClick={handleArrowClickForward}>
           <ArrowForward />
         </IconButton>
       </DialogTitle>
@@ -78,7 +116,15 @@ function SettingsMenu({ isVisible, view, setMenu, handleRemoveGraph, graph, data
         <List>
           <ListItem button onClick={handleOpenPicker}>
             <ListItemIcon>
-              <div style={{ height: 30, width: 30, backgroundColor: color }} />
+              <Paper>
+                <div
+                  style={{
+                    height: 25,
+                    width: 25,
+                    backgroundColor: `#${_.get(selectedGraphs, `[${view}].color`)}`
+                  }}
+                />
+              </Paper>
             </ListItemIcon>
             <ListItemText primary="Edit Style" />
           </ListItem>
@@ -104,11 +150,10 @@ function SettingsMenu({ isVisible, view, setMenu, handleRemoveGraph, graph, data
       </DialogContent>
 
       <ColorPicker
-        color={color}
-        setPicker={setPickerColor}
+        color={_.get(selectedGraphs, `[${view}].color`)}
         handleClose={handleClosePicker}
+        handleSave={handleSaveColor}
         anchorEl={anchorEl}
-        onChangeComplete={handleColorChange}
       />
       <DataTable isVisible={isDataTableVisible} handleClose={handleCloseDataTable} data={data} graph={graph} />
     </Dialog>
@@ -121,7 +166,10 @@ SettingsMenu.propTypes = {
   view: PropTypes.string,
   setMenu: PropTypes.func,
   handleRemoveGraph: PropTypes.func,
-  data: PropTypes.array
+  data: PropTypes.array,
+  setSelectedGraph: PropTypes.func,
+  currentGraphs: PropTypes.arrayOf(PropTypes.string),
+  selectedGraphs: PropTypes.object
 };
 
 export default SettingsMenu;

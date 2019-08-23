@@ -6,24 +6,35 @@ import IconButton from "@material-ui/core/IconButton";
 import Box from "@material-ui/core/Box";
 import MoreVert from "@material-ui/icons/MoreVert";
 import _ from "lodash";
+import { max, min } from "d3-array";
+import { scaleLinear } from "d3-scale";
 
 import LogPlotIcon from "../../../../assets/logPlot.svg";
 import { useAdditionalDataLog } from "../../../../api";
 import classes from "./styles.scss";
 import PixiContainer from "../../../../components/PixiContainer";
+import PixiLabel from "../../../../components/PixiLabel";
+import { frozenXYTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
 import useViewport from "../../../../hooks/useViewport";
 import PixiLine from "../../../../components/PixiLine";
 import Grid from "../../../../components/Grid";
 import LogMenu from "./LogMenu";
 import SettingsMenu from "./SettingsMenu";
-import { MD } from "../../../../constants/structuralGuidance";
 
-const SCALE_FACTOR = 1;
-const gridGutter = 50;
+const gridGutter = 20;
+
+function computeInitialViewXScaleValue(data) {
+  const diff = max(data, d => d.md) - min(data, d => d.md);
+  return scaleLinear()
+    .domain([0, diff])
+    .range([0, 1]);
+}
 
 function Line({ wellId, logId, viewport, mapper, refresh }) {
-  const { color, data = [] } = useAdditionalDataLog(wellId, logId);
+  const {
+    data: { color, data = [] }
+  } = useAdditionalDataLog(wellId, logId);
 
   useEffect(
     function refreshWebGLRenderer() {
@@ -38,13 +49,22 @@ function Line({ wellId, logId, viewport, mapper, refresh }) {
 }
 
 function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRemoveGraph }) {
-  const { color, data = [], label: graphName } = useAdditionalDataLog(wellId, logId);
+  const {
+    data: { color, data = [], label: graphName }
+  } = useAdditionalDataLog(wellId, logId);
   const [selectedGraphs, setSelectedGraph] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [{ isSettingsVisible, settingsView }, setSettingsMenu] = useState({
     isSettingsVisible: false,
-    settingsView: MD
+    settingsView: ""
   });
+  const [{ labelHeight, labelWidth }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
+  const currentGraphs = useMemo(() => _.keys(_.pickBy(selectedGraphs, "checked")), [selectedGraphs]);
+
+  const onSizeChanged = useCallback(
+    (labelWidth, labelHeight) => updateLabelDimensions({ labelWidth, labelHeight }),
+    []
+  );
 
   const handleOpenGraphMenu = event => {
     setAnchorEl(event.currentTarget);
@@ -62,11 +82,16 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
 
   const prevXAxis = usePrevious(xAxis);
   const mapper = d => [Number(d[xAxis.toLowerCase()]), Number(d.value)];
-  const menuItems = useMemo(() => availableGraphs.filter(g => g !== graphName), [availableGraphs, graphName]);
+  const menuItems = useMemo(() => availableGraphs.map(({ label }) => label), [availableGraphs]);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
+
+  const getInitialViewXScaleValue = useMemo(
+    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
+    [data]
+  );
 
   const [view, updateView] = useState({
     x: 0,
@@ -74,8 +99,6 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
     xScale: 1,
     yScale: 1
   });
-
-  const scaleInitialized = useRef(false);
 
   const viewportContainer = useRef(null);
 
@@ -86,9 +109,8 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
     height,
     view,
     updateView,
-    zoomXScale: true,
-    zoomYScale: true,
-    isXScalingValid: () => 1
+    zoomXScale: false,
+    zoomYScale: false
   });
 
   const onScale = useCallback(() => {
@@ -96,22 +118,22 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
     const minValue = Math.min(...data.map(d => d.value));
 
     updateView(view => {
+      const xScale = getInitialViewXScaleValue(width - gridGutter);
       return {
         ...view,
-        x: (-minDepth + 20) * view.xScale,
-        y: (-minValue + 40) * view.yScale,
-        yScale: SCALE_FACTOR,
-        xScale: SCALE_FACTOR
+        x: -minDepth * xScale + gridGutter,
+        y: -minValue * view.yScale + 10,
+        yScale: 0.15,
+        xScale
       };
     });
-  }, [data, xAxis]);
+  }, [data, xAxis, width, getInitialViewXScaleValue]);
 
   // set initial scale
   useEffect(
     function setInitialXScale() {
-      if (data && data.length && width && height && (!scaleInitialized.current || xAxis !== prevXAxis)) {
+      if (data && data.length && width && height) {
         onScale();
-        scaleInitialized.current = true;
       }
     },
     [width, data, height, onScale, xAxis, prevXAxis]
@@ -121,8 +143,20 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
     function refreshWebGLRenderer() {
       refresh();
     },
-    [refresh, stage, view, width, height, data, selectedGraphs]
+    [refresh, stage, view, width, height, data, selectedGraphs, labelHeight, labelWidth]
   );
+
+  useEffect(() => {
+    if (color) {
+      setSelectedGraph(selectedGraphs => {
+        return { ...selectedGraphs, [graphName]: { color, checked: true } };
+      });
+    }
+  }, [color, graphName]);
+
+  useEffect(() => {
+    if (graphName) setSettingsMenu({ isSettingsVisible, settingsView: graphName });
+  }, [graphName, isSettingsVisible]);
 
   return (
     <div className={classes.graphContainer}>
@@ -137,20 +171,33 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
         </Box>
         <div className={classes.plot} ref={canvasRef}>
           <PixiContainer ref={viewportContainer} container={stage} />
+          {currentGraphs.map((graph, index) => (
+            <PixiLabel
+              key={graph}
+              container={stage}
+              text={graph}
+              x={index * 30}
+              y={0}
+              height={height}
+              width={30}
+              updateTransform={frozenXYTransform}
+              sizeChanged={onSizeChanged}
+              textProps={{ fontSize: 14, color: 0xffffff, rotation: -Math.PI / 2, anchor: [1, 0] }}
+              backgroundProps={{ backgroundColor: Number(`0x${selectedGraphs[graph].color}`) }}
+            />
+          ))}
+
           <PixiContainer
             container={viewport}
             child={container => {
-              return _.map(selectedGraphs, (value, graph) => {
-                if (value) {
-                  const id = dataBySection[graph].id;
-                  return (
-                    <Line key={id} wellId={wellId} logId={id} viewport={container} mapper={mapper} refresh={refresh} />
-                  );
-                }
+              return currentGraphs.map(graph => {
+                const id = dataBySection[graph].id;
+                return (
+                  <Line key={id} wellId={wellId} logId={id} viewport={container} mapper={mapper} refresh={refresh} />
+                );
               });
             }}
           />
-          <PixiLine container={viewport} data={data} mapData={mapper} color={Number(`0x${color}`)} />
           <Grid
             container={viewport}
             view={view}
@@ -158,6 +205,7 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
             height={height}
             gridGutter={gridGutter}
             showXAxis={false}
+            showYAxis={false}
           />
         </div>
       </Box>
@@ -169,6 +217,7 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
         anchorEl={anchorEl}
         setAnchorEl={setAnchorEl}
         handleClose={handleCloseGraphMenu}
+        availableGraphs={availableGraphs}
       />
       <SettingsMenu
         graph={graphName}
@@ -177,6 +226,9 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
         view={settingsView}
         handleRemoveGraph={handleRemoveGraph}
         data={data}
+        setSelectedGraph={setSelectedGraph}
+        selectedGraphs={selectedGraphs}
+        currentGraphs={currentGraphs}
       />
     </div>
   );
@@ -185,7 +237,12 @@ function Chart({ wellId, logId, xAxis, availableGraphs, dataBySection, handleRem
 Chart.propTypes = {
   wellId: PropTypes.string,
   logId: PropTypes.number,
-  availableGraphs: PropTypes.arrayOf(PropTypes.string),
+  availableGraphs: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string,
+      color: PropTypes.color
+    })
+  ),
   dataBySection: PropTypes.object,
   handleRemoveGraph: PropTypes.func,
   xAxis: PropTypes.string

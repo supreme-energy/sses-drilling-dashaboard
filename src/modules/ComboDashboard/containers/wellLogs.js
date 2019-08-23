@@ -35,7 +35,6 @@ export function useWellLogList(wellId) {
   });
 
   const logList = transformLogs(list);
-
   const updateWellLogs = useCallback(
     data => {
       const dataById = keyBy(data, "id");

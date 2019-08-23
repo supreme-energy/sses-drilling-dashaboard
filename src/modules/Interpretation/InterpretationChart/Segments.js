@@ -8,10 +8,10 @@ import { useInterpretationRenderer } from ".";
 import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
-import { useDragActions, useSaveWellLogActions } from "../actions";
+import { useDragActions, useSaveWellLogActions, useSelectionActions } from "../actions";
 import { selectionColor, segmentColor, draftColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { getIsDraft, useComputedDraftSegments, useComputedDraftSegmentsOnly } from "../selectors";
+import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly } from "../selectors";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -54,29 +54,31 @@ const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...pr
   );
 });
 
-function RightSegments({ allSegments, container, view, totalWidth, nrPrevSurveysToDraft, selectedIndex }) {
-  const { byId } = useComputedDraftSegments();
-  return allSegments.map((s, index) => {
-    const isDraft = getIsDraft(index, selectedIndex, nrPrevSurveysToDraft);
-    const backgroundAlpha = isDraft ? 1 : 0.5;
-    const computedSegment = isDraft ? byId[s.id] : s;
-    const segmentHeight = view.yScale * (computedSegment.enddepth - computedSegment.startdepth);
-    return (
-      <PixiRectangle
-        width={10}
-        key={s.id}
-        height={segmentHeight}
-        updateTransform={frozenScaleTransform}
-        y={computedSegment.startdepth}
-        x={totalWidth - 70}
-        radius={5}
-        backgroundColor={draftColor}
-        backgroundAlpha={backgroundAlpha}
-        container={container}
-      />
-    );
-  });
-}
+const RightSegments = React.memo(
+  ({ allSegments, container, view, totalWidth, nrPrevSurveysToDraft, selectedIndex }) => {
+    const { byId } = useComputedSegments();
+    return allSegments.map((s, index) => {
+      const isDraft = getIsDraft(index, selectedIndex, nrPrevSurveysToDraft);
+      const backgroundAlpha = isDraft ? 1 : 0.5;
+      const computedSegment = isDraft ? byId[s.id] : s;
+      const segmentHeight = view.yScale * (computedSegment.enddepth - computedSegment.startdepth);
+      return (
+        <PixiRectangle
+          width={10}
+          key={s.id}
+          height={segmentHeight}
+          updateTransform={frozenScaleTransform}
+          y={computedSegment.startdepth}
+          x={totalWidth - 70}
+          radius={5}
+          backgroundColor={draftColor}
+          backgroundAlpha={backgroundAlpha}
+          container={container}
+        />
+      );
+    });
+  }
+);
 
 const SegmentSelection = ({
   totalWidth,
@@ -208,7 +210,12 @@ const SegmentSelection = ({
             text={twoDecimals(lastSegment.enddepth)}
             y={segmentHeight}
           />
-          <PixiContainer ref={segmentDragContainer} container={container} updateTransform={frozenScaleTransform} />
+          <PixiContainer
+            x={10}
+            ref={segmentDragContainer}
+            container={container}
+            updateTransform={frozenScaleTransform}
+          />
           <PixiContainer
             ref={startLineRef}
             container={container}
@@ -255,7 +262,7 @@ const SegmentSelection = ({
   );
 };
 
-const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
+const Segment = React.memo(({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
   const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
 
@@ -274,12 +281,13 @@ const Segment = ({ segment, view, selected, container, onSegmentClick, zIndex, t
       />
     </React.Fragment>
   );
-};
+});
 
 export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
   const { view } = useInterpretationRenderer();
-  const [{ nrPrevSurveysToDraft, draftMode }, , { setSelectedMd }] = useComboContainer();
-  const onSegmentClick = useCallback(segment => setSelectedMd(segment.endmd), [setSelectedMd]);
+  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+  const { toggleMdSelection } = useSelectionActions();
+  const onSegmentClick = useCallback(segment => toggleMdSelection(segment.endmd), [toggleMdSelection]);
   const selectedIndex = useMemo(() => selectedWellLog && segmentsData.findIndex(s => s.id === selectedWellLog.id), [
     segmentsData,
     selectedWellLog

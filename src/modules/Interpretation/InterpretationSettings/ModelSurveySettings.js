@@ -1,12 +1,15 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useMemo } from "react";
 import { Box, Typography, TextField, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
-import { useSelectedSegmentState, usePendingSegments } from "../selectors";
+import { useSelectedSegmentState, useComputedDraftSegmentsOnly } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
-import { useSaveWellLogActions } from "../actions";
+import debounce from "lodash/debounce";
+import mapKeys from "lodash/mapKeys";
+import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
+import { useUpdateSegmentsByMd } from "../actions";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
@@ -45,21 +48,31 @@ const FAULT_DIP_MODE = "Fault /Dip";
 const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
-  const [{ selectedMd, draftMode }, , { updateSegments }] = useComboContainer();
+  const [{ selectedMd, draftMode }] = useComboContainer();
+  const updateSegments = useUpdateSegmentsByMd();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
     FAULT_DIP_MODE
   );
 
-  const pendingSegments = usePendingSegments();
+  const pendingSegments = useComputedDraftSegmentsOnly();
   const selectedSegment = useSelectedSegmentState();
-  const { saveSelectedWellLog } = useSaveWellLogActions();
+  const [, , { updateWellLogs }] = useWellLogsContainer();
+
   const fault = selectedSegment && selectedSegment.fault;
   const dip = selectedSegment && selectedSegment.sectdip;
   const scale = selectedSegment && selectedSegment.scalefactor;
   const bias = selectedSegment && selectedSegment.scalebias;
 
+  // hide dip value if on draftMode pending segments have different dip values
+  const hideDipValue = useMemo(() => draftMode && pendingSegments.some(s => s.sectdip !== pendingSegments[0].sectdip), [
+    pendingSegments,
+    draftMode
+  ]);
+
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
+  const debouncedSaveWellLog = useMemo(() => debounce(updateWellLogs, 1000), [updateWellLogs]);
+
   const updateSegmentsHandler = props => {
     const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
     const segmentsProps = mds.reduce((acc, md) => {
@@ -67,8 +80,14 @@ export default function ModelSurveySettings(props) {
     }, {});
 
     updateSegments(segmentsProps);
+
     if (!draftMode) {
-      saveSelectedWellLog();
+      debouncedSaveWellLog([
+        {
+          id: selectedSegment.id,
+          ...mapKeys(props, (val, key) => (key === "dip" ? "sectdip" : key))
+        }
+      ]);
     }
   };
 
@@ -103,7 +122,7 @@ export default function ModelSurveySettings(props) {
               label={"Dip"}
               disabled={!selectedSegment}
               onChange={dip => updateSegmentsHandler({ dip })}
-              value={dip}
+              value={hideDipValue ? "" : dip}
               onIncrease={() => updateSegmentsHandler({ dip: Number(dip) + 1 })}
               onDecrease={() => updateSegmentsHandler({ dip: Number(dip) - 1 })}
             />

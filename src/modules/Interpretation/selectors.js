@@ -1,12 +1,14 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useMemo, useCallback } from "react";
-import { useWellLogData, EMPTY_ARRAY } from "../../api";
+import { useWellLogData, EMPTY_ARRAY, useWellInfo } from "../../api";
 import keyBy from "lodash/keyBy";
 import { useWellIdContainer, useSurveysDataContainer, useProjectionsDataContainer } from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
+import mapKeys from "lodash/mapKeys";
+import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -56,8 +58,19 @@ export function useGetLogByMd(md) {
   return { wellLog, prevLog, logIndex };
 }
 
+// only consider single selection
+export function useSelectedMd() {
+  const [, , , , byId] = useComputedSurveysAndProjections();
+  const [{ selectionById }] = useComboContainer();
+  return useMemo(() => {
+    const selectedId = getSelectedId(selectionById);
+    const selectedItem = byId[selectedId];
+    return selectedItem && selectedItem.md;
+  }, [byId, selectionById]);
+}
+
 export function useSelectedWellLog() {
-  const [{ selectedMd }] = useComboContainer();
+  const selectedMd = useSelectedMd();
   const { wellLog, prevLog, logIndex } = useGetLogByMd(selectedMd);
   return { selectedWellLog: wellLog, prevLog, selectedWellLogIndex: logIndex };
 }
@@ -153,26 +166,35 @@ const reduceComputedSegment = pendingSegmentsState => (acc, l, index) => {
   return acc;
 };
 
-// return all segment with computed properties
-export function useComputedDraftSegments() {
-  const [logList] = useWellLogsContainer();
+const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
+  const segments = logList.reduce(reduceComputedSegment(pendingSegmentsState), []);
+  const byId = keyBy(segments, "id");
+  return { segments, byId };
+});
+
+export function usePendingSegmentsStateByMd() {
   const [{ pendingSegmentsState }] = useComboContainer();
+  const [, , , , byId] = useComputedSurveysAndProjections();
+  return useMemo(
+    () =>
+      mapKeys(pendingSegmentsState, (value, key) => {
+        const item = byId[key];
+        return item && item.md;
+      }),
+    [pendingSegmentsState, byId]
+  );
+}
 
-  const computedSegments = useMemo(() => {
-    return logList.reduce(reduceComputedSegment(pendingSegmentsState), []);
-  }, [logList, pendingSegmentsState]);
-
-  const byId = useMemo(() => keyBy(computedSegments, "id"), [computedSegments]);
-
-  return {
-    segments: computedSegments,
-    byId
-  };
+// return all segment with computed properties
+export function useComputedSegments() {
+  const [logList] = useWellLogsContainer();
+  const pendingStateByMd = usePendingSegmentsStateByMd();
+  return getComputedSegments(logList, pendingStateByMd);
 }
 
 // return only segments that are in draft mode
 export function useComputedDraftSegmentsOnly() {
-  const { segments } = useComputedDraftSegments();
+  const { segments } = useComputedSegments();
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
   const { selectedWellLogIndex } = useSelectedWellLog();
 
@@ -185,27 +207,29 @@ export function useComputedDraftSegmentsOnly() {
   );
 }
 
-const getComputedSegments = memoizeOne((logList, pendingSegmentsState, draftMode) => {
-  // recompute logs with empty pending state because there is a situation
-  // when log is saved and dip/fault is updated on welllog but depth need to be recalculated
-  const computedSegments = draftMode
-    ? logList.reduce(reduceComputedSegment({}), [])
-    : logList.reduce(reduceComputedSegment(pendingSegmentsState), []);
-  const computedSegmentsById = keyBy(computedSegments, "id");
-  return [computedSegments, computedSegmentsById];
+const getComputedSegmentsNoPending = memoizeOne(logList => logList.reduce(reduceComputedSegment({}), []));
+
+const getCurentComputedSegments = memoizeOne((logList, computedSegments, draftMode) => {
+  // when not in draft mode we can't just return logList
+  // because dip/fault changed need to be recalculated while request is pending
+  const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(logList);
+  const currentComputedSegments = draftMode ? recomputedSegmentsWithNoPendingState : computedSegments;
+  const computedSegmentsById = keyBy(currentComputedSegments, "id");
+  return [currentComputedSegments, computedSegmentsById];
 });
 
-export function useComputedSegments() {
+export function useCurrentComputedSegments() {
+  const { segments: computedSegments } = useComputedSegments();
   const [logList] = useWellLogsContainer();
-  const [{ pendingSegmentsState, draftMode }] = useComboContainer();
-  return getComputedSegments(logList, pendingSegmentsState, draftMode);
+  const [{ draftMode }] = useComboContainer();
+  return getCurentComputedSegments(logList, computedSegments, draftMode);
 }
 
 export function useGetComputedLogData(log, draft) {
   const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  const { byId: draftLogsById } = useComputedDraftSegments();
-  const [computedSegments] = useComputedSegments();
+  const { byId: draftLogsById } = useComputedSegments();
+  const [computedSegments] = useCurrentComputedSegments();
   const [logList] = useWellLogsContainer();
   const logIndex = log ? logList.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
@@ -243,35 +267,160 @@ export function useGetComputedLogData(log, draft) {
   }, [logData, computedSegment, prevComputedSegment, log]);
 }
 
-export function useComputedSurveysAndProjections() {
-  const { surveys } = useSurveysDataContainer();
-  const [{ pendingSegmentsState, draftMode, selectedMd }] = useComboContainer();
-  const { projectionsData } = useProjectionsDataContainer();
-  return useMemo(
-    () =>
-      surveys.concat(projectionsData).reduce((acc, next, index) => {
-        const prevItem = acc[index - 1] || next;
-        const pendingState = (draftMode && selectedMd === next.md ? {} : pendingSegmentsState[next.md]) || {};
+export function getSelectedId(selectionById) {
+  return Object.keys(selectionById)[0];
+}
+
+const recomputeSurveysAndProjections = memoizeOne(
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm) => {
+    return surveys.concat(projections).reduce((acc, currSvy, index) => {
+      const prevSvy = acc[index - 1];
+      const selectedId = getSelectedId(selectionById);
+      const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
+      const combinedSvy = { ...currSvy, ...pendingState };
+
+      if (index === 0) {
+        let ca = Math.PI / 2;
+        if (combinedSvy.ns !== 0) {
+          ca = Math.atan2(combinedSvy.ew, combinedSvy.ns);
+        }
+        let cd = combinedSvy.ns;
+        if (ca !== 0.0) {
+          cd = Math.abs(combinedSvy.ew / Math.sin(ca));
+        }
+        ca = toDegrees(ca);
+        if (ca < 0.0) ca += 360.0;
+        acc[index] = {
+          ...combinedSvy,
+          ca,
+          cd
+        };
+      } else {
+        let dogLegSeverity = 0;
+        const courseLength = combinedSvy.md - prevSvy.md;
+        const pInc = toRadians(prevSvy.inc);
+        const cInc = toRadians(combinedSvy.inc);
+        const pAzm = toRadians(prevSvy.azm);
+        let cAzm = toRadians(combinedSvy.azm);
+        let dogleg = Math.acos(
+          Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+        );
+        if (isNaN(dogleg)) {
+          combinedSvy.azm += 0.01;
+          cAzm = toRadians(combinedSvy.azm);
+          dogleg = Math.acos(Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm));
+        }
+        if (courseLength > 0) {
+          // TODO: include check for "depth units"
+          //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
+          dogLegSeverity = (dogleg * 100.0) / courseLength;
+        }
+        // Radius also called curvature factor
+        let radius = 1;
+        if (dogleg !== 0.0) {
+          radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
+        }
+
+        const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
+        if (!tvd) {
+          console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
+        }
+        let ns =
+          prevSvy.ns +
+          (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
+        const ew =
+          prevSvy.ew +
+          (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
+
+        let ca = Math.PI / 2;
+        if (ns !== 0.0) {
+          ca = Math.atan2(ew, ns);
+        }
+
+        let cd = ns;
+        if (ca !== 0.0) {
+          cd = ew / Math.sin(ca);
+        }
+
+        const vs = Math.cos(ca - toRadians(propazm)) * cd;
 
         const dipPending = pendingState.dip !== undefined;
         const faultPending = pendingState.fault !== undefined;
-        const dip = dipPending ? pendingState.dip : next.dip;
-        const fault = faultPending ? pendingState.fault : next.fault;
+        const dip = dipPending ? pendingState.dip : currSvy.dip;
+        const fault = faultPending ? pendingState.fault : currSvy.fault;
+        const totDiff = calcTot(0, dip, currSvy.vs, prevSvy.vs, fault);
+        const tcl = prevSvy.tcl + totDiff;
+        const tot = prevSvy.tot + totDiff;
+        const bot = prevSvy.bot + totDiff;
 
-        const tcl = prevItem.tcl + -Math.tan(dip / 57.29578) * Math.abs(next.vs - prevItem.vs) + fault;
+        const caDeg = toDegrees(ca);
 
-        acc[index] = { ...next, tcl, fault, dip };
+        acc[index] = {
+          ...combinedSvy,
+          tvd,
+          vs,
+          dl: toDegrees(dogLegSeverity),
+          cl: courseLength,
+          ca: caDeg < 0 ? caDeg + 360 : ca,
+          ns,
+          ew,
+          build: ((cInc - pInc) * 100) / courseLength,
+          turn: ((cAzm - pAzm) * 100) / courseLength,
+          tcl,
+          fault,
+          dip,
+          tot,
+          bot
+        };
+      }
+      return acc;
+    }, []);
+  }
+);
 
-        return acc;
-      }, []),
-    [surveys, draftMode, pendingSegmentsState, selectedMd, projectionsData]
+const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
+const groupItemsById = memoizeOne(items => keyBy(items, "id"));
+
+export function useComputedSurveysAndProjections() {
+  const { wellId } = useWellIdContainer();
+  const [{ wellInfo }] = useWellInfo(wellId);
+  const { surveys } = useSurveysDataContainer();
+  const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
+  const { projectionsData } = useProjectionsDataContainer();
+  const surveysAndProjections = recomputeSurveysAndProjections(
+    surveys,
+    projectionsData,
+    draftMode,
+    selectionById,
+    pendingSegmentsState,
+    wellInfo ? wellInfo.propazm : 0
   );
+  const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
+    surveysAndProjections,
+    surveys
+  ]);
+
+  const computedProjections = useMemo(() => surveysAndProjections.slice(surveys.length), [
+    surveysAndProjections,
+    surveys
+  ]);
+
+  return [
+    surveysAndProjections,
+    computedSurveys,
+    computedProjections,
+    groupItemsByMd(surveysAndProjections),
+    groupItemsById(surveysAndProjections)
+  ];
 }
 
 export function useSelectedSurvey() {
-  const [{ selectedMd }] = useComboContainer();
-  const computedSurveys = useComputedSurveysAndProjections();
-  return useMemo(() => computedSurveys.find(s => s.md === selectedMd), [selectedMd, computedSurveys]);
+  const [{ selectionById }] = useComboContainer();
+  const [, , , , byId] = useComputedSurveysAndProjections();
+  return useMemo(() => {
+    const selectedId = getSelectedId(selectionById);
+    return byId[selectedId];
+  }, [selectionById, byId]);
 }
 
 export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
@@ -279,7 +428,7 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
 }
 
 export function useComputedFormations(formations) {
-  const computedSurveys = useComputedSurveysAndProjections();
+  const [surveysAndProjections] = useComputedSurveysAndProjections();
 
   const computedFormations = useMemo(
     () =>
@@ -287,7 +436,7 @@ export function useComputedFormations(formations) {
         return {
           ...f,
           data: f.data.map((item, index) => {
-            const survey = computedSurveys[index];
+            const survey = surveysAndProjections[index];
 
             if (!survey) {
               return item;
@@ -302,28 +451,23 @@ export function useComputedFormations(formations) {
           })
         };
       }),
-    [formations, computedSurveys]
+    [formations, surveysAndProjections]
   );
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : [0, 0]);
+export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
   return useMemo(() => getExtent(logData), [logData]);
 }
 
-export function useSelectedLogExtent() {
-  const { wellId } = useWellIdContainer();
-  const { selectedWellLog } = useSelectedWellLog();
-  return useLogExtent(selectedWellLog, wellId);
-}
-
 export function usePendingSegments() {
   const [logs] = useWellLogsContainer();
+  const selectedMd = useSelectedMd();
 
-  const [{ selectedMd, nrPrevSurveysToDraft, draftMode }] = useComboContainer();
+  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
 
   const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
 
@@ -332,8 +476,8 @@ export function usePendingSegments() {
 
 export function useSelectedSegmentState() {
   const [{ draftMode }] = useComboContainer();
-  const [, computedSegmentsById] = useComputedSegments();
-  const { byId: draftSegmentsById } = useComputedDraftSegments();
+  const [, computedSegmentsById] = useCurrentComputedSegments();
+  const { byId: draftSegmentsById } = useComputedSegments();
   const { selectedWellLog } = useSelectedWellLog();
   const map = draftMode ? draftSegmentsById : computedSegmentsById;
   return (selectedWellLog && map[selectedWellLog.id]) || {};

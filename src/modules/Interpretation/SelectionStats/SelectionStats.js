@@ -4,17 +4,17 @@ import CondensedText from "../../../components/ContensedText.js";
 import css from "./styles.scss";
 import { twoDecimals, EMPTY_FIELD } from "../../../constants/format.js";
 import { useGetComputedLogData } from "../selectors.js";
+import { useLogExtentContainer } from "../containers/logExtentContainer.js";
 
 const lastValue = array => array[array.length - 1];
 const formatValue = (item, prop) => (item ? twoDecimals(item[prop]) : EMPTY_FIELD);
 
-function useGetGameExtent(selection) {}
-
-export default function SelectionStats({ draft, selection, ...boxProps }) {
+export default function SelectionStats({ draft, selection, gammaRange, ...boxProps }) {
   const [startWellLog] = selection;
   const endWellLog = lastValue(selection);
   const startLogData = useGetComputedLogData(startWellLog, draft);
   const endLogData = useGetComputedLogData(endWellLog, draft);
+  const [xMin, xMax] = gammaRange;
 
   return (
     <Box display="flex" flexDirection="column" {...boxProps}>
@@ -38,13 +38,9 @@ export default function SelectionStats({ draft, selection, ...boxProps }) {
       </Box>
       <Box display="flex" flexDirection="row">
         <CondensedText className={css.label}>Gamma</CondensedText>
-        <CondensedText className={css.value}>
-          {startLogData ? twoDecimals(startLogData.data[0].value) : EMPTY_FIELD}
-        </CondensedText>
+        <CondensedText className={css.value}>{startLogData ? twoDecimals(xMin) : EMPTY_FIELD}</CondensedText>
         <CondensedText className={css.label}>to</CondensedText>
-        <CondensedText className={css.value}>
-          {startLogData ? twoDecimals(lastValue(startLogData.data).value) : EMPTY_FIELD}
-        </CondensedText>
+        <CondensedText className={css.value}>{startLogData ? twoDecimals(xMax) : EMPTY_FIELD}</CondensedText>
       </Box>
       <Box display="flex" flexDirection="row">
         <CondensedText className={css.label}>Scale</CondensedText>
@@ -65,3 +61,7 @@ export default function SelectionStats({ draft, selection, ...boxProps }) {
     </Box>
   );
 }
+
+SelectionStats.defaultProps = {
+  gammaRange: []
+};

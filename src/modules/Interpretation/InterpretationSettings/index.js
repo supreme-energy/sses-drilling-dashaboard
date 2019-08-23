@@ -9,9 +9,11 @@ import ModelSurveySettings from "./ModelSurveySettings";
 import DraftSurveys from "./DraftSurveys";
 import ApplyDraftButtons from "./ApplyDraftButtons";
 import { usePendingSegments } from "../selectors";
+import { useUpdateSegmentsByMd } from "../actions";
 
 export default function InterpretationSettings({ className }) {
-  const [{ draftMode }, , { updateSegments }] = useComboContainer();
+  const [{ draftMode }] = useComboContainer();
+  const updateSegments = useUpdateSegmentsByMd();
   const pendingSegments = usePendingSegments();
   const resetPendingState = useCallback(() => {
     const resetArgs = pendingSegments.reduce((acc, ps) => {
@@ -29,13 +31,15 @@ export default function InterpretationSettings({ className }) {
         <NavigationSettings />
       </Box>
       <ModelSurveySettings mt={2} />
-      {draftMode && <ApplyDraftButtons />}
       {draftMode && (
-        <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
-          <Button color="primary" onClick={resetPendingState}>
-            RESET FAULT/DIP
-          </Button>
-        </Box>
+        <React.Fragment>
+          <ApplyDraftButtons />
+          <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
+            <Button color="primary" onClick={resetPendingState}>
+              RESET FAULT/DIP
+            </Button>
+          </Box>
+        </React.Fragment>
       )}
     </Box>
   );

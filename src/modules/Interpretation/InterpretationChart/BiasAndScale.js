@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback } from "react";
 import { draftColor, selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
@@ -6,46 +6,51 @@ import { useSelectedSegmentState, usePendingSegments } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useBiasAndScaleActions, useSaveWellLogActions } from "../actions";
+import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useWellIdContainer } from "../../App/Containers";
-import LogExtent from "./LogExtent";
+
+import { useLogExtentContainer } from "../containers/logExtentContainer";
 
 const lineData = [[0, 10], [0, 0]];
 
 export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
-  const [{ draftMode, selectedMd }, dispatch] = useComboContainer();
-  const internalStateRef = useRef({ prevSelectedMd: null });
+  const [{ draftMode }] = useComboContainer();
+
   const segmentData = useSelectedSegmentState();
   const bias = Number(segmentData.scalebias);
   const scale = Number(segmentData.scalefactor);
   const pendingSegments = usePendingSegments();
-  const [[xMin, xMax], updateExtent] = useState([0, 0]);
-
-  if (selectedMd !== internalStateRef.current.prevSelectedMd) {
-    updateExtent([0, 0]);
-    internalStateRef.current.prevSelectedMd = selectedMd;
-  }
+  const [pendingSegmentsRange] = useLogExtentContainer();
+  const [xMin, xMax] = pendingSegmentsRange;
+  const updateSegments = useUpdateSegmentsByMd();
 
   const width = xMax - xMin;
-  const { wellId } = useWellIdContainer();
 
-  const { changeSelectedSegmentBias, changeSelectedSegmentScale } = useBiasAndScaleActions(dispatch);
+  const updatePendingSegments = useCallback(
+    props => {
+      const propsByMd = pendingSegments.reduce((acc, s) => {
+        acc[s.endmd] = props;
+        return acc;
+      }, {});
+      updateSegments(propsByMd);
+    },
+    [pendingSegments, updateSegments]
+  );
 
   useEffect(
     function setInitialBias() {
       if (draftMode) {
-        changeSelectedSegmentBias(xMax + 10);
+        updatePendingSegments({ bias: xMax - 10 });
       }
     },
-    [xMax, changeSelectedSegmentBias, draftMode]
+    [pendingSegmentsRange, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   useEffect(
     function redraw() {
       refresh();
     },
-    [refresh, xMin, xMax, bias, scale]
+    [refresh, pendingSegmentsRange, bias, scale]
   );
 
   const segmentContainerRef = useRef(null);
@@ -56,10 +61,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     (event, prevMouse) => {
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
-
-      changeSelectedSegmentBias(bias + delta);
+      updatePendingSegments({ bias: bias + delta });
     },
-    [changeSelectedSegmentBias, bias]
+    [updatePendingSegments, bias]
   );
 
   const onStartDragHandler = useCallback(
@@ -70,9 +74,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
       const newWidth = width * scale - delta;
       const newScale = newWidth / width;
 
-      changeSelectedSegmentScale(newScale, bias + delta / 2);
+      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
     },
-    [changeSelectedSegmentScale, width, bias, scale]
+    [updatePendingSegments, width, bias, scale]
   );
 
   const onEndDragHandler = useCallback(
@@ -83,9 +87,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
       const newWidth = width * scale + delta;
       const newScale = newWidth / width;
 
-      changeSelectedSegmentScale(newScale, bias + delta / 2);
+      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
     },
-    [changeSelectedSegmentScale, width, bias, scale]
+    [updatePendingSegments, width, bias, scale]
   );
 
   const computedWidth = width * scale;
@@ -121,7 +125,9 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     y: 0,
     height: 10
   });
+
   const getSegmentEnd = useCallback(() => endLineRef.current && endLineRef.current.container, []);
+
   useDraggable({
     getContainer: getSegmentEnd,
     root: container,
@@ -136,66 +142,60 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   });
 
   return (
-    <React.Fragment>
-      {pendingSegments.map(s => (
-        <LogExtent log={s} key={s.id} updateExtent={updateExtent} wellId={wellId} />
-      ))}
-      {/* {draftMode && <DraftLineInit xMax={xMax} />} */}
-      <PixiContainer
-        container={container}
-        x={gridGutter + computedXMin + bias}
-        y={y}
-        child={container => (
-          <React.Fragment>
-            <PixiContainer
-              ref={startLineRef}
-              container={container}
-              x={0}
-              y={-1}
-              child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
-              )}
-            />
-            <PixiContainer
-              ref={endLineRef}
-              container={container}
-              x={computedWidth}
-              y={-1}
-              child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
-              )}
-            />
+    <PixiContainer
+      container={container}
+      x={gridGutter + computedXMin + bias}
+      y={y}
+      child={container => (
+        <React.Fragment>
+          <PixiContainer
+            ref={startLineRef}
+            container={container}
+            x={0}
+            y={-1}
+            child={container => (
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={draftMode ? draftColor : selectionColor}
+                nativeLines={false}
+                lineWidth={2}
+              />
+            )}
+          />
+          <PixiContainer
+            ref={endLineRef}
+            container={container}
+            x={computedWidth}
+            y={-1}
+            child={container => (
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={draftMode ? draftColor : selectionColor}
+                nativeLines={false}
+                lineWidth={2}
+              />
+            )}
+          />
 
-            <PixiContainer
-              ref={segmentContainerRef}
-              container={container}
-              x={0}
-              y={0}
-              child={container => (
-                <PixiRectangle
-                  width={computedWidth - 2}
-                  height={8}
-                  radius={5}
-                  backgroundColor={draftMode ? draftColor : selectionColor}
-                  container={container}
-                />
-              )}
-            />
-          </React.Fragment>
-        )}
-      />
-    </React.Fragment>
+          <PixiContainer
+            ref={segmentContainerRef}
+            container={container}
+            x={0}
+            y={0}
+            child={container => (
+              <PixiRectangle
+                width={computedWidth - 2}
+                height={8}
+                radius={5}
+                backgroundColor={draftMode ? draftColor : selectionColor}
+                container={container}
+              />
+            )}
+          />
+        </React.Fragment>
+      )}
+    />
   );
 }

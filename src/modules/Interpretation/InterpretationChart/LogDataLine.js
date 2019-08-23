@@ -5,7 +5,7 @@ import { draftColor, selectionColor, logColor } from "../pixiColors";
 
 const mapWellLog = d => [d.value, d.depth];
 
-function LogData({ logData, draft, range, ...props }) {
+const LogData = React.memo(({ logData, draft, range, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
 
   const [xMin, xMax] = useMemo(() => getExtent(logData), [logData]);
@@ -36,7 +36,7 @@ function LogData({ logData, draft, range, ...props }) {
       <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} />
     </React.Fragment>
   );
-}
+});
 
 function LogDataLine({ log, prevLog, container, draft, selected, refresh, range }) {
   const logData = useGetComputedLogData(log, draft);
