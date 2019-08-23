@@ -98,10 +98,6 @@ function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) 
         pendingSegmentsState
       );
 
-    // case "CHANGE_SELECTED_SEGMENT_BIAS":
-    // case "CHANGE_SELECTED_SEGMENT_SCALE":
-    //   return updatePendingSegments(pendingSegmentsState, state, logs, action);
-
     default:
       return pendingSegmentsState;
   }

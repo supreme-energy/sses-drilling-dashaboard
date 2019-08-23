@@ -473,17 +473,6 @@ export function usePendingSegments() {
   return pendingSegments;
 }
 
-export function useComputedPendingSegments() {
-  const { segments } = useComputedSegments();
-  const selectedMd = useSelectedMd();
-
-  const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
-
-  const pendingSegments = getPendingSegments(selectedMd, segments, nrPrevSurveysToDraft, draftMode);
-
-  return pendingSegments;
-}
-
 export function useSelectedSegmentState() {
   const [{ draftMode }] = useComboContainer();
   const [, computedSegmentsById] = useCurrentComputedSegments();

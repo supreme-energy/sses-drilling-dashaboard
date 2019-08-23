@@ -6,7 +6,7 @@ import { useSelectedSegmentState, useLogExtent, usePendingSegments, getSelectedI
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useSaveWellLogActions, useUpdateSegments, useUpdateSegmentsByMd } from "../actions";
+import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { useWellIdContainer } from "../../App/Containers";
 
@@ -61,7 +61,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
         updatePendingSegments({ bias: xMax - 10 });
       }
     },
-    [xMax, draftMode]
+    [xMax, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   useEffect(
