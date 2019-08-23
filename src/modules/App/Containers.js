@@ -155,20 +155,11 @@ function useSurveysData() {
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projectionsData, projectionsDispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case "serverReset":
-        return action.data;
-      default:
-        throw new Error(`Unknown action type ${action.type}`);
-    }
-  }, []);
-
   const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
     wellId
   );
 
-  const augmentedProjections = useMemo(
+  const projectionsData = useMemo(
     () =>
       projections.map((p, i) => {
         return {
@@ -184,17 +175,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (augmentedProjections && augmentedProjections.length) {
-      projectionsDispatch({
-        type: "serverReset",
-        data: augmentedProjections
-      });
-    }
-  }, [augmentedProjections]);
-
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
+  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection };
 }
 
 function useFormationsData() {
