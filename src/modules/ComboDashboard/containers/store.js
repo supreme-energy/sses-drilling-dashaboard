@@ -173,7 +173,6 @@ function useUseComboStore() {
   const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
   const updateSegments = useCallback(
     propsByMd => {
-      console.log("updating with", propsByMd);
       return dispatch({ type: "UPDATE_SEGMENTS_PROPERTIES", propsByMd });
     },
     [dispatch]
@@ -188,7 +187,7 @@ export function useAddProjection() {
 
   return useCallback(
     projection => {
-      addProjection(projection).then(refreshFormations);
+      return addProjection(projection).then(refreshFormations);
     },
     [addProjection, refreshFormations]
   );
@@ -200,7 +199,7 @@ export function useDeleteProjection() {
 
   return useCallback(
     projection => {
-      deleteProjection(projection).then(refreshFormations);
+      return deleteProjection(projection).then(refreshFormations);
     },
     [deleteProjection, refreshFormations]
   );
