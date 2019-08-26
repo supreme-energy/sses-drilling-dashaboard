@@ -4,13 +4,13 @@ import { VerticalAlignTop as TopEnd, VerticalAlignBottom as BottomEnd, ArrowRigh
 import css from "./styles.scss";
 
 import { Box, IconButton, Typography } from "@material-ui/core";
-import { useSelectedWellLog } from "../selectors";
+import { useSelectedWellLog, useSelectedMd } from "../selectors";
 import { useWellIdContainer } from "../../App/Containers";
 import { useWellLogList } from "../../ComboDashboard/containers/wellLogs";
 import { useSelectionActions } from "../actions";
 
 export default function NavigationSettings(props) {
-  const [{ selectedMd }] = useComboContainer();
+  const selectedMd = useSelectedMd();
   const { toggleMdSelection } = useSelectionActions();
   const { selectedWellLog } = useSelectedWellLog();
   const { wellId } = useWellIdContainer();

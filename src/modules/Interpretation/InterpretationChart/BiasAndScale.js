@@ -13,19 +13,19 @@ import { useLogExtentContainer } from "../containers/logExtentContainer";
 
 const lineData = [[0, 10], [0, 0]];
 
-export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
+export default function BiasAndScale({ container, y, gridGutter, refresh, canvas, totalWidth }) {
   const [{ draftMode }] = useComboContainer();
 
   const segmentData = useSelectedSegmentState();
   const bias = Number(segmentData.scalebias);
   const scale = Number(segmentData.scalefactor);
   const pendingSegments = usePendingSegments();
-  const [pendingSegmentsRange] = useLogExtentContainer();
-  const [xMin, xMax] = pendingSegmentsRange;
+  const [{ selectionExtent, selectionExtentWithBiasAndScale }] = useLogExtentContainer();
+  const [xMin, xMax] = selectionExtent;
   const updateSegments = useUpdateSegmentsByMd();
 
   const width = xMax - xMin;
-
+  const computedWidth = width * scale;
   const updatePendingSegments = useCallback(
     props => {
       const propsByMd = pendingSegments.reduce((acc, s) => {
@@ -37,20 +37,25 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     [pendingSegments, updateSegments]
   );
 
+  const [min, max] = selectionExtentWithBiasAndScale;
+
   useEffect(
-    function setInitialBias() {
+    function setInitialBiasAndScale() {
       if (draftMode) {
-        updatePendingSegments({ bias: xMax - 10 });
+        updatePendingSegments({
+          bias: Math.min(max - min - 10, totalWidth - computedWidth - gridGutter - 10 - xMin),
+          scale: 1
+        });
       }
     },
-    [pendingSegmentsRange, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
+    [min, max, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   useEffect(
     function redraw() {
       refresh();
     },
-    [refresh, pendingSegmentsRange, bias, scale]
+    [refresh, selectionExtent, bias, scale, selectionExtentWithBiasAndScale]
   );
 
   const segmentContainerRef = useRef(null);
@@ -92,7 +97,6 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     [updatePendingSegments, width, bias, scale]
   );
 
-  const computedWidth = width * scale;
   const computedXMin = xMin - (computedWidth - width) / 2;
   const { saveSelectedWellLog } = useSaveWellLogActions();
   const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog(), [saveSelectedWellLog, draftMode]);

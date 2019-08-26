@@ -474,6 +474,12 @@ export function usePendingSegments() {
   return pendingSegments;
 }
 
+export function useComputedPendingSegments() {
+  const pendingSegments = usePendingSegments();
+  const { byId } = useComputedSegments();
+  return useMemo(() => pendingSegments.map(s => byId[s.id]), [byId, pendingSegments]);
+}
+
 export function useSelectedSegmentState() {
   const [{ draftMode }] = useComboContainer();
   const [, computedSegmentsById] = useCurrentComputedSegments();

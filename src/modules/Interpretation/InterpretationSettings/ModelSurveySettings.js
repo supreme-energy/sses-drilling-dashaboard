@@ -2,7 +2,12 @@ import React, { useReducer, useMemo } from "react";
 import { Box, Typography, TextField, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
-import { useSelectedSegmentState, useComputedDraftSegmentsOnly } from "../selectors";
+import {
+  useSelectedSegmentState,
+  useComputedDraftSegmentsOnly,
+  useSelectedMd,
+  useComputedPendingSegments
+} from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
@@ -48,7 +53,8 @@ const FAULT_DIP_MODE = "Fault /Dip";
 const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
-  const [{ selectedMd, draftMode }] = useComboContainer();
+  const [{ draftMode }] = useComboContainer();
+  const selectedMd = useSelectedMd();
   const updateSegments = useUpdateSegmentsByMd();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
@@ -56,10 +62,12 @@ export default function ModelSurveySettings(props) {
   );
 
   const pendingSegments = useComputedDraftSegmentsOnly();
+  const computedPendingSegments = useComputedPendingSegments();
   const selectedSegment = useSelectedSegmentState();
+  const firstSegment = computedPendingSegments[0];
   const [, , { updateWellLogs }] = useWellLogsContainer();
 
-  const fault = selectedSegment && selectedSegment.fault;
+  const fault = firstSegment && firstSegment.fault;
   const dip = selectedSegment && selectedSegment.sectdip;
   const scale = selectedSegment && selectedSegment.scalefactor;
   const bias = selectedSegment && selectedSegment.scalebias;
@@ -91,6 +99,11 @@ export default function ModelSurveySettings(props) {
     }
   };
 
+  function updateFirstSegment(props) {
+    const firstSegmentMd = firstSegment.endmd;
+    updateSegments({ [firstSegmentMd]: props });
+  }
+
   return (
     <Box display="flex" flexDirection="column" {...props}>
       <Typography className={css.title} variant="subtitle1">
@@ -102,10 +115,10 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Fault"}
               disabled={!selectedSegment}
-              onChange={fault => updateSegmentsHandler({ fault })}
+              onChange={fault => updateFirstSegment({ fault })}
               value={fault}
-              onIncrease={() => updateSegmentsHandler({ fault: Number(fault) + 1 })}
-              onDecrease={() => updateSegmentsHandler({ fault: Number(fault) - 1 })}
+              onIncrease={() => updateFirstSegment({ fault: Number(fault) + 1 })}
+              onDecrease={() => updateFirstSegment({ fault: Number(fault) - 1 })}
             />
           ) : (
             <PropertyField

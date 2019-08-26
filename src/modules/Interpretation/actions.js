@@ -262,14 +262,15 @@ export function useUpdateSegmentsByMd() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
   const [, dispatch] = useComboContainer();
   const updateSegments = useCallback(
-    propsByMd =>
+    propsByMd => {
       dispatch({
         type: "UPDATE_SEGMENTS_PROPERTIES",
         propsById: mapKeys(propsByMd, (value, md) => {
           const item = itemsByMd[md];
           return item && item.id;
         })
-      }),
+      });
+    },
     [dispatch, itemsByMd]
   );
 
