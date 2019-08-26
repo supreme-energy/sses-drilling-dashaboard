@@ -37,12 +37,7 @@ function useInterpretationWebglRenderer() {
   const { width, height } = useSize(canvasRef);
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
 
-  useEffect(
-    function refreshWebGLRenderer() {
-      refresh();
-    },
-    [refresh, width, height]
-  );
+  useEffect(refresh, [refresh, width, height]);
 
   const [view, updateView] = useState({
     x: gridGutter,
@@ -128,27 +123,22 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
   ] = useComboContainer();
 
-  useEffect(
-    function refreshWebGLRenderer() {
-      refresh();
-    },
-    [
-      refresh,
-      stage,
-      controlLogs,
-      selectedWellLog,
-      gr,
-      draftMode,
-      segments,
-      view,
-      viewport,
-      surveyVisibility,
-      surveyPrevVisibility,
-      nrPrevSurveysToDraft,
-      draftMode,
-      pendingSegmentsState
-    ]
-  );
+  useEffect(refresh, [
+    refresh,
+    stage,
+    controlLogs,
+    selectedWellLog,
+    gr,
+    draftMode,
+    segments,
+    view,
+    viewport,
+    surveyVisibility,
+    surveyPrevVisibility,
+    nrPrevSurveysToDraft,
+    draftMode,
+    pendingSegmentsState
+  ]);
 
   return (
     <div className={classNames(className, css.root)}>
