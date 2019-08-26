@@ -16,6 +16,7 @@ import { ALL } from "../../constants/wellSections";
 import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
+import { useSelectionActions } from "../Interpretation/actions";
 
 const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
@@ -193,15 +194,8 @@ export function useCrossSectionData() {
   const { surveys, wellPlan, formations, projections } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
-  const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
-
-  const selectedSections = useMemo(
-    function getSelectedSections() {
-      const selected = rawSections.find(s => s.md === selectedMd);
-      return selected ? { [selected.id]: true } : {};
-    },
-    [selectedMd, rawSections]
-  );
+  const [{ selectionById: selectedSections }] = useComboContainer();
+  const { toggleSegmentSelection, deselectAll } = useSelectionActions();
 
   const addProjection = useAddProjection();
   const deleteProjection = useDeleteProjection();
@@ -211,9 +205,8 @@ export function useCrossSectionData() {
     deleteProjection,
     wellPlan,
     selectedSections,
-    setSelectedMd,
-    deselectMd,
-    selectedMd,
+    toggleSegmentSelection,
+    deselectAll,
     calcSections: rawSections,
     calculatedFormations: formations
   };

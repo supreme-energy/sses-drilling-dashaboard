@@ -32,7 +32,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   selectedLabel.transform.updateTransform = frozenXTransform;
   subscribeToMoveEvents(selectedLabel, function(pos) {
     if (currSelected.isProjection) {
-      updateSegments({ [currSelected.md]: { vs: pos.x } });
+      updateSegments({ [currSelected.id]: { vs: pos.x } });
     }
   });
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
@@ -56,16 +56,16 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   };
 
   let calcSections = props.calcSections;
-  let setSelectedMd = props.setSelectedMd;
+  let toggleSegmentSelection = props.toggleSegmentSelection;
 
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
-    setSelectedMd = props.setSelectedMd;
+    toggleSegmentSelection = props.toggleSegmentSelection;
 
     const onSectionClick = section => {
-      setSelectedMd(section.endMD);
+      toggleSegmentSelection(section.entityId);
     };
     const adjustedY = height - gutter - buttonHeight;
 
@@ -89,7 +89,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
       const pixi = pixiList[i];
       pixi.beginFill(...color);
-      pixi.endMD = p2.md;
+      pixi.entityId = p2.id;
 
       const start = p1.vs * view.xScale + view.x;
       const length = (p2.vs - p1.vs) * view.xScale;

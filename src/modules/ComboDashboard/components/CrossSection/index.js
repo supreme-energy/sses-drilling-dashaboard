@@ -5,7 +5,8 @@ import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
-import { useComboContainer } from "../../containers/store";
+
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 
 const pixiApp = new PixiCrossSection();
 
@@ -14,13 +15,13 @@ const CrossSection = props => {
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
-  const [, , { updateSegments }] = useComboContainer();
+  const updateSegments = useUpdateSegmentsById();
+
   const {
     wellPlan,
     selectedSections,
-    setSelectedMd,
-    deselectMd,
-    selectedMd,
+    toggleSegmentSelection,
+    deselectAll,
     calcSections,
     calculatedFormations,
     addProjection,
@@ -107,9 +108,8 @@ const CrossSection = props => {
       height,
       wellPlan,
       selectedSections,
-      setSelectedMd,
-      deselectMd,
-      selectedMd,
+      toggleSegmentSelection,
+      deselectAll,
       calcSections,
       calculatedFormations,
       scale,
@@ -137,9 +137,8 @@ const CrossSection = props => {
     height,
     wellPlan,
     selectedSections,
-    setSelectedMd,
-    deselectMd,
-    selectedMd,
+    toggleSegmentSelection,
+    deselectAll,
     calcSections,
     calculatedFormations,
     scale,

@@ -19,7 +19,7 @@ import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
-import { useComboContainer } from "../../containers/store";
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 
 function SurveyIcon({ row }) {
@@ -75,7 +75,7 @@ function Cell(value, editable, changeHandler, Icon) {
 
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
-  const [, , { updateSegments }] = useComboContainer();
+  const updateSegments = useUpdateSegmentsById();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
@@ -113,7 +113,7 @@ export default function DetailsTable({ showFullTable = false }) {
         {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
           const update = field => {
-            return value => updateSegments({ [row.md]: { [field]: Number(value) } });
+            return value => updateSegments({ [row.id]: { [field]: Number(value) } });
           };
           return (
             <TableRow

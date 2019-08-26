@@ -17,7 +17,8 @@ function addButton(container, texture) {
 }
 
 function drawButtons(container, stage, props, gutter, tagHeight) {
-  const { setMouse, setMode, deselectMd } = props;
+  const { setMouse, setMode, deselectAll } = props;
+
   let latestProps = props;
   let lastMode = props.mode;
   const addCircleTexture = PIXI.Texture.from(addCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
@@ -34,7 +35,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   addCircle.position.x = 15;
   addCircle.position.y = tagHeight - 20;
   addCircle.on("click", () => {
-    deselectMd();
+    deselectAll();
     setMode(ADD_PA_STATION);
   });
 
@@ -45,7 +46,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const { deleteProjection, calcSections, selectedSections } = latestProps;
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
     deleteProjection(selectedPoint.id);
-    deselectMd();
+    deselectAll();
   });
 
   const checkCircle = addButton(btnStage, checkCircleTexture);
@@ -53,7 +54,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   checkCircle.position.y = tagHeight + 5;
   checkCircle.on("click", () => {
     setMode(NORMAL);
-    deselectMd();
+    deselectAll();
   });
 
   const paIndicator = container.addChild(new PIXI.Container());

@@ -45,20 +45,20 @@ function interactiveProjection(parent, props) {
   botLine.transform.updateTransform = frozenXYTransform;
 
   const prevTot = createCircle(container, red, red, function(pos) {
-    updateSegments({ [curr.md]: { fault: pos.y - prev.tot } });
+    updateSegments({ [curr.id]: { fault: pos.y - prev.tot } });
   });
   const prevBot = createCircle(container, red, red, function(pos) {
-    updateSegments({ [curr.md]: { fault: pos.y - prev.bot } });
+    updateSegments({ [curr.id]: { fault: pos.y - prev.bot } });
   });
 
   const currTot = createCircle(container, white, red, function(pos) {
     const dip = calculateDip(pos.y - curr.fault, prev.tot, curr.vs, prev.vs);
-    updateSegments({ [curr.md]: { dip } });
+    updateSegments({ [curr.id]: { dip } });
   });
 
   const currBot = createCircle(container, white, red, function(pos) {
     const dip = calculateDip(pos.y - curr.fault, prev.bot, curr.vs, prev.vs);
-    updateSegments({ [curr.md]: { dip } });
+    updateSegments({ [curr.id]: { dip } });
   });
 
   const memoSetKnobColor = memoizeOne(color => {
@@ -73,7 +73,7 @@ function interactiveProjection(parent, props) {
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(paMarker, function(pos) {
-    updateSegments({ [curr.md]: { tvd: pos.y, vs: pos.x } });
+    updateSegments({ [curr.id]: { tvd: pos.y, vs: pos.x } });
   });
 
   return props => {
