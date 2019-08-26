@@ -15,6 +15,7 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
+import TextField from "@material-ui/core/TextField";
 
 export const CrossSectionDashboard = ({ className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -55,14 +56,22 @@ export const CrossSectionDashboard = ({ className }) => {
               <ExpandMoreIcon />
             </IconButton>
             <Typography variant="subtitle1">Details</Typography>
-            <IconButton
-              size="small"
-              className={classNames(classes.expand, classes.tableButton)}
-              onClick={toggleModal}
-              aria-label="Show full details table"
-            >
-              <img src={TableChartIcon} className={classes.icon} />
-            </IconButton>
+            <div className={classes.flexRight}>
+              {expanded && (
+                <React.Fragment>
+                  <Typography variant="subtitle1">Auto-Dip</Typography>
+                  <TextField value="3" type="number" />
+                </React.Fragment>
+              )}
+              <IconButton
+                size="small"
+                className={classNames(classes.expand)}
+                onClick={toggleModal}
+                aria-label="Show full details table"
+              >
+                <img src={TableChartIcon} className={classes.icon} />
+              </IconButton>
+            </div>
           </div>
           <Collapse in={expanded} unmountOnExit>
             <DetailsTable />

@@ -28,9 +28,6 @@
 .expand {
   transform: rotate(0deg);
   outline: none;
-  &.tableButton {
-    margin-left: auto;
-  }
 }
 .expand:focus {
   outline: none;
@@ -55,6 +52,10 @@
 
 .row {
   display: flex;
+  .flexRight {
+    display: flex;
+    margin-left: auto;
+  }
 }
 
 .kpiRows {
