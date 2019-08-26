@@ -50,7 +50,7 @@ export const CrossSectionDashboard = ({ className }) => {
               })}
               onClick={toggleExpanded}
               aria-expanded={expanded}
-              aria-label="Show more"
+              aria-label="Show details"
             >
               <ExpandMoreIcon />
             </IconButton>
@@ -59,7 +59,7 @@ export const CrossSectionDashboard = ({ className }) => {
               size="small"
               className={classNames(classes.expand, classes.tableButton)}
               onClick={toggleModal}
-              aria-label="Show more"
+              aria-label="Show full details table"
             >
               <img src={TableChartIcon} className={classes.icon} />
             </IconButton>
