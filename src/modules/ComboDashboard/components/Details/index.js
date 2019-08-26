@@ -14,15 +14,24 @@ import Knob from "./knob";
 import surveySVG from "../../../../assets/survey.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
-import projectAheadSVG from "../../../../assets/projectAhead.svg";
+import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
+import projectionStatic from "../../../../assets/projectionStatic.svg";
+import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 
 function SurveyIcon({ row }) {
   let sourceType;
   if (row.isProjection) {
-    sourceType = projectAheadSVG;
+    if (row.method === TVD_VS) {
+      sourceType = projectionStatic;
+    } else if (row.method === MD_INC_AZ) {
+      sourceType = projectionDirectional;
+    } else {
+      sourceType = projectAheadSVG;
+    }
   } else if (row.isBitProj) {
     sourceType = bitProjectionSVG;
   } else if (row.isLastSurvey) {
@@ -138,19 +147,21 @@ export default function DetailsTable({ showFullTable = false }) {
                 Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
               {Cell(row.tcl.toFixed(2), editable && row.isProjection, update("tcl"))}
-              {Cell((row.tcl - row.tvd).toFixed(2), editable && row.isProjection, console.log)}
+              {Cell(row.pos.toFixed(2), editable && row.isProjection, update("pos"))}
               {showFullTable && Cell(row.tot.toFixed(2), false)}
               {showFullTable && Cell(row.bot.toFixed(2), false)}
               <TableCell className={classNames(classes.cell, classes.actions)}>
-                <IconButton
-                  size="small"
-                  aria-label="Delete row"
-                  onClick={() => {
-                    deleteProjection(row.id);
-                  }}
-                >
-                  <img src={trashcanIcon} />
-                </IconButton>
+                {row.isProjection && (
+                  <IconButton
+                    size="small"
+                    aria-label="Delete row"
+                    onClick={() => {
+                      deleteProjection(row.id);
+                    }}
+                  >
+                    <img src={trashcanIcon} />
+                  </IconButton>
+                )}
               </TableCell>
             </TableRow>
           );

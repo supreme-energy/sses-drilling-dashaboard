@@ -28,6 +28,9 @@
 .expand {
   transform: rotate(0deg);
   outline: none;
+  &.tableButton {
+    margin-left: auto;
+  }
 }
 .expand:focus {
   outline: none;
@@ -92,10 +95,6 @@
     min-height: 30px;
     max-height: 30px;
   }
-}
-
-.tableButton {
-  margin-left: auto;
 }
 
 .icon {

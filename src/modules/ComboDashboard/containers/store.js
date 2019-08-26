@@ -169,7 +169,7 @@ export function useAddProjection() {
 
   return useCallback(
     projection => {
-      addProjection(projection).then(refreshFormations);
+      return addProjection(projection).then(refreshFormations);
     },
     [addProjection, refreshFormations]
   );
@@ -181,7 +181,7 @@ export function useDeleteProjection() {
 
   return useCallback(
     projection => {
-      deleteProjection(projection).then(refreshFormations);
+      return deleteProjection(projection).then(refreshFormations);
     },
     [deleteProjection, refreshFormations]
   );

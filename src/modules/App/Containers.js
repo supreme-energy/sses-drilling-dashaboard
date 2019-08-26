@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState } from "react";
 import { createContainer } from "unstated-next";
 
 import memoize from "react-powertools/memoize";
@@ -156,24 +156,16 @@ function useSurveysData() {
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projectionsData, projectionsDispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case "serverReset":
-        return action.data;
-      default:
-        throw new Error(`Unknown action type ${action.type}`);
-    }
-  }, []);
-
   const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
     wellId
   );
 
-  const augmentedProjections = useMemo(
+  const projectionsData = useMemo(
     () =>
       projections.map((p, i) => {
         return {
           ...p,
+          pos: p.pos || p.tot - p.tvd,
           name: `PA${i + 1}`,
           isProjection: true,
           color: 0xee2211,
@@ -185,17 +177,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (augmentedProjections && augmentedProjections.length) {
-      projectionsDispatch({
-        type: "serverReset",
-        data: augmentedProjections
-      });
-    }
-  }, [augmentedProjections]);
-
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
+  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection };
 }
 
 function useFormationsData() {
