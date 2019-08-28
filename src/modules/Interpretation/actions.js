@@ -131,7 +131,7 @@ export function useSaveWellLogActions() {
   const updateSegments = useUpdateSegmentsByMd();
   const { replaceResult: replaceProjections } = useProjectionsDataContainer();
   const { replaceResult: replaceSurveys } = useSurveysDataContainer();
-  const [logs, , { updateWellLogs }] = useWellLogsContainer();
+  const [logs, , , { updateWellLogs }] = useWellLogsContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
 
   const replaceSurveysAndProjections = useCallback(() => {

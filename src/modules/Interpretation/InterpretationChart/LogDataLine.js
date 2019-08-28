@@ -44,9 +44,7 @@ function LogDataLine({ log, prevLog, container, draft, selected, refresh, range 
   const colors = useSelectedWellInfoColors();
 
   // we need to call refresh after log data is loaded to redraw
-  useEffect(() => {
-    refresh();
-  }, [logData, refresh]);
+  useEffect(refresh, [logData, refresh]);
 
   return logData ? (
     <LogData
