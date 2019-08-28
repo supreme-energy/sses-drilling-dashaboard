@@ -64,6 +64,9 @@
     .textField {
       width: 80px;
       margin: 0 5px;
+      input[type=number] {
+        padding: 6px 2px 7px;
+      }
     }
     .fullTableButton {
       height: 32px;

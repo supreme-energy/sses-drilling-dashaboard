@@ -1,6 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useReducer, useState } from "react";
+import React, { useCallback, useReducer, useState } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
@@ -15,12 +15,23 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import TextField from "@material-ui/core/TextField";
+import { useWellInfo } from "../../../api";
+import { DebouncedTextField } from "../../../components/DebouncedInputs";
 
-export const CrossSectionDashboard = ({ className }) => {
+export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [viewDirection, setViewDirection] = useState(0);
+  const [data, , updateWell, refreshFetchStore] = useWellInfo(wellId);
+  const wellInfo = (data && data.wellInfo) || {};
+
+  const updateAutoPosTCL = useCallback(
+    async value => {
+      await updateWell({ wellId, field: "autoposdec", value });
+      refreshFetchStore();
+    },
+    [updateWell, wellId, refreshFetchStore]
+  );
 
   return (
     <WidgetCard className={classNames(classes.crossSectionDash, className)} title="Cross Section" hideMenu>
@@ -59,8 +70,14 @@ export const CrossSectionDashboard = ({ className }) => {
             <div className={classes.flexRight}>
               {expanded && (
                 <React.Fragment>
-                  <Typography variant="subtitle1">Auto-Dip: </Typography>
-                  <TextField type="number" className={classes.textField} />
+                  <Typography variant="subtitle2">Auto Pos-TCL: </Typography>
+                  <DebouncedTextField
+                    type="number"
+                    variant="filled"
+                    value={wellInfo.autoposdec}
+                    onChange={updateAutoPosTCL}
+                    className={classes.textField}
+                  />
                 </React.Fragment>
               )}
               <IconButton
