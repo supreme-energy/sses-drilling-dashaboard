@@ -10,7 +10,6 @@ export default function LogExtent({ log, wellId, updateExtent, currentSelection,
 
   useEffect(() => {
     if (extent) {
-      console.log("update extent");
       updateExtent({ log, extent });
     }
   }, [updateExtent, extent, currentSelection, log, draftMode]);
