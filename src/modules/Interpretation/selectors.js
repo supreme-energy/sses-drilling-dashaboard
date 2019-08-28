@@ -395,7 +395,7 @@ export function useComputedSurveysAndProjections() {
     draftMode,
     selectionById,
     pendingSegmentsState,
-    wellInfo ? wellInfo.propazm : 0
+    wellInfo ? Number(wellInfo.propazm) : 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
