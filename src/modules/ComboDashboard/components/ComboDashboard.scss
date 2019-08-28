@@ -52,9 +52,23 @@
 
 .row {
   display: flex;
+
+}
+
+.detailsHeader {
+ align-items: center;
   .flexRight {
     display: flex;
-    margin-left: auto;
+    align-items: center;
+    margin-left: auto!important;
+    .textField {
+      width: 80px;
+      margin: 0 5px;
+    }
+    .fullTableButton {
+      height: 32px;
+      width: 32px;
+    }
   }
 }
 
@@ -103,3 +117,6 @@
   height: 20px;
 }
 
+.tableWrapper {
+  height: 156px;
+}

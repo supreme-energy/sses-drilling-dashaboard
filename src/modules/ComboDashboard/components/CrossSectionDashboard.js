@@ -43,7 +43,7 @@ export const CrossSectionDashboard = ({ className }) => {
         </div>
         <div className={classes.cardLine} />
         <div className={classNames(classes.column, classes.shrink)}>
-          <div className={classes.row}>
+          <div className={classNames(classes.row, classes.detailsHeader)}>
             <IconButton
               size="small"
               className={classNames(classes.expand, {
@@ -59,13 +59,13 @@ export const CrossSectionDashboard = ({ className }) => {
             <div className={classes.flexRight}>
               {expanded && (
                 <React.Fragment>
-                  <Typography variant="subtitle1">Auto-Dip</Typography>
-                  <TextField value="3" type="number" />
+                  <Typography variant="subtitle1">Auto-Dip: </Typography>
+                  <TextField type="number" className={classes.textField} />
                 </React.Fragment>
               )}
               <IconButton
                 size="small"
-                className={classNames(classes.expand)}
+                className={classNames(classes.expand, classes.fullTableButton)}
                 onClick={toggleModal}
                 aria-label="Show full details table"
               >
@@ -74,7 +74,9 @@ export const CrossSectionDashboard = ({ className }) => {
             </div>
           </div>
           <Collapse in={expanded} unmountOnExit>
-            <DetailsTable />
+            <div className={classes.tableWrapper}>
+              <DetailsTable />
+            </div>
           </Collapse>
           <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
         </div>
