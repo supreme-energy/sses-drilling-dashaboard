@@ -420,31 +420,22 @@ const surveysTransform = memoizeOne(data => {
 });
 
 export function useFetchSurveys(wellId) {
-  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult }] = useFetch();
-
-  const refresh = useCallback(
-    resetCache =>
-      fetch(
-        {
-          path: GET_WELL_SURVEYS,
-          query: {
-            seldbname: wellId
-          },
-          cache: resetCache ? "no-cache" : "default"
-        },
-        (prev, next) => surveysTransform(next)
-      ),
-    [fetch, wellId]
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult, refresh }] = useFetch(
+    {
+      path: GET_WELL_SURVEYS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: surveysTransform
+    }
   );
 
   const replaceResultCallback = useCallback(
     result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
     [isLoading, error, isPolling, isFetchingMore, replaceResult]
   );
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
 
@@ -501,31 +492,22 @@ const projectionsTransform = memoizeOne(projections => {
   return transform(projections);
 });
 export function useFetchProjections(wellId) {
-  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult }] = useFetch();
-
-  const refresh = useCallback(
-    resetCache =>
-      fetch(
-        {
-          path: GET_WELL_PROJECTIONS,
-          query: {
-            seldbname: wellId
-          },
-          cache: resetCache ? "no-cache" : "default"
-        },
-        (prev, next) => projectionsTransform(next)
-      ),
-    [fetch, wellId]
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult, refresh }] = useFetch(
+    {
+      path: GET_WELL_PROJECTIONS,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: projectionsTransform
+    }
   );
 
   const replaceResultCallback = useCallback(
     result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
     [isLoading, error, isPolling, isFetchingMore, replaceResult]
   );
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const saveProjection = (projectionId, method, fields = {}) => {
     // return the promise so we can refresh AFTER the API call is done
