@@ -261,8 +261,6 @@ function projtva(proposedAzm, projection, prevProjection) {
       if (_ns !== 0) _ca = Math.atan2(_ew, _ns);
       let _cd = _ns;
       if (_ca !== 0.0) _cd = Math.abs(_ew / Math.sin(_ca));
-      const _tvd = ptvd + (_cl / 2.0) * (Math.cos(pinc) + Math.cos(_inc)) * _radius;
-      const _vs = _cd * Math.cos(_ca - proposedAzm);
       _ca *= radiansToDegrees;
       if (_ca < 0.0) _ca = 180.0 + _ca;
       _dl = ((_dl * 100) / _cl) * radiansToDegrees;
