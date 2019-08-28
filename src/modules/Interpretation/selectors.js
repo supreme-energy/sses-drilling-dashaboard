@@ -1,14 +1,20 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useMemo, useCallback } from "react";
-import { useWellLogData, EMPTY_ARRAY, useWellInfo } from "../../api";
+import { useCallback, useMemo } from "react";
+import { EMPTY_ARRAY, useWellInfo, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
-import { useWellIdContainer, useSurveysDataContainer, useProjectionsDataContainer } from "../App/Containers";
+import {
+  useProjectionsDataContainer,
+  useSurveysDataContainer,
+  useWellIdContainer,
+  selectedWellInfoContainer
+} from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
+import { calculateProjection } from "../../hooks/useCalculations";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -295,7 +301,7 @@ const recomputeSurveysAndProjections = memoizeOne(
           ca,
           cd
         };
-      } else {
+      } else if (!currSvy.isProjection) {
         let dogLegSeverity = 0;
         const courseLength = combinedSvy.md - prevSvy.md;
         const pInc = toRadians(prevSvy.inc);
@@ -372,6 +378,8 @@ const recomputeSurveysAndProjections = memoizeOne(
           tot,
           bot
         };
+      } else {
+        acc[index] = calculateProjection(combinedSvy, acc, index, propazm);
       }
       return acc;
     }, []);
@@ -393,7 +401,7 @@ export function useComputedSurveysAndProjections() {
     draftMode,
     selectionById,
     pendingSegmentsState,
-    wellInfo ? wellInfo.propazm : 0
+    wellInfo ? Number(wellInfo.propazm) : 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
@@ -507,4 +515,22 @@ export function useGetChangedPendingStateFields() {
     },
     { dip: false, fault: false }
   );
+}
+
+const parseWellInfo = memoizeOne((wellInfo = {}) => {
+  const defaultSurveyColor = "FD9E2E";
+  const defaultColortot = "000000";
+  const defaultDraftColor = "1F8000";
+
+  return {
+    ...wellInfo,
+    selectedsurveycolor: wellInfo.selectedsurveycolor || defaultSurveyColor,
+    colortot: wellInfo.colortot || defaultColortot,
+    draftcolor: wellInfo.draftcolor || defaultDraftColor
+  };
+});
+
+export function useSelectedWellInfoColors() {
+  const [{ wellInfo }] = selectedWellInfoContainer();
+  return parseWellInfo(wellInfo);
 }

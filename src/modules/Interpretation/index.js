@@ -35,17 +35,23 @@ function Interpretation({
         <CloudServerModal wellId={wellId} />
         <SelectionStatsContainer />
         <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
-          <TCLValue />
-          <Typography variant="subtitle2">Draft Current</Typography>
-          <FormControlLabel
-            classes={{ root: css.label }}
-            value="Toggle Layer (L)"
-            control={
-              <Switch color="secondary" checked={draftMode} onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })} />
-            }
-            label="Toggle Layer (L)"
-            labelPlacement="end"
-          />
+          <Box display="flex" flexDirection="row" alignItems="center">
+            <TCLValue />
+            <FormControlLabel
+              classes={{ root: css.switchLabel }}
+              value="start"
+              control={
+                <Switch
+                  color="secondary"
+                  checked={draftMode}
+                  onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
+                />
+              }
+              label="Draft (D)"
+              labelPlacement="start"
+            />
+          </Box>
+          {/* Todo: add formations top here */}
         </Box>
 
         <InterpretationChart

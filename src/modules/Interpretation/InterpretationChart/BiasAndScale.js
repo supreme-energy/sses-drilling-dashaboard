@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback } from "react";
-import { draftColor, selectionColor } from "../pixiColors";
+import { selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedSegmentState, usePendingSegments } from "../selectors";
+import { useSelectedSegmentState, usePendingSegments, useSelectedWellInfoColors } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
@@ -10,6 +10,7 @@ import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 
 import { useLogExtentContainer } from "../containers/logExtentContainer";
+import { hexNumber } from "../../../constants/pixiColors";
 
 const lineData = [[0, 10], [0, 0]];
 
@@ -23,6 +24,8 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   const [{ selectionExtent, selectionExtentWithBiasAndScale }] = useLogExtentContainer();
   const [xMin, xMax] = selectionExtent;
   const updateSegments = useUpdateSegmentsByMd();
+  const colors = useSelectedWellInfoColors();
+  const draftColor = hexNumber(colors.draftcolor);
 
   const width = xMax - xMin;
   const computedWidth = width * scale;

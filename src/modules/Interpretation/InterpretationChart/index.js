@@ -14,7 +14,7 @@ import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSe
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useSelectedWellLog, useCurrentComputedSegments, usePendingSegments } from "../selectors";
+import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColors } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
@@ -125,8 +125,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
   ] = useComboContainer();
 
-  const [{ wellInfo }] = selectedWellInfoContainer();
-  const totColor = wellInfo && wellInfo.colortot;
+  const colors = useSelectedWellInfoColors();
 
   useEffect(refresh, [
     refresh,
@@ -143,7 +142,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     nrPrevSurveysToDraft,
     draftMode,
     pendingSegmentsState,
-    totColor
+    colors
   ]);
 
   return (

@@ -56,17 +56,17 @@ export default function NavigationSettings(props) {
         Survey Navigation
       </Typography>
       <Box display="flex" flexDirection="row">
-        <IconButton disableRipple onClick={selectFirst}>
+        <IconButton disableRipple onClick={selectFirst} className={css.arrowButton}>
           <TopEnd />
         </IconButton>
-        <IconButton disableRipple onClick={selectPrev}>
+        <IconButton disableRipple onClick={selectPrev} className={css.arrowButton}>
           <ArrowRightAlt className={css.arrowTop} />
         </IconButton>
-        <IconButton disableRipple onClick={selectLast}>
-          <BottomEnd />
-        </IconButton>
-        <IconButton disableRipple onClick={selectNext}>
+        <IconButton disableRipple onClick={selectNext} className={css.arrowButton}>
           <ArrowRightAlt className={css.arrowBottom} />
+        </IconButton>
+        <IconButton disableRipple onClick={selectLast} className={css.arrowButton}>
+          <BottomEnd />
         </IconButton>
       </Box>
     </Box>

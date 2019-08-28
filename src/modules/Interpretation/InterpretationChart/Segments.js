@@ -9,9 +9,10 @@ import PixiContainer from "../../../components/PixiContainer";
 import useRef from "react-powertools/hooks/useRef";
 import useDraggable from "../../../hooks/useDraggable";
 import { useDragActions, useSaveWellLogActions, useSelectionActions } from "../actions";
-import { selectionColor, segmentColor, draftColor } from "../pixiColors";
+import { selectionColor, segmentColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly } from "../selectors";
+import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly, useSelectedWellInfoColors } from "../selectors";
+import { hexNumber } from "../../../constants/pixiColors";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -55,7 +56,7 @@ const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...pr
 });
 
 const RightSegments = React.memo(
-  ({ allSegments, container, view, totalWidth, nrPrevSurveysToDraft, selectedIndex }) => {
+  ({ allSegments, container, view, totalWidth, nrPrevSurveysToDraft, selectedIndex, draftColor }) => {
     const { byId } = useComputedSegments();
     return allSegments.map((s, index) => {
       const isDraft = getIsDraft(index, selectedIndex, nrPrevSurveysToDraft);
@@ -85,6 +86,7 @@ const SegmentSelection = ({
   container,
   selectedWellLog,
   allSegments,
+  draftColor,
   draftMode,
   nrPrevSurveysToDraft,
   selectedIndex
@@ -290,6 +292,10 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
     segmentsData,
     selectedWellLog
   ]);
+
+  const colors = useSelectedWellInfoColors();
+  const draftColor = hexNumber(colors.draftcolor);
+
   return (
     <React.Fragment>
       {segmentsData.map(s => {
@@ -312,6 +318,7 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
         <SegmentSelection
           draftMode={draftMode}
           allSegments={segmentsData}
+          draftColor={draftColor}
           selectedIndex={selectedIndex}
           totalWidth={chartWidth}
           container={container}
@@ -321,6 +328,7 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
       )}
       {selectedWellLog && draftMode && (
         <RightSegments
+          draftColor={draftColor}
           container={container}
           view={view}
           selectedIndex={selectedIndex}

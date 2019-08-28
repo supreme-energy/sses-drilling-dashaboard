@@ -52,6 +52,10 @@
 
 .row {
   display: flex;
+  .flexRight {
+    display: flex;
+    margin-left: auto;
+  }
 }
 
 .kpiRows {
@@ -92,10 +96,6 @@
     min-height: 30px;
     max-height: 30px;
   }
-}
-
-.tableButton {
-  margin-left: auto;
 }
 
 .icon {
