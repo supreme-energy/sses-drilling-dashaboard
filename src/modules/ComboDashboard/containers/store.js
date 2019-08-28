@@ -2,7 +2,6 @@ import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
 import { useWellLogsContainer } from "./wellLogs";
 
-import { getPendingSegments } from "../../Interpretation/selectors";
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
 import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
@@ -14,42 +13,35 @@ export const surveyVisibility = {
 };
 
 const initialState = {
-  selectedMd: null,
+  selectionById: {},
   pendingSegmentsState: {},
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500,
-  pendingProjectionsByMd: {}
+  surveyPrevVisibility: 500
 };
 
 const initialPendingState = {};
 
-function selectedMdReducer(selectedMd, action) {
+function selectionByIdReducer(selectionById, action) {
   switch (action.type) {
-    case "TOGGLE_MD": {
-      if (selectedMd === action.md) {
-        return null;
+    case "TOGGLE_SELECTION": {
+      if (selectionById[action.id]) {
+        const newSelection = {
+          ...selectionById
+        };
+        delete newSelection[action.id];
+        return newSelection;
       }
-
-      return action.md;
+      return {
+        [action.id]: true
+      };
     }
     case "DESELECT_ALL":
-      return null;
+      return {};
     default:
-      return selectedMd;
+      return selectionById;
   }
-}
-
-function updatePendingSegments(pendingSegmentsState, state, logs, action) {
-  const { selectedMd, nrPrevSurveysToDraft, draftMode } = state;
-  const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
-  return pendingSegments.reduce((acc, segment) => {
-    return {
-      ...acc,
-      [segment.endmd]: pendingSegmentState(acc[segment.endmd], action, segment.endmd)
-    };
-  }, pendingSegmentsState);
 }
 
 function pendingSegmentState(pendingState, action, key) {
@@ -58,7 +50,7 @@ function pendingSegmentState(pendingState, action, key) {
       return { ...initialPendingState };
     }
     case "UPDATE_SEGMENTS_PROPERTIES": {
-      const segmentProps = action.propsByMd[key];
+      const segmentProps = action.propsById[key];
       return { ...(pendingState || initialPendingState), ...segmentProps };
     }
     case "CHANGE_SELECTED_SEGMENT_BIAS": {
@@ -86,8 +78,8 @@ function pendingSegmentState(pendingState, action, key) {
 
 function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) {
   switch (action.type) {
-    case "TOGGLE_MD": {
-      const resetPendingState = state.draftMode && state.selectedMd !== action.md;
+    case "TOGGLE_SELECTION": {
+      const resetPendingState = state.draftMode && state.selectionById[action.id];
       return resetPendingState ? {} : pendingSegmentState;
     }
     case "TOGGLE_DRAFT_MODE": {
@@ -96,19 +88,15 @@ function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) 
     }
     case "UPDATE_SEGMENTS_PROPERTIES":
       return reduce(
-        action.propsByMd,
-        (acc, newProps, md) => {
+        action.propsById,
+        (acc, newProps, id) => {
           return {
             ...acc,
-            [md]: pendingSegmentState(acc[md], action, md)
+            [id]: pendingSegmentState(acc[id], action, id)
           };
         },
         pendingSegmentsState
       );
-
-    case "CHANGE_SELECTED_SEGMENT_BIAS":
-    case "CHANGE_SELECTED_SEGMENT_SCALE":
-      return updatePendingSegments(pendingSegmentsState, state, logs, action);
 
     default:
       return pendingSegmentsState;
@@ -154,65 +142,48 @@ function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   }
 }
 
-function pendingProjectionsByMdReducer(pendingProjectionsByMd, action) {
-  switch (action.type) {
-    case "ADD_PENDING_PROJECTION": {
-      return {
-        ...pendingProjectionsByMd,
-        [action.projection.md]: action.projection
-      };
-    }
-    case "RESET_PENDING_PROJECTION": {
-      const newState = { ...pendingProjectionsByMd };
-      delete newState[action.projection.md];
-      return newState;
-    }
-  }
-}
-
 const comboStoreReducer = logs => (state, action) => {
   return {
     ...state,
-    selectedMd: selectedMdReducer(state.selectedMd, action),
+    selectionById: selectionByIdReducer(state.selectionById, action),
     pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state, logs),
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
-    pendingProjectionsByMd: pendingProjectionsByMdReducer(state.pendingProjectionsByMd, action)
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action)
   };
 };
 
 function useUseComboStore() {
   const [logs] = useWellLogsContainer();
+
   const reducer = useCallback(comboStoreReducer(logs), [logs]);
   const [state, dispatch] = useReducer(reducer, initialState);
-  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
-  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-  const updateSegments = useCallback(propsByMd => dispatch({ type: "UPDATE_SEGMENTS_PROPERTIES", propsByMd }), [
-    dispatch
-  ]);
 
-  return [state, dispatch, { setSelectedMd, updateSegments, deselectMd }];
+  return [state, dispatch];
 }
 
 export function useAddProjection() {
-  const [, dispatch] = useUseComboStore();
-  const addProjection = useCallback(projection => dispatch({ type: "ADD_PENDING_PROJECTION", projection }), [dispatch]);
-  const resetPendingProjection = useCallback(projection => dispatch({ type: "RESET_PENDING_PROJECTION", projection }), [
-    dispatch
-  ]);
-  const { addProjection: saveProjection } = useProjectionsDataContainer();
+  const { addProjection } = useProjectionsDataContainer();
   const { refreshFormations } = useFormationsDataContainer();
 
   return useCallback(
     projection => {
-      addProjection(projection);
-      saveProjection(projection)
-        .then(refreshFormations)
-        .then(() => resetPendingProjection(projection));
+      return addProjection(projection).then(refreshFormations);
     },
-    [addProjection, saveProjection, resetPendingProjection, refreshFormations]
+    [addProjection, refreshFormations]
+  );
+}
+
+export function useDeleteProjection() {
+  const { deleteProjection } = useProjectionsDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
+
+  return useCallback(
+    projection => {
+      return deleteProjection(projection).then(refreshFormations);
+    },
+    [deleteProjection, refreshFormations]
   );
 }
 

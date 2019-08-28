@@ -57,7 +57,7 @@ function Interpretation({
         </IconButton>
         <Typography variant="subtitle1">{draftMode ? "Drafting Controls" : "Modeling Controls"}</Typography>
       </div>
-      <Collapse in={expanded}>
+      <Collapse in={expanded} unmountOnExit>
         <InterpretationSettings className={css.settings} />
       </Collapse>
     </WidgetCard>

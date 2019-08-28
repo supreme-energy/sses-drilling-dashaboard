@@ -3,14 +3,19 @@ import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms"
 import surveySVG from "../../../../assets/survey.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
-import projectAheadSVG from "../../../../assets/projectAhead.svg";
+import projectionAutoDip from "../../../../assets/projectionAutoDip.svg";
+import projectionStatic from "../../../../assets/projectionStatic.svg";
+import projectionDirectional from "../../../../assets/projectionDirectional.svg";
+import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 
 /* eslint new-cap: 0 */
 export function drawSurveys(container) {
   const surveyMarker = PIXI.Texture.from(surveySVG);
   const lastMarker = PIXI.Texture.from(lastSurveySVG);
   const bitProjection = PIXI.Texture.from(bitProjectionSVG);
-  const paMarker = PIXI.Texture.from(projectAheadSVG);
+  const paAutoDip = PIXI.Texture.from(projectionAutoDip);
+  const paStatic = PIXI.Texture.from(projectionStatic);
+  const paDirectional = PIXI.Texture.from(projectionDirectional);
   const surveyGraphics = [];
 
   const widePath = container.addChild(new PIXI.Graphics());
@@ -37,8 +42,13 @@ export function drawSurveys(container) {
   function getTexture(point) {
     if (point.isLastSurvey) return lastMarker;
     else if (point.isBitProj) return bitProjection;
-    else if (point.isProjection) return paMarker;
-    else return surveyMarker;
+    else if (point.isProjection) {
+      if (point.method === TVD_VS) return paStatic;
+      else if (point.method === MD_INC_AZ) return paDirectional;
+      else return paAutoDip;
+    } else {
+      return surveyMarker;
+    }
   }
 
   return function(props) {
