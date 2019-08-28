@@ -12,7 +12,7 @@ import { useDragActions, useSaveWellLogActions, useSelectionActions } from "../a
 import { selectionColor, segmentColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { getIsDraft, useComputedSegments, useComputedDraftSegmentsOnly, useSelectedWellInfoColors } from "../selectors";
-import { hexNumber } from "../../../constants/pixiColors";
+import { hexColor } from "../../../constants/pixiColors";
 
 const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
   const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
@@ -294,7 +294,7 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
   ]);
 
   const colors = useSelectedWellInfoColors();
-  const draftColor = hexNumber(colors.draftcolor);
+  const draftColor = hexColor(colors.draftcolor);
 
   return (
     <React.Fragment>

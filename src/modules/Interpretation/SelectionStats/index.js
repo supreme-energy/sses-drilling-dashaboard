@@ -15,7 +15,7 @@ import css from "./styles.scss";
 import { useLogExtentContainer } from "../containers/logExtentContainer";
 import { useWellIdContainer } from "../../App/Containers";
 import WellColorPicker from "./WellColorPicker";
-import { formatValue, EMPTY_FIELD } from "../../../constants/format";
+import { EMPTY_FIELD } from "../../../constants/format";
 
 export default function SelectionStatsContainer() {
   const [{ draftMode }] = useComboContainer();

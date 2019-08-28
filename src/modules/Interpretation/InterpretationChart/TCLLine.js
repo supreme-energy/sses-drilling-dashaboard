@@ -3,11 +3,12 @@ import { useSelectedSurvey, useSelectedWellInfoColors } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import PixiContainer from "../../../components/PixiContainer";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import { hexColor } from "../../../constants/pixiColors";
 
 export default function TCLLine({ container, width }) {
   const selectedSurvey = useSelectedSurvey();
   const colors = useSelectedWellInfoColors();
-  const color = Number(`0x${colors.colortot}`);
+  const color = hexColor(colors.colortot);
   const lineData = useMemo(() => [[0, 0], [width, 0]], [width]);
   return selectedSurvey ? (
     <PixiContainer

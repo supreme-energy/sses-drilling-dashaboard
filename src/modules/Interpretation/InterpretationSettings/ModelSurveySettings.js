@@ -12,8 +12,6 @@ import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
 import debounce from "lodash/debounce";
-import mapKeys from "lodash/mapKeys";
-import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
 import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {

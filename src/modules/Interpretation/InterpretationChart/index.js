@@ -22,7 +22,6 @@ import TCLLine from "./TCLLine";
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { LogsExtentList } from "../containers/logExtentContainer";
-import { selectedWellInfoContainer } from "../../App/Containers";
 
 const gridGutter = 60;
 

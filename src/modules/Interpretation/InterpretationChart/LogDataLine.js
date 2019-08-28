@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
 import { logColor } from "../pixiColors";
-import { hexNumber } from "../../../constants/pixiColors";
+import { hexColor } from "../../../constants/pixiColors";
 
 const mapWellLog = d => [d.value, d.depth];
 
@@ -51,7 +51,7 @@ function LogDataLine({ log, prevLog, container, draft, selected, refresh, range 
   return logData ? (
     <LogData
       range={range}
-      color={draft ? hexNumber(colors.draftcolor) : selected ? hexNumber(colors.selectedsurveycolor) : logColor}
+      color={draft ? hexColor(colors.draftcolor) : selected ? hexColor(colors.selectedsurveycolor) : logColor}
       draft={draft}
       logData={logData}
       container={container}

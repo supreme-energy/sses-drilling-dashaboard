@@ -7,4 +7,4 @@ export const colorBySection = {
   [wellSections.LATERAL]: 0xceaa39
 };
 
-export const hexNumber = hString => Number(`0x${hString}`);
+export const hexColor = hString => Number(`0x${hString}`);

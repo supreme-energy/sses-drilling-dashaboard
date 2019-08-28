@@ -10,7 +10,7 @@ import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 
 import { useLogExtentContainer } from "../containers/logExtentContainer";
-import { hexNumber } from "../../../constants/pixiColors";
+import { hexColor } from "../../../constants/pixiColors";
 
 const lineData = [[0, 10], [0, 0]];
 
@@ -25,7 +25,7 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   const [xMin, xMax] = selectionExtent;
   const updateSegments = useUpdateSegmentsByMd();
   const colors = useSelectedWellInfoColors();
-  const draftColor = hexNumber(colors.draftcolor);
+  const draftColor = hexColor(colors.draftcolor);
 
   const width = xMax - xMin;
   const computedWidth = width * scale;

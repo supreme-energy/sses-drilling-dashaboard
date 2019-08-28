@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo } from "react";
-import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { VerticalAlignTop as TopEnd, VerticalAlignBottom as BottomEnd, ArrowRightAlt } from "@material-ui/icons";
 import css from "./styles.scss";
 
