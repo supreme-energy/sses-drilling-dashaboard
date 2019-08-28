@@ -1,4 +1,4 @@
-import React, { useReducer, useMemo } from "react";
+import React, { useReducer, useMemo, useRef } from "react";
 import { Box, Typography, TextField, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
@@ -14,7 +14,7 @@ import classNames from "classnames";
 import debounce from "lodash/debounce";
 import mapKeys from "lodash/mapKeys";
 import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
-import { useUpdateSegmentsByMd } from "../actions";
+import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
@@ -65,21 +65,25 @@ export default function ModelSurveySettings(props) {
   const computedPendingSegments = useComputedPendingSegments();
   const selectedSegment = useSelectedSegmentState();
   const firstSegment = computedPendingSegments[0];
-  const [, , { updateWellLogs }] = useWellLogsContainer();
 
+  const { saveWellLogs } = useSaveWellLogActions();
   const fault = firstSegment && firstSegment.fault;
   const dip = selectedSegment && selectedSegment.sectdip;
   const scale = selectedSegment && selectedSegment.scalefactor;
   const bias = selectedSegment && selectedSegment.scalebias;
+  const internalState = useRef({ saveWellLogs });
 
   // hide dip value if on draftMode pending segments have different dip values
   const hideDipValue = useMemo(() => draftMode && pendingSegments.some(s => s.sectdip !== pendingSegments[0].sectdip), [
     pendingSegments,
     draftMode
   ]);
+  internalState.current.saveWellLogs = saveWellLogs;
 
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
-  const debouncedSaveWellLog = useMemo(() => debounce(updateWellLogs, 1000), [updateWellLogs]);
+  const debouncedSaveWellLog = useMemo(() => {
+    return debounce(internalState.current.saveWellLogs, 1000);
+  }, []);
 
   const updateSegmentsHandler = props => {
     const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
@@ -90,18 +94,16 @@ export default function ModelSurveySettings(props) {
     updateSegments(segmentsProps);
 
     if (!draftMode) {
-      debouncedSaveWellLog([
-        {
-          id: selectedSegment.id,
-          ...mapKeys(props, (val, key) => (key === "dip" ? "sectdip" : key))
-        }
-      ]);
+      debouncedSaveWellLog([selectedSegment], { [selectedSegment.endmd]: props });
     }
   };
 
   function updateFirstSegment(props) {
     const firstSegmentMd = firstSegment.endmd;
     updateSegments({ [firstSegmentMd]: props });
+    if (!draftMode) {
+      debouncedSaveWellLog([firstSegment], { [firstSegment.endmd]: props });
+    }
   }
 
   return (

@@ -13,7 +13,8 @@ import {
   useWellIdContainer,
   ProjectionsProvider,
   FormationsProvider,
-  SurveysProvider
+  SurveysProvider,
+  SelectedWellInfoProvider
 } from "../modules/App/Containers";
 import useAudio from "../hooks/useAudio";
 import { useWellInfo, useSurveyCheck } from "../api";
@@ -89,19 +90,21 @@ export const PageLayout = ({ children, history }) => {
             <SurveysProvider>
               <ProjectionsProvider>
                 <FormationsProvider>
-                  <div className={classes.container}>
-                    <AppBar className={classes.appBar} color="inherit">
-                      <div className={classes.header}>
-                        <div className={classes.logo}>
-                          <img src="/sses-logo.svg" />
+                  <SelectedWellInfoProvider>
+                    <div className={classes.container}>
+                      <AppBar className={classes.appBar} color="inherit">
+                        <div className={classes.header}>
+                          <div className={classes.logo}>
+                            <img src="/sses-logo.svg" />
+                          </div>
+                          <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                          <span />
                         </div>
-                        <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-                        <span />
-                      </div>
-                    </AppBar>
+                      </AppBar>
 
-                    <div className={classes.viewport}>{children}</div>
-                  </div>
+                      <div className={classes.viewport}>{children}</div>
+                    </div>
+                  </SelectedWellInfoProvider>
                 </FormationsProvider>
               </ProjectionsProvider>
             </SurveysProvider>

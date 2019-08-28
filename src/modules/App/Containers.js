@@ -9,7 +9,8 @@ import {
   useFetchProjections,
   useFetchSurveys,
   useWellOverviewKPI,
-  useWellPath
+  useWellPath,
+  useWellInfo
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
@@ -149,9 +150,9 @@ function useWellId(initialState) {
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
-  const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult }] = useFetchSurveys(wellId);
 
-  return { updateSurvey, surveys };
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult };
 }
 
 function useProjectionsData() {
@@ -165,9 +166,14 @@ function useProjectionsData() {
     }
   }, []);
 
-  const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
-    wellId
-  );
+  const [
+    projections,
+    refreshProjections,
+    saveProjections,
+    deleteProjection,
+    addProjection,
+    replaceResult
+  ] = useFetchProjections(wellId);
 
   const augmentedProjections = useMemo(
     () =>
@@ -195,7 +201,15 @@ function useProjectionsData() {
     }
   }, [augmentedProjections]);
 
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection, addProjection };
+  return {
+    projectionsData,
+    projectionsDispatch,
+    saveProjections,
+    refreshProjections,
+    deleteProjection,
+    addProjection,
+    replaceResult
+  };
 }
 
 function useFormationsData() {
@@ -230,6 +244,11 @@ export function useCrossSectionData() {
   };
 }
 
+function useSelectedWellInfo() {
+  const { wellId } = useWellIdContainer();
+  return useWellInfo(wellId);
+}
+
 // Create containers
 
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
@@ -246,4 +265,8 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
 );
 export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
   useCrossSectionData
+);
+
+export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+  useSelectedWellInfo
 );

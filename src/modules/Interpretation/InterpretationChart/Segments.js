@@ -132,9 +132,7 @@ const SegmentSelection = ({
   const segmentDragContainer = useRef(null);
   const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog(), [saveSelectedWellLog, draftMode]);
   const { refresh } = useInterpretationRenderer();
-  const onOver = useCallback(() => {
-    refresh();
-  }, [refresh]);
+  const onOver = useCallback(refresh, [refresh]);
 
   const getStartLine = useCallback(() => startLineRef.current && startLineRef.current.container, []);
   const getEndLine = useCallback(() => endLineRef.current && endLineRef.current.container, []);

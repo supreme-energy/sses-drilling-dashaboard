@@ -417,18 +417,33 @@ const surveysTransform = memoizeOne(data => {
     };
   });
 });
+
 export function useFetchSurveys(wellId) {
-  const [data, , , , , { fetch }] = useFetch(
-    {
-      path: GET_WELL_SURVEYS,
-      query: {
-        seldbname: wellId
-      }
-    },
-    {
-      transform: surveysTransform
-    }
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult }] = useFetch();
+
+  const refresh = useCallback(
+    resetCache =>
+      fetch(
+        {
+          path: GET_WELL_SURVEYS,
+          query: {
+            seldbname: wellId
+          },
+          cache: resetCache ? "no-cache" : "default"
+        },
+        (prev, next) => surveysTransform(next)
+      ),
+    [fetch, wellId]
   );
+
+  const replaceResultCallback = useCallback(
+    result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
+    [isLoading, error, isPolling, isFetchingMore, replaceResult]
+  );
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
 
@@ -453,7 +468,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -485,17 +500,32 @@ const projectionsTransform = memoizeOne(projections => {
   return transform(projections);
 });
 export function useFetchProjections(wellId) {
-  const [data, , , , , { fetch, refresh }] = useFetch(
-    {
-      path: GET_WELL_PROJECTIONS,
-      query: {
-        seldbname: wellId
-      }
-    },
-    {
-      transform: projectionsTransform
-    }
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult }] = useFetch();
+
+  const refresh = useCallback(
+    resetCache =>
+      fetch(
+        {
+          path: GET_WELL_PROJECTIONS,
+          query: {
+            seldbname: wellId
+          },
+          cache: resetCache ? "no-cache" : "default"
+        },
+        (prev, next) => projectionsTransform(next)
+      ),
+    [fetch, wellId]
   );
+
+  const replaceResultCallback = useCallback(
+    result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
+    [isLoading, error, isPolling, isFetchingMore, replaceResult]
+  );
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
   const saveProjection = (projectionId, method, fields = {}) => {
     // return the promise so we can refresh AFTER the API call is done
     return fetch({
@@ -563,7 +593,7 @@ export function useFetchProjections(wellId) {
     );
   };
 
-  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection];
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection, replaceResultCallback];
 }
 
 export function useWellOverviewKPI(wellId) {

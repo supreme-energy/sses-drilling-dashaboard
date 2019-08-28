@@ -22,6 +22,7 @@ import TCLLine from "./TCLLine";
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { LogsExtentList } from "../containers/logExtentContainer";
+import { selectedWellInfoContainer } from "../../App/Containers";
 
 const gridGutter = 60;
 
@@ -124,6 +125,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
   ] = useComboContainer();
 
+  const [{ wellInfo }] = selectedWellInfoContainer();
+  const totColor = wellInfo && wellInfo.colortot;
+
   useEffect(refresh, [
     refresh,
     stage,
@@ -138,7 +142,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     surveyPrevVisibility,
     nrPrevSurveysToDraft,
     draftMode,
-    pendingSegmentsState
+    pendingSegmentsState,
+    totColor
   ]);
 
   return (

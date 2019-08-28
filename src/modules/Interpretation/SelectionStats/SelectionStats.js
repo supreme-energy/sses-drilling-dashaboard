@@ -2,11 +2,10 @@ import React, { useMemo } from "react";
 import { Box } from "@material-ui/core";
 import CondensedText from "../../../components/ContensedText.js";
 import css from "./styles.scss";
-import { twoDecimals, EMPTY_FIELD } from "../../../constants/format.js";
+import { twoDecimals, EMPTY_FIELD, formatValue } from "../../../constants/format.js";
 import { useGetComputedLogData } from "../selectors.js";
 
 const lastValue = array => array[array.length - 1];
-const formatValue = (item, prop) => (item ? twoDecimals(item[prop]) : EMPTY_FIELD);
 
 export default function SelectionStats({ draft, selection, selectedWellLog, gammaRange, ...boxProps }) {
   const [startWellLog] = selection;

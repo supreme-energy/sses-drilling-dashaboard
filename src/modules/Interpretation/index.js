@@ -14,6 +14,7 @@ import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import { LogExtentProvider } from "./containers/logExtentContainer";
+import TCLValue from "./SelectionStats/TCLValue";
 
 function Interpretation({
   match: {
@@ -34,6 +35,7 @@ function Interpretation({
         <CloudServerModal wellId={wellId} />
         <SelectionStatsContainer />
         <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+          <TCLValue />
           <Typography variant="subtitle2">Draft Current</Typography>
           <FormControlLabel
             classes={{ root: css.label }}
