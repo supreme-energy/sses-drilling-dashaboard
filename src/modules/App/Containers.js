@@ -241,6 +241,6 @@ export const { Provider: CrossSectionProvider, useContainer: useCrossSectionCont
   useCrossSectionData
 );
 
-export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+export const { Provider: SelectedWellInfoProvider, useContainer: useSelectedWellInfoContainer } = createContainer(
   useSelectedWellInfo
 );

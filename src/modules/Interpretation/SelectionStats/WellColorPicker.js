@@ -1,12 +1,12 @@
 import React from "react";
-import { useWellIdContainer, selectedWellInfoContainer } from "../../App/Containers";
+import { useWellIdContainer, useSelectedWellInfoContainer } from "../../App/Containers";
 import ColorPickerBox from "../../../components/ColorPickerBox";
 import css from "./styles.scss";
 import { useSelectedWellInfoColors } from "../selectors";
 
 export default function WellColorPicker({ field, boxProps, ...props }) {
   const { wellId } = useWellIdContainer();
-  const [, , updateWell] = selectedWellInfoContainer();
+  const [, , updateWell] = useSelectedWellInfoContainer();
   const colors = useSelectedWellInfoColors();
   const color = colors[field];
   return (

@@ -6,7 +6,7 @@ import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
-  selectedWellInfoContainer
+  useSelectedWellInfoContainer
 } from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -401,7 +401,7 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
-  const [{ wellInfo }] = selectedWellInfoContainer();
+  const [{ wellInfo }] = useSelectedWellInfoContainer();
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
@@ -542,6 +542,6 @@ const parseWellInfo = memoizeOne((wellInfo = {}) => {
 });
 
 export function useSelectedWellInfoColors() {
-  const [{ wellInfo }] = selectedWellInfoContainer();
+  const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
 }

@@ -4,9 +4,9 @@ import { useSize } from "react-hook-size";
 import { scaleThreshold } from "d3-scale";
 import { max, group } from "d3-array";
 
-import { useFilteredWellData } from "../../../App/Containers";
+import { useFilteredWellData, useSelectedWellInfoContainer } from "../../../App/Containers";
 
-import { useWellOverviewKPI, useWellInfo, useWellsMapLength } from "../../../../api";
+import { useWellOverviewKPI, useWellsMapLength } from "../../../../api";
 import * as wellSections from "../../../../constants/wellSections";
 import SurfaceMarker from "../../assets/aerialCSMarkerBlue.svg";
 import LandingMarker from "../../assets/aerialCSMarkerGreen.svg";
@@ -63,7 +63,9 @@ const SCALE_FACTOR = 0.025;
 /* eslint new-cap: 0 */
 function AerialCrossSection({ wellId }) {
   const { surveys, wellPlan } = useFilteredWellData(wellId);
-  const [{ wellSurfaceLocationLocal = {}, wellLandingLocationLocal = {}, wellPBHLLocal = {} }] = useWellInfo(wellId);
+  const [
+    { wellSurfaceLocationLocal = {}, wellLandingLocationLocal = {}, wellPBHLLocal = {} }
+  ] = useSelectedWellInfoContainer(wellId);
   const surveyData = useWellsMapLength(wellId, surveys);
   const wellPlanData = useWellsMapLength(wellId, wellPlan);
   const yDistance = Math.abs(wellPBHLLocal.y - wellSurfaceLocationLocal.y);
