@@ -178,17 +178,18 @@ const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
   return { segments, byId };
 });
 
+const getPendingSegmentsByMd = memoizeOne((pendingSegmentsState, byId) =>
+  mapKeys(pendingSegmentsState, (value, key) => {
+    const item = byId[key];
+    return item && item.md;
+  })
+);
+
 export function usePendingSegmentsStateByMd() {
   const [{ pendingSegmentsState }] = useComboContainer();
   const [, , , , byId] = useComputedSurveysAndProjections();
-  return useMemo(
-    () =>
-      mapKeys(pendingSegmentsState, (value, key) => {
-        const item = byId[key];
-        return item && item.md;
-      }),
-    [pendingSegmentsState, byId]
-  );
+
+  return getPendingSegmentsByMd(pendingSegmentsState, byId);
 }
 
 // return all segment with computed properties
@@ -244,9 +245,12 @@ export function useGetComputedLogData(log, draft) {
   const { byId: draftLogsById } = useComputedSegments();
   const [, computedSegments] = useCurrentComputedSegments();
   const [, , allLogs] = useWellLogsContainer();
-  const logIndex = log ? allLogs.findIndex(l => l.id === log.id) : -1;
+  const logIndex = useMemo(() => (log ? allLogs.findIndex(l => l.id === log.id) : -1), [allLogs, log]);
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
+
+  // console.log("logData changed", window.logData !== logData);
+  // window.logData = logData;
 
   if (draft) {
     computedSegment = draftLogsById[computedSegment.id];
@@ -397,11 +401,11 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
-  const { wellId } = useWellIdContainer();
-  const [{ wellInfo }] = useWellInfo(wellId);
+  const [{ wellInfo }] = selectedWellInfoContainer();
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
+
   const surveysAndProjections = recomputeSurveysAndProjections(
     surveys,
     projectionsData,

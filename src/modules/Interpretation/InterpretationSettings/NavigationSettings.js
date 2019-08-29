@@ -1,19 +1,17 @@
 import React, { useCallback, useMemo } from "react";
 import { VerticalAlignTop as TopEnd, VerticalAlignBottom as BottomEnd, ArrowRightAlt } from "@material-ui/icons";
 import css from "./styles.scss";
-
 import { Box, IconButton, Typography } from "@material-ui/core";
 import { useSelectedWellLog, useSelectedMd } from "../selectors";
-import { useWellIdContainer } from "../../App/Containers";
-import { useWellLogList } from "../../ComboDashboard/containers/wellLogs";
 import { useSelectionActions } from "../actions";
+import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
 
 export default function NavigationSettings(props) {
   const selectedMd = useSelectedMd();
   const { toggleMdSelection } = useSelectionActions();
   const { selectedWellLog } = useSelectedWellLog();
-  const { wellId } = useWellIdContainer();
-  const [logs] = useWellLogList(wellId);
+
+  const [logs] = useWellLogsContainer();
   const selectedWellIndex = useMemo(() => selectedWellLog && logs.findIndex(l => l.id === selectedWellLog.id), [
     selectedWellLog,
     logs

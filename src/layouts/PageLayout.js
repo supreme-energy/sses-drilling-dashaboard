@@ -86,11 +86,11 @@ export const PageLayout = ({ children, history }) => {
     <MuiThemeProvider theme={theme}>
       <WellIdProvider initialState={""}>
         <WellLogsProvider>
-          <ComboContainerProvider>
-            <SurveysProvider>
-              <ProjectionsProvider>
-                <FormationsProvider>
-                  <SelectedWellInfoProvider>
+          <SelectedWellInfoProvider>
+            <ComboContainerProvider>
+              <SurveysProvider>
+                <ProjectionsProvider>
+                  <FormationsProvider>
                     <div className={classes.container}>
                       <AppBar className={classes.appBar} color="inherit">
                         <div className={classes.header}>
@@ -104,11 +104,11 @@ export const PageLayout = ({ children, history }) => {
 
                       <div className={classes.viewport}>{children}</div>
                     </div>
-                  </SelectedWellInfoProvider>
-                </FormationsProvider>
-              </ProjectionsProvider>
-            </SurveysProvider>
-          </ComboContainerProvider>
+                  </FormationsProvider>
+                </ProjectionsProvider>
+              </SurveysProvider>
+            </ComboContainerProvider>
+          </SelectedWellInfoProvider>
         </WellLogsProvider>
       </WellIdProvider>
     </MuiThemeProvider>
