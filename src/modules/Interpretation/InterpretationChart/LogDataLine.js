@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import PixiLine from "../../../components/PixiLine";
-import { useGetComputedLogData, getExtent } from "../selectors";
-import { draftColor, selectionColor, logColor } from "../pixiColors";
+import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
+import { logColor } from "../pixiColors";
+import { hexColor } from "../../../constants/pixiColors";
 
 const mapWellLog = d => [d.value, d.depth];
 
@@ -38,8 +39,9 @@ const LogData = React.memo(({ logData, draft, range, ...props }) => {
   );
 });
 
-function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh, range }) {
-  const logData = useGetComputedLogData(wellId, log, draft);
+function LogDataLine({ log, prevLog, container, draft, selected, refresh, range }) {
+  const logData = useGetComputedLogData(log, draft);
+  const colors = useSelectedWellInfoColors();
 
   // we need to call refresh after log data is loaded to redraw
   useEffect(() => {
@@ -49,7 +51,7 @@ function LogDataLine({ wellId, log, prevLog, container, draft, selected, refresh
   return logData ? (
     <LogData
       range={range}
-      color={draft ? draftColor : selected ? selectionColor : logColor}
+      color={draft ? hexColor(colors.draftcolor) : selected ? hexColor(colors.selectedsurveycolor) : logColor}
       draft={draft}
       logData={logData}
       container={container}

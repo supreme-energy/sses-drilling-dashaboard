@@ -10,7 +10,7 @@ import classes from "./styles.scss";
 
 export const Slider = () => <span className={classes.slider} />;
 
-function ColorPicker({ handleSave, handleClose, hex, onChange, anchorEl, ...props }) {
+function ColorPicker({ handleSave, handleClose, onChange, anchorEl, ...props }) {
   const open = Boolean(anchorEl);
   const inputStyles = {
     input: {
@@ -33,7 +33,7 @@ function ColorPicker({ handleSave, handleClose, hex, onChange, anchorEl, ...prop
     }
   };
 
-  const handleSaveColor = () => handleSave(hex);
+  const handleSaveColor = () => handleSave(props.hex);
 
   return (
     <Popover
@@ -63,14 +63,14 @@ function ColorPicker({ handleSave, handleClose, hex, onChange, anchorEl, ...prop
             width: 30,
             height: 30,
             margin: "10px 10px 0",
-            background: hex
+            background: props.hex
           }}
         />
       </Box>
       <Box display="flex" justifyContent="space-evenly" p={2}>
         <FormControlLabel
           className={classes.input}
-          control={<EditableInput style={hexInputStyle} value={hex} onChange={onChange} />}
+          control={<EditableInput style={hexInputStyle} value={props.hex} onChange={onChange} />}
           label="Hex"
           labelPlacement="top"
         />

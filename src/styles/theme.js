@@ -11,6 +11,9 @@ export const theme = createMuiTheme({
     },
     caption: {
       color: "rgba(0,0,0,0.6)"
+    },
+    condensed: {
+      fontFamily: "Roboto Condensed"
     }
   },
   palette: {

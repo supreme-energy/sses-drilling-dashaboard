@@ -2,7 +2,12 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
 import { EMPTY_ARRAY, useWellInfo, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
-import { useProjectionsDataContainer, useSurveysDataContainer, useWellIdContainer } from "../App/Containers";
+import {
+  useProjectionsDataContainer,
+  useSurveysDataContainer,
+  useWellIdContainer,
+  selectedWellInfoContainer
+} from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
@@ -226,12 +231,13 @@ export function useCurrentComputedSegments() {
   return getCurentComputedSegments(logList, computedSegments, draftMode);
 }
 
-export function useGetComputedLogData(wellId, log, draft) {
+export function useGetComputedLogData(log, draft) {
+  const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, log && log.tablename);
   const { byId: draftLogsById } = useComputedSegments();
   const [computedSegments] = useCurrentComputedSegments();
   const [logList] = useWellLogsContainer();
-  const logIndex = logList.findIndex(l => l.id === log.id);
+  const logIndex = log ? logList.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 
@@ -476,6 +482,12 @@ export function usePendingSegments() {
   return pendingSegments;
 }
 
+export function useComputedPendingSegments() {
+  const pendingSegments = usePendingSegments();
+  const { byId } = useComputedSegments();
+  return useMemo(() => pendingSegments.map(s => byId[s.id]), [byId, pendingSegments]);
+}
+
 export function useSelectedSegmentState() {
   const [{ draftMode }] = useComboContainer();
   const [, computedSegmentsById] = useCurrentComputedSegments();
@@ -503,4 +515,22 @@ export function useGetChangedPendingStateFields() {
     },
     { dip: false, fault: false }
   );
+}
+
+const parseWellInfo = memoizeOne((wellInfo = {}) => {
+  const defaultSurveyColor = "FD9E2E";
+  const defaultColortot = "000000";
+  const defaultDraftColor = "1F8000";
+
+  return {
+    ...wellInfo,
+    selectedsurveycolor: wellInfo.selectedsurveycolor || defaultSurveyColor,
+    colortot: wellInfo.colortot || defaultColortot,
+    draftcolor: wellInfo.draftcolor || defaultDraftColor
+  };
+});
+
+export function useSelectedWellInfoColors() {
+  const [{ wellInfo }] = selectedWellInfoContainer();
+  return parseWellInfo(wellInfo);
 }

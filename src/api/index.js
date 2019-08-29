@@ -454,8 +454,9 @@ const surveysTransform = memoizeOne(data => {
     };
   });
 });
+
 export function useFetchSurveys(wellId) {
-  const [data, , , , , { fetch }] = useFetch(
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult, refresh }] = useFetch(
     {
       path: GET_WELL_SURVEYS,
       query: {
@@ -465,6 +466,11 @@ export function useFetchSurveys(wellId) {
     {
       transform: surveysTransform
     }
+  );
+
+  const replaceResultCallback = useCallback(
+    result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
+    [isLoading, error, isPolling, isFetchingMore, replaceResult]
   );
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
@@ -490,7 +496,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -522,7 +528,7 @@ const projectionsTransform = memoizeOne(projections => {
   return transform(projections);
 });
 export function useFetchProjections(wellId) {
-  const [data, , , , , { fetch, refresh }] = useFetch(
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult, refresh }] = useFetch(
     {
       path: GET_WELL_PROJECTIONS,
       query: {
@@ -533,6 +539,12 @@ export function useFetchProjections(wellId) {
       transform: projectionsTransform
     }
   );
+
+  const replaceResultCallback = useCallback(
+    result => replaceResult(result, isLoading, error, isPolling, isFetchingMore),
+    [isLoading, error, isPolling, isFetchingMore, replaceResult]
+  );
+
   const saveProjection = (projectionId, method, fields = {}) => {
     // return the promise so we can refresh AFTER the API call is done
     return fetch({
@@ -603,7 +615,7 @@ export function useFetchProjections(wellId) {
     );
   };
 
-  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection];
+  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection, replaceResultCallback];
 }
 
 export function useWellOverviewKPI(wellId) {
