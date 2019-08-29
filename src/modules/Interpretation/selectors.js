@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellInfo, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,

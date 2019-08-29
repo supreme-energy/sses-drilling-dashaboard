@@ -22,7 +22,7 @@ import TCLLine from "./TCLLine";
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { LogsExtentList } from "../containers/logExtentContainer";
-
+import { min } from "d3-array";
 const gridGutter = 60;
 
 const mapControlLog = d => [d.value, d.md];
@@ -98,15 +98,16 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   } = internalStateRef;
   const [segments] = useCurrentComputedSegments(wellId);
 
+  // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && segments && segments.length) {
-        const minDepth = segments[0].startdepth;
+      if (!scaleInitialized && controlLogs && controlLogs.length) {
+        const minDepth = min(controlLogs, cl => cl.data[0].md);
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
         internalStateRef.current.scaleInitialized = true;
       }
     },
-    [height, segments, updateView, scaleInitialized]
+    [height, controlLogs, updateView, scaleInitialized]
   );
 
   useEffect(
