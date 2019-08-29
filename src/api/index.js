@@ -41,12 +41,16 @@ export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
 export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
 export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
+export const GET_FILE_CHECK = "/welllog/file_check.php";
+export const UPLOAD_LAS_FILE = "/welllog/import.php";
+export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
+export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
+export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
-const GET_MOCK_SURVEY_CHECK = "/newSurveyCheck.json";
 
 const options = {
   shouldSort: true,
@@ -174,13 +178,13 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, emailInfo]
   );
 
-  const updateNotificationAlarm = useCallback(
-    ({ wellId, body }) => {
+  const updateAlarm = useCallback(
+    ({ wellId, field, value }) => {
       const optimisticResult = {
         ...data,
         appinfo: {
           ...appInfo,
-          ...body
+          [field]: value
         }
       };
 
@@ -191,13 +195,43 @@ export function useWellInfo(wellId) {
         },
         method: "POST",
         body: {
-          appinfo: body
+          appinfo: {
+            [field]: value
+          }
         },
         cache: "no-cache",
         optimisticResult
       });
     },
     [serializedUpdateFetch, data, appInfo]
+  );
+
+  const updateAutoImport = useCallback(
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        wellinfo: {
+          ...wellInfo,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          wellinfo: {
+            [field]: value
+          }
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, wellInfo]
   );
 
   const {
@@ -254,13 +288,15 @@ export function useWellInfo(wellId) {
       wellInfo,
       emailInfo,
       appInfo,
+      online,
       transform
     },
     isLoading,
     updateWell,
     refreshStore,
     updateEmail,
-    updateNotificationAlarm
+    updateAlarm,
+    updateAutoImport
   ];
 }
 
@@ -752,21 +788,79 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
   return { data: data || EMPTY_OBJECT, updateAdditionalLogDetails };
 }
 
-export function useSurveyCheck(wellId) {
-  const [data] = useFetch(
-    {
-      path: GET_MOCK_SURVEY_CHECK,
+export function useManualImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const getFileCheck = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: GET_FILE_CHECK,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  const uploadFile = useCallback(
+    (wellId, filename) => {
+      return fetch({
+        path: UPLOAD_LAS_FILE,
+        query: {
+          seldbname: wellId,
+          filename
+        }
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile };
+}
+
+export function useCloudServer(wellId) {
+  const [data, , , , , { refresh }] = useFetch(
+    wellId !== undefined && {
+      path: GET_SURVEY_CHECK,
       query: {
         seldbname: wellId
       }
-    },
-    {
-      id: "mock"
     }
   );
-  return data || EMPTY_OBJECT;
+
+  return { data: data || EMPTY_OBJECT, refresh };
 }
 
+export function useCloudImportSurveys(wellId, dataId) {
+  const [data, , , , , { fetch, refresh }] = useFetch(
+    dataId !== undefined &&
+      wellId !== undefined && {
+        path: GET_CLEANED_SURVEYS,
+        query: {
+          seldbname: wellId,
+          data: dataId
+        }
+      }
+  );
+
+  const deleteSurveys = useCallback(
+    wellId => {
+      return fetch({
+        path: DELETE_DIRTY_SURVEYS,
+        query: {
+          seldbname: wellId
+        }
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_ARRAY, deleteSurveys, refresh };
+}
 export function useEmailContacts(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch({
     path: GET_EMAIL_CONTACTS,
@@ -776,7 +870,7 @@ export function useEmailContacts(wellId) {
   });
 
   const addEmailContact = useCallback(
-    body => {
+    (wellId, body) => {
       return fetch({
         path: ADD_EMAIL_CONTACT,
         method: "POST",
@@ -786,11 +880,11 @@ export function useEmailContacts(wellId) {
         body
       });
     },
-    [fetch, wellId]
+    [fetch]
   );
 
   const deleteEmailContact = useCallback(
-    id => {
+    (wellId, id) => {
       return fetch({
         path: DELETE_EMAIL_CONTACT,
         method: "GET",
@@ -800,11 +894,11 @@ export function useEmailContacts(wellId) {
         }
       });
     },
-    [fetch, wellId]
+    [fetch]
   );
 
   const updateEmailContact = useCallback(
-    body => {
+    (wellId, body) => {
       return fetch({
         path: SET_EMAIL_CONTACT,
         method: "POST",
@@ -814,7 +908,7 @@ export function useEmailContacts(wellId) {
         body
       });
     },
-    [fetch, wellId]
+    [fetch]
   );
 
   return {
