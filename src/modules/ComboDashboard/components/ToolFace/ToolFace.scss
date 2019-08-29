@@ -1,3 +1,14 @@
-.toolFace {
-  max-height: 150px;
+
+.toolFaceContainer {
+    max-height: 150px;
+
+    .plot {
+        min-height: 100px;
+        max-width: 100px;
+        margin: 0 auto;
+    }
+
+    canvas {
+        position: absolute;
+    }
 }
