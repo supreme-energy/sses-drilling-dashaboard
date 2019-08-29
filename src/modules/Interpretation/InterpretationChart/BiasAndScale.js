@@ -1,49 +1,34 @@
-import React, { useEffect, useCallback, useState } from "react";
-import { draftColor, selectionColor } from "../pixiColors";
+import React, { useEffect, useCallback } from "react";
+import { selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
-import { useSelectedSegmentState, useLogExtent, usePendingSegments, getSelectedId } from "../selectors";
+import { useSelectedSegmentState, usePendingSegments, useSelectedWellInfoColors } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
 import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useWellIdContainer } from "../../App/Containers";
+
+import { useLogExtentContainer } from "../containers/logExtentContainer";
+import { hexColor } from "../../../constants/pixiColors";
 
 const lineData = [[0, 10], [0, 0]];
 
-// this is more a workaround for hooks looping limitation
-// useLogExtent is only working with one log
-const LogExtent = ({ log, wellId, updateExtent }) => {
-  const extent = useLogExtent(log, wellId);
-  useEffect(() => {
-    if (extent) {
-      const [min, max] = extent;
-      updateExtent(([currentMin, currentMax]) => [Math.min(currentMin, min), Math.max(currentMax, max)]);
-    }
-  }, [updateExtent, extent]);
-  return null;
-};
+export default function BiasAndScale({ container, y, gridGutter, refresh, canvas, totalWidth }) {
+  const [{ draftMode }] = useComboContainer();
 
-export default function BiasAndScale({ container, y, gridGutter, refresh, canvas }) {
-  const [{ draftMode, selectionById }] = useComboContainer();
-  const internalStateRef = useRef({ prevSelection: null });
   const segmentData = useSelectedSegmentState();
   const bias = Number(segmentData.scalebias);
   const scale = Number(segmentData.scalefactor);
   const pendingSegments = usePendingSegments();
-  const [[xMin, xMax], updateExtent] = useState([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
-  const currentSelection = getSelectedId(selectionById);
-
-  if (currentSelection !== internalStateRef.current.prevSelection) {
-    updateExtent([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
-    internalStateRef.current.prevSelection = currentSelection;
-  }
-
+  const [{ selectionExtent, selectionExtentWithBiasAndScale }] = useLogExtentContainer();
+  const [xMin, xMax] = selectionExtent;
   const updateSegments = useUpdateSegmentsByMd();
+  const colors = useSelectedWellInfoColors();
+  const draftColor = hexColor(colors.draftcolor);
 
   const width = xMax - xMin;
-  const { wellId } = useWellIdContainer();
+  const computedWidth = width * scale;
   const updatePendingSegments = useCallback(
     props => {
       const propsByMd = pendingSegments.reduce((acc, s) => {
@@ -55,20 +40,25 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     [pendingSegments, updateSegments]
   );
 
+  const [min, max] = selectionExtentWithBiasAndScale;
+
   useEffect(
-    function setInitialBias() {
+    function setInitialBiasAndScale() {
       if (draftMode) {
-        updatePendingSegments({ bias: xMax - 10 });
+        updatePendingSegments({
+          bias: Math.min(max - min - 10, totalWidth - computedWidth - gridGutter - 10 - xMin),
+          scale: 1
+        });
       }
     },
-    [xMax, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
+    [min, max, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   useEffect(
     function redraw() {
       refresh();
     },
-    [refresh, xMin, xMax, bias, scale]
+    [refresh, selectionExtent, bias, scale, selectionExtentWithBiasAndScale]
   );
 
   const segmentContainerRef = useRef(null);
@@ -110,7 +100,6 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     [updatePendingSegments, width, bias, scale]
   );
 
-  const computedWidth = width * scale;
   const computedXMin = xMin - (computedWidth - width) / 2;
   const { saveSelectedWellLog } = useSaveWellLogActions();
   const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog(), [saveSelectedWellLog, draftMode]);
@@ -160,66 +149,60 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
   });
 
   return (
-    <React.Fragment>
-      {pendingSegments.map(s => (
-        <LogExtent log={s} key={s.id} updateExtent={updateExtent} wellId={wellId} />
-      ))}
-      {/* {draftMode && <DraftLineInit xMax={xMax} />} */}
-      <PixiContainer
-        container={container}
-        x={gridGutter + computedXMin + bias}
-        y={y}
-        child={container => (
-          <React.Fragment>
-            <PixiContainer
-              ref={startLineRef}
-              container={container}
-              x={0}
-              y={-1}
-              child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
-              )}
-            />
-            <PixiContainer
-              ref={endLineRef}
-              container={container}
-              x={computedWidth}
-              y={-1}
-              child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
-              )}
-            />
+    <PixiContainer
+      container={container}
+      x={gridGutter + computedXMin + bias}
+      y={y}
+      child={container => (
+        <React.Fragment>
+          <PixiContainer
+            ref={startLineRef}
+            container={container}
+            x={0}
+            y={-1}
+            child={container => (
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={draftMode ? draftColor : selectionColor}
+                nativeLines={false}
+                lineWidth={2}
+              />
+            )}
+          />
+          <PixiContainer
+            ref={endLineRef}
+            container={container}
+            x={computedWidth}
+            y={-1}
+            child={container => (
+              <PixiLine
+                container={container}
+                data={lineData}
+                color={draftMode ? draftColor : selectionColor}
+                nativeLines={false}
+                lineWidth={2}
+              />
+            )}
+          />
 
-            <PixiContainer
-              ref={segmentContainerRef}
-              container={container}
-              x={0}
-              y={0}
-              child={container => (
-                <PixiRectangle
-                  width={computedWidth - 2}
-                  height={8}
-                  radius={5}
-                  backgroundColor={draftMode ? draftColor : selectionColor}
-                  container={container}
-                />
-              )}
-            />
-          </React.Fragment>
-        )}
-      />
-    </React.Fragment>
+          <PixiContainer
+            ref={segmentContainerRef}
+            container={container}
+            x={0}
+            y={0}
+            child={container => (
+              <PixiRectangle
+                width={computedWidth - 2}
+                height={8}
+                radius={5}
+                backgroundColor={draftMode ? draftColor : selectionColor}
+                container={container}
+              />
+            )}
+          />
+        </React.Fragment>
+      )}
+    />
   );
 }

@@ -6,3 +6,5 @@ export const colorBySection = {
   [wellSections.CURVE]: 0x959595,
   [wellSections.LATERAL]: 0xceaa39
 };
+
+export const hexColor = hString => Number(`0x${hString}`);

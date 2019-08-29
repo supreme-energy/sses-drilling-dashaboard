@@ -9,7 +9,8 @@ import {
   useFetchProjections,
   useFetchSurveys,
   useWellOverviewKPI,
-  useWellPath
+  useWellPath,
+  useWellInfo
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
@@ -111,6 +112,22 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
   };
 }
 
+export function useFilteredAdditionalDataInterval(wellId, id) {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const {
+    data: { label, data, scalelo, scalehi, color }
+  } = useAdditionalDataLog(wellId, id);
+
+  return {
+    label,
+    scalelo,
+    scalehi,
+    color,
+    data: filterDataToInterval(data, sliderInterval)
+  };
+}
+
 // Organize well sections into array of objects
 export function useWellSections(wellId) {
   const { data } = useWellOverviewKPI(wellId);
@@ -149,16 +166,21 @@ function useWellId(initialState) {
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
-  const [surveys, { updateSurvey }] = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult }] = useFetchSurveys(wellId);
 
-  return { updateSurvey, surveys };
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult };
 }
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projections, refreshProjections, saveProjections, deleteProjection, addProjection] = useFetchProjections(
-    wellId
-  );
+  const [
+    projections,
+    refreshProjections,
+    saveProjections,
+    deleteProjection,
+    addProjection,
+    replaceResult
+  ] = useFetchProjections(wellId);
 
   const projectionsData = useMemo(
     () =>
@@ -177,7 +199,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection };
+  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection, replaceResult };
 }
 
 function useFormationsData() {
@@ -212,6 +234,11 @@ export function useCrossSectionData() {
   };
 }
 
+function useSelectedWellInfo() {
+  const { wellId } = useWellIdContainer();
+  return useWellInfo(wellId);
+}
+
 // Create containers
 
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
@@ -228,4 +255,8 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
 );
 export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
   useCrossSectionData
+);
+
+export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+  useSelectedWellInfo
 );

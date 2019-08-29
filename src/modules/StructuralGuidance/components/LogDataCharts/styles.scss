@@ -6,6 +6,7 @@
 
     .plot {
         width: 100%;
+        min-height: 150px;
     }
 
     position: relative;
@@ -15,6 +16,7 @@
 
     .addChartButton {
         outline: none;
+        padding: 5px;
 
         span, svg {
             color: $gray;
@@ -27,8 +29,6 @@
 }
 
 .graphContainer {
-    padding-bottom: 20px;
-
     .moreVerticalMenu span {
         color: $gray;
     }
@@ -55,5 +55,11 @@
 
     .logMenuCheckboxes {
         float: right;
+    }
+}
+
+.settingsDialogContent {
+    .icon {
+        transform: rotate(90deg);
     }
 }

@@ -76,15 +76,15 @@ function pendingSegmentState(pendingState, action, key) {
   }
 }
 
-function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) {
+function pendingSegmentsStateReducer(stateSlice, action, state, logs) {
   switch (action.type) {
     case "TOGGLE_SELECTION": {
       const resetPendingState = state.draftMode && state.selectionById[action.id];
-      return resetPendingState ? {} : pendingSegmentState;
+      return resetPendingState ? {} : stateSlice;
     }
     case "TOGGLE_DRAFT_MODE": {
       // reset pending segments state to initialPendingState
-      return mapValues(pendingSegmentsState, (pendingState, md) => pendingSegmentState(pendingState, action, md));
+      return mapValues(stateSlice, (pendingState, md) => pendingSegmentState(pendingState, action, md));
     }
     case "UPDATE_SEGMENTS_PROPERTIES":
       return reduce(
@@ -95,11 +95,11 @@ function pendingSegmentsStateReducer(pendingSegmentsState, action, state, logs) 
             [id]: pendingSegmentState(acc[id], action, id)
           };
         },
-        pendingSegmentsState
+        stateSlice
       );
 
     default:
-      return pendingSegmentsState;
+      return stateSlice;
   }
 }
 

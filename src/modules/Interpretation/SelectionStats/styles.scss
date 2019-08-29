@@ -1,0 +1,36 @@
+
+.root {
+    .label {
+        font-weight: bold;  
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .labelColumn {
+        width: 25px;
+        margin-right: 10px;
+    }
+
+    .value {
+        width: 40px;
+        text-align: right;
+    }
+
+    .draftHelpText {
+        color: #828282;
+        letter-spacing: 0.33px;
+        line-height: 16px;
+        max-width: 170px;
+    }
+}
+
+.colorBox {
+    margin: 0 10px;
+    border: solid 1px #fff;
+}
+
+.header {
+    border-bottom: solid 1px #E4E4E4;
+}
+

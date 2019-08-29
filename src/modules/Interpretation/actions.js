@@ -17,6 +17,7 @@ import reduce from "lodash/reduce";
 import keyBy from "lodash/keyBy";
 import mapValues from "lodash/mapValues";
 import mapKeys from "lodash/mapKeys";
+import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -123,37 +124,20 @@ export function useDragActions() {
   return { onEndSegmentDrag, onStartSegmentDrag, onSegmentDrag };
 }
 
-export function useBiasAndScaleActions(dispatch) {
-  const changeSelectedSegmentBias = useCallback(
-    bias => {
-      dispatch({
-        type: "CHANGE_SELECTED_SEGMENT_BIAS",
-        bias
-      });
-    },
-    [dispatch]
-  );
-
-  const changeSelectedSegmentScale = useCallback(
-    (scale, bias) => {
-      dispatch({
-        type: "CHANGE_SELECTED_SEGMENT_SCALE",
-        scale,
-        bias
-      });
-    },
-    [dispatch]
-  );
-
-  return { changeSelectedSegmentScale, changeSelectedSegmentBias };
-}
-
 export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
   const [, dispatch] = useComboContainer();
   const pendingSegmentsState = usePendingSegmentsStateByMd();
   const updateSegments = useUpdateSegmentsByMd();
+  const { replaceResult: replaceProjections } = useProjectionsDataContainer();
+  const { replaceResult: replaceSurveys } = useSurveysDataContainer();
   const [logs, , { updateWellLogs }] = useWellLogsContainer();
+  const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
+
+  const replaceSurveysAndProjections = useCallback(() => {
+    replaceProjections(computedProjections);
+    replaceSurveys(computedSurveys);
+  }, [replaceProjections, replaceSurveys, computedSurveys, computedProjections]);
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
 
@@ -192,17 +176,18 @@ export function useSaveWellLogActions() {
             scalefactor: undefined
           };
 
-      const result = updateWellLogs(data);
       const resetLogProps = logs.reduce((acc, log) => {
         acc[log.endmd] = resetProps;
         return acc;
       }, {});
 
+      replaceSurveysAndProjections();
+      const result = updateWellLogs(data);
       updateSegments(resetLogProps);
 
       return result;
     },
-    [updateWellLogs, updateSegments]
+    [updateWellLogs, replaceSurveysAndProjections, updateSegments]
   );
   const saveSelectedWellLog = useCallback(
     debounce(fieldsToSave => {
@@ -229,7 +214,7 @@ export function useSaveWellLogActions() {
     [pendingSegmentsState, saveWellLogs, logsByEndMd]
   );
 
-  return { saveSelectedWellLog, saveAllPendingLogs };
+  return { saveSelectedWellLog, saveAllPendingLogs, saveWellLogs };
 }
 
 export function useSelectionActions() {
@@ -262,14 +247,15 @@ export function useUpdateSegmentsByMd() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
   const [, dispatch] = useComboContainer();
   const updateSegments = useCallback(
-    propsByMd =>
+    propsByMd => {
       dispatch({
         type: "UPDATE_SEGMENTS_PROPERTIES",
         propsById: mapKeys(propsByMd, (value, md) => {
           const item = itemsByMd[md];
           return item && item.id;
         })
-      }),
+      });
+    },
     [dispatch, itemsByMd]
   );
 

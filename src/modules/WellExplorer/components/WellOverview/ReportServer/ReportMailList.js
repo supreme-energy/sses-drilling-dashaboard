@@ -23,7 +23,7 @@ import {
 } from "../../../../../constants/reportServer";
 import classes from "./styles.scss";
 
-function MailingListRow({ data, isFirstRow, handleSave, deleteContact, refresh }) {
+function MailingListRow({ wellId, data, isFirstRow, handleSave, deleteContact, refresh }) {
   const label = field => (isFirstRow ? field : "");
   const [reportMailingInput, setReportMailing] = useReducer(stateReducer, INITIAL_MAILING_LIST_STATE);
   const [{ isVisible, isEditing }, setPopupMode] = useReducer(stateReducer, {
@@ -42,7 +42,7 @@ function MailingListRow({ data, isFirstRow, handleSave, deleteContact, refresh }
   const handleEdit = useCallback(() => setPopupMode({ isVisible: true, isEditing: true }), [setPopupMode]);
   const handleClose = useCallback(() => setPopupMode({ isVisible: false }), [setPopupMode]);
   const handleDelete = async () => {
-    await deleteContact(reportMailingInput.id);
+    await deleteContact(wellId, reportMailingInput.id);
     refresh();
   };
 
@@ -151,10 +151,10 @@ function ReportMailingList({ wellId }) {
   const handleAllReports = e => setReport({ allReportsSelected: e.target.checked });
   const handleReportChange = e => setReport({ [e.target.value]: e.target.checked });
   const handleInputChange = id => e => setAddContact({ [id]: e.target.value });
-  const handleUpdateContact = useCallback(body => updateEmailContact(body), [updateEmailContact]);
+  const handleUpdateContact = useCallback(body => updateEmailContact(wellId, body), [wellId, updateEmailContact]);
 
   const handleAddContact = async () => {
-    await addEmailContact(addContactInput);
+    await addEmailContact(wellId, addContactInput);
     refresh();
     handleClose();
   };
@@ -174,6 +174,7 @@ function ReportMailingList({ wellId }) {
           return (
             <MailingListRow
               key={index}
+              wellId={wellId}
               data={dataObj}
               isFirstRow={isFirstRow}
               deleteContact={deleteEmailContact}

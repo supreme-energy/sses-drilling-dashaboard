@@ -1,15 +1,18 @@
-import React, { useReducer, useMemo } from "react";
+import React, { useReducer, useMemo, useRef } from "react";
 import { Box, Typography, TextField, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
-import { useSelectedSegmentState, useComputedDraftSegmentsOnly } from "../selectors";
+import {
+  useSelectedSegmentState,
+  useComputedDraftSegmentsOnly,
+  useSelectedMd,
+  useComputedPendingSegments
+} from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
 import debounce from "lodash/debounce";
-import mapKeys from "lodash/mapKeys";
-import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
-import { useUpdateSegmentsByMd } from "../actions";
+import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
@@ -48,7 +51,8 @@ const FAULT_DIP_MODE = "Fault /Dip";
 const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
-  const [{ selectedMd, draftMode }] = useComboContainer();
+  const [{ draftMode }] = useComboContainer();
+  const selectedMd = useSelectedMd();
   const updateSegments = useUpdateSegmentsByMd();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
@@ -56,22 +60,28 @@ export default function ModelSurveySettings(props) {
   );
 
   const pendingSegments = useComputedDraftSegmentsOnly();
+  const computedPendingSegments = useComputedPendingSegments();
   const selectedSegment = useSelectedSegmentState();
-  const [, , { updateWellLogs }] = useWellLogsContainer();
+  const firstSegment = computedPendingSegments[0];
 
-  const fault = selectedSegment && selectedSegment.fault;
+  const { saveWellLogs } = useSaveWellLogActions();
+  const fault = firstSegment && firstSegment.fault;
   const dip = selectedSegment && selectedSegment.sectdip;
   const scale = selectedSegment && selectedSegment.scalefactor;
   const bias = selectedSegment && selectedSegment.scalebias;
+  const internalState = useRef({ saveWellLogs });
 
   // hide dip value if on draftMode pending segments have different dip values
   const hideDipValue = useMemo(() => draftMode && pendingSegments.some(s => s.sectdip !== pendingSegments[0].sectdip), [
     pendingSegments,
     draftMode
   ]);
+  internalState.current.saveWellLogs = saveWellLogs;
 
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
-  const debouncedSaveWellLog = useMemo(() => debounce(updateWellLogs, 1000), [updateWellLogs]);
+  const debouncedSaveWellLog = useMemo(() => {
+    return debounce(internalState.current.saveWellLogs, 1000);
+  }, []);
 
   const updateSegmentsHandler = props => {
     const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
@@ -82,14 +92,17 @@ export default function ModelSurveySettings(props) {
     updateSegments(segmentsProps);
 
     if (!draftMode) {
-      debouncedSaveWellLog([
-        {
-          id: selectedSegment.id,
-          ...mapKeys(props, (val, key) => (key === "dip" ? "sectdip" : key))
-        }
-      ]);
+      debouncedSaveWellLog([selectedSegment], { [selectedSegment.endmd]: props });
     }
   };
+
+  function updateFirstSegment(props) {
+    const firstSegmentMd = firstSegment.endmd;
+    updateSegments({ [firstSegmentMd]: props });
+    if (!draftMode) {
+      debouncedSaveWellLog([firstSegment], { [firstSegment.endmd]: props });
+    }
+  }
 
   return (
     <Box display="flex" flexDirection="column" {...props}>
@@ -102,10 +115,10 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Fault"}
               disabled={!selectedSegment}
-              onChange={fault => updateSegmentsHandler({ fault })}
+              onChange={fault => updateFirstSegment({ fault })}
               value={fault}
-              onIncrease={() => updateSegmentsHandler({ fault: Number(fault) + 1 })}
-              onDecrease={() => updateSegmentsHandler({ fault: Number(fault) - 1 })}
+              onIncrease={() => updateFirstSegment({ fault: Number(fault) + 1 })}
+              onDecrease={() => updateFirstSegment({ fault: Number(fault) - 1 })}
             />
           ) : (
             <PropertyField

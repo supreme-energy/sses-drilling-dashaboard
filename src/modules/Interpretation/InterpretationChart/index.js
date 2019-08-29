@@ -14,13 +14,14 @@ import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSe
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useSelectedWellLog, useCurrentComputedSegments } from "../selectors";
+import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColors } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
 import TCLLine from "./TCLLine";
 import Formations from "./Formations";
 import LogLines from "../LogLines";
+import { LogsExtentList } from "../containers/logExtentContainer";
 
 const gridGutter = 60;
 
@@ -123,6 +124,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
   ] = useComboContainer();
 
+  const colors = useSelectedWellInfoColors();
+
   useEffect(refresh, [
     refresh,
     stage,
@@ -137,11 +140,13 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     surveyPrevVisibility,
     nrPrevSurveysToDraft,
     draftMode,
-    pendingSegmentsState
+    pendingSegmentsState,
+    colors
   ]);
 
   return (
     <div className={classNames(className, css.root)}>
+      <LogsExtentList wellId={wellId} />
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
       <Formations container={viewport} width={width} />
