@@ -111,6 +111,22 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
   };
 }
 
+export function useFilteredAdditionalDataInterval(wellId, id) {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const {
+    data: { label, data, scalelo, scalehi, color }
+  } = useAdditionalDataLog(wellId, id);
+
+  return {
+    label,
+    scalelo,
+    scalehi,
+    color,
+    data: filterDataToInterval(data, sliderInterval)
+  };
+}
+
 // Organize well sections into array of objects
 export function useWellSections(wellId) {
   const { data } = useWellOverviewKPI(wellId);

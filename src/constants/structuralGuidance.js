@@ -1,2 +1,3 @@
-export const MD = "MD";
-export const VS = "VS";
+export const MD = "md";
+export const VS = "vs";
+export const INITIAL_SCALE_BIAS = { scale: 1, bias: 0 };
