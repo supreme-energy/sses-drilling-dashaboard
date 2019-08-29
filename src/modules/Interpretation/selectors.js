@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellInfo, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
@@ -277,9 +277,27 @@ export function getSelectedId(selectionById) {
   return Object.keys(selectionById)[0];
 }
 
+const applyAutoPosDec = memoizeOne((projections, bitProjPos, autoPosDec) => {
+  // Source calculations https://github.com/supreme-energy/sses-main/blob/color_and_logo_change/web/projws.php#L1238
+  if (autoPosDec <= 0 || !bitProjPos) {
+    return projections;
+  }
+  console.log(projections.length, autoPosDec, bitProjPos);
+  const sign = bitProjPos > 0 ? 1 : -1;
+  const cap = bitProjPos > 0 ? Math.max : Math.min;
+  return projections.map((p, i) => {
+    return {
+      ...p,
+      pos: cap(0, bitProjPos - sign * (i + 1) * autoPosDec)
+    };
+  });
+});
+
 const recomputeSurveysAndProjections = memoizeOne(
-  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm) => {
-    return surveys.concat(projections).reduce((acc, currSvy, index) => {
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
+    const bitProjPos = surveys.length && surveys[surveys.length - 1].pos;
+    const autoPosProjections = applyAutoPosDec(projections, bitProjPos, autoPosDec);
+    return surveys.concat(autoPosProjections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
       const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
@@ -376,7 +394,8 @@ const recomputeSurveysAndProjections = memoizeOne(
           fault,
           dip,
           tot,
-          bot
+          bot,
+          pos: tot - tvd
         };
       } else {
         acc[index] = calculateProjection(combinedSvy, acc, index, propazm);
@@ -390,8 +409,7 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
-  const { wellId } = useWellIdContainer();
-  const [{ wellInfo }] = useWellInfo(wellId);
+  const [{ wellInfo = {} }] = selectedWellInfoContainer();
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
@@ -401,7 +419,8 @@ export function useComputedSurveysAndProjections() {
     draftMode,
     selectionById,
     pendingSegmentsState,
-    wellInfo ? Number(wellInfo.propazm) : 0
+    Number(wellInfo.propazm) || 0,
+    Number(wellInfo.autoposdec) || 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
