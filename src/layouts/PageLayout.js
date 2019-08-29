@@ -17,7 +17,8 @@ import {
   SelectedWellInfoProvider
 } from "../modules/App/Containers";
 import useAudio from "../hooks/useAudio";
-import { useWellInfo, useSurveyCheck } from "../api";
+import { useWellInfo, useCloudServer } from "../api";
+import { PULL } from "../constants/interpretation";
 
 import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
 import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
@@ -40,13 +41,16 @@ const PageTabs = ({
   // trigger re-render when size changed
   useSize(tabsRef);
 
-  const { cleanup_occured: hasConflict, next_survey: newSurvey } = useSurveyCheck(wellId);
-  const [{ appInfo = {} }] = useWellInfo(wellId);
-  // TODO: Get this value from BE DD-276
-  const serverEnabled = false;
+  const {
+    data: { next_survey: newSurvey, cmes }
+  } = useCloudServer(wellId);
+  const [{ appInfo = {}, wellInfo = {}, online }] = useWellInfo(wellId);
+  const isOnline = !!online;
   const [playing, handleAlarmOn, handleAlarmOff] = useAudio(`/${appInfo.import_alarm}`);
   const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = appInfo;
+  const hasConflict = !!cmes;
   const hasUpdate = hasConflict || newSurvey;
+  const isAutoImportEnabled = wellInfo[PULL];
   const hasPlayed = useRef(false);
 
   useEffect(() => {
@@ -58,13 +62,13 @@ const PageTabs = ({
       }
     }
 
-    if (alarm && alarmEnabled && hasUpdate && !hasPlayed.current && serverEnabled) {
+    if (alarm && alarmEnabled && hasUpdate && !hasPlayed.current && isAutoImportEnabled && isOnline) {
       handleAlarmOn();
       hasPlayed.current = true;
       setTimeout(turnOff, 5000);
       return turnOff;
     }
-  }, [handleAlarmOn, handleAlarmOff, playing, alarm, alarmEnabled, hasUpdate, serverEnabled]);
+  }, [handleAlarmOn, handleAlarmOff, playing, alarm, alarmEnabled, hasUpdate, isAutoImportEnabled, isOnline]);
 
   return (
     <div ref={tabsRef}>

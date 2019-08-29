@@ -28,6 +28,10 @@
         left: 10px;
         bottom: 10px;
     }
+
+    .boldText {
+        font-style: bold;
+    }
 }
 
 .importDialogContent {
@@ -37,6 +41,18 @@
 
     h6 {
         color: $gold;
+    }
+
+    .fileName {
+        position: relative;
+        left: 20px;
+    }
+
+    .conflictButton {
+        background-color: $conflictRed;
+    }
+    .conflictButton:hover {
+        background-color: #BC0143;
     }
 }
 
@@ -68,14 +84,56 @@
     .intervalDropdown, .alarmDropdown {
         width: 300px;
     }
+
+    .switch {
+        margin-right: 10px;
+        position: relative;
+        top: 10px;
+    }
+
+    .switchBuffer {
+        margin-right: 5px;
+    }
 }
 
 .notificationFlag {
-    top: 15px;
     left: 15px;
     position: relative;
+    line-height: 50px;
     
     span {
         margin-left: 10px;
+    }
+}
+
+.refreshDataButton {
+
+    button {
+        outline: none;
+    }
+}
+
+.manualReviewContent {
+    .spacer {
+        margin-right: 10px;
+    }
+    h6 {
+        color: $gold;
+    }
+}
+
+.fileUploadButton {
+    position: relative;
+    left: 10px;
+    top: 10px;
+
+    button {
+        outline: none;
+    }
+}
+
+.autoImportReviewActions {
+    button {
+        outline: none;
     }
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useEffect } from "react";
+import React, { useCallback, useReducer, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import {
   Button,
@@ -21,63 +21,101 @@ import CloudOff from "@material-ui/icons/CloudOff";
 
 import { audioReducer } from "./reducers";
 import useAudio from "../../../../hooks/useAudio";
-import { MEDIA_URL, IMPORT, ALARM, ALARM_ENABLED, INITIAL_AUDIO_STATE } from "../../../../constants/interpretation";
+import {
+  MEDIA_URL,
+  ALARM,
+  ALARM_ENABLED,
+  PULL,
+  PULL_INTERVAL,
+  INITIAL_AUDIO_STATE
+} from "../../../../constants/interpretation";
 
 import classes from "./styles.scss";
 
 function NotificationSettings({
   wellId,
-  data,
-  refresh,
+  appInfo,
+  wellInfo,
   updateAlarm,
+  updateAutoImport,
   handleClose,
-  hasUpdate,
-  setView,
   countdown,
-  isServerEnabled,
-  setServerState,
-  interval,
-  setInterval
+  setAutoImport,
+  autoImportSettings,
+  handleRefreshCheck
 }) {
   const [audio, setAudio] = useReducer(audioReducer, INITIAL_AUDIO_STATE);
   const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = audio;
+  const { [PULL]: isAutoImportEnabled, [PULL_INTERVAL]: interval } = autoImportSettings;
   const [playing, handleAlarmOn, handleAlarmOff] = useAudio(MEDIA_URL(audio.import_alarm));
 
-  const handleIntervalSelect = e => setInterval(e.target.value);
-  const handleSetServer = () => setServerState();
+  const handleIntervalSelect = e => setAutoImport({ type: "UPDATE", payload: { [PULL_INTERVAL]: e.target.value } });
   const handleAlarmToggle = () => {
     return setAudio({ type: "TOGGLE_IMPORT_ALARM" });
   };
   const handleAlarmSelect = e => {
     setAudio({ type: "UPDATE", payload: { [ALARM]: e.target.value } });
   };
-  const handleSave = useCallback(() => {
-    const body = {};
 
-    Object.entries(audio).map(([key, value]) => {
-      if (data[key] !== value) {
-        body[key] = value;
+  const autoImportKeys = useMemo(() => {
+    return Object.keys(autoImportSettings).filter(key => wellInfo[key] !== autoImportSettings[key]);
+  }, [autoImportSettings, wellInfo]);
+
+  const alarmKeys = useMemo(() => Object.keys(audio).filter(key => appInfo[key] !== audio[key]), [appInfo, audio]);
+
+  const onAlarmFieldChange = useCallback((field, value) => updateAlarm({ wellId, field, value }), [
+    updateAlarm,
+    wellId
+  ]);
+
+  const onAutoImportFieldChange = useCallback((field, value) => updateAutoImport({ wellId, field, value }), [
+    updateAutoImport,
+    wellId
+  ]);
+
+  const onBlurAlarm = useCallback(
+    e => {
+      if (alarmKeys.length) {
+        e.returnValue = "Changes you made may not be saved.";
+        if (!document.activeElement.id) {
+          const key = alarmKeys[0];
+          onAlarmFieldChange(key, audio[key]);
+        }
       }
-    });
+    },
+    [onAlarmFieldChange, audio, alarmKeys]
+  );
 
-    updateAlarm({ wellId, body });
-    refresh();
-
-    if (hasUpdate) {
-      setView(IMPORT);
-    } else {
-      handleClose();
-    }
-  }, [handleClose, hasUpdate, setView, audio, data, updateAlarm, refresh, wellId]);
+  const onBlurAutoImport = useCallback(
+    e => {
+      if (autoImportKeys.length) {
+        e.returnValue = "Changes you made may not be saved.";
+        if (!document.activeElement.id) {
+          const key = autoImportKeys[0];
+          onAutoImportFieldChange(key, autoImportSettings[key]);
+        }
+      }
+    },
+    [onAutoImportFieldChange, autoImportKeys, autoImportSettings]
+  );
 
   useEffect(() => {
-    if (data) {
+    if (appInfo) {
       setAudio({
         type: "UPDATE",
-        payload: { [ALARM]: data[ALARM], [ALARM_ENABLED]: data[ALARM_ENABLED] }
+        payload: { [ALARM]: appInfo[ALARM], [ALARM_ENABLED]: appInfo[ALARM_ENABLED] }
       });
     }
-  }, [data]);
+  }, [appInfo]);
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", onBlurAlarm);
+    window.addEventListener("beforeunload", onBlurAutoImport);
+    return () => {
+      window.removeEventListener("beforeunload", onBlurAlarm);
+      window.removeEventListener("beforeunload", onBlurAutoImport);
+    };
+  });
 
   return (
     <React.Fragment>
@@ -89,20 +127,26 @@ function NotificationSettings({
       </DialogTitle>
       <DialogContent className={classes.notificationContent}>
         <Box display="flex" flexDirection="row">
-          <div>
-            <span>Auto-check for new data</span>
-            <Switch color="primary" checked={!!isServerEnabled} onChange={handleSetServer} />
+          <div className={classes.switch}>
+            <span className={classes.switchBuffer}>Auto-check for new data</span>
+            <Switch
+              color="primary"
+              checked={!!isAutoImportEnabled}
+              onChange={() => setAutoImport({ type: "TOGGLE_AUTO_IMPORT" })}
+              onBlur={onBlurAutoImport}
+            />
           </div>
           <FormControl>
             <InputLabel htmlFor="interval-select">Check for new data every</InputLabel>
             <Select
               className={classes.intervalDropdown}
-              value={interval}
+              value={interval || ""}
               onChange={handleIntervalSelect}
               inputProps={{
                 name: "interval",
                 id: "interval-select"
               }}
+              onBlur={onBlurAutoImport}
             >
               <MenuItem value={10}>10 Seconds</MenuItem>
               <MenuItem value={30}>30 Seconds</MenuItem>
@@ -113,9 +157,9 @@ function NotificationSettings({
           </FormControl>
         </Box>
         <Box display="flex" flexDirection="row">
-          <div>
+          <div className={classes.switch}>
             <span>Play a sound for new data</span>
-            <Switch color="primary" checked={!!alarmEnabled} onChange={handleAlarmToggle} />
+            <Switch color="primary" checked={!!alarmEnabled} onChange={handleAlarmToggle} onBlur={onBlurAlarm} />
           </div>
           <FormControl>
             <InputLabel htmlFor="alarm-select">Sound To Play</InputLabel>
@@ -127,6 +171,7 @@ function NotificationSettings({
                 name: "alarm",
                 id: "alarm-select"
               }}
+              onBlur={onBlurAlarm}
             >
               <MenuItem value={"BOMB_SIREN-BOMB_SIREN.mp3"}>Bomb Siren</MenuItem>
               <MenuItem value={"School_Fire_Alarm.mp3"}>Fire Alarm</MenuItem>
@@ -144,15 +189,15 @@ function NotificationSettings({
       </DialogContent>
       <Box display="flex" justifyContent="space-between">
         <div className={classes.notificationFlag}>
-          {isServerEnabled ? <Cloud /> : <CloudOff />}
+          {isAutoImportEnabled ? <Cloud /> : <CloudOff />}
           <span>
-            {isServerEnabled
+            {isAutoImportEnabled
               ? `Checking for next survey data in ${countdown} seconds`
               : "Automatic checking for new data is off"}
           </span>
         </div>
-        <DialogActions className={classes.cloudServerDialogActions}>
-          <Button onClick={handleSave} color="primary">
+        <DialogActions className={classes.refreshDataButton}>
+          <Button onClick={handleRefreshCheck} color="primary">
             Check for New Data Now
           </Button>
         </DialogActions>
@@ -163,17 +208,18 @@ function NotificationSettings({
 
 NotificationSettings.propTypes = {
   wellId: PropTypes.string,
-  isServerEnabled: PropTypes.bool,
-  setServerState: PropTypes.func,
-  data: PropTypes.object,
-  refresh: PropTypes.func,
+  setAutoImport: PropTypes.func,
+  appInfo: PropTypes.object,
   updateAlarm: PropTypes.func,
   handleClose: PropTypes.func,
-  hasUpdate: PropTypes.bool,
-  setView: PropTypes.func,
+  handleRefreshCheck: PropTypes.func,
+  updateAutoImport: PropTypes.func,
   countdown: PropTypes.number,
-  interval: PropTypes.number,
-  setInterval: PropTypes.func
+  autoImportSettings: PropTypes.shape({
+    [PULL]: PropTypes.bool,
+    [PULL_INTERVAL]: PropTypes.number
+  }),
+  wellInfo: PropTypes.object
 };
 
 export default NotificationSettings;
