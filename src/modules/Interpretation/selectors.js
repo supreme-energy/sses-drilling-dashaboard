@@ -277,27 +277,10 @@ export function getSelectedId(selectionById) {
   return Object.keys(selectionById)[0];
 }
 
-const applyAutoPosDec = memoizeOne((projections, bitProjPos, autoPosDec) => {
-  // Source calculations https://github.com/supreme-energy/sses-main/blob/color_and_logo_change/web/projws.php#L1238
-  if (autoPosDec <= 0 || !bitProjPos) {
-    return projections;
-  }
-  console.log(projections.length, autoPosDec, bitProjPos);
-  const sign = bitProjPos > 0 ? 1 : -1;
-  const cap = bitProjPos > 0 ? Math.max : Math.min;
-  return projections.map((p, i) => {
-    return {
-      ...p,
-      pos: cap(0, bitProjPos - sign * (i + 1) * autoPosDec)
-    };
-  });
-});
-
 const recomputeSurveysAndProjections = memoizeOne(
   (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
-    const bitProjPos = surveys.length && surveys[surveys.length - 1].pos;
-    const autoPosProjections = applyAutoPosDec(projections, bitProjPos, autoPosDec);
-    return surveys.concat(autoPosProjections).reduce((acc, currSvy, index) => {
+    const bitProjIdx = surveys.length - 1;
+    return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
       const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
@@ -398,7 +381,11 @@ const recomputeSurveysAndProjections = memoizeOne(
           pos: tot - tvd
         };
       } else {
-        acc[index] = calculateProjection(combinedSvy, acc, index, propazm);
+        const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+        const sign = bitProjPos > 0 ? 1 : -1;
+        const cap = bitProjPos > 0 ? Math.max : Math.min;
+        const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+        acc[index] = calculateProjection({ ...combinedSvy, pos }, acc, index, propazm);
       }
       return acc;
     }, []);

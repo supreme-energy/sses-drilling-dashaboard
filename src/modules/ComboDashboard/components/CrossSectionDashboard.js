@@ -72,6 +72,7 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
                 <React.Fragment>
                   <Typography variant="subtitle2">Auto Pos-TCL: </Typography>
                   <DebouncedTextField
+                    debounceInterval={100}
                     type="number"
                     variant="filled"
                     value={wellInfo.autoposdec}
