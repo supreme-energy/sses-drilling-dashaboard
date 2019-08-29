@@ -378,7 +378,7 @@ const recomputeSurveysAndProjections = memoizeOne(
           dip,
           tot,
           bot,
-          pos: tot - tvd
+          pos: tcl - tvd
         };
       } else {
         const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
