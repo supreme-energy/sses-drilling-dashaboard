@@ -1,14 +1,9 @@
-import { useState, useReducer, useCallback } from "react";
-
-import { autoImportReducer } from "./reducers";
-import { PULL, PULL_INTERVAL, INITIAL_AUTO_IMPORT_STATE } from "../../../../constants/interpretation";
+import { useState, useCallback } from "react";
 
 export default function useCloudServerModal() {
   const [view, setView] = useState("");
   const [isVisible, setVisibility] = useState(false);
-  const [autoImportSettings, setAutoImport] = useReducer(autoImportReducer, INITIAL_AUTO_IMPORT_STATE);
-  const [countdown, setCountdown] = useState(0);
-  const { [PULL]: isAutoImportEnabled, [PULL_INTERVAL]: interval } = autoImportSettings;
+  const [isAutoImportEnabled, setAutoImport] = useState(false);
 
   // Handlers
   const handleOpen = useCallback(() => setVisibility(true), []);
@@ -21,10 +16,6 @@ export default function useCloudServerModal() {
     isAutoImportEnabled,
     setAutoImport,
     handleOpen,
-    handleClose,
-    interval,
-    autoImportSettings,
-    countdown,
-    setCountdown
+    handleClose
   };
 }
