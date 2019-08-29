@@ -15,14 +15,14 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import { useWellInfo } from "../../../api";
+import { selectedWellInfoContainer } from "../../App/Containers";
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
 
 export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [viewDirection, setViewDirection] = useState(0);
-  const [data, , updateWell, refreshFetchStore] = useWellInfo(wellId);
+  const [data, , updateWell, refreshFetchStore] = selectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
 
   const updateAutoPosTCL = useCallback(
