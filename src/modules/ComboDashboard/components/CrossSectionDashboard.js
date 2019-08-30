@@ -84,6 +84,7 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
                     debounceInterval={100}
                     type="number"
                     variant="filled"
+                    inputProps={{ min: "0" }}
                     value={wellInfo.autoposdec}
                     onChange={updateAutoPosTCL}
                     className={classes.textField}
