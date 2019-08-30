@@ -3,14 +3,14 @@ import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
 import { logColor } from "../pixiColors";
 import { hexColor } from "../../../constants/pixiColors";
+import { useWellLogData, EMPTY_ARRAY } from "../../../api";
+import { useWellIdContainer } from "../../App/Containers";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = React.memo(({ logData, draft, range, ...props }) => {
+const LogData = ({ logData, range, extent, draft, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-
-  const [xMin, xMax] = useMemo(() => getExtent(logData), [logData]);
-
+  const [xMin, xMax] = extent;
   const width = xMax - xMin;
 
   const computedWidth = width * scale;
@@ -22,7 +22,6 @@ const LogData = React.memo(({ logData, draft, range, ...props }) => {
       return logData.data;
     }
     const [startMd, endMd] = range;
-
     // some logs start after or before our range so we don't include them and not filter either
     const shouldBeIncluded = logData.endmd >= startMd && logData.startmd <= endMd;
     return range
@@ -37,34 +36,40 @@ const LogData = React.memo(({ logData, draft, range, ...props }) => {
       <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} />
     </React.Fragment>
   );
-});
+};
 
-function LogDataLine({ log, prevLog, container, draft, selected, refresh, range }) {
-  const logData = useGetComputedLogData(log, draft);
-  const colors = useSelectedWellInfoColors();
+function LogDataLine({ log, prevLog, container, draft, selected, refresh, range, colors, extent }) {
+  const computedLogData = useGetComputedLogData(log, draft);
 
-  // we need to call refresh after log data is loaded to redraw
-  useEffect(refresh, [logData, refresh]);
-
-  return logData ? (
+  return computedLogData ? (
     <LogData
       range={range}
       color={draft ? hexColor(colors.draftcolor) : selected ? hexColor(colors.selectedsurveycolor) : logColor}
       draft={draft}
-      logData={logData}
+      extent={extent}
+      logData={computedLogData}
       container={container}
       selected={selected}
     />
   ) : null;
 }
 
-export default props => {
+export default ({ refresh, ...props }) => {
   const { draft } = props;
+  const { wellId } = useWellIdContainer();
+  const [logData] = useWellLogData(wellId, props.log && props.log.tablename);
+  const colors = useSelectedWellInfoColors();
+  const extent = useMemo(() => {
+    return logData ? getExtent(logData) : EMPTY_ARRAY;
+  }, [logData]);
+
+  // we need to call refresh after log data is loaded to redraw
+  useEffect(refresh, [logData, refresh]);
 
   return (
     <React.Fragment>
-      <LogDataLine {...props} draft={false} key={"line"} />
-      {draft && <LogDataLine {...props} draft key={"draftLine"} />}
+      <LogDataLine {...props} draft={false} key={"line"} colors={colors} extent={extent} />
+      {draft && <LogDataLine {...props} draft key={"draftLine"} colors={colors} extent={extent} />}
     </React.Fragment>
   );
 };

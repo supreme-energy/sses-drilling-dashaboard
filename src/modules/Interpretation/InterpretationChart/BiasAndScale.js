@@ -54,13 +54,6 @@ export default function BiasAndScale({ container, y, gridGutter, refresh, canvas
     [min, max, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  useEffect(
-    function redraw() {
-      refresh();
-    },
-    [refresh, selectionExtent, bias, scale, selectionExtentWithBiasAndScale]
-  );
-
   const segmentContainerRef = useRef(null);
   const startLineRef = useRef(null);
   const endLineRef = useRef(null);

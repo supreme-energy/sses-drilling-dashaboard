@@ -15,20 +15,11 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import { LogExtentProvider } from "./containers/logExtentContainer";
 import TCLValue from "./SelectionStats/TCLValue";
+import Headers from "./Headers";
+import { useWellIdContainer } from "../App/Containers";
 
-function Interpretation({
-  match: {
-    params: { wellId }
-  },
-  className
-}) {
-  const [controlLogs] = useWellControlLog(wellId);
-  const [logList] = useWellLogsContainer();
-  const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
-  const { data: gr } = useAdditionalDataLog(wellId, aditionalLogs && aditionalLogs.GR && aditionalLogs.GR.id, true);
+const Interpretation = React.memo(({ wellId, className, draftMode, dispatch, controlLogs, logList }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
-  const [state, dispatch] = useComboContainer();
-  const { draftMode } = state;
   return (
     <LogExtentProvider>
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
@@ -53,14 +44,9 @@ function Interpretation({
           </Box>
           {/* Todo: add formations top here */}
         </Box>
+        <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
-        <InterpretationChart
-          wellId={wellId}
-          className={css.chart}
-          controlLogs={controlLogs}
-          gr={gr}
-          logList={logList}
-        />
+        <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
 
         <div className="layout horizontal">
           <IconButton
@@ -83,6 +69,26 @@ function Interpretation({
       </WidgetCard>
     </LogExtentProvider>
   );
-}
+});
 
-export default withRouter(Interpretation);
+const InterpretatinContainer = props => {
+  const { wellId } = useWellIdContainer();
+  const [controlLogs] = useWellControlLog(wellId);
+  const [logList] = useWellLogsContainer();
+
+  const [state, dispatch] = useComboContainer();
+  const { draftMode } = state;
+
+  return (
+    <Interpretation
+      {...props}
+      controlLogs={controlLogs}
+      logList={logList}
+      dispatch={dispatch}
+      draftMode={draftMode}
+      wellId={wellId}
+    />
+  );
+};
+
+export default InterpretatinContainer;

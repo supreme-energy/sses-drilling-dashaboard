@@ -30,6 +30,7 @@ export const LogsExtentList = ({ wellId }) => {
     internalStateRef.current.prevSelection = currentSelection;
     internalStateRef.current.prevDraftMode = draftMode;
   }
+
   return (
     <React.Fragment>
       {pendingSegments.map(s => (
