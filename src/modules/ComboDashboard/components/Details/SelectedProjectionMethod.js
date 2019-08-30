@@ -1,22 +1,21 @@
 import React, { useCallback } from "react";
+import classNames from "classnames";
 import { Typography } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
-import classes from "../ComboDashboard.scss";
 import FilledInput from "@material-ui/core/FilledInput";
 import MenuItem from "@material-ui/core/MenuItem";
+
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { DIP_FAULT_POS_VS, MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
-import classNames from "classnames";
 import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
-import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import classes from "../ComboDashboard.scss";
 
 export const SelectedProjectionMethod = ({ selectedProjection }) => {
   const updateSegments = useUpdateSegmentsById();
   const updateSelectedPAMethod = useCallback(
-    e => {
-      updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } });
-    },
+    e => updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } }),
     [updateSegments, selectedProjection]
   );
 
