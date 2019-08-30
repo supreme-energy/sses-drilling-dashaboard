@@ -101,6 +101,8 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>TVD</TableCell>
           <TableCell className={classes.cell}>Dog Leg</TableCell>
           <TableCell className={classes.cell}>VS</TableCell>
+          {showFullTable && <TableCell className={classes.cell}>NS</TableCell>}
+          {showFullTable && <TableCell className={classes.cell}>EW</TableCell>}
           <TableCell className={classes.cell}>Fault</TableCell>
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
@@ -136,6 +138,8 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"))}
               {Cell(row.dl.toFixed(2), false)}
               {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"))}
+              {showFullTable && Cell(row.ns.toFixed(2), false)}
+              {showFullTable && Cell(row.ew.toFixed(2), false)}
               {Cell(row.fault.toFixed(2), editable, update("fault"), a =>
                 Knob({
                   ...a,
