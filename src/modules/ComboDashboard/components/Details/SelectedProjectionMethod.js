@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { Typography } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import classes from "../ComboDashboard.scss";
@@ -11,11 +11,10 @@ import projectionDirectional from "../../../../assets/projectionDirectional.svg"
 import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 
-export default function selectedProjectionMethod({ selectedProjection }) {
+export const SelectedProjectionMethod = ({ selectedProjection }) => {
   const updateSegments = useUpdateSegmentsById();
   const updateSelectedPAMethod = useCallback(
     e => {
-      console.log(e.target.value);
       updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } });
     },
     [updateSegments, selectedProjection]
@@ -33,17 +32,19 @@ export default function selectedProjectionMethod({ selectedProjection }) {
       >
         <MenuItem value={TVD_VS}>
           <img className={classNames(classes.paIcon)} src={projectionStatic} alt="static projection" />
-          Static
+          TVD/VS
         </MenuItem>
         <MenuItem value={MD_INC_AZ}>
           <img className={classNames(classes.paIcon)} src={projectionDirectional} alt="static projection" />
-          Directional
+          MD/INC/AZM
         </MenuItem>
         <MenuItem value={DIP_FAULT_POS_VS}>
           <img className={classNames(classes.paIcon)} src={projectAheadSVG} alt="static projection" />
-          Auto
+          Auto-Projection
         </MenuItem>
       </Select>
     </React.Fragment>
   );
-}
+};
+
+export default SelectedProjectionMethod;

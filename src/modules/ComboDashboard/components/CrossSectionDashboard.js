@@ -18,14 +18,6 @@ import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirecti
 import { selectedWellInfoContainer, useCrossSectionContainer } from "../../App/Containers";
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
 import SelectedProjectionMethod from "./Details/selectedProjectionMethod";
-import Select from "@material-ui/core/Select";
-import FilledInput from "@material-ui/core/FilledInput";
-import MenuItem from "@material-ui/core/MenuItem";
-import { DIP_FAULT_POS_VS, MD_INC_AZ, TVD_VS } from "../../../constants/calcMethods";
-import projectAheadSVG from "../../../assets/projectionAutoDip.svg";
-import projectionStatic from "../../../assets/projectionStatic.svg";
-import projectionDirectional from "../../../assets/projectionDirectional.svg";
-import { useUpdateSegmentsById } from "../../Interpretation/actions";
 
 export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
