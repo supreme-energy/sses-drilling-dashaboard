@@ -76,6 +76,7 @@ function Cell(value, editable, changeHandler, Icon) {
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
+  console.log(selectedSections);
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);

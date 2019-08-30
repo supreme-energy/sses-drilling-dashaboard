@@ -61,10 +61,18 @@
     display: flex;
     align-items: center;
     margin-left: auto!important;
+    .methodSelect {
+      width: 200px;
+      margin: 0 5px;
+      background-color: rgba(0,0,0,0);
+      div {
+        padding: 6px 2px 4px;
+      }
+    }
     .textField {
       width: 80px;
       margin: 0 5px;
-      input[type=number] {
+      input {
         padding: 6px 2px 7px;
       }
     }
@@ -113,6 +121,14 @@
     min-height: 30px;
     max-height: 30px;
   }
+}
+
+.paIcon {
+  position: relative;
+  top: -2px;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
 }
 
 .icon {

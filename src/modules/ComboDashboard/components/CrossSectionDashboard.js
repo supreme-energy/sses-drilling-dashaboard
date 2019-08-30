@@ -1,6 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useMemo, useReducer, useState } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
@@ -15,8 +15,17 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import { selectedWellInfoContainer } from "../../App/Containers";
+import { selectedWellInfoContainer, useCrossSectionContainer } from "../../App/Containers";
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
+import SelectedProjectionMethod from "./Details/selectedProjectionMethod";
+import Select from "@material-ui/core/Select";
+import FilledInput from "@material-ui/core/FilledInput";
+import MenuItem from "@material-ui/core/MenuItem";
+import { DIP_FAULT_POS_VS, MD_INC_AZ, TVD_VS } from "../../../constants/calcMethods";
+import projectAheadSVG from "../../../assets/projectionAutoDip.svg";
+import projectionStatic from "../../../assets/projectionStatic.svg";
+import projectionDirectional from "../../../assets/projectionDirectional.svg";
+import { useUpdateSegmentsById } from "../../Interpretation/actions";
 
 export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -24,6 +33,11 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
   const [viewDirection, setViewDirection] = useState(0);
   const [data, , updateWell, refreshFetchStore] = selectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
+
+  const { selectedSections, calcSections } = useCrossSectionContainer();
+  const selectedSegment = useMemo(() => {
+    return calcSections.find(s => selectedSections[s.id]) || {};
+  }, [calcSections, selectedSections]);
 
   const updateAutoPosTCL = useCallback(
     async value => {
@@ -68,6 +82,9 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
             </IconButton>
             <Typography variant="subtitle1">Details</Typography>
             <div className={classes.flexRight}>
+              {expanded && selectedSegment.isProjection && (
+                <SelectedProjectionMethod selectedProjection={selectedSegment} />
+              )}
               {expanded && (
                 <React.Fragment>
                   <Typography variant="subtitle2">Auto Pos-TCL: </Typography>
