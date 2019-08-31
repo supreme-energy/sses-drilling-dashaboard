@@ -36,7 +36,7 @@ function ServerStatus({ wellId, theme }) {
         <Badge
           className={hasConflict ? classes.badgeRed : classes.badgeGreen}
           variant="dot"
-          invisible={!hasUpdate}
+          invisible={!hasUpdate && !isOnline}
           color="secondary"
         >
           <Icon style={{ fill: color }} />

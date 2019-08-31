@@ -4,7 +4,8 @@ import { useSize } from "react-hook-size";
 
 import useRef from "react-powertools/hooks/useRef";
 
-import { useAdditionalDataLog, useWellOverviewKPI } from "../../../../api";
+import { useWellOverviewKPI } from "../../../../api";
+import { useFilteredAdditionalDataInterval } from "../../../App/Containers";
 import WidgetCard from "../../../../components/WidgetCard";
 import PixiCircle from "../../../../components/PixiCircle";
 import PixiArc from "../../../../components/PixiArc";
@@ -25,9 +26,7 @@ function ToolFace({ wellId }) {
   // Get tool face efficiency
   const { bySegment } = useWellOverviewKPI(wellId);
   // Get GTF data
-  const {
-    data: { data = [] }
-  } = useAdditionalDataLog(wellId, 29);
+  const { data = [] } = useFilteredAdditionalDataInterval(wellId, 29);
 
   const tfEfficiency = useMemo(() => bySegment.get(CURVE) && bySegment.get(CURVE)[0].toolFaceEfficiency, [bySegment]);
   const toolFaceHistory = useMemo(() => data.slice(data.length - 6, data.length), [data]);

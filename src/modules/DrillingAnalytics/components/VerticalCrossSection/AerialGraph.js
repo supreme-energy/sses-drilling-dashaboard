@@ -113,7 +113,7 @@ export function VerticalCrossSection({ selectedMenuItems, keys, wellPlanFiltered
           formations.map(f => {
             return (
               <PixiLine
-                key={f.label}
+                key={f.id}
                 container={viewport}
                 data={f.data}
                 mapData={mapValues}

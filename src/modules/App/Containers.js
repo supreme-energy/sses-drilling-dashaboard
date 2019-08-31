@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useReducer, useState, useEffect } from "react";
 import { createContainer } from "unstated-next";
 import usePrevious from "react-use/lib/usePrevious";
-import memoize from "react-powertools/memoize";
 import {
   useAdditionalDataLog,
   useFetchFormations,
@@ -26,13 +25,13 @@ const filterDataToInterval = (data, interval) => {
   }
 };
 
-const filterDataToLast = memoize((data, lastDepth) => {
+const filterDataToLast = (data, lastDepth) => {
   if (data && data.length) {
     return data.find(({ md }) => md >= lastDepth);
   } else {
     return {};
   }
-});
+};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {
