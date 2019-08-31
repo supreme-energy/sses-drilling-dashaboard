@@ -9,11 +9,6 @@ import DetailsTable from ".";
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
     <Dialog
-      PaperProps={{
-        style: {
-          maxWidth: "940px"
-        }
-      }}
       onClose={() => handleClose()}
       maxWidth="md"
       aria-labelledby="customized-dialog-title"

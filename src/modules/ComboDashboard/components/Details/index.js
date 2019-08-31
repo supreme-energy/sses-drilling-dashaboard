@@ -14,14 +14,24 @@ import Knob from "./knob";
 import surveySVG from "../../../../assets/survey.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
-import projectAheadSVG from "../../../../assets/projectAhead.svg";
+import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
+import projectionStatic from "../../../../assets/projectionStatic.svg";
+import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 
 function SurveyIcon({ row }) {
   let sourceType;
   if (row.isProjection) {
-    sourceType = projectAheadSVG;
+    if (row.method === TVD_VS) {
+      sourceType = projectionStatic;
+    } else if (row.method === MD_INC_AZ) {
+      sourceType = projectionDirectional;
+    } else {
+      sourceType = projectAheadSVG;
+    }
   } else if (row.isBitProj) {
     sourceType = bitProjectionSVG;
   } else if (row.isLastSurvey) {
@@ -64,19 +74,21 @@ function Cell(value, editable, changeHandler, Icon) {
 }
 
 export default function DetailsTable({ showFullTable = false }) {
-  const { selectedSections, calcSections } = useCrossSectionContainer();
-  let details;
+  const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
+  const updateSegments = useUpdateSegmentsById();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
-  const selectedId = (calcSections[selectedIndex] || {}).id;
+  const selectedId = useMemo(() => (calcSections[selectedIndex] || {}).id, [calcSections, selectedIndex]);
 
-  if (showFullTable) {
-    details = calcSections.slice().reverse();
-  } else {
-    details = calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
-  }
+  const details = useMemo(() => {
+    if (showFullTable) {
+      return calcSections.slice().reverse();
+    } else {
+      return calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+    }
+  }, [calcSections, showFullTable, selectedIndex]);
 
   return (
     <Table className={classes.table}>
@@ -98,11 +110,14 @@ export default function DetailsTable({ showFullTable = false }) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {details.map(row => {
+        {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
+          const update = field => {
+            return value => updateSegments({ [row.id]: { [field]: Number(value) } });
+          };
           return (
             <TableRow
-              key={row.id}
+              key={`${row.id}${index}`}
               className={classNames(classes.row, {
                 [classes.PARow]: row.isProjection,
                 [classes.surveyRow]: row.isSurvey,
@@ -115,43 +130,38 @@ export default function DetailsTable({ showFullTable = false }) {
                 <SurveyIcon row={row} />
                 {row.name}
               </TableCell>
-              {Cell(row.md.toFixed(2), editable, v => console.log(v))}
-              {Cell(row.inc.toFixed(2), editable, v => console.log(v))}
-              {Cell(row.azm.toFixed(2), editable, v => console.log(v))}
-              {Cell(row.tvd.toFixed(2), editable, v => console.log(v))}
+              {Cell(row.md.toFixed(2), editable, update("md"))}
+              {Cell(row.inc.toFixed(2), editable, update("inc"))}
+              {Cell(row.azm.toFixed(2), editable, update("azm"))}
+              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"))}
               {Cell(row.dl.toFixed(2), false)}
-              {Cell(row.vs.toFixed(2), editable, v => console.log(v))}
-              {Cell(
-                row.fault.toFixed(2),
-                editable,
-                v => console.log(v),
-                a =>
-                  Knob({
-                    ...a,
-                    fill: `#${row.color.toString(16).padStart(6, 0)}`,
-                    outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
-                  })
+              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"))}
+              {Cell(row.fault.toFixed(2), editable, update("fault"), a =>
+                Knob({
+                  ...a,
+                  fill: `#${row.color.toString(16).padStart(6, 0)}`,
+                  outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
+                })
               )}
-              {Cell(
-                row.dip.toFixed(2),
-                editable,
-                v => console.log(v),
-                a => Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
+              {Cell(row.dip.toFixed(2), editable, update("dip"), a =>
+                Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
-              {Cell(row.tcl.toFixed(2), editable, v => console.log(v))}
-              {Cell((row.tcl - row.tvd).toFixed(2), editable, v => console.log(v))}
+              {Cell(row.tcl.toFixed(2), editable && row.isProjection, update("tcl"))}
+              {Cell(row.pos.toFixed(2), editable && row.isProjection, update("pos"))}
               {showFullTable && Cell(row.tot.toFixed(2), false)}
               {showFullTable && Cell(row.bot.toFixed(2), false)}
               <TableCell className={classNames(classes.cell, classes.actions)}>
-                <IconButton
-                  size="small"
-                  aria-label="Delete row"
-                  onClick={() => {
-                    console.log(row.name);
-                  }}
-                >
-                  <img src={trashcanIcon} />
-                </IconButton>
+                {row.isProjection && (
+                  <IconButton
+                    size="small"
+                    aria-label="Delete row"
+                    onClick={() => {
+                      deleteProjection(row.id);
+                    }}
+                  >
+                    <img src={trashcanIcon} />
+                  </IconButton>
+                )}
               </TableCell>
             </TableRow>
           );

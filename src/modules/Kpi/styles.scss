@@ -1,3 +1,4 @@
+@import "../../styles/base";
 
 .statusIcon {
     width: 25px;
@@ -31,6 +32,16 @@
 
 .serverStatus, .zoneStatus {
     @extend .vertical;
+}
+
+.serverStatus {
+    .badgeGreen span {
+        background-color: green;
+    }
+
+    .badgeRed span {
+        background-color: $conflictRed;
+    }
 }
 
 .spacer {

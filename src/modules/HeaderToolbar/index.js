@@ -24,6 +24,7 @@ export function HeaderToolbar({ changeSelectedWell, history }) {
     changeSelectedWell(well.id);
     history.push(`/${well.id}`);
   }, [changeSelectedWell, history, well.id]);
+
   return (
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
@@ -36,11 +37,11 @@ export function HeaderToolbar({ changeSelectedWell, history }) {
         </div>
         <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
-          <WellPathStatus wellId={well.id} />
+          <WellPathStatus wellId={wellId} />
           <TargetAccuracy wellId={wellId} />
-          <Rop wellId={well.id} />
-          <ServerStatus wellId={well.id} />
-          <BitDepth wellId={well.id} />
+          <Rop wellId={wellId} />
+          <ServerStatus wellId={wellId} />
+          <BitDepth wellId={wellId} />
         </div>
       </CardContent>
     </Card>
@@ -56,7 +57,7 @@ HeaderToolbar.propTypes = {
 
 export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) {
   return (
-    <div>
+    <React.Fragment>
       <Route
         path="/:wellId/:page"
         exact
@@ -64,7 +65,7 @@ export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) 
         history={history}
       />
       <div className={classes.viewport}>{children}</div>
-    </div>
+    </React.Fragment>
   );
 }
 

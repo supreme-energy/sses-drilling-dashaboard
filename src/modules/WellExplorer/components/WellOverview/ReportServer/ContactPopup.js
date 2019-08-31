@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -17,38 +17,24 @@ import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
 
 import { PERSONNEL, EMAIL, NAME, PHONE } from "../../../../../constants/reportServer";
-import { stateReducer } from "./reducer";
 import classes from "./styles.scss";
 
-const REPORTS = {
-  "Combo Dashboard": false,
-  "Structural Guidance": false,
-  "Drilling Analytics": false,
-  "Directional Guidance": false,
-  "Key Performance Indicator": false,
-  "Survey Sheet": false,
-  "Lateral Plot (Only)": false,
-  "Horizontal Plot (Only)": false,
-  "LAS Data": false,
-  '1" MD Logs': false,
-  '2" MD Logs': false,
-  '5" MD Logs': false,
-  '1" TVD Logs': false,
-  '2" TVD Logs': false,
-  '5" TVD Logs': false,
-  allReportsSelected: false
-};
-
-function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEditing }) {
+function ContactPopup({
+  reports,
+  handleAllReports,
+  handleReportChange,
+  handleSave,
+  handleInputChange,
+  handleClose,
+  values,
+  isVisible,
+  isEditing
+}) {
   const type = isEditing ? "Edit " : "Add ";
-  const [reports, setReport] = useReducer(stateReducer, REPORTS);
+
+  // TODO: Integrate BE for Reports
   const isChecked = value => reports.allReportsSelected || value;
-
-  const handleAllReports = useCallback(e => setReport({ allReportsSelected: e.target.checked }), []);
-  const handleReportChange = useCallback(e => setReport({ [e.target.value]: e.target.checked }), []);
-  const handleSave = useCallback(() => handleClose(), [handleClose]);
-
-  const reportKeys = Object.keys(REPORTS);
+  const reportKeys = Object.keys(reports);
   const viewReports = reportKeys.slice(0, 8);
   const dataReports = reportKeys.slice(8, reportKeys.length - 1);
 
@@ -76,7 +62,7 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
           <TextField
             className={classes.textField}
             label={PERSONNEL.label}
-            value={values.personnel}
+            value={values.cat}
             onChange={handleInputChange(PERSONNEL.field)}
             margin="normal"
             fullWidth
@@ -94,7 +80,7 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
           <TextField
             className={classes.textField}
             label={EMAIL.label}
-            value={values.email_address}
+            value={values.email}
             onChange={handleInputChange(EMAIL.field)}
             margin="normal"
             fullWidth
@@ -150,11 +136,15 @@ function ContactPopup({ handleInputChange, handleClose, values, isVisible, isEdi
 }
 
 ContactPopup.propTypes = {
+  handleSave: PropTypes.func,
   handleInputChange: PropTypes.func,
   handleClose: PropTypes.func,
   values: PropTypes.object,
   isVisible: PropTypes.bool,
-  isEditing: PropTypes.bool
+  isEditing: PropTypes.bool,
+  reports: PropTypes.object,
+  handleAllReports: PropTypes.func,
+  handleReportChange: PropTypes.func
 };
 
 export default ContactPopup;

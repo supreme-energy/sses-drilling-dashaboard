@@ -1,7 +1,8 @@
-import React, { useReducer, useEffect, useRef } from "react";
+import React, { useReducer } from "react";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 import classNames from "classnames";
+import usePrevious from "react-use/lib/usePrevious";
 
 import { useFilteredWellData } from "../../../App/Containers";
 import { crossSectionMenuReducer } from "../reducer";
@@ -12,14 +13,6 @@ import { LATERAL, DRILLOUT } from "../../../../constants/wellSections";
 import { ACTUAL, PLAN, TARGET_BOUNDARY, EST_BOTTOM_TGT, SLIDES } from "../../../../constants/drillingAnalytics";
 import KpiItem from "../../../Kpi/KpiItem";
 import classes from "../DrillingAnalytics.scss";
-
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
 
 export function VerticalCrossSection({ className, wellId, drillPhase, inView }) {
   const isDrillout = drillPhase === DRILLOUT && inView;

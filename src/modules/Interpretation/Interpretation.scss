@@ -1,13 +1,30 @@
+@import "../../styles/base";
+
 .interpretationContainer {
   margin-left: 8px;
   display: flex;
   flex-direction: column;
+  max-width: 370px;
 
   .chart {
     flex: 1;
   }
 
+  .settings {
+    flex: none;
+  }
+
   .upArrow {
     margin-bottom: 10px;
+  }
+
+  .expandOpen {
+    transform: rotate(180deg)
+  }
+
+  .switchLabel {
+    color: $gray;
+    font-size: 12px;
+    margin-bottom: 0px;
   }
 }

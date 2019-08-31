@@ -5,18 +5,20 @@ import useRef from "react-powertools/hooks/useRef";
 import PixiContainer from "./PixiContainer";
 
 const PixiLabel = forwardRef(
-  ({ text, padding, container, backgroundProps, textProps, x, y, sizeChanged, ...props }, ref) => {
+  ({ text, padding, container, backgroundProps, textProps, x, y, sizeChanged, height, width, ...props }, ref) => {
     const textRef = useRef(null);
     const textWidth = (textRef.current && textRef.current.pixiText.width) || 0;
     const textHeight = (textRef.current && textRef.current.pixiText.height) || 0;
-    const bgWidth = textWidth + padding.left + padding.right;
-    const bgHeight = textHeight + padding.top + padding.bottom;
+    const bgWidth = width || textWidth + padding.left + padding.right;
+    const bgHeight = height || textHeight + padding.top + padding.bottom;
+    const containerRef = useRef(null);
 
     useImperativeHandle(
       ref,
       () => ({
         width: bgWidth,
-        height: bgHeight
+        height: bgHeight,
+        container: containerRef.current && containerRef.current.container
       }),
       [bgWidth, bgHeight]
     );
@@ -27,6 +29,7 @@ const PixiLabel = forwardRef(
 
     return (
       <PixiContainer
+        ref={containerRef}
         container={container}
         {...props}
         child={container => (

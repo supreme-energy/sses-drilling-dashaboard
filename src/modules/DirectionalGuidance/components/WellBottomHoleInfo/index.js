@@ -2,10 +2,10 @@ import React, { useReducer, useMemo, useState, useEffect } from "react";
 
 import { scaleLinear } from "d3-scale";
 import { max, min } from "d3-array";
-import { useAdditionalDataLog, useAdditionalDataLogsList } from "../../../../api";
+import { useAdditionalDataLogsList } from "../../../../api";
 import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./styles.scss";
-import { useWellIdContainer } from "../../../App/Containers";
+import { useWellIdContainer, useFilteredAdditionalDataInterval } from "../../../App/Containers";
 import { graphReducer } from "./reducers";
 import classNames from "classnames";
 
@@ -25,11 +25,18 @@ function computeInitialViewXScaleValue(data) {
     .range([0, 1]);
 }
 
+function computeInitialViewYScaleValue(data) {
+  const diff = max(data, d => d.md) - min(data, d => d.md);
+  return scaleLinear()
+    .domain([0, diff])
+    .range([0, 1]);
+}
+
 const mapValue = d => [Number(d.value), Number(d.md)];
 const gridGutter = 40;
 
 function GraphComponent({ wellId, logId, isFirstGraph }) {
-  const { label, color, data = [] } = useAdditionalDataLog(wellId, logId);
+  const { label, color, data = [] } = useFilteredAdditionalDataInterval(wellId, logId);
 
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -37,6 +44,11 @@ function GraphComponent({ wellId, logId, isFirstGraph }) {
 
   const getInitialViewXScaleValue = useMemo(
     () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
+    [data]
+  );
+
+  const getInitialViewYScaleValue = useMemo(
+    () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
     [data]
   );
 
@@ -69,17 +81,19 @@ function GraphComponent({ wellId, logId, isFirstGraph }) {
         const minValue = Math.min(...data.map(d => d.value));
 
         updateView(view => {
-          const xScale = getInitialViewXScaleValue(width - 50);
+          const xScale = getInitialViewXScaleValue(width - gridGutter - 10);
+          const yScale = getInitialViewYScaleValue(height - gridGutter - 10);
           return {
             ...view,
-            x: -minValue * xScale + 50,
-            y: -minDepth * view.yScale + 30,
-            xScale: xScale
+            x: -minValue * xScale + gridGutter + 10,
+            y: -minDepth * view.yScale + gridGutter - 10,
+            xScale,
+            yScale
           };
         });
       }
     },
-    [data, width, getInitialViewXScaleValue]
+    [data, width, height, getInitialViewXScaleValue, getInitialViewYScaleValue]
   );
 
   useEffect(

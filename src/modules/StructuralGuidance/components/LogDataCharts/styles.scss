@@ -1,0 +1,65 @@
+@import "../../../../styles/base";
+
+.dataChartsContainer {
+    width: 100%;
+    flex-grow: 1;
+
+    .plot {
+        width: 100%;
+        min-height: 150px;
+    }
+
+    position: relative;
+    canvas {
+        position: absolute;
+    }
+
+    .addChartButton {
+        outline: none;
+        padding: 5px;
+
+        span, svg {
+            color: $gray;
+        }
+    }
+
+    .addChartButtonInitial {
+        top: 15px;
+    }
+}
+
+.graphContainer {
+    .moreVerticalMenu span {
+        color: $gray;
+    }
+}
+
+.dialogTitle {
+    h6 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.logFormGroup {
+    label {
+        margin-left: 10px;
+        display: inline-block;
+        line-height: 40px;
+    }
+
+    .logMenuLabel {
+        margin: 0 20px;
+    }
+
+    .logMenuCheckboxes {
+        float: right;
+    }
+}
+
+.settingsDialogContent {
+    .icon {
+        transform: rotate(90deg);
+    }
+}

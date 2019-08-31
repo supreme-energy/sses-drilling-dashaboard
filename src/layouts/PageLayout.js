@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Route } from "react-router-dom";
 import { MuiThemeProvider } from "@material-ui/core";
@@ -14,9 +14,17 @@ import {
   ProjectionsProvider,
   FormationsProvider,
   SurveysProvider,
-  ComboContainerProvider,
-  CrossSectionProvider
+  CloudServerCountdownProvider,
+  useCloudServerCountdownContainer,
+  SelectedWellInfoProvider
 } from "../modules/App/Containers";
+import useAudio from "../hooks/useAudio";
+import useInterval from "../hooks/useInterval";
+import { useWellInfo, useCloudServer } from "../api";
+import { PULL, PULL_INTERVAL, ALARM, ALARM_ENABLED, MEDIA_URL } from "../constants/interpretation";
+import usePrevious from "react-use/lib/usePrevious";
+import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
+import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
 
 const PageTabs = ({
   match: {
@@ -35,6 +43,55 @@ const PageTabs = ({
   const tabsRef = useRef(null);
   // trigger re-render when size changed
   useSize(tabsRef);
+
+  const {
+    data: { next_survey: newSurvey }
+  } = useCloudServer(wellId);
+  const { countdown, setAutoCheckInterval, handleCountdown, resetCountdown } = useCloudServerCountdownContainer();
+  const [{ appInfo = {}, wellInfo = {}, online }] = useWellInfo(wellId);
+  const isOnline = !!online;
+  const [, handleAlarmOn, handleAlarmOff, setAudio] = useAudio("");
+  const { [ALARM]: alarm, [ALARM_ENABLED]: alarmEnabled } = appInfo;
+  const isAutoImportEnabled = !!wellInfo[PULL];
+  const previouslyEnabled = usePrevious(isAutoImportEnabled);
+  const hadNewSurvey = usePrevious(newSurvey);
+  const importReenabled = isAutoImportEnabled && !previouslyEnabled;
+
+  useEffect(() => {
+    if (alarm) {
+      setAudio(new Audio(MEDIA_URL(alarm)));
+    }
+  }, [setAudio, alarm]);
+
+  useEffect(() => {
+    if (wellInfo && wellInfo[PULL_INTERVAL]) {
+      setAutoCheckInterval(wellInfo[PULL_INTERVAL]);
+    }
+  }, [wellInfo, setAutoCheckInterval]);
+
+  useEffect(() => {
+    let stopped;
+    function turnOff() {
+      if (!stopped) {
+        stopped = true;
+        handleAlarmOff();
+      }
+    }
+
+    if (alarm && alarmEnabled && newSurvey && isAutoImportEnabled && isOnline) {
+      handleAlarmOn();
+      setTimeout(turnOff, 5000);
+    }
+  }, [handleAlarmOn, handleAlarmOff, alarm, alarmEnabled, newSurvey, isAutoImportEnabled, isOnline]);
+
+  useEffect(() => {
+    if ((hadNewSurvey && !newSurvey) || importReenabled) {
+      resetCountdown();
+    }
+  }, [hadNewSurvey, newSurvey, resetCountdown, importReenabled, wellInfo]);
+
+  useInterval(() => handleCountdown(), countdown && isAutoImportEnabled && isOnline ? 1000 : null);
+
   return (
     <div ref={tabsRef}>
       <Tabs value={actualPage} indicatorColor="primary" className={classes.tabs} onChange={onTabChange}>
@@ -52,29 +109,33 @@ export const PageLayout = ({ children, history }) => {
   return (
     <MuiThemeProvider theme={theme}>
       <WellIdProvider initialState={""}>
-        <SurveysProvider>
-          <ProjectionsProvider>
-            <FormationsProvider>
-              <ComboContainerProvider>
-                <CrossSectionProvider>
-                  <div className={classes.container}>
-                    <AppBar className={classes.appBar} color="inherit">
-                      <div className={classes.header}>
-                        <div className={classes.logo}>
-                          <img src="/sses-logo.svg" />
-                        </div>
-                        <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-                        <span />
-                      </div>
-                    </AppBar>
+        <WellLogsProvider>
+          <ComboContainerProvider>
+            <SurveysProvider>
+              <ProjectionsProvider>
+                <FormationsProvider>
+                  <CloudServerCountdownProvider initialState={60}>
+                    <SelectedWellInfoProvider>
+                      <div className={classes.container}>
+                        <AppBar className={classes.appBar} color="inherit">
+                          <div className={classes.header}>
+                            <div className={classes.logo}>
+                              <img src="/sses-logo.svg" />
+                            </div>
+                            <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                            <span />
+                          </div>
+                        </AppBar>
 
-                    <div className={classes.viewport}>{children}</div>
-                  </div>
-                </CrossSectionProvider>
-              </ComboContainerProvider>
-            </FormationsProvider>
-          </ProjectionsProvider>
-        </SurveysProvider>
+                        <div className={classes.viewport}>{children}</div>
+                      </div>
+                    </SelectedWellInfoProvider>
+                  </CloudServerCountdownProvider>
+                </FormationsProvider>
+              </ProjectionsProvider>
+            </SurveysProvider>
+          </ComboContainerProvider>
+        </WellLogsProvider>
       </WellIdProvider>
     </MuiThemeProvider>
   );

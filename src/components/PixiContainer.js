@@ -3,7 +3,10 @@ import { useEffect, useImperativeHandle, forwardRef } from "react";
 import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
-function Container({ container: parentContainer, child, x, y, updateTransform, name }, ref) {
+function Container(
+  { container: parentContainer, child, x, y, updateTransform, name, zIndex, scale, pivot, width },
+  ref
+) {
   const {
     current: { container, initialUpdateTransform }
   } = useRef(() => {
@@ -49,6 +52,41 @@ function Container({ container: parentContainer, child, x, y, updateTransform, n
       container.y = y;
     },
     [x, y, container]
+  );
+
+  useEffect(
+    function updateScale() {
+      if (scale) {
+        container.scale = scale;
+      }
+    },
+    [container, scale]
+  );
+
+  useEffect(
+    function updatePivot() {
+      if (pivot) {
+        container.pivot = pivot;
+      }
+    },
+    [container, pivot]
+  );
+
+  useEffect(
+    function updateWidth() {
+      if (width !== undefined) {
+        container.width = width;
+      }
+    },
+
+    [container, width]
+  );
+
+  useEffect(
+    function updateZindex() {
+      container.zIndex = zIndex;
+    },
+    [zIndex, container]
   );
 
   return child ? child(container) : null;

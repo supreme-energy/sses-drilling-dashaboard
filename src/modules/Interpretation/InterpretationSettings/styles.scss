@@ -1,0 +1,97 @@
+@import "../../../styles/base";
+
+.root {
+    .label {
+        font-size: 14px;
+    }
+    
+    .title {
+        color: $gold;
+    }
+
+    .tab {
+        min-width: auto;
+    }
+
+    .borderedInput {
+        margin-top: 0px;
+        width: 60px;
+       input {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        width: auto;
+        -webkit-appearance: none; 
+        margin: 0; 
+       }
+    }
+
+    .arrowBottom {
+        transform: rotate(90deg);
+    }
+
+    .arrowButton {
+        padding: 5px;
+    }
+
+    .arrowTop {
+        transform: rotate(-90deg);
+    }
+
+    .valueInput {
+        width: 60px;
+        padding: 0px;
+    }
+    
+    .noWrap {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .applyLabel {
+        margin-right: 10px;
+    }
+
+    .applyButton {
+        margin-right: 10px;
+    }
+
+    .segmentIcon {
+        width: 18px;
+        height: 5px;
+        background-color: #757575;
+        border-radius: 5px;
+        position: relative;
+        left: 0px;
+
+        &.rotated {
+            margin-bottom: 10px;
+            transform: rotate(90deg);
+        }
+
+        &::after {
+            display: block;
+            content: "";
+            position: absolute;
+            left: 20px;
+            width: 2px;
+            height: 5px;
+            background-color: #757575;
+        }
+
+        &::before {
+            display: block;
+            content: "";
+            position: absolute;
+            right: 20px;
+            width: 2px;
+            height: 5px;
+            background-color: #757575;
+        }
+    }
+
+    .switchButton {
+        cursor: pointer;
+        width: 22px;
+        margin: 0 10px;
+    }
+}

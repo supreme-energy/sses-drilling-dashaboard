@@ -52,6 +52,10 @@
 
 .row {
   display: flex;
+  .flexRight {
+    display: flex;
+    margin-left: auto;
+  }
 }
 
 .kpiRows {
@@ -78,11 +82,20 @@
 }
 
 .crossSectionDash {
+  position: relative;
   padding-bottom: 30px;
 }
 
-.tableButton {
-  margin-left: auto;
+.tabs {
+  position: absolute;
+  z-index: 10;
+  top: 8px;
+  left: 150px;
+  .tab {
+    min-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+  }
 }
 
 .icon {

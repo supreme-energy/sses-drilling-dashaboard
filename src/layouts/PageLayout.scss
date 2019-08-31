@@ -15,7 +15,9 @@
   }
 
   .viewport {
-    height: calc(100% - #{$header-height});
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - #{$header-height} - 10px);
     top: $header-height;
     position: relative;
   }
@@ -27,5 +29,9 @@
 
   .logo img {
     height: $header-height;
+  }
+
+  .alarmNotification {
+    display: none;
   }
 }

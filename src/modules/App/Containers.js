@@ -1,28 +1,30 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState, useEffect } from "react";
 import { createContainer } from "unstated-next";
-
+import usePrevious from "react-use/lib/usePrevious";
 import memoize from "react-powertools/memoize";
-
 import {
   useAdditionalDataLog,
   useFetchFormations,
   useFetchProjections,
   useFetchSurveys,
   useWellOverviewKPI,
-  useWellPath
+  useWellPath,
+  useWellInfo
 } from "../../api";
-import { drillPhaseReducer, PADeltaInit, PADeltaReducer } from "./reducers";
-import usePrevious from "react-use/lib/usePrevious";
-import { DIP_END, FAULT_END, INIT, PA_END, TAG_END } from "../../constants/interactivePAStatus";
-import { DIP_FAULT_POS_VS, TVD_VS } from "../../constants/calcMethods";
+import { drillPhaseReducer } from "./reducers";
+import { ALL } from "../../constants/wellSections";
+import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
+import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
+import memoizeOne from "memoize-one";
+import { useSelectionActions } from "../Interpretation/actions";
 
-const filterDataToInterval = memoize((data, interval) => {
+const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
     return data.filter(({ md }) => interval.firstDepth <= md && md <= interval.lastDepth);
   } else {
     return [];
   }
-});
+};
 
 const filterDataToLast = memoize((data, lastDepth) => {
   if (data && data.length) {
@@ -44,6 +46,25 @@ function useDrillPhase(initialState) {
   return { drillPhaseObj, setDrillPhase };
 }
 
+// Shared state for Cloud Server Modal Countdown
+function useCloudServerCountdown(initialState) {
+  const [interval, setAutoCheckInterval] = useState(initialState);
+  const [countdown, setCountdown] = useState(initialState);
+  const prevInterval = usePrevious(interval);
+
+  const resetCountdown = () => setCountdown(interval);
+  const handleCountdown = () => setCountdown(count => count - 1);
+
+  useEffect(() => {
+    const intervalChanged = interval !== prevInterval;
+    if (intervalChanged || !countdown) {
+      setCountdown(interval);
+    }
+  }, [interval, prevInterval, countdown]);
+
+  return { countdown, interval, setAutoCheckInterval, handleCountdown, resetCountdown };
+}
+
 function useAppStateData() {
   const [requestId, updateRequestId] = useState(0);
 
@@ -54,63 +75,42 @@ function useAppStateData() {
   return { requestId, updateRequestId, refreshRequestId };
 }
 
+const filterFormationsMem = memoizeOne((formationsData, sliderInterval) => {
+  return formationsData.map(f => {
+    return {
+      ...f,
+      data: filterDataToInterval(f.data, sliderInterval)
+    };
+  });
+});
+
+const filterSurveysToInterval = memoizeOne(filterDataToInterval);
+const filterProjectionsToInterval = memoizeOne(filterDataToInterval);
+const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
+
 // Uses current time slider location to filter well Cross-Section
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
   const { wellId } = useWellIdContainer();
 
-  const { formationsData, refreshFormations } = useFormationsDataContainer();
-  const { surveysData } = useSurveysDataContainer();
-  const { projectionsData, saveProjections, refreshProjections, deleteProjection } = useProjectionsDataContainer();
+  const { formationsData } = useFormationsDataContainer();
+
+  const [, surveys, projections] = useComputedSurveysAndProjections();
   const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
-  const wellPlanFiltered = filterDataToInterval(wellPlan, sliderInterval);
-  const surveysFiltered = filterDataToInterval(surveysData, sliderInterval);
-  const projectionsFiltered = filterDataToInterval(projectionsData, sliderInterval);
-  const formationsFiltered = formationsData.map(f => {
-    return {
-      ...f,
-      data: filterDataToInterval(f.data, sliderInterval)
-    };
-  });
-
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const saveAndUpdate = useCallback(
-    (...args) => {
-      saveProjections(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [saveProjections, refreshProjections, refreshFormations]
-  );
-  // TODO: Remove this update method when implementing entity versions
-  //  (FE should perform same action as BE without the need to update)
-  const deleteAndUpdate = useCallback(
-    (...args) => {
-      deleteProjection(...args).then((data, err) => {
-        if (!err) {
-          refreshFormations();
-          refreshProjections();
-        }
-      });
-    },
-    [deleteProjection, refreshProjections, refreshFormations]
-  );
+  const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
+  const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
+  const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
+  const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
 
   return {
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
     formations: formationsFiltered,
-    projections: projectionsFiltered,
-    saveProjection: saveAndUpdate,
-    deleteProjection: deleteAndUpdate
+    projections: projectionsFiltered
   };
 }
 
@@ -118,7 +118,9 @@ export function useFilteredWellData() {
 export function useFilteredAdditionalDataLogs(wellId, id) {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { label, data, scalelo, scalehi } = useAdditionalDataLog(wellId, id);
+  const {
+    data: { label, data, scalelo, scalehi }
+  } = useAdditionalDataLog(wellId, id);
 
   return {
     label,
@@ -128,11 +130,27 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
   };
 }
 
+export function useFilteredAdditionalDataInterval(wellId, id) {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const {
+    data: { label, data, scalelo, scalehi, color }
+  } = useAdditionalDataLog(wellId, id);
+
+  return {
+    label,
+    scalelo,
+    scalehi,
+    color,
+    data: filterDataToInterval(data, sliderInterval)
+  };
+}
+
 // Organize well sections into array of objects
 export function useWellSections(wellId) {
   const { data } = useWellOverviewKPI(wellId);
   const drillPhases = useMemo(() => {
-    return data.map((s, index) => {
+    const drillPhaseArr = data.map((s, index) => {
       return {
         index,
         phase: s.type,
@@ -142,6 +160,16 @@ export function useWellSections(wellId) {
         set: false
       };
     });
+
+    drillPhaseArr.unshift({
+      phase: ALL,
+      phaseStart: 0,
+      phaseEnd: Infinity,
+      inView: true,
+      set: false
+    });
+
+    return drillPhaseArr;
   }, [data]);
 
   return drillPhases;
@@ -154,232 +182,85 @@ function useWellId(initialState) {
 
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
-  const [surveysData, setSurveys] = useState([]);
 
-  const surveys = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult }] = useFetchSurveys(wellId);
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (surveys && surveys.length) {
-      setSurveys(surveys);
-    }
-  }, [surveys, setSurveys]);
-
-  return { surveysData, setSurveys };
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult };
 }
 
 function useProjectionsData() {
   const { wellId } = useWellIdContainer();
-  const [projectionsData, projectionsDispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case "serverReset":
-        return action.data;
-      default:
-        throw new Error(`Unknown action type ${action.type}`);
-    }
-  }, []);
+  const [
+    projections,
+    refreshProjections,
+    saveProjections,
+    deleteProjection,
+    addProjection,
+    replaceResult
+  ] = useFetchProjections(wellId);
 
-  const [projections, refreshProjections, saveProjections, deleteProjection] = useFetchProjections(wellId);
+  const projectionsData = useMemo(
+    () =>
+      projections.map((p, i) => {
+        return {
+          ...p,
+          pos: p.pos || p.tot - p.tvd,
+          name: `PA${i + 1}`,
+          isProjection: true,
+          color: 0xee2211,
+          selectedColor: 0xee2211,
+          alpha: 0.5,
+          selectedAlpha: 1
+        };
+      }),
+    [projections]
+  );
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (projections && projections.length) {
-      projectionsDispatch({
-        type: "serverReset",
-        data: projections
-      });
-    }
-  }, [projections]);
-
-  return { projectionsData, projectionsDispatch, saveProjections, refreshProjections, deleteProjection };
+  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection, replaceResult };
 }
 
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
-  const { projectionsData } = useProjectionsDataContainer();
-  const [formationsData, setFormations] = useState([]);
 
   const [serverFormations, refreshFormations] = useFetchFormations(wellId);
 
-  useEffect(() => {
-    // TODO Check timestamp or something to determine if we should update with server data
-    if (serverFormations && serverFormations.length) {
-      setFormations(serverFormations);
-    }
-  }, [serverFormations]);
+  const computedFormations = useComputedFormations(serverFormations);
 
-  // If projections or surveys change, recalculate formations
-  useEffect(() => {
-    // TODO: calculate formations from surveys, projections, and formations
-    // https://github.com/supreme-energy/sses-main/blob/master/sses_af/calccurve.c
-  }, [projectionsData]);
-
-  return { formationsData, setFormations, refreshFormations };
+  return { formationsData: computedFormations, refreshFormations };
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, saveProjection } = useFilteredWellData();
-
+  const { surveys, wellPlan, formations, projections } = useFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
-  const [ghostDiff, ghostDiffDispatch] = useReducer(PADeltaReducer, {}, PADeltaInit);
 
-  const [{ selectedMd }, , { setSelectedMd, deselectMd }] = useComboContainer();
+  const [{ selectionById: selectedSections }] = useComboContainer();
+  const { toggleSegmentSelection, deselectAll } = useSelectionActions();
 
-  const selectedSections = useMemo(
-    function getSelectedSections() {
-      const selected = rawSections.find((s, index) => {
-        return index > 0 && rawSections[index - 1].md <= selectedMd && s.md > selectedMd;
-      });
-      return selected ? { [selected.id]: true } : {};
-    },
-    [selectedMd, rawSections]
-  );
+  const addProjection = useAddProjection();
+  const deleteProjection = useDeleteProjection();
 
-  const prevStatus = usePrevious(ghostDiff.status);
-  useEffect(() => {
-    const { status, op, prevOp } = ghostDiff;
-    const pos = op.tcl + ghostDiff.tcl - (op.tvd + ghostDiff.tvd);
-    if (prevStatus !== status) {
-      switch (status) {
-        case DIP_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip - ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case FAULT_END:
-          saveProjection(prevOp.id, DIP_FAULT_POS_VS, { fault: prevOp.fault + ghostDiff.prevFault });
-          break;
-        case PA_END:
-          saveProjection(op.id, TVD_VS, { tvd: op.tvd + ghostDiff.tvd, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-        case TAG_END:
-          saveProjection(op.id, DIP_FAULT_POS_VS, { dip: op.dip + ghostDiff.dip, vs: op.vs + ghostDiff.vs, pos: pos });
-          break;
-      }
-    }
-  }, [ghostDiff, prevStatus, saveProjection]);
-
-  const calcSections = useMemo(() => {
-    const index = rawSections.findIndex(p => p.id === ghostDiff.id);
-    if (index === -1) {
-      return rawSections;
-    }
-    return rawSections.map((p, i) => {
-      if (i === index - 1) {
-        return {
-          ...p,
-          tot: p.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.prevFault,
-          fault: p.fault + ghostDiff.prevFault
-        };
-      } else if (i === index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tvd + ghostDiff.prevFault,
-          vs: p.vs + ghostDiff.vs,
-          tot: p.tot + ghostDiff.tot + ghostDiff.prevFault,
-          bot: p.bot + ghostDiff.bot + ghostDiff.prevFault,
-          tcl: p.tcl + ghostDiff.tcl + ghostDiff.prevFault
-        };
-      } else if (i > index) {
-        return {
-          ...p,
-          tvd: p.tvd + ghostDiff.tot + ghostDiff.prevFault
-        };
-      } else {
-        return p;
-      }
-    });
-  }, [rawSections, ghostDiff]);
-
-  const calculatedFormations = useMemo(() => {
-    const index = calcSections.findIndex(p => p.id === ghostDiff.id);
-
-    return formations.map(layer => {
-      return {
-        ...layer,
-        data: layer.data.map((point, j) => {
-          if (j === index) {
-            return {
-              ...point,
-              vs: point.vs + ghostDiff.vs,
-              fault: point.fault + ghostDiff.prevFault,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          } else if (j > index) {
-            return {
-              ...point,
-              tot: point.tot + ghostDiff.tot + ghostDiff.prevFault
-            };
-          }
-          return point;
-        })
-      };
-    });
-  }, [formations, ghostDiff, calcSections]);
-
-  useEffect(() => {
-    const id = Object.keys(selectedSections)[0];
-    const index = rawSections.findIndex(s => s.id === Number(id));
-    if (index !== -1) {
-      ghostDiffDispatch({
-        type: INIT,
-        prevSection: rawSections[index - 1],
-        section: rawSections[index],
-        nextSection: rawSections[index + 1]
-      });
-    }
-  }, [selectedSections, rawSections]);
   return {
+    addProjection,
+    deleteProjection,
     wellPlan,
     selectedSections,
-    setSelectedMd,
-    deselectMd,
-    selectedMd,
-    ghostDiff,
-    ghostDiffDispatch,
-    calcSections,
-    calculatedFormations
+    toggleSegmentSelection,
+    deselectAll,
+    calcSections: rawSections,
+    calculatedFormations: formations
   };
 }
 
-const initialState = {
-  selectedMd: null
-};
-
-function comboStoreReducer(state, action) {
-  switch (action.type) {
-    case "DESELECT_ALL":
-      return {
-        ...state,
-        selectedMd: null
-      };
-    case "TOGGLE_MD": {
-      if (state.selectedMd === action.md) {
-        return {
-          ...state,
-          selectedMd: null
-        };
-      } else {
-        return {
-          ...state,
-          selectedMd: action.md
-        };
-      }
-    }
-  }
-}
-
-function useUseComboStore() {
-  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
-
-  const setSelectedMd = useCallback(md => dispatch({ type: "TOGGLE_MD", md }), [dispatch]);
-  const deselectMd = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-
-  return [state, dispatch, { setSelectedMd, deselectMd }];
+function useSelectedWellInfo() {
+  const { wellId } = useWellIdContainer();
+  return useWellInfo(wellId);
 }
 
 // Create containers
-export const { Provider: ComboContainerProvider, useContainer: useComboContainer } = createContainer(useUseComboStore);
+export const {
+  Provider: CloudServerCountdownProvider,
+  useContainer: useCloudServerCountdownContainer
+} = createContainer(useCloudServerCountdown);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
@@ -394,4 +275,7 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
 );
 export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
   useCrossSectionData
+);
+export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+  useSelectedWellInfo
 );
