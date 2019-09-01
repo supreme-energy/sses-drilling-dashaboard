@@ -12,7 +12,7 @@ import proj4 from "proj4";
 import { toWGS84 } from "../utils/projections";
 import memoize from "react-powertools/memoize";
 import serialize from "react-powertools/serialize";
-import { useAppState } from "../modules/App/Containers";
+import { useAppState, useCloudServerCountdownContainer } from "../modules/App/Containers";
 import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
 import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
@@ -44,6 +44,8 @@ export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
 export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
+export const GET_SURVEY_RANGE = "/survey/cloud/load_range.php";
+export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
 export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
@@ -835,16 +837,35 @@ export function useManualImport() {
 }
 
 export function useCloudServer(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
-    wellId !== undefined && {
-      path: GET_SURVEY_CHECK,
-      query: {
-        seldbname: wellId
-      }
-    }
-  );
+  const { countdown, interval } = useCloudServerCountdownContainer();
+  const initialCall = useRef(false);
 
-  return { data: data || EMPTY_OBJECT, refresh };
+  const [data, , , , , { fetch }] = useFetch();
+
+  const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
+
+  const refreshData = useCallback(() => {
+    return serializedRefresh(
+      {
+        path: GET_SURVEY_CHECK,
+        query: {
+          seldbname: wellId
+        },
+        cache: "no-cache"
+      },
+      (_, next) => next
+    );
+  }, [wellId, serializedRefresh]);
+
+  // Trigger refresh when countdown hits zero
+  useEffect(() => {
+    if ((countdown === 0 && interval) || !initialCall.current) {
+      refreshData();
+      initialCall.current = true;
+    }
+  }, [interval, countdown, refreshData]);
+
+  return { data: data || EMPTY_OBJECT, refresh: refreshData };
 }
 
 export function useCloudImportSurveys(wellId, dataId) {
@@ -859,6 +880,41 @@ export function useCloudImportSurveys(wellId, dataId) {
       }
   );
 
+  const importNewSurvey = useCallback(
+    wellId => {
+      return fetch({
+        path: GET_NEXT_SURVEY,
+        query: {
+          seldbname: wellId
+        },
+        cache: "no-cache"
+      });
+    },
+    [fetch]
+  );
+
+  const reimportSurveys = useCallback(
+    (wellId, sdepth, edepth, groupid) => {
+      const options = {
+        path: GET_SURVEY_RANGE,
+        query: {
+          seldbname: wellId,
+          sdepth,
+          edepth,
+          groupid
+        }
+      };
+
+      if (groupid) {
+        options.query.groupid = groupid;
+        return fetch(options);
+      } else {
+        return fetch(options);
+      }
+    },
+    [fetch]
+  );
+
   const deleteSurveys = useCallback(
     wellId => {
       return fetch({
@@ -871,7 +927,7 @@ export function useCloudImportSurveys(wellId, dataId) {
     [fetch]
   );
 
-  return { data: data || EMPTY_ARRAY, deleteSurveys, refresh };
+  return { data: data || EMPTY_ARRAY, importNewSurvey, reimportSurveys, deleteSurveys, refresh };
 }
 export function useEmailContacts(wellId) {
   const [data, , , , , { fetch, refresh }] = useFetch({

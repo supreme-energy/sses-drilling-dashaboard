@@ -30,7 +30,7 @@ function ComboDashboard() {
         <div className={classes.kpiRows}>
           <div className={classes.row}>
             <Kpi className={classes.drillPhaseKpi} data={kpiData} />
-            <ToolFace />
+            <ToolFace wellId={wellId} />
             <WellOperation wellId={wellId} />
             <AerialCrossSection wellId={wellId} />
           </div>

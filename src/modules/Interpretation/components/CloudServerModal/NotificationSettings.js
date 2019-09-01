@@ -41,25 +41,29 @@ function NotificationSettings({
   handleClose,
   countdown,
   setAutoImport,
-  autoImportSettings,
-  handleRefreshCheck
+  isAutoImportEnabled,
+  handleRefreshCheck,
+  setAutoCheckInterval,
+  interval,
+  refresh,
+  hasNewSurvey
 }) {
   const [audio, setAudio] = useReducer(audioReducer, INITIAL_AUDIO_STATE);
   const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = audio;
-  const { [PULL]: isAutoImportEnabled, [PULL_INTERVAL]: interval } = autoImportSettings;
-  const [playing, handleAlarmOn, handleAlarmOff] = useAudio(MEDIA_URL(audio.import_alarm));
+  const [playing, handleAlarmOn, handleAlarmOff] = useAudio(MEDIA_URL(alarm));
 
-  const handleIntervalSelect = e => setAutoImport({ type: "UPDATE", payload: { [PULL_INTERVAL]: e.target.value } });
+  const onClose = () => {
+    handleAlarmOff();
+    handleClose();
+  };
+  const handleIntervalSelect = e => setAutoCheckInterval(e.target.value);
   const handleAlarmToggle = () => {
     return setAudio({ type: "TOGGLE_IMPORT_ALARM" });
   };
   const handleAlarmSelect = e => {
+    handleAlarmOff();
     setAudio({ type: "UPDATE", payload: { [ALARM]: e.target.value } });
   };
-
-  const autoImportKeys = useMemo(() => {
-    return Object.keys(autoImportSettings).filter(key => wellInfo[key] !== autoImportSettings[key]);
-  }, [autoImportSettings, wellInfo]);
 
   const alarmKeys = useMemo(() => Object.keys(audio).filter(key => appInfo[key] !== audio[key]), [appInfo, audio]);
 
@@ -68,10 +72,13 @@ function NotificationSettings({
     wellId
   ]);
 
-  const onAutoImportFieldChange = useCallback((field, value) => updateAutoImport({ wellId, field, value }), [
-    updateAutoImport,
-    wellId
-  ]);
+  const onAutoImportFieldChange = useCallback(
+    async (field, value) => {
+      await updateAutoImport({ wellId, field, value });
+      refresh();
+    },
+    [updateAutoImport, wellId, refresh]
+  );
 
   const onBlurAlarm = useCallback(
     e => {
@@ -86,18 +93,31 @@ function NotificationSettings({
     [onAlarmFieldChange, audio, alarmKeys]
   );
 
-  const onBlurAutoImport = useCallback(
+  const onBlurAutoImportSwitch = useCallback(
     e => {
-      if (autoImportKeys.length) {
+      if (wellInfo[PULL] !== e.target.checked && e.target.checked !== null) {
         e.returnValue = "Changes you made may not be saved.";
         if (!document.activeElement.id) {
-          const key = autoImportKeys[0];
-          onAutoImportFieldChange(key, autoImportSettings[key]);
+          onAutoImportFieldChange(PULL, +e.target.checked);
         }
       }
     },
-    [onAutoImportFieldChange, autoImportKeys, autoImportSettings]
+    [wellInfo, onAutoImportFieldChange]
   );
+
+  const onBlurAutoImportInterval = useCallback(
+    e => {
+      if (wellInfo[PULL_INTERVAL] !== e.target.value) {
+        e.returnValue = "Changes you made may not be saved.";
+        if (!document.activeElement.id) {
+          onAutoImportFieldChange(PULL_INTERVAL, e.target.value);
+        }
+      }
+    },
+    [wellInfo, onAutoImportFieldChange]
+  );
+
+  const handleToggleAutoImport = () => setAutoImport(!isAutoImportEnabled);
 
   useEffect(() => {
     if (appInfo) {
@@ -110,10 +130,12 @@ function NotificationSettings({
 
   useEffect(() => {
     window.addEventListener("beforeunload", onBlurAlarm);
-    window.addEventListener("beforeunload", onBlurAutoImport);
+    window.addEventListener("beforeunload", onBlurAutoImportSwitch);
+    window.addEventListener("beforeunload", onBlurAutoImportInterval);
     return () => {
       window.removeEventListener("beforeunload", onBlurAlarm);
-      window.removeEventListener("beforeunload", onBlurAutoImport);
+      window.removeEventListener("beforeunload", onBlurAutoImportSwitch);
+      window.removeEventListener("beforeunload", onBlurAutoImportInterval);
     };
   });
 
@@ -121,7 +143,7 @@ function NotificationSettings({
     <React.Fragment>
       <DialogTitle className={classes.notificationDialogTitle}>
         <span>Cloud Server Pull/Notification Settings</span>
-        <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>
+        <IconButton aria-label="Close" className={classes.closeButton} onClick={onClose}>
           <Close />
         </IconButton>
       </DialogTitle>
@@ -132,8 +154,8 @@ function NotificationSettings({
             <Switch
               color="primary"
               checked={!!isAutoImportEnabled}
-              onChange={() => setAutoImport({ type: "TOGGLE_AUTO_IMPORT" })}
-              onBlur={onBlurAutoImport}
+              onChange={handleToggleAutoImport}
+              onBlur={onBlurAutoImportSwitch}
             />
           </div>
           <FormControl>
@@ -146,7 +168,7 @@ function NotificationSettings({
                 name: "interval",
                 id: "interval-select"
               }}
-              onBlur={onBlurAutoImport}
+              onBlur={onBlurAutoImportInterval}
             >
               <MenuItem value={10}>10 Seconds</MenuItem>
               <MenuItem value={30}>30 Seconds</MenuItem>
@@ -198,7 +220,7 @@ function NotificationSettings({
         </div>
         <DialogActions className={classes.refreshDataButton}>
           <Button onClick={handleRefreshCheck} color="primary">
-            Check for New Data Now
+            {hasNewSurvey ? "A New Survey is Available" : "Check for New Data Now"}
           </Button>
         </DialogActions>
       </Box>
@@ -215,11 +237,12 @@ NotificationSettings.propTypes = {
   handleRefreshCheck: PropTypes.func,
   updateAutoImport: PropTypes.func,
   countdown: PropTypes.number,
-  autoImportSettings: PropTypes.shape({
-    [PULL]: PropTypes.bool,
-    [PULL_INTERVAL]: PropTypes.number
-  }),
-  wellInfo: PropTypes.object
+  isAutoImportEnabled: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  wellInfo: PropTypes.object,
+  setAutoCheckInterval: PropTypes.func,
+  interval: PropTypes.number,
+  refresh: PropTypes.func,
+  hasNewSurvey: PropTypes.bool
 };
 
 export default NotificationSettings;

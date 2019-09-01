@@ -6,24 +6,15 @@ import Dialog from "@material-ui/core/Dialog";
 import Cloud from "@material-ui/icons/CloudOutlined";
 import CloudOff from "@material-ui/icons/CloudOff";
 import Import from "@material-ui/icons/OpenInBrowser";
-import usePrevious from "react-use/lib/usePrevious";
 
+import { useCloudServerCountdownContainer } from "../../../App/Containers";
 import useCloudServerModal from "./useCloudServerModal";
-import useInterval from "../../../../hooks/useInterval";
 import { useWellInfo, useCloudServer } from "../../../../api";
 import ReviewCleanData from "./ReviewCleanData";
 import ReviewManualImport from "./ReviewManualImport";
 import NotificationSettings from "./NotificationSettings";
 import { ManualImportModal, AutoImportModal } from "./ImportModals";
-import {
-  IMPORT,
-  SETTINGS,
-  PULL,
-  PULL_INTERVAL,
-  REVIEW_CLEAN_DATA,
-  REVIEW_MANUAL_IMPORT
-} from "../../../../constants/interpretation";
-
+import { IMPORT, SETTINGS, PULL, REVIEW_CLEAN_DATA, REVIEW_MANUAL_IMPORT } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
 function CloudServerModal({ wellId }) {
@@ -31,88 +22,58 @@ function CloudServerModal({ wellId }) {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
   } = useCloudServer(wellId);
-  const [{ appInfo, wellInfo, online }, , , , , updateAlarm, updateAutoImport] = useWellInfo(wellId);
+  const [{ appInfo, wellInfo, online }, , , refreshFetchStore, , updateAlarm, updateAutoImport] = useWellInfo(wellId);
   const {
     view,
     setView,
     isVisible,
     isAutoImportEnabled,
-    autoImportSettings,
     setAutoImport,
-    interval,
-    countdown,
-    setCountdown,
     handleOpen,
     handleClose
   } = useCloudServerModal();
 
+  const { countdown, interval, setAutoCheckInterval } = useCloudServerCountdownContainer();
+
   const [file, setFile] = useState({});
   const [errors, setErrors] = useState([]);
   const hasConflict = !!cmes;
-  const hasUpdate = hasConflict || newSurvey;
   const isOnline = !!online;
-  const prevInterval = usePrevious(interval);
-  const previouslyEnabled = usePrevious(isAutoImportEnabled);
 
   const handleRefreshCheck = async () => {
-    await refresh();
-    const hasUpdate = cmes || newSurvey;
-    if (hasUpdate) {
+    const { next_survey: newSurvey } = await refresh();
+
+    if (newSurvey) {
       setView(IMPORT);
     }
   };
 
   useEffect(() => {
     if (!isVisible) {
-      if ((hasUpdate && isOnline) || !isOnline) {
+      if ((newSurvey && isOnline) || !isOnline) {
         setView(IMPORT);
       } else if (isOnline) {
         setView(SETTINGS);
       }
     }
-  }, [hasUpdate, isVisible, setView, isOnline, isAutoImportEnabled]);
-
-  useEffect(() => {
-    if (wellInfo && wellInfo[PULL_INTERVAL]) {
-      setAutoImport({ type: "UPDATE", payload: { [PULL_INTERVAL]: wellInfo[PULL_INTERVAL] } });
-    }
-  }, [wellInfo, setAutoImport, isAutoImportEnabled]);
+  }, [newSurvey, isVisible, setView, isOnline, isAutoImportEnabled]);
 
   useEffect(() => {
     if (wellInfo && wellInfo[PULL]) {
-      setAutoImport({
-        type: "UPDATE",
-        payload: {
-          [PULL]: wellInfo[PULL]
-        }
-      });
+      setAutoImport(wellInfo[PULL]);
     }
-  }, [wellInfo, setAutoImport, interval]);
-
-  useEffect(() => {
-    const importReenabled = isAutoImportEnabled && !previouslyEnabled;
-    const intervalChanged = interval !== prevInterval;
-    if (intervalChanged || importReenabled || !countdown) {
-      setCountdown(interval);
-    }
-
-    if (!countdown && interval) {
-      refresh();
-    }
-  }, [interval, prevInterval, countdown, setCountdown, previouslyEnabled, isAutoImportEnabled, refresh]);
-
-  useInterval(() => setCountdown(count => count - 1), countdown && isAutoImportEnabled && isOnline ? 1000 : null);
+  }, [wellInfo, setAutoImport]);
 
   return (
     <React.Fragment>
       <div className={classes.cloudServerButton}>
         <Button onClick={handleOpen}>
-          {isAutoImportEnabled && <span>{countdown}</span>}
+          {isAutoImportEnabled && !newSurvey && <span>{countdown}</span>}
           {isAutoImportEnabled ? (
             <Badge
               className={hasConflict ? classes.badgeRed : classes.badgeGreen}
               variant="dot"
-              invisible={!hasUpdate}
+              invisible={!newSurvey && !isOnline}
               color="secondary"
             >
               <Cloud />
@@ -132,6 +93,7 @@ function CloudServerModal({ wellId }) {
             setView={setView}
             hasConflict={hasConflict}
             handleClose={handleClose}
+            refresh={refresh}
             md={md}
             inc={inc}
             azm={azm}
@@ -159,11 +121,15 @@ function CloudServerModal({ wellId }) {
             handleClose={handleClose}
             setAutoImport={setAutoImport}
             countdown={countdown}
-            autoImportSettings={autoImportSettings}
+            isAutoImportEnabled={isAutoImportEnabled}
+            setAutoCheckInterval={setAutoCheckInterval}
             handleRefreshCheck={handleRefreshCheck}
+            interval={interval}
+            refresh={refreshFetchStore}
+            hasNewSurvey={newSurvey}
           />
         )}
-        {view === REVIEW_CLEAN_DATA && <ReviewCleanData wellId={wellId} setView={setView} handleClose={handleClose} />}
+        {view === REVIEW_CLEAN_DATA && <ReviewCleanData wellId={wellId} setView={setView} newSurvey={newSurvey} />}
         {view === REVIEW_MANUAL_IMPORT && (
           <ReviewManualImport
             wellId={wellId}

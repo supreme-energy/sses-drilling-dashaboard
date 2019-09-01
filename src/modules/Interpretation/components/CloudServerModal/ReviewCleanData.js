@@ -19,28 +19,49 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import _ from "lodash";
-import { IMPORT } from "../../../../constants/interpretation";
+import { IMPORT, SETTINGS } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 import { useCloudImportSurveys } from "../../../../api";
 
-const ReviewCleanData = React.memo(({ wellId, handleClose, setView }) => {
-  const { data } = useCloudImportSurveys(wellId, 1);
-  const [currentId, setCurrentId] = useState(0);
-  const currentSurvey = useMemo(() => _.filter(data, value => value.id === currentId), [currentId, data]);
+const ReviewCleanData = React.memo(({ wellId, setView, newSurvey }) => {
+  const { data, reimportSurveys } = useCloudImportSurveys(wellId, 1);
+  const [{ sDepth, eDepth, id }, setDeletedStats] = useState({ sDepth: 0, eDepth: 0, id: 0 });
+  const currentSurvey = useMemo(() => _.filter(data, value => value.id === id), [id, data]);
   const headers = useMemo(() => Object.keys(_.get(data, "[0].data.cleaned_surveys[0]", [])), [data]);
-  const disableImport = _.get(data, "[0].id") !== currentId;
+  const disableImport = _.get(data, "[0].id") !== id;
+
   const handleImportWithDip = () => {
+    reimportSurveys(wellId, sDepth, eDepth, id);
     setView(IMPORT);
   };
   const handleImportWithoutDip = () => {
+    reimportSurveys(wellId, sDepth, eDepth);
     setView(IMPORT);
   };
-  function handleSelectDataSet(event) {
-    setCurrentId(event.target.value);
-  }
+  const handleSelectDataSet = event => {
+    setDeletedStats(deletedStats => {
+      return { ...deletedStats, id: event.target.value };
+    });
+  };
+  const handleClose = () => {
+    if (newSurvey) {
+      setView(IMPORT);
+    } else {
+      setView(SETTINGS);
+    }
+  };
 
   useEffect(() => {
-    if (data && data.length) setCurrentId(data[0].id);
+    if (data && data.length) {
+      const surveys = data[0].data.cleaned_surveys;
+      const id = data[0].id;
+      const sDepth = surveys[0].md;
+      const eDepth = surveys[surveys.length - 1].md;
+
+      setDeletedStats(deletedStats => {
+        return { ...deletedStats, sDepth, eDepth, id };
+      });
+    }
   }, [data]);
 
   return (
@@ -59,7 +80,7 @@ const ReviewCleanData = React.memo(({ wellId, handleClose, setView }) => {
         <FormControl>
           <InputLabel htmlFor="age-simple">Clean-Up Timestamp</InputLabel>
 
-          <Select value={currentId} onChange={handleSelectDataSet} inputProps={{ name: "survey" }}>
+          <Select value={id || ""} onChange={handleSelectDataSet} inputProps={{ name: "survey" }}>
             {data.map(dataSet => (
               <MenuItem key={dataSet.id} value={dataSet.id}>
                 {dataSet.created}
@@ -110,8 +131,8 @@ const ReviewCleanData = React.memo(({ wellId, handleClose, setView }) => {
 
 ReviewCleanData.propTypes = {
   wellId: PropTypes.string,
-  handleClose: PropTypes.func,
-  setView: PropTypes.func
+  setView: PropTypes.func,
+  hasUpdate: PropTypes.bool
 };
 
 export default ReviewCleanData;
