@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -8,6 +8,7 @@ import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import classNames from "classnames";
+import debounce from "lodash/debounce";
 
 import { useCrossSectionContainer } from "../../../App/Containers";
 import Knob from "./knob";
@@ -19,7 +20,7 @@ import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
-import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useSaveWellLogActions, useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 
 function SurveyIcon({ row }) {
@@ -76,6 +77,11 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
+  const { saveSelectedWellLog } = useSaveWellLogActions();
+  const saveCallback = useRef(() => {});
+  saveCallback.current = saveSelectedWellLog;
+  // saveSelectedWellLog is debounced, but it's a new function every time a value changes, so we have to debounce here
+  const debouncedSave = useMemo(() => debounce(() => saveCallback.current(), 500), []);
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
@@ -115,7 +121,10 @@ export default function DetailsTable({ showFullTable = false }) {
         {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
           const update = field => {
-            return value => updateSegments({ [row.id]: { [field]: Number(value) } });
+            return value => {
+              updateSegments({ [row.id]: { [field]: Number(value) } });
+              debouncedSave();
+            };
           };
           return (
             <TableRow
