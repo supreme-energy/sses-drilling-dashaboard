@@ -46,14 +46,14 @@ const iconStyle = {
   marginRight: 0
 };
 
-function Cell(value, editable, changeHandler, Icon) {
+function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
   if (editable) {
     return (
       <TextField
         value={value}
         onChange={e => changeHandler(e.target.value)}
         type="number"
-        className={classNames(classes.textField, classes.cell)}
+        className={classNames(classes.textField, classes.cell, { [classes.methodInput]: markAsInput })}
         InputLabelProps={{
           shrink: true
         }}
@@ -101,6 +101,8 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>TVD</TableCell>
           <TableCell className={classes.cell}>Dog Leg</TableCell>
           <TableCell className={classes.cell}>VS</TableCell>
+          {showFullTable && <TableCell className={classes.cell}>NS</TableCell>}
+          {showFullTable && <TableCell className={classes.cell}>EW</TableCell>}
           <TableCell className={classes.cell}>Fault</TableCell>
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
@@ -130,20 +132,22 @@ export default function DetailsTable({ showFullTable = false }) {
                 <SurveyIcon row={row} />
                 {row.name}
               </TableCell>
-              {Cell(row.md.toFixed(2), editable, update("md"))}
-              {Cell(row.inc.toFixed(2), editable, update("inc"))}
-              {Cell(row.azm.toFixed(2), editable, update("azm"))}
-              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"))}
+              {Cell(row.md.toFixed(2), editable, update("md"), row.method === MD_INC_AZ)}
+              {Cell(row.inc.toFixed(2), editable, update("inc"), row.method === MD_INC_AZ)}
+              {Cell(row.azm.toFixed(2), editable, update("azm"), row.method === MD_INC_AZ)}
+              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"), row.method === TVD_VS)}
               {Cell(row.dl.toFixed(2), false)}
-              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"))}
-              {Cell(row.fault.toFixed(2), editable, update("fault"), a =>
+              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"), row.method === TVD_VS)}
+              {showFullTable && Cell(row.ns.toFixed(2), false)}
+              {showFullTable && Cell(row.ew.toFixed(2), false)}
+              {Cell(row.fault.toFixed(2), editable, update("fault"), false, a =>
                 Knob({
                   ...a,
                   fill: `#${row.color.toString(16).padStart(6, 0)}`,
                   outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
                 })
               )}
-              {Cell(row.dip.toFixed(2), editable, update("dip"), a =>
+              {Cell(row.dip.toFixed(2), editable, update("dip"), false, a =>
                 Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
               {Cell(row.tcl.toFixed(2), editable && row.isProjection, update("tcl"))}
