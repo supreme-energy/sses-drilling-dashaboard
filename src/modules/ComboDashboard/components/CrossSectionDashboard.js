@@ -17,7 +17,7 @@ import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 import { selectedWellInfoContainer, useCrossSectionContainer } from "../../App/Containers";
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
-import SelectedProjectionMethod from "./Details/selectedProjectionMethod";
+import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 
 export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
