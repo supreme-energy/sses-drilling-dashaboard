@@ -51,7 +51,7 @@ function toTitleCase(text) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function WellOperation({ wellId }) {
+const WellOperation = React.memo(({ wellId }) => {
   const data = useWellOperationHours(wellId);
   const textRef = useRef(null);
   const canvasRef = useRef(null);
@@ -172,6 +172,6 @@ function WellOperation({ wellId }) {
       </div>
     </WidgetCard>
   );
-}
+});
 
 export default WellOperation;

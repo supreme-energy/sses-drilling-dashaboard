@@ -19,7 +19,7 @@ import { useSelectedWellInfoContainer, useCrossSectionContainer } from "../../Ap
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 
-export const CrossSectionDashboard = ({ wellId, className }) => {
+export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [viewDirection, setViewDirection] = useState(0);
@@ -55,7 +55,15 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
       <div className={classNames(classes.responsiveWrapper, classes.column)}>
         <div className={classNames(classes.column, classes.grow)}>
           <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
-            {({ width, height }) => <CrossSection width={width} height={height} viewDirection={viewDirection} />}
+            {({ width, height }) => (
+              <CrossSection
+                width={width}
+                height={height}
+                viewDirection={viewDirection}
+                view={view}
+                updateView={updateView}
+              />
+            )}
           </ParentSize>
         </div>
         <div className={classes.cardLine} />
@@ -111,6 +119,6 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
       </div>
     </WidgetCard>
   );
-};
+});
 
 export default CrossSectionDashboard;

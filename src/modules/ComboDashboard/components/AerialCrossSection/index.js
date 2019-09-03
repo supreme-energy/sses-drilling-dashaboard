@@ -61,7 +61,7 @@ const mapCrossSectionRotated = d => [Number(d.mapPosition.y), Number(d.mapPositi
 const SCALE_FACTOR = 0.025;
 
 /* eslint new-cap: 0 */
-function AerialCrossSection({ wellId }) {
+const AerialCrossSection = React.memo(({ wellId }) => {
   const { surveys, wellPlan } = useFilteredWellData(wellId);
   const [
     { wellSurfaceLocationLocal = {}, wellLandingLocationLocal = {}, wellPBHLLocal = {} }
@@ -208,7 +208,7 @@ function AerialCrossSection({ wellId }) {
       </div>
     </WidgetCard>
   );
-}
+});
 
 AerialCrossSection.propTypes = {
   wellId: PropTypes.string

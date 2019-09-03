@@ -4,7 +4,7 @@ import { Typography } from "@material-ui/core";
 import classNames from "classnames";
 import usePrevious from "react-use/lib/usePrevious";
 
-import { useFilteredWellData } from "../../../App/Containers";
+import { useComputedFilteredWellData } from "../../../App/Containers";
 import { crossSectionMenuReducer } from "../reducer";
 import WidgetCard from "../../../../components/WidgetCard";
 import CrossSectionGraph from "./CrossSectionGraph";
@@ -22,7 +22,7 @@ export function VerticalCrossSection({ className, wellId, drillPhase, inView }) 
   const phaseMenuItems = [ACTUAL, PLAN];
   const menuItems = isLateral ? [...phaseMenuItems, ...lateralMenuItems] : phaseMenuItems;
 
-  const { surveys, wellPlanFiltered, formations } = useFilteredWellData(wellId);
+  const { surveys, wellPlanFiltered, formations } = useComputedFilteredWellData(wellId);
 
   const [selectedMenuItems, setSelectedMenuItem] = useReducer(crossSectionMenuReducer, menuItems);
 

@@ -8,7 +8,7 @@ import LogPlotIcon from "../../../../assets/logPlot.svg";
 import _ from "lodash";
 import classes from "./styles.scss";
 
-function LogMenu({ menuItems, selectedLogs, setSelectedLog, handleClose, anchorEl, availableLogs }) {
+const LogMenu = React.memo(({ menuItems, selectedLogs, setSelectedLog, handleClose, anchorEl, availableLogs }) => {
   const handleCheckbox = name => event => {
     // Limit to 4 checks (i.e. logs)
     const count = _.reduce(selectedLogs, (result, value) => (value.checked ? (result += 1) : result), 0);
@@ -65,7 +65,7 @@ function LogMenu({ menuItems, selectedLogs, setSelectedLog, handleClose, anchorE
       </FormGroup>
     </Menu>
   );
-}
+});
 
 LogMenu.propTypes = {
   menuItems: PropTypes.arrayOf(PropTypes.string),

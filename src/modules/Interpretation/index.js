@@ -16,12 +16,7 @@ import SelectionStatsContainer from "./SelectionStats";
 import { LogExtentProvider } from "./containers/logExtentContainer";
 import TCLValue from "./SelectionStats/TCLValue";
 
-function Interpretation({
-  match: {
-    params: { wellId }
-  },
-  className
-}) {
+const Interpretation = React.memo(({ match: { params: { wellId } }, className }) => {
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogsContainer();
   const { dataBySection: aditionalLogs = {} } = useAdditionalDataLogsList(wellId);
@@ -83,6 +78,6 @@ function Interpretation({
       </WidgetCard>
     </LogExtentProvider>
   );
-}
+});
 
 export default withRouter(Interpretation);
