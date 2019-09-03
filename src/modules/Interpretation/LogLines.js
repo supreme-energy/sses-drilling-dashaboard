@@ -7,7 +7,8 @@ import {
   useComputedDraftSegmentsOnly,
   useLogsExtentWithBiasAndScale,
   getExtentWithBiasAndScale,
-  getFilteredLogsExtent
+  getFilteredLogsExtent,
+  getColorForWellLog
 } from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
 import { withWellLogsData, EMPTY_ARRAY } from "../../api";
@@ -16,7 +17,7 @@ import PixiContainer from "../../components/PixiContainer";
 
 function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
   const [
-    { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale },
+    { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale, colorsByWellLog },
     dispatch
   ] = useComboContainer();
   const { refresh } = useInterpretationRenderer();
@@ -71,7 +72,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
 
   const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
   const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
-
+  const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
   return (
     <PixiContainer
       x={x}
@@ -86,6 +87,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
               range={range}
               refresh={refresh}
               log={log}
+              logColor={logColor}
               key={log.id}
               wellId={wellId}
               container={container}

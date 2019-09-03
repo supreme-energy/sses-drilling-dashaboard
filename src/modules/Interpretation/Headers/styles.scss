@@ -1,7 +1,11 @@
 .header {
     height: 24px;
     
-    span {
+    .headerText {
         color: #ffffff;    
+    }
+
+    .moreBtn {
+        padding: 0px;
     }
 }

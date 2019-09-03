@@ -126,7 +126,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       pendingSegmentsState,
       nrPrevSurveysToDraft,
       currentEditedLog,
-      logsBiasAndScale
+      logsBiasAndScale,
+      colorsByWellLog
     }
   ] = useComboContainer();
 
@@ -149,6 +150,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     pendingSegmentsState,
     colors,
     currentEditedLog,
+    logsBiasAndScale,
+    colorsByWellLog,
     logsBiasAndScale
   ]);
 

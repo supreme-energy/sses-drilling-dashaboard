@@ -19,7 +19,10 @@ const initialState = {
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500
+  surveyPrevVisibility: 500,
+  colorsByWellLog: {
+    wellLogs: "275196"
+  }
 };
 
 const initialPendingState = {};
@@ -153,22 +156,23 @@ function currentEditedLogReducer(currentEditedLog, action) {
   }
 }
 
-const initialLogBiasAndScale = {
+export const initialLogBiasAndScale = {
   bias: 1,
   scale: 1
 };
 
 function logBiasAndScale(biasAndScale, action) {
   switch (action.type) {
-    case "CHANGE_CURRENT_EDITED_LOG": {
-      return biasAndScale || initialLogBiasAndScale;
-    }
     case "UPDATE_LOG_BIAS_AND_SCALE": {
+      const currentBiasAndScale = biasAndScale || initialLogBiasAndScale;
       return {
-        ...biasAndScale,
-        bias: action.bias !== undefined ? action.bias : biasAndScale.bias,
-        scale: action.scale !== undefined ? action.scale : biasAndScale.scale
+        ...currentBiasAndScale,
+        bias: action.bias !== undefined ? action.bias : currentBiasAndScale.bias,
+        scale: action.scale !== undefined ? action.scale : currentBiasAndScale.scale
       };
+    }
+    case "RESET_LOG_BIAS_AND_SCALE": {
+      return null;
     }
     default:
       return biasAndScale;
@@ -178,7 +182,8 @@ function logBiasAndScale(biasAndScale, action) {
 function logsBiasAndScaleReducer(logsBiasAndScale, action) {
   switch (action.type) {
     case "CHANGE_CURRENT_EDITED_LOG":
-    case "UPDATE_LOG_BIAS_AND_SCALE": {
+    case "UPDATE_LOG_BIAS_AND_SCALE":
+    case "RESET_LOG_BIAS_AND_SCALE": {
       if (!action.logId) {
         return logsBiasAndScale;
       }
@@ -193,6 +198,19 @@ function logsBiasAndScaleReducer(logsBiasAndScale, action) {
   }
 }
 
+function colorsByWellLogReducer(colorsByWellLog, action) {
+  switch (action.type) {
+    case "CHANGE_LOG_COLOR":
+      console.log("action", action);
+      return {
+        ...colorsByWellLog,
+        [action.logId]: action.color
+      };
+    default:
+      return colorsByWellLog;
+  }
+}
+
 const comboStoreReducer = (state, action) => {
   return {
     ...state,
@@ -203,7 +221,8 @@ const comboStoreReducer = (state, action) => {
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
     nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
     currentEditedLog: currentEditedLogReducer(state.currentEditedLog, action),
-    logsBiasAndScale: logsBiasAndScaleReducer(state.logsBiasAndScale, action)
+    logsBiasAndScale: logsBiasAndScaleReducer(state.logsBiasAndScale, action),
+    colorsByWellLog: colorsByWellLogReducer(state.colorsByWellLog, action)
   };
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
-import { logColor } from "../pixiColors";
+
 import { hexColor } from "../../../constants/pixiColors";
 import { useWellLogData, EMPTY_ARRAY } from "../../../api";
 import { useWellIdContainer } from "../../App/Containers";
@@ -33,7 +33,19 @@ const LogData = ({ logData, range, extent, draft, container, ...props }) => {
   );
 };
 
-function LogDataLine({ log, prevLog, container, draft, selected, refresh, range, colors, extent, logLineData }) {
+function LogDataLine({
+  log,
+  prevLog,
+  container,
+  draft,
+  selected,
+  refresh,
+  range,
+  colors,
+  extent,
+  logLineData,
+  logColor
+}) {
   const computedLogData = useGetComputedLogData(log, draft);
 
   return computedLogData ? (

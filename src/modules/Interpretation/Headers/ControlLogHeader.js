@@ -8,5 +8,6 @@ export default function ControlLogHeader({ data, ...props }) {
 }
 
 ControlLogHeader.defaultProps = {
-  data: []
+  data: [],
+  color: "#7E7D7E"
 };

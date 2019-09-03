@@ -580,3 +580,7 @@ export function getExtentWithBiasAndScale(logs, extentsByTableName) {
 
 export const getFilteredLogsExtent = memoizeOne(getExtentWithBiasAndScale);
 export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
+
+export function getColorForWellLog(colorsByWellLog, logId) {
+  return colorsByWellLog[logId] || "7E7D7E";
+}

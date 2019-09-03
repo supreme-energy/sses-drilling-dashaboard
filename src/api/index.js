@@ -746,7 +746,6 @@ export const withWellLogsData = withFetchClient(
   ({ logs, wellId }) => logs.map(log => ({ seldbname: wellId, tablename: log.tablename })),
   {
     mapResult: memoize(results => {
-      console.log("map results");
       return {
         logsDataResults: results,
         logsGammaExtent: [...getWellsGammaExtent(results)]

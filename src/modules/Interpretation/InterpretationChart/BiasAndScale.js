@@ -14,7 +14,7 @@ import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
 import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
-import { useComboContainer } from "../../ComboDashboard/containers/store";
+import { useComboContainer, initialLogBiasAndScale } from "../../ComboDashboard/containers/store";
 
 import { hexColor } from "../../../constants/pixiColors";
 import { withWellLogsData, EMPTY_ARRAY } from "../../../api";
@@ -285,7 +285,7 @@ function useLogsBiasAndScaleProps({
 
   const [xMin, xMax] = currentExtent;
 
-  const { bias, scale } = logsBiasAndScale[currentEditedLog] || {};
+  const { bias, scale } = logsBiasAndScale[currentEditedLog] || initialLogBiasAndScale;
 
   const width = xMax - xMin;
   const computedWidth = width * scale;
