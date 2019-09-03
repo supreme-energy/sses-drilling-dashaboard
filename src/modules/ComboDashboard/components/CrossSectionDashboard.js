@@ -15,7 +15,7 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import { selectedWellInfoContainer, useCrossSectionContainer } from "../../App/Containers";
+import { useSelectedWellInfoContainer, useCrossSectionContainer } from "../../App/Containers";
 import { DebouncedTextField } from "../../../components/DebouncedInputs";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 
@@ -23,7 +23,7 @@ export const CrossSectionDashboard = ({ wellId, className }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [viewDirection, setViewDirection] = useState(0);
-  const [data, , updateWell, refreshFetchStore] = selectedWellInfoContainer();
+  const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
 
   const { selectedSections, calcSections } = useCrossSectionContainer();

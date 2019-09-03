@@ -276,6 +276,7 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
 export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
   useCrossSectionData
 );
-export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+
+export const { Provider: SelectedWellInfoProvider, useContainer: useSelectedWellInfoContainer } = createContainer(
   useSelectedWellInfo
 );

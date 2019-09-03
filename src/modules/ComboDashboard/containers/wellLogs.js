@@ -4,7 +4,7 @@ import { GET_WELL_LOG_LIST, UPDATE_WELL_LOG, EMPTY_ARRAY } from "../../../api";
 import { useMemo, useCallback } from "react";
 import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
-import { useWellIdContainer } from "../../App/Containers";
+import { useWellIdContainer, useTimeSliderContainer } from "../../App/Containers";
 import mapKeys from "lodash/mapKeys";
 
 const mapLogList = d => ({
@@ -76,9 +76,16 @@ export function useWellLogList(wellId) {
   return [logs, logsById, { updateWellLogs }];
 }
 
+const filterWellLogs = memoizeOne((wellLogs, interval) => {
+  return wellLogs.filter(log => interval.firstDepth <= log.startmd && log.endmd <= interval.lastDepth);
+});
+
 function useWellLogs() {
+  const { sliderInterval } = useTimeSliderContainer();
   const { wellId } = useWellIdContainer();
-  return useWellLogList(wellId);
+  const [logs, logsById, actions] = useWellLogList(wellId);
+  const filteredLogs = filterWellLogs(logs, sliderInterval);
+  return [filteredLogs, logsById, logs, actions];
 }
 
 export const { Provider: WellLogsProvider, useContainer: useWellLogsContainer } = createContainer(useWellLogs);

@@ -1,6 +1,5 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
-import { useWellLogsContainer } from "./wellLogs";
 
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
@@ -76,7 +75,7 @@ function pendingSegmentState(pendingState, action, key) {
   }
 }
 
-function pendingSegmentsStateReducer(stateSlice, action, state, logs) {
+function pendingSegmentsStateReducer(stateSlice, action, state) {
   switch (action.type) {
     case "TOGGLE_SELECTION": {
       const resetPendingState = state.draftMode && state.selectionById[action.id];
@@ -142,11 +141,11 @@ function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   }
 }
 
-const comboStoreReducer = logs => (state, action) => {
+const comboStoreReducer = (state, action) => {
   return {
     ...state,
     selectionById: selectionByIdReducer(state.selectionById, action),
-    pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state, logs),
+    pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state),
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
@@ -155,10 +154,7 @@ const comboStoreReducer = logs => (state, action) => {
 };
 
 function useUseComboStore() {
-  const [logs] = useWellLogsContainer();
-
-  const reducer = useCallback(comboStoreReducer(logs), [logs]);
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
 
   return [state, dispatch];
 }
