@@ -547,19 +547,28 @@ export function useFetchProjections(wellId) {
     [isLoading, error, isPolling, isFetchingMore, replaceResult]
   );
 
-  const saveProjection = (projectionId, method, fields = {}) => {
-    // return the promise so we can refresh AFTER the API call is done
-    return fetch({
-      path: SET_WELL_PROJECTIONS,
-      method: "GET",
-      query: {
-        seldbname: wellId,
-        id: projectionId,
-        method: method,
-        ...fields
-      }
-    });
-  };
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
+  const updateProjection = useCallback(
+    ({ projectionId, fields = {} }) => {
+      const optimisticResult = data.map(p => {
+        return p.id === projectionId ? { ...p, ...fields } : p;
+      });
+
+      return serializedUpdateFetch({
+        path: SET_WELL_PROJECTIONS,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: projectionId,
+          ...fields
+        },
+        optimisticResult,
+        cache: "no-cache"
+      });
+    },
+    [serializedUpdateFetch, wellId, data]
+  );
 
   function sortByMD(a, b) {
     if (a.md < b.md) return -1;
@@ -617,7 +626,7 @@ export function useFetchProjections(wellId) {
     );
   };
 
-  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection, replaceResultCallback];
+  return [data || EMPTY_ARRAY, refresh, updateProjection, deleteProjection, addProjection, replaceResultCallback];
 }
 
 export function useWellOverviewKPI(wellId) {

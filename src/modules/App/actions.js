@@ -7,7 +7,7 @@ import _ from "lodash";
 export function useSaveSurveysAndProjections() {
   const [, dispatch] = useComboContainer();
   const [{ pendingSegmentsState }] = useComboContainer();
-  const { replaceResult: replaceProjections, saveProjection } = useProjectionsDataContainer();
+  const { replaceResult: replaceProjections, updateProjection } = useProjectionsDataContainer();
   const { replaceResult: replaceSurveys, updateSurvey } = useSurveysDataContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
 
@@ -23,12 +23,20 @@ export function useSaveSurveysAndProjections() {
 
   const saveSurveys = useCallback(() => {
     const pendingSurveyState = _.pickBy(pendingRef.current, (val, key) => !!surveyIds[key]);
-    console.log(pendingRef.current, pendingSurveyState);
+    const pendingProjectionsState = _.pickBy(pendingRef.current, (val, key) => !!projectionIds[key]);
+
     replaceSurveysAndProjections();
-    const res = Promise.all(_.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId, fields })));
-    dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: pendingSurveyState });
-    return res;
-  }, [surveyIds, pendingRef, dispatch, updateSurvey, replaceSurveysAndProjections]);
+    const surveyRes = Promise.all(
+      _.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields }))
+    );
+    const projectionRes = Promise.all(
+      _.map(pendingProjectionsState, (fields, projectionId) =>
+        updateProjection({ projectionId: Number(projectionId), fields })
+      )
+    );
+    dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
+    return [].concat(surveyRes, projectionRes);
+  }, [surveyIds, pendingRef, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, projectionIds]);
 
   return { saveSurveys };
 }

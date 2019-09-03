@@ -193,7 +193,7 @@ function useProjectionsData() {
   const [
     projections,
     refreshProjections,
-    saveProjections,
+    updateProjection,
     deleteProjection,
     addProjection,
     replaceResult
@@ -216,7 +216,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection, replaceResult };
+  return { projectionsData, updateProjection, refreshProjections, deleteProjection, addProjection, replaceResult };
 }
 
 function useFormationsData() {
