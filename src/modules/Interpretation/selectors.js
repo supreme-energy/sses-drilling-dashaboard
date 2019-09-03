@@ -249,9 +249,6 @@ export function useGetComputedLogData(log, draft) {
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 
-  // console.log("logData changed", window.logData !== logData);
-  // window.logData = logData;
-
   if (draft) {
     computedSegment = draftLogsById[computedSegment.id];
     prevComputedSegment = prevComputedSegment && draftLogsById[prevComputedSegment.id];
