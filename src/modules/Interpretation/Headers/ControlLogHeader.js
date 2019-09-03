@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import Header from "./Header";
-import { extent } from "d3-array";
+import { logDataExtent } from "../selectors";
 
 export default function ControlLogHeader({ data, ...props }) {
-  const range = useMemo(() => extent(data, item => item.value), [data]);
+  const range = logDataExtent(data);
   return <Header {...props} range={range} />;
 }
 

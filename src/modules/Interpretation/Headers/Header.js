@@ -2,10 +2,11 @@ import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import css from "./styles.scss";
 
-export default function Header({ color, range, name }) {
+export default function Header({ color, range, name, onClick }) {
   return (
     <Box
       display="flex"
+      onClick={onClick}
       pl={0.5}
       pr={0.5}
       flexDirection="row"

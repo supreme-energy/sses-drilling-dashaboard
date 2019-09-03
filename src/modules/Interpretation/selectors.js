@@ -8,13 +8,14 @@ import {
   useWellIdContainer,
   useSelectedWellInfoContainer
 } from "../App/Containers";
-import { extent } from "d3-array";
+import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/useCalculations";
+import memoize from "react-powertools/memoize";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -542,3 +543,40 @@ export function useSelectedWellInfoColors() {
   const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
 }
+
+export const logDataExtent = memoize(data => {
+  return extent(data, d => Number(d.value));
+});
+
+export const getWellsGammaExtent = memoizeOne(logsData => {
+  const extents = logsData.map(ld => [...logDataExtent(ld.data), ld.tablename]);
+  const extentsByTableName = keyBy(extents, ([, , tablename]) => tablename);
+  return [min(extents, ([min]) => min), max(extents, ([, max]) => max), extents, extentsByTableName];
+});
+
+export function getExtentWithBiasAndScale(logs, extentsByTableName) {
+  return logs.reduce(
+    (acc, log) => {
+      const bias = Number(log.scalebias);
+      const scale = Number(log.scalefactor);
+      const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
+      const width = max - min;
+      const computedWidth = width * scale;
+
+      return {
+        extentWithBiasAndScale: [
+          Math.min(acc.extentWithBiasAndScale[0], bias + min - (computedWidth - width) / 2),
+          Math.max(acc.extentWithBiasAndScale[1], bias + computedWidth)
+        ],
+        extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
+      };
+    },
+    {
+      extentWithBiasAndScale: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+      extent: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
+    }
+  );
+}
+
+export const getFilteredLogsExtent = memoizeOne(getExtentWithBiasAndScale);
+export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);

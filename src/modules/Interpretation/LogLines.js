@@ -2,13 +2,25 @@ import React, { useMemo, useRef, useEffect } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
-import { getIsDraft, useComputedDraftSegmentsOnly } from "./selectors";
+import {
+  getIsDraft,
+  useComputedDraftSegmentsOnly,
+  useLogsExtentWithBiasAndScale,
+  getExtentWithBiasAndScale,
+  getFilteredLogsExtent
+} from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
+import { withWellLogsData, EMPTY_ARRAY } from "../../api";
+import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
+import PixiContainer from "../../components/PixiContainer";
 
-export default function LogLines({ logList, wellId, selectedWellLogIndex, container }) {
-  const [{ surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft }, dispatch] = useComboContainer();
+function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
+  const [
+    { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale },
+    dispatch
+  ] = useComboContainer();
   const { refresh } = useInterpretationRenderer();
-  const selectedWellLog = logList[selectedWellLogIndex];
+  const selectedWellLog = logs[selectedWellLogIndex];
   const internalState = useRef({ prevFirstDraft: null });
 
   const range = useMemo(() => {
@@ -28,8 +40,8 @@ export default function LogLines({ logList, wellId, selectedWellLogIndex, contai
       return [selectedWellLog];
     }
 
-    return logList;
-  }, [logList, selectedWellLog, surveyVisibility]);
+    return logs;
+  }, [logs, selectedWellLog, surveyVisibility]);
 
   const draftSegments = useComputedDraftSegmentsOnly();
   const [firstDraft] = draftSegments;
@@ -53,23 +65,37 @@ export default function LogLines({ logList, wellId, selectedWellLogIndex, contai
     }
   }, [sliderInterval, draftMode, firstDraft, dispatch]);
 
+  const { bias, scale } = logsBiasAndScale.wellLogs || { bias: 1, scale: 1 };
+  const logsGammaExtent = (result && result.logsGammaExtent) || EMPTY_ARRAY;
+  const [, , , extentsByTableName] = logsGammaExtent;
+
+  const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
+  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
+
   return (
-    <React.Fragment>
-      {filteredLogList.map((log, index) => {
-        const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
-        return (
-          <LogDataLine
-            draft={draft}
-            range={range}
-            refresh={refresh}
-            log={log}
-            key={log.id}
-            wellId={wellId}
-            container={container}
-            selected={selectedWellLog && log.id === selectedWellLog.id}
-          />
-        );
-      })}
-    </React.Fragment>
+    <PixiContainer
+      x={x}
+      scale={pixiScale}
+      container={container}
+      child={container =>
+        filteredLogList.map((log, index) => {
+          const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
+          return (
+            <LogDataLine
+              draft={draft}
+              range={range}
+              refresh={refresh}
+              log={log}
+              key={log.id}
+              wellId={wellId}
+              container={container}
+              selected={selectedWellLog && log.id === selectedWellLog.id}
+            />
+          );
+        })
+      }
+    />
   );
 }
+
+export default withWellLogsData(LogLines);

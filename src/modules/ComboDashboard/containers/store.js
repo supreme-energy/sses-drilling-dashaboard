@@ -14,6 +14,8 @@ export const surveyVisibility = {
 const initialState = {
   selectionById: {},
   pendingSegmentsState: {},
+  logsBiasAndScale: {},
+  currentEditedLog: null,
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
@@ -141,6 +143,56 @@ function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   }
 }
 
+function currentEditedLogReducer(currentEditedLog, action) {
+  switch (action.type) {
+    case "CHANGE_CURRENT_EDITED_LOG": {
+      return action.logId;
+    }
+    default:
+      return currentEditedLog;
+  }
+}
+
+const initialLogBiasAndScale = {
+  bias: 1,
+  scale: 1
+};
+
+function logBiasAndScale(biasAndScale, action) {
+  switch (action.type) {
+    case "CHANGE_CURRENT_EDITED_LOG": {
+      return biasAndScale || initialLogBiasAndScale;
+    }
+    case "UPDATE_LOG_BIAS_AND_SCALE": {
+      return {
+        ...biasAndScale,
+        bias: action.bias !== undefined ? action.bias : biasAndScale.bias,
+        scale: action.scale !== undefined ? action.scale : biasAndScale.scale
+      };
+    }
+    default:
+      return biasAndScale;
+  }
+}
+
+function logsBiasAndScaleReducer(logsBiasAndScale, action) {
+  switch (action.type) {
+    case "CHANGE_CURRENT_EDITED_LOG":
+    case "UPDATE_LOG_BIAS_AND_SCALE": {
+      if (!action.logId) {
+        return logsBiasAndScale;
+      }
+      return {
+        ...logsBiasAndScale,
+        [action.logId]: logBiasAndScale(logsBiasAndScale[action.logId], action)
+      };
+    }
+
+    default:
+      return logsBiasAndScale;
+  }
+}
+
 const comboStoreReducer = (state, action) => {
   return {
     ...state,
@@ -149,7 +201,9 @@ const comboStoreReducer = (state, action) => {
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action)
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
+    currentEditedLog: currentEditedLogReducer(state.currentEditedLog, action),
+    logsBiasAndScale: logsBiasAndScaleReducer(state.logsBiasAndScale, action)
   };
 };
 

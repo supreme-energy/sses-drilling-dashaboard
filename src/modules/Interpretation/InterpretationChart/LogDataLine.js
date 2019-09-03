@@ -5,17 +5,14 @@ import { logColor } from "../pixiColors";
 import { hexColor } from "../../../constants/pixiColors";
 import { useWellLogData, EMPTY_ARRAY } from "../../../api";
 import { useWellIdContainer } from "../../App/Containers";
+import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
+import PixiContainer from "../../../components/PixiContainer";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = ({ logData, range, extent, draft, ...props }) => {
+const LogData = ({ logData, range, extent, draft, container, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-  const [xMin, xMax] = extent;
-  const width = xMax - xMin;
-
-  const computedWidth = width * scale;
-  const x = bias + xMin - (computedWidth - width) / 2 - xMin * scale;
-  const pixiScale = useMemo(() => ({ y: 1, x: scale || 1 }), [scale]);
+  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
 
   const filteredLogData = useMemo(() => {
     if (!range) {
@@ -32,13 +29,11 @@ const LogData = ({ logData, range, extent, draft, ...props }) => {
   }, [logData, range]);
 
   return (
-    <React.Fragment>
-      <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} />
-    </React.Fragment>
+    <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} container={container} />
   );
 };
 
-function LogDataLine({ log, prevLog, container, draft, selected, refresh, range, colors, extent }) {
+function LogDataLine({ log, prevLog, container, draft, selected, refresh, range, colors, extent, logLineData }) {
   const computedLogData = useGetComputedLogData(log, draft);
 
   return computedLogData ? (

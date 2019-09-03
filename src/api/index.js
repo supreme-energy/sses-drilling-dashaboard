@@ -17,6 +17,7 @@ import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
 import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
+import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -740,8 +741,18 @@ export function useWellLogData(wellId, tableName) {
   );
 }
 
-export const withWellLogsData = withFetchClient(GET_WELL_LOG_DATA, ({ logs, wellId }) =>
-  logs.map(log => ({ seldbname: wellId, tablename: log.tablename }))
+export const withWellLogsData = withFetchClient(
+  GET_WELL_LOG_DATA,
+  ({ logs, wellId }) => logs.map(log => ({ seldbname: wellId, tablename: log.tablename })),
+  {
+    mapResult: memoize(results => {
+      console.log("map results");
+      return {
+        logsDataResults: results,
+        logsGammaExtent: [...getWellsGammaExtent(results)]
+      };
+    })
+  }
 );
 
 export function useAdditionalDataLogsList(wellId) {

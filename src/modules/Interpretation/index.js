@@ -13,7 +13,6 @@ import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
-import { LogExtentProvider } from "./containers/logExtentContainer";
 import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
 import { useWellIdContainer } from "../App/Containers";
@@ -21,53 +20,47 @@ import { useWellIdContainer } from "../App/Containers";
 const Interpretation = React.memo(({ wellId, className, draftMode, dispatch, controlLogs, logList }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   return (
-    <LogExtentProvider>
-      <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
-        <CloudServerModal wellId={wellId} />
-        <SelectionStatsContainer />
-        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Box display="flex" flexDirection="row" alignItems="center">
-            <TCLValue />
-            <FormControlLabel
-              classes={{ root: css.switchLabel }}
-              value="start"
-              control={
-                <Switch
-                  color="secondary"
-                  checked={draftMode}
-                  onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
-                />
-              }
-              label="Draft (D)"
-              labelPlacement="start"
-            />
-          </Box>
-          {/* Todo: add formations top here */}
+    <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
+      <CloudServerModal wellId={wellId} />
+      <SelectionStatsContainer logs={logList} wellId={wellId} />
+      <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+        <Box display="flex" flexDirection="row" alignItems="center">
+          <TCLValue />
+          <FormControlLabel
+            classes={{ root: css.switchLabel }}
+            value="start"
+            control={
+              <Switch color="secondary" checked={draftMode} onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })} />
+            }
+            label="Draft (D)"
+            labelPlacement="start"
+          />
         </Box>
-        <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
+        {/* Todo: add formations top here */}
+      </Box>
+      <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
-        <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
+      <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
 
-        <div className="layout horizontal">
-          <IconButton
-            size="small"
-            className={classNames(css.expand, {
-              [css.expandOpen]: expanded
-            })}
-            onClick={toggleExpanded}
-            aria-expanded={expanded}
-            aria-label="Show more"
-            mr={1}
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-          <Typography variant="subtitle1">{draftMode ? "Drafting Controls" : "Modeling Controls"}</Typography>
-        </div>
-        <Collapse in={expanded} unmountOnExit>
-          <InterpretationSettings className={css.settings} />
-        </Collapse>
-      </WidgetCard>
-    </LogExtentProvider>
+      <div className="layout horizontal">
+        <IconButton
+          size="small"
+          className={classNames(css.expand, {
+            [css.expandOpen]: expanded
+          })}
+          onClick={toggleExpanded}
+          aria-expanded={expanded}
+          aria-label="Show more"
+          mr={1}
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+        <Typography variant="subtitle1">{draftMode ? "Drafting Controls" : "Modeling Controls"}</Typography>
+      </div>
+      <Collapse in={expanded} unmountOnExit>
+        <InterpretationSettings className={css.settings} />
+      </Collapse>
+    </WidgetCard>
   );
 });
 

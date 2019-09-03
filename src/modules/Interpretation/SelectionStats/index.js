@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box } from "@material-ui/core";
 import SelectionStats from "./SelectionStats";
 import {
@@ -7,17 +7,19 @@ import {
   useComputedDraftSegmentsOnly,
   useLogExtent,
   useSelectedSegmentState,
-  useSelectedSurvey
+  useSelectedSurvey,
+  getPendingSegmentsExtent,
+  usePendingSegments
 } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import CondensedText from "../../../components/ContensedText.js";
 import css from "./styles.scss";
-import { useLogExtentContainer } from "../containers/logExtentContainer";
 import { useWellIdContainer } from "../../App/Containers";
 import WellColorPicker from "./WellColorPicker";
 import { EMPTY_FIELD } from "../../../constants/format";
+import { withWellLogsData, EMPTY_ARRAY } from "../../../api";
 
-export default function SelectionStatsContainer() {
+function SelectionStatsContainer({ data: { result } }) {
   const [{ draftMode }] = useComboContainer();
   const computedSegments = useComputedDraftSegmentsOnly();
   const { byId: computedSegmentsById } = useComputedSegments();
@@ -27,7 +29,9 @@ export default function SelectionStatsContainer() {
   const { wellId } = useWellIdContainer();
   const selectedWellLogGammaRange = useLogExtent(selectedWellLog, wellId) || [];
   const computedSelectedWellLog = selectedWellLog && computedSegmentsById[selectedWellLog.id];
-  const [{ selectionExtent }] = useLogExtentContainer();
+  const [, , , extentsByTableName] = (result && result.logsGammaExtent) || EMPTY_ARRAY;
+  const pendingSegments = usePendingSegments();
+  const { extent: selectionExtent } = getPendingSegmentsExtent(pendingSegments, extentsByTableName);
 
   return (
     <Box display="flex" flexDirection="column" className={css.root}>
@@ -89,3 +93,5 @@ export default function SelectionStatsContainer() {
     </Box>
   );
 }
+
+export default withWellLogsData(SelectionStatsContainer);
