@@ -97,6 +97,17 @@ function pendingSegmentsStateReducer(stateSlice, action, state, logs) {
         },
         stateSlice
       );
+    case "RESET_SEGMENTS_PROPERTIES":
+      return reduce(
+        action.propsById,
+        (acc, newProps, id) => {
+          return {
+            ...acc,
+            [id]: initialPendingState
+          };
+        },
+        stateSlice
+      );
 
     default:
       return stateSlice;

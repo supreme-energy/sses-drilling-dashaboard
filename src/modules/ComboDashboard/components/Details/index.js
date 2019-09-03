@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -20,8 +20,9 @@ import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
-import { useSaveWellLogActions, useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
+import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -77,10 +78,9 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
-  const { saveSelectedWellLog } = useSaveWellLogActions();
+  const { saveSurveys } = useSaveSurveysAndProjections();
   const saveCallback = useRef(() => {});
-  saveCallback.current = saveSelectedWellLog;
-  // saveSelectedWellLog is debounced, but it's a new function every time a value changes, so we have to debounce here
+  saveCallback.current = saveSurveys;
   const debouncedSave = useMemo(() => debounce(() => saveCallback.current(), 500), []);
 
   const selectedIndex = useMemo(() => {
