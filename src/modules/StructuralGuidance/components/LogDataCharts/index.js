@@ -6,36 +6,36 @@ import Import from "@material-ui/icons/OpenInBrowser";
 import _ from "lodash";
 import classNames from "classnames";
 
-import { MD } from "../../../../constants/structuralGuidance";
+import { VS, INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import LogMenu from "./LogMenu";
 import { useAdditionalDataLogsList } from "../../../../api";
 import WidgetCard from "../../../../components/WidgetCard";
-import Chart from "./Chart";
+import ChartContainer from "./ChartContainer";
 import classes from "./styles.scss";
 
 function LogData({ wellId }) {
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
-  const [selectedGraphs, setSelectedGraph] = useState({});
+  const [selectedLogs, setSelectedLog] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
-  const graphInitialized = useRef(false);
+  const logInitialized = useRef(false);
 
-  const currentGraphs = useMemo(() => _.keys(_.pickBy(selectedGraphs, "checked")), [selectedGraphs]);
-  const availableGraphs = useMemo(() => {
+  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs, "checked")), [selectedLogs]);
+  const availableLogs = useMemo(() => {
     return data
       .filter(l => l.data_count > 0)
-      .map(({ label, color }) => {
-        return { label, color };
+      .map(({ label, color, scalelo, scalehi }) => {
+        return { label, color, scalelo, scalehi, ...INITIAL_SCALE_BIAS };
       });
   }, [data]);
-  const menuItems = useMemo(() => availableGraphs.map(({ label }) => label), [availableGraphs]);
-  const areGraphsSelected = useMemo(() => _.some(selectedGraphs, "checked"), [selectedGraphs]);
+  const menuItems = useMemo(() => availableLogs.map(({ label }) => label), [availableLogs]);
+  const areLogsSelected = useMemo(() => _.some(selectedLogs, "checked"), [selectedLogs]);
 
   const handleAddChart = event => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleRemoveGraph = graph => {
-    setSelectedGraph({ ...selectedGraphs, [graph]: false });
+  const handleRemoveChart = log => {
+    setSelectedLog({ ...selectedLogs, [log]: false });
   };
 
   const handleCloseMenu = () => {
@@ -45,13 +45,14 @@ function LogData({ wellId }) {
   const handleImport = () => {};
 
   useEffect(() => {
-    if (!graphInitialized.current && menuItems.length) {
-      setSelectedGraph({ [menuItems[0]]: { checked: true } });
-      graphInitialized.current = true;
+    if (!logInitialized.current && menuItems.length) {
+      const log = menuItems.includes("GR") ? "GR" : menuItems[0];
+      setSelectedLog({ [log]: { checked: true } });
+      logInitialized.current = true;
     }
   }, [menuItems]);
 
-  if (!availableGraphs.length) {
+  if (!availableLogs.length) {
     return (
       <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
         <Button
@@ -68,25 +69,25 @@ function LogData({ wellId }) {
 
   return (
     <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
-      {currentGraphs.map(graph => {
+      {currentLogs.map(log => {
         if (!_.isEmpty(dataBySection)) {
-          const logId = dataBySection[graph].id;
+          const logId = dataBySection[log].id;
           return (
-            <Chart
+            <ChartContainer
               key={logId}
               wellId={wellId}
               logId={logId}
-              availableGraphs={availableGraphs}
+              availableLogs={availableLogs}
               dataBySection={dataBySection}
-              handleRemoveGraph={handleRemoveGraph}
-              xAxis={MD}
+              handleRemoveChart={handleRemoveChart}
+              xAxis={VS}
             />
           );
         }
       })}
       <Button
         className={classNames(classes.addChartButton, {
-          [classes.addChartButtonInitial]: !areGraphsSelected
+          [classes.addChartButtonInitial]: !areLogsSelected
         })}
         color="secondary"
         onClick={handleAddChart}
@@ -96,11 +97,11 @@ function LogData({ wellId }) {
       </Button>
       <LogMenu
         menuItems={menuItems}
-        selectedGraphs={selectedGraphs}
-        setSelectedGraph={setSelectedGraph}
+        selectedLogs={selectedLogs}
+        setSelectedLog={setSelectedLog}
         handleClose={handleCloseMenu}
         anchorEl={anchorEl}
-        availableGraphs={availableGraphs}
+        availableLogs={availableLogs}
       />
     </WidgetCard>
   );

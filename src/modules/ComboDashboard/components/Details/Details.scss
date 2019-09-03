@@ -110,6 +110,9 @@ $black: rgb(0, 0, 0);
       &:first-child:before {
         background-color: rgba($red, 1);
       }
+      &.methodInput {
+        background-color: rgba($red, 0.4);
+      }
       background-color: rgba($red, 0.3);
     }
   }

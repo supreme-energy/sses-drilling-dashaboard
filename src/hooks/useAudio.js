@@ -10,20 +10,23 @@ const useAudio = url => {
   const toggleOff = useCallback(() => setPlaying(false), []);
 
   useEffect(() => {
-    audio.volume = 0.2;
-    playing ? audio.play() : audio.pause();
+    if (playing) {
+      audio.volume = 0.2;
+      audio.currentTime = 0;
+      audio.play();
+    } else {
+      audio.pause();
+    }
   }, [playing, audio]);
 
   useEffect(() => {
     if (prevUrl !== url) {
-      setAudio(audio => {
-        playing && setPlaying(false);
-        return new Audio(url);
-      });
+      playing && setPlaying(false);
+      setAudio(new Audio(url));
     }
   }, [url, playing, prevUrl]);
 
-  return [playing, toggleOn, toggleOff];
+  return [playing, toggleOn, toggleOff, setAudio];
 };
 
 export default useAudio;

@@ -8,18 +8,35 @@ import LogPlotIcon from "../../../../assets/logPlot.svg";
 import _ from "lodash";
 import classes from "./styles.scss";
 
-function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anchorEl, availableGraphs }) {
+function LogMenu({ menuItems, selectedLogs, setSelectedLog, handleClose, anchorEl, availableLogs }) {
   const handleCheckbox = name => event => {
-    // Limit to 4 checks (i.e. graphs)
-    const count = _.reduce(selectedGraphs, (result, value) => (value.checked ? (result += 1) : result), 0);
-    const selectedGraph = availableGraphs.filter(({ label }) => label === name)[0];
+    // Limit to 4 checks (i.e. logs)
+    const count = _.reduce(selectedLogs, (result, value) => (value.checked ? (result += 1) : result), 0);
+    const { color, scale, bias, scalelo, scalehi } = availableLogs.filter(({ label }) => label === name)[0];
 
     if (count >= 4) {
-      setSelectedGraph({ ...selectedGraphs, [name]: { color: selectedGraph.color, checked: false } });
+      setSelectedLog({
+        ...selectedLogs,
+        [name]: {
+          prevScale: { scale, bias },
+          currScale: { scale, bias },
+          scalelo,
+          scalehi,
+          color,
+          checked: false
+        }
+      });
     } else {
-      setSelectedGraph({
-        ...selectedGraphs,
-        [name]: { color: selectedGraph.color, checked: event.target.checked }
+      setSelectedLog({
+        ...selectedLogs,
+        [name]: {
+          color,
+          prevScale: { scale, bias },
+          currScale: { scale, bias },
+          scalelo,
+          scalehi,
+          checked: event.target.checked
+        }
       });
     }
   };
@@ -27,18 +44,18 @@ function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anc
   return (
     <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
       <FormGroup className={classes.logFormGroup}>
-        {menuItems.map(graph => (
+        {menuItems.map(log => (
           <FormControlLabel
-            key={graph}
+            key={log}
             control={
               <React.Fragment>
                 <img src={LogPlotIcon} className={classes.icon} />
-                <span className={classes.logMenuLabel}>{graph}</span>
+                <span className={classes.logMenuLabel}>{log}</span>
                 <Checkbox
                   className={classes.logMenuCheckboxes}
-                  checked={_.get(selectedGraphs, `[${graph}].checked`, false)}
-                  onChange={handleCheckbox(graph)}
-                  value={graph}
+                  checked={_.get(selectedLogs, `[${log}].checked`, false)}
+                  onChange={handleCheckbox(log)}
+                  value={log}
                   color="secondary"
                 />
               </React.Fragment>
@@ -52,11 +69,11 @@ function LogMenu({ menuItems, selectedGraphs, setSelectedGraph, handleClose, anc
 
 LogMenu.propTypes = {
   menuItems: PropTypes.arrayOf(PropTypes.string),
-  selectedGraphs: PropTypes.object,
-  setSelectedGraph: PropTypes.func,
+  selectedLogs: PropTypes.object,
+  setSelectedLog: PropTypes.func,
   anchorEl: PropTypes.object,
   handleClose: PropTypes.func,
-  availableGraphs: PropTypes.arrayOf(
+  availableLogs: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,
       color: PropTypes.color

@@ -1,8 +1,6 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState, useEffect } from "react";
 import { createContainer } from "unstated-next";
-
-import memoize from "react-powertools/memoize";
-
+import usePrevious from "react-use/lib/usePrevious";
 import {
   useAdditionalDataLog,
   useFetchFormations,
@@ -27,13 +25,13 @@ const filterDataToInterval = (data, interval) => {
   }
 };
 
-const filterDataToLast = memoize((data, lastDepth) => {
+const filterDataToLast = (data, lastDepth) => {
   if (data && data.length) {
     return data.find(({ md }) => md >= lastDepth);
   } else {
     return {};
   }
-});
+};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {
@@ -45,6 +43,25 @@ function useTimeSlider(initialState) {
 function useDrillPhase(initialState) {
   const [drillPhaseObj, setDrillPhase] = useReducer(drillPhaseReducer, initialState);
   return { drillPhaseObj, setDrillPhase };
+}
+
+// Shared state for Cloud Server Modal Countdown
+function useCloudServerCountdown(initialState) {
+  const [interval, setAutoCheckInterval] = useState(initialState);
+  const [countdown, setCountdown] = useState(initialState);
+  const prevInterval = usePrevious(interval);
+
+  const resetCountdown = () => setCountdown(interval);
+  const handleCountdown = () => setCountdown(count => count - 1);
+
+  useEffect(() => {
+    const intervalChanged = interval !== prevInterval;
+    if (intervalChanged || !countdown) {
+      setCountdown(interval);
+    }
+  }, [interval, prevInterval, countdown]);
+
+  return { countdown, interval, setAutoCheckInterval, handleCountdown, resetCountdown };
 }
 
 function useAppStateData() {
@@ -109,6 +126,22 @@ export function useFilteredAdditionalDataLogs(wellId, id) {
     scalelo,
     scalehi,
     ...filterDataToLast(data, sliderInterval.lastDepth)
+  };
+}
+
+export function useFilteredAdditionalDataInterval(wellId, id) {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const {
+    data: { label, data, scalelo, scalehi, color }
+  } = useAdditionalDataLog(wellId, id);
+
+  return {
+    label,
+    scalelo,
+    scalehi,
+    color,
+    data: filterDataToInterval(data, sliderInterval)
   };
 }
 
@@ -224,7 +257,10 @@ function useSelectedWellInfo() {
 }
 
 // Create containers
-
+export const {
+  Provider: CloudServerCountdownProvider,
+  useContainer: useCloudServerCountdownContainer
+} = createContainer(useCloudServerCountdown);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);

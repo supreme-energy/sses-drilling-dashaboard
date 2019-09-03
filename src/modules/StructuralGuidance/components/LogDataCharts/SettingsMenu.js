@@ -19,9 +19,7 @@ import _ from "lodash";
 import { useAdditionalDataLog, useAdditionalDataLogsList } from "../../../../api";
 import { useWellIdContainer } from "../../../App/Containers";
 import ColorPicker from "../ColorPicker";
-import DataTable from "./DataTable";
 import ScalePlotIcon from "../../../../assets/scalePlot.svg";
-import TableChartIcon from "../../../../assets/tableChart.svg";
 
 import classes from "./styles.scss";
 
@@ -29,15 +27,15 @@ function SettingsMenu({
   isVisible,
   view,
   setMenu,
-  handleRemoveGraph,
-  graph,
-  data,
-  setSelectedGraph,
-  selectedGraphs,
-  currentGraphs
+  handleRemoveChart,
+  log,
+  setSelectedLog,
+  selectedLogs,
+  setEditingScale,
+  handleArrowBack,
+  handleArrowForward
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [isDataTableVisible, handleDataTable] = useState(false);
   const { wellId } = useWellIdContainer();
   const { dataBySection = {} } = useAdditionalDataLogsList(wellId);
   const { updateAdditionalLogDetails } = useAdditionalDataLog(wellId);
@@ -45,40 +43,16 @@ function SettingsMenu({
   const handleSaveColor = hex => {
     const id = dataBySection[view].id;
     const color = hex.substring(1);
-    setSelectedGraph({ ...selectedGraphs, [view]: { ...selectedGraphs[view], color } });
+    setSelectedLog({ ...selectedLogs, [view]: { ...selectedLogs[view], color } });
     updateAdditionalLogDetails(wellId, { id, color });
     handleClosePicker();
   };
 
-  const handleCloseModal = () => {
+  const handleCloseSettings = () => {
     setMenu(d => {
       return { ...d, isSettingsVisible: false };
     });
   };
-
-  const handleArrowClickBack = () =>
-    setMenu(d => {
-      const currentIndex = currentGraphs.findIndex(graph => graph === d.settingsView);
-      if (currentIndex === 0) {
-        return { ...d, settingsView: graph };
-      } else if (currentIndex < 0) {
-        return { ...d, settingsView: currentGraphs[currentGraphs.length - 1] };
-      } else {
-        return { ...d, settingsView: currentGraphs[currentIndex - 1] };
-      }
-    });
-
-  const handleArrowClickForward = () =>
-    setMenu(d => {
-      const currentIndex = currentGraphs.findIndex(graph => graph === d.settingsView);
-      if (currentIndex === currentGraphs.length - 1) {
-        return { ...d, settingsView: graph };
-      } else if (currentIndex < 0) {
-        return { ...d, settingsView: currentGraphs[0] };
-      } else {
-        return { ...d, settingsView: currentGraphs[currentIndex + 1] };
-      }
-    });
 
   const handleOpenPicker = event => {
     const open = Boolean(anchorEl);
@@ -87,32 +61,31 @@ function SettingsMenu({
 
   const handleClosePicker = () => {
     setAnchorEl(null);
+    handleCloseSettings();
+  };
+
+  const handleEditScale = () => {
+    setEditingScale(true);
+    handleCloseSettings();
   };
 
   const handleDelete = () => {
-    handleRemoveGraph(graph);
-  };
-
-  const handleOpenDataTable = () => {
-    handleDataTable(true);
-  };
-
-  const handleCloseDataTable = () => {
-    handleDataTable(false);
+    handleRemoveChart(log);
+    handleCloseSettings();
   };
 
   return (
-    <Dialog onClose={handleCloseModal} open={isVisible}>
+    <Dialog onClose={handleCloseSettings} open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
-        <IconButton aria-label="arrow-back" onClick={handleArrowClickBack}>
+        <IconButton aria-label="arrow-back" onClick={handleArrowBack}>
           <ArrowBack />
         </IconButton>
         <span>{view}</span>
-        <IconButton aria-label="arrow-forward" onClick={handleArrowClickForward}>
+        <IconButton aria-label="arrow-forward" onClick={handleArrowForward}>
           <ArrowForward />
         </IconButton>
       </DialogTitle>
-      <DialogContent className={classes.dialogContent}>
+      <DialogContent className={classes.settingsDialogContent}>
         <List>
           <ListItem button onClick={handleOpenPicker}>
             <ListItemIcon>
@@ -121,24 +94,18 @@ function SettingsMenu({
                   style={{
                     height: 25,
                     width: 25,
-                    backgroundColor: `#${_.get(selectedGraphs, `[${view}].color`)}`
+                    backgroundColor: `#${_.get(selectedLogs, `[${view}].color`)}`
                   }}
                 />
               </Paper>
             </ListItemIcon>
             <ListItemText primary="Edit Style" />
           </ListItem>
-          <ListItem button onClick={() => {}}>
+          <ListItem button onClick={handleEditScale}>
             <ListItemIcon>
               <img src={ScalePlotIcon} className={classes.icon} />
             </ListItemIcon>
             <ListItemText primary="Edit Bias and Scale" />
-          </ListItem>
-          <ListItem button onClick={handleOpenDataTable}>
-            <ListItemIcon>
-              <img src={TableChartIcon} className={classes.icon} />
-            </ListItemIcon>
-            <ListItemText primary="DataTable" />
           </ListItem>
           <ListItem button onClick={handleDelete}>
             <ListItemIcon>
@@ -150,26 +117,26 @@ function SettingsMenu({
       </DialogContent>
 
       <ColorPicker
-        color={_.get(selectedGraphs, `[${view}].color`)}
+        color={_.get(selectedLogs, `[${view}].color`)}
         handleClose={handleClosePicker}
         handleSave={handleSaveColor}
         anchorEl={anchorEl}
       />
-      <DataTable isVisible={isDataTableVisible} handleClose={handleCloseDataTable} data={data} graph={graph} />
     </Dialog>
   );
 }
 
 SettingsMenu.propTypes = {
   isVisible: PropTypes.bool,
-  graph: PropTypes.string,
+  log: PropTypes.string,
   view: PropTypes.string,
   setMenu: PropTypes.func,
-  handleRemoveGraph: PropTypes.func,
-  data: PropTypes.array,
-  setSelectedGraph: PropTypes.func,
-  currentGraphs: PropTypes.arrayOf(PropTypes.string),
-  selectedGraphs: PropTypes.object
+  handleRemoveChart: PropTypes.func,
+  setEditingScale: PropTypes.func,
+  setSelectedLog: PropTypes.func,
+  selectedLogs: PropTypes.object,
+  handleArrowBack: PropTypes.func,
+  handleArrowForward: PropTypes.func
 };
 
 export default SettingsMenu;
