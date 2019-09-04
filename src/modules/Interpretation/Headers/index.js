@@ -100,7 +100,7 @@ function headersReducer(state, action) {
       throw new Error("action not available");
   }
 }
-export default function HeadersContainer(props) {
+export default React.memo(props => {
   const [{ currentEditedLog, logsBiasAndScale, colorsByWellLog }, dispatch] = useComboContainer();
   const changeCurrentEditedLog = useCallback(logId => dispatch({ type: "CHANGE_CURRENT_EDITED_LOG", logId }), [
     dispatch
@@ -123,7 +123,7 @@ export default function HeadersContainer(props) {
   };
 
   return <Headers {...props} {...logProps} />;
-}
+});
 
 Headers.defaultProps = {
   controlLogs: []

@@ -31,7 +31,6 @@ const Interpretation = React.memo(
     resetLogBiasAndScale,
     changeCurrentEditedLog
   }) => {
-    console.log("render");
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
