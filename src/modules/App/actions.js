@@ -11,19 +11,24 @@ export function useSaveSurveysAndProjections() {
   const { replaceResult: replaceSurveys, updateSurvey } = useSurveysDataContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
 
+  //  These change with every pending survey/projection value update.
+  //  A debounced save with these as dependencies is worthless, since it redefines the callback on every change
   const pendingRef = useRef({});
-  pendingRef.current = pendingSegmentsState;
-  const surveyIds = useMemo(() => _.keyBy(computedSurveys, s => s.id), [computedSurveys]);
-  const projectionIds = useMemo(() => _.keyBy(computedProjections, p => p.id), [computedProjections]);
+  pendingRef.current.pendingSegmentsState = pendingSegmentsState;
+  pendingRef.current.computedSurveys = computedSurveys;
+  pendingRef.current.computedProjections = computedProjections;
 
   const replaceSurveysAndProjections = useCallback(() => {
-    replaceProjections(computedProjections);
-    replaceSurveys(computedSurveys);
-  }, [replaceProjections, replaceSurveys, computedSurveys, computedProjections]);
+    replaceProjections(pendingRef.current.computedProjections);
+    replaceSurveys(pendingRef.current.computedSurveys);
+  }, [replaceProjections, replaceSurveys, pendingRef]);
 
-  const saveSurveys = useCallback(() => {
-    const pendingSurveyState = _.pickBy(pendingRef.current, (val, key) => !!surveyIds[key]);
-    const pendingProjectionsState = _.pickBy(pendingRef.current, (val, key) => !!projectionIds[key]);
+  const save = useCallback(() => {
+    const { computedSurveys, computedProjections, pendingSegmentsState } = pendingRef.current;
+    const surveyIds = _.keyBy(computedSurveys, s => s.id);
+    const projectionIds = _.keyBy(computedProjections, p => p.id);
+    const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
+    const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
 
     replaceSurveysAndProjections();
     const surveyRes = Promise.all(
@@ -36,7 +41,9 @@ export function useSaveSurveysAndProjections() {
     );
     dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
     return [].concat(surveyRes, projectionRes);
-  }, [surveyIds, pendingRef, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, projectionIds]);
+  }, [pendingRef, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection]);
 
-  return { saveSurveys };
+  const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);
+
+  return { save, debouncedSave };
 }

@@ -78,10 +78,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
-  const { saveSurveys } = useSaveSurveysAndProjections();
-  const saveCallback = useRef(() => {});
-  saveCallback.current = saveSurveys;
-  const debouncedSave = useMemo(() => debounce(() => saveCallback.current(), 500), []);
+  const { debouncedSave } = useSaveSurveysAndProjections();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
