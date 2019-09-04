@@ -45,7 +45,7 @@ function LogDataLine({
   logLineData,
   logColor
 }) {
-  const computedLogData = useGetComputedLogData(log, draft);
+  const computedLogData = useGetComputedLogData(log && log.id, draft);
 
   return computedLogData ? (
     <LogData

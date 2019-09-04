@@ -11,7 +11,7 @@ const lastValue = array => array[array.length - 1];
 export default function SelectionStats({ draft, selection, selectedWellLog, gammaRange, ...boxProps }) {
   const [startWellLog] = selection;
   const endWellLog = lastValue(selection);
-  const startLogData = useGetComputedLogData(startWellLog, draft);
+  const startLogData = useGetComputedLogData(startWellLog && startWellLog.id, draft);
   const [xMin, xMax] = gammaRange;
 
   // hide dip value if segment selection have different dip values

@@ -240,13 +240,8 @@ export function useCurrentComputedSegments() {
   return getCurentComputedSegments(allLogs, filteredLogs, segments, draftMode);
 }
 
-export function useGetComputedLogData(log, draft) {
-  const { wellId } = useWellIdContainer();
-  const [logData] = useWellLogData(wellId, log && log.tablename);
-  const { byId: draftLogsById } = useComputedSegments();
-  const [, computedSegments] = useCurrentComputedSegments();
-  const [, , allLogs] = useWellLogsContainer();
-  const logIndex = useMemo(() => (log ? allLogs.findIndex(l => l.id === log.id) : -1), [allLogs, log]);
+const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, allLogs) => {
+  const logIndex = log ? allLogs.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 
@@ -255,31 +250,45 @@ export function useGetComputedLogData(log, draft) {
     prevComputedSegment = prevComputedSegment && draftLogsById[prevComputedSegment.id];
   }
 
-  return useMemo(() => {
-    if (logData && computedSegment) {
-      const currentLogData = { ...log, fault: computedSegment.fault };
-      const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
-      return {
-        ...logData,
-        scalebias: computedSegment.scalebias,
-        scalefactor: computedSegment.scalefactor,
-        data: logData.data.reduce((acc, d, index) => {
-          const { vs, tvd } = d;
+  if (logData && computedSegment) {
+    const currentLogData = { ...log, fault: computedSegment.fault };
+    const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
+    return {
+      ...logData,
+      scalebias: computedSegment.scalebias,
+      scalefactor: computedSegment.scalefactor,
+      data: logData.data.reduce((acc, d, index) => {
+        const { vs, tvd } = d;
 
-          const newLog = { ...d };
+        const newLog = { ...d };
 
-          const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
-          newLog.depth = depth;
+        const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
+        newLog.depth = depth;
 
-          acc.push(newLog);
+        acc.push(newLog);
 
-          return acc;
-        }, [])
-      };
-    }
+        return acc;
+      }, [])
+    };
+  }
 
-    return logData;
-  }, [logData, computedSegment, prevComputedSegment, log]);
+  return logData;
+};
+
+const recomputeLogDataFactory = memoize(log => {
+  return memoizeOne(recomputeLogData);
+});
+
+export function useGetComputedLogData(logId, draft) {
+  const { wellId } = useWellIdContainer();
+  const [, logsById, allLogs] = useWellLogsContainer();
+  const log = logsById[logId];
+  const [logData] = useWellLogData(wellId, log && log.tablename);
+  const { byId: draftLogsById } = useComputedSegments();
+  const [, computedSegments] = useCurrentComputedSegments();
+
+  const recomputeLogData = recomputeLogDataFactory(log);
+  return recomputeLogData(logData, log, draftLogsById, computedSegments, draft, allLogs);
 }
 
 export function getSelectedId(selectionById) {
