@@ -31,6 +31,7 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
   const { updateSegments } = props;
+  let debouncedSave = () => {};
   const red = 0xee2211;
   const white = 0xffffff;
   let prev, curr;
@@ -44,22 +45,46 @@ function interactiveProjection(parent, props) {
   const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
 
-  const prevTot = createCircle(container, red, red, function(pos) {
-    updateSegments({ [curr.id]: { fault: pos.y - prev.tot } });
-  });
-  const prevBot = createCircle(container, red, red, function(pos) {
-    updateSegments({ [curr.id]: { fault: pos.y - prev.bot } });
-  });
+  const prevTot = createCircle(
+    container,
+    red,
+    red,
+    function(pos) {
+      updateSegments({ [curr.id]: { fault: pos.y - prev.tot } });
+    },
+    () => debouncedSave()
+  );
+  const prevBot = createCircle(
+    container,
+    red,
+    red,
+    function(pos) {
+      updateSegments({ [curr.id]: { fault: pos.y - prev.bot } });
+    },
+    () => debouncedSave()
+  );
 
-  const currTot = createCircle(container, white, red, function(pos) {
-    const dip = calculateDip(pos.y - curr.fault, prev.tot, curr.vs, prev.vs);
-    updateSegments({ [curr.id]: { dip } });
-  });
+  const currTot = createCircle(
+    container,
+    white,
+    red,
+    function(pos) {
+      const dip = calculateDip(pos.y - curr.fault, prev.tot, curr.vs, prev.vs);
+      updateSegments({ [curr.id]: { dip } });
+    },
+    () => debouncedSave()
+  );
 
-  const currBot = createCircle(container, white, red, function(pos) {
-    const dip = calculateDip(pos.y - curr.fault, prev.bot, curr.vs, prev.vs);
-    updateSegments({ [curr.id]: { dip } });
-  });
+  const currBot = createCircle(
+    container,
+    white,
+    red,
+    function(pos) {
+      const dip = calculateDip(pos.y - curr.fault, prev.bot, curr.vs, prev.vs);
+      updateSegments({ [curr.id]: { dip } });
+    },
+    () => debouncedSave()
+  );
 
   const memoSetKnobColor = memoizeOne(color => {
     drawCircle(prevTot, color, color);
@@ -72,9 +97,13 @@ function interactiveProjection(parent, props) {
   paMarker.lineStyle(2, red).beginFill(white, 0.01);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
   paMarker.transform.updateTransform = frozenScaleTransform;
-  subscribeToMoveEvents(paMarker, function(pos) {
-    updateSegments({ [curr.id]: { tvd: pos.y, vs: pos.x } });
-  });
+  subscribeToMoveEvents(
+    paMarker,
+    function(pos) {
+      updateSegments({ [curr.id]: { tvd: pos.y, vs: pos.x } });
+    },
+    () => debouncedSave()
+  );
 
   return props => {
     const { selectedSections, calcSections, scale } = props;
@@ -85,6 +114,7 @@ function interactiveProjection(parent, props) {
       container.visible = false;
       return;
     }
+    debouncedSave = props.debouncedSave;
     container.visible = true;
 
     if (!currTot.transform || !currBot.transform || !paMarker.transform || !prevTot.transform || !prevBot.transform) {
