@@ -32,6 +32,12 @@ const Interpretation = React.memo(
     changeCurrentEditedLog
   }) => {
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
+    const logSettingsProps = {
+      resetLogBiasAndScale,
+      changeCurrentEditedLog,
+      currentEditedLog,
+      logsBiasAndScale
+    };
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
@@ -59,7 +65,9 @@ const Interpretation = React.memo(
 
         <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
 
-        {currentEditedLog ? null : (
+        {currentEditedLog ? (
+          <LogSettings {...logSettingsProps} />
+        ) : (
           <React.Fragment>
             <div className="layout horizontal">
               <IconButton

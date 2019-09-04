@@ -7,8 +7,6 @@ import Refresh from "@material-ui/icons/Refresh";
 export default function LogSettings({
   resetLogBiasAndScale,
   changeCurrentEditedLog,
-  handleSave,
-
   currentEditedLog,
   logsBiasAndScale
 }) {
