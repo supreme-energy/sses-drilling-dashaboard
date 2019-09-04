@@ -1,4 +1,3 @@
-// Hook
 import { useEffect, useRef } from "react";
 
 export default function useWhyDidYouUpdate(name, props) {
