@@ -6,7 +6,6 @@ import { hexColor } from "../../../constants/pixiColors";
 import { useWellLogData, EMPTY_ARRAY } from "../../../api";
 import { useWellIdContainer } from "../../App/Containers";
 import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
-import PixiContainer from "../../../components/PixiContainer";
 
 const mapWellLog = d => [d.value, d.depth];
 

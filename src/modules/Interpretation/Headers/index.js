@@ -3,7 +3,6 @@ import { Box } from "@material-ui/core";
 import ControlLogHeader from "./ControlLogHeader";
 import WellLogsHeader from "./WellLogsHeader";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
 import { getColorForWellLog } from "../selectors";
 
 const Headers = React.memo(
@@ -101,7 +100,7 @@ function headersReducer(state, action) {
   }
 }
 export default React.memo(props => {
-  const [{ currentEditedLog, logsBiasAndScale, colorsByWellLog }, dispatch] = useComboContainer();
+  const [{ currentEditedLog, colorsByWellLog }, dispatch] = useComboContainer();
   const changeCurrentEditedLog = useCallback(logId => dispatch({ type: "CHANGE_CURRENT_EDITED_LOG", logId }), [
     dispatch
   ]);
@@ -112,7 +111,6 @@ export default React.memo(props => {
 
   const [{ activeLog }, dispatchHeaders] = useReducer(headersReducer, initialState);
   const changeActiveLog = useCallback(log => dispatchHeaders({ type: "CHANGE_ACTIVE_LOG", log }), [dispatchHeaders]);
-  const [, , , { updateWellLogs }] = useWellLogsContainer();
   const logProps = {
     changeCurrentEditedLog,
     currentEditedLog,

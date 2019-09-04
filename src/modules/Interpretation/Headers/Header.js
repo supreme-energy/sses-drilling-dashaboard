@@ -1,21 +1,8 @@
 import React, { useRef } from "react";
-
 import css from "./styles.scss";
-import { MoreVert, RemoveCircle, ArrowBack, ArrowForward } from "@material-ui/icons";
+import { MoreVert, ArrowBack, ArrowForward } from "@material-ui/icons";
 import ScalePlotIcon from "../../../assets/scalePlot.svg";
-
-import {
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Box,
-  Typography,
-  Popover,
-  IconButton,
-  List
-} from "@material-ui/core";
-import _ from "lodash";
+import { ListItem, ListItemIcon, ListItemText, Box, Typography, Popover, IconButton, List } from "@material-ui/core";
 import ColorPickerBox from "../../../components/ColorPickerBox";
 
 function LogPopupContent({

@@ -2,14 +2,7 @@ import React, { useMemo, useRef, useEffect } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
-import {
-  getIsDraft,
-  useComputedDraftSegmentsOnly,
-  useLogsExtentWithBiasAndScale,
-  getExtentWithBiasAndScale,
-  getFilteredLogsExtent,
-  getColorForWellLog
-} from "./selectors";
+import { getIsDraft, useComputedDraftSegmentsOnly, getFilteredLogsExtent, getColorForWellLog } from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
 import { withWellLogsData, EMPTY_ARRAY } from "../../api";
 import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";

@@ -1,6 +1,5 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { Box, IconButton } from "@material-ui/core";
-import Check from "@material-ui/icons/Check";
 import Close from "@material-ui/icons/Close";
 import Refresh from "@material-ui/icons/Refresh";
 

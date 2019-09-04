@@ -3,8 +3,7 @@ import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from 
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
-import { useWellControlLog, useAdditionalDataLogsList, useAdditionalDataLog } from "../../api";
-import { withRouter } from "react-router";
+import { useWellControlLog } from "../../api";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
