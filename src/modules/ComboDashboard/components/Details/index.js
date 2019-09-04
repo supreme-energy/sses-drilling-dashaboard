@@ -116,9 +116,9 @@ export default function DetailsTable({ showFullTable = false }) {
       <TableBody>
         {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
-          const update = field => {
+          const update = (field, method) => {
             return value => {
-              updateSegments({ [row.id]: { [field]: Number(value) } });
+              updateSegments({ [row.id]: { [field]: Number(value), ...(method && { method }) } });
               debouncedSave();
             };
           };
@@ -137,12 +137,12 @@ export default function DetailsTable({ showFullTable = false }) {
                 <SurveyIcon row={row} />
                 {row.name}
               </TableCell>
-              {Cell(row.md.toFixed(2), editable, update("md"), row.method === MD_INC_AZ)}
-              {Cell(row.inc.toFixed(2), editable, update("inc"), row.method === MD_INC_AZ)}
-              {Cell(row.azm.toFixed(2), editable, update("azm"), row.method === MD_INC_AZ)}
-              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd"), row.method === TVD_VS)}
+              {Cell(row.md.toFixed(2), editable, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.inc.toFixed(2), editable, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.azm.toFixed(2), editable, update("azm", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd", TVD_VS), row.method === TVD_VS)}
               {Cell(row.dl.toFixed(2), false)}
-              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs"), row.method === TVD_VS)}
+              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs", TVD_VS), row.method === TVD_VS)}
               {showFullTable && Cell(row.ns.toFixed(2), false)}
               {showFullTable && Cell(row.ew.toFixed(2), false)}
               {Cell(row.fault.toFixed(2), editable, update("fault"), false, a =>
@@ -155,8 +155,8 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.dip.toFixed(2), editable, update("dip"), false, a =>
                 Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
-              {Cell(row.tcl.toFixed(2), editable && row.isProjection, update("tcl"))}
-              {Cell(row.pos.toFixed(2), editable && row.isProjection, update("pos"))}
+              {Cell(row.tcl.toFixed(2), false)}
+              {Cell(row.pos.toFixed(2), false)}
               {showFullTable && Cell(row.tot.toFixed(2), false)}
               {showFullTable && Cell(row.bot.toFixed(2), false)}
               <TableCell className={classNames(classes.cell, classes.actions)}>
