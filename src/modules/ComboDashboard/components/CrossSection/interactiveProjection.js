@@ -3,6 +3,7 @@ import memoizeOne from "memoize-one";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
 import { calculateDip } from "./formulas";
+import { TVD_VS } from "../../../../constants/calcMethods";
 
 function drawCircle(circle, lineColor, fillColor) {
   circle.clear();
@@ -12,6 +13,7 @@ function drawCircle(circle, lineColor, fillColor) {
 function createCircle(container, lineColor, fillColor, cb, cbEnd) {
   const circle = container.addChild(new PIXI.Graphics());
   drawCircle(circle, lineColor, fillColor);
+  circle.cursor = "pointer";
   circle.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(circle, cb, cbEnd);
   return circle;
@@ -94,13 +96,14 @@ function interactiveProjection(parent, props) {
   });
 
   const paMarker = container.addChild(new PIXI.Graphics());
-  paMarker.lineStyle(2, red).beginFill(white, 0.01);
+  paMarker.lineStyle(2, red, 0).beginFill(white, 0.01);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
+  paMarker.cursor = "pointer";
   paMarker.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(
     paMarker,
     function(pos) {
-      updateSegments({ [curr.id]: { tvd: pos.y, vs: pos.x } });
+      updateSegments({ [curr.id]: { tvd: pos.y, method: TVD_VS } });
     },
     () => debouncedSave()
   );
