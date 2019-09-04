@@ -275,7 +275,7 @@ const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, 
   return logData;
 };
 
-const recomputeLogDataFactory = memoize(log => {
+const recomputeLogDataFactory = memoize(logId => {
   return memoizeOne(recomputeLogData);
 });
 
@@ -287,7 +287,7 @@ export function useGetComputedLogData(logId, draft) {
   const { byId: draftLogsById } = useComputedSegments();
   const [, computedSegments] = useCurrentComputedSegments();
 
-  const recomputeLogData = recomputeLogDataFactory(log);
+  const recomputeLogData = recomputeLogDataFactory(logId);
   return recomputeLogData(logData, log, draftLogsById, computedSegments, draft, allLogs);
 }
 

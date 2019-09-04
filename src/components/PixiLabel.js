@@ -45,7 +45,7 @@ const PixiLabel = forwardRef(
               ref={textRef}
               container={container}
               text={text}
-              x={x + padding.left - 5}
+              x={x + padding.left}
               y={y + padding.top}
               {...textProps}
             />
