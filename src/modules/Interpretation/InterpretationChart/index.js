@@ -164,8 +164,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       {controlLogs.map(cl => (
         <ControlLogLine key={cl.id} log={cl} container={viewport} />
       ))}
-      {/* todo use this when add aditional logs
-      {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
       <LogLines
         wellId={wellId}
         logs={logList}

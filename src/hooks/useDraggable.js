@@ -22,6 +22,7 @@ export default function useDraggable({
       if (container) {
         container.interactive = true;
         container.hitArea = new PIXI.Rectangle(x, y, width, height);
+        container.__draggable = true;
       }
     },
     [getContainer, width, height, x, y]
@@ -65,12 +66,15 @@ export default function useDraggable({
     [getContainer]
   );
 
-  const onMouseOut = useCallback(() => {
-    interactionStateRef.current.isOutside = true;
-    if (canvas && !interactionStateRef.current.isDragging) {
-      canvas.style.cursor = "default";
-    }
-  }, [canvas]);
+  const onMouseOut = useCallback(
+    e => {
+      interactionStateRef.current.isOutside = true;
+      if (canvas && !interactionStateRef.current.isDragging && !(e.target && e.target.__draggable)) {
+        canvas.style.cursor = "default";
+      }
+    },
+    [canvas]
+  );
   const onMouseOver = useCallback(
     e => {
       interactionStateRef.current.isOutside = false;
