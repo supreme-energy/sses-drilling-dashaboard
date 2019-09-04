@@ -93,7 +93,7 @@ const Interpretation = React.memo(
   }
 );
 
-const InterpretatinContainer = props => {
+const InterpretatinContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
   const [controlLogs] = useWellControlLog(wellId);
   const [logList] = useWellLogsContainer();
@@ -116,6 +116,6 @@ const InterpretatinContainer = props => {
     changeCurrentEditedLog
   };
   return <Interpretation {...props} {...interpretationProps} />;
-};
+});
 
 export default InterpretatinContainer;

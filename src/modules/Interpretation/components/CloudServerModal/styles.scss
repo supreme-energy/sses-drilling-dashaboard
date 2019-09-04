@@ -1,9 +1,9 @@
 @import "../../../../styles/base";
 
 .cloudServerButton {
-    position: relative;
-    left: 200px;
-    bottom: 35px;
+    position: absolute;
+    left: 250px;
+    padding-bottom: 10px;
 
     .badgeGreen span {
         background-color: green;
@@ -54,6 +54,12 @@
     .conflictButton:hover {
         background-color: #BC0143;
     }
+
+    .newSurveyContainer {
+        span {
+            margin-left: 10px;
+        }
+    }
 }
 
 .importDialogActions {
@@ -66,6 +72,11 @@
     .conflictButton:hover {
         background-color: #BC0143;
     }
+
+    .conflictButtonOutlined {
+        border-color: $conflictRed;
+        color: $conflictRed;
+    }
 }
 
 .notificationButton {
@@ -73,6 +84,10 @@
     top: 8px;
     left: 10px;
     height: 40px;
+}
+
+.cleanUpDataButton {
+    outline: none !important;
 }
 
 .notificationContent {

@@ -1,8 +1,6 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useState, useEffect } from "react";
 import { createContainer } from "unstated-next";
-
-import memoize from "react-powertools/memoize";
-
+import usePrevious from "react-use/lib/usePrevious";
 import {
   useAdditionalDataLog,
   useFetchFormations,
@@ -27,13 +25,13 @@ const filterDataToInterval = (data, interval) => {
   }
 };
 
-const filterDataToLast = memoize((data, lastDepth) => {
+const filterDataToLast = (data, lastDepth) => {
   if (data && data.length) {
     return data.find(({ md }) => md >= lastDepth);
   } else {
     return {};
   }
-});
+};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {
@@ -45,6 +43,25 @@ function useTimeSlider(initialState) {
 function useDrillPhase(initialState) {
   const [drillPhaseObj, setDrillPhase] = useReducer(drillPhaseReducer, initialState);
   return { drillPhaseObj, setDrillPhase };
+}
+
+// Shared state for Cloud Server Modal Countdown
+function useCloudServerCountdown(initialState) {
+  const [interval, setAutoCheckInterval] = useState(initialState);
+  const [countdown, setCountdown] = useState(initialState);
+  const prevInterval = usePrevious(interval);
+
+  const resetCountdown = () => setCountdown(interval);
+  const handleCountdown = () => setCountdown(count => count - 1);
+
+  useEffect(() => {
+    const intervalChanged = interval !== prevInterval;
+    if (intervalChanged || !countdown) {
+      setCountdown(interval);
+    }
+  }, [interval, prevInterval, countdown]);
+
+  return { countdown, interval, setAutoCheckInterval, handleCountdown, resetCountdown };
 }
 
 function useAppStateData() {
@@ -71,7 +88,7 @@ const filterProjectionsToInterval = memoizeOne(filterDataToInterval);
 const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 
 // Uses current time slider location to filter well Cross-Section
-export function useFilteredWellData() {
+export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
   const { wellId } = useWellIdContainer();
@@ -86,6 +103,31 @@ export function useFilteredWellData() {
   const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
   const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
+
+  return {
+    surveys: surveysFiltered,
+    wellPlan,
+    wellPlanFiltered,
+    formations: formationsFiltered,
+    projections: projectionsFiltered
+  };
+}
+
+export function useFilteredWellData() {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const { wellId } = useWellIdContainer();
+
+  const wellPlan = useWellPath(wellId);
+  const { surveys } = useSurveysDataContainer();
+  const { serverFormations: formations } = useFormationsDataContainer();
+  const { projections } = useProjectionsDataContainer();
+
+  // Filter data and memoize
+  const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
+  const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
+  const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
+  const formationsFiltered = filterFormationsMem(formations, sliderInterval);
 
   return {
     surveys: surveysFiltered,
@@ -209,11 +251,11 @@ function useFormationsData() {
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { formationsData: computedFormations, refreshFormations };
+  return { serverFormations, formationsData: computedFormations, refreshFormations };
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections } = useComputedFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
@@ -240,7 +282,10 @@ function useSelectedWellInfo() {
 }
 
 // Create containers
-
+export const {
+  Provider: CloudServerCountdownProvider,
+  useContainer: useCloudServerCountdownContainer
+} = createContainer(useCloudServerCountdown);
 export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContainer } = createContainer(useTimeSlider);
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);

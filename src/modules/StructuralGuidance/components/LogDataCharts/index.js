@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import AddCircle from "@material-ui/icons/AddCircle";
@@ -6,6 +6,7 @@ import Import from "@material-ui/icons/OpenInBrowser";
 import _ from "lodash";
 import classNames from "classnames";
 
+import SegmentPlot from "./SegmentPlot";
 import { VS, INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import LogMenu from "./LogMenu";
 import { useAdditionalDataLogsList } from "../../../../api";
@@ -13,7 +14,7 @@ import WidgetCard from "../../../../components/WidgetCard";
 import ChartContainer from "./ChartContainer";
 import classes from "./styles.scss";
 
-function LogData({ wellId }) {
+const LogDataCharts = React.memo(({ wellId, view }) => {
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
   const [selectedLogs, setSelectedLog] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
@@ -34,13 +35,16 @@ function LogData({ wellId }) {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleRemoveChart = log => {
-    setSelectedLog({ ...selectedLogs, [log]: false });
-  };
+  const handleRemoveChart = useCallback(
+    log => {
+      setSelectedLog({ ...selectedLogs, [log]: false });
+    },
+    [selectedLogs]
+  );
 
-  const handleCloseMenu = () => {
+  const handleCloseMenu = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   const handleImport = () => {};
 
@@ -69,6 +73,7 @@ function LogData({ wellId }) {
 
   return (
     <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
+      <SegmentPlot newView={view} xAxis={VS} />
       {currentLogs.map(log => {
         if (!_.isEmpty(dataBySection)) {
           const logId = dataBySection[log].id;
@@ -81,6 +86,7 @@ function LogData({ wellId }) {
               dataBySection={dataBySection}
               handleRemoveChart={handleRemoveChart}
               xAxis={VS}
+              view={view}
             />
           );
         }
@@ -105,10 +111,10 @@ function LogData({ wellId }) {
       />
     </WidgetCard>
   );
-}
+});
 
-LogData.propTypes = {
+LogDataCharts.propTypes = {
   wellId: PropTypes.string
 };
 
-export default LogData;
+export default LogDataCharts;

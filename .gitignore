@@ -8,3 +8,4 @@ coverage
 !.idea/codeStyleSettings.xml
 .yarn-cache
 src/react-powertools/
+*.vscode

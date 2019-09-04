@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import css from "./styles.scss";
 import { MoreVert, ArrowBack, ArrowForward } from "@material-ui/icons";
 import ScalePlotIcon from "../../../assets/scalePlot.svg";
@@ -60,6 +60,8 @@ export default function Header({
 }) {
   const headerRef = useRef(null);
 
+  const handleChangeColor = useCallback(color => onChangeColor({ color, logId }), [onChangeColor, logId]);
+  const editScaleCallback = useCallback(() => () => handleEditScale(logId), [handleEditScale, logId]);
   return (
     <React.Fragment>
       <Box display="flex" className={css.header}>
@@ -103,12 +105,12 @@ export default function Header({
         }}
       >
         <LogPopupContent
-          onChangeColor={color => onChangeColor({ color, logId })}
+          onChangeColor={handleChangeColor}
           color={color}
           onNextClick={onNextClick}
           onPrevClick={onPrevClick}
           name={name}
-          handleEditScale={() => handleEditScale(logId)}
+          handleEditScale={editScaleCallback}
         />
       </Popover>
     </React.Fragment>

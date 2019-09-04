@@ -186,7 +186,7 @@ export function VerticalCrossSection({
           formations.map(f => {
             return (
               <PixiLine
-                key={f.label}
+                key={f.id}
                 container={viewport}
                 data={f.data}
                 mapData={mapValues}

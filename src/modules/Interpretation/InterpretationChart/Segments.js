@@ -283,7 +283,7 @@ const Segment = React.memo(({ segment, view, selected, container, onSegmentClick
   );
 });
 
-export default function Segments({ segmentsData, container, selectedWellLog, chartWidth }) {
+export default React.memo(({ segmentsData, container, selectedWellLog, chartWidth }) => {
   const { view } = useInterpretationRenderer();
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
   const { toggleMdSelection } = useSelectionActions();
@@ -340,4 +340,4 @@ export default function Segments({ segmentsData, container, selectedWellLog, cha
       )}
     </React.Fragment>
   );
-}
+});

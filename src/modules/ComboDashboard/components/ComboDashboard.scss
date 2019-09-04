@@ -52,9 +52,34 @@
 
 .row {
   display: flex;
+
+}
+
+.detailsHeader {
+ align-items: center;
   .flexRight {
     display: flex;
-    margin-left: auto;
+    align-items: center;
+    margin-left: auto!important;
+    .methodSelect {
+      width: 200px;
+      margin: 0 5px;
+      background-color: rgba(0,0,0,0);
+      div {
+        padding: 6px 2px 4px;
+      }
+    }
+    .textField {
+      width: 80px;
+      margin: 0 5px;
+      input {
+        padding: 6px 2px 7px;
+      }
+    }
+    .fullTableButton {
+      height: 32px;
+      width: 32px;
+    }
   }
 }
 
@@ -98,8 +123,19 @@
   }
 }
 
+.paIcon {
+  position: relative;
+  top: -2px;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+}
+
 .icon {
   width: 20px;
   height: 20px;
 }
 
+.tableWrapper {
+  height: 156px;
+}

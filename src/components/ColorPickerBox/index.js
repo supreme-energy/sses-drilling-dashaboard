@@ -1,33 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Paper } from "@material-ui/core";
 import ColorPicker from "../../modules/StructuralGuidance/components/ColorPicker";
 import css from "./styles.scss";
 
-export default function ColorPickerBox({ boxProps, ...props }) {
+const ColorPickerBox = React.memo(({ boxProps, handleSave, ...props }) => {
   const [anchorEl, updateAnchorEl] = useState(null);
+  const saveCallback = useCallback(
+    value => {
+      handleSave(value);
+      updateAnchorEl(null);
+    },
+    [updateAnchorEl, handleSave]
+  );
+  const closeCallback = useCallback(() => updateAnchorEl(null), [updateAnchorEl]);
+  const clickCallback = useCallback(() => e => updateAnchorEl(e.target), [updateAnchorEl]);
   return (
     <Paper {...boxProps}>
       <div
         className={css.colorBox}
-        onClick={e => updateAnchorEl(e.target)}
+        onClick={clickCallback}
         style={{
           backgroundColor: props.hex
         }}
       />
-      <ColorPicker
-        {...props}
-        handleSave={value => {
-          props.handleSave(value);
-          updateAnchorEl(null);
-        }}
-        anchorEl={anchorEl}
-        handleClose={() => updateAnchorEl(null)}
-      />
+      <ColorPicker {...props} handleSave={saveCallback} anchorEl={anchorEl} handleClose={closeCallback} />
     </Paper>
   );
-}
+});
 
 ColorPickerBox.defaultProps = {
   boxProps: {},
   handleSave: () => {}
 };
+
+export default ColorPickerBox;

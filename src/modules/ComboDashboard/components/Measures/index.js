@@ -36,7 +36,7 @@ function PercentageBarKpi({ className, value, scaleLow, scaleHigh, unit, label, 
   );
 }
 
-function Measures({ wellId }) {
+const Measures = React.memo(({ wellId }) => {
   const { dataBySection: additionalDataLogKeys = {} } = useAdditionalDataLogsList(wellId);
   const getFieldId = field => _.get(additionalDataLogKeys, `${field}.id`);
   const useFADL = field => useFilteredAdditionalDataLogs(wellId, getFieldId(field));
@@ -142,6 +142,6 @@ function Measures({ wellId }) {
       <KpiItem className={classes.kpi} value={gtf.value} measureUnit={"Units"} label={"Survey GTF"} small />
     </WidgetCard>
   );
-}
+});
 
 export default Measures;

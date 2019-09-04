@@ -287,7 +287,8 @@ export function getSelectedId(selectionById) {
 }
 
 const recomputeSurveysAndProjections = memoizeOne(
-  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm) => {
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
+    const bitProjIdx = surveys.length - 1;
     return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
@@ -385,10 +386,15 @@ const recomputeSurveysAndProjections = memoizeOne(
           fault,
           dip,
           tot,
-          bot
+          bot,
+          pos: tcl - tvd
         };
       } else {
-        acc[index] = calculateProjection(combinedSvy, acc, index, propazm);
+        const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+        const sign = bitProjPos > 0 ? 1 : -1;
+        const cap = bitProjPos > 0 ? Math.max : Math.min;
+        const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+        acc[index] = calculateProjection({ ...combinedSvy, pos }, acc, index, propazm);
       }
       return acc;
     }, []);
@@ -399,7 +405,7 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
-  const [{ wellInfo }] = useSelectedWellInfoContainer();
+  const [{ wellInfo = {} }] = useSelectedWellInfoContainer();
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
@@ -410,7 +416,8 @@ export function useComputedSurveysAndProjections() {
     draftMode,
     selectionById,
     pendingSegmentsState,
-    wellInfo ? Number(wellInfo.propazm) : 0
+    Number(wellInfo.propazm) || 0,
+    Number(wellInfo.autoposdec) || 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,

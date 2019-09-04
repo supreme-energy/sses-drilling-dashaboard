@@ -89,7 +89,7 @@ function BiasAndScale({
     cursor: segmentCursor,
     width: !isVertical ? computedLength - 4 : 8,
     height: isVertical ? computedLength - 4 : 8,
-    x: 4,
+    x: 2,
     y: 0
   });
 
@@ -101,10 +101,10 @@ function BiasAndScale({
     onDragEnd,
     canvas,
     cursor: lineCursor,
-    width: 3,
+    width: isVertical ? 10 : 3,
     x: -1,
-    y: 0,
-    height: 10
+    y: -1,
+    height: isVertical ? 3 : 10
   });
 
   const getSegmentEnd = useCallback(() => endLineRef.current && endLineRef.current.container, []);
@@ -115,10 +115,10 @@ function BiasAndScale({
     onDragEnd,
     canvas,
     cursor: lineCursor,
-    width: 3,
+    width: isVertical ? 10 : 3,
     x: 0,
     y: 0,
-    height: 10
+    height: isVertical ? 3 : 10
   });
 
   return (
@@ -126,14 +126,14 @@ function BiasAndScale({
       <PixiContainer
         container={container}
         x={!isVertical ? gridGutter + computedMin + bias : x}
-        y={isVertical ? gridGutter + computedMin + bias : y}
+        y={isVertical ? computedMin + bias - gridGutter : y}
         child={container => (
           <React.Fragment>
             <PixiContainer
               ref={startLineRef}
               container={container}
               x={!isVertical ? 0 : -1}
-              y={isVertical ? 0 : -1}
+              y={isVertical ? -2 : -1}
               child={container => (
                 <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
@@ -142,7 +142,7 @@ function BiasAndScale({
               ref={endLineRef}
               container={container}
               x={!isVertical ? computedLength : -1}
-              y={isVertical ? computedLength : -1}
+              y={isVertical ? computedLength - 2 : -1}
               child={container => (
                 <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
@@ -189,6 +189,7 @@ BiasAndScale.defaultProps = {
   x: 0,
   y: 0,
   axis: "x",
+  gridGutter: 0,
   handleDragEnd: () => {}
 };
 

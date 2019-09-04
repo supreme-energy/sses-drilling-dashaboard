@@ -20,7 +20,9 @@ const ReviewManualImport = React.memo(({ wellId, handleClose, fileName, setFile,
   const errorMsg = errors.results;
 
   const handleImport = async () => {
-    await uploadFile(wellId, fileName);
+    const res = await uploadFile(wellId, errors.filename);
+    // Clear files if call is successful
+    if (res.status === "success") setFile({});
     handleClose();
   };
 
