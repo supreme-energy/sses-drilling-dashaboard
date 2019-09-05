@@ -195,23 +195,25 @@ function projtma(proposedAzm, projection, prevProjection) {
 function projtva(proposedAzm, projection, prevProjection) {
   const otherInputs = {};
 
-  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
+  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, tcl: ptcl, ew: pew, ns: pns, vs: pvs } = {
     ...prevProjection
   };
   pinc = toRadians(pinc);
   pazm = toRadians(pazm);
-  let { tvd, azm, vs, tot, pos, dip, fault, method } = {
+  let { tvd, azm, vs, tcl, pos, dip, fault, method } = {
     ...projection
   };
   azm = toRadians(azm);
 
   if (method === 8 || method === 7 || method === 6) {
     if (method === 8) {
-      let tot = ptot + -Math.tan(dip / 57.29578) * Math.abs(vs - pvs);
-      let bot = pbot - (ptot - tot);
-      tot += fault;
+      let tcl = ptcl + -Math.tan(dip / 57.29578) * Math.abs(vs - pvs);
+      let tot = ptot - (ptcl - tcl);
+      let bot = pbot - (ptcl - tcl);
+      tcl += fault;
       bot += fault;
-      tvd = tot - pos;
+      tvd = tcl - pos;
+      otherInputs.tcl = tcl;
       otherInputs.tot = tot;
       otherInputs.bot = bot;
       otherInputs.tvd = tvd;
@@ -219,13 +221,14 @@ function projtva(proposedAzm, projection, prevProjection) {
       otherInputs.fault = fault;
     }
     if (method === 7) {
-      tvd = tot - pos;
-      let bot = pbot + (tot - ptot);
+      tvd = tcl - pos;
+      let tot = ptot + (tcl - ptcl);
+      let bot = pbot + (tcl - ptcl);
 
       if (vs - pvs === 0.0) {
         dip = 0.0;
       } else {
-        const tdiff = tot - ptot;
+        const tdiff = tcl - ptcl;
         const vdiff = vs - pvs;
         const a = tdiff / vdiff;
         dip = -toDegrees(Math.atan(a));
@@ -234,6 +237,7 @@ function projtva(proposedAzm, projection, prevProjection) {
         }
       }
 
+      otherInputs.tcl = tcl;
       otherInputs.tot = tot;
       otherInputs.bot = bot;
       otherInputs.tvd = tvd;
