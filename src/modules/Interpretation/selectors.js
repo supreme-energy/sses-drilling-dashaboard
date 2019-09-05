@@ -342,9 +342,6 @@ const recomputeSurveysAndProjections = memoizeOne(
           }
 
           const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
-          if (!tvd) {
-            console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
-          }
           let ns =
             prevSvy.ns +
             (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;

@@ -16,6 +16,7 @@ import { useAppState, useCloudServerCountdownContainer } from "../modules/App/Co
 import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
 import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
+import isNumber from "../utils/isNumber";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -445,7 +446,7 @@ const surveysTransform = memoizeOne(data => {
     return {
       ...s,
       name: isBitProj ? `BPrj` : `${i}`,
-      pos: s.pos || s.tcl - s.tvd,
+      pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,

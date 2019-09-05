@@ -41,7 +41,7 @@ export function useSaveSurveysAndProjections() {
     );
     dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
     return [].concat(surveyRes, projectionRes);
-  }, [pendingRef, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection]);
+  }, [dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection]);
 
   const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);
 
