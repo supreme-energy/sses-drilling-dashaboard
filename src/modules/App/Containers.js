@@ -218,7 +218,7 @@ function useProjectionsData() {
   const [
     projections,
     refreshProjections,
-    saveProjections,
+    updateProjection,
     deleteProjection,
     addProjection,
     replaceResult
@@ -229,7 +229,7 @@ function useProjectionsData() {
       projections.map((p, i) => {
         return {
           ...p,
-          pos: p.pos || p.tot - p.tvd,
+          pos: p.pos || p.tcl - p.tvd,
           name: `PA${i + 1}`,
           isProjection: true,
           color: 0xee2211,
@@ -241,7 +241,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection, replaceResult };
+  return { projectionsData, updateProjection, refreshProjections, deleteProjection, addProjection, replaceResult };
 }
 
 function useFormationsData() {
