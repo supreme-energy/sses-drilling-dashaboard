@@ -23,6 +23,7 @@ function PixiTooltip({
   targetWidth,
   targetHeight,
   position,
+  canvas,
   ...props
 }) {
   const [state, updatePosition] = useState({ x: 0, y: 0, width: 0, height: 0, mouseOut: true });
@@ -40,12 +41,14 @@ function PixiTooltip({
     function makeInteractive() {
       if (target && !havePosition) {
         target.interactive = true;
-        target.hitArea = new PIXI.Rectangle(0, -3, targetWidth, targetHeight);
+        target.hitArea = new PIXI.Rectangle(0, -2, targetWidth, targetHeight);
       }
 
       return () => {
-        target.interactive = false;
-        target.hitArea = null;
+        if (target) {
+          target.interactive = false;
+          target.hitArea = null;
+        }
       };
     },
     [target, targetWidth, targetHeight, havePosition]
@@ -58,13 +61,19 @@ function PixiTooltip({
       };
 
       const onMouseOver = e => {
-        updatePosition(state => ({ ...state, ...e.data.getLocalPosition(target), mouseOut: false }));
-        target.on("mousemove", onMouseMove);
+        if (e) {
+          e.target.emit("mouseover");
+          updatePosition(state => ({ ...state, ...e.data.getLocalPosition(target), mouseOut: false }));
+          target.on("mousemove", onMouseMove);
+        }
       };
 
       const onMouseOut = e => {
         target.off("mousemove", onMouseMove);
         updatePosition(state => ({ ...state, mouseOut: true }));
+        if (canvas && !(e.target && e.target.__draggable)) {
+          canvas.style.cursor = "default";
+        }
       };
 
       if (target && !havePosition) {
@@ -83,7 +92,7 @@ function PixiTooltip({
         }
       };
     },
-    [target, havePosition, mouseOut]
+    [target, havePosition, mouseOut, canvas]
   );
 
   useEffect(refresh, [state, text]);
@@ -312,9 +321,9 @@ const SegmentSelection = ({
     onDrag: onStartSegmentDragHandler,
     onDragEnd,
     x: 0,
-    y: -3,
+    y: -2,
     width: totalWidth,
-    height: 6
+    height: 4
   });
 
   useDraggable({
@@ -328,7 +337,7 @@ const SegmentSelection = ({
     x: 0,
     y: -2,
     width: totalWidth,
-    height: 4
+    height: 6
   });
 
   useDraggable({
@@ -340,9 +349,9 @@ const SegmentSelection = ({
     onDragEnd,
     cursor: "ns-resize",
     x: 0,
-    y: 4,
+    y: 2,
     width: totalWidth,
-    height: segmentHeight - 8
+    height: segmentHeight - 2
   });
 
   const backgroundColor = draftMode ? draftColor : selectionColor;
@@ -353,8 +362,8 @@ const SegmentSelection = ({
     () =>
       interactionsRunning
         ? {
-            x: -60,
-            y: fault ? 20 : segmentHeight - 55
+            x: -55,
+            y: fault ? 10 : segmentHeight - 60
           }
         : null,
     [interactionsRunning, segmentHeight, fault]
@@ -363,7 +372,7 @@ const SegmentSelection = ({
   return (
     <PixiContainer
       ref={selectionContainerRef}
-      y={firstSegment.startdepth}
+      y={firstSegment.startdepth - 2}
       container={container}
       updateTransform={frozenScaleTransform}
       child={container => (
@@ -383,25 +392,19 @@ const SegmentSelection = ({
             text={twoDecimals(lastSegment.enddepth)}
             y={segmentHeight}
           />
-          <PixiContainer
+          <PixiTooltip
+            canvas={canvasRef.current}
+            targetWidth={totalWidth}
+            position={tooltipPosition}
+            targetHeight={segmentHeight + 5}
+            target={container}
+            text={tooltipText}
             container={container}
-            y={-5}
-            updateTransform={frozenScaleTransform}
-            child={targetContainer => (
-              <PixiTooltip
-                targetWidth={totalWidth}
-                position={tooltipPosition}
-                targetHeight={segmentHeight + 5}
-                target={container}
-                text={tooltipText}
-                container={targetContainer}
-                refresh={refresh}
-                textProps={tooltipTextProps}
-              />
-            )}
+            refresh={refresh}
+            textProps={tooltipTextProps}
           />
           <PixiContainer
-            x={10}
+            x={0}
             ref={segmentDragContainer}
             container={container}
             updateTransform={frozenScaleTransform}
@@ -409,9 +412,11 @@ const SegmentSelection = ({
           <PixiContainer
             ref={startLineRef}
             container={container}
+            y={2}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
+                y={0}
                 container={container}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}
@@ -427,6 +432,7 @@ const SegmentSelection = ({
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
+                y={2}
                 container={container}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}

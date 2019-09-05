@@ -489,11 +489,11 @@ export function useComputedFormations(formations) {
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
+export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  return useMemo(() => getExtent(logData), [logData]);
+  return getExtent(logData);
 }
 
 export function usePendingSegments() {

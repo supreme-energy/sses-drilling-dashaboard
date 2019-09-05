@@ -69,6 +69,7 @@ export default function useDraggable({
   const onMouseOut = useCallback(
     e => {
       interactionStateRef.current.isOutside = true;
+
       if (canvas && !interactionStateRef.current.isDragging && !(e.target && e.target.__draggable)) {
         canvas.style.cursor = "default";
       }
@@ -78,7 +79,6 @@ export default function useDraggable({
   const onMouseOver = useCallback(
     e => {
       interactionStateRef.current.isOutside = false;
-
       if (canvas) {
         canvas.style.cursor = cursor;
       }
