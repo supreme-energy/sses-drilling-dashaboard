@@ -13,7 +13,7 @@ const ColorPickerBox = React.memo(({ boxProps, handleSave, ...props }) => {
     [updateAnchorEl, handleSave]
   );
   const closeCallback = useCallback(() => updateAnchorEl(null), [updateAnchorEl]);
-  const clickCallback = useCallback(() => e => updateAnchorEl(e.target), [updateAnchorEl]);
+  const clickCallback = useCallback(e => updateAnchorEl(e.target), [updateAnchorEl]);
   return (
     <Paper {...boxProps}>
       <div
