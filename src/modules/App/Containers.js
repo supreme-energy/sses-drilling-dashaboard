@@ -204,7 +204,7 @@ function useProjectionsData() {
       projections.map((p, i) => {
         return {
           ...p,
-          pos: p.pos || p.tot - p.tvd,
+          pos: p.pos || p.tcl - p.tvd,
           name: `PA${i + 1}`,
           isProjection: true,
           color: 0xee2211,
