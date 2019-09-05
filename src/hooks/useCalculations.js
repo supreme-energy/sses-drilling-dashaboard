@@ -339,6 +339,7 @@ function projtva(proposedAzm, projection, prevProjection) {
       newInc = toDegrees(pinc + (inc - pinc) / 2.0);
       otherInputs.tvd = tvd;
       otherInputs.vs = vs;
+      otherInputs.pos = tcl - tvd;
 
       return { ...projection, md: newMd, inc: newInc, ns, ew, cd, ca, dl, cl, ...otherInputs };
     } else {
