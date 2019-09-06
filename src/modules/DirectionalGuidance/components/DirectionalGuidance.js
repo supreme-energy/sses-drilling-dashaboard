@@ -1,5 +1,6 @@
 import React from "react";
 
+import MotorYield from "./MotorYield";
 import BottomHoleAssembly from "./BottomHoleAssembly";
 import Measures from "../../ComboDashboard/components/Measures";
 import WellBottomHoleInfo from "./WellBottomHoleInfo";
@@ -15,7 +16,7 @@ export function DirectionalGuidance() {
         <div className={classes.row}>
           <WidgetCard title="Projection" hideMenu />
           <BottomHoleAssembly />
-          <WidgetCard title="Motor Yield" hideMenu />
+          <MotorYield />
         </div>
         <div className={classes.graphRow}>
           <WellBottomHoleInfo />
