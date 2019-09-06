@@ -14,10 +14,7 @@
     }
 
     .toolFaceColumn {
-        flex-grow: 2;
-         > div:first-child {
-            flex-grow: 2;
-        }
+        flex: 3;
     }
 
     .kpiRows {

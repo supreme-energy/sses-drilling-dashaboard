@@ -1,5 +1,6 @@
 import React from "react";
 
+import ToolFace from "./ToolFace/index";
 import MotorYield from "./MotorYield";
 import BottomHoleAssembly from "./BottomHoleAssembly";
 import Measures from "../../ComboDashboard/components/Measures";
@@ -23,7 +24,7 @@ export function DirectionalGuidance() {
         </div>
       </div>
       <div className={classes.toolFaceColumn}>
-        <WidgetCard title="Tool Face" hideMenu />
+        <ToolFace />
       </div>
       <div className={classes.measuresColumn}>
         <Measures wellId={wellId} />
