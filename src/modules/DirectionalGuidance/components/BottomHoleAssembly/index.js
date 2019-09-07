@@ -1,5 +1,5 @@
 import React from "react";
-import bottomHoleAssembly from "../../../../assets/BottomHoleAssembly.png";
+import bottomHoleAssembly from "../../../../assets/bottomHoleAssembly.png";
 import WidgetCard from "../../../../components/WidgetCard";
 import classes from "./styles.scss";
 
