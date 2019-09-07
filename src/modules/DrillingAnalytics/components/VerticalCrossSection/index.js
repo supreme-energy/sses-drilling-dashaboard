@@ -2,7 +2,6 @@ import React, { useReducer } from "react";
 import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 import classNames from "classnames";
-import usePrevious from "react-use/lib/usePrevious";
 
 import { useComputedFilteredWellData } from "../../../App/Containers";
 import { crossSectionMenuReducer } from "../reducer";
@@ -25,10 +24,6 @@ export function VerticalCrossSection({ className, wellId, drillPhase, inView }) 
   const { surveys, wellPlanFiltered, formations } = useComputedFilteredWellData(wellId);
 
   const [selectedMenuItems, setSelectedMenuItem] = useReducer(crossSectionMenuReducer, menuItems);
-
-  const prevPhase = usePrevious(drillPhase);
-  const prevViewState = usePrevious(inView);
-  const hasPhaseChanged = prevPhase !== drillPhase || prevViewState !== inView;
 
   return (
     <WidgetCard
@@ -58,8 +53,6 @@ export function VerticalCrossSection({ className, wellId, drillPhase, inView }) 
         surveys={surveys}
         wellPlanFiltered={wellPlanFiltered}
         formations={formations}
-        isLateral={isLateral}
-        hasPhaseChanged={hasPhaseChanged}
       />
       {isLateral && (
         <AerialGraph
