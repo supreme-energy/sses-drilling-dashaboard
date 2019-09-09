@@ -54,55 +54,42 @@ export default function useDraggable({
   interactionStateRef.current.onDrag = onDrag;
   interactionStateRef.current.onDragEnd = onDragEnd;
 
-  const onMouseDown = useCallback(
-    function(e) {
-      const container = getContainer();
-      const interactionState = interactionStateRef.current;
-      const pos = e.data.global;
-      Object.assign(interactionState.prevMouse, pos);
-      interactionState.isDragging = true;
-      container.on("mousemove", interactionState.onMouseMove);
-    },
-    [getContainer]
-  );
-
-  const onMouseOut = useCallback(
-    e => {
-      interactionStateRef.current.isOutside = true;
-
-      if (canvas && !interactionStateRef.current.isDragging && !(e.target && e.target.__draggable)) {
-        canvas.style.cursor = "default";
-      }
-    },
-    [canvas]
-  );
-  const onMouseOver = useCallback(
-    e => {
-      interactionStateRef.current.isOutside = false;
-      if (canvas) {
-        canvas.style.cursor = cursor;
-      }
-      onOver(e);
-    },
-    [onOver, canvas, cursor]
-  );
-
-  const onMouseUp = useCallback(
-    e => {
-      const container = getContainer();
-      const interactionState = interactionStateRef.current;
-      interactionState.isDragging = false;
-      container.off("mousemove", interactionState.onMouseMove);
-      interactionState.onDragEnd(e);
-      if (canvas) {
-        canvas.style.cursor = "default";
-      }
-    },
-    [getContainer, canvas]
-  );
-
   useEffect(
     function enableMouseInteractions() {
+      const onMouseDown = e => {
+        const container = getContainer();
+        const interactionState = interactionStateRef.current;
+        const pos = e.data.global;
+        Object.assign(interactionState.prevMouse, pos);
+        interactionState.isDragging = true;
+        container.on("mousemove", interactionState.onMouseMove);
+      };
+
+      const onMouseOut = e => {
+        interactionStateRef.current.isOutside = true;
+
+        if (canvas && !interactionStateRef.current.isDragging && !(e.target && e.target.__draggable)) {
+          canvas.style.cursor = "default";
+        }
+      };
+      const onMouseOver = e => {
+        interactionStateRef.current.isOutside = false;
+        if (canvas) {
+          canvas.style.cursor = cursor;
+        }
+        onOver(e);
+      };
+
+      const onMouseUp = e => {
+        const container = getContainer();
+        const interactionState = interactionStateRef.current;
+        interactionState.isDragging = false;
+        container.off("mousemove", interactionState.onMouseMove);
+        interactionState.onDragEnd(e);
+        if (canvas) {
+          canvas.style.cursor = "default";
+        }
+      };
       const container = getContainer();
       if (container) {
         container.on("mouseout", onMouseOut);
@@ -123,6 +110,6 @@ export default function useDraggable({
         }
       };
     },
-    [getContainer, onMouseDown, onMouseOut, onMouseOver, onMouseUp, canvas]
+    [getContainer, canvas, onOver, cursor]
   );
 }

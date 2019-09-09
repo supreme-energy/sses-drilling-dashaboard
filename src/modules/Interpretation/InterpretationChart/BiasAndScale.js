@@ -49,7 +49,7 @@ const BiasAndScale = React.memo(
     const endLineRef = useRef(null);
     const finalComputedWidth = computedWidth * parentScale;
 
-    const computedXMin = xMin - (finalComputedWidth - width) / 2;
+    const computedXMin = xMin - (computedWidth - width) / 2;
 
     const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog && saveSelectedWellLog(), [
       saveSelectedWellLog,
