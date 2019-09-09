@@ -747,12 +747,12 @@ export const withWellLogsData = withFetchClient(
   GET_WELL_LOG_DATA,
   ({ logs, wellId }) => logs.map(log => ({ seldbname: wellId, tablename: log.tablename })),
   {
-    mapResult: memoize(results => {
+    mapResult: results => {
       return {
         logsDataResults: results,
         logsGammaExtent: [...getWellsGammaExtent(results)]
       };
-    })
+    }
   }
 );
 

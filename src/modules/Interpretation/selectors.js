@@ -275,7 +275,7 @@ const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, 
   return logData;
 };
 
-const recomputeLogDataFactory = memoize(log => {
+const recomputeLogDataFactory = memoize(logId => {
   return memoizeOne(recomputeLogData);
 });
 
@@ -287,7 +287,7 @@ export function useGetComputedLogData(logId, draft) {
   const { byId: draftLogsById } = useComputedSegments();
   const [, computedSegments] = useCurrentComputedSegments();
 
-  const recomputeLogData = recomputeLogDataFactory(log);
+  const recomputeLogData = recomputeLogDataFactory(logId);
   return recomputeLogData(logData, log, draftLogsById, computedSegments, draft, allLogs);
 }
 
@@ -489,11 +489,11 @@ export function useComputedFormations(formations) {
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
+export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  return useMemo(() => getExtent(logData), [logData]);
+  return getExtent(logData);
 }
 
 export function usePendingSegments() {
