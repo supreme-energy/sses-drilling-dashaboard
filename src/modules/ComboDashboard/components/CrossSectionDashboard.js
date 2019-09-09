@@ -1,6 +1,6 @@
 import { Typography } from "@material-ui/core";
 import { ParentSize } from "@vx/responsive";
-import React, { useCallback, useMemo, useReducer, useState } from "react";
+import React, { useMemo, useReducer, useState } from "react";
 import classNames from "classnames";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
