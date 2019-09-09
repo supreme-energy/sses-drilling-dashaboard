@@ -578,11 +578,12 @@ export function getExtentWithBiasAndScale(logs, extentsByTableName) {
       const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
       const width = max - min;
       const computedWidth = width * scale;
+      const computedXMin = min - (computedWidth - width) / 2;
 
       return {
         extentWithBiasAndScale: [
-          Math.min(acc.extentWithBiasAndScale[0], bias + min - (computedWidth - width) / 2),
-          Math.max(acc.extentWithBiasAndScale[1], bias + computedWidth)
+          Math.min(acc.extentWithBiasAndScale[0], computedXMin + bias),
+          Math.max(acc.extentWithBiasAndScale[1], computedXMin + bias + computedWidth)
         ],
         extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
       };

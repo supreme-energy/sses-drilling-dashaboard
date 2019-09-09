@@ -61,7 +61,7 @@ export default function Header({
   const headerRef = useRef(null);
 
   const handleChangeColor = useCallback(color => onChangeColor({ color, logId }), [onChangeColor, logId]);
-  const editScaleCallback = useCallback(() => () => handleEditScale(logId), [handleEditScale, logId]);
+  const editScaleCallback = useCallback(() => handleEditScale(logId), [handleEditScale, logId]);
   return (
     <React.Fragment>
       <Box display="flex" className={css.header}>
