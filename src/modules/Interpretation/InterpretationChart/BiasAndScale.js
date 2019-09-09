@@ -49,7 +49,7 @@ const BiasAndScale = React.memo(
     const endLineRef = useRef(null);
     const finalComputedWidth = computedWidth * parentScale;
 
-    const computedXMin = xMin - (computedWidth - width) / 2;
+    const computedXMin = xMin - (finalComputedWidth - width) / 2;
 
     const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog && saveSelectedWellLog(), [
       saveSelectedWellLog,
@@ -179,7 +179,6 @@ function useSegmentBiasAndScale({
   const pendingSegments = usePendingSegments();
   const [, , , extentsByTableName] = (result && result.logsGammaExtent) || EMPTY_ARRAY;
   const parentExtent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
-  
 
   const { extent, extentWithBiasAndScale } = getPendingSegmentsExtent(pendingSegments, extentsByTableName);
 
