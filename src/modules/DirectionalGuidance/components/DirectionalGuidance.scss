@@ -25,15 +25,19 @@
         .row, .graphRow {
             display: flex;
             margin-left: 7px;
-            flex: 1;
 
             > div {
                 margin: 3px;
             }
         }
 
+        .row {
+            flex: 0;
+        }
+
         .graphRow {
             min-height: 600px;
+            flex: 1;
         }
     }
 }

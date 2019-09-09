@@ -1,0 +1,71 @@
+.tabs { 
+    span {
+        color: #216F04;
+    }
+
+    button {
+        border-bottom: 1px solid #EDEDED;
+    }
+
+    div > span {
+            background-color: #216F04;
+        }
+}
+
+.bitContainer {
+    margin-top: 15px;
+    justify-content: space-around;
+
+
+}
+
+.bitContainer {
+    button {
+        display: inline-block;
+    }
+
+    .bitContainerCarousel {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+
+        .kpiColumn {
+            display: flex;
+            flex-direction: column;
+            div {
+                margin-bottom: 15px;
+            }
+        }
+
+        .textField {
+            div:before {
+                border-bottom: 1px solid #EDEDED;
+            }
+        }
+    }
+
+    .bitControls {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .warningSnackbar {
+        background-color: red;
+    }
+
+    .icon {
+        font-size: 20px;
+    }
+
+    .iconVariant {
+        opacity: 0.9;
+        margin-right: 5px;
+    }
+
+    .message {
+        display: flex;
+        align-items: center;
+    }
+}

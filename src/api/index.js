@@ -50,6 +50,7 @@ export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
 export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
+export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -996,4 +997,34 @@ export function useEmailContacts(wellId) {
     updateEmailContact,
     refresh
   };
+}
+
+export function useBitProjection(wellId) {
+  const [data, , , , , { fetch, refresh }] = useFetch(
+    {
+      path: GET_BIT_PROJECTION,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => transform(data)
+    }
+  );
+
+  const updateBitProjection = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: GET_BIT_PROJECTION,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
 }

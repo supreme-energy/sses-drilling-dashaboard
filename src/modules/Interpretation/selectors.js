@@ -14,7 +14,7 @@ import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
-import { calculateProjection } from "../../hooks/useCalculations";
+import { calculateProjection } from "../../hooks/projectionCalculations";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;

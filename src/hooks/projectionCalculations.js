@@ -74,12 +74,10 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   let cd = 0.0;
   let radius = 0.0;
   let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevProjection };
-  let { md, inc, azm, tvd, vs, dl } = { ...projection };
+  let { md, inc, azm, tvd, vs } = { ...projection };
 
   if (md <= pmd) {
-    throw new Error(
-      "Warning: Measured depth less than the previous survey. Projections will be reordered after saving"
-    );
+    return "Warning: Measured depth less than the previous survey. Projections will be reordered after saving";
   }
 
   if (inc > 180.0) inc -= 360.0;
@@ -92,7 +90,7 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   azm *= degreesToRadians;
   pinc *= degreesToRadians;
   pazm *= degreesToRadians;
-  dl = Math.acos(Math.cos(pinc) * Math.cos(inc) + Math.sin(pinc) * Math.sin(inc) * Math.cos(azm - pazm));
+  let dl = Math.acos(Math.cos(pinc) * Math.cos(inc) + Math.sin(pinc) * Math.sin(inc) * Math.cos(azm - pazm));
   const cl = md - pmd;
 
   if (dl !== 0.0) {

@@ -1,13 +1,13 @@
 import React from "react";
 
+import Projections from "./Projections";
 import ToolFace from "./ToolFace/index";
 import MotorYield from "./MotorYield";
 import BottomHoleAssembly from "./BottomHoleAssembly";
 import Measures from "../../ComboDashboard/components/Measures";
 import WellBottomHoleInfo from "./WellBottomHoleInfo";
-import WidgetCard from "../../../components/WidgetCard";
-import classes from "./DirectionalGuidance.scss";
 import { useWellIdContainer } from "../../App/Containers";
+import classes from "./DirectionalGuidance.scss";
 
 export function DirectionalGuidance() {
   const { wellId } = useWellIdContainer();
@@ -15,7 +15,7 @@ export function DirectionalGuidance() {
     <div className={classes.directionalGuidanceContainer}>
       <div className={classes.kpiRows}>
         <div className={classes.row}>
-          <WidgetCard title="Projection" hideMenu />
+          <Projections wellId={wellId} />
           <BottomHoleAssembly />
           <MotorYield />
         </div>
