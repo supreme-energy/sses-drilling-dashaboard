@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useMemo } from "react";
+import React, { useReducer, useCallback, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -27,6 +27,8 @@ import uniqueId from "lodash/uniqueId";
 import calculateAverageDip from "./calculateControlDipClosure";
 import memoizeOne from "memoize-one";
 import { mean } from "d3-array";
+import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../../actions";
+import { useSelectedSegmentState } from "../../selectors";
 
 export const NORMAL = "NORMAL";
 export const CALCULATED = "CALCULATED";
@@ -41,29 +43,9 @@ const mothodTypes = {
 const initialState = {
   dipMode: NORMAL,
   settingsOpened: false,
-  rowsById: {}
+  rowsById: {},
+  manualValue: 0
 };
-
-//   const rows = [
-//     { calculationMethod: mothodTypes.AVERAGE_DIP, startIndex: 7800, nrOfSurveysBack: 2, dip: 1, id: "test" },
-//     { calculationMethod: mothodTypes.MANUAL_INPUT, startIndex: 7800, nrOfSurveysBack: 2, dip: 1, id: "test1" },
-//     {
-//       calculationMethod: mothodTypes.AVERAGE_CONTROL_DIP_CLOSURE,
-//       startIndex: 7800,
-//       nrOfSurveysBack: 2,
-//       dip: 1,
-//       id: "test2"
-//     },
-//     {
-//       calculationMethod: mothodTypes.AVERAGE_REAL_DIP_CLOSURE,
-//       startIndex: 7800,
-//       nrOfSurveysBack: 2,
-//       dip: 1,
-//       id: "test3"
-//     }
-//   ];
-
-function updateRow(row, action) {}
 
 function autoDipReducer(state, action) {
   switch (action.type) {
@@ -71,6 +53,12 @@ function autoDipReducer(state, action) {
       return {
         ...state,
         dipMode: action.mode
+      };
+
+    case "CHANGE_MANUAL_VALUE":
+      return {
+        ...state,
+        manualValue: action.manualValue
       };
 
     case "TOGGLE_SETTINGS":
@@ -210,24 +198,6 @@ function ManualInputRow({
   );
 }
 
-// function AverageDipClosureRow({ handleChange, row, options, onDelete, onMethodChange }) {
-//   return (
-//     <Box display="flex">
-//       <MethodTypeDropDown value={row.calculationMethod} onChange={onMethodChange} />
-//       <Select className={classNames(css.col, css.col2)} value={10} onChange={handleChange}>
-//         {options.map(s => (
-//           <MenuItem value={s.dip}>{`${s.md} (${twoDecimals(s.dip)})`}</MenuItem>
-//         ))}
-//       </Select>
-//       <SurveysBackDropDown nrSurveys={options.length} value={row.nrOfSurveysBack} />
-//       <DipValueInput />
-//       <IconButton onClick={onDelete}>
-//         <Close />
-//       </IconButton>
-//     </Box>
-//   );
-// }
-
 function calculateTregDip({ md, ns, ew }, cl) {
   const closure = Math.atan2(ew, ns);
   const stregdipazm = cl.azm;
@@ -254,7 +224,7 @@ function useAverageControlDipOptions(wellId, controlLogs = EMPTY_ARRAY) {
   );
 }
 
-function getAverageRealDipClosure(surveys, controlLogs = EMPTY_ARRAY) {
+const getAverageRealDipClosure = memoizeOne((surveys, controlLogs = EMPTY_ARRAY) => {
   const [cl] = controlLogs;
 
   if (!cl) {
@@ -268,12 +238,11 @@ function getAverageRealDipClosure(surveys, controlLogs = EMPTY_ARRAY) {
       dip: tregdip
     };
   });
-}
+});
 
 const computeFinalDip = memoizeOne((rows, optionsByRowMethod) => {
   return mean(rows, r => {
     if (r.calculationMethod === mothodTypes.MANUAL_INPUT) {
-      console.log("r.manualInputValue", r.manualInputValue);
       return r.manualInputValue;
     }
 
@@ -281,23 +250,14 @@ const computeFinalDip = memoizeOne((rows, optionsByRowMethod) => {
   });
 });
 
-function AutoDipSettings({ dialogProps, onClose, dispatch, rows }) {
+function useOptionsByMethodType() {
   const { wellId } = useWellIdContainer();
-  const [controlLogs] = useWellControlLogList(wellId);
   const { surveys } = useSurveysDataContainer();
+  const averageSurveysDipOptions = useMemo(() => surveys.reverse(), [surveys]);
+  const [controlLogs] = useWellControlLogList(wellId);
   const averageControlDipOptions = useAverageControlDipOptions(wellId, controlLogs);
   const averageRealDipOptions = getAverageRealDipClosure(surveys, controlLogs);
-
-  const updateRow = (row, field, value) => dispatch({ type: "UPDATE_ROW", id: row.id, field, value });
-  const handleChangeMethod = row => e => updateRow(row, "calculationMethod", e.target.value);
-  const handleStartChange = row => e => updateRow(row, "startIndex", e.target.value);
-  const handleNrSurveysBackChange = row => e => updateRow(row, "nrSurveysBack", e.target.value);
-  const handleManualInputValueChanged = row => e => updateRow(row, "manualInputValue", e.target.value);
-  const handleDeleteRow = row => () => dispatch({ type: "DELETE_ROW", id: row.id });
-
-  const averageSurveysDipOptions = useMemo(() => surveys.reverse(), [surveys]);
-
-  const getOptionsByMethodType = useMemo(
+  return useMemo(
     () => ({
       [mothodTypes.AVERAGE_DIP]: averageSurveysDipOptions,
       [mothodTypes.AVERAGE_CONTROL_DIP_CLOSURE]: averageControlDipOptions,
@@ -305,6 +265,24 @@ function AutoDipSettings({ dialogProps, onClose, dispatch, rows }) {
     }),
     [averageSurveysDipOptions, averageControlDipOptions, averageRealDipOptions]
   );
+}
+
+function AutoDipSettings({
+  dialogProps,
+  onClose,
+  dispatch,
+  rows,
+  getOptionsByMethodType,
+  finalValue,
+  onSaveDip,
+  dipMode
+}) {
+  const updateRow = (row, field, value) => dispatch({ type: "UPDATE_ROW", id: row.id, field, value });
+  const handleChangeMethod = row => e => updateRow(row, "calculationMethod", e.target.value);
+  const handleStartChange = row => e => updateRow(row, "startIndex", e.target.value);
+  const handleNrSurveysBackChange = row => e => updateRow(row, "nrSurveysBack", e.target.value);
+  const handleManualInputValueChanged = row => e => updateRow(row, "manualInputValue", e.target.value);
+  const handleDeleteRow = row => () => dispatch({ type: "DELETE_ROW", id: row.id });
 
   function getRowEl(row) {
     switch (row.calculationMethod) {
@@ -339,8 +317,6 @@ function AutoDipSettings({ dialogProps, onClose, dispatch, rows }) {
         return null;
     }
   }
-  console.log("rows", rows);
-  const finalValue = computeFinalDip(rows, getOptionsByMethodType);
 
   return (
     <Dialog classes={{ paper: css.autoDipPaper, root: css.autoDip }} {...dialogProps}>
@@ -381,7 +357,14 @@ function AutoDipSettings({ dialogProps, onClose, dispatch, rows }) {
               {finalValue}
             </Typography>
           </Box>
-          <Button variant="outlined" color="primary">
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              onSaveDip(finalValue);
+              onClose();
+            }}
+          >
             Apply Now
           </Button>
         </Box>
@@ -390,49 +373,46 @@ function AutoDipSettings({ dialogProps, onClose, dispatch, rows }) {
   );
 }
 
-export default function AutoDip() {
-  const [{ dipMode, settingsOpened, rowsById }, dispatch] = useReducer(autoDipReducer, initialState);
-  const toggleSettings = useCallback(() => dispatch({ type: "TOGGLE_SETTINGS" }), [dispatch]);
-  const rows = useMemo(() => Object.values(rowsById), [rowsById]);
-  return (
-    <Box diplay="flex" flexDirection="column">
-      <Box display="flex" alignItems="center">
-        <Typography className={classNames(css.title, css.autoDipTitle)} variant="subtitle1">
-          Auto-Dip
-        </Typography>
+const AutoDip = React.memo(
+  ({
+    onSaveDip,
+    applyDisabled,
+    dispatch,
+    settingsOpened,
+    rows,
+    dipMode,
+    manualValue,
+    finalValue,
+    valueToApply,
+    getOptionsByMethodType
+  }) => {
+    const toggleSettings = useCallback(() => dispatch({ type: "TOGGLE_SETTINGS" }), [dispatch]);
+    return (
+      <Box diplay="flex" flexDirection="column">
+        <Box display="flex" alignItems="center">
+          <Typography className={classNames(css.title, css.autoDipTitle)} variant="subtitle1">
+            Auto-Dip
+          </Typography>
 
-        <Typography variant="caption">Dip to auto-apply to each new survey</Typography>
-      </Box>
-      <Box display="flex">
-        <Box display="flex" flexDirection="column">
-          <Tabs
-            value={dipMode}
-            indicatorColor="primary"
-            centered
-            onChange={(_, tab) => {
-              dispatch({ type: "CHANGE_DIP_MODE", mode: tab });
-            }}
-          >
-            <Tab label={NORMAL} value={NORMAL} className={css.tab} />
-            <Tab label={CALCULATED} value={CALCULATED} className={css.tab} />
-          </Tabs>
-          {dipMode === NORMAL ? (
-            <TextField
-              value={"0.00"}
-              onChange={e => {}}
-              type="number"
-              label={"Value Auto-Applied"}
-              className={classNames("hideArrows", css.autoDipInput)}
-              margin="dense"
-              InputLabelProps={{
-                shrink: true
+          <Typography variant="caption">Dip to auto-apply to each new survey</Typography>
+        </Box>
+        <Box display="flex">
+          <Box display="flex" flexDirection="column">
+            <Tabs
+              value={dipMode}
+              indicatorColor="primary"
+              centered
+              onChange={(_, tab) => {
+                dispatch({ type: "CHANGE_DIP_MODE", mode: tab });
               }}
-            />
-          ) : (
-            <Box display="flex">
+            >
+              <Tab label={NORMAL} value={NORMAL} className={css.tab} />
+              <Tab label={CALCULATED} value={CALCULATED} className={css.tab} />
+            </Tabs>
+            {dipMode === NORMAL ? (
               <TextField
-                value={"0.00"}
-                onChange={e => {}}
+                value={manualValue}
+                onChange={e => dispatch({ type: "CHANGE_MANUAL_VALUE", manualValue: e.target.value })}
                 type="number"
                 label={"Value Auto-Applied"}
                 className={classNames("hideArrows", css.autoDipInput)}
@@ -441,24 +421,93 @@ export default function AutoDip() {
                   shrink: true
                 }}
               />
+            ) : (
+              <Box display="flex">
+                <TextField
+                  value={finalValue}
+                  type="number"
+                  label={"Value Auto-Applied"}
+                  className={classNames("hideArrows", css.autoDipInput)}
+                  margin="dense"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
 
-              <IconButton onClick={toggleSettings}>
-                <Tune />
-              </IconButton>
-            </Box>
-          )}
+                <IconButton onClick={toggleSettings}>
+                  <Tune />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
+
+          <Button
+            className="self-end"
+            variant="outlined"
+            color="primary"
+            disabled={applyDisabled}
+            onClick={() => onSaveDip(valueToApply)}
+          >
+            Apply Now
+          </Button>
         </Box>
-
-        <Button className="self-end" variant="outlined" color="primary" onClick={() => {}}>
-          Apply Now
-        </Button>
+        <AutoDipSettings
+          onSaveDip={onSaveDip}
+          dialogProps={{ open: settingsOpened }}
+          onClose={toggleSettings}
+          dispatch={dispatch}
+          getOptionsByMethodType={getOptionsByMethodType}
+          finalValue={finalValue}
+          rows={rows}
+        />
       </Box>
-      <AutoDipSettings
-        dialogProps={{ open: settingsOpened }}
-        onClose={toggleSettings}
-        dispatch={dispatch}
-        rows={rows}
-      />
-    </Box>
+    );
+  }
+);
+
+export default function AutoDipContainer() {
+  const selectedSegment = useSelectedSegmentState();
+  const updateSegments = useUpdateSegmentsByMd();
+
+  const { saveWellLogs } = useSaveWellLogActions();
+
+  const handleApply = useCallback(
+    dip => {
+      const changes = { [selectedSegment.endmd]: { dip } };
+      updateSegments();
+      saveWellLogs([selectedSegment], changes);
+    },
+    [selectedSegment, updateSegments, saveWellLogs]
   );
+
+  const internalState = useRef({ handleApply });
+
+  internalState.current.handleApply = handleApply;
+
+  const handleSaveDip = useCallback(dip => {
+    internalState.current.handleApply(dip);
+  }, []);
+
+  const [{ dipMode, settingsOpened, rowsById, manualValue }, dispatch] = useReducer(autoDipReducer, initialState);
+
+  const rows = useMemo(() => Object.values(rowsById), [rowsById]);
+  const getOptionsByMethodType = useOptionsByMethodType();
+  const finalValue = computeFinalDip(rows, getOptionsByMethodType);
+
+  const valueToApply = dipMode === NORMAL ? manualValue : finalValue;
+  const applyDisabled = Number.isNaN(parseFloat(valueToApply)) || selectedSegment.sectdip === Number(valueToApply);
+
+  const props = {
+    onSaveDip: handleSaveDip,
+    applyDisabled,
+    dispatch,
+    settingsOpened,
+    rows,
+    dipMode,
+    manualValue,
+    finalValue,
+    valueToApply,
+    getOptionsByMethodType
+  };
+  return <AutoDip {...props} />;
 }
