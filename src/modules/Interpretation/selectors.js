@@ -1,20 +1,21 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellInfo, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
-  selectedWellInfoContainer
+  useSelectedWellInfoContainer
 } from "../App/Containers";
-import { extent } from "d3-array";
+import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
-import { calculateProjection } from "../../hooks/useCalculations";
+import { calculateProjection } from "../../hooks/projectionCalculations";
+import memoize from "react-powertools/memoize";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -178,66 +179,69 @@ const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
   return { segments, byId };
 });
 
+const getPendingSegmentsByMd = memoizeOne((pendingSegmentsState, byId) =>
+  mapKeys(pendingSegmentsState, (value, key) => {
+    const item = byId[key];
+    return item && item.md;
+  })
+);
+
 export function usePendingSegmentsStateByMd() {
   const [{ pendingSegmentsState }] = useComboContainer();
   const [, , , , byId] = useComputedSurveysAndProjections();
-  return useMemo(
-    () =>
-      mapKeys(pendingSegmentsState, (value, key) => {
-        const item = byId[key];
-        return item && item.md;
-      }),
-    [pendingSegmentsState, byId]
-  );
+
+  return getPendingSegmentsByMd(pendingSegmentsState, byId);
 }
 
 // return all segment with computed properties
 export function useComputedSegments() {
-  const [logList] = useWellLogsContainer();
+  const [filteredLogs, , allLogs] = useWellLogsContainer();
   const pendingStateByMd = usePendingSegmentsStateByMd();
-  return getComputedSegments(logList, pendingStateByMd);
+  const { segments, byId } = getComputedSegments(allLogs, pendingStateByMd);
+  const filteredSegments = useMemo(() => filteredLogs.map(l => byId[l.id]), [filteredLogs, byId]);
+  return {
+    segments,
+    byId,
+    filteredSegments
+  };
 }
 
 // return only segments that are in draft mode
 export function useComputedDraftSegmentsOnly() {
-  const { segments } = useComputedSegments();
+  const { filteredSegments } = useComputedSegments();
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
   const { selectedWellLogIndex } = useSelectedWellLog();
 
   return useMemo(
     () =>
       draftMode
-        ? segments.slice(Math.max(selectedWellLogIndex - nrPrevSurveysToDraft, 0), selectedWellLogIndex + 1)
+        ? filteredSegments.slice(Math.max(selectedWellLogIndex - nrPrevSurveysToDraft, 0), selectedWellLogIndex + 1)
         : EMPTY_ARRAY,
-    [selectedWellLogIndex, nrPrevSurveysToDraft, segments, draftMode]
+    [selectedWellLogIndex, nrPrevSurveysToDraft, filteredSegments, draftMode]
   );
 }
 
 const getComputedSegmentsNoPending = memoizeOne(logList => logList.reduce(reduceComputedSegment({}), []));
 
-const getCurentComputedSegments = memoizeOne((logList, computedSegments, draftMode) => {
+const getCurentComputedSegments = memoizeOne((allLogs, filteredLogs, computedSegments, draftMode) => {
   // when not in draft mode we can't just return logList
   // because dip/fault changed need to be recalculated while request is pending
-  const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(logList);
+  const recomputedSegmentsWithNoPendingState = getComputedSegmentsNoPending(allLogs);
   const currentComputedSegments = draftMode ? recomputedSegmentsWithNoPendingState : computedSegments;
   const computedSegmentsById = keyBy(currentComputedSegments, "id");
-  return [currentComputedSegments, computedSegmentsById];
+  const currentFilteredSegments = filteredLogs.map(l => computedSegmentsById[l.id]);
+  return [currentFilteredSegments, currentComputedSegments, computedSegmentsById];
 });
 
 export function useCurrentComputedSegments() {
-  const { segments: computedSegments } = useComputedSegments();
-  const [logList] = useWellLogsContainer();
+  const { segments } = useComputedSegments();
+  const [filteredLogs, , allLogs] = useWellLogsContainer();
   const [{ draftMode }] = useComboContainer();
-  return getCurentComputedSegments(logList, computedSegments, draftMode);
+  return getCurentComputedSegments(allLogs, filteredLogs, segments, draftMode);
 }
 
-export function useGetComputedLogData(log, draft) {
-  const { wellId } = useWellIdContainer();
-  const [logData] = useWellLogData(wellId, log && log.tablename);
-  const { byId: draftLogsById } = useComputedSegments();
-  const [computedSegments] = useCurrentComputedSegments();
-  const [logList] = useWellLogsContainer();
-  const logIndex = log ? logList.findIndex(l => l.id === log.id) : -1;
+const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, allLogs) => {
+  const logIndex = log ? allLogs.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 
@@ -246,31 +250,45 @@ export function useGetComputedLogData(log, draft) {
     prevComputedSegment = prevComputedSegment && draftLogsById[prevComputedSegment.id];
   }
 
-  return useMemo(() => {
-    if (logData && computedSegment) {
-      const currentLogData = { ...log, fault: computedSegment.fault };
-      const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
-      return {
-        ...logData,
-        scalebias: computedSegment.scalebias,
-        scalefactor: computedSegment.scalefactor,
-        data: logData.data.reduce((acc, d, index) => {
-          const { vs, tvd } = d;
+  if (logData && computedSegment) {
+    const currentLogData = { ...log, fault: computedSegment.fault };
+    const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
+    return {
+      ...logData,
+      scalebias: computedSegment.scalebias,
+      scalefactor: computedSegment.scalefactor,
+      data: logData.data.reduce((acc, d, index) => {
+        const { vs, tvd } = d;
 
-          const newLog = { ...d };
+        const newLog = { ...d };
 
-          const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
-          newLog.depth = depth;
+        const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
+        newLog.depth = depth;
 
-          acc.push(newLog);
+        acc.push(newLog);
 
-          return acc;
-        }, [])
-      };
-    }
+        return acc;
+      }, [])
+    };
+  }
 
-    return logData;
-  }, [logData, computedSegment, prevComputedSegment, log]);
+  return logData;
+};
+
+const recomputeLogDataFactory = memoize(logId => {
+  return memoizeOne(recomputeLogData);
+});
+
+export function useGetComputedLogData(logId, draft) {
+  const { wellId } = useWellIdContainer();
+  const [, logsById, allLogs] = useWellLogsContainer();
+  const log = logsById[logId];
+  const [logData] = useWellLogData(wellId, log && log.tablename);
+  const { byId: draftLogsById } = useComputedSegments();
+  const [, computedSegments] = useCurrentComputedSegments();
+
+  const recomputeLogData = recomputeLogDataFactory(logId);
+  return recomputeLogData(logData, log, draftLogsById, computedSegments, draft, allLogs);
 }
 
 export function getSelectedId(selectionById) {
@@ -278,7 +296,8 @@ export function getSelectedId(selectionById) {
 }
 
 const recomputeSurveysAndProjections = memoizeOne(
-  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm) => {
+  (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
+    const bitProjIdx = surveys.length - 1;
     return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
@@ -301,55 +320,8 @@ const recomputeSurveysAndProjections = memoizeOne(
           ca,
           cd
         };
-      } else if (!currSvy.isProjection) {
-        let dogLegSeverity = 0;
-        const courseLength = combinedSvy.md - prevSvy.md;
-        const pInc = toRadians(prevSvy.inc);
-        const cInc = toRadians(combinedSvy.inc);
-        const pAzm = toRadians(prevSvy.azm);
-        let cAzm = toRadians(combinedSvy.azm);
-        let dogleg = Math.acos(
-          Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
-        );
-        if (isNaN(dogleg)) {
-          combinedSvy.azm += 0.01;
-          cAzm = toRadians(combinedSvy.azm);
-          dogleg = Math.acos(Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm));
-        }
-        if (courseLength > 0) {
-          // TODO: include check for "depth units"
-          //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
-          dogLegSeverity = (dogleg * 100.0) / courseLength;
-        }
-        // Radius also called curvature factor
-        let radius = 1;
-        if (dogleg !== 0.0) {
-          radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
-        }
-
-        const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
-        if (!tvd) {
-          console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
-        }
-        let ns =
-          prevSvy.ns +
-          (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
-        const ew =
-          prevSvy.ew +
-          (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
-
-        let ca = Math.PI / 2;
-        if (ns !== 0.0) {
-          ca = Math.atan2(ew, ns);
-        }
-
-        let cd = ns;
-        if (ca !== 0.0) {
-          cd = ew / Math.sin(ca);
-        }
-
-        const vs = Math.cos(ca - toRadians(propazm)) * cd;
-
+      } else {
+        // Perform the same formation related fault and dip calculations for both surveys and projections
         const dipPending = pendingState.dip !== undefined;
         const faultPending = pendingState.fault !== undefined;
         const dip = dipPending ? pendingState.dip : currSvy.dip;
@@ -359,27 +331,81 @@ const recomputeSurveysAndProjections = memoizeOne(
         const tot = prevSvy.tot + totDiff;
         const bot = prevSvy.bot + totDiff;
 
-        const caDeg = toDegrees(ca);
+        if (!currSvy.isProjection) {
+          let dogLegSeverity = 0;
+          const courseLength = combinedSvy.md - prevSvy.md;
+          const pInc = toRadians(prevSvy.inc);
+          const cInc = toRadians(combinedSvy.inc);
+          const pAzm = toRadians(prevSvy.azm);
+          let cAzm = toRadians(combinedSvy.azm);
+          let dogleg = Math.acos(
+            Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+          );
+          if (isNaN(dogleg)) {
+            combinedSvy.azm += 0.01;
+            cAzm = toRadians(combinedSvy.azm);
+            dogleg = Math.acos(
+              Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+            );
+          }
+          if (courseLength > 0) {
+            // TODO: include check for "depth units"
+            //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
+            dogLegSeverity = (dogleg * 100.0) / courseLength;
+          }
+          // Radius also called curvature factor
+          let radius = 1;
+          if (dogleg !== 0.0) {
+            radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
+          }
 
-        acc[index] = {
-          ...combinedSvy,
-          tvd,
-          vs,
-          dl: toDegrees(dogLegSeverity),
-          cl: courseLength,
-          ca: caDeg < 0 ? caDeg + 360 : ca,
-          ns,
-          ew,
-          build: ((cInc - pInc) * 100) / courseLength,
-          turn: ((cAzm - pAzm) * 100) / courseLength,
-          tcl,
-          fault,
-          dip,
-          tot,
-          bot
-        };
-      } else {
-        acc[index] = calculateProjection(combinedSvy, acc, index, propazm);
+          const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
+          let ns =
+            prevSvy.ns +
+            (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
+          const ew =
+            prevSvy.ew +
+            (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
+
+          let ca = Math.PI / 2;
+          if (ns !== 0.0) {
+            ca = Math.atan2(ew, ns);
+          }
+
+          let cd = ns;
+          if (ca !== 0.0) {
+            cd = ew / Math.sin(ca);
+          }
+
+          const vs = Math.cos(ca - toRadians(propazm)) * cd;
+
+          const caDeg = toDegrees(ca);
+
+          acc[index] = {
+            ...combinedSvy,
+            tvd,
+            vs,
+            dl: toDegrees(dogLegSeverity),
+            cl: courseLength,
+            ca: caDeg < 0 ? caDeg + 360 : ca,
+            ns,
+            ew,
+            build: ((cInc - pInc) * 100) / courseLength,
+            turn: ((cAzm - pAzm) * 100) / courseLength,
+            tcl,
+            fault,
+            dip,
+            tot,
+            bot,
+            pos: tcl - tvd
+          };
+        } else {
+          const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+          const sign = bitProjPos > 0 ? 1 : -1;
+          const cap = bitProjPos > 0 ? Math.max : Math.min;
+          const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          acc[index] = calculateProjection({ ...combinedSvy, pos, tcl, fault, dip, tot, bot }, acc, index, propazm);
+        }
       }
       return acc;
     }, []);
@@ -390,18 +416,19 @@ const groupItemsByMd = memoizeOne(items => keyBy(items, "md"));
 const groupItemsById = memoizeOne(items => keyBy(items, "id"));
 
 export function useComputedSurveysAndProjections() {
-  const { wellId } = useWellIdContainer();
-  const [{ wellInfo }] = useWellInfo(wellId);
+  const [{ wellInfo = {} }] = useSelectedWellInfoContainer();
   const { surveys } = useSurveysDataContainer();
   const [{ pendingSegmentsState, draftMode, selectionById }] = useComboContainer();
   const { projectionsData } = useProjectionsDataContainer();
+
   const surveysAndProjections = recomputeSurveysAndProjections(
     surveys,
     projectionsData,
     draftMode,
     selectionById,
     pendingSegmentsState,
-    wellInfo ? Number(wellInfo.propazm) : 0
+    Number(wellInfo.propazm) || 0,
+    Number(wellInfo.autoposdec) || 0
   );
   const computedSurveys = useMemo(() => surveysAndProjections.slice(0, surveys.length), [
     surveysAndProjections,
@@ -464,11 +491,11 @@ export function useComputedFormations(formations) {
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
+export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  return useMemo(() => getExtent(logData), [logData]);
+  return getExtent(logData);
 }
 
 export function usePendingSegments() {
@@ -490,7 +517,7 @@ export function useComputedPendingSegments() {
 
 export function useSelectedSegmentState() {
   const [{ draftMode }] = useComboContainer();
-  const [, computedSegmentsById] = useCurrentComputedSegments();
+  const [, , computedSegmentsById] = useCurrentComputedSegments();
   const { byId: draftSegmentsById } = useComputedSegments();
   const { selectedWellLog } = useSelectedWellLog();
   const map = draftMode ? draftSegmentsById : computedSegmentsById;
@@ -531,6 +558,45 @@ const parseWellInfo = memoizeOne((wellInfo = {}) => {
 });
 
 export function useSelectedWellInfoColors() {
-  const [{ wellInfo }] = selectedWellInfoContainer();
+  const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
+}
+
+export const logDataExtent = memoize(data => {
+  return extent(data, d => Number(d.value));
+});
+
+export const getWellsGammaExtent = memoizeOne(logsData => {
+  const extents = logsData.map(ld => [...logDataExtent(ld.data), ld.tablename]);
+  const extentsByTableName = keyBy(extents, ([, , tablename]) => tablename);
+  return [min(extents, ([min]) => min), max(extents, ([, max]) => max), extents, extentsByTableName];
+});
+
+export function getExtentWithBiasAndScale(logs, extentsByTableName) {
+  return logs.reduce(
+    (acc, log) => {
+      const bias = Number(log.scalebias);
+      const scale = Number(log.scalefactor);
+      const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
+
+      return {
+        extentWithBiasAndScale: [
+          Math.min(acc.extentWithBiasAndScale[0], min * scale + bias),
+          Math.max(acc.extentWithBiasAndScale[1], (max - min) * scale + min + bias)
+        ],
+        extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
+      };
+    },
+    {
+      extentWithBiasAndScale: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+      extent: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
+    }
+  );
+}
+
+export const getFilteredLogsExtent = memoizeOne(getExtentWithBiasAndScale);
+export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
+
+export function getColorForWellLog(colorsByWellLog, logId) {
+  return colorsByWellLog[logId] || "7E7D7E";
 }

@@ -4,17 +4,13 @@ import { Box, Button, IconButton, Dialog, DialogActions, DialogContent, DialogTi
 
 import Close from "@material-ui/icons/Close";
 import classes from "./Details.scss";
+import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
+import AutoPosTCLField from "./AutoPosTCLField";
 
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
-    <Dialog
-      onClose={() => handleClose()}
-      maxWidth="md"
-      aria-labelledby="customized-dialog-title"
-      open={isVisible}
-      fullWidth
-    >
+    <Dialog onClose={() => handleClose()} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
         <span>Surveys in View</span>
         <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>
@@ -24,6 +20,9 @@ function DetailsFullModal({ handleClose, isVisible }) {
       <DialogContent className={classes.dialogContent}>
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column">
+            <div className={comboClasses.flexRight}>
+              <AutoPosTCLField />
+            </div>
             <DetailsTable showFullTable />
           </Box>
         </Box>

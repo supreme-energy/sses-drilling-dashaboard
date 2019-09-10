@@ -110,6 +110,9 @@ $black: rgb(0, 0, 0);
       &:first-child:before {
         background-color: rgba($red, 1);
       }
+      &.methodInput {
+        background-color: rgba($red, 0.4);
+      }
       background-color: rgba($red, 0.3);
     }
   }
@@ -119,6 +122,7 @@ $black: rgb(0, 0, 0);
 }
 
 .dialogTitle {
+  padding-bottom: 0px;
   .closeButton {
     position: relative;
     left: 10px;

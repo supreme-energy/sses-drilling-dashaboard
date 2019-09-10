@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
@@ -7,15 +7,17 @@ import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
 
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
-  const { width, height, viewDirection } = props;
+  const { width, height, viewDirection, view, updateView } = props;
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
+  const { debouncedSave } = useSaveSurveysAndProjections();
 
   const {
     wellPlan,
@@ -40,26 +42,18 @@ const CrossSection = props => {
     return viewDirection ? -1 : 1;
   }, [viewDirection]);
 
-  const [view, updateView] = useReducer(
-    function(state, arg) {
-      if (typeof arg === "function") {
-        return { ...state, ...arg(state) };
-      }
-      return { ...state, ...arg };
-    },
-    // TODO: calculate these based on some 'default zoom' estimate from data (will need width/height)
-    {
-      x: -844,
-      y: -16700,
-      xScale: 2.14,
-      yScale: 2.14
-    }
-  );
-
   useEffect(() => {
-    // TODO: Calculate the x/y and zoom to fit the new data view
-    updateView({});
-  }, [xField, yField]);
+    // TODO: Calculate the zoom to fit the new data view
+    // Currently initialized the graph at the first Well plan data point
+    const minX = Math.min(...wellPlan.map(d => d[xField]));
+    const minY = Math.min(...wellPlan.map(d => d[yField]));
+    updateView({
+      x: -minX,
+      y: -minY,
+      xScale: 1,
+      yScale: 1
+    });
+  }, [xField, yField, updateView, wellPlan]);
 
   const [mouse, setMouse] = useState({
     x: 0,
@@ -85,7 +79,8 @@ const CrossSection = props => {
         xField,
         yField,
         yAxisDirection,
-        updateSegments
+        updateSegments,
+        debouncedSave
       },
       view,
       updateView
@@ -125,7 +120,8 @@ const CrossSection = props => {
       yAxisDirection,
       addProjection,
       deleteProjection,
-      updateSegments
+      updateSegments,
+      debouncedSave
     });
   }, [
     view.x,
@@ -151,8 +147,10 @@ const CrossSection = props => {
     viewDirection,
     yAxisDirection,
     addProjection,
+    updateView,
     deleteProjection,
-    updateSegments
+    updateSegments,
+    debouncedSave
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
@@ -161,7 +159,14 @@ const CrossSection = props => {
 CrossSection.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
-  viewDirection: PropTypes.number
+  viewDirection: PropTypes.number,
+  view: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+    xScale: PropTypes.number,
+    yScale: PropTypes.number
+  }),
+  updateView: PropTypes.func
 };
 
 export default CrossSection;

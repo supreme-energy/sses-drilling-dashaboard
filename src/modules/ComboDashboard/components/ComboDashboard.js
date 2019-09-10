@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useReducer } from "react";
 import classNames from "classnames";
 import Progress from "@material-ui/core/CircularProgress";
 
@@ -24,6 +24,16 @@ function ComboDashboard() {
   const { data } = useWellOverviewKPI(wellId);
   const kpiData = data.find(d => d.type === phase) || { type: ALL };
 
+  const [view, updateView] = useReducer(
+    function(state, arg) {
+      if (typeof arg === "function") {
+        return { ...state, ...arg(state) };
+      }
+      return { ...state, ...arg };
+    },
+    { x: 0, y: 0, xScale: 1, yScale: 1 }
+  );
+
   return (
     <div className={classes.comboDashboardWrapper}>
       <Suspense fallback={<Progress />}>
@@ -36,7 +46,8 @@ function ComboDashboard() {
           </div>
           <div className={classNames(classes.row, classes.graphRow)}>
             <Interpretation className={"flex"} />
-            <CrossSectionDashboard wellId={wellId} className={"flex-3"} />
+
+            <CrossSectionDashboard wellId={wellId} className={"flex-3"} view={view} updateView={updateView} />
           </div>
         </div>
         <div className={classes.kpiColumn}>

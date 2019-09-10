@@ -38,7 +38,7 @@ export function HeaderToolbar({ changeSelectedWell, history }) {
         <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
           <WellPathStatus wellId={wellId} />
-          <TargetAccuracy wellId={wellId} />
+          <TargetAccuracy />
           <Rop wellId={wellId} />
           <ServerStatus wellId={wellId} />
           <BitDepth wellId={wellId} />

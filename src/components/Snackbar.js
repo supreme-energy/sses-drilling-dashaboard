@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import classNames from "classNames";
-import Button from "@material-ui/core/Button";
+import classNames from "classnames";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
 import InfoIcon from "@material-ui/icons/Info";
 import CloseIcon from "@material-ui/icons/Close";
-import { amber, green } from "@material-ui/core/colors";
 import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
@@ -22,16 +20,16 @@ const variantIcon = {
 
 const useStyles = makeStyles(theme => ({
   success: {
-    backgroundColor: green[600]
+    backgroundColor: theme.palette.success.main
   },
   error: {
-    backgroundColor: theme.palette.error.dark
+    backgroundColor: theme.palette.warning.main
   },
   info: {
     backgroundColor: theme.palette.primary.main
   },
   warning: {
-    backgroundColor: amber[700]
+    backgroundColor: theme.palette.yellow.main
   },
   icon: {
     fontSize: 20
@@ -46,61 +44,38 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-function SnackbarComponent({ className, variant, message }) {
+function SnackbarComponent({ className, variant, message, open, handleClose, duration = 6000 }) {
   const classes = useStyles();
   const Icon = variantIcon[variant];
-  const [open, setOpen] = useState(false);
-
-  function handleClick() {
-    setOpen(true);
-  }
-
-  function handleClose(event, reason) {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setOpen(false);
-  }
 
   return (
-    <div>
-      <Button variant="outlined" onClick={handleClick}>
-        Open Snackbar
-      </Button>
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left"
-        }}
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <SnackbarContent
-          className={classNames(classes[variant], className)}
-          aria-describedby="snackbar"
-          message={
-            <span id="snackbar" className={classes.message}>
-              <Icon className={classNames(classes.icon, classes.iconVariant)} />
-              {message}
-            </span>
-          }
-          action={[
-            <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
-              <CloseIcon className={classes.icon} />
-            </IconButton>
-          ]}
-        />
-      </Snackbar>
-    </div>
+    <Snackbar open={open} autoHideDuration={duration} onClose={handleClose}>
+      <SnackbarContent
+        className={classNames(classes[variant], className)}
+        aria-describedby="snackbar"
+        message={
+          <span id="snackbar" className={classes.message}>
+            <Icon className={classNames(classes.icon, classes.iconVariant)} />
+            {message}
+          </span>
+        }
+        action={[
+          <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
+            <CloseIcon className={classes.icon} />
+          </IconButton>
+        ]}
+      />
+    </Snackbar>
   );
 }
 
 SnackbarComponent.propTypes = {
   className: PropTypes.string,
   message: PropTypes.string,
-  variant: PropTypes.oneOf(["error", "info", "success", "warning"]).isRequired
+  variant: PropTypes.oneOf(["error", "info", "success", "warning"]).isRequired,
+  open: PropTypes.bool,
+  handleClose: PropTypes.func,
+  duration: PropTypes.number
 };
 
 export default SnackbarComponent;

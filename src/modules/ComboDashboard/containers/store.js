@@ -1,6 +1,5 @@
 import { createContainer } from "unstated-next";
 import { useReducer, useCallback } from "react";
-import { useWellLogsContainer } from "./wellLogs";
 
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
@@ -15,10 +14,15 @@ export const surveyVisibility = {
 const initialState = {
   selectionById: {},
   pendingSegmentsState: {},
+  logsBiasAndScale: {},
+  currentEditedLog: null,
   nrPrevSurveysToDraft: 2,
   draftMode: false,
   surveyVisibility: surveyVisibility.ALL,
-  surveyPrevVisibility: 500
+  surveyPrevVisibility: 500,
+  colorsByWellLog: {
+    wellLogs: "275196"
+  }
 };
 
 const initialPendingState = {};
@@ -76,7 +80,7 @@ function pendingSegmentState(pendingState, action, key) {
   }
 }
 
-function pendingSegmentsStateReducer(stateSlice, action, state, logs) {
+function pendingSegmentsStateReducer(stateSlice, action, state) {
   switch (action.type) {
     case "TOGGLE_SELECTION": {
       const resetPendingState = state.draftMode && state.selectionById[action.id];
@@ -93,6 +97,17 @@ function pendingSegmentsStateReducer(stateSlice, action, state, logs) {
           return {
             ...acc,
             [id]: pendingSegmentState(acc[id], action, id)
+          };
+        },
+        stateSlice
+      );
+    case "RESET_SEGMENTS_PROPERTIES":
+      return reduce(
+        action.propsById,
+        (acc, newProps, id) => {
+          return {
+            ...acc,
+            [id]: initialPendingState
           };
         },
         stateSlice
@@ -142,23 +157,88 @@ function nrPrevSurveysToDraftReducer(nrPrevSurveysToDraft, action) {
   }
 }
 
-const comboStoreReducer = logs => (state, action) => {
+function currentEditedLogReducer(currentEditedLog, action) {
+  switch (action.type) {
+    case "CHANGE_CURRENT_EDITED_LOG": {
+      return action.logId;
+    }
+    default:
+      return currentEditedLog;
+  }
+}
+
+export const initialLogBiasAndScale = {
+  bias: 1,
+  scale: 1
+};
+
+function logBiasAndScale(biasAndScale, action) {
+  switch (action.type) {
+    case "UPDATE_LOG_BIAS_AND_SCALE": {
+      const currentBiasAndScale = biasAndScale || initialLogBiasAndScale;
+      return {
+        ...currentBiasAndScale,
+        bias: action.bias !== undefined ? action.bias : currentBiasAndScale.bias,
+        scale: action.scale !== undefined ? action.scale : currentBiasAndScale.scale
+      };
+    }
+    case "RESET_LOG_BIAS_AND_SCALE": {
+      return null;
+    }
+    default:
+      return biasAndScale;
+  }
+}
+
+function logsBiasAndScaleReducer(logsBiasAndScale, action) {
+  switch (action.type) {
+    case "CHANGE_CURRENT_EDITED_LOG":
+    case "UPDATE_LOG_BIAS_AND_SCALE":
+    case "RESET_LOG_BIAS_AND_SCALE": {
+      if (!action.logId) {
+        return logsBiasAndScale;
+      }
+      return {
+        ...logsBiasAndScale,
+        [action.logId]: logBiasAndScale(logsBiasAndScale[action.logId], action)
+      };
+    }
+
+    default:
+      return logsBiasAndScale;
+  }
+}
+
+function colorsByWellLogReducer(colorsByWellLog, action) {
+  switch (action.type) {
+    case "CHANGE_LOG_COLOR":
+      console.log("action", action);
+      return {
+        ...colorsByWellLog,
+        [action.logId]: action.color
+      };
+    default:
+      return colorsByWellLog;
+  }
+}
+
+const comboStoreReducer = (state, action) => {
   return {
     ...state,
     selectionById: selectionByIdReducer(state.selectionById, action),
-    pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state, logs),
+    pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state),
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
     surveyPrevVisibility: surveyPrevVisibilityReducer(state.surveyPrevVisibility, action),
-    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action)
+    nrPrevSurveysToDraft: nrPrevSurveysToDraftReducer(state.nrPrevSurveysToDraft, action),
+    currentEditedLog: currentEditedLogReducer(state.currentEditedLog, action),
+    logsBiasAndScale: logsBiasAndScaleReducer(state.logsBiasAndScale, action),
+    colorsByWellLog: colorsByWellLogReducer(state.colorsByWellLog, action)
   };
 };
 
 function useUseComboStore() {
-  const [logs] = useWellLogsContainer();
-
-  const reducer = useCallback(comboStoreReducer(logs), [logs]);
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
 
   return [state, dispatch];
 }

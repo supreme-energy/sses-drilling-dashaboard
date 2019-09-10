@@ -74,12 +74,10 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   let cd = 0.0;
   let radius = 0.0;
   let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevProjection };
-  let { md, inc, azm, tvd, vs, dl } = { ...projection };
+  let { md, inc, azm, tvd, vs } = { ...projection };
 
   if (md <= pmd) {
-    throw new Error(
-      "Warning: Measured depth less than the previous survey. Projections will be reordered after saving"
-    );
+    return "Warning: Measured depth less than the previous survey. Projections will be reordered after saving";
   }
 
   if (inc > 180.0) inc -= 360.0;
@@ -92,7 +90,7 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   azm *= degreesToRadians;
   pinc *= degreesToRadians;
   pazm *= degreesToRadians;
-  dl = Math.acos(Math.cos(pinc) * Math.cos(inc) + Math.sin(pinc) * Math.sin(inc) * Math.cos(azm - pazm));
+  let dl = Math.acos(Math.cos(pinc) * Math.cos(inc) + Math.sin(pinc) * Math.sin(inc) * Math.cos(azm - pazm));
   const cl = md - pmd;
 
   if (dl !== 0.0) {
@@ -195,23 +193,25 @@ function projtma(proposedAzm, projection, prevProjection) {
 function projtva(proposedAzm, projection, prevProjection) {
   const otherInputs = {};
 
-  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, ew: pew, ns: pns, vs: pvs } = {
+  let { md: pmd, tvd: ptvd, inc: pinc, azm: pazm, bot: pbot, tot: ptot, tcl: ptcl, ew: pew, ns: pns, vs: pvs } = {
     ...prevProjection
   };
   pinc = toRadians(pinc);
   pazm = toRadians(pazm);
-  let { tvd, azm, vs, tot, pos, dip, fault, method } = {
+  let { tvd, azm, vs, tcl, pos, dip, fault, method } = {
     ...projection
   };
   azm = toRadians(azm);
 
   if (method === 8 || method === 7 || method === 6) {
     if (method === 8) {
-      let tot = ptot + -Math.tan(dip / 57.29578) * Math.abs(vs - pvs);
-      let bot = pbot - (ptot - tot);
-      tot += fault;
+      let tcl = ptcl + -Math.tan(dip / 57.29578) * Math.abs(vs - pvs);
+      let tot = ptot - (ptcl - tcl);
+      let bot = pbot - (ptcl - tcl);
+      tcl += fault;
       bot += fault;
-      tvd = tot - pos;
+      tvd = tcl - pos;
+      otherInputs.tcl = tcl;
       otherInputs.tot = tot;
       otherInputs.bot = bot;
       otherInputs.tvd = tvd;
@@ -219,13 +219,14 @@ function projtva(proposedAzm, projection, prevProjection) {
       otherInputs.fault = fault;
     }
     if (method === 7) {
-      tvd = tot - pos;
-      let bot = pbot + (tot - ptot);
+      tvd = tcl - pos;
+      let tot = ptot + (tcl - ptcl);
+      let bot = pbot + (tcl - ptcl);
 
       if (vs - pvs === 0.0) {
         dip = 0.0;
       } else {
-        const tdiff = tot - ptot;
+        const tdiff = tcl - ptcl;
         const vdiff = vs - pvs;
         const a = tdiff / vdiff;
         dip = -toDegrees(Math.atan(a));
@@ -234,41 +235,111 @@ function projtva(proposedAzm, projection, prevProjection) {
         }
       }
 
+      otherInputs.tcl = tcl;
       otherInputs.tot = tot;
       otherInputs.bot = bot;
       otherInputs.tvd = tvd;
       otherInputs.dip = dip;
       otherInputs.pos = pos;
     }
+    let inc = 0;
+    let ns = 0;
+    let ew = 0;
+    let ca = 0;
+    let cd = 0;
+    let dl = 0;
+    let cl = 0;
+    let newInc = 0;
+    let newvs = 0;
+    let newMd = 0;
+    let newtvd = 0;
+    let radius = 1.0;
     const dtvd = tvd - ptvd;
     const dvs = vs - pvs;
     if (dtvd !== 0.0 || dvs !== 0.0) {
-      // TODO: confirm with Danny that these calculations are using the correct method -- this may be slightly off
-      //  The original server calculations used a loop to find Inclination, but it can be calculated directly
+      let incr = 0.1;
+      let r = Math.sqrt(dtvd * dtvd + dvs * dvs);
+      newMd = pmd + r;
+      // TODO: Performance issue -- See if we can calculate inc, md, etc directly instead of guessing hundreds of times
+      //  The server calculations loop thousands of times to find inc & md, but there should be a better way
       //  Original C and JS versions found on the SSES github here:
       //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L281
       //  https://github.com/supreme-energy/sses-main/blob/color_and_logo_change/web/projws.php#L836
-      const _inc = toDegrees(Math.atan2(vs - pvs, dtvd));
-      const _md = pmd + Math.sqrt((vs - pvs) ** 2 + dtvd ** 2);
-      let _dl = Math.acos(Math.cos(pinc) * Math.cos(_inc) + Math.sin(pinc) * Math.sin(_inc) * Math.cos(azm - pazm));
-      let _radius = 1;
-      if (_dl !== 0.0) _radius = (2.0 / _dl) * Math.tan(_dl / 2.0);
-      let _cl = _md - pmd;
+      // Make a better guess at the newInc than "0"
+      newInc = toDegrees(Math.atan2(vs - pvs, dtvd)) - 10;
+      let counter = 0;
+      do {
+        counter++;
+        cl = newMd - pmd;
+        if (newInc >= toDegrees(pinc) - incr && newInc <= toDegrees(pinc) + incr) {
+          if (newvs < vs && newtvd > tvd) {
+            newMd += incr;
+            newInc += incr;
+          } else if (newvs > vs && newtvd <= tvd) {
+            newInc -= incr;
+          } else if (newvs > vs && newtvd < tvd) {
+            newInc -= incr;
+            newMd -= incr;
+          }
+          continue;
+        }
+        inc = toRadians(newInc);
+        dl = Math.acos(Math.cos(pinc) * Math.cos(inc) + Math.sin(pinc) * Math.sin(inc) * Math.cos(azm - pazm));
 
-      const _ns = pns + (_cl / 2.0) * (Math.sin(pinc) * Math.cos(pazm) + Math.sin(_inc) * Math.cos(azm)) * _radius;
-      const _ew = pew + (_cl / 2.0) * (Math.sin(pinc) * Math.sin(pazm) + Math.sin(_inc) * Math.sin(azm)) * _radius;
-      let _ca = Math.PI * 0.5 * (_ew / Math.abs(_ew));
-      if (_ns !== 0) _ca = Math.atan2(_ew, _ns);
-      let _cd = _ns;
-      if (_ca !== 0.0) _cd = Math.abs(_ew / Math.sin(_ca));
-      _ca *= radiansToDegrees;
-      if (_ca < 0.0) _ca = 180.0 + _ca;
-      _dl = ((_dl * 100) / _cl) * radiansToDegrees;
+        if (dl !== 0.0) {
+          radius = (2.0 / dl) * Math.tan(dl / 2.0);
+        } else {
+          radius = 1.0;
+        }
 
+        newtvd = ptvd + (cl / 2.0) * (Math.cos(pinc) + Math.cos(inc)) * radius;
+        ns = pns + (cl / 2.0) * (Math.sin(pinc) * Math.cos(pazm) + Math.sin(inc) * Math.cos(azm)) * radius;
+        ew = pew + (cl / 2.0) * (Math.sin(pinc) * Math.sin(pazm) + Math.sin(inc) * Math.sin(azm)) * radius;
+
+        if (ns !== 0) {
+          ca = Math.atan2(ew, ns);
+        } else {
+          ca = Math.PI * 0.5 * (ew / Math.abs(ew));
+        }
+
+        if (ca !== 0.0) {
+          cd = Math.abs(ew / Math.sin(ca));
+        } else {
+          cd = ns;
+        }
+
+        newvs = cd * Math.cos(ca - proposedAzm);
+
+        if (Math.abs(newvs - vs) < 2 && Math.abs(newtvd - tvd) < 2) {
+          incr = 0.01;
+        }
+        if (Math.abs(newvs - vs) < 0.02 && Math.abs(newtvd - tvd) < 0.02) {
+          incr = 0.001;
+        }
+        if (newvs < vs && newtvd > tvd) {
+          newMd += incr;
+          newInc += incr;
+        } else if (newvs < vs && newtvd <= tvd) {
+          newMd += incr;
+        } else if (newvs > vs && newtvd <= tvd) {
+          newInc -= incr;
+        } else if (newvs >= vs && newtvd > tvd) {
+          newMd -= incr;
+        } else if (newvs > vs && newtvd < tvd) {
+          newInc -= incr;
+          newMd -= incr;
+        }
+      } while ((newtvd > tvd + incr || newvs < vs - incr) && newInc > 0 && newInc <= 180 && counter < 2000);
+
+      ca *= radiansToDegrees;
+      if (ca < 0.0) ca = 180.0 + ca;
+      dl = ((dl * 100) / cl) * radiansToDegrees;
+      newInc = toDegrees(pinc + (inc - pinc) / 2.0);
       otherInputs.tvd = tvd;
       otherInputs.vs = vs;
+      otherInputs.pos = tcl - tvd;
 
-      return { ...projection, md: _md, inc: _inc, _ns, _ew, _cd, _ca, _dl, _cl, ...otherInputs };
+      return { ...projection, md: newMd, inc: newInc, ns, ew, cd, ca, dl, cl, ...otherInputs };
     } else {
       return projection;
     }

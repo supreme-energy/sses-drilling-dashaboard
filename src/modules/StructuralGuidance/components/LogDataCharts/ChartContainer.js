@@ -1,17 +1,17 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import Box from "@material-ui/core/Box";
 import _ from "lodash";
 
 import { INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import { useAdditionalDataLog } from "../../../../api";
-import ChartControls from "./ChartControls";
+import ChartControls, { BiasControls } from "./ChartControls";
 import Chart from "./Chart";
 import LogMenu from "./LogMenu";
 import SettingsMenu from "./SettingsMenu";
 import classes from "./styles.scss";
 
-function ChartContainer({ wellId, logId, xAxis, availableLogs, dataBySection, handleRemoveChart }) {
+const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBySection, handleRemoveChart, view }) => {
   const {
     data: { color, data = [], label: initialLogName, scalelo, scalehi }
   } = useAdditionalDataLog(wellId, logId);
@@ -25,71 +25,81 @@ function ChartContainer({ wellId, logId, xAxis, availableLogs, dataBySection, ha
 
   const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs, "checked")), [selectedLogs]);
 
-  const handleOpenLogMenu = event => {
+  const handleOpenLogMenu = useCallback(event => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleOpenSettings = () => {
+  const handleOpenSettings = useCallback(() => {
     setSettingsMenu(d => {
       return { ...d, isSettingsVisible: true };
     });
-  };
+  }, []);
 
-  const handleCloseLogMenu = () => {
+  const handleCloseLogMenu = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const handleCloseScale = () => {
+  const handleResetScale = useCallback(() => {
+    setSelectedLog(state => {
+      return { ...state, [settingsView]: { ...state[settingsView], currScale: state[settingsView].prevScale } };
+    });
+  }, [settingsView]);
+
+  const handleCloseScale = useCallback(() => {
     handleResetScale();
     setEditingScale(false);
-  };
+  }, [handleResetScale]);
 
-  const handleSaveScale = () => {
+  const handleSaveScale = useCallback(() => {
     setSelectedLog(state => {
       return { ...state, [settingsView]: { ...state[settingsView], prevScale: state[settingsView].currScale } };
     });
     setEditingScale(false);
-  };
+  }, [settingsView]);
 
-  const handleResetScale = () => {
-    setSelectedLog(state => {
-      return { ...state, [settingsView]: { ...state[settingsView], currScale: state[settingsView].prevScale } };
-    });
-  };
-  const handleUpdateScale = (scale, bias) => {
-    setSelectedLog(state => {
-      return {
-        ...state,
-        [settingsView]: { ...state[settingsView], currScale: { scale, bias } }
-      };
-    });
-  };
+  const handleUpdateScale = useCallback(
+    (scale, bias) => {
+      setSelectedLog(state => {
+        return {
+          ...state,
+          [settingsView]: { ...state[settingsView], currScale: { scale, bias } }
+        };
+      });
+    },
+    [settingsView]
+  );
 
-  const handleArrowBack = () =>
-    setSettingsMenu(d => {
-      const currentIndex = currentLogs.findIndex(log => log === d.settingsView);
-      if (currentIndex === 0) {
-        return { ...d, settingsView: currentLogs[currentLogs.length - 1] };
-      } else {
-        return { ...d, settingsView: currentLogs[currentIndex - 1] };
-      }
-    });
+  const handleArrowBack = useCallback(
+    () =>
+      setSettingsMenu(d => {
+        const currentIndex = currentLogs.findIndex(log => log === d.settingsView);
+        if (currentIndex === 0) {
+          return { ...d, settingsView: currentLogs[currentLogs.length - 1] };
+        } else {
+          return { ...d, settingsView: currentLogs[currentIndex - 1] };
+        }
+      }),
+    [currentLogs]
+  );
 
-  const handleArrowForward = () =>
-    setSettingsMenu(d => {
-      const currentIndex = currentLogs.findIndex(log => log === d.settingsView);
-      if (currentIndex === currentLogs.length - 1) {
-        return { ...d, settingsView: initialLogName };
-      } else {
-        return { ...d, settingsView: currentLogs[currentIndex + 1] };
-      }
-    });
+  const handleArrowForward = useCallback(
+    () =>
+      setSettingsMenu(d => {
+        const currentIndex = currentLogs.findIndex(log => log === d.settingsView);
+        if (currentIndex === currentLogs.length - 1) {
+          return { ...d, settingsView: currentLogs[0] };
+        } else {
+          return { ...d, settingsView: currentLogs[currentIndex + 1] };
+        }
+      }),
+    [currentLogs]
+  );
 
   const menuItems = useMemo(() => availableLogs.map(({ label }) => label), [availableLogs]);
 
   useEffect(() => {
     if (initialLogName) setSettingsMenu(d => ({ ...d, settingsView: initialLogName }));
-  }, [initialLogName, isSettingsVisible]);
+  }, [initialLogName]);
 
   useEffect(() => {
     if (color) {
@@ -121,28 +131,31 @@ function ChartContainer({ wellId, logId, xAxis, availableLogs, dataBySection, ha
         <ChartControls
           isEditingScale={isEditingScale}
           currentLogs={currentLogs}
-          view={settingsView}
-          selectedLogs={selectedLogs}
           handleOpenMenu={handleOpenLogMenu}
           handleOpenSettings={handleOpenSettings}
           handleArrowForward={handleArrowForward}
           handleArrowBack={handleArrowBack}
+        />
+        <Chart
+          wellId={wellId}
+          data={data}
+          xAxis={xAxis}
+          isEditing={isEditingScale}
+          selectedLogs={selectedLogs}
+          currentLogs={currentLogs}
+          dataBySection={dataBySection}
+          currentLog={settingsView}
+          setScale={handleUpdateScale}
+          newView={view}
+        />
+        <BiasControls
+          isEditingScale={isEditingScale}
+          view={settingsView}
+          selectedLogs={selectedLogs}
           handleReset={handleResetScale}
           handleClose={handleCloseScale}
           handleSave={handleSaveScale}
-        >
-          <Chart
-            wellId={wellId}
-            data={data}
-            xAxis={xAxis}
-            isEditing={isEditingScale}
-            selectedLogs={selectedLogs}
-            currentLogs={currentLogs}
-            dataBySection={dataBySection}
-            currentLog={settingsView}
-            setScale={handleUpdateScale}
-          />
-        </ChartControls>
+        />
       </Box>
 
       <LogMenu
@@ -169,7 +182,7 @@ function ChartContainer({ wellId, logId, xAxis, availableLogs, dataBySection, ha
       />
     </div>
   );
-}
+});
 
 ChartContainer.propTypes = {
   wellId: PropTypes.string,
@@ -182,7 +195,13 @@ ChartContainer.propTypes = {
   ),
   dataBySection: PropTypes.object,
   handleRemoveChart: PropTypes.func,
-  xAxis: PropTypes.string
+  xAxis: PropTypes.string,
+  view: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+    xScale: PropTypes.number,
+    yScale: PropTypes.number
+  })
 };
 
 export default ChartContainer;

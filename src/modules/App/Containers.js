@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useReducer, useState, useEffect } from "react";
 import { createContainer } from "unstated-next";
 import usePrevious from "react-use/lib/usePrevious";
-import memoize from "react-powertools/memoize";
 import {
   useAdditionalDataLog,
   useFetchFormations,
@@ -26,13 +25,13 @@ const filterDataToInterval = (data, interval) => {
   }
 };
 
-const filterDataToLast = memoize((data, lastDepth) => {
+const filterDataToLast = (data, lastDepth) => {
   if (data && data.length) {
     return data.find(({ md }) => md >= lastDepth);
   } else {
     return {};
   }
-});
+};
 
 // Shared state for current time slider location
 function useTimeSlider(initialState) {
@@ -89,7 +88,7 @@ const filterProjectionsToInterval = memoizeOne(filterDataToInterval);
 const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 
 // Uses current time slider location to filter well Cross-Section
-export function useFilteredWellData() {
+export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
   const { wellId } = useWellIdContainer();
@@ -104,6 +103,31 @@ export function useFilteredWellData() {
   const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
   const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
+
+  return {
+    surveys: surveysFiltered,
+    wellPlan,
+    wellPlanFiltered,
+    formations: formationsFiltered,
+    projections: projectionsFiltered
+  };
+}
+
+export function useFilteredWellData() {
+  const { sliderInterval } = useTimeSliderContainer();
+
+  const { wellId } = useWellIdContainer();
+
+  const wellPlan = useWellPath(wellId);
+  const { surveys } = useSurveysDataContainer();
+  const { serverFormations: formations } = useFormationsDataContainer();
+  const { projections } = useProjectionsDataContainer();
+
+  // Filter data and memoize
+  const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
+  const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
+  const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
+  const formationsFiltered = filterFormationsMem(formations, sliderInterval);
 
   return {
     surveys: surveysFiltered,
@@ -149,6 +173,7 @@ export function useFilteredAdditionalDataInterval(wellId, id) {
 // Organize well sections into array of objects
 export function useWellSections(wellId) {
   const { data } = useWellOverviewKPI(wellId);
+
   const drillPhases = useMemo(() => {
     const drillPhaseArr = data.map((s, index) => {
       return {
@@ -193,7 +218,7 @@ function useProjectionsData() {
   const [
     projections,
     refreshProjections,
-    saveProjections,
+    updateProjection,
     deleteProjection,
     addProjection,
     replaceResult
@@ -204,7 +229,7 @@ function useProjectionsData() {
       projections.map((p, i) => {
         return {
           ...p,
-          pos: p.pos || p.tot - p.tvd,
+          pos: p.pos || p.tcl - p.tvd,
           name: `PA${i + 1}`,
           isProjection: true,
           color: 0xee2211,
@@ -216,7 +241,7 @@ function useProjectionsData() {
     [projections]
   );
 
-  return { projectionsData, saveProjections, refreshProjections, deleteProjection, addProjection, replaceResult };
+  return { projectionsData, updateProjection, refreshProjections, deleteProjection, addProjection, replaceResult };
 }
 
 function useFormationsData() {
@@ -226,11 +251,11 @@ function useFormationsData() {
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { formationsData: computedFormations, refreshFormations };
+  return { serverFormations, formationsData: computedFormations, refreshFormations };
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections } = useFilteredWellData();
+  const { surveys, wellPlan, formations, projections } = useComputedFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
@@ -276,6 +301,7 @@ export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataCo
 export const { Provider: CrossSectionProvider, useContainer: useCrossSectionContainer } = createContainer(
   useCrossSectionData
 );
-export const { Provider: SelectedWellInfoProvider, useContainer: selectedWellInfoContainer } = createContainer(
+
+export const { Provider: SelectedWellInfoProvider, useContainer: useSelectedWellInfoContainer } = createContainer(
   useSelectedWellInfo
 );

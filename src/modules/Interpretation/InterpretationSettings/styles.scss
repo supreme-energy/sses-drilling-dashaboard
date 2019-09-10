@@ -8,6 +8,10 @@
     .title {
         color: $gold;
     }
+    
+    .autoDipTitle {
+        margin-right: 10px;
+    }
 
     .tab {
         min-width: auto;
@@ -23,6 +27,10 @@
         -webkit-appearance: none; 
         margin: 0; 
        }
+    }
+
+    .autoDipInput {
+        width: 140px;
     }
 
     .arrowBottom {
@@ -93,5 +101,41 @@
         cursor: pointer;
         width: 22px;
         margin: 0 10px;
+    }
+}
+
+.autoDip {
+    .autoDipPaper {
+        width: 800px;
+        min-height: 370px;
+        max-width: 800px;
+    
+        .col {
+            flex: none;
+            margin-right: 10px;
+        }
+    
+        .col1 {
+            width: 210px;
+        }
+        .col2 {
+            width: 145px;
+        }
+    
+        .col3 {
+            width: 80px;
+        }
+    
+        .col4 {
+            width: 230px;
+        }
+
+        .valueInput {
+            flex-direction: column-reverse;
+        }
+
+        .finalValue {
+            margin-left: 10px;
+        }
     }
 }

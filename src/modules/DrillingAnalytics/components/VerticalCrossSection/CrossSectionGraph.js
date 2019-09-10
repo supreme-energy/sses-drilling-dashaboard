@@ -1,8 +1,6 @@
-import React, { useMemo, useState, useCallback, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSize } from "react-hook-size";
-import { scaleLinear } from "d3-scale";
-import { max } from "d3-array";
 import _ from "lodash";
 
 import useRef from "react-powertools/hooks/useRef";
@@ -18,22 +16,6 @@ import Grid from "../../../../components/Grid";
 import Legend from "../Legend";
 import classes from "../DrillingAnalytics.scss";
 
-function computeInitialViewYScaleValue(data) {
-  if (data && data.length > 0) {
-    return scaleLinear()
-      .domain([0, data[data.length - 1].tvd])
-      .range([0, 1]);
-  }
-}
-
-function computeInitialViewXScaleValue(data) {
-  if (data && data.length > 0) {
-    return scaleLinear()
-      .domain([0, max(data, d => d.vs)])
-      .range([0, 1]);
-  }
-}
-
 const mapValues = d => [Number(d.vs), Number(d.tvd)];
 const gridGutter = 50;
 
@@ -44,8 +26,7 @@ export function VerticalCrossSection({
   wellPlanFiltered,
   surveys,
   formations = [],
-  isLateral,
-  hasPhaseChanged
+  isLateral
 }) {
   const canvasRef = useRef(null);
   const { width, height } = useSize(canvasRef);
@@ -53,16 +34,6 @@ export function VerticalCrossSection({
   const data = wellPlanFiltered && surveys && wellPlanFiltered.length > surveys.length ? wellPlanFiltered : surveys;
   const lastSurveyDepth =
     surveys && surveys.length && surveys[surveys.length - 1].isLastSurvey ? surveys[surveys.length - 1].md : 0;
-
-  const getInitialViewYScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewYScaleValue(data) : () => 1),
-    [data]
-  );
-
-  const getInitialViewXScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
-    [data]
-  );
 
   const [view, updateView] = useState({
     x: gridGutter,
@@ -85,39 +56,38 @@ export function VerticalCrossSection({
     isXScalingValid: () => 1
   });
 
-  const onReset = useCallback(() => {
-    if (isLateral) {
-      updateView(view => ({
-        x: 0 - 10 * view.xScale,
-        y: -850 * 2 - getInitialViewYScaleValue(height + 800),
-        yScale: getInitialViewYScaleValue(height + 700) * 2,
-        xScale: getInitialViewXScaleValue(width - 10 / data.length)
-      }));
-    } else if (hasPhaseChanged) {
-      updateView(view => ({
-        ...view,
-        x: -15,
-        y: -2300,
-        yScale: getInitialViewYScaleValue(height + 700) * 2,
-        xScale: getInitialViewXScaleValue(width - 10 / data.length)
-      }));
-    } else {
-      updateView(view => ({
-        ...view,
-        x: 0 - 15 * view.xScale,
-        y: -2300,
-        yScale: getInitialViewYScaleValue(height + 700) * 2,
-        xScale: getInitialViewXScaleValue(width - 10 / data.length)
-      }));
-    }
-  }, [getInitialViewYScaleValue, getInitialViewXScaleValue, width, height, data, isLateral, hasPhaseChanged]);
-
-  // set initial scale
   useEffect(() => {
-    if (data && data.length && width && height) {
-      onReset();
-    }
-  }, [width, data, height, onReset]);
+    if (!data || !data.length || !width || !height) return;
+    const firstLayer = (formations[0] && formations[0].data) || [];
+    const lastLayer = (formations[formations.length - 1] && formations[formations.length - 1].data) || [];
+
+    const dataMaxY = Math.max(...data.map(d => d.tvd));
+    const dataMinY = Math.min(...data.map(d => d.tvd));
+    const dataMaxX = data[data.length - 1].vs;
+    const dataMinX = data[0].vs;
+
+    const formationMaxY = Math.max(...lastLayer.map(l => l.tot));
+    const formationMinY = Math.min(...firstLayer.map(l => l.tot));
+    const formationMaxX = Math.max(...firstLayer.map(l => l.vs));
+    const formationMinX = Math.min(...firstLayer.map(l => l.vs));
+    const maxY = Math.max(dataMaxY, formationMaxY);
+    const minY = Math.min(dataMinY, formationMinY);
+    const maxX = Math.max(dataMaxX, formationMaxX);
+    const minX = Math.min(dataMinX, formationMinX);
+
+    const usableHeight = height - gridGutter;
+    const usableWidth = width - gridGutter;
+    const newYScale = (usableHeight * 0.9) / (maxY - minY);
+    const newXScale = (usableWidth * 0.9) / (maxX - minX);
+
+    updateView(view => ({
+      ...view,
+      x: -minX * newXScale + gridGutter + usableWidth * 0.05,
+      y: -minY * newYScale + gridGutter + usableHeight * 0.05,
+      yScale: newYScale,
+      xScale: newXScale
+    }));
+  }, [width, height, data, formations]);
 
   useEffect(() => {
     refresh();
@@ -186,7 +156,7 @@ export function VerticalCrossSection({
           formations.map(f => {
             return (
               <PixiLine
-                key={f.label}
+                key={f.id}
                 container={viewport}
                 data={f.data}
                 mapData={mapValues}
@@ -242,8 +212,7 @@ VerticalCrossSection.propTypes = {
   formations: PropTypes.arrayOf(PropTypes.object),
   keys: PropTypes.arrayOf(PropTypes.string),
   selectedMenuItems: PropTypes.arrayOf(PropTypes.string),
-  isLateral: PropTypes.bool,
-  hasPhaseChanged: PropTypes.bool
+  isLateral: PropTypes.bool
 };
 
 export default VerticalCrossSection;

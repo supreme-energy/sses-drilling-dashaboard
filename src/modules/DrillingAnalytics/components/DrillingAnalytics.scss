@@ -98,6 +98,7 @@
             display: flex;
             justify-content: space-around;
         }
+
         .legend {
             display: flex;
             justify-content: center;
@@ -126,7 +127,7 @@
         }
 
         .tvdGraphContainer {
-            height: 100%;
+            height: calc(100% - 75px);
           position: relative;
           canvas {
             position: absolute;
@@ -163,6 +164,7 @@
             span {
                 font-size: 14px;
             }
+            
             h5 {
                 font-size: 45px;
                 font-weight: 500;

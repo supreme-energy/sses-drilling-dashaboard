@@ -1,9 +1,9 @@
 @import "../../../../styles/base";
 
 .cloudServerButton {
-    position: relative;
-    left: 200px;
-    bottom: 35px;
+    position: absolute;
+    left: 250px;
+    padding-bottom: 10px;
 
     .badgeGreen span {
         background-color: green;

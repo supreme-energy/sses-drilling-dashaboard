@@ -1,22 +1,28 @@
-import React from "react";
-import { useWellIdContainer, selectedWellInfoContainer } from "../../App/Containers";
+import React, { useCallback } from "react";
+import { useWellIdContainer, useSelectedWellInfoContainer } from "../../App/Containers";
 import ColorPickerBox from "../../../components/ColorPickerBox";
 import css from "./styles.scss";
 import { useSelectedWellInfoColors } from "../selectors";
+import useMemo from "react-powertools/hooks/useMemo";
 
 export default function WellColorPicker({ field, boxProps, ...props }) {
   const { wellId } = useWellIdContainer();
-  const [, , updateWell] = selectedWellInfoContainer();
+  const [, , updateWell] = useSelectedWellInfoContainer();
   const colors = useSelectedWellInfoColors();
   const color = colors[field];
+  const handleSave = useCallback(
+    value => {
+      updateWell({ wellId, field, value: value.replace("#", "") });
+    },
+    [updateWell, field, wellId]
+  );
+
   return (
     <ColorPickerBox
       hex={`#${color}`}
       color={`#${color}`}
-      boxProps={{ className: css.colorBox, ...boxProps }}
-      handleSave={value => {
-        updateWell({ wellId, field, value: value.replace("#", "") });
-      }}
+      boxProps={useMemo(() => ({ className: css.colorBox, ...boxProps }), [boxProps])}
+      handleSave={handleSave}
       {...props}
     />
   );

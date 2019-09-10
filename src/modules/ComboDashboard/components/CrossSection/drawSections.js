@@ -30,11 +30,15 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
   const selectedLabel = higherContainer.addChild(new PIXI.Container());
   selectedLabel.transform.updateTransform = frozenXTransform;
-  subscribeToMoveEvents(selectedLabel, function(pos) {
-    if (currSelected.isProjection) {
-      updateSegments({ [currSelected.id]: { vs: pos.x } });
-    }
-  });
+  subscribeToMoveEvents(
+    selectedLabel,
+    function(pos) {
+      if (currSelected.isProjection) {
+        updateSegments({ [currSelected.id]: { vs: pos.x } });
+      }
+    },
+    () => debouncedSave()
+  );
   const labelBG = selectedLabel.addChild(new PIXI.Graphics());
   labelBG.position.x = -10;
   const memoInitLabel = memoizeOne(color => {
@@ -57,12 +61,14 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
 
   let calcSections = props.calcSections;
   let toggleSegmentSelection = props.toggleSegmentSelection;
+  let debouncedSave = props.debouncedSave;
 
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
     toggleSegmentSelection = props.toggleSegmentSelection;
+    debouncedSave = props.debouncedSave;
 
     const onSectionClick = section => {
       toggleSegmentSelection(section.entityId);

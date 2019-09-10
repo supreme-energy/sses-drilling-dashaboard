@@ -71,7 +71,7 @@ SlidingKpi.defaultProps = {
   data: {}
 };
 
-export default function Kpi({ className, data }) {
+const Kpi = React.memo(({ className, data }) => {
   const theme = useTheme();
 
   const getTargetColor = useMemo(
@@ -109,8 +109,10 @@ export default function Kpi({ className, data }) {
       </div>
     </Card>
   );
-}
+});
 
 Kpi.defaultProps = {
   data: {}
 };
+
+export default Kpi;
