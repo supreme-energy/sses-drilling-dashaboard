@@ -1,12 +1,13 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellControlLog, useWellLogData, useWellPath } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
-  useSelectedWellInfoContainer
+  useSelectedWellInfoContainer,
+  useFormationsDataContainer
 } from "../App/Containers";
 import { extent } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -550,4 +551,45 @@ const parseWellInfo = memoizeOne((wellInfo = {}) => {
 export function useSelectedWellInfoColors() {
   const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
+}
+
+export function useSetupWizardData() {
+  const { wellId } = useWellIdContainer();
+  const wellPlan = useWellPath(wellId);
+  const [controlLogs] = useWellControlLog(wellId);
+  const [{ wellInfo }] = useSelectedWellInfoContainer();
+  const { surveys } = useSurveysDataContainer();
+  const { formationsData } = useFormationsDataContainer();
+
+  // A default empty well has one entry in the well plan
+  const wellPlanIsImported = wellPlan && wellPlan.length > 1;
+  const controlLogIsImported = controlLogs && !!controlLogs.length;
+  const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
+
+  const tieIn = (surveys && surveys[0]) || {};
+  const tieInIsCompleted = wellInfo && !!wellInfo.tot && !!tieIn.azm && !!tieIn.md && !!tieIn.inc;
+
+  // Formations must have TOT and BOT as layers
+  const layerNames = (formationsData && formationsData.map(l => l.label)) || [];
+  const formationsAreCompleted = layerNames.includes("TOT") && layerNames.includes("BOT");
+
+  const surveyDataIsImported = surveys && surveys.length > 1;
+
+  const allStepsAreCompleted =
+    wellPlanIsImported &&
+    controlLogIsImported &&
+    propAzmAndProjDipAreSet &&
+    tieInIsCompleted &&
+    formationsAreCompleted &&
+    surveyDataIsImported;
+
+  return {
+    allStepsAreCompleted,
+    wellPlanIsImported,
+    controlLogIsImported,
+    propAzmAndProjDipAreSet,
+    tieInIsCompleted,
+    formationsAreCompleted,
+    surveyDataIsImported
+  };
 }
