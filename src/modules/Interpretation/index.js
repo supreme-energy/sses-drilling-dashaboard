@@ -3,7 +3,7 @@ import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from 
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
-import { useWellControlLog } from "../../api";
+import { useWellControlLogList } from "../../api";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
@@ -95,7 +95,7 @@ const Interpretation = React.memo(
 
 const InterpretatinContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
-  const [controlLogs] = useWellControlLog(wellId);
+  const [controlLogs] = useWellControlLogList(wellId);
   const [logList] = useWellLogsContainer();
 
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
