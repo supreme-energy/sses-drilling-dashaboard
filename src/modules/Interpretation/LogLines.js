@@ -85,6 +85,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
               parentScale={d3Scale}
               draft={draft}
               range={range}
+              parentScale={scale}
               refresh={refresh}
               log={log}
               logColor={logColor}
