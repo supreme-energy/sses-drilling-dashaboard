@@ -8,13 +8,14 @@ import {
   useWellIdContainer,
   useSelectedWellInfoContainer
 } from "../App/Containers";
-import { extent } from "d3-array";
+import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/projectionCalculations";
+import memoize from "react-powertools/memoize";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -239,13 +240,8 @@ export function useCurrentComputedSegments() {
   return getCurentComputedSegments(allLogs, filteredLogs, segments, draftMode);
 }
 
-export function useGetComputedLogData(log, draft) {
-  const { wellId } = useWellIdContainer();
-  const [logData] = useWellLogData(wellId, log && log.tablename);
-  const { byId: draftLogsById } = useComputedSegments();
-  const [, computedSegments] = useCurrentComputedSegments();
-  const [, , allLogs] = useWellLogsContainer();
-  const logIndex = useMemo(() => (log ? allLogs.findIndex(l => l.id === log.id) : -1), [allLogs, log]);
+const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, allLogs) => {
+  const logIndex = log ? allLogs.findIndex(l => l.id === log.id) : -1;
   let computedSegment = computedSegments[logIndex];
   let prevComputedSegment = computedSegments[logIndex - 1];
 
@@ -254,31 +250,45 @@ export function useGetComputedLogData(log, draft) {
     prevComputedSegment = prevComputedSegment && draftLogsById[prevComputedSegment.id];
   }
 
-  return useMemo(() => {
-    if (logData && computedSegment) {
-      const currentLogData = { ...log, fault: computedSegment.fault };
-      const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
-      return {
-        ...logData,
-        scalebias: computedSegment.scalebias,
-        scalefactor: computedSegment.scalefactor,
-        data: logData.data.reduce((acc, d, index) => {
-          const { vs, tvd } = d;
+  if (logData && computedSegment) {
+    const currentLogData = { ...log, fault: computedSegment.fault };
+    const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
+    return {
+      ...logData,
+      scalebias: computedSegment.scalebias,
+      scalefactor: computedSegment.scalefactor,
+      data: logData.data.reduce((acc, d, index) => {
+        const { vs, tvd } = d;
 
-          const newLog = { ...d };
+        const newLog = { ...d };
 
-          const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
-          newLog.depth = depth;
+        const depth = calculateDepth({ tvd, dip: computedSegment.sectdip, vs });
+        newLog.depth = depth;
 
-          acc.push(newLog);
+        acc.push(newLog);
 
-          return acc;
-        }, [])
-      };
-    }
+        return acc;
+      }, [])
+    };
+  }
 
-    return logData;
-  }, [logData, computedSegment, prevComputedSegment, log]);
+  return logData;
+};
+
+const recomputeLogDataFactory = memoize(logId => {
+  return memoizeOne(recomputeLogData);
+});
+
+export function useGetComputedLogData(logId, draft) {
+  const { wellId } = useWellIdContainer();
+  const [, logsById, allLogs] = useWellLogsContainer();
+  const log = logsById[logId];
+  const [logData] = useWellLogData(wellId, log && log.tablename);
+  const { byId: draftLogsById } = useComputedSegments();
+  const [, computedSegments] = useCurrentComputedSegments();
+
+  const recomputeLogData = recomputeLogDataFactory(logId);
+  return recomputeLogData(logData, log, draftLogsById, computedSegments, draft, allLogs);
 }
 
 export function getSelectedId(selectionById) {
@@ -481,11 +491,11 @@ export function useComputedFormations(formations) {
 
   return computedFormations;
 }
-export const getExtent = logData => (logData ? extent(logData.data, d => d.value) : null);
+export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 
 export function useLogExtent(log, wellId) {
   const [logData] = useWellLogData(wellId, log && log.tablename);
-  return useMemo(() => getExtent(logData), [logData]);
+  return getExtent(logData);
 }
 
 export function usePendingSegments() {
@@ -550,4 +560,43 @@ const parseWellInfo = memoizeOne((wellInfo = {}) => {
 export function useSelectedWellInfoColors() {
   const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
+}
+
+export const logDataExtent = memoize(data => {
+  return extent(data, d => Number(d.value));
+});
+
+export const getWellsGammaExtent = memoizeOne(logsData => {
+  const extents = logsData.map(ld => [...logDataExtent(ld.data), ld.tablename]);
+  const extentsByTableName = keyBy(extents, ([, , tablename]) => tablename);
+  return [min(extents, ([min]) => min), max(extents, ([, max]) => max), extents, extentsByTableName];
+});
+
+export function getExtentWithBiasAndScale(logs, extentsByTableName) {
+  return logs.reduce(
+    (acc, log) => {
+      const bias = Number(log.scalebias);
+      const scale = Number(log.scalefactor);
+      const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
+
+      return {
+        extentWithBiasAndScale: [
+          Math.min(acc.extentWithBiasAndScale[0], min * scale + bias),
+          Math.max(acc.extentWithBiasAndScale[1], (max - min) * scale + min + bias)
+        ],
+        extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
+      };
+    },
+    {
+      extentWithBiasAndScale: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+      extent: [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
+    }
+  );
+}
+
+export const getFilteredLogsExtent = memoizeOne(getExtentWithBiasAndScale);
+export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
+
+export function getColorForWellLog(colorsByWellLog, logId) {
+  return colorsByWellLog[logId] || "7E7D7E";
 }

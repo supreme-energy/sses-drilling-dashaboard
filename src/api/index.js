@@ -16,6 +16,8 @@ import { useAppState, useCloudServerCountdownContainer } from "../modules/App/Co
 import useRef from "react-powertools/hooks/useRef";
 import { CURVE } from "../constants/wellSections";
 import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
+import withFetchClient from "../utils/withFetchClient";
+import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
 
 export const GET_WELL_LIST = "/joblist.php";
@@ -30,7 +32,8 @@ export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
-export const GET_WELL_CONTROL_LOG = "/controlloglist.php";
+export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
+export const GET_WELL_CONTROL_LOG = "/controllog.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
@@ -736,10 +739,10 @@ export function useWellOperationHours(wellId) {
   return data || EMPTY_ARRAY;
 }
 
-export function useWellControlLog(wellId) {
+export function useWellControlLogList(wellId) {
   return useFetch(
     {
-      path: GET_WELL_CONTROL_LOG,
+      path: GET_WELL_CONTROL_LOG_LIST,
       query: { seldbname: wellId, data: 1 }
     },
     {
@@ -752,6 +755,13 @@ export function useWellControlLog(wellId) {
       }
     }
   );
+}
+
+export function useWellControlLog(tablename) {
+  return useFetch({
+    path: GET_WELL_CONTROL_LOG,
+    query: { tablename }
+  });
 }
 
 const transformWellLogData = memoize(logData => {
@@ -782,6 +792,19 @@ export function useWellLogData(wellId, tableName) {
     { transform: transformWellLogData }
   );
 }
+
+export const withWellLogsData = withFetchClient(
+  GET_WELL_LOG_DATA,
+  ({ logs, wellId }) => logs.map(log => ({ seldbname: wellId, tablename: log.tablename })),
+  {
+    mapResult: results => {
+      return {
+        logsDataResults: results,
+        logsGammaExtent: [...getWellsGammaExtent(results)]
+      };
+    }
+  }
+);
 
 export function useAdditionalDataLogsList(wellId) {
   const [data] = useFetch(
