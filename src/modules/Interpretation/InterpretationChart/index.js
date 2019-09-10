@@ -8,7 +8,6 @@ import css from "./styles.scss";
 import useViewport from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
-import PixiLine from "../../../components/PixiLine";
 import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
@@ -21,11 +20,9 @@ import * as PIXI from "pixi.js";
 import TCLLine from "./TCLLine";
 import Formations from "./Formations";
 import LogLines from "../LogLines";
-import { LogsExtentList } from "../containers/logExtentContainer";
 import { min } from "d3-array";
+import ControlLogLine from "./ControlLogLine";
 const gridGutter = 60;
-
-const mapControlLog = d => [d.value, d.md];
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -122,7 +119,16 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   );
 
   const [
-    { surveyVisibility, surveyPrevVisibility, draftMode, pendingSegmentsState, nrPrevSurveysToDraft }
+    {
+      surveyVisibility,
+      surveyPrevVisibility,
+      draftMode,
+      pendingSegmentsState,
+      nrPrevSurveysToDraft,
+      currentEditedLog,
+      logsBiasAndScale,
+      colorsByWellLog
+    }
   ] = useComboContainer();
 
   const colors = useSelectedWellInfoColors();
@@ -142,22 +148,29 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     nrPrevSurveysToDraft,
     draftMode,
     pendingSegmentsState,
-    colors
+    colors,
+    currentEditedLog,
+    logsBiasAndScale,
+    colorsByWellLog,
+    logsBiasAndScale
   ]);
 
   return (
     <div className={classNames(className, css.root)}>
-      <LogsExtentList wellId={wellId} />
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
       <Formations container={viewport} width={width} />
 
       {controlLogs.map(cl => (
-        <PixiLine key={cl.id} container={viewport} data={cl.data} mapData={mapControlLog} color={0x7e7d7e} />
+        <ControlLogLine key={cl.id} log={cl} container={viewport} />
       ))}
-      {/* todo use this when add aditional logs
-      {gr && gr.data && <PixiLine container={viewport} data={gr.data} mapData={mapGammaRay} color={0x0d0079} />} */}
-      <LogLines wellId={wellId} logList={logList} container={viewport} selectedWellLogIndex={selectedWellLogIndex} />
+      <LogLines
+        wellId={wellId}
+        logs={logList}
+        container={viewport}
+        selectedWellLogIndex={selectedWellLogIndex}
+        offset={gridGutter}
+      />
 
       <Grid
         container={viewport}
@@ -181,6 +194,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       <TCLLine container={viewport} width={width} />
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       <BiasAndScale
+        controlLogs={controlLogs}
+        logs={logList}
+        wellId={wellId}
         container={stage}
         y={height - 10}
         gridGutter={gridGutter}

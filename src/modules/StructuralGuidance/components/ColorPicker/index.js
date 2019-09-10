@@ -125,4 +125,4 @@ ColorPicker.propTypes = {
   handleSave: PropTypes.func
 };
 
-export default CustomPicker(ColorPicker);
+export default React.memo(CustomPicker(ColorPicker));
