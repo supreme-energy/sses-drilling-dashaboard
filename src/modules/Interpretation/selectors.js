@@ -573,7 +573,6 @@ export function useSetupWizardData() {
 
   // A default empty well has one entry in the well plan
   const wellPlanIsImported = wellPlan && wellPlan.length > 1;
-  console.log(controlLogs);
   const controlLogIsImported = !!controlLogs && !!controlLogs.length;
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
@@ -585,14 +584,6 @@ export function useSetupWizardData() {
   const formationsAreCompleted = layerNames.includes("TOT") && layerNames.includes("BOT");
 
   const surveyDataIsImported = surveys && surveys.length > 1;
-  console.log(
-    wellPlanIsImported,
-    controlLogIsImported,
-    propAzmAndProjDipAreSet,
-    tieInIsCompleted,
-    formationsAreCompleted,
-    surveyDataIsImported
-  );
   const allStepsAreCompleted =
     wellPlanIsImported &&
     controlLogIsImported &&
