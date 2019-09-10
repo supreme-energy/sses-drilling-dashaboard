@@ -73,7 +73,7 @@ function CloudServerModal({ wellId }) {
             <Badge
               className={hasConflict ? classes.badgeRed : classes.badgeGreen}
               variant="dot"
-              invisible={!newSurvey && !isOnline}
+              invisible={!newSurvey || !isOnline}
               color="secondary"
             >
               <Cloud />

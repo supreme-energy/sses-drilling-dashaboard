@@ -320,55 +320,8 @@ const recomputeSurveysAndProjections = memoizeOne(
           ca,
           cd
         };
-      } else if (!currSvy.isProjection) {
-        let dogLegSeverity = 0;
-        const courseLength = combinedSvy.md - prevSvy.md;
-        const pInc = toRadians(prevSvy.inc);
-        const cInc = toRadians(combinedSvy.inc);
-        const pAzm = toRadians(prevSvy.azm);
-        let cAzm = toRadians(combinedSvy.azm);
-        let dogleg = Math.acos(
-          Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
-        );
-        if (isNaN(dogleg)) {
-          combinedSvy.azm += 0.01;
-          cAzm = toRadians(combinedSvy.azm);
-          dogleg = Math.acos(Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm));
-        }
-        if (courseLength > 0) {
-          // TODO: include check for "depth units"
-          //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
-          dogLegSeverity = (dogleg * 100.0) / courseLength;
-        }
-        // Radius also called curvature factor
-        let radius = 1;
-        if (dogleg !== 0.0) {
-          radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
-        }
-
-        const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
-        if (!tvd) {
-          console.log(prevSvy.tvd, courseLength, pInc, cInc, radius);
-        }
-        let ns =
-          prevSvy.ns +
-          (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
-        const ew =
-          prevSvy.ew +
-          (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
-
-        let ca = Math.PI / 2;
-        if (ns !== 0.0) {
-          ca = Math.atan2(ew, ns);
-        }
-
-        let cd = ns;
-        if (ca !== 0.0) {
-          cd = ew / Math.sin(ca);
-        }
-
-        const vs = Math.cos(ca - toRadians(propazm)) * cd;
-
+      } else {
+        // Perform the same formation related fault and dip calculations for both surveys and projections
         const dipPending = pendingState.dip !== undefined;
         const faultPending = pendingState.fault !== undefined;
         const dip = dipPending ? pendingState.dip : currSvy.dip;
@@ -378,32 +331,81 @@ const recomputeSurveysAndProjections = memoizeOne(
         const tot = prevSvy.tot + totDiff;
         const bot = prevSvy.bot + totDiff;
 
-        const caDeg = toDegrees(ca);
+        if (!currSvy.isProjection) {
+          let dogLegSeverity = 0;
+          const courseLength = combinedSvy.md - prevSvy.md;
+          const pInc = toRadians(prevSvy.inc);
+          const cInc = toRadians(combinedSvy.inc);
+          const pAzm = toRadians(prevSvy.azm);
+          let cAzm = toRadians(combinedSvy.azm);
+          let dogleg = Math.acos(
+            Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+          );
+          if (isNaN(dogleg)) {
+            combinedSvy.azm += 0.01;
+            cAzm = toRadians(combinedSvy.azm);
+            dogleg = Math.acos(
+              Math.cos(pInc) * Math.cos(cInc) + Math.sin(pInc) * Math.sin(cInc) * Math.cos(cAzm - pAzm)
+            );
+          }
+          if (courseLength > 0) {
+            // TODO: include check for "depth units"
+            //  https://github.com/supreme-energy/sses-main/blob/master/sses_cc/calccurve.c#L227
+            dogLegSeverity = (dogleg * 100.0) / courseLength;
+          }
+          // Radius also called curvature factor
+          let radius = 1;
+          if (dogleg !== 0.0) {
+            radius = (2.0 / dogleg) * Math.tan(dogleg / 2.0);
+          }
 
-        acc[index] = {
-          ...combinedSvy,
-          tvd,
-          vs,
-          dl: toDegrees(dogLegSeverity),
-          cl: courseLength,
-          ca: caDeg < 0 ? caDeg + 360 : ca,
-          ns,
-          ew,
-          build: ((cInc - pInc) * 100) / courseLength,
-          turn: ((cAzm - pAzm) * 100) / courseLength,
-          tcl,
-          fault,
-          dip,
-          tot,
-          bot,
-          pos: tcl - tvd
-        };
-      } else {
-        const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
-        const sign = bitProjPos > 0 ? 1 : -1;
-        const cap = bitProjPos > 0 ? Math.max : Math.min;
-        const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
-        acc[index] = calculateProjection({ ...combinedSvy, pos }, acc, index, propazm);
+          const tvd = prevSvy.tvd + (courseLength / 2.0) * (Math.cos(pInc) + Math.cos(cInc)) * radius;
+          let ns =
+            prevSvy.ns +
+            (courseLength / 2.0) * (Math.sin(pInc) * Math.cos(pAzm) + Math.sin(cInc) * Math.cos(cAzm)) * radius;
+          const ew =
+            prevSvy.ew +
+            (courseLength / 2.0) * (Math.sin(pInc) * Math.sin(pAzm) + Math.sin(cInc) * Math.sin(cAzm)) * radius;
+
+          let ca = Math.PI / 2;
+          if (ns !== 0.0) {
+            ca = Math.atan2(ew, ns);
+          }
+
+          let cd = ns;
+          if (ca !== 0.0) {
+            cd = ew / Math.sin(ca);
+          }
+
+          const vs = Math.cos(ca - toRadians(propazm)) * cd;
+
+          const caDeg = toDegrees(ca);
+
+          acc[index] = {
+            ...combinedSvy,
+            tvd,
+            vs,
+            dl: toDegrees(dogLegSeverity),
+            cl: courseLength,
+            ca: caDeg < 0 ? caDeg + 360 : ca,
+            ns,
+            ew,
+            build: ((cInc - pInc) * 100) / courseLength,
+            turn: ((cAzm - pAzm) * 100) / courseLength,
+            tcl,
+            fault,
+            dip,
+            tot,
+            bot,
+            pos: tcl - tvd
+          };
+        } else {
+          const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+          const sign = bitProjPos > 0 ? 1 : -1;
+          const cap = bitProjPos > 0 ? Math.max : Math.min;
+          const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          acc[index] = calculateProjection({ ...combinedSvy, pos, tcl, fault, dip, tot, bot }, acc, index, propazm);
+        }
       }
       return acc;
     }, []);

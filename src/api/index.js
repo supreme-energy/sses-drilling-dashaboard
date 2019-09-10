@@ -18,6 +18,7 @@ import { CURVE } from "../constants/wellSections";
 import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
+import isNumber from "../utils/isNumber";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -51,6 +52,7 @@ export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
 export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
+export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -447,7 +449,7 @@ const surveysTransform = memoizeOne(data => {
     return {
       ...s,
       name: isBitProj ? `BPrj` : `${i}`,
-      pos: s.pos || s.tot - s.tvd,
+      pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
@@ -549,19 +551,28 @@ export function useFetchProjections(wellId) {
     [isLoading, error, isPolling, isFetchingMore, replaceResult]
   );
 
-  const saveProjection = (projectionId, method, fields = {}) => {
-    // return the promise so we can refresh AFTER the API call is done
-    return fetch({
-      path: SET_WELL_PROJECTIONS,
-      method: "GET",
-      query: {
-        seldbname: wellId,
-        id: projectionId,
-        method: method,
-        ...fields
-      }
-    });
-  };
+  const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
+  const updateProjection = useCallback(
+    ({ projectionId, fields = {} }) => {
+      const optimisticResult = data.map(p => {
+        return p.id === projectionId ? { ...p, ...fields } : p;
+      });
+
+      return serializedUpdateFetch({
+        path: SET_WELL_PROJECTIONS,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: projectionId,
+          ...fields
+        },
+        optimisticResult,
+        cache: "no-cache"
+      });
+    },
+    [serializedUpdateFetch, wellId, data]
+  );
 
   function sortByMD(a, b) {
     if (a.md < b.md) return -1;
@@ -619,7 +630,7 @@ export function useFetchProjections(wellId) {
     );
   };
 
-  return [data || EMPTY_ARRAY, refresh, saveProjection, deleteProjection, addProjection, replaceResultCallback];
+  return [data || EMPTY_ARRAY, refresh, updateProjection, deleteProjection, addProjection, replaceResultCallback];
 }
 
 export function useWellOverviewKPI(wellId) {
@@ -1001,4 +1012,34 @@ export function useEmailContacts(wellId) {
     updateEmailContact,
     refresh
   };
+}
+
+export function useBitProjection(wellId) {
+  const [data, , , , , { fetch, refresh }] = useFetch(
+    {
+      path: GET_BIT_PROJECTION,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => transform(data)
+    }
+  );
+
+  const updateBitProjection = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: GET_BIT_PROJECTION,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
 }

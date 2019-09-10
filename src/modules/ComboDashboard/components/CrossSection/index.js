@@ -7,6 +7,7 @@ import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
 
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 const pixiApp = new PixiCrossSection();
 
@@ -16,6 +17,7 @@ const CrossSection = props => {
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
+  const { debouncedSave } = useSaveSurveysAndProjections();
 
   const {
     wellPlan,
@@ -77,7 +79,8 @@ const CrossSection = props => {
         xField,
         yField,
         yAxisDirection,
-        updateSegments
+        updateSegments,
+        debouncedSave
       },
       view,
       updateView
@@ -117,7 +120,8 @@ const CrossSection = props => {
       yAxisDirection,
       addProjection,
       deleteProjection,
-      updateSegments
+      updateSegments,
+      debouncedSave
     });
   }, [
     view.x,
@@ -145,7 +149,8 @@ const CrossSection = props => {
     addProjection,
     updateView,
     deleteProjection,
-    updateSegments
+    updateSegments,
+    debouncedSave
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

@@ -11,12 +11,17 @@ import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
 import classes from "../ComboDashboard.scss";
+import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 export const SelectedProjectionMethod = ({ selectedProjection }) => {
   const updateSegments = useUpdateSegmentsById();
+  const { debouncedSave } = useSaveSurveysAndProjections();
   const updateSelectedPAMethod = useCallback(
-    e => updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } }),
-    [updateSegments, selectedProjection]
+    e => {
+      updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } });
+      debouncedSave();
+    },
+    [updateSegments, selectedProjection, debouncedSave]
   );
 
   return (
