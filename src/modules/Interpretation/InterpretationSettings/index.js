@@ -10,6 +10,7 @@ import DraftSurveys from "./DraftSurveys";
 import ApplyDraftButtons from "./ApplyDraftButtons";
 import { usePendingSegments } from "../selectors";
 import { useUpdateSegmentsByMd } from "../actions";
+import AutoDip from "./AutoDip";
 
 export default function InterpretationSettings({ className }) {
   const [{ draftMode }] = useComboContainer();
@@ -41,6 +42,7 @@ export default function InterpretationSettings({ className }) {
           </Box>
         </React.Fragment>
       )}
+      {!draftMode && <AutoDip />}
     </Box>
   );
 }

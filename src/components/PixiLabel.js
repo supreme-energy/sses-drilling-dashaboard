@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useEffect } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect, useState } from "react";
 import PixiRectangle from "./PixiRectangle";
 import PixiText from "./PixiText";
 import useRef from "react-powertools/hooks/useRef";
@@ -7,8 +7,8 @@ import PixiContainer from "./PixiContainer";
 const PixiLabel = forwardRef(
   ({ text, padding, container, backgroundProps, textProps, x, y, sizeChanged, height, width, ...props }, ref) => {
     const textRef = useRef(null);
-    const textWidth = (textRef.current && textRef.current.pixiText.width) || 0;
-    const textHeight = (textRef.current && textRef.current.pixiText.height) || 0;
+
+    const [{ textWidth, textHeight }, updateLabelDimensions] = useState({ textWidth: 0, textHeight: 0 });
     const bgWidth = width || textWidth + padding.left + padding.right;
     const bgHeight = height || textHeight + padding.top + padding.bottom;
     const containerRef = useRef(null);
@@ -22,6 +22,12 @@ const PixiLabel = forwardRef(
       }),
       [bgWidth, bgHeight]
     );
+
+    useEffect(() => {
+      const measuredTextWidth = (textRef.current && textRef.current.pixiText.width) || 0;
+      const measuredTextHeight = (textRef.current && textRef.current.pixiText.height) || 0;
+      updateLabelDimensions({ textWidth: measuredTextWidth, textHeight: measuredTextHeight });
+    }, [text]);
 
     useEffect(() => {
       sizeChanged(bgWidth, bgHeight);
@@ -53,6 +59,8 @@ const PixiLabel = forwardRef(
 PixiLabel.defaultProps = {
   backgroundProps: {},
   sizeChanged: () => {},
+  x: 0,
+  y: 0,
   textProps: {},
   padding: { top: 5, bottom: 2, left: 5, right: 5 }
 };

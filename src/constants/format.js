@@ -2,6 +2,7 @@ import { format } from "d3-format";
 
 export const EMPTY_FIELD = "—";
 export const twoDecimals = format(",.2f");
+export const threeDecimals = format(",.3f");
 export const percentage = format(".0%");
 export const noDecimals = format(".0f");
 
