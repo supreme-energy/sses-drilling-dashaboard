@@ -78,6 +78,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
             <LogDataLine
               draft={draft}
               range={range}
+              parentScale={scale}
               refresh={refresh}
               log={log}
               logColor={logColor}

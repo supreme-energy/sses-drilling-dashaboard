@@ -9,9 +9,14 @@ import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = ({ logData, range, extent, draft, container, ...props }) => {
+const LogData = ({ logData, range, extent, draft, container, parentScale, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
+  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias / parentScale, scale, extent), [
+    bias,
+    scale,
+    extent,
+    parentScale
+  ]);
 
   const filteredLogData = useMemo(() => {
     if (!range) {
@@ -43,7 +48,8 @@ function LogDataLine({
   colors,
   extent,
   logLineData,
-  logColor
+  logColor,
+  parentScale
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
 
@@ -56,6 +62,7 @@ function LogDataLine({
       logData={computedLogData}
       container={container}
       selected={selected}
+      parentScale={parentScale}
     />
   ) : null;
 }
