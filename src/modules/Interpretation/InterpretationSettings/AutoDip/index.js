@@ -33,7 +33,7 @@ import { useSelectedSegmentState } from "../../selectors";
 export const NORMAL = "NORMAL";
 export const CALCULATED = "CALCULATED";
 
-const mothodTypes = {
+const methodTypes = {
   AVERAGE_DIP: "Average Dip",
   AVERAGE_CONTROL_DIP_CLOSURE: "Average Control Dip-Closure",
   MANUAL_INPUT: "Manual Input",
@@ -74,7 +74,7 @@ function autoDipReducer(state, action) {
           ...state.rowsById,
           [id]: {
             id,
-            calculationMethod: mothodTypes.MANUAL_INPUT,
+            calculationMethod: methodTypes.MANUAL_INPUT,
             nrSurveysBack: 2
           }
         }
@@ -120,7 +120,7 @@ function MethodTypeDropDown(props) {
           id: "method-type"
         }}
       >
-        {Object.values(mothodTypes).map(v => (
+        {Object.values(methodTypes).map(v => (
           <MenuItem key={v} value={v}>
             {v}
           </MenuItem>
@@ -242,7 +242,7 @@ const getAverageRealDipClosure = memoizeOne((surveys, controlLogs = EMPTY_ARRAY)
 
 const computeFinalDip = memoizeOne((rows, optionsByRowMethod) => {
   return mean(rows, r => {
-    if (r.calculationMethod === mothodTypes.MANUAL_INPUT) {
+    if (r.calculationMethod === methodTypes.MANUAL_INPUT) {
       return r.manualInputValue;
     }
 
@@ -259,9 +259,9 @@ function useOptionsByMethodType() {
   const averageRealDipOptions = getAverageRealDipClosure(surveys, controlLogs);
   return useMemo(
     () => ({
-      [mothodTypes.AVERAGE_DIP]: averageSurveysDipOptions,
-      [mothodTypes.AVERAGE_CONTROL_DIP_CLOSURE]: averageControlDipOptions,
-      [mothodTypes.AVERAGE_REAL_DIP_CLOSURE]: averageRealDipOptions
+      [methodTypes.AVERAGE_DIP]: averageSurveysDipOptions,
+      [methodTypes.AVERAGE_CONTROL_DIP_CLOSURE]: averageControlDipOptions,
+      [methodTypes.AVERAGE_REAL_DIP_CLOSURE]: averageRealDipOptions
     }),
     [averageSurveysDipOptions, averageControlDipOptions, averageRealDipOptions]
   );
@@ -286,7 +286,7 @@ function AutoDipSettings({
 
   function getRowEl(row) {
     switch (row.calculationMethod) {
-      case mothodTypes.MANUAL_INPUT:
+      case methodTypes.MANUAL_INPUT:
         return (
           <ManualInputRow
             key={row.id}
@@ -296,9 +296,9 @@ function AutoDipSettings({
             onMethodChange={handleChangeMethod(row)}
           />
         );
-      case mothodTypes.AVERAGE_DIP:
-      case mothodTypes.AVERAGE_CONTROL_DIP_CLOSURE:
-      case mothodTypes.AVERAGE_REAL_DIP_CLOSURE:
+      case methodTypes.AVERAGE_DIP:
+      case methodTypes.AVERAGE_CONTROL_DIP_CLOSURE:
+      case methodTypes.AVERAGE_REAL_DIP_CLOSURE:
         const options = getOptionsByMethodType[row.calculationMethod];
 
         return (
