@@ -40,9 +40,6 @@ const BiasAndScale = React.memo(
     onRootDragHandler,
     onStartDragHandler,
     onEndDragHandler,
-    parentScale,
-    parentExtent,
-    parentBias,
     x
   }) => {
     const segmentContainerRef = useRef(null);
@@ -260,8 +257,6 @@ function useSegmentBiasAndScale({
     parentExtent,
     draftMode,
     saveSelectedWellLog,
-    parentBias: logsBias,
-    parentScale: logsScale,
     gridGutter,
     container,
     canvas,
@@ -350,8 +345,6 @@ function useLogsBiasAndScaleProps({
     xMax,
     logXMin: xMin,
     onRootDragHandler,
-    parentBias: 0,
-    parentScale: 1,
     y,
     x: bias + xMin + gridGutter,
     computedWidth,
