@@ -2,7 +2,13 @@ import React, { useMemo, useRef, useEffect } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
-import { getIsDraft, useComputedDraftSegmentsOnly, getFilteredLogsExtent, getColorForWellLog } from "./selectors";
+import {
+  getIsDraft,
+  useComputedDraftSegmentsOnly,
+  getFilteredLogsExtent,
+  getColorForWellLog,
+  getGammaRayLogD3Scale
+} from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
 import { withWellLogsData, EMPTY_ARRAY } from "../../api";
 import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
@@ -64,18 +70,19 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   const [, , , extentsByTableName] = logsGammaExtent;
 
   const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
-  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
+  const [x] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
   const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
+  const d3Scale = getGammaRayLogD3Scale(scale, extent);
   return (
     <PixiContainer
-      x={x}
-      scale={pixiScale}
+      x={bias}
       container={container}
       child={container =>
         filteredLogList.map((log, index) => {
           const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
           return (
             <LogDataLine
+              parentScale={d3Scale}
               draft={draft}
               range={range}
               refresh={refresh}

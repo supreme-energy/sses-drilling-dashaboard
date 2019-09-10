@@ -8,7 +8,8 @@ import {
   useSelectedWellInfoColors,
   logDataExtent,
   getPendingSegmentsExtent,
-  getFilteredLogsExtent
+  getFilteredLogsExtent,
+  getGammaRayLogD3Scale
 } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
@@ -42,14 +43,12 @@ const BiasAndScale = React.memo(
     onEndDragHandler,
     parentScale,
     parentExtent,
-    parentBias
+    parentBias,
+    x
   }) => {
     const segmentContainerRef = useRef(null);
     const startLineRef = useRef(null);
     const endLineRef = useRef(null);
-    const finalComputedWidth = computedWidth * parentScale;
-
-    const computedXMin = xMin - (computedWidth - width) / 2;
 
     const onDragEnd = useCallback(() => !draftMode && saveSelectedWellLog && saveSelectedWellLog(), [
       saveSelectedWellLog,
@@ -64,7 +63,7 @@ const BiasAndScale = React.memo(
       onDragEnd,
       canvas,
       cursor: "ew-resize",
-      width: finalComputedWidth - 4,
+      width: computedWidth - 4,
       height: 8,
       x: 4,
       y: 0
@@ -103,7 +102,7 @@ const BiasAndScale = React.memo(
     return (
       <PixiContainer
         container={container}
-        x={gridGutter + computedXMin + bias + parentBias}
+        x={x}
         y={y}
         child={container => (
           <React.Fragment>
@@ -125,7 +124,7 @@ const BiasAndScale = React.memo(
             <PixiContainer
               ref={endLineRef}
               container={container}
-              x={finalComputedWidth}
+              x={computedWidth}
               y={-1}
               child={container => (
                 <PixiLine
@@ -145,7 +144,7 @@ const BiasAndScale = React.memo(
               y={0}
               child={container => (
                 <PixiRectangle
-                  width={finalComputedWidth - 2}
+                  width={computedWidth - 2}
                   height={8}
                   radius={5}
                   backgroundColor={draftMode ? draftColor : selectionColor}
@@ -182,14 +181,15 @@ function useSegmentBiasAndScale({
 
   const { extent, extentWithBiasAndScale } = getPendingSegmentsExtent(pendingSegments, extentsByTableName);
 
-  const [xMin, xMax] = extent;
+  let [xMin, xMax] = extent;
   const updateSegments = useUpdateSegmentsByMd();
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
+  const d3Scale = getGammaRayLogD3Scale(logsScale, parentExtent);
 
   const width = xMax - xMin;
 
-  const computedWidth = width * scale;
+  const computedWidth = d3Scale(xMax * scale) - d3Scale(xMin * scale);
 
   const updatePendingSegments = useCallback(
     props => {
@@ -250,6 +250,8 @@ function useSegmentBiasAndScale({
     },
     [updatePendingSegments, width, bias, scale]
   );
+  const computedXMin = xMin - (computedWidth - width) / 2 - (logsScale !== 1 ? xMin - d3Scale(parentExtent[0]) : 0);
+  const x = gridGutter + computedXMin + bias + logsBias;
 
   return {
     bias: bias,
@@ -268,6 +270,7 @@ function useSegmentBiasAndScale({
     canvas,
     draftColor,
     y,
+    x,
     onRootDragHandler,
     onStartDragHandler,
     onEndDragHandler
@@ -336,7 +339,7 @@ function useLogsBiasAndScaleProps({
 
       const newWidth = width * scale + delta;
       const newScale = newWidth / width;
-      dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta / 2, scale: newScale, logId: currentEditedLog });
+      dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", scale: newScale, logId: currentEditedLog });
     },
     [dispatch, bias, scale, currentEditedLog, width]
   );
@@ -353,6 +356,7 @@ function useLogsBiasAndScaleProps({
     parentBias: 0,
     parentScale: 1,
     y,
+    x: xMin + bias + gridGutter,
     computedWidth,
     width,
     gridGutter,

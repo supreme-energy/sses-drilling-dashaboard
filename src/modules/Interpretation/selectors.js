@@ -16,6 +16,7 @@ import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/useCalculations";
 import memoize from "react-powertools/memoize";
+import { scaleLinear } from "d3-scale";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -601,3 +602,9 @@ export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
 export function getColorForWellLog(colorsByWellLog, logId) {
   return colorsByWellLog[logId] || "7E7D7E";
 }
+
+export const getGammaRayLogD3Scale = (scale, extent) => {
+  return scaleLinear()
+    .domain(extent)
+    .range([extent[0], extent[1] * scale]);
+};

@@ -6,10 +6,12 @@ import { hexColor } from "../../../constants/pixiColors";
 import { useWellLogData, EMPTY_ARRAY } from "../../../api";
 import { useWellIdContainer } from "../../App/Containers";
 import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
+import { scaleLinear } from "d3-scale";
+import PixiContainer from "../../../components/PixiContainer";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = ({ logData, range, extent, draft, container, ...props }) => {
+const LogData = ({ logData, range, extent, draft, container, parentScale, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
   const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
 
@@ -27,8 +29,19 @@ const LogData = ({ logData, range, extent, draft, container, ...props }) => {
       : logData.data;
   }, [logData, range]);
 
+  const scaledData = useMemo(() => filteredLogData.map(d => ({ ...d, value: parentScale(d.value * scale + x) })), [
+    parentScale,
+    filteredLogData,
+    scale,
+    x
+  ]);
+  console.log("x", x);
   return (
-    <PixiLine {...props} x={x} scale={pixiScale} mapData={mapWellLog} data={filteredLogData} container={container} />
+    <PixiContainer
+      container={container}
+      x={0}
+      child={container => <PixiLine {...props} mapData={mapWellLog} data={scaledData} container={container} />}
+    />
   );
 };
 
@@ -43,7 +56,8 @@ function LogDataLine({
   colors,
   extent,
   logLineData,
-  logColor
+  logColor,
+  parentScale
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
 
@@ -54,6 +68,7 @@ function LogDataLine({
       draft={draft}
       extent={extent}
       logData={computedLogData}
+      parentScale={parentScale}
       container={container}
       selected={selected}
     />
