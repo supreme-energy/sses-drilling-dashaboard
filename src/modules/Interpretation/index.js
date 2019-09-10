@@ -15,6 +15,8 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import { LogExtentProvider } from "./containers/logExtentContainer";
 import TCLValue from "./SelectionStats/TCLValue";
+import { useSetupWizardData } from "./selectors";
+import WizardChecklist from "./components/WizardChecklist";
 
 const Interpretation = React.memo(({ match: { params: { wellId } }, className }) => {
   const [controlLogs] = useWellControlLog(wellId);
@@ -24,11 +26,12 @@ const Interpretation = React.memo(({ match: { params: { wellId } }, className })
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [state, dispatch] = useComboContainer();
   const { draftMode } = state;
+  const { allStepsAreCompleted, dataHasLoaded } = useSetupWizardData();
   return (
     <LogExtentProvider>
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
-        <SelectionStatsContainer />
+        {dataHasLoaded ? allStepsAreCompleted ? <SelectionStatsContainer /> : <WizardChecklist /> : null}
         <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
           <Box display="flex" flexDirection="row" alignItems="center">
             <TCLValue />
