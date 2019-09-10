@@ -555,15 +555,15 @@ export function useSelectedWellInfoColors() {
 
 export function useSetupWizardData() {
   const { wellId } = useWellIdContainer();
-  const wellPlan = useWellPath(wellId);
-  const [controlLogs] = useWellControlLog(wellId);
-  const [{ wellInfo }] = useSelectedWellInfoContainer();
-  const { surveys } = useSurveysDataContainer();
-  const { formationsData } = useFormationsDataContainer();
+  const [wellPlan, wPlanLoading] = useWellPath(wellId);
+  const [controlLogs, cLogLoading] = useWellControlLog(wellId);
+  const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
+  const { surveys, isLoading: surveysLoading } = useSurveysDataContainer();
+  const { formationsData, isLoading: formationsLoading } = useFormationsDataContainer();
 
   // A default empty well has one entry in the well plan
   const wellPlanIsImported = wellPlan && wellPlan.length > 1;
-  const controlLogIsImported = controlLogs && !!controlLogs.length;
+  const controlLogIsImported = !!controlLogs && !!controlLogs.length;
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
   const tieIn = (surveys && surveys[0]) || {};
@@ -582,14 +582,10 @@ export function useSetupWizardData() {
     tieInIsCompleted &&
     formationsAreCompleted &&
     surveyDataIsImported;
+  const dataHasLoaded = !(formationsLoading || surveysLoading || wellInfoLoading || cLogLoading || wPlanLoading);
 
   return {
     allStepsAreCompleted,
-    wellPlanIsImported,
-    controlLogIsImported,
-    propAzmAndProjDipAreSet,
-    tieInIsCompleted,
-    formationsAreCompleted,
-    surveyDataIsImported
+    dataHasLoaded
   };
 }
