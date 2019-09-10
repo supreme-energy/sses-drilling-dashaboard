@@ -206,7 +206,7 @@ function calculateTregDip({ md, ns, ew }, cl) {
 }
 
 function useAverageControlDipOptions(wellId, controlLogs = EMPTY_ARRAY) {
-  const wellPlan = useWellPath(wellId);
+  const [wellPlan] = useWellPath(wellId);
 
   const [cl] = controlLogs;
 
