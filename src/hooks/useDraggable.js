@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import useRef from "react-powertools/hooks/useRef";
 
 const IDENTITY = d => d;

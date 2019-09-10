@@ -16,7 +16,6 @@ import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/useCalculations";
 import memoize from "react-powertools/memoize";
-import { scaleLinear } from "d3-scale";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -577,14 +576,11 @@ export function getExtentWithBiasAndScale(logs, extentsByTableName) {
       const bias = Number(log.scalebias);
       const scale = Number(log.scalefactor);
       const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
-      const width = max - min;
-      const computedWidth = width * scale;
-      const computedXMin = min - (computedWidth - width) / 2;
 
       return {
         extentWithBiasAndScale: [
-          Math.min(acc.extentWithBiasAndScale[0], computedXMin + bias),
-          Math.max(acc.extentWithBiasAndScale[1], computedXMin + bias + computedWidth)
+          Math.min(acc.extentWithBiasAndScale[0], min * scale + bias),
+          Math.max(acc.extentWithBiasAndScale[1], (max - min) * scale + min + bias)
         ],
         extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
       };
@@ -602,9 +598,3 @@ export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
 export function getColorForWellLog(colorsByWellLog, logId) {
   return colorsByWellLog[logId] || "7E7D7E";
 }
-
-export const getGammaRayLogD3Scale = (scale, extent) => {
-  return scaleLinear()
-    .domain(extent)
-    .range([extent[0], extent[1] * scale]);
-};

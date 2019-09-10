@@ -8,8 +8,7 @@ import {
   useSelectedWellInfoColors,
   logDataExtent,
   getPendingSegmentsExtent,
-  getFilteredLogsExtent,
-  getGammaRayLogD3Scale
+  getFilteredLogsExtent
 } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
@@ -185,11 +184,10 @@ function useSegmentBiasAndScale({
   const updateSegments = useUpdateSegmentsByMd();
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
-  const d3Scale = getGammaRayLogD3Scale(logsScale, parentExtent);
 
   const width = xMax - xMin;
 
-  const computedWidth = d3Scale(xMax * scale) - d3Scale(xMin * scale);
+  const computedWidth = xMax * scale * logsScale - xMin * scale * logsScale;
 
   const updatePendingSegments = useCallback(
     props => {
@@ -219,10 +217,10 @@ function useSegmentBiasAndScale({
   const onRootDragHandler = useCallback(
     (event, prevMouse) => {
       const currMouse = event.data.global;
-      const delta = currMouse.x - prevMouse.x;
+      const delta = (currMouse.x - prevMouse.x) / logsScale;
       updatePendingSegments({ bias: bias + delta });
     },
-    [updatePendingSegments, bias]
+    [updatePendingSegments, bias, logsScale]
   );
 
   const onStartDragHandler = useCallback(
@@ -243,15 +241,14 @@ function useSegmentBiasAndScale({
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
 
-      const newWidth = width * scale + delta;
+      const newWidth = width * scale + delta / logsScale;
       const newScale = newWidth / width;
-
-      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
+      updatePendingSegments({ scale: newScale });
     },
-    [updatePendingSegments, width, bias, scale]
+    [updatePendingSegments, width, logsScale, scale]
   );
-  const computedXMin = xMin - (computedWidth - width) / 2 - (logsScale !== 1 ? xMin - d3Scale(parentExtent[0]) : 0);
-  const x = gridGutter + computedXMin + bias + logsBias;
+
+  const x = gridGutter + xMin + bias * logsScale + logsBias;
 
   return {
     bias: bias,
@@ -341,7 +338,7 @@ function useLogsBiasAndScaleProps({
       const newScale = newWidth / width;
       dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", scale: newScale, logId: currentEditedLog });
     },
-    [dispatch, bias, scale, currentEditedLog, width]
+    [dispatch, scale, currentEditedLog, width]
   );
 
   return {
@@ -356,7 +353,7 @@ function useLogsBiasAndScaleProps({
     parentBias: 0,
     parentScale: 1,
     y,
-    x: xMin + bias + gridGutter,
+    x: bias + xMin + gridGutter,
     computedWidth,
     width,
     gridGutter,
