@@ -595,7 +595,13 @@ export function useSetupWizardData() {
 
   return {
     allStepsAreCompleted,
-    dataHasLoaded
+    dataHasLoaded,
+    wellPlanIsImported,
+    controlLogIsImported,
+    propAzmAndProjDipAreSet,
+    tieInIsCompleted,
+    formationsAreCompleted,
+    surveyDataIsImported
   };
 }
 

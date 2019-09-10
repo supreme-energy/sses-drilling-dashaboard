@@ -39,7 +39,7 @@ const Interpretation = React.memo(
       currentEditedLog,
       logsBiasAndScale
     };
-    const { dataHasLoaded, allStepsAreCompleted } = useSetupWizardData();
+    const { dataHasLoaded, allStepsAreCompleted, ...setupSteps } = useSetupWizardData();
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
@@ -47,7 +47,7 @@ const Interpretation = React.memo(
           allStepsAreCompleted ? (
             <SelectionStatsContainer logs={logList} wellId={wellId} />
           ) : (
-            <WizardChecklist />
+            <WizardChecklist {...setupSteps} />
           )
         ) : null}
         <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
