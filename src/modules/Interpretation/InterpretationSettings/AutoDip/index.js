@@ -253,7 +253,7 @@ const computeFinalDip = memoizeOne((rows, optionsByRowMethod) => {
 function useOptionsByMethodType() {
   const { wellId } = useWellIdContainer();
   const { surveys } = useSurveysDataContainer();
-  const averageSurveysDipOptions = useMemo(() => surveys.reverse(), [surveys]);
+  const averageSurveysDipOptions = useMemo(() => surveys.slice().reverse(), [surveys]);
   const [controlLogs] = useWellControlLogList(wellId);
   const averageControlDipOptions = useAverageControlDipOptions(wellId, controlLogs);
   const averageRealDipOptions = getAverageRealDipClosure(surveys, controlLogs);
