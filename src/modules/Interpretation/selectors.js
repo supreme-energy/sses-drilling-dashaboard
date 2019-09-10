@@ -14,7 +14,7 @@ import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
-import { calculateProjection } from "../../hooks/useCalculations";
+import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
