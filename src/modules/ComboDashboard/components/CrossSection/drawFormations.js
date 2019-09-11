@@ -1,6 +1,19 @@
 import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
+function makeLabelTag(container, text, color) {
+  const tagDot = container.addChild(new PIXI.Graphics());
+  tagDot.beginFill(Number(`0x${color}`), 0.8);
+  tagDot.drawCircle(0, 0, 4);
+  tagDot.transform.updateTransform = frozenXYTransform;
+  const label = tagDot.addChild(new PIXI.Text(text, { fontSize: 13, fill: `#${color}` }));
+  label.anchor.set(1, 0.5);
+  label.position.x = -12;
+  const tagLine = tagDot.addChild(new PIXI.Graphics());
+  tagLine.lineStyle(3, Number(`0x${color}`), 0.8);
+  tagLine.moveTo(-4, 0).lineTo(-10, 0);
+  return tagDot;
+}
 /**
  * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
@@ -8,6 +21,7 @@ import { frozenXYTransform } from "./customPixiTransforms";
 export function drawFormations(container) {
   const layerTiles = [];
   const layerLines = [];
+  const layerLabels = [];
 
   return function update(props) {
     const { calculatedFormations: layers, calcSections, scale } = props;
@@ -18,7 +32,13 @@ export function drawFormations(container) {
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
-      let { bg_color: currColor, bg_percent: currAlpha, show_line: showLineYN, color: lineColor } = currLayer;
+      let {
+        bg_color: currColor,
+        bg_percent: currAlpha,
+        show_line: showLineYN,
+        color: lineColor,
+        data = []
+      } = currLayer;
       const showLine = showLineYN.toUpperCase() === "YES";
 
       if (!layerLines[layerIdx]) {
@@ -26,6 +46,15 @@ export function drawFormations(container) {
         layerLines[layerIdx].transform.updateTransform = frozenXYTransform;
       }
       layerLines[layerIdx].lineStyle(1, parseInt(lineColor, 16), 1);
+
+      if (!layerLabels[layerIdx]) {
+        layerLabels[layerIdx] = makeLabelTag(container, currLayer.label, currColor);
+      }
+      const first = data[0];
+      const second = data[1] || {};
+      if (first) {
+        layerLabels[layerIdx].position = new PIXI.Point(...scale(first.vs, first.tot + (second.fault || 0)));
+      }
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
         if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
