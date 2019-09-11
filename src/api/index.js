@@ -581,6 +581,7 @@ export function useFetchProjections(wellId) {
     return 0;
   }
   const addProjection = newProjection => {
+    newProjection.method = newProjection.method || DIP_FAULT_POS_VS;
     const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
@@ -588,8 +589,7 @@ export function useFetchProjections(wellId) {
         method: "GET",
         query: {
           seldbname: wellId,
-          ...newProjection,
-          method: DIP_FAULT_POS_VS
+          ...newProjection
         },
         cache: "no-cache",
         optimisticResult
