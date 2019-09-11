@@ -2,17 +2,37 @@ import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
 function makeLabelTag(container, text, color) {
+  let lastColor = color;
   const tagDot = container.addChild(new PIXI.Graphics());
-  tagDot.beginFill(Number(`0x${color}`), 0.8);
-  tagDot.drawCircle(0, 0, 4);
+  const tagLine = tagDot.addChild(new PIXI.Graphics());
   tagDot.transform.updateTransform = frozenXYTransform;
   const label = tagDot.addChild(new PIXI.Text(text, { fontSize: 13, fill: `#${color}` }));
   label.anchor.set(1, 0.5);
   label.position.x = -12;
-  const tagLine = tagDot.addChild(new PIXI.Graphics());
-  tagLine.lineStyle(3, Number(`0x${color}`), 0.8);
-  tagLine.moveTo(-4, 0).lineTo(-10, 0);
-  return tagDot;
+  function drawTag(color) {
+    tagDot.beginFill(Number(`0x${color}`), 0.8);
+    tagDot.drawCircle(0, 0, 4);
+    tagLine.lineStyle(3, Number(`0x${color}`), 0.8);
+    tagLine.moveTo(-4, 0).lineTo(-10, 0);
+  }
+  drawTag(color);
+
+  return {
+    setPosition: function(x, y) {
+      tagDot.x = x;
+      tagDot.y = y;
+    },
+    setText: function(text) {
+      if (text !== label.text) label.text = text;
+    },
+    setColor: function(color) {
+      if (lastColor !== color) {
+        lastColor = color;
+        label.style = { fontsize: 13, fill: `#${color}` };
+        drawTag(color);
+      }
+    }
+  };
 }
 /**
  * Add formation layers calculated from the formation data
@@ -53,7 +73,9 @@ export function drawFormations(container) {
       const pointOne = data[0];
       const pointTwo = data[1] || {};
       if (pointOne) {
-        layerLabels[layerIdx].position = new PIXI.Point(...scale(pointOne.vs, pointOne.tot + (pointTwo.fault || 0)));
+        layerLabels[layerIdx].setPosition(...scale(pointOne.vs, pointOne.tot + (pointTwo.fault || 0)));
+        layerLabels[layerIdx].setColor(currColor);
+        layerLabels[layerIdx].setText(currLayer.label);
       }
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
