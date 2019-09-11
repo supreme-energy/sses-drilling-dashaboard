@@ -388,7 +388,7 @@ export function useRopData() {
 const wellPathTransform = memoizeOne(transform);
 
 export function useWellPath(wellId) {
-  const [data] = useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -399,7 +399,7 @@ export function useWellPath(wellId) {
       transform: wellPathTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {
@@ -503,7 +503,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -516,7 +516,7 @@ const formationsTransform = memoizeOne(formationList => {
 });
 
 export function useFetchFormations(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -528,7 +528,7 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, refresh];
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 const projectionsTransform = memoizeOne(projections => {
