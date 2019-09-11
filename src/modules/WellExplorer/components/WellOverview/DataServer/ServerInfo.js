@@ -9,7 +9,7 @@ import _ from "lodash";
 
 import { useSelectedWellInfoContainer } from "../../../../App/Containers";
 import Title from "../../../../../components/Title";
-import { fields, labels, connectionTypes, initialServerState } from "../../../../../constants/dataServer";
+import { serverFields, serverLabels, connectionTypes, initialServerState } from "../../../../../constants/dataServer";
 import classes from "./styles.scss";
 
 function ServerInfo({ wellId }) {
@@ -64,8 +64,8 @@ function ServerInfo({ wellId }) {
           <FormControl className={classes.textField}>
             <InputLabel htmlFor="server-type">Server Type</InputLabel>
             <Select
-              value={values[fields.TYPE]}
-              onChange={handleInputChange(fields.TYPE)}
+              value={values[serverFields.TYPE]}
+              onChange={handleInputChange(serverFields.TYPE)}
               onBlur={onBlur}
               inputProps={{
                 name: "type",
@@ -82,26 +82,26 @@ function ServerInfo({ wellId }) {
           <div className={classes.textInputContainer}>
             <TextField
               className={classes.textField}
-              label={labels.USERNAME}
-              value={values[fields.USERNAME]}
-              onChange={handleInputChange(fields.USERNAME)}
+              label={serverLabels.USERNAME}
+              value={values[serverFields.USERNAME]}
+              onChange={handleInputChange(serverFields.USERNAME)}
               margin="normal"
               onBlur={onBlur}
             />
             <TextField
               className={classes.textField}
-              label={labels.PASSWORD}
-              value={values[fields.PASSWORD]}
-              onChange={handleInputChange(fields.PASSWORD)}
+              label={serverLabels.PASSWORD}
+              value={values[serverFields.PASSWORD]}
+              onChange={handleInputChange(serverFields.PASSWORD)}
               margin="normal"
               onBlur={onBlur}
               type="password"
             />
             <TextField
               className={classes.endpointTextField}
-              label={labels.ENDPOINT}
-              value={values[fields.ENDPOINT]}
-              onChange={handleInputChange(fields.ENDPOINT)}
+              label={serverLabels.ENDPOINT}
+              value={values[serverFields.ENDPOINT]}
+              onChange={handleInputChange(serverFields.ENDPOINT)}
               margin="normal"
               onBlur={onBlur}
             />

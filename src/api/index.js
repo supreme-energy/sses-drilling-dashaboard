@@ -118,7 +118,7 @@ export function useWellInfo(wellId) {
     // avoid refresh on the component that trigger the update
     if (requestId !== stateRef.current.internalRequestId) {
       serializedRefresh(
-        {
+        wellId && {
           path: GET_WELL_INFO,
           query: {
             seldbname: wellId,
