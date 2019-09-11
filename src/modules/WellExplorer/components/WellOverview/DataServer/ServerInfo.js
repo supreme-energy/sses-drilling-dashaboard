@@ -16,7 +16,7 @@ function ServerInfo({ wellId }) {
   const [{ autorc }, , , refresh, , , , updateAutoRc] = useSelectedWellInfoContainer(wellId);
   const [values, setValues] = useState(initialServerState);
 
-  const differenceKey = useMemo(() => autorc && Object.keys(values).filter(k => values[k] !== autorc[k])[0], [
+  const differenceKey = useMemo(() => autorc && _.filter(values, (value, key) => value !== autorc[key])[0], [
     values,
     autorc
   ]);
