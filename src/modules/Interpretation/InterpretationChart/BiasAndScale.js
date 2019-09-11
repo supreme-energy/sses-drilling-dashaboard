@@ -8,7 +8,8 @@ import {
   useSelectedWellInfoColors,
   logDataExtent,
   getPendingSegmentsExtent,
-  getFilteredLogsExtent
+  getFilteredLogsExtent,
+  useSelectedWellLog
 } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
@@ -166,8 +167,9 @@ function useSegmentBiasAndScale({
   logs,
   data: { result }
 }) {
-  const [{ draftMode }] = useComboContainer();
+  const [{ draftMode, selectionById }] = useComboContainer();
   const segmentData = useSelectedSegmentState();
+  const { selectedWellLog } = useSelectedWellLog();
   const { bias: logsBias, scale: logsScale } = logsBiasAndScale["wellLogs"] || initialLogBiasAndScale;
   let bias = Number(segmentData.scalebias);
   let scale = Number(segmentData.scalefactor);
@@ -175,7 +177,8 @@ function useSegmentBiasAndScale({
   const [, , , extentsByTableName] = (result && result.logsGammaExtent) || EMPTY_ARRAY;
   const parentExtent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
 
-  const { extent, extentWithBiasAndScale } = getPendingSegmentsExtent(pendingSegments, extentsByTableName);
+  const { extent } = getPendingSegmentsExtent(pendingSegments, extentsByTableName);
+  const internalState = useRef({ prevDraftSelection: selectionById });
 
   let [xMin, xMax] = extent;
   const updateSegments = useUpdateSegmentsByMd();
@@ -198,17 +201,34 @@ function useSegmentBiasAndScale({
   );
   const { saveSelectedWellLog } = useSaveWellLogActions();
 
-  const [min, max] = extentWithBiasAndScale;
   useEffect(
     function setInitialBiasAndScale() {
-      if (draftMode) {
+      if (draftMode && selectedWellLog && internalState.current.prevDraftSelection !== selectionById) {
+        let initialBias = totalWidth - xMax - gridGutter - 10;
+        if (initialBias === bias) {
+          initialBias = bias - computedWidth;
+        }
+
         updatePendingSegments({
-          bias: Math.min(max - min - 10, totalWidth - computedWidth - gridGutter - 10 - xMin),
+          bias: initialBias,
           scale: 1
         });
+
+        internalState.current.prevDraftSelection = selectionById;
       }
     },
-    [min, max, draftMode] // eslint-disable-line react-hooks/exhaustive-deps
+    [
+      computedWidth,
+      totalWidth,
+      gridGutter,
+
+      xMax,
+      draftMode,
+      selectionById,
+      updatePendingSegments,
+      bias,
+      selectedWellLog
+    ]
   );
 
   const onRootDragHandler = useCallback(
