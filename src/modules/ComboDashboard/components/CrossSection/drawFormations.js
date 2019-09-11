@@ -50,10 +50,10 @@ export function drawFormations(container) {
       if (!layerLabels[layerIdx]) {
         layerLabels[layerIdx] = makeLabelTag(container, currLayer.label, currColor);
       }
-      const first = data[0];
-      const second = data[1] || {};
-      if (first) {
-        layerLabels[layerIdx].position = new PIXI.Point(...scale(first.vs, first.tot + (second.fault || 0)));
+      const pointOne = data[0];
+      const pointTwo = data[1] || {};
+      if (pointOne) {
+        layerLabels[layerIdx].position = new PIXI.Point(...scale(pointOne.vs, pointOne.tot + (pointTwo.fault || 0)));
       }
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
