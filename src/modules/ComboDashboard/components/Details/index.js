@@ -175,6 +175,13 @@ export default function DetailsTable({ showFullTable = false }) {
             </TableRow>
           );
         })}
+        {!details.length && (
+          <TableRow>
+            <TableCell colSpan={11} className={classes.emptyTableMessage}>
+              Select a survey or projection to see details here
+            </TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );
