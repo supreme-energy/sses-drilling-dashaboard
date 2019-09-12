@@ -12,6 +12,7 @@ import classNames from "classnames";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import Knob from "./knob";
 import surveySVG from "../../../../assets/survey.svg";
+import tieInSVG from "../../../../assets/tieIn.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
@@ -37,6 +38,8 @@ function SurveyIcon({ row }) {
     sourceType = bitProjectionSVG;
   } else if (row.isLastSurvey) {
     sourceType = lastSurveySVG;
+  } else if (row.isTieIn) {
+    sourceType = tieInSVG;
   } else {
     sourceType = surveySVG;
   }
@@ -88,7 +91,7 @@ export default function DetailsTable({ showFullTable = false }) {
     if (showFullTable) {
       return calcSections.slice().reverse();
     } else {
-      return calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+      return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
     }
   }, [calcSections, showFullTable, selectedIndex]);
 
