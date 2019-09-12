@@ -450,7 +450,7 @@ const surveysTransform = memoizeOne(data => {
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      name: isTieIn ? "Tie-in" : isBitProj ? `BPrj` : `${i}`,
+      name: isTieIn ? "Tie-in" : isBitProj ? "BPrj" : `${i}`,
       pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
       isTieIn: isTieIn,
       isBitProj: isBitProj,
