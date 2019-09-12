@@ -88,7 +88,7 @@ export default function DetailsTable({ showFullTable = false }) {
     if (showFullTable) {
       return calcSections.slice().reverse();
     } else {
-      return calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+      return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
     }
   }, [calcSections, showFullTable, selectedIndex]);
 

@@ -445,12 +445,14 @@ const surveysTransform = memoizeOne(data => {
   const hasBitProj = surveys.some(s => s.plan === 1);
   return surveys.map((s, i, l) => {
     // If included, bit projection is always the last item and the last survey is second to last
+    const isTieIn = i === 0;
     const isBitProj = i === l.length - 1 && hasBitProj;
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      name: isBitProj ? `BPrj` : `${i}`,
+      name: isTieIn ? "Tie-in" : isBitProj ? `BPrj` : `${i}`,
       pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
+      isTieIn: isTieIn,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
