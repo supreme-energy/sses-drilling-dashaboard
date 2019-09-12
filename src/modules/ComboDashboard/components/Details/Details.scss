@@ -130,6 +130,10 @@ $black: rgb(0, 0, 0);
     float: right;
   }
 }
+.emptyTableMessage {
+  text-align: center;
+  border-bottom: none;
+}
 
 .dialogContent {
   display: flex;
