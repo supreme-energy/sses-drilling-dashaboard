@@ -1,0 +1,19 @@
+.serverInfoContainer {
+    .formContainer {
+        padding: 15px;
+    }
+
+    .textInputContainer {
+        > div {
+            margin-right: 20px;
+        }
+    }
+
+    .textField {
+        min-width: 150px;
+    }
+
+    .endpointTextField {
+        min-width: 250px;
+    }
+}

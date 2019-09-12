@@ -108,7 +108,8 @@ export function useWellInfo(wellId) {
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
-  const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
+  const autorc = data && data.autorc;
+  const online = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -155,6 +156,34 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
+  );
+
+  const updateAutoRc = useCallback(
+    ({ wellId, field, value, refreshStore }) => {
+      const optimisticResult = {
+        ...data,
+        autorc: {
+          ...autorc,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          autorc: {
+            [field]: value
+          }
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, autorc]
   );
 
   const updateEmail = useCallback(
@@ -292,6 +321,7 @@ export function useWellInfo(wellId) {
       wellLandingLocationLocal,
       wellPBHL,
       wellPBHLLocal,
+      autorc,
       wellInfo,
       emailInfo,
       appInfo,
@@ -303,7 +333,8 @@ export function useWellInfo(wellId) {
     refreshStore,
     updateEmail,
     updateAlarm,
-    updateAutoImport
+    updateAutoImport,
+    updateAutoRc
   ];
 }
 
