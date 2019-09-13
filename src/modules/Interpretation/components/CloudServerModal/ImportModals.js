@@ -91,7 +91,7 @@ export const AutoImportModal = React.memo(
       await importNewSurvey(wellId);
       const res = await refresh();
       if (!res.next_survey) {
-        refreshSurveys();
+        await refreshSurveys();
         handleClose();
       }
     };
