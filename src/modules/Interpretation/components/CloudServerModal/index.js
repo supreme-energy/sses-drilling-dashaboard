@@ -7,9 +7,9 @@ import Cloud from "@material-ui/icons/CloudOutlined";
 import CloudOff from "@material-ui/icons/CloudOff";
 import Import from "@material-ui/icons/OpenInBrowser";
 
-import { useCloudServerCountdownContainer } from "../../../App/Containers";
+import { useCloudServerCountdownContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
 import useCloudServerModal from "./useCloudServerModal";
-import { useWellInfo, useCloudServer } from "../../../../api";
+import { useCloudServer } from "../../../../api";
 import ReviewCleanData from "./ReviewCleanData";
 import ReviewManualImport from "./ReviewManualImport";
 import NotificationSettings from "./NotificationSettings";
@@ -22,7 +22,15 @@ function CloudServerModal({ wellId }) {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
   } = useCloudServer(wellId);
-  const [{ appInfo, wellInfo, online }, , , refreshFetchStore, , updateAlarm, updateAutoImport] = useWellInfo(wellId);
+  const [
+    { appInfo, wellInfo, online },
+    ,
+    ,
+    refreshFetchStore,
+    ,
+    updateAlarm,
+    updateAutoImport
+  ] = useSelectedWellInfoContainer(wellId);
   const {
     view,
     setView,

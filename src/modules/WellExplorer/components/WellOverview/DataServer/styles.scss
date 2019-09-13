@@ -1,6 +1,6 @@
 .serverInfoContainer {
     .formContainer {
-        padding: 15px;
+        padding: 0 15px 15px;
     }
 
     .textInputContainer {
@@ -19,5 +19,20 @@
 
     .endpointTextField {
         min-width: 250px;
+    }
+}
+
+.notificationsContainer {
+    .formContainer {
+        padding: 0 15px 15px;
+    }
+
+    .alarmDropdown {
+        width: 250px;
+        margin-right: 20px;
+    }
+
+    button { 
+        outline: none;
     }
 }

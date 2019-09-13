@@ -418,7 +418,7 @@ export function useRopData() {
 const wellPathTransform = memoizeOne(transform);
 
 export function useWellPath(wellId) {
-  const [data] = useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -429,7 +429,7 @@ export function useWellPath(wellId) {
       transform: wellPathTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {
@@ -475,12 +475,14 @@ const surveysTransform = memoizeOne(data => {
   const hasBitProj = surveys.some(s => s.plan === 1);
   return surveys.map((s, i, l) => {
     // If included, bit projection is always the last item and the last survey is second to last
+    const isTieIn = i === 0;
     const isBitProj = i === l.length - 1 && hasBitProj;
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      name: isBitProj ? `BPrj` : `${i}`,
+      name: isTieIn ? "Tie-in" : isBitProj ? "BPrj" : `${i}`,
       pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
+      isTieIn: isTieIn,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
@@ -533,7 +535,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -546,7 +548,7 @@ const formationsTransform = memoizeOne(formationList => {
 });
 
 export function useFetchFormations(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -558,7 +560,7 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, refresh];
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 const projectionsTransform = memoizeOne(projections => {
@@ -611,6 +613,7 @@ export function useFetchProjections(wellId) {
     return 0;
   }
   const addProjection = newProjection => {
+    newProjection.method = newProjection.method || DIP_FAULT_POS_VS;
     const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
@@ -618,8 +621,7 @@ export function useFetchProjections(wellId) {
         method: "GET",
         query: {
           seldbname: wellId,
-          ...newProjection,
-          method: DIP_FAULT_POS_VS
+          ...newProjection
         },
         cache: "no-cache",
         optimisticResult
