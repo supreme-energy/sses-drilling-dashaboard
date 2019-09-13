@@ -18,6 +18,7 @@ import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirecti
 import { useCrossSectionContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import AutoPosTCLField from "./Details/AutoPosTCLField";
+import WellInfoField from "./Details/WellInfoField";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -75,7 +76,9 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
               {expanded && selectedSegment.isProjection && (
                 <SelectedProjectionMethod selectedProjection={selectedSegment} />
               )}
-              {expanded && <AutoPosTCLField />}
+              {expanded && (
+                <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
+              )}
               <IconButton
                 size="small"
                 className={classNames(classes.expand, classes.fullTableButton)}

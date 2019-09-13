@@ -6,7 +6,7 @@ import Close from "@material-ui/icons/Close";
 import classes from "./Details.scss";
 import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
-import AutoPosTCLField from "./AutoPosTCLField";
+import WellInfoField from "./WellInfoField";
 
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
@@ -21,7 +21,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column">
             <div className={comboClasses.flexRight}>
-              <AutoPosTCLField />
+              <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
             </div>
             <DetailsTable showFullTable />
           </Box>
