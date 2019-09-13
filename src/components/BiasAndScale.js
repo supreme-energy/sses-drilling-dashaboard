@@ -27,7 +27,7 @@ function BiasAndScale({
   const isVertical = axis === "y";
   const segmentCursor = isVertical ? "ns-resize" : "ew-resize";
   const lineCursor = isVertical ? "row-resize" : "col-resize";
-  const lineData = isVertical ? [[0, 0], [1000, 0]] : [[0, 0], [0, height]];
+  const lineData = isVertical ? [[0, 0], [width, 0]] : [[0, 0], [0, height]];
 
   useEffect(
     function redraw() {
