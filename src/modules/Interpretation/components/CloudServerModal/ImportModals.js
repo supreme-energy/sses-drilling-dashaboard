@@ -31,7 +31,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
     const fileName = json.filename;
 
     if (success) {
-      uploadFile(wellId, fileName);
+      await uploadFile(wellId, fileName);
       refreshSurveys();
       handleClose();
     } else {
