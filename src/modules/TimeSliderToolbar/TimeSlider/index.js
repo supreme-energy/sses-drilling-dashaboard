@@ -107,6 +107,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     const index = data.findIndex(d => d.hole_depth >= drillPhaseObj.phaseEnd) - 1;
     return index > 0 ? index : data.length - 1;
   }, [data, drillPhaseObj.phaseEnd]);
+  // If we (sslider) are in the NOW statee, then show projections, otherwise, only show surveys
 
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
@@ -149,8 +150,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const onReset = useCallback(() => {
     if (holeDepthLeftIndex >= 0 && holeDepthRightIndex > 0) {
       const isLastIndex = data.length - 1 <= holeDepthRightIndex;
-      const beginningDate = _.get(data, `[${holeDepthLeftIndex}].Date_Time`, "");
-      const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].Date_Time`, "") : "NOW";
+      const beginningDate = _.get(data, `[${holeDepthLeftIndex}].rig_time`, "");
+      const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].rig_time`, "") : "NOW";
       const indexDiff = holeDepthRightIndex - holeDepthLeftIndex + 1;
 
       updateView(view => {
@@ -159,7 +160,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
           x: -1 * holeDepthLeftIndex * xScale,
           y: 62,
           xScale,
-          yScale: height ? getInitialViewYScaleValue(dataMin - 50) : view.yScale
+          yScale: height ? getInitialViewYScaleValue(dataMin - 75) : view.yScale
         };
       });
 
@@ -204,7 +205,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const maxDepth = hasProjections ? maxProjectionDepth : maxSurveyDepth;
       for (let i = minSurveyDepth; i <= maxDepth; i += 100) {
         const index = i > maxDepth ? maxDepth : i;
-        console.log(minSurveyDepth, maxDepth, hasSurveys, surveys);
         await getTimeSliderData(wellId, index, index + 100);
       }
     }
@@ -233,8 +233,8 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   useEffect(() => {
     if (data && data.length && step >= 0 && maxStep > 0 && leftBoundIndexMoving >= 0 && rightBoundIndex > 0) {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
-      const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].Date_Time`, "");
-      const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].Date_Time`, "") : "NOW";
+      const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].rig_time`, "");
+      const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].rig_time`, "") : "NOW";
 
       setSliderInterval({
         firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),

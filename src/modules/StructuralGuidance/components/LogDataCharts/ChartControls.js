@@ -11,6 +11,7 @@ import Close from "@material-ui/icons/Close";
 import Refresh from "@material-ui/icons/Refresh";
 import _ from "lodash";
 import LogPlotIcon from "../../../../assets/logPlot.svg";
+import { noDecimals } from "../../../../constants/format";
 import classes from "./styles.scss";
 
 const ChartControls = React.memo(
