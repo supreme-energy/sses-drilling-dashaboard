@@ -28,7 +28,7 @@ function CloudServerModal({ wellId }) {
     ,
     refreshFetchStore,
     ,
-    updateAlarm,
+    updateAppInfo,
     updateAutoImport
   ] = useSelectedWellInfoContainer(wellId);
   const {
@@ -124,7 +124,7 @@ function CloudServerModal({ wellId }) {
             wellId={wellId}
             appInfo={appInfo}
             wellInfo={wellInfo}
-            updateAlarm={updateAlarm}
+            updateAlarm={updateAppInfo}
             updateAutoImport={updateAutoImport}
             handleClose={handleClose}
             setAutoImport={setAutoImport}

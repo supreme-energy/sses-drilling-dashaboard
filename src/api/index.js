@@ -57,6 +57,7 @@ export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
+const GET_MOCK_WELL_BORE_LIST = "/witslwellborelist.json";
 
 const options = {
   shouldSort: true,
@@ -213,7 +214,7 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, emailInfo]
   );
 
-  const updateAlarm = useCallback(
+  const updateAppInfo = useCallback(
     ({ wellId, field, value }) => {
       const optimisticResult = {
         ...data,
@@ -331,7 +332,7 @@ export function useWellInfo(wellId) {
     updateWell,
     refreshStore,
     updateEmail,
-    updateAlarm,
+    updateAppInfo,
     updateAutoImport,
     updateAutoRc
   ];
@@ -1124,4 +1125,20 @@ export function useBitProjection(wellId) {
   );
 
   return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
+}
+
+export function useWellBoreData() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_WELL_BORE_LIST
+    },
+
+    {
+      id: "mock",
+      transform: data => {
+        return data.data;
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
 }

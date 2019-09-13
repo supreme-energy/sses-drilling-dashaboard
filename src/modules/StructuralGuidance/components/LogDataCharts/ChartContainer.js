@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Box from "@material-ui/core/Box";
 import _ from "lodash";
 
+import { useSelectedLogDataScaleContainer } from "../../../App/Containers";
 import { INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import { useAdditionalDataLog } from "../../../../api";
 import ChartControls, { BiasControls } from "./ChartControls";
@@ -15,7 +16,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   const {
     data: { color, data = [], label: initialLogName, scalelo, scalehi }
   } = useAdditionalDataLog(wellId, logId);
-  const [selectedLogs, setSelectedLog] = useState({});
+  const { selectedLogs, setSelectedLog } = useSelectedLogDataScaleContainer();
   const [isEditingScale, setEditingScale] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [{ isSettingsVisible, settingsView }, setSettingsMenu] = useState({
@@ -43,7 +44,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
     setSelectedLog(state => {
       return { ...state, [settingsView]: { ...state[settingsView], currScale: state[settingsView].prevScale } };
     });
-  }, [settingsView]);
+  }, [settingsView, setSelectedLog]);
 
   const handleCloseScale = useCallback(() => {
     handleResetScale();
@@ -55,7 +56,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
       return { ...state, [settingsView]: { ...state[settingsView], prevScale: state[settingsView].currScale } };
     });
     setEditingScale(false);
-  }, [settingsView]);
+  }, [settingsView, setSelectedLog]);
 
   const handleUpdateScale = useCallback(
     (scale, bias, scaleLow, scaleHigh) => {
@@ -73,7 +74,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         };
       });
     },
-    [settingsView]
+    [settingsView, setSelectedLog]
   );
 
   const handleArrowBack = useCallback(
@@ -124,7 +125,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         };
       });
     }
-  }, [color, initialLogName, scalelo, scalehi]);
+  }, [color, initialLogName, scalelo, scalehi, setSelectedLog]);
 
   useEffect(() => {
     if (!currentLogs.includes(settingsView)) {

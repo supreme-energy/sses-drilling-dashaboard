@@ -281,6 +281,12 @@ function useSelectedWellInfo() {
   return useWellInfo(wellId);
 }
 
+function useSelectedLogDataScale(initialState) {
+  const [selectedLogs, setSelectedLog] = useState(initialState);
+
+  return { selectedLogs, setSelectedLog };
+}
+
 // Create containers
 export const {
   Provider: CloudServerCountdownProvider,
@@ -305,3 +311,7 @@ export const { Provider: CrossSectionProvider, useContainer: useCrossSectionCont
 export const { Provider: SelectedWellInfoProvider, useContainer: useSelectedWellInfoContainer } = createContainer(
   useSelectedWellInfo
 );
+export const {
+  Provider: SelectedLogDataScaleProvider,
+  useContainer: useSelectedLogDataScaleContainer
+} = createContainer(useSelectedLogDataScale);

@@ -16,7 +16,7 @@ function ServerInfo({ wellId }) {
   const [{ autorc }, , , refresh, , , , updateAutoRc] = useSelectedWellInfoContainer(wellId);
   const [values, setValues] = useState(initialServerState);
 
-  const differenceKey = useMemo(() => autorc && _.filter(values, (value, key) => value !== autorc[key])[0], [
+  const differenceKey = useMemo(() => autorc && Object.keys(values).filter(key => values[key] !== autorc[key])[0], [
     values,
     autorc
   ]);
@@ -98,7 +98,7 @@ function ServerInfo({ wellId }) {
               type="password"
             />
             <TextField
-              className={classes.endpointTextField}
+              className={classes.extendedTextField}
               label={serverLabels.ENDPOINT}
               value={values[serverFields.ENDPOINT]}
               onChange={handleInputChange(serverFields.ENDPOINT)}

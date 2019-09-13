@@ -18,8 +18,8 @@ import { useSelectedWellInfoContainer } from "../../../../App/Containers";
 import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
 
-function ServerInfo({ wellId }) {
-  const [{ appInfo }, , , refreshFetchStore, , updateAlarm] = useSelectedWellInfoContainer(wellId);
+function Notifications({ wellId }) {
+  const [{ appInfo }, , , refreshFetchStore, , updateAppInfo] = useSelectedWellInfoContainer(wellId);
 
   const [audio, setAudio] = useReducer(audioReducer, INITIAL_AUDIO_STATE);
   const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = audio;
@@ -37,10 +37,10 @@ function ServerInfo({ wellId }) {
 
   const onAlarmFieldChange = useCallback(
     async (field, value) => {
-      await updateAlarm({ wellId, field, value });
+      await updateAppInfo({ wellId, field, value });
       refreshFetchStore();
     },
-    [updateAlarm, wellId, refreshFetchStore]
+    [updateAppInfo, wellId, refreshFetchStore]
   );
 
   const onBlurAlarm = useCallback(
@@ -113,8 +113,8 @@ function ServerInfo({ wellId }) {
   );
 }
 
-ServerInfo.propTypes = {
+Notifications.propTypes = {
   wellId: PropTypes.string
 };
 
-export default ServerInfo;
+export default Notifications;
