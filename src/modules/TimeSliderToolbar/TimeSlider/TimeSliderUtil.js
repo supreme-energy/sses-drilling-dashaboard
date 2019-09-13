@@ -18,10 +18,9 @@ export function computeInitialViewXScaleValue(dataLength) {
 }
 
 export const transformDate = dateTime => {
-  const splitDateTime = dateTime.split(" ");
+  const splitDateTime = dateTime.split("T");
   if (splitDateTime.length > 1) {
-    const date = splitDateTime[0].split("/");
-    return `${date[0]}-${date[1]} ${date[2]}`;
+    return splitDateTime[0];
   }
   return dateTime;
 };

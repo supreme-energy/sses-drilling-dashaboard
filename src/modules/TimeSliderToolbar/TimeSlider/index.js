@@ -5,7 +5,6 @@ import classNames from "classnames";
 import _ from "lodash";
 import { useSize } from "react-hook-size";
 import { max, min } from "d3-array";
-import usePrevious from "react-use/lib/usePrevious";
 
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import PixiContainer from "../../../components/PixiContainer";
@@ -45,7 +44,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   // Import shared state
   const { setSliderInterval, sliderInterval } = useTimeSliderContainer();
   const { setDrillPhase, drillPhaseObj } = useDrillPhaseContainer();
-  const prevPhase = usePrevious(drillPhaseObj);
   const { surveys } = useSurveysDataContainer();
   const { projectionsData: projections } = useProjectionsDataContainer();
   const wellSections = useWellSections(wellId);
@@ -107,7 +105,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     const index = data.findIndex(d => d.hole_depth >= drillPhaseObj.phaseEnd) - 1;
     return index > 0 ? index : data.length - 1;
   }, [data, drillPhaseObj.phaseEnd]);
-  // If we (sslider) are in the NOW statee, then show projections, otherwise, only show surveys
 
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
@@ -132,7 +129,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   );
 
   const sliderDate = useMemo(() => {
-    return _.get(data, `[${Math.round(stepIndex)}].Date_Time`);
+    return _.get(data, `[${Math.round(stepIndex)}].rig_time`);
   }, [data, stepIndex]);
 
   const viewport = useViewport({
@@ -160,7 +157,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
           x: -1 * holeDepthLeftIndex * xScale,
           y: 62,
           xScale,
-          yScale: height ? getInitialViewYScaleValue(dataMin - 75) : view.yScale
+          yScale: height ? getInitialViewYScaleValue(dataMin - 50) : view.yScale
         };
       });
 
@@ -189,16 +186,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   // set initial scale
   useMemo(() => {
-    if (
-      data &&
-      data.length &&
-      ((width && height) || !expanded) &&
-      (!scaleInitialized.current || (!_.isEqual(drillPhaseObj, prevPhase) && drillPhaseObj.set))
-    ) {
+    if (data && data.length && ((width && height) || !expanded)) {
       onReset();
       scaleInitialized.current = true;
     }
-  }, [width, height, expanded, data, onReset, drillPhaseObj, prevPhase]);
+  }, [width, height, expanded, data, onReset]);
 
   useEffect(() => {
     async function startTimeSliderFetch() {

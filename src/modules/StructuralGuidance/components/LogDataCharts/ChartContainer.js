@@ -67,9 +67,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
           ...state,
           [settingsView]: {
             ...state[settingsView],
-            currScale: { scale, bias },
-            scalelo,
-            scalehi
+            currScale: { scale, bias, scalelo, scalehi }
           }
         };
       });
@@ -119,8 +117,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
             checked: true,
             scalelo,
             scalehi,
-            currScale: INITIAL_SCALE_BIAS,
-            prevScale: INITIAL_SCALE_BIAS
+            currScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi },
+            prevScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi }
           }
         };
       });

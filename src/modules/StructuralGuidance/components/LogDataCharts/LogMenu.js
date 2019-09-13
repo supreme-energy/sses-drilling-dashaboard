@@ -18,10 +18,8 @@ const LogMenu = React.memo(({ menuItems, selectedLogs, setSelectedLog, handleClo
       setSelectedLog({
         ...selectedLogs,
         [name]: {
-          prevScale: { scale, bias },
-          currScale: { scale, bias },
-          scalelo,
-          scalehi,
+          prevScale: { scale, bias, scalelo, scalehi },
+          currScale: { scale, bias, scalelo, scalehi },
           color,
           checked: false
         }
@@ -31,10 +29,8 @@ const LogMenu = React.memo(({ menuItems, selectedLogs, setSelectedLog, handleClo
         ...selectedLogs,
         [name]: {
           color,
-          prevScale: { scale, bias },
-          currScale: { scale, bias },
-          scalelo,
-          scalehi,
+          prevScale: { scale, bias, scalelo, scalehi },
+          currScale: { scale, bias, scalelo, scalehi },
           checked: event.target.checked
         }
       });

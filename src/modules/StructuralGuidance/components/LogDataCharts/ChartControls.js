@@ -11,7 +11,6 @@ import Close from "@material-ui/icons/Close";
 import Refresh from "@material-ui/icons/Refresh";
 import _ from "lodash";
 import LogPlotIcon from "../../../../assets/logPlot.svg";
-import { noDecimals } from "../../../../constants/format";
 import classes from "./styles.scss";
 
 const ChartControls = React.memo(
@@ -56,8 +55,6 @@ export default ChartControls;
 
 export const BiasControls = React.memo(
   ({ isEditingScale, setScale, logInfo, handleReset, handleSave, handleClose }) => {
-    const scaleLow = _.get(logInfo, "scalelo");
-    const scaleHigh = _.get(logInfo, "scalehi");
     const prevScale = _.get(logInfo, "prevScale");
     const currScale = _.get(logInfo, "currScale");
     const hasScaleChanged = JSON.stringify(prevScale) !== JSON.stringify(currScale);
@@ -65,18 +62,27 @@ export const BiasControls = React.memo(
     const handleSetScaleLow = useCallback(
       e => {
         const value = e.target.value;
-        const low = scaleLow || 1;
-        setScale(value / low, currScale.bias, value / currScale.scale, scaleHigh);
+        setScale(
+          (prevScale.scalehi - value) / (prevScale.scalehi - prevScale.scalelo),
+          currScale.bias,
+          value,
+          currScale.scalehi
+        );
       },
-      [currScale, scaleHigh, scaleLow, setScale]
+      [currScale, prevScale, setScale]
     );
 
     const handleSetScaleHigh = useCallback(
       e => {
         const value = e.target.value;
-        setScale(value / scaleHigh, currScale.bias, scaleLow, value / currScale.scale);
+        setScale(
+          (value - prevScale.scalelo) / (prevScale.scalehi - prevScale.scalelo),
+          currScale.bias,
+          currScale.scalelo,
+          value
+        );
       },
-      [currScale, scaleLow, scaleHigh, setScale]
+      [currScale, prevScale, setScale]
     );
 
     return (
@@ -87,7 +93,7 @@ export const BiasControls = React.memo(
               <Box display="flex" flexDirection="row">
                 <TextField
                   className={classes.textField}
-                  value={scaleLow * currScale.scale}
+                  value={currScale.scalelo}
                   onChange={handleSetScaleLow}
                   type="number"
                   label="Min"
@@ -98,7 +104,7 @@ export const BiasControls = React.memo(
                 />
                 <TextField
                   className={classes.textField}
-                  value={scaleHigh * currScale.scale}
+                  value={currScale.scalehi}
                   onChange={handleSetScaleHigh}
                   type="number"
                   label="Max"
