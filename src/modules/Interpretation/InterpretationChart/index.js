@@ -22,7 +22,8 @@ import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
-const gridGutter = 60;
+import { useFormationsStore } from "./Formations/store";
+const gridGutter = 65;
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -131,6 +132,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     }
   ] = useComboContainer();
 
+  const [{ editMode: formationsEditMode }] = useFormationsStore();
+
   const colors = useSelectedWellInfoColors();
 
   useEffect(refresh, [
@@ -151,14 +154,15 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     currentEditedLog,
     logsBiasAndScale,
     colorsByWellLog,
-    logsBiasAndScale
+    logsBiasAndScale,
+    formationsEditMode
   ]);
 
   return (
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} />
+      <Formations container={viewport} width={width} view={view} gridGutter={gridGutter} />
 
       {controlLogs.map(cl => (
         <ControlLogLine key={cl.id} log={cl} container={viewport} />
@@ -189,20 +193,24 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         backgroundColor={0xffffff}
         container={viewport}
       />
-      <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      {!formationsEditMode && (
+        <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      )}
       <TCLLine container={viewport} width={width} />
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
-      <BiasAndScale
-        controlLogs={controlLogs}
-        logs={logList}
-        wellId={wellId}
-        container={stage}
-        y={height - 10}
-        gridGutter={gridGutter}
-        refresh={refresh}
-        totalWidth={width}
-        canvas={canvasRef.current}
-      />
+      {!formationsEditMode && (
+        <BiasAndScale
+          controlLogs={controlLogs}
+          logs={logList}
+          wellId={wellId}
+          container={stage}
+          y={height - 10}
+          gridGutter={gridGutter}
+          refresh={refresh}
+          totalWidth={width}
+          canvas={canvasRef.current}
+        />
+      )}
     </div>
   );
 }

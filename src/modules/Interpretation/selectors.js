@@ -462,32 +462,32 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
   return index <= selectedIndex && index >= selectedIndex - nrPrevSurveysToDraft;
 }
 
+const computeFormations = memoizeOne((formations, surveysAndProjections) => {
+  return formations.map(f => {
+    return {
+      ...f,
+      data: f.data.map((item, index) => {
+        const survey = surveysAndProjections[index];
+
+        if (!survey) {
+          return item;
+        }
+
+        return {
+          ...item,
+          fault: survey.fault,
+          dip: survey.dip,
+          tot: survey.tcl + item.thickness
+        };
+      })
+    };
+  });
+});
+
 export function useComputedFormations(formations) {
   const [surveysAndProjections] = useComputedSurveysAndProjections();
 
-  const computedFormations = useMemo(
-    () =>
-      formations.map(f => {
-        return {
-          ...f,
-          data: f.data.map((item, index) => {
-            const survey = surveysAndProjections[index];
-
-            if (!survey) {
-              return item;
-            }
-
-            return {
-              ...item,
-              fault: survey.fault,
-              dip: survey.dip,
-              tot: survey.tcl + item.thickness
-            };
-          })
-        };
-      }),
-    [formations, surveysAndProjections]
-  );
+  const computedFormations = computeFormations(formations, surveysAndProjections);
 
   return computedFormations;
 }

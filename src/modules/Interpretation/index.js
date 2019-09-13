@@ -1,5 +1,5 @@
 import React, { useReducer, useCallback } from "react";
-import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from "@material-ui/core";
+import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch, Button } from "@material-ui/core";
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
@@ -16,6 +16,17 @@ import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
 import { useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
+import { FormationsStoreProvider, useFormationsStore } from "./InterpretationChart/Formations/store";
+
+function TopsButton() {
+  const [, dispatch] = useFormationsStore();
+
+  return (
+    <Button variant="text" color="primary" onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}>
+      Tops
+    </Button>
+  );
+}
 
 const Interpretation = React.memo(
   ({
@@ -28,7 +39,8 @@ const Interpretation = React.memo(
     currentEditedLog,
     logsBiasAndScale,
     resetLogBiasAndScale,
-    changeCurrentEditedLog
+    changeCurrentEditedLog,
+    formationsEditMode
   }) => {
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
     const logSettingsProps = {
@@ -58,7 +70,9 @@ const Interpretation = React.memo(
               labelPlacement="start"
             />
           </Box>
-          {/* Todo: add formations top here */}
+          <TopsButton variant="text" color="primary">
+            Tops
+          </TopsButton>
         </Box>
         <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
@@ -118,4 +132,8 @@ const InterpretatinContainer = React.memo(props => {
   return <Interpretation {...props} {...interpretationProps} />;
 });
 
-export default InterpretatinContainer;
+export default props => (
+  <FormationsStoreProvider>
+    <InterpretatinContainer {...props} />
+  </FormationsStoreProvider>
+);
