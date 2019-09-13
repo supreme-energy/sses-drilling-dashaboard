@@ -61,13 +61,13 @@ function LogDataLine({
   logData
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
-  const internalState = useRef({ initialRender: false });
+  const internalState = useRef({ dataLoaded: false });
 
   useEffect(() => {
     // refresh when we have computedLogData
-    if (!internalState.current.initialRender && computedLogData) {
+    if (!internalState.current.dataLoaded && computedLogData) {
       refresh();
-      internalState.current.initialRender = true;
+      internalState.current.dataLoaded = true;
     }
   }, [refresh, computedLogData]);
 

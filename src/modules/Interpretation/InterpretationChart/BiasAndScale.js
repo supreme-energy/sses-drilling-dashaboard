@@ -226,7 +226,6 @@ function useSegmentBiasAndScale({
       computedWidth,
       totalWidth,
       gridGutter,
-
       xMax,
       draftMode,
       selectionById,
