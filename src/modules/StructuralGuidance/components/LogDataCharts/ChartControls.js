@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import IconButton from "@material-ui/core/IconButton";
 import Box from "@material-ui/core/Box";
+import TextField from "@material-ui/core/TextField";
 import MoreVert from "@material-ui/icons/MoreVert";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import ArrowForward from "@material-ui/icons/ArrowForward";
@@ -53,17 +54,60 @@ ChartControls.propTypes = {
 export default ChartControls;
 
 export const BiasControls = React.memo(
-  ({ isEditingScale, view, selectedLogs, handleReset, handleSave, handleClose }) => {
-    const prevScale = _.get(selectedLogs, `[${view}].prevScale`);
-    const currScale = _.get(selectedLogs, `[${view}].currScale`);
+  ({ isEditingScale, setScale, logInfo, handleReset, handleSave, handleClose }) => {
+    const scaleLow = _.get(logInfo, "scalelo");
+    const scaleHigh = _.get(logInfo, "scalehi");
+    const prevScale = _.get(logInfo, "prevScale");
+    const currScale = _.get(logInfo, "currScale");
     const hasScaleChanged = JSON.stringify(prevScale) !== JSON.stringify(currScale);
+
+    const handleSetScaleLow = useCallback(
+      e => {
+        const value = e.target.value;
+        const low = scaleLow || 1;
+        setScale(value / low, currScale.bias, value / currScale.scale, scaleHigh);
+      },
+      [currScale, scaleHigh, scaleLow, setScale]
+    );
+
+    const handleSetScaleHigh = useCallback(
+      e => {
+        const value = e.target.value;
+        setScale(value / scaleHigh, currScale.bias, scaleLow, value / currScale.scale);
+      },
+      [currScale, scaleLow, scaleHigh, setScale]
+    );
 
     return (
       <React.Fragment>
-        {isEditingScale && (
+        {isEditingScale && currScale && (
           <Box display="flex" p={1}>
-            <Box display="flex" flexDirection="column" p={1}>
-              <Box display="flex">
+            <Box display="flex" flexDirection="column">
+              <Box display="flex" flexDirection="row">
+                <TextField
+                  className={classes.textField}
+                  value={scaleLow * currScale.scale}
+                  onChange={handleSetScaleLow}
+                  type="number"
+                  label="Min"
+                  margin="dense"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+                <TextField
+                  className={classes.textField}
+                  value={scaleHigh * currScale.scale}
+                  onChange={handleSetScaleHigh}
+                  type="number"
+                  label="Max"
+                  margin="dense"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Box>
+              <Box display="flex" justifyContent="flex-end">
                 <IconButton onClick={handleReset} disabled={!hasScaleChanged}>
                   <Refresh />
                 </IconButton>
@@ -84,8 +128,6 @@ export const BiasControls = React.memo(
 
 BiasControls.propTypes = {
   isEditingScale: PropTypes.bool,
-  view: PropTypes.string,
-  selectedLogs: PropTypes.object,
   handleClose: PropTypes.func,
   handleReset: PropTypes.func,
   handleSave: PropTypes.func

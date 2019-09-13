@@ -19,13 +19,15 @@ function BiasAndScale({
   refresh,
   canvas,
   color,
+  width,
+  height,
   handleDragEnd
 }) {
   const length = extent[1] - extent[0];
   const isVertical = axis === "y";
   const segmentCursor = isVertical ? "ns-resize" : "ew-resize";
   const lineCursor = isVertical ? "row-resize" : "col-resize";
-  const lineData = isVertical ? [[10, 0], [0, 0]] : [[0, 10], [0, 0]];
+  const lineData = isVertical ? [[0, 0], [1000, 0]] : [[0, 0], [0, height]];
 
   useEffect(
     function redraw() {
@@ -101,10 +103,10 @@ function BiasAndScale({
     onDragEnd,
     canvas,
     cursor: lineCursor,
-    width: isVertical ? 10 : 3,
+    width: isVertical ? width : 3,
     x: -1,
     y: -1,
-    height: isVertical ? 3 : 10
+    height: isVertical ? 3 : height
   });
 
   const getSegmentEnd = useCallback(() => endLineRef.current && endLineRef.current.container, []);
@@ -115,10 +117,10 @@ function BiasAndScale({
     onDragEnd,
     canvas,
     cursor: lineCursor,
-    width: isVertical ? 10 : 3,
+    width: isVertical ? width : 3,
     x: 0,
     y: 0,
-    height: isVertical ? 3 : 10
+    height: isVertical ? 3 : height
   });
 
   return (
@@ -132,8 +134,8 @@ function BiasAndScale({
             <PixiContainer
               ref={startLineRef}
               container={container}
-              x={!isVertical ? 0 : -1}
-              y={isVertical ? -2 : -1}
+              x={!isVertical ? 0 : -width}
+              y={isVertical ? -1 : -height}
               child={container => (
                 <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
@@ -141,8 +143,8 @@ function BiasAndScale({
             <PixiContainer
               ref={endLineRef}
               container={container}
-              x={!isVertical ? computedLength : -1}
-              y={isVertical ? computedLength - 2 : -1}
+              x={!isVertical ? computedLength : -width}
+              y={isVertical ? computedLength - 2 : -height}
               child={container => (
                 <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
@@ -182,7 +184,9 @@ BiasAndScale.propTypes = {
   color: PropTypes.number,
   canvas: PropTypes.object,
   handleDragEnd: PropTypes.func,
-  extent: PropTypes.arrayOf(PropTypes.number)
+  extent: PropTypes.arrayOf(PropTypes.number),
+  width: PropTypes.number,
+  height: PropTypes.number
 };
 
 BiasAndScale.defaultProps = {

@@ -58,11 +58,18 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, [settingsView]);
 
   const handleUpdateScale = useCallback(
-    (scale, bias) => {
+    (scale, bias, scaleLow, scaleHigh) => {
       setSelectedLog(state => {
+        const scalelo = scaleLow !== undefined ? scaleLow : state[settingsView].scalelo;
+        const scalehi = scaleHigh || state[settingsView].scalehi;
         return {
           ...state,
-          [settingsView]: { ...state[settingsView], currScale: { scale, bias } }
+          [settingsView]: {
+            ...state[settingsView],
+            currScale: { scale, bias },
+            scalelo,
+            scalehi
+          }
         };
       });
     },
@@ -111,8 +118,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
             checked: true,
             scalelo,
             scalehi,
-            currScale: { ...INITIAL_SCALE_BIAS },
-            prevScale: { ...INITIAL_SCALE_BIAS }
+            currScale: INITIAL_SCALE_BIAS,
+            prevScale: INITIAL_SCALE_BIAS
           }
         };
       });
@@ -150,8 +157,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         />
         <BiasControls
           isEditingScale={isEditingScale}
-          view={settingsView}
-          selectedLogs={selectedLogs}
+          logInfo={selectedLogs[settingsView]}
+          setScale={handleUpdateScale}
           handleReset={handleResetScale}
           handleClose={handleCloseScale}
           handleSave={handleSaveScale}

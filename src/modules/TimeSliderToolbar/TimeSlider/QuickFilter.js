@@ -14,8 +14,14 @@ const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view
 
   // Define constants
   const { phaseStart, phaseEnd, phase } = phaseObj;
-  const firstIndex = useMemo(() => data.map(e => e.Hole_Depth).indexOf(phaseStart), [data, phaseStart]);
-  const lastIndex = useMemo(() => data.map(e => e.Hole_Depth).lastIndexOf(phaseEnd), [data, phaseEnd]);
+  const firstIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= phaseStart);
+    return index > 0 ? index : 0;
+  }, [data, phaseStart]);
+  const lastIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= phaseEnd);
+    return index > 0 ? index : data.length - 1;
+  }, [data, phaseEnd]);
   const filterWidth = (lastIndex - firstIndex) * view.xScale;
   const startingX = firstIndex * view.xScale;
 

@@ -26,6 +26,7 @@ const Line = React.memo(
     logId,
     width,
     viewport,
+    view,
     mapper,
     refresh,
     isEditing,
@@ -36,7 +37,7 @@ const Line = React.memo(
     bias
   }) => {
     const { color, data = [], label } = useFilteredAdditionalDataInterval(wellId, logId);
-    const selectedColor = _.get(selectedLogs, `[${label}].color`);
+    const selectedColor = Number(`0x${_.get(selectedLogs, `[${label}].color`, color)}`);
     const lineScale = { x: 1, y: scale || 1 };
     const alpha = isEditing && !showScale ? 0.3 : 1;
     const extent = [min(data, d => d.value), max(data, d => d.value)];
@@ -63,7 +64,7 @@ const Line = React.memo(
           scale={lineScale}
           data={data}
           mapData={mapper}
-          color={Number(`0x${selectedColor}`) || Number(`0x${color}`)}
+          color={selectedColor}
           alpha={alpha}
         />
         {showScale && (
@@ -71,10 +72,11 @@ const Line = React.memo(
             container={stage}
             axis="y"
             x={width - 10}
+            width={width}
             refresh={refresh}
             totalWidth={width}
             canvas={canvasRef.current}
-            color={Number(`0x${selectedColor}`) || Number(`0x${color}`)}
+            color={selectedColor}
             scale={scale}
             bias={bias}
             setScale={setScale}
@@ -216,6 +218,7 @@ function Chart({
                 canvasRef={canvasRef}
                 width={width}
                 viewport={container}
+                view={view}
                 refresh={refresh}
                 isEditing={isEditing}
                 mapper={mapper}

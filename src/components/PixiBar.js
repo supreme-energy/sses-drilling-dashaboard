@@ -61,7 +61,7 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
 
         chunk.forEach(point => {
           if (point[1]) {
-            chunkGraphic.drawRect(point[0], y, width, height * point[1]);
+            chunkGraphic.drawRect(point[0], y, width, height);
           }
         });
       });

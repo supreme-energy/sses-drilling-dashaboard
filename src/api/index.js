@@ -40,6 +40,7 @@ export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 export const GET_WELL_OPERATION_HOURS = "/analytics/rig_states.php";
 export const GET_KPI = "/analytics/overview.php";
+export const GET_TIME_SLIDER_DATA = "/analytics/edr_drilled.php";
 export const GET_EMAIL_CONTACTS = "/email_contacts/list.php";
 export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
 export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
@@ -54,10 +55,8 @@ export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
-
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
-const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
 
 const options = {
   shouldSort: true,
@@ -716,17 +715,59 @@ export function useWellOverviewKPI(wellId) {
   };
 }
 
-export function useTimeSliderData() {
-  const [data] = useFetch(
+export function useTimeSliderData(wellId, minDepth, maxDepth) {
+  const [data, , , , , { fetch }] = useFetch(
+    wellId !== undefined &&
+      minDepth !== undefined &&
+      maxDepth && {
+        path: GET_TIME_SLIDER_DATA,
+        query: {
+          seldbname: wellId,
+          hole_depth_gte: minDepth,
+          hole_depth_lte: maxDepth
+        }
+      },
     {
-      path: GET_MOCK_TIME_SLIDER_DATA
-    },
-
-    {
-      id: "mock"
+      transform: data => {
+        return data.map(d => ({
+          ...d,
+          rop_a: Number(d.rop_a),
+          astra_mse: Number(d.astra_mse)
+        }));
+      }
     }
   );
-  return data || EMPTY_ARRAY;
+
+  const getTimeSliderData = useCallback(
+    (wellId, minDepth, maxDepth) => {
+      return fetch(
+        wellId !== undefined &&
+          minDepth !== undefined &&
+          maxDepth && {
+            path: GET_TIME_SLIDER_DATA,
+            query: {
+              seldbname: wellId,
+              hole_depth_gte: minDepth,
+              hole_depth_lte: maxDepth
+            }
+          },
+        (current, result) => {
+          const parsedRes = result.map(d => ({
+            ...d,
+            rop_a: Number(d.rop_a),
+            astra_mse: Number(d.astra_mse)
+          }));
+          if (current) {
+            return [...current, ...parsedRes];
+          }
+          return [...parsedRes];
+        }
+      );
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_ARRAY, getTimeSliderData };
 }
 
 export function useWellOperationHours(wellId) {
@@ -919,7 +960,7 @@ export function useCloudServer(wellId) {
         cache: "no-cache"
       },
       (_, next) => next
-    );
+    ).catch(err => err);
   }, [wellId, serializedRefresh]);
 
   // Trigger refresh when countdown hits zero
