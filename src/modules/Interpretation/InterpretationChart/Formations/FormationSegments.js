@@ -47,12 +47,11 @@ export default function FormationSegments({
     const selected = selectedFormation === formationItem.id;
 
     return (
-      <React.Fragment>
+      <React.Fragment key={formationItem.id}>
         <PixiRectangle
           updateTransform={frozenScaleTransform}
           onClick={() => onSegmentClick(formationItem.id)}
           width={10}
-          key={formationItem.id}
           height={height - padding}
           y={formationItem.y}
           x={0}

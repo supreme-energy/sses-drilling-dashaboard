@@ -3,7 +3,6 @@ import PixiRectangle from "../../../../components/PixiRectangle";
 import { useFormationsDataContainer, useFilteredFormations } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
-import FormationsTops from "./FormationsTops";
 import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
 import PixiLine from "../../../../components/PixiLine";
 import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
@@ -12,7 +11,6 @@ import FormationSegments from "./FormationSegments";
 import { useInterpretationRenderer } from "..";
 
 function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
-  console.log("formation", label, y);
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width, 0]);
   return (
     <React.Fragment>
@@ -42,7 +40,7 @@ function Formation({ y, height, label, width, container, backgroundAlpha, backgr
 }
 
 function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
-  return rawFormationsData.reduce((acc, item, index) => {
+  const items = rawFormationsData.reduce((acc, item, index) => {
     if (item.data && item.data.length && index <= rawFormationsData.length - 2) {
       const formationData = item.data[selectedSurveyIndex];
       const nextFormation = rawFormationsData[index + 1];
@@ -63,6 +61,21 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 
     return acc;
   }, []);
+  const lastAddedItem = items[items.length - 1];
+  const lastFormationItem = rawFormationsData[rawFormationsData.length - 1];
+
+  items.push({
+    y: lastAddedItem.y + lastAddedItem.height,
+    height: 20,
+    label: lastFormationItem.label,
+    id: lastFormationItem.id,
+    showLine: Boolean(lastFormationItem.show_line),
+    backgroundColor: Number(`0x${lastFormationItem.bg_color}`),
+    backgroundAlpha: Number(lastFormationItem.bg_percent),
+    color: Number(`0x${lastFormationItem.color}`)
+  });
+
+  return items;
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
@@ -83,7 +96,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
     [selectedSurveyIndex, formationsData]
   );
-
+  console.log("formationDataForSelectedSurvey", formationDataForSelectedSurvey);
   const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", formationId: id }), [dispatch]);
 
   return (

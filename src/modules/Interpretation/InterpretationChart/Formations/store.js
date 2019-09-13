@@ -16,7 +16,6 @@ function formationsReducer(state, action) {
     }
     case "TOGGLE_SELECTION": {
       const currentSelection = state.selectedFormation;
-      console.log("TOGGLE_SELECTION", action, currentSelection);
       return {
         ...state,
         selectedFormation: currentSelection === action.formationId ? null : action.formationId

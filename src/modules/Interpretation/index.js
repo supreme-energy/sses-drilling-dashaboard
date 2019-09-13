@@ -17,6 +17,7 @@ import Headers from "./Headers";
 import { useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
 import { FormationsStoreProvider, useFormationsStore } from "./InterpretationChart/Formations/store";
+import FormationSettings from "./InterpretationSettings/FormationSettings";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
@@ -49,6 +50,10 @@ const Interpretation = React.memo(
       currentEditedLog,
       logsBiasAndScale
     };
+    const showFormationSettings = formationsEditMode;
+    const showLogSettings = !formationsEditMode && currentEditedLog;
+    const showInterpretationSettings = !formationsEditMode && !currentEditedLog;
+
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
@@ -77,10 +82,9 @@ const Interpretation = React.memo(
         <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
         <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
-
-        {currentEditedLog ? (
-          <LogSettings {...logSettingsProps} />
-        ) : (
+        {showFormationSettings && <FormationSettings />}
+        {showLogSettings && <LogSettings {...logSettingsProps} />}
+        {showInterpretationSettings && (
           <React.Fragment>
             <div className="layout horizontal">
               <IconButton
@@ -111,7 +115,7 @@ const InterpretatinContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
   const [controlLogs] = useWellControlLogList(wellId);
   const [logList] = useWellLogsContainer();
-
+  const [{ editMode: formationsEditMode }] = useFormationsStore();
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
   const resetLogBiasAndScale = useCallback(logId => dispatch({ type: "RESET_LOG_BIAS_AND_SCALE", logId }), [dispatch]);
   const changeCurrentEditedLog = useCallback(
@@ -127,7 +131,8 @@ const InterpretatinContainer = React.memo(props => {
     currentEditedLog,
     logsBiasAndScale,
     resetLogBiasAndScale,
-    changeCurrentEditedLog
+    changeCurrentEditedLog,
+    formationsEditMode
   };
   return <Interpretation {...props} {...interpretationProps} />;
 });
