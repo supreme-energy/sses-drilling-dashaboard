@@ -17,6 +17,8 @@ const useAudio = url => {
     } else {
       audio.pause();
     }
+
+    return () => audio.pause();
   }, [playing, audio]);
 
   useEffect(() => {
