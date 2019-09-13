@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect } from "react";
 import PixiRectangle from "../../../../components/PixiRectangle";
-import { useFormationsDataContainer, useFilteredFormations } from "../../../App/Containers";
+import { useFormationsDataContainer } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
 import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
@@ -11,7 +11,7 @@ import FormationSegments from "./FormationSegments";
 import { useInterpretationRenderer } from "..";
 
 function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
-  const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width, 0]);
+  const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
   return (
     <React.Fragment>
       <PixiRectangle

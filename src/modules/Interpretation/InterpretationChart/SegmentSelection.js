@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, forwardRef, useState, useEffect, useImperativeHandle } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useInterpretationRenderer } from ".";
 import { useComputedDraftSegmentsOnly } from "../selectors";
 import useMemo from "react-powertools/hooks/useMemo";
