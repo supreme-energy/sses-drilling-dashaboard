@@ -139,7 +139,6 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     controlLogs,
     selectedWellLog,
     gr,
-    draftMode,
     segments,
     view,
     viewport,

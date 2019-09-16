@@ -21,6 +21,8 @@ function PixiTooltip({
   labelPadding,
   textProps,
   targetWidth,
+  targetX,
+  targetY,
   targetHeight,
   position,
   canvas,
@@ -41,7 +43,7 @@ function PixiTooltip({
     function makeInteractive() {
       if (target && !havePosition) {
         target.interactive = true;
-        target.hitArea = new PIXI.Rectangle(0, -2, targetWidth, targetHeight);
+        target.hitArea = new PIXI.Rectangle(targetX, targetY, targetWidth, targetHeight);
       }
 
       return () => {
@@ -51,7 +53,7 @@ function PixiTooltip({
         }
       };
     },
-    [target, targetWidth, targetHeight, havePosition]
+    [target, targetWidth, targetHeight, havePosition, targetX, targetY]
   );
 
   useEffect(
@@ -394,7 +396,9 @@ const SegmentSelection = ({
           />
           <PixiTooltip
             canvas={canvasRef.current}
-            targetWidth={totalWidth}
+            targetWidth={totalWidth - 10}
+            targetX={10}
+            targetY={-2}
             position={tooltipPosition}
             targetHeight={segmentHeight + 5}
             target={container}
