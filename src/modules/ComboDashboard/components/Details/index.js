@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -23,6 +23,7 @@ import classes from "./Details.scss";
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
+import { limitAzm } from "../CrossSection/formulas";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -142,7 +143,7 @@ export default function DetailsTable({ showFullTable = false }) {
               </TableCell>
               {Cell(row.md.toFixed(2), editable, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
               {Cell(row.inc.toFixed(2), editable, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.azm.toFixed(2), editable, update("azm", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.azm.toFixed(2), editable, v => update("azm", MD_INC_AZ)(limitAzm(v)), row.method === MD_INC_AZ)}
               {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd", TVD_VS), row.method === TVD_VS)}
               {Cell(row.dl.toFixed(2), false)}
               {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs", TVD_VS), row.method === TVD_VS)}

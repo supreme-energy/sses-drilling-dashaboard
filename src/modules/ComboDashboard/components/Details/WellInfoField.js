@@ -1,29 +1,41 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useReducer, useRef } from "react";
 import { Typography } from "@material-ui/core";
-import { DebouncedTextField } from "../../../../components/DebouncedInputs";
 import classes from "../ComboDashboard.scss";
 import { useSelectedWellInfoContainer, useWellIdContainer } from "../../../App/Containers";
+import TextField from "@material-ui/core/TextField";
 
-export const WellInfoField = ({ field, label, ...textProps }) => {
+export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
   const { wellId } = useWellIdContainer();
   const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
+  const mask = options.mask || (a => a);
+  const [b, tick] = useReducer(b => !b);
+  const internalState = useRef({ value: wellInfo[field] });
   const updateValue = useCallback(
-    async value => {
-      await updateWell({ wellId, field, value });
+    _.debounce(async () => {
+      await updateWell({ wellId, field, value: internalState.current.value });
       refreshFetchStore();
-    },
+    }, 100),
     [updateWell, wellId, refreshFetchStore]
+  );
+
+  const changeHandler = useCallback(
+    e => {
+      internalState.current.value = mask(e.target.value);
+      tick();
+      updateValue();
+    },
+    [updateValue]
   );
 
   return (
     <React.Fragment>
       <Typography variant="subtitle2">{`${label}: `}</Typography>
-      <DebouncedTextField
+      <TextField
         debounceInterval={100}
         variant="filled"
-        value={wellInfo[field]}
-        onChange={updateValue}
+        value={internalState.current.value}
+        onChange={changeHandler}
         className={classes.textField}
         {...textProps}
       />

@@ -7,6 +7,7 @@ import classes from "./Details.scss";
 import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
 import WellInfoField from "./WellInfoField";
+import { limitAzm } from "../CrossSection/formulas";
 
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
@@ -21,6 +22,9 @@ function DetailsFullModal({ handleClose, isVisible }) {
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column">
             <div className={comboClasses.flexRight}>
+              <WellInfoField label={"Proposed Direction"} field="propazm" type="number" options={{ mask: limitAzm }} />
+              <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
+              <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
               <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
             </div>
             <DetailsTable showFullTable />
