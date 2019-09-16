@@ -9,9 +9,9 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
   const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
   const mask = options.mask || (a => a);
-  const [b, tick] = useReducer(b => !b);
+  const [, forceRerender] = useReducer(b => !b);
   const internalState = useRef({ value: wellInfo[field] });
-  const updateValue = useCallback(
+  const debouncedFieldSave = useCallback(
     _.debounce(async () => {
       await updateWell({ wellId, field, value: internalState.current.value });
       refreshFetchStore();
@@ -22,10 +22,10 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
   const changeHandler = useCallback(
     e => {
       internalState.current.value = mask(e.target.value);
-      tick();
-      updateValue();
+      forceRerender();
+      debouncedFieldSave();
     },
-    [updateValue]
+    [debouncedFieldSave]
   );
 
   return (
