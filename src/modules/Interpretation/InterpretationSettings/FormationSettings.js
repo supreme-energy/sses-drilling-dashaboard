@@ -15,7 +15,7 @@ export default function FormationSettings() {
     }
     const selectedIndex = getSelectedIndex();
     let nextIndex = selectedIndex + direction;
-    // last formation top is not a segment?
+
     if (nextIndex === formationsData.length) {
       nextIndex = 0;
     }
@@ -24,7 +24,6 @@ export default function FormationSettings() {
       nextIndex = formationsData.length - 1;
     }
 
-    console.log(formationsData[nextIndex]);
     const nextId = formationsData[nextIndex].id;
     dispatch({ type: "TOGGLE_SELECTION", formationId: nextId });
   };

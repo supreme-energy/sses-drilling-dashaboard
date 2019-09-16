@@ -7,30 +7,30 @@ import { twoDecimals } from "../../../../constants/format";
 import PixiLine from "../../../../components/PixiLine";
 import PixiContainer from "../../../../components/PixiContainer";
 
-const LabelDepthDepth = ({ gridGutter, y, ...props }) => {
+const LabelDepth = ({ gridGutter, y, ...props }) => {
   const lineData = [[-5, 0], [5, 0]];
   return (
-    <React.Fragment>
-      <PixiContainer
-        updateTransform={frozenScaleTransform}
-        y={y}
-        container={props.container}
-        child={container => (
-          <React.Fragment>
-            <PixiLine
-              container={container}
-              data={lineData}
-              color={props.backgroundColor}
-              lineWidth={2}
-              nativeLines={false}
-            />
-            <SegmentLabel {...props} container={container} offsetX={-5} y={0} />
-          </React.Fragment>
-        )}
-      />
-    </React.Fragment>
+    <PixiContainer
+      updateTransform={frozenScaleTransform}
+      y={y}
+      container={props.container}
+      child={container => (
+        <React.Fragment>
+          <PixiLine
+            container={container}
+            data={lineData}
+            color={props.backgroundColor}
+            lineWidth={2}
+            nativeLines={false}
+          />
+          <SegmentLabel {...props} container={container} offsetX={-5} y={0} />
+        </React.Fragment>
+      )}
+    />
   );
 };
+
+const padding = 2;
 
 export default function FormationSegments({
   formationData,
@@ -42,7 +42,6 @@ export default function FormationSegments({
   gridGutter
 }) {
   return formationData.map(formationItem => {
-    const padding = 2;
     const height = formationItem.height * view.yScale;
     const selected = selectedFormation === formationItem.id;
 
@@ -60,7 +59,7 @@ export default function FormationSegments({
           container={container}
         />
         {selected && (
-          <LabelDepthDepth
+          <LabelDepth
             gridGutter={gridGutter}
             refresh={refresh}
             container={container}

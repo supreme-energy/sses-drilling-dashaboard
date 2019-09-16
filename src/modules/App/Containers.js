@@ -87,12 +87,6 @@ const filterSurveysToInterval = memoizeOne(filterDataToInterval);
 const filterProjectionsToInterval = memoizeOne(filterDataToInterval);
 const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 
-export const useFilteredFormations = () => {
-  const { sliderInterval } = useTimeSliderContainer();
-  const { formationsData } = useFormationsDataContainer();
-  return filterFormationsMem(formationsData, sliderInterval);
-};
-
 // Uses current time slider location to filter well Cross-Section
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
@@ -101,17 +95,19 @@ export function useComputedFilteredWellData() {
 
   const [, surveys, projections] = useComputedSurveysAndProjections();
   const wellPlan = useWellPath(wellId);
+  const { formationsData } = useFormationsDataContainer();
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
   const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
+  const filteredFormations = filterFormationsMem(formationsData, sliderInterval);
 
   return {
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
-    formations: useFilteredFormations(),
+    formations: filteredFormations,
     projections: projectionsFiltered
   };
 }

@@ -79,7 +79,7 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
-  const [{ selectedFormation }, dispatch] = useFormationsStore();
+  const [{ selectedFormation, editMode }, dispatch] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
 
   useEffect(refresh, [refresh, selectedFormation]);
@@ -96,22 +96,24 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
     [selectedSurveyIndex, formationsData]
   );
-  console.log("formationDataForSelectedSurvey", formationDataForSelectedSurvey);
+
   const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", formationId: id }), [dispatch]);
 
   return (
     <React.Fragment>
       {selectedSurvey &&
         formationDataForSelectedSurvey.map(f => <Formation container={container} width={width} {...f} key={f.id} />)}
-      <FormationSegments
-        refresh={refresh}
-        gridGutter={gridGutter}
-        selectedFormation={selectedFormation}
-        container={container}
-        formationData={formationDataForSelectedSurvey}
-        view={view}
-        onSegmentClick={toggleSegmentSelection}
-      />
+      {editMode && (
+        <FormationSegments
+          refresh={refresh}
+          gridGutter={gridGutter}
+          selectedFormation={selectedFormation}
+          container={container}
+          formationData={formationDataForSelectedSurvey}
+          view={view}
+          onSegmentClick={toggleSegmentSelection}
+        />
+      )}
     </React.Fragment>
   );
 });
