@@ -60,7 +60,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
     return (
       <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
         <Button
-          className={classNames(classes.addChartButton, classes.addChartButtonInitial)}
+          className={classNames(classes.addChartButton, classes.absoluteCenter)}
           color="secondary"
           onClick={handleImport}
         >
