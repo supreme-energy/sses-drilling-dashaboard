@@ -246,11 +246,11 @@ function useProjectionsData() {
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
 
-  const [serverFormations, refreshFormations] = useFetchFormations(wellId);
+  const [serverFormations, refreshFormations, addTop, deleteTop] = useFetchFormations(wellId);
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { serverFormations, formationsData: computedFormations, refreshFormations };
+  return { serverFormations, formationsData: computedFormations, refreshFormations, addTop, deleteTop };
 }
 
 export function useCrossSectionData() {

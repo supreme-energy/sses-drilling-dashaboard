@@ -1,11 +1,11 @@
 import React from "react";
 import css from "./styles.scss";
-import { Box, IconButton } from "@material-ui/core";
-import { ArrowRightAlt } from "@material-ui/icons";
+import { Box, IconButton, Typography } from "@material-ui/core";
+import { ArrowRightAlt, AddCircle } from "@material-ui/icons";
 import { useFormationsDataContainer } from "../../App/Containers";
 import { useFormationsStore } from "../InterpretationChart/Formations/store";
 
-export default function FormationSettings() {
+export default function FormationControls() {
   const { formationsData } = useFormationsDataContainer();
   const [{ selectedFormation }, dispatch] = useFormationsStore();
   const getSelectedIndex = () => formationsData.findIndex(d => d.id === selectedFormation);
@@ -30,10 +30,16 @@ export default function FormationSettings() {
 
   return (
     <Box display="flex" flexDirection="row" className={css.root}>
-      <IconButton disableRipple onClick={() => navigate(1)} className={css.arrowButton}>
+      <Box display="flex" alignItems="center" mr={1}>
+        <IconButton disableRipple onClick={() => dispatch({ type: "CREATE_TOP" })}>
+          <AddCircle />
+        </IconButton>
+        <Typography variant="caption">Add Top</Typography>
+      </Box>
+      <IconButton disableRipple flex="none" onClick={() => navigate(1)} className={css.arrowButton}>
         <ArrowRightAlt className={css.arrowBottom} />
       </IconButton>
-      <IconButton disableRipple onClick={() => navigate(-1)} className={css.arrowButton}>
+      <IconButton disableRipple flex="none" onClick={() => navigate(-1)} className={css.arrowButton}>
         <ArrowRightAlt className={css.arrowTop} />
       </IconButton>
     </Box>

@@ -3,7 +3,8 @@ import { useReducer } from "react";
 
 const initialState = {
   editMode: false,
-  selectedFormation: null
+  selectedFormation: null,
+  pendingAddTop: false
 };
 
 function formationsReducer(state, action) {
@@ -19,6 +20,25 @@ function formationsReducer(state, action) {
       return {
         ...state,
         selectedFormation: currentSelection === action.formationId ? null : action.formationId
+      };
+    }
+    case "CREATE_TOP": {
+      return {
+        ...state,
+        pendingAddTop: true
+      };
+    }
+    case "PENDING_TOP_CREATED": {
+      return {
+        ...state,
+        pendingAddTop: false,
+        selectedFormation: action.pendingId
+      };
+    }
+    case "TOP_CREATED": {
+      return {
+        ...state,
+        selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
       };
     }
     default:

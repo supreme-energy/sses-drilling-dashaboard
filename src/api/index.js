@@ -32,6 +32,8 @@ export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const ADD_FORMATION = "formation/add.php";
+export const REMOVE_FORMATION = "formation/delete.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
@@ -507,6 +509,7 @@ export function useFetchSurveys(wellId) {
 }
 
 const formationsTransform = memoizeOne(formationList => {
+  console.log("transform formations");
   return formationList.map(f => {
     return {
       ...f,
@@ -515,8 +518,14 @@ const formationsTransform = memoizeOne(formationList => {
   });
 });
 
+const sortByThickness = (a, b) => {
+  const aThickness = Number(_.get(a, "data[0].thickness"));
+  const bThickness = Number(_.get(b, "data[0].thickness"));
+  return aThickness - bThickness;
+};
+
 export function useFetchFormations(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
+  const [data, , , , , { refresh, fetch }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -528,7 +537,57 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, refresh];
+
+  const addTop = useCallback(
+    ({ thickness, optimisticData, pendingId }) => {
+      const defaultProps = { label: "New Formation", show_line: "Yes", color: "000000", bg_color: "", bg_percent: 0 };
+      const optimisticResult = [
+        ...data,
+        {
+          ...defaultProps,
+          id: pendingId,
+          data: optimisticData
+        }
+      ].sort(sortByThickness);
+      return fetch(
+        {
+          path: ADD_FORMATION,
+          method: "POST",
+          query: {
+            seldbname: wellId
+          },
+          body: { ...defaultProps, thickness },
+          optimisticResult
+        },
+        (currentFormations, result) => {
+          const formations = currentFormations
+            .filter(f => f.id !== pendingId)
+            .concat(result)
+            .sort(sortByThickness);
+
+          return formationsTransform(formations);
+        }
+      );
+    },
+    [fetch, data, wellId]
+  );
+
+  const deleteTop = useCallback(
+    id => {
+      const optimisticResult = data.filter(f => f.id !== id);
+      fetch({
+        path: REMOVE_FORMATION,
+        optimisticResult,
+        query: {
+          seldbname: wellId,
+          id
+        }
+      });
+    },
+    [fetch, wellId, data]
+  );
+
+  return [data || EMPTY_ARRAY, refresh, addTop, deleteTop];
 }
 
 const projectionsTransform = memoizeOne(projections => {

@@ -7,12 +7,13 @@ import { twoDecimals } from "../../../../constants/format";
 import PixiLine from "../../../../components/PixiLine";
 import PixiContainer from "../../../../components/PixiContainer";
 
-const LabelDepth = ({ gridGutter, y, ...props }) => {
+export const LabelDepth = ({ y, x, ...props }) => {
   const lineData = [[-5, 0], [5, 0]];
   return (
     <PixiContainer
       updateTransform={frozenScaleTransform}
       y={y}
+      x={x}
       container={props.container}
       child={container => (
         <React.Fragment>
@@ -38,8 +39,7 @@ export default function FormationSegments({
   view,
   onSegmentClick,
   selectedFormation,
-  refresh,
-  gridGutter
+  refresh
 }) {
   return formationData.map(formationItem => {
     const height = formationItem.height * view.yScale;
@@ -60,7 +60,6 @@ export default function FormationSegments({
         />
         {selected && (
           <LabelDepth
-            gridGutter={gridGutter}
             refresh={refresh}
             container={container}
             backgroundColor={formationTopsSelectedColor}

@@ -23,7 +23,8 @@ import LogLines from "../LogLines";
 import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
 import { useFormationsStore } from "./Formations/store";
-const gridGutter = 65;
+
+export const gridGutter = 65;
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);

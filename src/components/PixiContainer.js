@@ -4,18 +4,20 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
 function Container(
-  { container: parentContainer, child, x, y, updateTransform, name, zIndex, scale, pivot, width },
+  { container: parentContainer, child, x, y, updateTransform, name, zIndex, scale, pivot, width, height, onClick },
   ref
 ) {
-  const {
-    current: { container, initialUpdateTransform }
-  } = useRef(() => {
+  const internalStateRef = useRef(() => {
     const container = new PIXI.Container();
     return {
       container,
       initialUpdateTransform: container.transform.updateTransform
     };
   });
+
+  const {
+    current: { container, initialUpdateTransform }
+  } = internalStateRef;
 
   useEffect(() => {
     container.sortableChildren = true;
@@ -77,9 +79,13 @@ function Container(
       if (width !== undefined) {
         container.width = width;
       }
+
+      if (height !== undefined) {
+        container.height = height;
+      }
     },
 
-    [container, width]
+    [container, width, height]
   );
 
   useEffect(
@@ -87,6 +93,21 @@ function Container(
       container.zIndex = zIndex;
     },
     [zIndex, container]
+  );
+
+  useEffect(
+    function addEvents() {
+      const container = internalStateRef.current.container;
+
+      container.off("click");
+
+      onClick && container.on("click", onClick);
+
+      return () => {
+        onClick && container.off("click", onClick);
+      };
+    },
+    [onClick]
   );
 
   return child ? child(container) : null;

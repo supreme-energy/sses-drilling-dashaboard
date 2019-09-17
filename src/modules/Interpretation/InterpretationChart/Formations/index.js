@@ -9,6 +9,7 @@ import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSe
 import PixiContainer from "../../../../components/PixiContainer";
 import FormationSegments from "./FormationSegments";
 import { useInterpretationRenderer } from "..";
+import AddTop from "./AddTop";
 
 function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
@@ -79,7 +80,7 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
-  const [{ selectedFormation, editMode }, dispatch] = useFormationsStore();
+  const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
 
   useEffect(refresh, [refresh, selectedFormation]);
@@ -91,14 +92,13 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     [selectedSurvey, surveysAndProjections]
   );
 
-  const { formationsData } = useFormationsDataContainer();
+  const { formationsData, addTop } = useFormationsDataContainer();
   const formationDataForSelectedSurvey = useMemo(
     () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
     [selectedSurveyIndex, formationsData]
   );
 
   const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", formationId: id }), [dispatch]);
-
   return (
     <React.Fragment>
       {selectedSurvey &&
@@ -114,6 +114,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
           onSegmentClick={toggleSegmentSelection}
         />
       )}
+      {pendingAddTop && <AddTop addTop={addTop} selectedSurveyIndex={selectedSurveyIndex} container={container} />}
     </React.Fragment>
   );
 });

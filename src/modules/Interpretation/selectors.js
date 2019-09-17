@@ -6,7 +6,8 @@ import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
-  useSelectedWellInfoContainer
+  useSelectedWellInfoContainer,
+  useFormationsDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -16,6 +17,7 @@ import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
+import { useFormationsStore } from "./InterpretationChart/Formations/store";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -463,7 +465,7 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
 }
 
 const computeFormations = memoizeOne((formations, surveysAndProjections) => {
-  return formations.map(f => {
+  const computedFormations = formations.map(f => {
     return {
       ...f,
       data: f.data.map((item, index) => {
@@ -482,6 +484,8 @@ const computeFormations = memoizeOne((formations, surveysAndProjections) => {
       })
     };
   });
+
+  return computedFormations;
 });
 
 export function useComputedFormations(formations) {
@@ -490,6 +494,16 @@ export function useComputedFormations(formations) {
   const computedFormations = computeFormations(formations, surveysAndProjections);
 
   return computedFormations;
+}
+
+const getSelectedFormation = memoizeOne((selectedId, formations) => {
+  return formations.find(f => f.id === selectedId);
+});
+
+export function useSelectedFormation() {
+  const { formationsData } = useFormationsDataContainer();
+  const [{ selectedFormation }] = useFormationsStore();
+  return getSelectedFormation(selectedFormation, formationsData);
 }
 export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 

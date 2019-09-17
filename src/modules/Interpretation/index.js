@@ -17,13 +17,20 @@ import Headers from "./Headers";
 import { useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
 import { FormationsStoreProvider, useFormationsStore } from "./InterpretationChart/Formations/store";
-import FormationSettings from "./InterpretationSettings/FormationSettings";
+import FormationControls from "./InterpretationSettings/FormationControls";
+import { useSelectedWellLog } from "./selectors";
+import FormationSettings from "./InterpretationChart/FormationSettings";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
-
+  const { selectedWellLog } = useSelectedWellLog();
   return (
-    <Button variant="text" color="primary" onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}>
+    <Button
+      variant="text"
+      color="primary"
+      onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}
+      disabled={!selectedWellLog}
+    >
       Tops
     </Button>
   );
@@ -50,39 +57,45 @@ const Interpretation = React.memo(
       currentEditedLog,
       logsBiasAndScale
     };
-    const showFormationSettings = formationsEditMode;
+    const showFormationControls = formationsEditMode;
     const showLogSettings = !formationsEditMode && currentEditedLog;
     const showInterpretationSettings = !formationsEditMode && !currentEditedLog;
 
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
-        <SelectionStatsContainer logs={logList} wellId={wellId} />
-        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Box display="flex" flexDirection="row" alignItems="center">
-            <TCLValue />
-            <FormControlLabel
-              classes={{ root: css.switchLabel }}
-              value="start"
-              control={
-                <Switch
-                  color="secondary"
-                  checked={draftMode}
-                  onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
+        {formationsEditMode ? (
+          <FormationSettings />
+        ) : (
+          <React.Fragment>
+            <SelectionStatsContainer logs={logList} wellId={wellId} />
+            <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+              <Box display="flex" flexDirection="row" alignItems="center">
+                <TCLValue />
+                <FormControlLabel
+                  classes={{ root: css.switchLabel }}
+                  value="start"
+                  control={
+                    <Switch
+                      color="secondary"
+                      checked={draftMode}
+                      onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
+                    />
+                  }
+                  label="Draft (D)"
+                  labelPlacement="start"
                 />
-              }
-              label="Draft (D)"
-              labelPlacement="start"
-            />
-          </Box>
-          <TopsButton variant="text" color="primary">
-            Tops
-          </TopsButton>
-        </Box>
+              </Box>
+              <TopsButton variant="text" color="primary">
+                Tops
+              </TopsButton>
+            </Box>
+          </React.Fragment>
+        )}
         <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
         <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
-        {showFormationSettings && <FormationSettings />}
+        {showFormationControls && <FormationControls />}
         {showLogSettings && <LogSettings {...logSettingsProps} />}
         {showInterpretationSettings && (
           <React.Fragment>
