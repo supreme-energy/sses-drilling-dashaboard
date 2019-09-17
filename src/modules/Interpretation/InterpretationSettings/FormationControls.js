@@ -25,7 +25,7 @@ export default function FormationControls() {
     }
 
     const nextId = formationsData[nextIndex].id;
-    dispatch({ type: "TOGGLE_SELECTION", formationId: nextId });
+    dispatch({ type: "CHANGE_SELECTION", formationId: nextId });
   };
 
   return (

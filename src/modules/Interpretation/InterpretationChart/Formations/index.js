@@ -10,6 +10,7 @@ import PixiContainer from "../../../../components/PixiContainer";
 import FormationSegments from "./FormationSegments";
 import { useInterpretationRenderer } from "..";
 import AddTop from "./AddTop";
+import get from "lodash/get";
 
 function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
@@ -92,13 +93,21 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     [selectedSurvey, surveysAndProjections]
   );
 
-  const { formationsData, addTop } = useFormationsDataContainer();
+  const { formationsData, addTop, serverFormations } = useFormationsDataContainer();
   const formationDataForSelectedSurvey = useMemo(
     () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
     [selectedSurveyIndex, formationsData]
   );
 
-  const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", formationId: id }), [dispatch]);
+  const changeSegmentSelection = useCallback(id => dispatch({ type: "CHANGE_SELECTION", formationId: id }), [dispatch]);
+  useEffect(
+    function ensureFormationSelected() {
+      if (editMode && !selectedFormation) {
+        changeSegmentSelection(get(serverFormations, "[0].id"));
+      }
+    },
+    [selectedFormation, serverFormations, changeSegmentSelection, editMode]
+  );
   return (
     <React.Fragment>
       {selectedSurvey &&
@@ -111,7 +120,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
           container={container}
           formationData={formationDataForSelectedSurvey}
           view={view}
-          onSegmentClick={toggleSegmentSelection}
+          onSegmentClick={changeSegmentSelection}
         />
       )}
       {pendingAddTop && <AddTop addTop={addTop} selectedSurveyIndex={selectedSurveyIndex} container={container} />}

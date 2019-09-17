@@ -15,11 +15,10 @@ function formationsReducer(state, action) {
         editMode: !state.editMode
       };
     }
-    case "TOGGLE_SELECTION": {
-      const currentSelection = state.selectedFormation;
+    case "CHANGE_SELECTION": {
       return {
         ...state,
-        selectedFormation: currentSelection === action.formationId ? null : action.formationId
+        selectedFormation: action.formationId
       };
     }
     case "CREATE_TOP": {
@@ -39,6 +38,12 @@ function formationsReducer(state, action) {
       return {
         ...state,
         selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
+      };
+    }
+    case "DELETE_FORMATION": {
+      return {
+        ...state,
+        selectedFormation: state.selectedFormation === action.id ? action.nextId : state.selectedFormation
       };
     }
     default:
