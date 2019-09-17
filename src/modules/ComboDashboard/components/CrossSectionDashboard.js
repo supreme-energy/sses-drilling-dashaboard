@@ -20,11 +20,13 @@ import { useCrossSectionContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import AutoPosTCLField from "./Details/AutoPosTCLField";
 import Button from "@material-ui/core/Button";
+import { useSetupWizardData } from "../../Interpretation/selectors";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
+  const { wellPlanIsImported } = useSetupWizardData();
   const [viewDirection, setViewDirection] = useState(0);
 
   const { selectedSections, calcSections } = useCrossSectionContainer();
@@ -58,12 +60,14 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
               />
             )}
           </ParentSize>
-          <div className={classes.importWellPlanButton}>
-            <Button onClick={toggleImportWellPlanModal}>
-              <Import />
-              Import Well Plan
-            </Button>
-          </div>
+          {!wellPlanIsImported && (
+            <div className={classes.importWellPlanButton}>
+              <Button onClick={toggleImportWellPlanModal}>
+                <Import />
+                Import Well Plan
+              </Button>
+            </div>
+          )}
         </div>
         <div className={classes.cardLine} />
         <div className={classNames(classes.column, classes.shrink)}>
