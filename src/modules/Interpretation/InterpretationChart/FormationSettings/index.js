@@ -15,7 +15,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
     <React.Fragment>
       <Typography variant="subtitle2">Add a Formation Top</Typography>
       <Typography variant="body2">
-        Point and click the depth of your new formation top. You can drag the top up or down after adding it2.
+        Point and click the depth of your new formation top. You can drag the top up or down after adding it.
       </Typography>
     </React.Fragment>
   ) : selectedFormation ? (

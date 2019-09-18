@@ -89,6 +89,17 @@ export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
     [setY]
   );
 
+  useEffect(function addKeyboardEvents() {
+    const onKeyDown = e => {
+      if (e.code === "Escape") {
+        dispatch({ type: "CREATE_TOP_CANCELED" });
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => document.removeEventListener("keydown", onKeyDown);
+  });
+
   const onClick = internalState.current.onClick;
   useEffect(refresh, [y, onClick]);
 

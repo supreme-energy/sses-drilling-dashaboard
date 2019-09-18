@@ -28,6 +28,12 @@ function formationsReducer(state, action) {
         pendingAddTop: true
       };
     }
+    case "CREATE_TOP_CANCELED": {
+      return {
+        ...state,
+        pendingAddTop: false
+      };
+    }
     case "PENDING_TOP_CREATED": {
       return {
         ...state,

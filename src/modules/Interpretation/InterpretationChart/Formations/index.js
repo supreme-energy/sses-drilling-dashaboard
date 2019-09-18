@@ -84,7 +84,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
 
-  useEffect(refresh, [refresh, selectedFormation]);
+  useEffect(refresh, [refresh, selectedFormation, pendingAddTop]);
 
   const selectedSurvey = useSelectedSurvey();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
