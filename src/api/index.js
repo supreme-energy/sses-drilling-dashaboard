@@ -743,17 +743,16 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
 
   const getTimeSliderData = useCallback(
     (wellId, minDepth, maxDepth) => {
+      const shouldFetch = wellId !== undefined && minDepth !== undefined && maxDepth;
       return fetch(
-        wellId !== undefined &&
-          minDepth !== undefined &&
-          maxDepth && {
-            path: GET_TIME_SLIDER_DATA,
-            query: {
-              seldbname: wellId,
-              hole_depth_gte: minDepth,
-              hole_depth_lte: maxDepth
-            }
-          },
+        shouldFetch && {
+          path: GET_TIME_SLIDER_DATA,
+          query: {
+            seldbname: wellId,
+            hole_depth_gte: minDepth,
+            hole_depth_lte: maxDepth
+          }
+        },
         (current, result) => {
           const parsedRes = result.map(d => ({
             ...d,
