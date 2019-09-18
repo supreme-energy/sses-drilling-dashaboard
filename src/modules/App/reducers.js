@@ -1,5 +1,3 @@
-import { INITIAL_SCALE_BIAS } from "../../constants/structuralGuidance";
-
 export function drillPhaseReducer(state, action) {
   switch (action.type) {
     case "SET":
@@ -18,24 +16,30 @@ export function selectedLogReducer(state, action) {
     case "SAVE_SCALE":
       return {
         ...state,
-        [action.settingsView]: { ...state[action.settingsView], prevScale: state[action.settingsView].currScale }
+        [action.payload.settingsView]: {
+          ...state[action.payload.settingsView],
+          prevScale: state[action.payload.settingsView].currScale
+        }
       };
     case "SAVE_COLOR":
-      return { ...state, [action.view]: { ...state[action.view], color: action.color } };
+      return { ...state, [action.payload.view]: { ...state[action.payload.view], color: action.payload.color } };
     case "RESET_SCALE":
       return {
         ...state,
-        [action.settingsView]: { ...state[action.settingsView], currScale: state[action.settingsView].prevScale }
+        [action.payload.settingsView]: {
+          ...state[action.payload.settingsView],
+          currScale: state[action.payload.settingsView].prevScale
+        }
       };
     case "UPDATE_SCALE":
       const scalelo =
-        action.payload.scaleLow !== undefined ? action.payload.scaleLow : state[action.settingsView].scalelo;
-      const scalehi = action.payloadscaleHigh || state[action.settingsView].scalehi;
+        action.payload.scaleLow !== undefined ? action.payload.scaleLow : state[action.payload.settingsView].scalelo;
+      const scalehi = action.payloadscaleHigh || state[action.payload.settingsView].scalehi;
       return {
         ...state,
-        [action.settingsView]: {
-          ...state[action.settingsView],
-          currScale: { scale: action.scale, bias: action.bias, scalelo, scalehi }
+        [action.payload.settingsView]: {
+          ...state[action.payload.settingsView],
+          currScale: { scale: action.payload.scale, bias: action.payload.bias, scalelo, scalehi }
         }
       };
     default:
