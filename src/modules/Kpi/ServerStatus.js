@@ -20,7 +20,7 @@ const icons = {
 };
 
 function ServerStatus({ wellId, theme }) {
-  const [{ serverStatus, online, wellInfo }] = useSelectedWellInfoContainer(wellId);
+  const [{ online, wellInfo }] = useSelectedWellInfoContainer(wellId);
   const {
     data: { next_survey: newSurvey, cmes }
   } = useCloudServer(wellId);
@@ -31,10 +31,9 @@ function ServerStatus({ wellId, theme }) {
   const hasUpdate = hasConflict || newSurvey;
   const isAutoImportEnabled = wellInfo && wellInfo[PULL];
 
-  const Icon = icons[serverStatus || OFFLINE];
+  const Icon = icons[isAutoImportEnabled && online ? ONLINE : online ? OFFLINE : MANUAL];
   const color = isOnline && (isAutoImportEnabled || hasUpdate) ? theme.palette.success.main : theme.palette.gray.main;
 
-  console.log("isOnlein", online);
   return (
     <div className={classes.serverStatus}>
       <div className={classes.horizontalCenter}>

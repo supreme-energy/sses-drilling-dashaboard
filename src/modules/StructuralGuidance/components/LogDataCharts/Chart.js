@@ -55,7 +55,6 @@ const Line = React.memo(
       [refresh, data, showScale, color]
     );
 
-    console.log(y, "bias");
     return (
       <React.Fragment>
         <PixiLine

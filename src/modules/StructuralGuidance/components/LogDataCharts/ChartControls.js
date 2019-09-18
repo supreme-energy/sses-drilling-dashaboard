@@ -63,7 +63,7 @@ export const BiasControls = React.memo(
       e => {
         const value = e.target.value;
         setScale(
-          (prevScale.scalehi - value) / (prevScale.scalehi - prevScale.scalelo),
+          (currScale.scalehi - value) / (prevScale.scalehi - prevScale.scalelo),
           currScale.bias,
           value,
           currScale.scalehi
@@ -76,7 +76,7 @@ export const BiasControls = React.memo(
       e => {
         const value = e.target.value;
         setScale(
-          (value - prevScale.scalelo) / (prevScale.scalehi - prevScale.scalelo),
+          (value - currScale.scalelo) / (prevScale.scalehi - prevScale.scalelo),
           currScale.bias,
           currScale.scalelo,
           value

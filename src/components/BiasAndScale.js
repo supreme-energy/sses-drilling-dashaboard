@@ -143,8 +143,8 @@ function BiasAndScale({
             <PixiContainer
               ref={endLineRef}
               container={container}
-              x={!isVertical ? computedLength : -width}
-              y={isVertical ? computedLength : -height}
+              x={!isVertical ? computedLength : -width + gridGutter}
+              y={isVertical ? computedLength : -height + gridGutter}
               child={container => (
                 <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
