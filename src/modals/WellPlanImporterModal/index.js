@@ -20,14 +20,21 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
   const { uploadWellPlan } = useWellPlanImport();
   const { refreshWellPlan } = useCrossSectionData();
   const [file, setFile] = useState("");
+  const [error, setError] = useState("");
 
   const handleImport = async () => {
     const data = new FormData();
     data.append("userfile", file);
 
-    await uploadWellPlan(wellId, data);
-    refreshWellPlan();
-    handleClose();
+    const res = await uploadWellPlan(wellId, data);
+    const json = await res.json();
+    const success = json.status !== "error";
+    if (success) {
+      refreshWellPlan();
+      handleClose();
+    } else {
+      setError(json);
+    }
   };
 
   const handleSelectFile = e => {
@@ -42,6 +49,11 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
         </IconButton>
       </DialogTitle>
       <DialogContent className={classes.importDialogContent}>
+        {error && (
+          <DialogContentText className={classes.conflictText}>
+            Problem with upload. Server message: {error.message}
+          </DialogContentText>
+        )}
         <DialogContentText>Choose a file to import a new well plan</DialogContentText>
         <input accept=".csv" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
         <label htmlFor="manual-import-file">
