@@ -11,8 +11,9 @@ import { noDecimals } from "../../../../constants/format";
 import useRef from "react-powertools/hooks/useRef";
 import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
 import uniqueId from "lodash/uniqueId";
+import get from "lodash/get";
 
-export default function AddTop({ addTop, selectedSurveyIndex }) {
+export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
   const {
     stage,
     size: { width, height },
@@ -20,7 +21,7 @@ export default function AddTop({ addTop, selectedSurveyIndex }) {
 
     refresh
   } = useInterpretationRenderer();
-  const [{ pendingAddTop }, dispatch] = useFormationsStore();
+  const [, dispatch] = useFormationsStore();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
   const selectedSurvey = useSelectedSurvey();
   const [y, setY] = useState(0);
@@ -39,14 +40,20 @@ export default function AddTop({ addTop, selectedSurveyIndex }) {
       md: s.md
     }));
     const pendingId = uniqueId();
+
     addTop({
       pendingId,
       thickness,
       selectedIndex: selectedSurveyIndex,
       optimisticData
-    }).then(result => {
-      dispatch({ type: "TOP_CREATED", pendingId, id: result.id });
-    });
+    })
+      .then(result => {
+        dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id });
+      })
+      .catch(() => {
+        const nextSelected = get(formatinsData, "[0].id");
+        dispatch({ type: "CREATE_TOP_ERROR", pendingId, nextId: nextSelected });
+      });
 
     dispatch({ type: "PENDING_TOP_CREATED", pendingId });
   };

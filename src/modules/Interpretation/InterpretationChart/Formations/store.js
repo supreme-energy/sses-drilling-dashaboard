@@ -4,7 +4,8 @@ import { useReducer } from "react";
 const initialState = {
   editMode: false,
   selectedFormation: null,
-  pendingAddTop: false
+  pendingAddTop: false,
+  addTopLoading: false
 };
 
 function formationsReducer(state, action) {
@@ -31,13 +32,22 @@ function formationsReducer(state, action) {
       return {
         ...state,
         pendingAddTop: false,
+        addTopLoading: true,
         selectedFormation: action.pendingId
       };
     }
-    case "TOP_CREATED": {
+    case "CREATE_TOP_SUCCESS": {
       return {
         ...state,
+        addTopLoading: false,
         selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
+      };
+    }
+    case "CREATE_TOP_ERROR": {
+      return {
+        ...state,
+        addTopLoading: false,
+        selectedFormation: action.nextId
       };
     }
     case "DELETE_FORMATION": {

@@ -509,7 +509,6 @@ export function useFetchSurveys(wellId) {
 }
 
 const formationsTransform = memoizeOne(formationList => {
-  console.log("transform formations");
   return formationList.map(f => {
     return {
       ...f,

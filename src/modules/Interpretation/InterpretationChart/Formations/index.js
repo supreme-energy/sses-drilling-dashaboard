@@ -123,7 +123,14 @@ export default React.memo(({ container, width, view, gridGutter }) => {
           onSegmentClick={changeSegmentSelection}
         />
       )}
-      {pendingAddTop && <AddTop addTop={addTop} selectedSurveyIndex={selectedSurveyIndex} container={container} />}
+      {pendingAddTop && (
+        <AddTop
+          addTop={addTop}
+          selectedSurveyIndex={selectedSurveyIndex}
+          container={container}
+          formationData={formationDataForSelectedSurvey}
+        />
+      )}
     </React.Fragment>
   );
 });
