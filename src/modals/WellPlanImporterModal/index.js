@@ -12,7 +12,7 @@ import {
 
 import Close from "@material-ui/icons/Close";
 import classes from "./WellPlanImporter.scss";
-import { useWellPath, useWellPlanImport } from "../../api";
+import { useWellPlanImport } from "../../api";
 import { useCrossSectionData, useWellIdContainer } from "../../modules/App/Containers";
 
 function WellPlanImporterModal({ handleClose, isVisible }) {
@@ -26,9 +26,7 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
     data.append("userfile", file);
 
     await uploadWellPlan(wellId, data);
-    console.log("refreshing");
     refreshWellPlan();
-    console.log("refreshed");
     handleClose();
   };
 

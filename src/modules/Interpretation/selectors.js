@@ -1,13 +1,14 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellControlLogList, useWellLogData, useWellPath } from "../../api";
+import { EMPTY_ARRAY, useWellControlLogList, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
   useSelectedWellInfoContainer,
-  useFormationsDataContainer
+  useFormationsDataContainer,
+  useWellPlanDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -565,7 +566,7 @@ export function useSelectedWellInfoColors() {
 
 export function useSetupWizardData() {
   const { wellId } = useWellIdContainer();
-  const [wellPlan, wPlanLoading] = useWellPath(wellId);
+  const [wellPlan, wPlanLoading] = useWellPlanDataContainer();
   const [controlLogs, cLogLoading] = useWellControlLogList(wellId);
   const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
   const { surveys, isLoading: surveysLoading } = useSurveysDataContainer();

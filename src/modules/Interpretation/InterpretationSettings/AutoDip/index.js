@@ -19,8 +19,8 @@ import css from "../styles.scss";
 
 import classNames from "classnames";
 import { Tune, Close, AddCircle } from "@material-ui/icons";
-import { useWellControlLogList, useWellPath, EMPTY_ARRAY } from "../../../../api";
-import { useWellIdContainer, useSurveysDataContainer } from "../../../App/Containers";
+import { useWellControlLogList, EMPTY_ARRAY } from "../../../../api";
+import { useWellIdContainer, useSurveysDataContainer, useWellPlanDataContainer } from "../../../App/Containers";
 import { toRadians } from "../../../ComboDashboard/components/CrossSection/formulas";
 import { twoDecimals } from "../../../../constants/format";
 import uniqueId from "lodash/uniqueId";
@@ -206,7 +206,7 @@ function calculateTregDip({ md, ns, ew }, cl) {
 }
 
 function useAverageControlDipOptions(wellId, controlLogs = EMPTY_ARRAY) {
-  const [wellPlan] = useWellPath(wellId);
+  const [wellPlan] = useWellPlanDataContainer();
 
   const [cl] = controlLogs;
 

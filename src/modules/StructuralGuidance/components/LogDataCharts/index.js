@@ -72,7 +72,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
     <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
       <SegmentPlot newView={view} xAxis={VS} />
       {currentLogs.map(log => {
-        if (!isEmpty(dataBySection)) {
+        if (!_.isEmpty(dataBySection)) {
           const logId = dataBySection[log].id;
           return (
             <ChartContainer

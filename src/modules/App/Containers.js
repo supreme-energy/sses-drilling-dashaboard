@@ -91,12 +91,10 @@ const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { wellId } = useWellIdContainer();
-
   const { formationsData } = useFormationsDataContainer();
 
   const [, surveys, projections] = useComputedSurveysAndProjections();
-  const [wellPlan, , , , , { refresh }] = useWellPath(wellId);
+  const [wellPlan, , , , , { refresh }] = useWellPlanDataContainer();
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
@@ -117,9 +115,7 @@ export function useComputedFilteredWellData() {
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { wellId } = useWellIdContainer();
-
-  const [wellPlan] = useWellPath(wellId);
+  const [wellPlan] = useWellPlanDataContainer();
   const { surveys } = useSurveysDataContainer();
   const { serverFormations: formations } = useFormationsDataContainer();
   const { projections } = useProjectionsDataContainer();
@@ -204,6 +200,11 @@ export function useWellSections(wellId) {
 function useWellId(initialState) {
   const [wellId, setWellId] = useState(initialState);
   return { wellId, setWellId };
+}
+
+function useWellPlanData() {
+  const { wellId } = useWellIdContainer();
+  return useWellPath(wellId);
 }
 
 function useSurveysData() {
@@ -297,6 +298,7 @@ export const { Provider: FormationsProvider, useContainer: useFormationsDataCont
   useFormationsData
 );
 export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
+export const { Provider: WellPlanProvider, useContainer: useWellPlanDataContainer } = createContainer(useWellPlanData);
 export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
   useProjectionsData
 );

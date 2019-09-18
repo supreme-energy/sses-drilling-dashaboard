@@ -159,7 +159,9 @@ function CloudServerModal({ wellId, className, importText = "" }) {
 }
 
 CloudServerModal.propTypes = {
-  wellId: PropTypes.string
+  wellId: PropTypes.string,
+  className: PropTypes.object,
+  importText: PropTypes.optional
 };
 
 export default CloudServerModal;
