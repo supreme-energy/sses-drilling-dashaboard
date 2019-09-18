@@ -18,10 +18,11 @@ import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 import { useCrossSectionContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
-import AutoPosTCLField from "./Details/AutoPosTCLField";
 import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
 import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
+import WellInfoField from "./Details/WellInfoField";
+import { limitAzm } from "./CrossSection/formulas";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -87,9 +88,23 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
             <Typography variant="subtitle1">Details</Typography>
             <div className={classes.flexRight}>
               {expanded && selectedSegment.isProjection && (
-                <SelectedProjectionMethod selectedProjection={selectedSegment} />
+                <React.Fragment>
+                  <SelectedProjectionMethod selectedProjection={selectedSegment} />
+                  <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
+                </React.Fragment>
               )}
-              {expanded && <AutoPosTCLField />}
+              {expanded && !selectedSegment.isProjection && (
+                <React.Fragment>
+                  <WellInfoField
+                    label={"Proposed Direction"}
+                    field="propazm"
+                    type="number"
+                    options={{ mask: limitAzm }}
+                  />
+                  <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
+                  <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
+                </React.Fragment>
+              )}
               <IconButton
                 size="small"
                 className={classNames(classes.expand, classes.fullTableButton)}
