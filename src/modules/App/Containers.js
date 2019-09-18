@@ -10,7 +10,7 @@ import {
   useWellPath,
   useWellInfo
 } from "../../api";
-import { drillPhaseReducer } from "./reducers";
+import { drillPhaseReducer, selectedLogReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
 import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
@@ -282,7 +282,7 @@ function useSelectedWellInfo() {
 }
 
 function useSelectedLogDataScale(initialState) {
-  const [selectedLogs, setSelectedLog] = useState(initialState);
+  const [selectedLogs, setSelectedLog] = useReducer(selectedLogReducer, initialState);
 
   return { selectedLogs, setSelectedLog };
 }

@@ -193,11 +193,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   }, [width, height, expanded, data, onReset]);
 
   useEffect(() => {
-    async function startTimeSliderFetch() {
+    function startTimeSliderFetch() {
       const maxDepth = hasProjections ? maxProjectionDepth : maxSurveyDepth;
       for (let i = minSurveyDepth; i <= maxDepth; i += 100) {
         const index = i > maxDepth ? maxDepth : i;
-        await getTimeSliderData(wellId, index, index + 100);
+        getTimeSliderData(wellId, index, index + 100);
       }
     }
 

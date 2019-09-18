@@ -41,9 +41,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, []);
 
   const handleResetScale = useCallback(() => {
-    setSelectedLog(state => {
-      return { ...state, [settingsView]: { ...state[settingsView], currScale: state[settingsView].prevScale } };
-    });
+    setSelectedLog({ type: "RESET_SCALE", payload: { settingsView } });
   }, [settingsView, setSelectedLog]);
 
   const handleCloseScale = useCallback(() => {
@@ -52,25 +50,13 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, [handleResetScale]);
 
   const handleSaveScale = useCallback(() => {
-    setSelectedLog(state => {
-      return { ...state, [settingsView]: { ...state[settingsView], prevScale: state[settingsView].currScale } };
-    });
+    setSelectedLog({ type: "SAVE_SCALE", payload: { settingsView } });
     setEditingScale(false);
   }, [settingsView, setSelectedLog]);
 
   const handleUpdateScale = useCallback(
     (scale, bias, scaleLow, scaleHigh) => {
-      setSelectedLog(state => {
-        const scalelo = scaleLow !== undefined ? scaleLow : state[settingsView].scalelo;
-        const scalehi = scaleHigh || state[settingsView].scalehi;
-        return {
-          ...state,
-          [settingsView]: {
-            ...state[settingsView],
-            currScale: { scale, bias, scalelo, scalehi }
-          }
-        };
-      });
+      setSelectedLog({ type: "UPDATE_SCALE", payload: { settingsView, scale, bias, scaleLow, scaleHigh } });
     },
     [settingsView, setSelectedLog]
   );
@@ -109,9 +95,9 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
 
   useEffect(() => {
     if (color) {
-      setSelectedLog(selectedLogs => {
-        return {
-          ...selectedLogs,
+      setSelectedLog({
+        type: "ADD_LOG",
+        payload: {
           [initialLogName]: {
             color,
             checked: true,
@@ -120,7 +106,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
             currScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi },
             prevScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi }
           }
-        };
+        }
       });
     }
   }, [color, initialLogName, scalelo, scalehi, setSelectedLog]);

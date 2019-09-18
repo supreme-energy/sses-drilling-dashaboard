@@ -719,6 +719,14 @@ export function useWellOverviewKPI(wellId) {
 }
 
 export function useTimeSliderData(wellId, minDepth, maxDepth) {
+  const transformData = data => {
+    return data.map(d => ({
+      ...d,
+      rop_a: Number(d.rop_a),
+      astra_mse: Number(d.astra_mse)
+    }));
+  };
+
   const [data, , , , , { fetch }] = useFetch(
     wellId !== undefined &&
       minDepth !== undefined &&
@@ -731,13 +739,7 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
         }
       },
     {
-      transform: data => {
-        return data.map(d => ({
-          ...d,
-          rop_a: Number(d.rop_a),
-          astra_mse: Number(d.astra_mse)
-        }));
-      }
+      transform: transformData
     }
   );
 
@@ -754,11 +756,7 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
           }
         },
         (current, result) => {
-          const parsedRes = result.map(d => ({
-            ...d,
-            rop_a: Number(d.rop_a),
-            astra_mse: Number(d.astra_mse)
-          }));
+          const parsedRes = transformData(result);
           if (current) {
             return [...current, ...parsedRes];
           }

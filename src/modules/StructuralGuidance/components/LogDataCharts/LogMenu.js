@@ -16,22 +16,26 @@ const LogMenu = React.memo(({ menuItems, selectedLogs, setSelectedLog, handleClo
 
     if (count >= 4) {
       setSelectedLog({
-        ...selectedLogs,
-        [name]: {
-          prevScale: { scale, bias, scalelo, scalehi },
-          currScale: { scale, bias, scalelo, scalehi },
-          color,
-          checked: false
+        type: "ADD_LOG",
+        payload: {
+          [name]: {
+            prevScale: { scale, bias, scalelo, scalehi },
+            currScale: { scale, bias, scalelo, scalehi },
+            color,
+            checked: false
+          }
         }
       });
     } else {
       setSelectedLog({
-        ...selectedLogs,
-        [name]: {
-          color,
-          prevScale: { scale, bias, scalelo, scalehi },
-          currScale: { scale, bias, scalelo, scalehi },
-          checked: event.target.checked
+        type: "ADD_LOG",
+        payload: {
+          [name]: {
+            color,
+            prevScale: { scale, bias, scalelo, scalehi },
+            currScale: { scale, bias, scalelo, scalehi },
+            checked: event.target.checked
+          }
         }
       });
     }
