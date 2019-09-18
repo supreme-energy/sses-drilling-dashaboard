@@ -34,7 +34,7 @@ export function selectedLogReducer(state, action) {
     case "UPDATE_SCALE":
       const scalelo =
         action.payload.scaleLow !== undefined ? action.payload.scaleLow : state[action.payload.settingsView].scalelo;
-      const scalehi = action.payloadscaleHigh || state[action.payload.settingsView].scalehi;
+      const scalehi = action.payload.payloadscaleHigh || state[action.payload.settingsView].scalehi;
       return {
         ...state,
         [action.payload.settingsView]: {
