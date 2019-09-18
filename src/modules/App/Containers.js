@@ -94,7 +94,7 @@ export function useComputedFilteredWellData() {
   const { formationsData } = useFormationsDataContainer();
 
   const [, surveys, projections] = useComputedSurveysAndProjections();
-  const [wellPlan, , , , , { refresh }] = useWellPlanDataContainer();
+  const [wellPlan] = useWellPlanDataContainer();
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
@@ -107,8 +107,7 @@ export function useComputedFilteredWellData() {
     wellPlan,
     wellPlanFiltered,
     formations: formationsFiltered,
-    projections: projectionsFiltered,
-    refreshWellPlan: refresh
+    projections: projectionsFiltered
   };
 }
 
@@ -257,7 +256,7 @@ function useFormationsData() {
 }
 
 export function useCrossSectionData() {
-  const { surveys, wellPlan, formations, projections, refreshWellPlan } = useComputedFilteredWellData();
+  const { surveys, wellPlan, formations, projections } = useComputedFilteredWellData();
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
@@ -274,8 +273,7 @@ export function useCrossSectionData() {
     toggleSegmentSelection,
     deselectAll,
     calcSections: rawSections,
-    calculatedFormations: formations,
-    refreshWellPlan
+    calculatedFormations: formations
   };
 }
 

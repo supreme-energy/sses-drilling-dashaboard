@@ -11,14 +11,14 @@ import {
 } from "@material-ui/core";
 
 import Close from "@material-ui/icons/Close";
-import classes from "./WellPlanImporter.scss";
+import classes from "../baseModalStyles.scss";
 import { useWellPlanImport } from "../../api";
-import { useCrossSectionData, useWellIdContainer } from "../../modules/App/Containers";
+import { useWellIdContainer, useWellPlanDataContainer } from "../../modules/App/Containers";
 
 function WellPlanImporterModal({ handleClose, isVisible }) {
   const { wellId } = useWellIdContainer();
   const { uploadWellPlan } = useWellPlanImport();
-  const { refreshWellPlan } = useCrossSectionData();
+  const [, , , , , { refresh }] = useWellPlanDataContainer();
   const [file, setFile] = useState("");
   const [error, setError] = useState("");
 
@@ -30,7 +30,7 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
     const json = await res.json();
     const success = json.status !== "error";
     if (success) {
-      refreshWellPlan();
+      refresh();
       handleClose();
     } else {
       setError(json);
