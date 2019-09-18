@@ -21,6 +21,7 @@ import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import AutoPosTCLField from "./Details/AutoPosTCLField";
 import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
+import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -105,6 +106,7 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
             </div>
           </Collapse>
           <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
+          <WellPlanImporterModal handleClose={toggleImportWellPlanModal} isVisible={showImportWellPlanModal} />
         </div>
       </div>
     </WidgetCard>

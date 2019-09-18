@@ -47,6 +47,7 @@ export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
+export const UPLOAD_WELL_PLAN_CSV = "/well/plan/import.php";
 export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
 export const GET_SURVEY_RANGE = "/survey/cloud/load_range.php";
 export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
@@ -901,6 +902,27 @@ export function useManualImport() {
   );
 
   return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile };
+}
+
+export function useWellPlanImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadWellPlan = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_WELL_PLAN_CSV,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadWellPlan };
 }
 
 export function useCloudServer(wellId) {
