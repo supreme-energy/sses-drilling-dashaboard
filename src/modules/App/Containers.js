@@ -8,7 +8,8 @@ import {
   useFetchSurveys,
   useWellOverviewKPI,
   useWellPath,
-  useWellInfo
+  useWellInfo,
+  useWellControlLogList
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
@@ -206,6 +207,11 @@ function useWellPlanData() {
   return useWellPath(wellId);
 }
 
+function useControlLogListData() {
+  const { wellId } = useWellIdContainer();
+  return useWellControlLogList(wellId);
+}
+
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
@@ -291,12 +297,14 @@ export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContaine
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
-// TODO: Reduce number of providers (formations, surveys, projections may not be needed)
 export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
   useFormationsData
 );
 export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
 export const { Provider: WellPlanProvider, useContainer: useWellPlanDataContainer } = createContainer(useWellPlanData);
+export const { Provider: ControlLogProvider, useContainer: useControlLogDataContainer } = createContainer(
+  useControlLogListData
+);
 export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
   useProjectionsData
 );

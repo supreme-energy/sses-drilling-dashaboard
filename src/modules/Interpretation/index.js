@@ -14,7 +14,7 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
-import { useWellIdContainer } from "../App/Containers";
+import { useControlLogDataContainer, useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
 import { useSetupWizardData } from "./selectors";
 import WizardChecklist from "./components/WizardChecklist";
@@ -104,7 +104,7 @@ const Interpretation = React.memo(
 
 const InterpretatinContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
-  const [controlLogs] = useWellControlLogList(wellId);
+  const [controlLogs] = useControlLogDataContainer();
   const [logList] = useWellLogsContainer();
 
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();

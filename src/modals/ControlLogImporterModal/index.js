@@ -13,12 +13,12 @@ import {
 import Close from "@material-ui/icons/Close";
 import classes from "../baseModalStyles.scss";
 import { useControlLogImport, useWellControlLogList } from "../../api";
-import { useWellIdContainer } from "../../modules/App/Containers";
+import { useControlLogDataContainer, useWellIdContainer } from "../../modules/App/Containers";
 
 function ControlLogImportModal({ handleClose, isVisible }) {
   const { wellId } = useWellIdContainer();
   const { uploadControlLog } = useControlLogImport();
-  const [, , , , , { refresh }] = useWellControlLogList();
+  const [, , , , , { refresh }] = useControlLogDataContainer();
   const [file, setFile] = useState("");
   const [error, setError] = useState("");
 

@@ -8,7 +8,7 @@ import {
   useWellIdContainer,
   useSelectedWellInfoContainer,
   useFormationsDataContainer,
-  useWellPlanDataContainer
+  useWellPlanDataContainer, useControlLogDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -567,7 +567,7 @@ export function useSelectedWellInfoColors() {
 export function useSetupWizardData() {
   const { wellId } = useWellIdContainer();
   const [wellPlan, wPlanLoading] = useWellPlanDataContainer();
-  const [controlLogs, cLogLoading] = useWellControlLogList(wellId);
+  const [controlLogs, cLogLoading] = useControlLogDataContainer();
   const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
   const { surveys, isLoading: surveysLoading } = useSurveysDataContainer();
   const { formationsData, isLoading: formationsLoading } = useFormationsDataContainer();
