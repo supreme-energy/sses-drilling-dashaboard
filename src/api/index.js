@@ -745,7 +745,7 @@ export function useWellOperationHours(wellId) {
 }
 
 export function useWellControlLogList(wellId) {
-  return useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_CONTROL_LOG_LIST,
       query: { seldbname: wellId, data: 1 }
@@ -760,6 +760,7 @@ export function useWellControlLogList(wellId) {
       }
     }
   );
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellControlLog(tablename) {
