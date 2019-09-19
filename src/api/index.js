@@ -34,6 +34,8 @@ export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
+export const UPLOAD_CONTROL_LOG_LAS = "/controllog/import.php";
+export const DELETE_CONTROL_LOG_LAS = "/controllog/delete.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
@@ -923,6 +925,27 @@ export function useWellPlanImport() {
   );
 
   return { data: data || EMPTY_OBJECT, uploadWellPlan };
+}
+
+export function useControlLogImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadControlLog = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_CONTROL_LOG_LAS,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadControlLog };
 }
 
 export function useCloudServer(wellId) {
