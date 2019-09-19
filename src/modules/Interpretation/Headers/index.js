@@ -105,7 +105,7 @@ export default React.memo(props => {
     dispatch
   ]);
   const changeLogColor = useCallback(
-    ({ logId, color }) => dispatch({ type: "CHANGE_LOG_COLOR", logId, color: color.replace("#", "") }),
+    ({ logId, hex }) => dispatch({ type: "CHANGE_LOG_COLOR", logId, color: hex.replace("#", "") }),
     [dispatch]
   );
 

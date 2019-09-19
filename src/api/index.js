@@ -525,23 +525,26 @@ const sortByThickness = (a, b) => {
   return aThickness - bThickness;
 };
 
-const debouncedUpdateTop = debounce(
-  ({ wellId, props, fetch }) =>
-    fetch(
-      {
-        path: UPDATE_FORMATION,
-        method: "POST",
-        query: {
-          seldbname: wellId
-        },
-        body: props
+const debouncedUpdateTop = debounce(async ({ wellId, props, fetch, requestId }) => {
+  const r = await fetch(
+    {
+      path: UPDATE_FORMATION,
+      method: "POST",
+      query: {
+        seldbname: wellId
       },
-      (currentFormations, result) => {
-        return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f)));
-      }
-    ),
-  1000
-);
+      body: props
+    },
+    (currentFormations, result) => {
+      return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f)));
+    }
+  );
+
+  return {
+    result: r,
+    requestId
+  };
+}, 1000);
 
 export function useFetchFormations(wellId) {
   const [data, , , , , { refresh, fetch }] = useFetch(
