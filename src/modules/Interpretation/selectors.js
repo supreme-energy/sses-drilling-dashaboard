@@ -1,6 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import { EMPTY_ARRAY, useWellControlLogList, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
@@ -8,7 +8,8 @@ import {
   useWellIdContainer,
   useSelectedWellInfoContainer,
   useFormationsDataContainer,
-  useWellPlanDataContainer, useControlLogDataContainer
+  useWellPlanDataContainer,
+  useControlLogDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -565,7 +566,6 @@ export function useSelectedWellInfoColors() {
 }
 
 export function useSetupWizardData() {
-  const { wellId } = useWellIdContainer();
   const [wellPlan, wPlanLoading] = useWellPlanDataContainer();
   const [controlLogs, cLogLoading] = useControlLogDataContainer();
   const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
@@ -574,7 +574,7 @@ export function useSetupWizardData() {
 
   // A default empty well has one entry in the well plan
   const wellPlanIsImported = wellPlan && wellPlan.length > 1;
-  const controlLogIsImported = !!controlLogs && !!controlLogs.length;
+  const controlLogIsImported = _.some(controlLogs, l => l.data && l.data.length && l.startmd && l.endmd);
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
   const tieIn = (surveys && surveys[0]) || {};
