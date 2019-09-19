@@ -55,7 +55,7 @@ function ControlLogImportModal({ handleClose, isVisible }) {
           </DialogContentText>
         )}
         <DialogContentText>Choose a file to import a new control log</DialogContentText>
-        <input accept=".csv" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
+        <input accept=".las" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
         <label htmlFor="manual-import-file">
           <Button component="span" color="primary" variant="outlined">
             Choose File
