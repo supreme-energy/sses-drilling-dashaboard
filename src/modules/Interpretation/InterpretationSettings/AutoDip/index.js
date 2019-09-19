@@ -19,7 +19,7 @@ import css from "../styles.scss";
 
 import classNames from "classnames";
 import { Tune, Close, AddCircle } from "@material-ui/icons";
-import { useWellControlLogList, EMPTY_ARRAY } from "../../../../api";
+import { EMPTY_ARRAY } from "../../../../api";
 import {
   useWellIdContainer,
   useSurveysDataContainer,

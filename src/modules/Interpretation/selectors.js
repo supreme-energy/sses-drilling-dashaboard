@@ -1,5 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
+import some from "lodash/some";
 import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
@@ -574,7 +575,7 @@ export function useSetupWizardData() {
 
   // A default empty well has one entry in the well plan
   const wellPlanIsImported = wellPlan && wellPlan.length > 1;
-  const controlLogIsImported = _.some(controlLogs, l => l.data && l.data.length && l.startmd && l.endmd);
+  const controlLogIsImported = some(controlLogs, l => l.data && l.data.length && l.startmd && l.endmd);
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
   const tieIn = (surveys && surveys[0]) || {};

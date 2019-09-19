@@ -12,7 +12,7 @@ import {
 
 import Close from "@material-ui/icons/Close";
 import classes from "../baseModalStyles.scss";
-import { useControlLogImport, useWellControlLogList } from "../../api";
+import { useControlLogImport } from "../../api";
 import { useControlLogDataContainer, useWellIdContainer } from "../../modules/App/Containers";
 
 function ControlLogImportModal({ handleClose, isVisible }) {
