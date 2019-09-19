@@ -99,8 +99,6 @@ function Container(
     function addEvents() {
       const container = internalStateRef.current.container;
 
-      container.off("click");
-
       onClick && container.on("click", onClick);
 
       return () => {

@@ -13,12 +13,11 @@ import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selec
 import uniqueId from "lodash/uniqueId";
 import get from "lodash/get";
 
-export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
+export default function AddTop({ addTop, selectedSurveyIndex, formationData }) {
   const {
     stage,
     size: { width, height },
     view,
-
     refresh
   } = useInterpretationRenderer();
   const [, dispatch] = useFormationsStore();
@@ -26,7 +25,6 @@ export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
   const selectedSurvey = useSelectedSurvey();
   const [y, setY] = useState(0);
   const addLineData = useMemo(() => [[gridGutter, 0], [width, 0]], [width]);
-
   const containerRef = useRef(null);
   const internalState = useRef(() => ({}));
 
@@ -51,7 +49,7 @@ export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
         dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id });
       })
       .catch(() => {
-        const nextSelected = get(formatinsData, "[0].id");
+        const nextSelected = get(formationData, "[0].id");
         dispatch({ type: "CREATE_TOP_ERROR", pendingId, nextId: nextSelected });
       });
 
@@ -106,9 +104,7 @@ export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
   return (
     <PixiContainer
       updateTransform={frozenScaleTransform}
-      y={0}
       onClick={onClick}
-      x={0}
       ref={containerRef}
       container={stage}
       child={container => (
