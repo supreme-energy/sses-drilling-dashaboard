@@ -1,11 +1,13 @@
 import { createContainer } from "unstated-next";
 import { useReducer } from "react";
+import pickBy from "lodash/pickBy";
 
 const initialState = {
   editMode: false,
   selectedFormation: null,
   pendingAddTop: false,
-  addTopLoading: false
+  addTopLoading: false,
+  formationVisibilityByWellAndTop: {}
 };
 
 function formationsReducer(state, action) {
@@ -60,6 +62,27 @@ function formationsReducer(state, action) {
       return {
         ...state,
         selectedFormation: state.selectedFormation === action.id ? action.nextId : state.selectedFormation
+      };
+    }
+    case "CHANGE_FORMATION_VISIBILITY": {
+      const { wellId, topId, interpretationLine, interpretationFill, vsLine, vsFill } = action;
+      const wellState = state.formationVisibilityByWellAndTop[wellId] || {};
+      const topState = wellState[topId] || {};
+
+      const changes = pickBy({ interpretationLine, interpretationFill, vsLine, vsFill }, d => d !== undefined);
+
+      return {
+        ...state,
+        formationVisibilityByWellAndTop: {
+          ...state.formationVisibilityByWellAndTop,
+          [wellId]: {
+            ...wellState,
+            [topId]: {
+              ...topState,
+              ...changes
+            }
+          }
+        }
       };
     }
     default:

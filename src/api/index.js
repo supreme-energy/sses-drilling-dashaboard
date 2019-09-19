@@ -1,6 +1,6 @@
 import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
@@ -19,6 +19,7 @@ import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
+import debounce from "debounce-promise";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -33,6 +34,7 @@ export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const ADD_FORMATION = "formation/add.php";
+export const UPDATE_FORMATION = "formation/update.php";
 export const REMOVE_FORMATION = "formation/delete.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
@@ -512,7 +514,7 @@ const formationsTransform = memoizeOne(formationList => {
   return formationList.map(f => {
     return {
       ...f,
-      data: transform(f.data)
+      data: f.data.map(d => ({ ..._.mapValues(d, Number), thickness: d.thickness }))
     };
   });
 });
@@ -522,6 +524,24 @@ const sortByThickness = (a, b) => {
   const bThickness = Number(_.get(b, "data[0].thickness"));
   return aThickness - bThickness;
 };
+
+const debouncedUpdateTop = debounce(
+  ({ wellId, props, fetch }) =>
+    fetch(
+      {
+        path: UPDATE_FORMATION,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body: props
+      },
+      (currentFormations, result) => {
+        return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f)));
+      }
+    ),
+  1000
+);
 
 export function useFetchFormations(wellId) {
   const [data, , , , , { refresh, fetch }] = useFetch(
@@ -536,6 +556,10 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
+
+  const [updateTopOptimisticData, changeUpdateTopOptimisticData] = useState(null);
+  const internalState = useRef({ lastReqeustId: null });
+  const formations = updateTopOptimisticData || data || EMPTY_ARRAY;
 
   const addTop = useCallback(
     ({ thickness, optimisticData, pendingId }) => {
@@ -586,7 +610,44 @@ export function useFetchFormations(wellId) {
     [fetch, wellId, data]
   );
 
-  return [data || EMPTY_ARRAY, refresh, addTop, deleteTop];
+  const updateTop = useCallback(
+    async props => {
+      const optimisticResult = formations
+        .map(d => {
+          if (d.id === props.id) {
+            const formation = {
+              ...d,
+              ...props
+            };
+            if (props.thickness) {
+              formation.data = formation.data.map(fd => ({ ...fd, thickness: props.thickness }));
+            }
+            return formation;
+          }
+          return d;
+        })
+        .sort(sortByThickness);
+
+      changeUpdateTopOptimisticData(optimisticResult);
+      let result;
+      try {
+        const requestId = _.uniqueId();
+        internalState.current.lastReqeustId = requestId;
+        result = await debouncedUpdateTop({ wellId, props, fetch, requestId });
+      } catch (e) {
+        throw e;
+      } finally {
+        if (result.requestId === internalState.current.lastReqeustId) {
+          changeUpdateTopOptimisticData(null);
+        }
+      }
+
+      return result;
+    },
+    [formations, wellId, changeUpdateTopOptimisticData, fetch]
+  );
+
+  return [formations, refresh, addTop, deleteTop, updateTop];
 }
 
 const projectionsTransform = memoizeOne(projections => {

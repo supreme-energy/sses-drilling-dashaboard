@@ -1,3 +1,53 @@
 .root {
-    height: 220px;
+    height: 197px;
+    .thicknessInput {
+        width: 90px;
+    }
+
+    .colorBox {
+        width: 25px;
+        height: 25px;
+        > div {
+            width: 25px;
+            height: 25px;
+        }
+    }
+
+    .headerGrid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 10px;
+        grid-auto-rows: minmax(20px, auto);
+
+        .col1 {
+            grid-column: 1 / 1;
+            margin: auto;
+        }
+
+        .col2 {
+            grid-column: 2 / 2;
+            margin: auto
+        }
+
+        .col3 {
+            grid-column: 3 / 3;
+            margin: auto
+        }
+
+        .row1 {
+            grid-row: 1 / 1;
+        }
+        .row2 {
+            grid-row: 2 / 2;
+        }
+
+        .row3 {
+            grid-row: 3 / 3;
+        }
+
+        .visibilityText {
+            width: 94px
+        }
+
+    }
 }

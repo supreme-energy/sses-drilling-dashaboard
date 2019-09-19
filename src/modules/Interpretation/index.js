@@ -124,7 +124,7 @@ const Interpretation = React.memo(
   }
 );
 
-const InterpretatinContainer = React.memo(props => {
+const InterpretationContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
   const [controlLogs] = useWellControlLogList(wellId);
   const [logList] = useWellLogsContainer();
@@ -150,8 +150,4 @@ const InterpretatinContainer = React.memo(props => {
   return <Interpretation {...props} {...interpretationProps} />;
 });
 
-export default props => (
-  <FormationsStoreProvider>
-    <InterpretatinContainer {...props} />
-  </FormationsStoreProvider>
-);
+export default InterpretationContainer;

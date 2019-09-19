@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback, useEffect } from "react";
 import PixiRectangle from "../../../../components/PixiRectangle";
-import { useFormationsDataContainer } from "../../../App/Containers";
+import { useFormationsDataContainer, useWellIdContainer } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
-import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
+import { useSelectedSurvey, useComputedSurveysAndProjections, getFormatinVisibilitySettings } from "../../selectors";
 import PixiLine from "../../../../components/PixiLine";
 import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import PixiContainer from "../../../../components/PixiContainer";
@@ -12,21 +12,34 @@ import { useInterpretationRenderer } from "..";
 import AddTop from "./AddTop";
 import get from "lodash/get";
 
-function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
+function Formation({
+  y,
+  height,
+  label,
+  width,
+  container,
+  backgroundAlpha,
+  backgroundColor,
+  color,
+  interpretationLine,
+  interpretationFill
+}) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
   return (
     <React.Fragment>
-      <PixiRectangle
-        backgroundColor={backgroundColor}
-        backgroundAlpha={backgroundAlpha}
-        x={12}
-        y={y}
-        width={width}
-        height={height}
-        container={container}
-      />
+      {interpretationFill && (
+        <PixiRectangle
+          backgroundColor={backgroundColor}
+          backgroundAlpha={backgroundAlpha}
+          x={12}
+          y={y}
+          width={width}
+          height={height}
+          container={container}
+        />
+      )}
 
-      {showLine && (
+      {interpretationLine && (
         <PixiContainer
           updateTransform={frozenScaleTransform}
           y={y}
@@ -81,10 +94,12 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
-  const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
+  const [
+    { selectedFormation, editMode, pendingAddTop, formationVisibilityByWellAndTop },
+    dispatch
+  ] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
-
-  useEffect(refresh, [refresh, selectedFormation, pendingAddTop]);
+  const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
@@ -108,10 +123,21 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     },
     [selectedFormation, serverFormations, changeSegmentSelection, editMode]
   );
+
+  useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData, formationVisibilityByWellAndTop]);
+
   return (
     <React.Fragment>
       {selectedSurvey &&
-        formationDataForSelectedSurvey.map(f => <Formation container={container} width={width} {...f} key={f.id} />)}
+        formationDataForSelectedSurvey.map(f => (
+          <Formation
+            container={container}
+            width={width}
+            {...f}
+            key={f.id}
+            {...getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, f.id)}
+          />
+        ))}
       {editMode && (
         <FormationSegments
           refresh={refresh}
