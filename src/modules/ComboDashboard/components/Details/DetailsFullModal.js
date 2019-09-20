@@ -11,7 +11,7 @@ import { limitAzm } from "../CrossSection/formulas";
 
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
-    <Dialog onClose={() => handleClose()} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
+    <Dialog onClose={handleClose} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
         <span>Surveys in View</span>
         <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>

@@ -6,6 +6,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
+import Import from "@material-ui/icons/OpenInBrowser";
 import TableChartIcon from "../../../assets/tableChart.svg";
 
 import WidgetCard from "../../../components/WidgetCard";
@@ -17,12 +18,17 @@ import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 import { useCrossSectionContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
+import Button from "@material-ui/core/Button";
+import { useSetupWizardData } from "../../Interpretation/selectors";
+import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
 import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
   const [showModal, toggleModal] = useReducer(m => !m, false);
+  const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
+  const { wellPlanIsImported } = useSetupWizardData();
   const [viewDirection, setViewDirection] = useState(0);
 
   const { selectedSections, calcSections } = useCrossSectionContainer();
@@ -56,6 +62,14 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
               />
             )}
           </ParentSize>
+          {!wellPlanIsImported && (
+            <div className={classes.importWellPlanButton}>
+              <Button onClick={toggleImportWellPlanModal}>
+                <Import />
+                Import Well Plan
+              </Button>
+            </div>
+          )}
         </div>
         <div className={classes.cardLine} />
         <div className={classNames(classes.column, classes.shrink)}>
@@ -107,6 +121,7 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
             </div>
           </Collapse>
           <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
+          <WellPlanImporterModal handleClose={toggleImportWellPlanModal} isVisible={showImportWellPlanModal} />
         </div>
       </div>
     </WidgetCard>
