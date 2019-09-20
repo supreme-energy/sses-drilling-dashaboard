@@ -47,6 +47,7 @@ function useInterpretationWebglRenderer() {
   });
 
   const viewportContainer = useRef(null);
+  const topContainerRef = useRef(null);
 
   const viewport = useViewport({
     renderer,
@@ -69,7 +70,8 @@ function useInterpretationWebglRenderer() {
     canvasRef,
     size: { width, height },
     viewport,
-    viewportContainer
+    viewportContainer,
+    topContainerRef
   };
 }
 
@@ -86,7 +88,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     canvasRef,
     size: { width, height },
     view,
-    updateView
+    updateView,
+    topContainerRef
   } = useInterpretationRenderer();
 
   const { selectedWellLog, selectedWellLogIndex } = useSelectedWellLog();
@@ -212,6 +215,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
           canvas={canvasRef.current}
         />
       )}
+      <PixiContainer ref={topContainerRef} container={viewport} />
     </div>
   );
 }

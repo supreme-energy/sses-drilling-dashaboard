@@ -25,19 +25,23 @@ function Formation({
   interpretationFill
 }) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
+
   return (
     <React.Fragment>
-      {interpretationFill && (
-        <PixiRectangle
-          backgroundColor={backgroundColor}
-          backgroundAlpha={backgroundAlpha}
-          x={12}
-          y={y}
-          width={width}
-          height={height}
-          container={container}
-        />
-      )}
+      <PixiContainer
+        x={12}
+        y={y}
+        container={container}
+        child={container => (
+          <PixiRectangle
+            backgroundColor={backgroundColor}
+            backgroundAlpha={interpretationFill ? backgroundAlpha : 0}
+            width={width}
+            height={height}
+            container={container}
+          />
+        )}
+      />
 
       {interpretationLine && (
         <PixiContainer
@@ -49,7 +53,13 @@ function Formation({
           )}
         />
       )}
-      <PixiText container={container} text={label} y={y} x={20} color={color} fontSize={11} />
+
+      <PixiContainer
+        y={y}
+        x={20}
+        container={container}
+        child={container => <PixiText container={container} text={label} color={color} fontSize={11} />}
+      />
     </React.Fragment>
   );
 }
@@ -127,36 +137,44 @@ export default React.memo(({ container, width, view, gridGutter }) => {
   useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData, formationVisibilityByWellAndTop]);
 
   return (
-    <React.Fragment>
-      {selectedSurvey &&
-        formationDataForSelectedSurvey.map(f => (
-          <Formation
-            container={container}
-            width={width}
-            {...f}
-            key={f.id}
-            {...getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, f.id)}
-          />
-        ))}
-      {editMode && (
-        <FormationSegments
-          refresh={refresh}
-          gridGutter={gridGutter}
-          selectedFormation={selectedFormation}
-          container={container}
-          formationData={formationDataForSelectedSurvey}
-          view={view}
-          onSegmentClick={changeSegmentSelection}
-        />
+    <PixiContainer
+      container={container}
+      x={0}
+      y={0}
+      child={container => (
+        <React.Fragment>
+          {selectedSurvey &&
+            formationDataForSelectedSurvey.map((f, index) => (
+              <Formation
+                container={container}
+                width={width}
+                {...f}
+                key={f.id}
+                {...getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, f.id)}
+              />
+            ))}
+          {editMode && (
+            <FormationSegments
+              refresh={refresh}
+              gridGutter={gridGutter}
+              selectedFormation={selectedFormation}
+              container={container}
+              formationData={formationDataForSelectedSurvey}
+              view={view}
+              onSegmentClick={changeSegmentSelection}
+            />
+          )}
+          {pendingAddTop && (
+            <AddTop
+              addTop={addTop}
+              wellId={wellId}
+              selectedSurveyIndex={selectedSurveyIndex}
+              container={container}
+              formationData={formationDataForSelectedSurvey}
+            />
+          )}
+        </React.Fragment>
       )}
-      {pendingAddTop && (
-        <AddTop
-          addTop={addTop}
-          selectedSurveyIndex={selectedSurveyIndex}
-          container={container}
-          formationData={formationDataForSelectedSurvey}
-        />
-      )}
-    </React.Fragment>
+    />
   );
 });

@@ -13,7 +13,7 @@ import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selec
 import uniqueId from "lodash/uniqueId";
 import get from "lodash/get";
 
-export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
+export default function AddTop({ addTop, selectedSurveyIndex, formatinsData, wellId }) {
   const {
     stage,
     size: { width, height },
@@ -48,7 +48,7 @@ export default function AddTop({ addTop, selectedSurveyIndex, formatinsData }) {
       optimisticData
     })
       .then(result => {
-        dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id });
+        dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id, wellId });
       })
       .catch(() => {
         const nextSelected = get(formatinsData, "[0].id");

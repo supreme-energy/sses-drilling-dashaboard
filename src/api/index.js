@@ -526,7 +526,6 @@ const sortByThickness = (a, b) => {
 };
 
 const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
-  console.log("updateFormationTop", props);
   const r = await fetch(
     {
       path: UPDATE_FORMATION,
@@ -567,7 +566,13 @@ export function useFetchFormations(wellId) {
 
   const addTop = useCallback(
     ({ thickness, optimisticData, pendingId }) => {
-      const defaultProps = { label: "New Formation", show_line: "Yes", color: "000000", bg_color: "", bg_percent: 0 };
+      const defaultProps = {
+        label: "New Formation",
+        show_line: "Yes",
+        color: "000000",
+        bg_color: "ffffff",
+        bg_percent: 1
+      };
       const optimisticResult = [
         ...data,
         {

@@ -11,7 +11,7 @@ import { EMPTY_FIELD } from "../../../../constants/format";
 import ColorPickerBox from "../../../../components/ColorPickerBox";
 import { rgb } from "d3-color";
 import classNames from "classnames";
-import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
+import { NumericDebouceTextField, DebouncedTextField } from "../../../../components/DebouncedInputs";
 
 const ButtonWithConfirm = withConfirmDelete(IconButton);
 
@@ -54,10 +54,17 @@ function SettingsContent({
   ) : selectedFormation ? (
     <Box display="flex" flexDirection="column">
       <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
-        <div>
-          <Typography variant="caption">Formation Top Label</Typography>
-          <Typography variant="subtitle1">{selectedFormation.label}</Typography>
-        </div>
+        <DebouncedTextField
+          value={selectedFormation.label}
+          onChange={value => updateTop({ id: selectedFormation.id, label: value })}
+          placeholder={EMPTY_FIELD}
+          label={"Formation Top Label"}
+          margin="dense"
+          InputLabelProps={{
+            shrink: true
+          }}
+        />
+
         <ButtonWithConfirm
           disableRipple
           onConfirm={() => {

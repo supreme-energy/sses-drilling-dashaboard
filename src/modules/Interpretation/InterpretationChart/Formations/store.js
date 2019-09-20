@@ -10,6 +10,27 @@ const initialState = {
   formationVisibilityByWellAndTop: {}
 };
 
+function updateFormationVisibility(state, { wellId, topId, interpretationLine, interpretationFill, vsLine, vsFill }) {
+  const wellState = state.formationVisibilityByWellAndTop[wellId] || {};
+  const topState = wellState[topId] || {};
+
+  const changes = pickBy({ interpretationLine, interpretationFill, vsLine, vsFill }, d => d !== undefined);
+
+  return {
+    ...state,
+    formationVisibilityByWellAndTop: {
+      ...state.formationVisibilityByWellAndTop,
+      [wellId]: {
+        ...wellState,
+        [topId]: {
+          ...topState,
+          ...changes
+        }
+      }
+    }
+  };
+}
+
 function formationsReducer(state, action) {
   switch (action.type) {
     case "TOGGLE_EDIT_MODE": {
@@ -45,11 +66,17 @@ function formationsReducer(state, action) {
       };
     }
     case "CREATE_TOP_SUCCESS": {
-      return {
+      const newState = {
         ...state,
         addTopLoading: false,
         selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
       };
+      return updateFormationVisibility(newState, {
+        wellId: action.wellId,
+        topId: action.id,
+        vsFill: false,
+        interpretationFill: false
+      });
     }
     case "CREATE_TOP_ERROR": {
       return {
@@ -65,25 +92,7 @@ function formationsReducer(state, action) {
       };
     }
     case "CHANGE_FORMATION_VISIBILITY": {
-      const { wellId, topId, interpretationLine, interpretationFill, vsLine, vsFill } = action;
-      const wellState = state.formationVisibilityByWellAndTop[wellId] || {};
-      const topState = wellState[topId] || {};
-
-      const changes = pickBy({ interpretationLine, interpretationFill, vsLine, vsFill }, d => d !== undefined);
-
-      return {
-        ...state,
-        formationVisibilityByWellAndTop: {
-          ...state.formationVisibilityByWellAndTop,
-          [wellId]: {
-            ...wellState,
-            [topId]: {
-              ...topState,
-              ...changes
-            }
-          }
-        }
-      };
+      return updateFormationVisibility(state, action);
     }
     default:
       throw new Error("action not found");
