@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import surveySVG from "../../../../assets/survey.svg";
-import tieInSVG from "../../../../assets/tieIn.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectionAutoDip from "../../../../assets/projectionAutoDip.svg";
@@ -12,7 +11,6 @@ import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 /* eslint new-cap: 0 */
 export function drawSurveys(container) {
   const surveyMarker = PIXI.Texture.from(surveySVG);
-  const tieInMarker = PIXI.Texture.from(tieInSVG);
   const lastMarker = PIXI.Texture.from(lastSurveySVG);
   const bitProjection = PIXI.Texture.from(bitProjectionSVG);
   const paAutoDip = PIXI.Texture.from(projectionAutoDip);
@@ -43,7 +41,6 @@ export function drawSurveys(container) {
 
   function getTexture(point) {
     if (point.isLastSurvey) return lastMarker;
-    else if (point.isTieIn) return tieInMarker;
     else if (point.isBitProj) return bitProjection;
     else if (point.isProjection) {
       if (point.method === TVD_VS) return paStatic;

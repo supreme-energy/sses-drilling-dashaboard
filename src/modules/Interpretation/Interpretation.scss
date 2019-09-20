@@ -28,18 +28,3 @@
     margin-bottom: 0px;
   }
 }
-
-.stepDone {
-  color: $lightgray;
-  position: relative;
-  &::before {
-    content: ' ';
-    background: url("../../assets/checkCircle.svg");
-    background-size: contain;
-    width: 12px;
-    height: 12px;
-    position: absolute;
-    left: -30px;
-    top: 4px;
-  }
-}

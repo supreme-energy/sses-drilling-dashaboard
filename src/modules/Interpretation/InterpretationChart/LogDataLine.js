@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
 
@@ -57,19 +57,9 @@ function LogDataLine({
   colors,
   extent,
   logLineData,
-  logColor,
-  logData
+  logColor
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
-  const internalState = useRef({ dataLoaded: false });
-
-  useEffect(() => {
-    // refresh when we have computedLogData
-    if (!internalState.current.dataLoaded && computedLogData) {
-      refresh();
-      internalState.current.dataLoaded = true;
-    }
-  }, [refresh, computedLogData]);
 
   return computedLogData ? (
     <LogData
@@ -84,7 +74,7 @@ function LogDataLine({
   ) : null;
 }
 
-export default props => {
+export default ({ refresh, ...props }) => {
   const { draft } = props;
   const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, props.log && props.log.tablename);
@@ -93,11 +83,13 @@ export default props => {
     return logData ? getExtent(logData) : EMPTY_ARRAY;
   }, [logData]);
 
-  const lineProps = { extent, colors, logData };
+  // we need to call refresh after log data is loaded to redraw
+  useEffect(refresh, [logData, refresh]);
+
   return (
     <React.Fragment>
-      <LogDataLine {...props} draft={false} {...lineProps} />
-      {draft && <LogDataLine {...props} draft {...lineProps} />}
+      <LogDataLine {...props} draft={false} key={"line"} colors={colors} extent={extent} />
+      {draft && <LogDataLine {...props} draft key={"draftLine"} colors={colors} extent={extent} />}
     </React.Fragment>
   );
 };

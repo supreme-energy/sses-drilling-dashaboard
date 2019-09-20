@@ -96,7 +96,7 @@ export function useComputedFilteredWellData() {
   const { formationsData } = useFormationsDataContainer();
 
   const [, surveys, projections] = useComputedSurveysAndProjections();
-  const [wellPlan] = useWellPath(wellId);
+  const wellPlan = useWellPath(wellId);
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
@@ -118,7 +118,7 @@ export function useFilteredWellData() {
 
   const { wellId } = useWellIdContainer();
 
-  const [wellPlan] = useWellPath(wellId);
+  const wellPlan = useWellPath(wellId);
   const { surveys } = useSurveysDataContainer();
   const { serverFormations: formations } = useFormationsDataContainer();
   const { projections } = useProjectionsDataContainer();
@@ -208,9 +208,9 @@ function useWellId(initialState) {
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
-  const [surveys, { updateSurvey, refresh, replaceResult, isLoading }] = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult }] = useFetchSurveys(wellId);
 
-  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult, isLoading };
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult };
 }
 
 function useProjectionsData() {
@@ -247,11 +247,11 @@ function useProjectionsData() {
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
 
-  const [serverFormations, isLoading, , , , { refresh }] = useFetchFormations(wellId);
+  const [serverFormations, refreshFormations] = useFetchFormations(wellId);
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { serverFormations, formationsData: computedFormations, refreshFormations: refresh, isLoading };
+  return { serverFormations, formationsData: computedFormations, refreshFormations };
 }
 
 export function useCrossSectionData() {

@@ -7,9 +7,9 @@ import Cloud from "@material-ui/icons/CloudOutlined";
 import CloudOff from "@material-ui/icons/CloudOff";
 import Import from "@material-ui/icons/OpenInBrowser";
 
-import { useCloudServerCountdownContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
+import { useCloudServerCountdownContainer } from "../../../App/Containers";
 import useCloudServerModal from "./useCloudServerModal";
-import { useCloudServer } from "../../../../api";
+import { useWellInfo, useCloudServer } from "../../../../api";
 import ReviewCleanData from "./ReviewCleanData";
 import ReviewManualImport from "./ReviewManualImport";
 import NotificationSettings from "./NotificationSettings";
@@ -22,6 +22,7 @@ function CloudServerModal({ wellId }) {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
   } = useCloudServer(wellId);
+<<<<<<< HEAD
   const [
     { appInfo, wellInfo, online },
     ,
@@ -31,6 +32,9 @@ function CloudServerModal({ wellId }) {
     updateAppInfo,
     updateAutoImport
   ] = useSelectedWellInfoContainer(wellId);
+=======
+  const [{ appInfo, wellInfo, online }, , , refreshFetchStore, , updateAlarm, updateAutoImport] = useWellInfo(wellId);
+>>>>>>> parent of ea6662c4... Merge branch 'master' into develop
   const {
     view,
     setView,

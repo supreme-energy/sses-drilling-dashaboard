@@ -16,8 +16,6 @@ import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
 import { useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
-import { useSetupWizardData } from "./selectors";
-import WizardChecklist from "./components/WizardChecklist";
 
 const Interpretation = React.memo(
   ({
@@ -39,17 +37,10 @@ const Interpretation = React.memo(
       currentEditedLog,
       logsBiasAndScale
     };
-    const { dataHasLoaded, allStepsAreCompleted, ...setupSteps } = useSetupWizardData();
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
-        {dataHasLoaded ? (
-          allStepsAreCompleted ? (
-            <SelectionStatsContainer logs={logList} wellId={wellId} />
-          ) : (
-            <WizardChecklist {...setupSteps} />
-          )
-        ) : null}
+        <SelectionStatsContainer logs={logList} wellId={wellId} />
         <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
           <Box display="flex" flexDirection="row" alignItems="center">
             <TCLValue />

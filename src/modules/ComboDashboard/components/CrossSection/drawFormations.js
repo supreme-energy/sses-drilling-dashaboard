@@ -1,39 +1,6 @@
 import * as PIXI from "pixi.js";
 import { frozenXYTransform } from "./customPixiTransforms";
 
-function makeLabelTag(container, text, color) {
-  let lastColor = color;
-  const tagDot = container.addChild(new PIXI.Graphics());
-  const tagLine = tagDot.addChild(new PIXI.Graphics());
-  tagDot.transform.updateTransform = frozenXYTransform;
-  const label = tagDot.addChild(new PIXI.Text(text, { fontSize: 13, fill: `#${color}` }));
-  label.anchor.set(1, 0.5);
-  label.position.x = -12;
-  function drawTag(color) {
-    tagDot.beginFill(Number(`0x${color}`), 0.8);
-    tagDot.drawCircle(0, 0, 4);
-    tagLine.lineStyle(3, Number(`0x${color}`), 0.8);
-    tagLine.moveTo(-4, 0).lineTo(-10, 0);
-  }
-  drawTag(color);
-
-  return {
-    setPosition: function(x, y) {
-      tagDot.x = x;
-      tagDot.y = y;
-    },
-    setText: function(text) {
-      if (text !== label.text) label.text = text;
-    },
-    setColor: function(color) {
-      if (lastColor !== color) {
-        lastColor = color;
-        label.style = { fontsize: 13, fill: `#${color}` };
-        drawTag(color);
-      }
-    }
-  };
-}
 /**
  * Add formation layers calculated from the formation data
  * @param container The PIXI container that will get the formations
@@ -41,7 +8,6 @@ function makeLabelTag(container, text, color) {
 export function drawFormations(container) {
   const layerTiles = [];
   const layerLines = [];
-  const layerLabels = [];
 
   return function update(props) {
     const { calculatedFormations: layers, calcSections, scale } = props;
@@ -52,13 +18,7 @@ export function drawFormations(container) {
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
-      let {
-        bg_color: currColor,
-        bg_percent: currAlpha,
-        show_line: showLineYN,
-        color: lineColor,
-        data = []
-      } = currLayer;
+      let { bg_color: currColor, bg_percent: currAlpha, show_line: showLineYN, color: lineColor } = currLayer;
       const showLine = showLineYN.toUpperCase() === "YES";
 
       if (!layerLines[layerIdx]) {
@@ -66,17 +26,6 @@ export function drawFormations(container) {
         layerLines[layerIdx].transform.updateTransform = frozenXYTransform;
       }
       layerLines[layerIdx].lineStyle(1, parseInt(lineColor, 16), 1);
-
-      if (!layerLabels[layerIdx]) {
-        layerLabels[layerIdx] = makeLabelTag(container, currLayer.label, currColor);
-      }
-      const pointOne = data[0];
-      const pointTwo = data[1] || {};
-      if (pointOne) {
-        layerLabels[layerIdx].setPosition(...scale(pointOne.vs, pointOne.tot + (pointTwo.fault || 0)));
-        layerLabels[layerIdx].setColor(currColor);
-        layerLabels[layerIdx].setText(currLayer.label);
-      }
 
       for (let pointIdx = 0; pointIdx < currLayer.data.length - 1; pointIdx++) {
         if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];

@@ -108,8 +108,7 @@ export function useWellInfo(wellId) {
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
-  const autorc = data && data.autorc;
-  const online = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
+  const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -156,34 +155,6 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
-  );
-
-  const updateAutoRc = useCallback(
-    ({ wellId, field, value, refreshStore }) => {
-      const optimisticResult = {
-        ...data,
-        autorc: {
-          ...autorc,
-          [field]: value
-        }
-      };
-
-      return serializedUpdateFetch({
-        path: SET_WELL_FIELD,
-        query: {
-          seldbname: wellId
-        },
-        method: "POST",
-        body: {
-          autorc: {
-            [field]: value
-          }
-        },
-        cache: "no-cache",
-        optimisticResult
-      });
-    },
-    [serializedUpdateFetch, data, autorc]
   );
 
   const updateEmail = useCallback(
@@ -321,7 +292,6 @@ export function useWellInfo(wellId) {
       wellLandingLocationLocal,
       wellPBHL,
       wellPBHLLocal,
-      autorc,
       wellInfo,
       emailInfo,
       appInfo,
@@ -332,9 +302,14 @@ export function useWellInfo(wellId) {
     updateWell,
     refreshStore,
     updateEmail,
+<<<<<<< HEAD
     updateAppInfo,
     updateAutoImport,
     updateAutoRc
+=======
+    updateAlarm,
+    updateAutoImport
+>>>>>>> parent of ea6662c4... Merge branch 'master' into develop
   ];
 }
 
@@ -419,7 +394,7 @@ export function useRopData() {
 const wellPathTransform = memoizeOne(transform);
 
 export function useWellPath(wellId) {
-  const [data, ...rest] = useFetch(
+  const [data] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -430,7 +405,7 @@ export function useWellPath(wellId) {
       transform: wellPathTransform
     }
   );
-  return [data || EMPTY_ARRAY, ...rest];
+  return data || EMPTY_ARRAY;
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {
@@ -476,14 +451,12 @@ const surveysTransform = memoizeOne(data => {
   const hasBitProj = surveys.some(s => s.plan === 1);
   return surveys.map((s, i, l) => {
     // If included, bit projection is always the last item and the last survey is second to last
-    const isTieIn = i === 0;
     const isBitProj = i === l.length - 1 && hasBitProj;
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      name: isTieIn ? "Tie-in" : isBitProj ? "BPrj" : `${i}`,
+      name: isBitProj ? `BPrj` : `${i}`,
       pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
-      isTieIn: isTieIn,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
@@ -536,7 +509,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -549,7 +522,7 @@ const formationsTransform = memoizeOne(formationList => {
 });
 
 export function useFetchFormations(wellId) {
-  const [data, ...rest] = useFetch(
+  const [data, , , , , { refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -561,7 +534,7 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, ...rest];
+  return [data || EMPTY_ARRAY, refresh];
 }
 
 const projectionsTransform = memoizeOne(projections => {
@@ -614,7 +587,6 @@ export function useFetchProjections(wellId) {
     return 0;
   }
   const addProjection = newProjection => {
-    newProjection.method = newProjection.method || DIP_FAULT_POS_VS;
     const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
@@ -622,7 +594,8 @@ export function useFetchProjections(wellId) {
         method: "GET",
         query: {
           seldbname: wellId,
-          ...newProjection
+          ...newProjection,
+          method: DIP_FAULT_POS_VS
         },
         cache: "no-cache",
         optimisticResult
