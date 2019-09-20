@@ -80,7 +80,7 @@ export default function ModelSurveySettings(props) {
 
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
   const debouncedSaveWellLog = useMemo(() => {
-    return debounce(internalState.current.saveWellLogs, 1000);
+    return debounce((...args) => internalState.current.saveWellLogs(...args), 1000);
   }, []);
 
   const updateSegmentsHandler = props => {
