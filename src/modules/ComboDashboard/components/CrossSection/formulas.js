@@ -16,10 +16,4 @@ function getChangeInY(dip, vs, prevVs) {
   return -Math.tan(-dip / 57.29578) * Math.abs(vs - prevVs);
 }
 
-function limitAzm(azm) {
-  if (azm > 360) return azm % 360;
-  if (azm < 0) return (azm % 360) + 360;
-  return azm;
-}
-
-export { calculateDip, toDegrees, toRadians, getChangeInY, limitAzm };
+export { calculateDip, toDegrees, toRadians, getChangeInY };

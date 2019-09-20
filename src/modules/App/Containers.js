@@ -8,8 +8,7 @@ import {
   useFetchSurveys,
   useWellOverviewKPI,
   useWellPath,
-  useWellInfo,
-  useWellControlLogList
+  useWellInfo
 } from "../../api";
 import { drillPhaseReducer, selectedLogReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
@@ -92,10 +91,12 @@ const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
+  const { wellId } = useWellIdContainer();
+
   const { formationsData } = useFormationsDataContainer();
 
   const [, surveys, projections] = useComputedSurveysAndProjections();
-  const [wellPlan] = useWellPlanDataContainer();
+  const [wellPlan] = useWellPath(wellId);
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
@@ -115,7 +116,9 @@ export function useComputedFilteredWellData() {
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const [wellPlan] = useWellPlanDataContainer();
+  const { wellId } = useWellIdContainer();
+
+  const [wellPlan] = useWellPath(wellId);
   const { surveys } = useSurveysDataContainer();
   const { serverFormations: formations } = useFormationsDataContainer();
   const { projections } = useProjectionsDataContainer();
@@ -200,16 +203,6 @@ export function useWellSections(wellId) {
 function useWellId(initialState) {
   const [wellId, setWellId] = useState(initialState);
   return { wellId, setWellId };
-}
-
-function useWellPlanData() {
-  const { wellId } = useWellIdContainer();
-  return useWellPath(wellId);
-}
-
-function useControlLogListData() {
-  const { wellId } = useWellIdContainer();
-  return useWellControlLogList(wellId);
 }
 
 function useSurveysData() {
@@ -303,14 +296,11 @@ export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContaine
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
+// TODO: Reduce number of providers (formations, surveys, projections may not be needed)
 export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
   useFormationsData
 );
 export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
-export const { Provider: WellPlanProvider, useContainer: useWellPlanDataContainer } = createContainer(useWellPlanData);
-export const { Provider: ControlLogProvider, useContainer: useControlLogDataContainer } = createContainer(
-  useControlLogListData
-);
 export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
   useProjectionsData
 );

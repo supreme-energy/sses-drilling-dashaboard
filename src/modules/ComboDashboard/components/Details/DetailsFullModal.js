@@ -6,12 +6,11 @@ import Close from "@material-ui/icons/Close";
 import classes from "./Details.scss";
 import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
-import WellInfoField from "./WellInfoField";
-import { limitAzm } from "../CrossSection/formulas";
+import AutoPosTCLField from "./AutoPosTCLField";
 
 function DetailsFullModal({ handleClose, isVisible }) {
   return (
-    <Dialog onClose={handleClose} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
+    <Dialog onClose={() => handleClose()} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
         <span>Surveys in View</span>
         <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>
@@ -22,10 +21,7 @@ function DetailsFullModal({ handleClose, isVisible }) {
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column">
             <div className={comboClasses.flexRight}>
-              <WellInfoField label={"Proposed Direction"} field="propazm" type="number" options={{ mask: limitAzm }} />
-              <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
-              <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
-              <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
+              <AutoPosTCLField />
             </div>
             <DetailsTable showFullTable />
           </Box>

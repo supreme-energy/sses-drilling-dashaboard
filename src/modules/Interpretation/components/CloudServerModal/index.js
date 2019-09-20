@@ -6,7 +6,6 @@ import Dialog from "@material-ui/core/Dialog";
 import Cloud from "@material-ui/icons/CloudOutlined";
 import CloudOff from "@material-ui/icons/CloudOff";
 import Import from "@material-ui/icons/OpenInBrowser";
-import classNames from "classnames";
 
 import { useCloudServerCountdownContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
 import useCloudServerModal from "./useCloudServerModal";
@@ -18,7 +17,7 @@ import { ManualImportModal, AutoImportModal } from "./ImportModals";
 import { IMPORT, SETTINGS, PULL, REVIEW_CLEAN_DATA, REVIEW_MANUAL_IMPORT } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
-function CloudServerModal({ wellId, className, importText = "" }) {
+function CloudServerModal({ wellId }) {
   const {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
@@ -75,7 +74,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
 
   return (
     <React.Fragment>
-      <div className={classNames(classes.cloudServerButton, className)}>
+      <div className={classes.cloudServerButton}>
         <Button onClick={handleOpen}>
           {isAutoImportEnabled && !newSurvey && <span>{countdown}</span>}
           {isAutoImportEnabled ? (
@@ -90,10 +89,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
           ) : isOnline ? (
             <CloudOff />
           ) : (
-            <React.Fragment>
-              <Import />
-              {importText}
-            </React.Fragment>
+            <Import />
           )}
         </Button>
       </div>
@@ -159,9 +155,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
 }
 
 CloudServerModal.propTypes = {
-  wellId: PropTypes.string,
-  className: PropTypes.string,
-  importText: PropTypes.string
+  wellId: PropTypes.string
 };
 
 export default CloudServerModal;

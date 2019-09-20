@@ -128,10 +128,10 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   return function update(props) {
     const { height, mode, calcSections, selectedSections, mouse, view } = props;
     latestProps = props;
-    paIndicator.visible = false;
-    btnStage.visible = false;
     if (!container.transform) return;
-    if (!calcSections || calcSections.length <= 1) return;
+    if (!calcSections.length) return;
+
+    paIndicator.visible = false;
 
     const modeChanged = lastMode !== mode;
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
@@ -140,7 +140,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const buttonX = selectedPoint ? selectedPoint.vs : calcSections[calcSections.length - 1].vs;
 
     setButtonPositions(selectedPoint, mode);
-    btnStage.visible = true;
     btnStage.position.x = buttonX;
     btnStage.position.y = height - gutter;
 

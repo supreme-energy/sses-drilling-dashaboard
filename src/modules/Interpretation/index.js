@@ -1,8 +1,9 @@
-import React, { useReducer, useCallback, useMemo } from "react";
+import React, { useReducer, useCallback } from "react";
 import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from "@material-ui/core";
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
+import { useWellControlLogList } from "../../api";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
@@ -13,7 +14,7 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
-import { useControlLogDataContainer, useWellIdContainer } from "../App/Containers";
+import { useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
 import { useSetupWizardData } from "./selectors";
 import WizardChecklist from "./components/WizardChecklist";
@@ -103,8 +104,7 @@ const Interpretation = React.memo(
 
 const InterpretatinContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
-  const [controlLogs] = useControlLogDataContainer();
-  const cLogsFiltered = useMemo(() => controlLogs.filter(l => l.data.length && l.endmd && l.startmd), [controlLogs]);
+  const [controlLogs] = useWellControlLogList(wellId);
   const [logList] = useWellLogsContainer();
 
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
@@ -114,7 +114,7 @@ const InterpretatinContainer = React.memo(props => {
     [dispatch, currentEditedLog]
   );
   const interpretationProps = {
-    controlLogs: cLogsFiltered,
+    controlLogs,
     logList,
     dispatch,
     draftMode,

@@ -62,7 +62,6 @@ const LogMenu = React.memo(({ menuItems, selectedLogs, setSelectedLog, handleClo
             }
           />
         ))}
-        {!menuItems.length && <FormControlLabel control={<div />} label={"No data currently available"} />}
       </FormGroup>
     </Menu>
   );

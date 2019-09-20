@@ -4,11 +4,7 @@
   overflow-x: auto
 }
 .table {
-  min-width: 650px;
-  .emptyTableMessage {
-    text-align: center;
-    border-bottom: none;
-  }
+  min-width: 650px
 }
 .row {
   img {
@@ -133,6 +129,10 @@ $black: rgb(0, 0, 0);
     bottom: 5px;
     float: right;
   }
+}
+.emptyTableMessage {
+  text-align: center;
+  border-bottom: none;
 }
 
 .dialogContent {

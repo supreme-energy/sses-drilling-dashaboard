@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from "react"
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import AddCircle from "@material-ui/icons/AddCircle";
+import Import from "@material-ui/icons/OpenInBrowser";
 import _ from "lodash";
 import classNames from "classnames";
 
@@ -12,15 +13,12 @@ import { useAdditionalDataLogsList } from "../../../../api";
 import WidgetCard from "../../../../components/WidgetCard";
 import ChartContainer from "./ChartContainer";
 import classes from "./styles.scss";
-import CloudServerModal from "../../../Interpretation/components/CloudServerModal";
-import { useSetupWizardData } from "../../../Interpretation/selectors";
 
 const LogDataCharts = React.memo(({ wellId, view }) => {
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
   const [selectedLogs, setSelectedLog] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const logInitialized = useRef(false);
-  const { surveyDataIsImported } = useSetupWizardData();
 
   const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs, "checked")), [selectedLogs]);
   const availableLogs = useMemo(() => {
@@ -48,6 +46,8 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
     setAnchorEl(null);
   }, []);
 
+  const handleImport = () => {};
+
   useEffect(() => {
     if (!logInitialized.current && menuItems.length) {
       const log = menuItems.includes("GR") ? "GR" : menuItems[0];
@@ -56,14 +56,17 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
     }
   }, [menuItems]);
 
-  if (!surveyDataIsImported && !availableLogs.length) {
+  if (!availableLogs.length) {
     return (
       <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
-        <CloudServerModal
-          wellId={wellId}
-          importText="Import Survey Data"
-          className={classNames(classes.addChartButton, classes.absoluteCenter)}
-        />
+        <Button
+          className={classNames(classes.addChartButton, classes.addChartButtonInitial)}
+          color="secondary"
+          onClick={handleImport}
+        >
+          <Import />
+          Import Survey Data
+        </Button>
       </WidgetCard>
     );
   }

@@ -1,16 +1,13 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
-import some from "lodash/some";
-import { EMPTY_ARRAY, useWellLogData } from "../../api";
+import { EMPTY_ARRAY, useWellControlLogList, useWellLogData, useWellPath } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
   useProjectionsDataContainer,
   useSurveysDataContainer,
   useWellIdContainer,
   useSelectedWellInfoContainer,
-  useFormationsDataContainer,
-  useWellPlanDataContainer,
-  useControlLogDataContainer
+  useFormationsDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -567,15 +564,16 @@ export function useSelectedWellInfoColors() {
 }
 
 export function useSetupWizardData() {
-  const [wellPlan, wPlanLoading] = useWellPlanDataContainer();
-  const [controlLogs, cLogLoading] = useControlLogDataContainer();
+  const { wellId } = useWellIdContainer();
+  const [wellPlan, wPlanLoading] = useWellPath(wellId);
+  const [controlLogs, cLogLoading] = useWellControlLogList(wellId);
   const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
   const { surveys, isLoading: surveysLoading } = useSurveysDataContainer();
   const { formationsData, isLoading: formationsLoading } = useFormationsDataContainer();
 
   // A default empty well has one entry in the well plan
   const wellPlanIsImported = wellPlan && wellPlan.length > 1;
-  const controlLogIsImported = some(controlLogs, l => l.data && l.data.length && l.startmd && l.endmd);
+  const controlLogIsImported = !!controlLogs && !!controlLogs.length;
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
   const tieIn = (surveys && surveys[0]) || {};
