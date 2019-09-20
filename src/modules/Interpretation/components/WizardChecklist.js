@@ -23,7 +23,7 @@ export default function WizardChecklist({
       </Box>
       <Box display="flex" flexDirection="row">
         <Box flexDirection="column">
-          <Typography variant="body2">
+          <Typography component={"div"} variant="body2">
             <ol>
               <CheckItem done={wellPlanIsImported}>Import the Well Plan</CheckItem>
               <CheckItem done={controlLogIsImported}>Import a Control Log with Gamma</CheckItem>
