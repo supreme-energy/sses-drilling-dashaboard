@@ -3,7 +3,6 @@ import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo, useEffect } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
-import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
 import _ from "lodash";
@@ -58,6 +57,7 @@ export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
+
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
 const GET_MOCK_WELL_BORE_LIST = "/witslwellborelist.json";
@@ -112,7 +112,7 @@ export function useWellInfo(wellId) {
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
   const autorc = data && data.autorc;
-  const online = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
+  const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -317,7 +317,6 @@ export function useWellInfo(wellId) {
 
   return [
     {
-      serverStatus: online ? ONLINE : OFFLINE,
       wellSurfaceLocationLocal,
       wellSurfaceLocation,
       wellLandingLocation,
@@ -328,7 +327,7 @@ export function useWellInfo(wellId) {
       wellInfo,
       emailInfo,
       appInfo,
-      online,
+      isCloudServerEnabled,
       transform
     },
     isLoading,

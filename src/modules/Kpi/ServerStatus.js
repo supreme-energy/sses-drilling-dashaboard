@@ -8,31 +8,32 @@ import Badge from "@material-ui/core/Badge";
 import { withTheme } from "@material-ui/core/styles";
 import KpiItem from "./KpiItem";
 import { noDecimals } from "./DrillPhaseKPI/Kpi";
-import { ONLINE, OFFLINE, MANUAL } from "../../constants/serverStatus";
+import { AUTO_IMPORT_ON, AUTO_IMPORT_OFF, MANUAL_IMPORT } from "../../constants/serverStatus";
 import { PULL } from "../../constants/interpretation";
 import { useCloudServerCountdownContainer, useSelectedWellInfoContainer } from "../App/Containers";
 import { useCloudServer } from "../../api/index";
 
 const icons = {
-  [ONLINE]: Cloud,
-  [OFFLINE]: CloudOff,
-  [MANUAL]: File
+  [AUTO_IMPORT_ON]: Cloud,
+  [AUTO_IMPORT_OFF]: CloudOff,
+  [MANUAL_IMPORT]: File
 };
 
 function ServerStatus({ wellId, theme }) {
-  const [{ online, wellInfo }] = useSelectedWellInfoContainer(wellId);
+  const [{ isCloudServerEnabled, wellInfo }] = useSelectedWellInfoContainer(wellId);
   const {
     data: { next_survey: newSurvey, cmes }
   } = useCloudServer(wellId);
   const { countdown } = useCloudServerCountdownContainer();
 
   const hasConflict = !!cmes;
-  const isOnline = !!online;
   const hasUpdate = hasConflict || newSurvey;
-  const isAutoImportEnabled = wellInfo && wellInfo[PULL];
-
-  const Icon = icons[isAutoImportEnabled && online ? ONLINE : online ? OFFLINE : MANUAL];
-  const color = isOnline && (isAutoImportEnabled || hasUpdate) ? theme.palette.success.main : theme.palette.gray.main;
+  const canAutoImport = wellInfo && wellInfo[PULL];
+  const isAutoImporting = canAutoImport && isCloudServerEnabled;
+  const iconState =
+    canAutoImport && isCloudServerEnabled ? AUTO_IMPORT_ON : isCloudServerEnabled ? AUTO_IMPORT_OFF : MANUAL_IMPORT;
+  const Icon = icons[iconState];
+  const color = isAutoImporting || hasUpdate ? theme.palette.success.main : theme.palette.gray.main;
 
   return (
     <div className={classes.serverStatus}>
@@ -40,18 +41,18 @@ function ServerStatus({ wellId, theme }) {
         <Badge
           className={hasConflict ? classes.badgeRed : classes.badgeGreen}
           variant="dot"
-          invisible={!hasUpdate || !isOnline}
+          invisible={!hasUpdate || !isCloudServerEnabled}
           color="secondary"
         >
           <Icon style={{ fill: color }} />
         </Badge>
         <span className={classes.spacer} />
         <Typography variant="h5" style={{ color }}>
-          {!isOnline ? (
+          {!isCloudServerEnabled ? (
             "File"
           ) : hasUpdate ? (
             "Update"
-          ) : isAutoImportEnabled ? (
+          ) : isAutoImporting ? (
             <KpiItem className={classes.slidingLabel} format={noDecimals} value={countdown} measureUnit="sec" />
           ) : (
             "Off"

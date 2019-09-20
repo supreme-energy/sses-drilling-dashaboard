@@ -9,7 +9,6 @@ import ArrowForward from "@material-ui/icons/ArrowForward";
 import Check from "@material-ui/icons/Check";
 import Close from "@material-ui/icons/Close";
 import Refresh from "@material-ui/icons/Refresh";
-import _ from "lodash";
 import LogPlotIcon from "../../../../assets/logPlot.svg";
 import classes from "./styles.scss";
 
@@ -55,8 +54,8 @@ export default ChartControls;
 
 export const BiasControls = React.memo(
   ({ isEditingScale, setScale, logInfo, handleReset, handleSave, handleClose }) => {
-    const prevScale = _.get(logInfo, "prevScale");
-    const currScale = _.get(logInfo, "currScale");
+    const prevScale = logInfo && logInfo.prevScale;
+    const currScale = logInfo && logInfo.currScale;
     const hasScaleChanged = JSON.stringify(prevScale) !== JSON.stringify(currScale);
 
     const handleSetScaleLow = useCallback(
