@@ -34,6 +34,8 @@ export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
+export const UPLOAD_CONTROL_LOG_LAS = "/controllog/import.php";
+export const DELETE_CONTROL_LOG_LAS = "/controllog/delete.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
@@ -47,6 +49,7 @@ export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
+export const UPLOAD_WELL_PLAN_CSV = "/well/plan/import.php";
 export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
 export const GET_SURVEY_RANGE = "/survey/cloud/load_range.php";
 export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
@@ -742,7 +745,7 @@ export function useWellOperationHours(wellId) {
 }
 
 export function useWellControlLogList(wellId) {
-  return useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_CONTROL_LOG_LIST,
       query: { seldbname: wellId, data: 1 }
@@ -757,6 +760,7 @@ export function useWellControlLogList(wellId) {
       }
     }
   );
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellControlLog(tablename) {
@@ -901,6 +905,48 @@ export function useManualImport() {
   );
 
   return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile };
+}
+
+export function useWellPlanImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadWellPlan = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_WELL_PLAN_CSV,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadWellPlan };
+}
+
+export function useControlLogImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadControlLog = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_CONTROL_LOG_LAS,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadControlLog };
 }
 
 export function useCloudServer(wellId) {

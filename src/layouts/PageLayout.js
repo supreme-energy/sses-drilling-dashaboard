@@ -16,7 +16,9 @@ import {
   SurveysProvider,
   CloudServerCountdownProvider,
   useCloudServerCountdownContainer,
-  SelectedWellInfoProvider
+  SelectedWellInfoProvider,
+  WellPlanProvider,
+  ControlLogProvider
 } from "../modules/App/Containers";
 import useAudio from "../hooks/useAudio";
 import useInterval from "../hooks/useInterval";
@@ -112,27 +114,31 @@ export const PageLayout = ({ children, history }) => {
         <WellLogsProvider>
           <SelectedWellInfoProvider>
             <ComboContainerProvider>
-              <SurveysProvider>
-                <ProjectionsProvider>
-                  <FormationsProvider>
-                    <CloudServerCountdownProvider initialState={60}>
-                      <div className={classes.container}>
-                        <AppBar className={classes.appBar} color="inherit">
-                          <div className={classes.header}>
-                            <div className={classes.logo}>
-                              <img src="/sses-logo.svg" />
-                            </div>
-                            <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
-                            <span />
-                          </div>
-                        </AppBar>
+              <ControlLogProvider>
+                <WellPlanProvider>
+                  <SurveysProvider>
+                    <ProjectionsProvider>
+                      <FormationsProvider>
+                        <CloudServerCountdownProvider initialState={60}>
+                          <div className={classes.container}>
+                            <AppBar className={classes.appBar} color="inherit">
+                              <div className={classes.header}>
+                                <div className={classes.logo}>
+                                  <img src="/sses-logo.svg" />
+                                </div>
+                                <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                                <span />
+                              </div>
+                            </AppBar>
 
-                        <div className={classes.viewport}>{children}</div>
-                      </div>
-                    </CloudServerCountdownProvider>
-                  </FormationsProvider>
-                </ProjectionsProvider>
-              </SurveysProvider>
+                            <div className={classes.viewport}>{children}</div>
+                          </div>
+                        </CloudServerCountdownProvider>
+                      </FormationsProvider>
+                    </ProjectionsProvider>
+                  </SurveysProvider>
+                </WellPlanProvider>
+              </ControlLogProvider>
             </ComboContainerProvider>
           </SelectedWellInfoProvider>
         </WellLogsProvider>

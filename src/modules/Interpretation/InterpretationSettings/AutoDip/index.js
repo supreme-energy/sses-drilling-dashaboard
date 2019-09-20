@@ -19,8 +19,13 @@ import css from "../styles.scss";
 
 import classNames from "classnames";
 import { Tune, Close, AddCircle } from "@material-ui/icons";
-import { useWellControlLogList, useWellPath, EMPTY_ARRAY } from "../../../../api";
-import { useWellIdContainer, useSurveysDataContainer } from "../../../App/Containers";
+import { EMPTY_ARRAY } from "../../../../api";
+import {
+  useWellIdContainer,
+  useSurveysDataContainer,
+  useWellPlanDataContainer,
+  useControlLogDataContainer
+} from "../../../App/Containers";
 import { toRadians } from "../../../ComboDashboard/components/CrossSection/formulas";
 import { twoDecimals } from "../../../../constants/format";
 import uniqueId from "lodash/uniqueId";
@@ -206,7 +211,7 @@ function calculateTregDip({ md, ns, ew }, cl) {
 }
 
 function useAverageControlDipOptions(wellId, controlLogs = EMPTY_ARRAY) {
-  const [wellPlan] = useWellPath(wellId);
+  const [wellPlan] = useWellPlanDataContainer();
 
   const [cl] = controlLogs;
 
@@ -254,7 +259,7 @@ function useOptionsByMethodType() {
   const { wellId } = useWellIdContainer();
   const { surveys } = useSurveysDataContainer();
   const averageSurveysDipOptions = useMemo(() => surveys.slice().reverse(), [surveys]);
-  const [controlLogs] = useWellControlLogList(wellId);
+  const [controlLogs] = useControlLogDataContainer();
   const averageControlDipOptions = useAverageControlDipOptions(wellId, controlLogs);
   const averageRealDipOptions = getAverageRealDipClosure(surveys, controlLogs);
   return useMemo(
