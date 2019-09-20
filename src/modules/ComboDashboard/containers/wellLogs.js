@@ -6,6 +6,7 @@ import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
 import { useWellIdContainer, useTimeSliderContainer } from "../../App/Containers";
 import mapKeys from "lodash/mapKeys";
+import serialize from "react-powertools/serialize";
 
 const mapLogList = d => ({
   ...d,
@@ -28,6 +29,31 @@ const transformLogs = memoizeOne(logs => {
   return logs && logs.map(mapLogList);
 });
 
+const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
+  Promise.all(
+    data.map(dataToSave => {
+      return fetch(
+        {
+          path: UPDATE_WELL_LOG,
+          method: "POST",
+          body: {
+            seldbname: wellId,
+            ...dataToSave,
+            id: String(dataToSave.id)
+          },
+          optimisticResult,
+          cache: "no-cache"
+        },
+        (original, newResult) => {
+          return original.map(l => {
+            return String(l.id) === String(newResult.welllog.id) ? { ...mapLogList(newResult.welllog) } : l;
+          });
+        }
+      );
+    })
+  )
+);
+
 export function useWellLogList(wellId) {
   const [list, , , , , { fetch }] = useFetch({
     path: GET_WELL_LOG_LIST,
@@ -43,29 +69,7 @@ export function useWellLogList(wellId) {
           ? { ...d, ...mapKeys(dataById[d.id], (value, key) => (key === "dip" ? "sectdip" : key)) }
           : d;
       });
-
-      return Promise.all(
-        data.map(dataToSave => {
-          return fetch(
-            {
-              path: UPDATE_WELL_LOG,
-              method: "POST",
-              body: {
-                seldbname: wellId,
-                ...dataToSave,
-                id: String(dataToSave.id)
-              },
-              optimisticResult,
-              cache: "no-cache"
-            },
-            (original, newResult) => {
-              return original.map(l => {
-                return String(l.id) === String(newResult.welllog.id) ? { ...mapLogList(newResult.welllog) } : l;
-              });
-            }
-          );
-        })
-      );
+      return changeWellLogs(data, wellId, optimisticResult, fetch);
     },
     [fetch, list, wellId]
   );

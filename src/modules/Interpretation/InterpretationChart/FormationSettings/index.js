@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, IconButton, Typography, CircularProgress, TextField } from "@material-ui/core";
+import { Box, IconButton, Typography, CircularProgress } from "@material-ui/core";
 import { DeleteForever, Visibility, VisibilityOff } from "@material-ui/icons";
 import { useFormationsStore } from "../Formations/store";
 import { useSelectedFormation, getFormatinVisibilitySettings } from "../../selectors";
@@ -11,6 +11,7 @@ import { EMPTY_FIELD } from "../../../../constants/format";
 import ColorPickerBox from "../../../../components/ColorPickerBox";
 import { rgb } from "d3-color";
 import classNames from "classnames";
+import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
 
 const ButtonWithConfirm = withConfirmDelete(IconButton);
 
@@ -75,9 +76,9 @@ function SettingsContent({
       </Box>
       <div className={css.headerGrid}>
         <div className={classNames(css.col1, css.row1)}>
-          <TextField
+          <NumericDebouceTextField
             value={thickness}
-            onChange={e => updateTop({ id: selectedFormation.id, thickness: e.target.value.replace(/[^\d.-]/g, "") })}
+            onChange={value => updateTop({ id: selectedFormation.id, thickness: value })}
             placeholder={EMPTY_FIELD}
             label={"Thickness"}
             className={"hideArrows"}

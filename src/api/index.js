@@ -514,7 +514,7 @@ const formationsTransform = memoizeOne(formationList => {
   return formationList.map(f => {
     return {
       ...f,
-      data: f.data.map(d => ({ ..._.mapValues(d, Number), thickness: d.thickness }))
+      data: transform(f.data)
     };
   });
 });
@@ -525,7 +525,8 @@ const sortByThickness = (a, b) => {
   return aThickness - bThickness;
 };
 
-const debouncedUpdateTop = debounce(async ({ wellId, props, fetch, requestId }) => {
+const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
+  console.log("updateFormationTop", props);
   const r = await fetch(
     {
       path: UPDATE_FORMATION,
@@ -536,7 +537,7 @@ const debouncedUpdateTop = debounce(async ({ wellId, props, fetch, requestId }) 
       body: props
     },
     (currentFormations, result) => {
-      return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f)));
+      return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f))).sort(sortByThickness);
     }
   );
 
@@ -544,7 +545,7 @@ const debouncedUpdateTop = debounce(async ({ wellId, props, fetch, requestId }) 
     result: r,
     requestId
   };
-}, 1000);
+};
 
 export function useFetchFormations(wellId) {
   const [data, , , , , { refresh, fetch }] = useFetch(
@@ -561,7 +562,7 @@ export function useFetchFormations(wellId) {
   );
 
   const [updateTopOptimisticData, changeUpdateTopOptimisticData] = useState(null);
-  const internalState = useRef({ lastReqeustId: null });
+  const internalState = useRef({ lastRequestId: null });
   const formations = updateTopOptimisticData || data || EMPTY_ARRAY;
 
   const addTop = useCallback(
@@ -623,7 +624,8 @@ export function useFetchFormations(wellId) {
               ...props
             };
             if (props.thickness) {
-              formation.data = formation.data.map(fd => ({ ...fd, thickness: props.thickness }));
+              console.log("props.thickness", props.thickness, typeof props.thickness);
+              formation.data = formation.data.map(fd => ({ ...fd, thickness: Number(props.thickness) }));
             }
             return formation;
           }
@@ -635,12 +637,12 @@ export function useFetchFormations(wellId) {
       let result;
       try {
         const requestId = _.uniqueId();
-        internalState.current.lastReqeustId = requestId;
-        result = await debouncedUpdateTop({ wellId, props, fetch, requestId });
+        internalState.current.lastRequestId = requestId;
+        result = await updateFormationTop({ wellId, props, fetch, requestId });
       } catch (e) {
         throw e;
       } finally {
-        if (result.requestId === internalState.current.lastReqeustId) {
+        if (result.requestId === internalState.current.lastRequestId) {
           changeUpdateTopOptimisticData(null);
         }
       }

@@ -481,7 +481,7 @@ const computeFormations = memoizeOne((formations, surveysAndProjections) => {
           ...item,
           fault: survey.fault,
           dip: survey.dip,
-          tot: survey.tcl + Number(item.thickness)
+          tot: survey.tcl + item.thickness
         };
       })
     };
