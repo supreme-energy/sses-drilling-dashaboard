@@ -408,7 +408,15 @@ const recomputeSurveysAndProjections = memoizeOne(
           const sign = bitProjPos > 0 ? 1 : -1;
           const cap = bitProjPos > 0 ? Math.max : Math.min;
           const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
-          acc[index] = calculateProjection({ ...combinedSvy, pos, tcl, fault, dip, tot, bot }, acc, index, propazm);
+          const itemWithProjection = calculateProjection(
+            { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
+            acc,
+            index,
+            propazm
+          );
+          if (itemWithProjection) {
+            acc[index] = itemWithProjection;
+          }
         }
       }
       return acc;
