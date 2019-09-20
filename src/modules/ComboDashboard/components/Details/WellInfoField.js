@@ -2,7 +2,6 @@ import React, { useCallback, useReducer, useRef } from "react";
 import { Typography } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import debounce from "lodash/debounce";
-import noop from "lodash/noop";
 import classes from "../ComboDashboard.scss";
 import { useSelectedWellInfoContainer, useWellIdContainer } from "../../../App/Containers";
 
@@ -10,7 +9,7 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
   const { wellId } = useWellIdContainer();
   const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
-  const mask = options.mask || noop;
+  const mask = options.mask || (a => a);
   const [, forceRerender] = useReducer(b => !b);
   const internalState = useRef({ value: wellInfo[field] });
   const debouncedFieldSave = useCallback(
