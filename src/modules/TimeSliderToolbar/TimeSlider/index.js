@@ -146,7 +146,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   const onReset = useCallback(() => {
     if (holeDepthLeftIndex >= 0 && holeDepthRightIndex > 0) {
-      console.log("yo");
       const isLastIndex = data.length - 1 <= holeDepthRightIndex;
       const beginningDate = _.get(data, `[${holeDepthLeftIndex}].rig_time`, "");
       const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].rig_time`, "") : "NOW";
@@ -246,7 +245,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
       const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].rig_time`, "");
       const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].rig_time`, "") : "NOW";
-      console.log("herer");
       setSliderInterval({
         firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),
         lastDepth: _.get(data, `[${Math.round(stepIndex)}].hole_depth`, data[data.length - 1].hole_depth),
