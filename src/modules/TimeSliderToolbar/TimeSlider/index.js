@@ -57,7 +57,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const maxSurveyDepth = hasSurveys && surveys[surveys.length - 1].md;
   const maxProjectionDepth = hasProjections && projections[projections.length - 1].md;
 
-  const { data, getTimeSliderData } = useTimeSliderData();
+  const { data, getTimeSliderData, isLoading, isFetchingMore } = useTimeSliderData();
 
   // Create local state
   const [{ maxStep, step, stepSize, isDragging, isPlaying, isSpeeding }, setSliderStep] = useReducer(
@@ -69,7 +69,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[SURFACE].graphs);
 
   // Canvas resizing hooks
-  const scaleInitialized = useRef(null);
   const canvasRef = useRef(null);
   const sliderRef = useRef(null);
   const { width, height } = useSize(sliderRef);
@@ -109,6 +108,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
   const leftBoundIndexMoving = Math.abs(view.x / view.xScale);
+  const maxDepth = hasProjections ? maxProjectionDepth : maxSurveyDepth;
 
   const rightBoundIndex = calcBounds(visibleDataLength + leftBoundIndexMoving, data.length);
   const stepIndex = calcBounds(stepFactor * visibleDataLength + leftBoundIndexMoving, data.length);
@@ -146,6 +146,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
   const onReset = useCallback(() => {
     if (holeDepthLeftIndex >= 0 && holeDepthRightIndex > 0) {
+      console.log("yo");
       const isLastIndex = data.length - 1 <= holeDepthRightIndex;
       const beginningDate = _.get(data, `[${holeDepthLeftIndex}].rig_time`, "");
       const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].rig_time`, "") : "NOW";
@@ -163,11 +164,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
       setGlobalDates([beginningDate, endDate]);
 
-      setSliderInterval({
-        firstDepth: _.get(data, `[${Math.floor(holeDepthLeftIndex)}].hole_depth`),
-        lastDepth: _.get(data, `[${Math.round(holeDepthRightIndex)}].hole_depth`),
-        isLastIndex
-      });
+      setSliderInterval(interval => ({
+        ...interval,
+        firstDepth: drillPhaseObj.phaseStart,
+        lastDepth: drillPhaseObj.phaseEnd
+      }));
 
       setSliderStep({ type: "UPDATE", payload: { step: indexDiff, direction: 1, maxStep: indexDiff } });
       setDrillPhase({ type: "SET", payload: { set: false } });
@@ -181,31 +182,41 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     width,
     holeDepthLeftIndex,
     holeDepthRightIndex,
-    setDrillPhase
+    setDrillPhase,
+    drillPhaseObj.phaseStart,
+    drillPhaseObj.phaseEnd
   ]);
 
   // set initial scale
   useMemo(() => {
     if (data && data.length && ((width && height) || !expanded)) {
       onReset();
-      scaleInitialized.current = true;
     }
   }, [width, height, expanded, data, onReset]);
 
   useEffect(() => {
     function startTimeSliderFetch() {
-      const maxDepth = hasProjections ? maxProjectionDepth : maxSurveyDepth;
       for (let i = minSurveyDepth; i <= maxDepth; i += 100) {
         const index = i > maxDepth ? maxDepth : i;
-        getTimeSliderData(wellId, index, index + 100);
+        getTimeSliderData(wellId, index, index + 100).then(() => {
+          if (i + 100 >= maxDepth - 1) hasFetchedTimeSliderData.current = true;
+        });
       }
     }
 
     if (hasSurveys && !hasFetchedTimeSliderData.current) {
       startTimeSliderFetch();
-      hasFetchedTimeSliderData.current = true;
     }
-  }, [hasSurveys, hasProjections, getTimeSliderData, maxSurveyDepth, maxProjectionDepth, minSurveyDepth, wellId]);
+  }, [
+    hasSurveys,
+    hasProjections,
+    getTimeSliderData,
+    maxSurveyDepth,
+    maxProjectionDepth,
+    minSurveyDepth,
+    wellId,
+    maxDepth
+  ]);
 
   useEffect(() => {
     refresh();
@@ -223,11 +234,19 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   }, [expanded, view.xScale, width]);
 
   useEffect(() => {
-    if (data && data.length && step >= 0 && maxStep > 0 && leftBoundIndexMoving >= 0 && rightBoundIndex > 0) {
+    if (
+      data &&
+      data.length &&
+      step >= 0 &&
+      maxStep > 0 &&
+      leftBoundIndexMoving >= 0 &&
+      rightBoundIndex > 0 &&
+      hasFetchedTimeSliderData.current
+    ) {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
       const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].rig_time`, "");
       const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].rig_time`, "") : "NOW";
-
+      console.log("herer");
       setSliderInterval({
         firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),
         lastDepth: _.get(data, `[${Math.round(stepIndex)}].hole_depth`, data[data.length - 1].hole_depth),

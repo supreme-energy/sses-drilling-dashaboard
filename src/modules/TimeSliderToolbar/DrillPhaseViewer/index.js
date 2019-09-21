@@ -68,7 +68,7 @@ const DrillPhaseViewer = React.memo(({ className, wellId, expanded }) => {
   // Set drill phase when fetching complete
   useEffect(() => {
     if (drillPhases && drillPhases.length) {
-      setDrillPhase({ type: "SET", payload: { ...drillPhases[drillPhases.length - 1], set: true } });
+      setDrillPhase({ type: "SET", payload: { ...drillPhases[0], set: true } });
     }
   }, [drillPhases, setDrillPhase]);
 

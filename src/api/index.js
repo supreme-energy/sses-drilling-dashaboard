@@ -729,21 +729,7 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
     }));
   };
 
-  const [data, , , , , { fetch }] = useFetch(
-    wellId !== undefined &&
-      minDepth !== undefined &&
-      maxDepth && {
-        path: GET_TIME_SLIDER_DATA,
-        query: {
-          seldbname: wellId,
-          hole_depth_gte: minDepth,
-          hole_depth_lte: maxDepth
-        }
-      },
-    {
-      transform: transformData
-    }
-  );
+  const [data, , , , , { fetch }] = useFetch();
 
   const getTimeSliderData = useCallback(
     (wellId, minDepth, maxDepth) => {
@@ -756,6 +742,7 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
             hole_depth_gte: minDepth,
             hole_depth_lte: maxDepth
           }
+          // cache: "no-cache"
         },
         (current, result) => {
           const parsedRes = transformData(result);
