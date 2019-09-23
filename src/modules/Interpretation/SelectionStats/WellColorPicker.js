@@ -11,8 +11,8 @@ export default function WellColorPicker({ field, boxProps, ...props }) {
   const colors = useSelectedWellInfoColors();
   const color = colors[field];
   const handleSave = useCallback(
-    value => {
-      updateWell({ wellId, field, value: value.replace("#", "") });
+    ({ hex }) => {
+      updateWell({ wellId, field, value: hex.replace("#", "") });
     },
     [updateWell, field, wellId]
   );

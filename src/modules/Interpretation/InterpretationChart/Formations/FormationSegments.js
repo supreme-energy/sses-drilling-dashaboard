@@ -6,13 +6,16 @@ import SegmentLabel from "../../../../components/SegmentLabel";
 import { twoDecimals } from "../../../../constants/format";
 import PixiLine from "../../../../components/PixiLine";
 import PixiContainer from "../../../../components/PixiContainer";
+import { useInterpretationRenderer } from "..";
+import get from "lodash/get";
 
-const LabelDepth = ({ gridGutter, y, ...props }) => {
+export const LabelDepth = ({ y, x, ...props }) => {
   const lineData = [[-5, 0], [5, 0]];
   return (
     <PixiContainer
       updateTransform={frozenScaleTransform}
       y={y}
+      x={x}
       container={props.container}
       child={container => (
         <React.Fragment>
@@ -38,12 +41,14 @@ export default function FormationSegments({
   view,
   onSegmentClick,
   selectedFormation,
-  refresh,
-  gridGutter
+  refresh
 }) {
+  const { topContainerRef } = useInterpretationRenderer();
+
   return formationData.map(formationItem => {
     const height = formationItem.height * view.yScale;
     const selected = selectedFormation === formationItem.id;
+    const topContainer = get(topContainerRef, "current.container");
 
     return (
       <React.Fragment key={formationItem.id}>
@@ -58,11 +63,10 @@ export default function FormationSegments({
           backgroundColor={selected ? formationTopsSelectedColor : segmentColor}
           container={container}
         />
-        {selected && (
+        {selected && topContainer && (
           <LabelDepth
-            gridGutter={gridGutter}
             refresh={refresh}
-            container={container}
+            container={topContainer}
             backgroundColor={formationTopsSelectedColor}
             y={formationItem.y}
             text={twoDecimals(formationItem.y)}

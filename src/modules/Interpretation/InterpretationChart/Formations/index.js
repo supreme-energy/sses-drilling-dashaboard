@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect } from "react";
 import PixiRectangle from "../../../../components/PixiRectangle";
-import { useFormationsDataContainer } from "../../../App/Containers";
+import { useFormationsDataContainer, useWellIdContainer } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
 import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
@@ -9,22 +9,40 @@ import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSe
 import PixiContainer from "../../../../components/PixiContainer";
 import FormationSegments from "./FormationSegments";
 import { useInterpretationRenderer } from "..";
+import AddTop from "./AddTop";
+import get from "lodash/get";
 
-function Formation({ y, height, label, width, container, backgroundAlpha, backgroundColor, color, showLine }) {
+function Formation({
+  y,
+  height,
+  label,
+  width,
+  container,
+  backgroundAlpha,
+  backgroundColor,
+  color,
+  interpretationLine,
+  interpretationFill
+}) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
   return (
     <React.Fragment>
-      <PixiRectangle
-        backgroundColor={backgroundColor}
-        backgroundAlpha={backgroundAlpha}
+      <PixiContainer
         x={12}
         y={y}
-        width={width}
-        height={height}
         container={container}
+        child={container => (
+          <PixiRectangle
+            backgroundColor={backgroundColor}
+            backgroundAlpha={interpretationFill ? backgroundAlpha : 0}
+            width={width}
+            height={height}
+            container={container}
+          />
+        )}
       />
 
-      {showLine && (
+      {interpretationLine && (
         <PixiContainer
           updateTransform={frozenScaleTransform}
           y={y}
@@ -34,7 +52,13 @@ function Formation({ y, height, label, width, container, backgroundAlpha, backgr
           )}
         />
       )}
-      <PixiText container={container} text={label} y={y} x={20} color={color} fontSize={11} />
+
+      <PixiContainer
+        y={y}
+        x={20}
+        container={container}
+        child={container => <PixiText container={container} text={label} color={color} fontSize={11} />}
+      />
     </React.Fragment>
   );
 }
@@ -51,6 +75,8 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
         y,
         height,
         label: item.label,
+        interpretationLine: item.interp_line_show,
+        interpretationFill: item.interp_fill_show,
         id: item.id,
         showLine: Boolean(item.show_line),
         backgroundColor: Number(`0x${item.bg_color}`),
@@ -69,6 +95,8 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
     height: 20,
     label: lastFormationItem.label,
     id: lastFormationItem.id,
+    interpretationLine: lastFormationItem.interp_line_show,
+    interpretationFill: lastFormationItem.interp_fill_show,
     showLine: Boolean(lastFormationItem.show_line),
     backgroundColor: Number(`0x${lastFormationItem.bg_color}`),
     backgroundAlpha: Number(lastFormationItem.bg_percent),
@@ -79,10 +107,9 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
-  const [{ selectedFormation, editMode }, dispatch] = useFormationsStore();
+  const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
-
-  useEffect(refresh, [refresh, selectedFormation]);
+  const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
@@ -91,29 +118,57 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     [selectedSurvey, surveysAndProjections]
   );
 
-  const { formationsData } = useFormationsDataContainer();
+  const { formationsData, addTop, serverFormations } = useFormationsDataContainer();
   const formationDataForSelectedSurvey = useMemo(
     () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
     [selectedSurveyIndex, formationsData]
   );
 
-  const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", formationId: id }), [dispatch]);
+  const changeSegmentSelection = useCallback(id => dispatch({ type: "CHANGE_SELECTION", formationId: id }), [dispatch]);
+  useEffect(
+    function ensureFormationSelected() {
+      if (editMode && !selectedFormation) {
+        changeSegmentSelection(get(serverFormations, "[0].id"));
+      }
+    },
+    [selectedFormation, serverFormations, changeSegmentSelection, editMode]
+  );
+
+  useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData]);
 
   return (
-    <React.Fragment>
-      {selectedSurvey &&
-        formationDataForSelectedSurvey.map(f => <Formation container={container} width={width} {...f} key={f.id} />)}
-      {editMode && (
-        <FormationSegments
-          refresh={refresh}
-          gridGutter={gridGutter}
-          selectedFormation={selectedFormation}
-          container={container}
-          formationData={formationDataForSelectedSurvey}
-          view={view}
-          onSegmentClick={toggleSegmentSelection}
-        />
+    <PixiContainer
+      container={container}
+      x={0}
+      y={0}
+      child={container => (
+        <React.Fragment>
+          {selectedSurvey &&
+            formationDataForSelectedSurvey.map((f, index) => (
+              <Formation container={container} width={width} {...f} key={f.id} />
+            ))}
+          {editMode && (
+            <FormationSegments
+              refresh={refresh}
+              gridGutter={gridGutter}
+              selectedFormation={selectedFormation}
+              container={container}
+              formationData={formationDataForSelectedSurvey}
+              view={view}
+              onSegmentClick={changeSegmentSelection}
+            />
+          )}
+          {pendingAddTop && (
+            <AddTop
+              addTop={addTop}
+              wellId={wellId}
+              selectedSurveyIndex={selectedSurveyIndex}
+              container={container}
+              formationData={formationDataForSelectedSurvey}
+            />
+          )}
+        </React.Fragment>
       )}
-    </React.Fragment>
+    />
   );
 });

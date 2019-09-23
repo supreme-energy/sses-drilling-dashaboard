@@ -23,7 +23,8 @@ import LogLines from "../LogLines";
 import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
 import { useFormationsStore } from "./Formations/store";
-const gridGutter = 65;
+
+export const gridGutter = 65;
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -46,6 +47,7 @@ function useInterpretationWebglRenderer() {
   });
 
   const viewportContainer = useRef(null);
+  const topContainerRef = useRef(null);
 
   const viewport = useViewport({
     renderer,
@@ -68,7 +70,8 @@ function useInterpretationWebglRenderer() {
     canvasRef,
     size: { width, height },
     viewport,
-    viewportContainer
+    viewportContainer,
+    topContainerRef
   };
 }
 
@@ -85,7 +88,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     canvasRef,
     size: { width, height },
     view,
-    updateView
+    updateView,
+    topContainerRef
   } = useInterpretationRenderer();
 
   const { selectedWellLog, selectedWellLogIndex } = useSelectedWellLog();
@@ -99,7 +103,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && controlLogs && controlLogs.length) {
+      if (!scaleInitialized && controlLogs && controlLogs.length && controlLogs.data && controlLogs.data.length) {
         const minDepth = min(controlLogs, cl => cl.data[0].md);
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
         internalStateRef.current.scaleInitialized = true;
@@ -211,6 +215,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
           canvas={canvasRef.current}
         />
       )}
+      <PixiContainer ref={topContainerRef} container={viewport} />
     </div>
   );
 }

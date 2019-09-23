@@ -51,6 +51,7 @@ export default function Header({
   logId,
   active,
   onMenuClick,
+  menuIcon,
   onClose,
   isActive,
   onNextClick,
@@ -60,13 +61,13 @@ export default function Header({
 }) {
   const headerRef = useRef(null);
 
-  const handleChangeColor = useCallback(color => onChangeColor({ color, logId }), [onChangeColor, logId]);
+  const handleChangeColor = useCallback(({ hex }) => onChangeColor({ hex, logId }), [onChangeColor, logId]);
   const editScaleCallback = useCallback(() => handleEditScale(logId), [handleEditScale, logId]);
   return (
     <React.Fragment>
       <Box display="flex" className={css.header}>
         <IconButton size="small" className={css.moreBtn} onClick={onMenuClick}>
-          <MoreVert />
+          {menuIcon || <MoreVert />}
         </IconButton>
         <Box
           display="flex"

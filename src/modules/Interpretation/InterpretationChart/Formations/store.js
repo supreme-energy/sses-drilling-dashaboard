@@ -1,9 +1,12 @@
 import { createContainer } from "unstated-next";
 import { useReducer } from "react";
+import pickBy from "lodash/pickBy";
 
 const initialState = {
   editMode: false,
-  selectedFormation: null
+  selectedFormation: null,
+  pendingAddTop: false,
+  addTopLoading: false
 };
 
 function formationsReducer(state, action) {
@@ -14,11 +17,50 @@ function formationsReducer(state, action) {
         editMode: !state.editMode
       };
     }
-    case "TOGGLE_SELECTION": {
-      const currentSelection = state.selectedFormation;
+    case "CHANGE_SELECTION": {
       return {
         ...state,
-        selectedFormation: currentSelection === action.formationId ? null : action.formationId
+        selectedFormation: action.formationId
+      };
+    }
+    case "CREATE_TOP": {
+      return {
+        ...state,
+        pendingAddTop: true
+      };
+    }
+    case "CREATE_TOP_CANCELED": {
+      return {
+        ...state,
+        pendingAddTop: false
+      };
+    }
+    case "PENDING_TOP_CREATED": {
+      return {
+        ...state,
+        pendingAddTop: false,
+        addTopLoading: true,
+        selectedFormation: action.pendingId
+      };
+    }
+    case "CREATE_TOP_SUCCESS": {
+      return {
+        ...state,
+        addTopLoading: false,
+        selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
+      };
+    }
+    case "CREATE_TOP_ERROR": {
+      return {
+        ...state,
+        addTopLoading: false,
+        selectedFormation: action.nextId
+      };
+    }
+    case "DELETE_FORMATION": {
+      return {
+        ...state,
+        selectedFormation: state.selectedFormation === action.id ? action.nextId : state.selectedFormation
       };
     }
     default:

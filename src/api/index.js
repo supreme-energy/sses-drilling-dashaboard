@@ -1,6 +1,6 @@
 import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
 import { ONLINE, OFFLINE } from "../constants/serverStatus";
@@ -19,6 +19,7 @@ import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
+import debounce from "debounce-promise";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
@@ -32,8 +33,13 @@ export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const ADD_FORMATION = "formation/add.php";
+export const UPDATE_FORMATION = "formation/update.php";
+export const REMOVE_FORMATION = "formation/delete.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
+export const UPLOAD_CONTROL_LOG_LAS = "/controllog/import.php";
+export const DELETE_CONTROL_LOG_LAS = "/controllog/delete.php";
 export const GET_WELL_LOG_LIST = "/wellloglist.php";
 export const GET_WELL_LOG_DATA = "/welllog.php";
 export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
@@ -47,6 +53,7 @@ export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
+export const UPLOAD_WELL_PLAN_CSV = "/well/plan/import.php";
 export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
 export const GET_SURVEY_RANGE = "/survey/cloud/load_range.php";
 export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
@@ -108,7 +115,8 @@ export function useWellInfo(wellId) {
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
-  const online = data && data.autorc.host && data.autorc.username && data.autorc.password;
+  const autorc = data && data.autorc;
+  const online = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -155,6 +163,34 @@ export function useWellInfo(wellId) {
       });
     },
     [serializedUpdateFetch, data, wellInfo]
+  );
+
+  const updateAutoRc = useCallback(
+    ({ wellId, field, value, refreshStore }) => {
+      const optimisticResult = {
+        ...data,
+        autorc: {
+          ...autorc,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          autorc: {
+            [field]: value
+          }
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, autorc]
   );
 
   const updateEmail = useCallback(
@@ -292,6 +328,7 @@ export function useWellInfo(wellId) {
       wellLandingLocationLocal,
       wellPBHL,
       wellPBHLLocal,
+      autorc,
       wellInfo,
       emailInfo,
       appInfo,
@@ -303,7 +340,8 @@ export function useWellInfo(wellId) {
     refreshStore,
     updateEmail,
     updateAlarm,
-    updateAutoImport
+    updateAutoImport,
+    updateAutoRc
   ];
 }
 
@@ -388,7 +426,7 @@ export function useRopData() {
 const wellPathTransform = memoizeOne(transform);
 
 export function useWellPath(wellId) {
-  const [data] = useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -399,7 +437,7 @@ export function useWellPath(wellId) {
       transform: wellPathTransform
     }
   );
-  return data || EMPTY_ARRAY;
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {
@@ -445,12 +483,14 @@ const surveysTransform = memoizeOne(data => {
   const hasBitProj = surveys.some(s => s.plan === 1);
   return surveys.map((s, i, l) => {
     // If included, bit projection is always the last item and the last survey is second to last
+    const isTieIn = i === 0;
     const isBitProj = i === l.length - 1 && hasBitProj;
     const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
     return {
       ...s,
-      name: isBitProj ? `BPrj` : `${i}`,
+      name: isTieIn ? "Tie-in" : isBitProj ? "BPrj" : `${i}`,
       pos: isNumber(s.pos) ? s.pos : s.tcl - s.tvd,
+      isTieIn: isTieIn,
       isBitProj: isBitProj,
       isSurvey: !isBitProj,
       isLastSurvey: isLastSurvey,
@@ -503,7 +543,7 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback }];
+  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading }];
 }
 
 const formationsTransform = memoizeOne(formationList => {
@@ -515,8 +555,35 @@ const formationsTransform = memoizeOne(formationList => {
   });
 });
 
+const sortByThickness = (a, b) => {
+  const aThickness = Number(_.get(a, "data[0].thickness"));
+  const bThickness = Number(_.get(b, "data[0].thickness"));
+  return aThickness - bThickness;
+};
+
+const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
+  const r = await fetch(
+    {
+      path: UPDATE_FORMATION,
+      method: "POST",
+      query: {
+        seldbname: wellId
+      },
+      body: props
+    },
+    (currentFormations, result) => {
+      return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f))).sort(sortByThickness);
+    }
+  );
+
+  return {
+    result: r,
+    requestId
+  };
+};
+
 export function useFetchFormations(wellId) {
-  const [data, , , , , { refresh }] = useFetch(
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -528,7 +595,104 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, refresh];
+
+  const [updateTopOptimisticData, changeUpdateTopOptimisticData] = useState(null);
+  const internalState = useRef({ lastRequestId: null });
+  const formations = updateTopOptimisticData || data || EMPTY_ARRAY;
+
+  const addTop = useCallback(
+    ({ thickness, optimisticData, pendingId }) => {
+      const defaultProps = {
+        label: "New Formation",
+        show_line: "Yes",
+        color: "000000",
+        bg_color: "ffffff",
+        bg_percent: 1
+      };
+      const optimisticResult = [
+        ...data,
+        {
+          ...defaultProps,
+          id: pendingId,
+          data: optimisticData
+        }
+      ].sort(sortByThickness);
+      return fetch(
+        {
+          path: ADD_FORMATION,
+          method: "POST",
+          query: {
+            seldbname: wellId
+          },
+          body: { ...defaultProps, thickness },
+          optimisticResult
+        },
+        (currentFormations, result) => {
+          const formations = currentFormations
+            .filter(f => f.id !== pendingId)
+            .concat(result)
+            .sort(sortByThickness);
+
+          return formationsTransform(formations);
+        }
+      );
+    },
+    [fetch, data, wellId]
+  );
+
+  const deleteTop = useCallback(
+    id => {
+      const optimisticResult = data.filter(f => f.id !== id);
+      fetch({
+        path: REMOVE_FORMATION,
+        optimisticResult,
+        query: {
+          seldbname: wellId,
+          id
+        }
+      });
+    },
+    [fetch, wellId, data]
+  );
+
+  const updateTop = useCallback(
+    async props => {
+      const optimisticResult = formations
+        .map(d => {
+          if (d.id === props.id) {
+            const formation = {
+              ...d,
+              ...props
+            };
+            if (props.thickness) {
+              formation.data = formation.data.map(fd => ({ ...fd, thickness: Number(props.thickness) }));
+            }
+            return formation;
+          }
+          return d;
+        })
+        .sort(sortByThickness);
+
+      changeUpdateTopOptimisticData(optimisticResult);
+      let result;
+      try {
+        const requestId = _.uniqueId();
+        internalState.current.lastRequestId = requestId;
+        result = await updateFormationTop({ wellId, props, fetch, requestId });
+      } catch (e) {
+        throw e;
+      } finally {
+        if (result.requestId === internalState.current.lastRequestId) {
+          changeUpdateTopOptimisticData(null);
+        }
+      }
+
+      return result;
+    },
+    [formations, wellId, changeUpdateTopOptimisticData, fetch]
+  );
+
+  return [formations, isLoading, error, isPolling, isFetchingMore, { refresh, addTop, deleteTop, updateTop }];
 }
 
 const projectionsTransform = memoizeOne(projections => {
@@ -581,6 +745,7 @@ export function useFetchProjections(wellId) {
     return 0;
   }
   const addProjection = newProjection => {
+    newProjection.method = newProjection.method || DIP_FAULT_POS_VS;
     const optimisticResult = [...(data || EMPTY_ARRAY), newProjection].sort(sortByMD);
     return fetch(
       {
@@ -588,8 +753,7 @@ export function useFetchProjections(wellId) {
         method: "GET",
         query: {
           seldbname: wellId,
-          ...newProjection,
-          method: DIP_FAULT_POS_VS
+          ...newProjection
         },
         cache: "no-cache",
         optimisticResult
@@ -709,7 +873,7 @@ export function useWellOperationHours(wellId) {
 }
 
 export function useWellControlLogList(wellId) {
-  return useFetch(
+  const [data, ...rest] = useFetch(
     {
       path: GET_WELL_CONTROL_LOG_LIST,
       query: { seldbname: wellId, data: 1 }
@@ -724,6 +888,7 @@ export function useWellControlLogList(wellId) {
       }
     }
   );
+  return [data || EMPTY_ARRAY, ...rest];
 }
 
 export function useWellControlLog(tablename) {
@@ -868,6 +1033,48 @@ export function useManualImport() {
   );
 
   return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile };
+}
+
+export function useWellPlanImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadWellPlan = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_WELL_PLAN_CSV,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadWellPlan };
+}
+
+export function useControlLogImport() {
+  const [data, , , , , { fetch }] = useFetch();
+
+  const uploadControlLog = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: UPLOAD_CONTROL_LOG_LAS,
+        method: "POST",
+        headers: { Accept: "*/*" },
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_OBJECT, uploadControlLog };
 }
 
 export function useCloudServer(wellId) {

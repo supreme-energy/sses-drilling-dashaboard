@@ -33,7 +33,7 @@ function ColorPicker({ handleSave, handleClose, onChange, anchorEl, ...props }) 
     }
   };
 
-  const handleSaveColor = () => handleSave(props.hex);
+  const handleSaveColor = () => handleSave(props);
 
   return (
     <Popover
