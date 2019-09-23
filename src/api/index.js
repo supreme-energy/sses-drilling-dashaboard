@@ -19,7 +19,6 @@ import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
-import debounce from "debounce-promise";
 
 export const GET_WELL_LIST = "/joblist.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
