@@ -91,6 +91,7 @@ const Line = React.memo(
 function Chart({
   wellId,
   data,
+  logId,
   xAxis,
   isEditing,
   dataBySection,
@@ -252,6 +253,7 @@ function Chart({
 Chart.propTypes = {
   wellId: PropTypes.string,
   data: PropTypes.array,
+  logId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   xAxis: PropTypes.string,
   isEditing: PropTypes.bool,
   dataBySection: PropTypes.object,

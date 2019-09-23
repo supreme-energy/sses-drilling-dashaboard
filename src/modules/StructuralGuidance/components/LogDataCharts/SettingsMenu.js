@@ -34,7 +34,8 @@ const SettingsMenu = React.memo(
     selectedLogs,
     setEditingScale,
     handleArrowBack,
-    handleArrowForward
+    handleArrowForward,
+    logId
   }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const { wellId } = useWellIdContainer();
@@ -44,7 +45,7 @@ const SettingsMenu = React.memo(
     const handleSaveColor = hex => {
       const id = dataBySection[view].id;
       const color = hex.substring(1);
-      setSelectedLog({ type: "SAVE_COLOR", payload: { view, color } });
+      setSelectedLog({ type: "SAVE_COLOR", payload: { logId, view, color } });
       updateAdditionalLogDetails(wellId, { id, color });
       handleClosePicker();
     };
@@ -133,6 +134,7 @@ SettingsMenu.propTypes = {
   log: PropTypes.string,
   view: PropTypes.string,
   setMenu: PropTypes.func,
+  logId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   handleRemoveChart: PropTypes.func,
   setEditingScale: PropTypes.func,
   setSelectedLog: PropTypes.func,
