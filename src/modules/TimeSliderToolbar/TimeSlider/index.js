@@ -57,7 +57,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const maxSurveyDepth = hasSurveys && surveys[surveys.length - 1].md;
   const maxProjectionDepth = hasProjections && projections[projections.length - 1].md;
 
-  const { data, getTimeSliderData, isLoading, isFetchingMore } = useTimeSliderData();
+  const { data, getTimeSliderData } = useTimeSliderData();
 
   // Create local state
   const [{ maxStep, step, stepSize, isDragging, isPlaying, isSpeeding }, setSliderStep] = useReducer(
@@ -122,7 +122,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         stepFactor * visibleDataLength + leftBoundIndexMoving <= data.length - 1 &&
         (data.length - 1) * xScale - Math.abs(newX) > width - 6 &&
         Math.round(step) <= Math.round(maxStep) &&
-        newX / xScale < 0
+        newX / xScale - 3 < 0
       );
     },
     [width, data.length, step, maxStep, leftBoundIndexMoving, stepFactor, visibleDataLength]
@@ -379,10 +379,10 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
                     key={phaseObj.phase + index}
                     wellId={wellId}
                     container={container}
-                    data={data}
                     phaseObj={phaseObj}
                     setDrillPhase={setDrillPhase}
                     view={view}
+                    data={data}
                     refresh={refresh}
                   />
                 ));

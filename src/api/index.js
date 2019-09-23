@@ -720,7 +720,12 @@ export function useWellOverviewKPI(wellId) {
   };
 }
 
-export function useTimeSliderData(wellId, minDepth, maxDepth) {
+function sortByDepth(a, b) {
+  if (a.hole_depth < b.hole_depth) return -1;
+  if (a.hole_depth > b.hole_depth) return 1;
+  return 0;
+}
+export function useTimeSliderData() {
   const transformData = data => {
     return data.map(d => ({
       ...d,
@@ -742,12 +747,11 @@ export function useTimeSliderData(wellId, minDepth, maxDepth) {
             hole_depth_gte: minDepth,
             hole_depth_lte: maxDepth
           }
-          // cache: "no-cache"
         },
         (current, result) => {
           const parsedRes = transformData(result);
           if (current) {
-            return [...current, ...parsedRes];
+            return [...current, ...parsedRes].sort(sortByDepth);
           }
           return [...parsedRes];
         }

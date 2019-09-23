@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer, useEffect, useState } from "react";
+import React, { useCallback, useReducer, useMemo, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiLabel from "../../../components/PixiLabel";
@@ -7,7 +7,7 @@ import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
 import { stateReducer } from "./reducers";
 
 const HEIGHT = 6;
-const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view, refresh }) => {
+const QuickFilter = React.memo(({ container, phaseObj, data, setDrillPhase, view, refresh }) => {
   // Create state for component
   const [{ isTooltipVisible, xPos }, setVisible] = useReducer(stateReducer, { isTooltipVisible: false, xPos: 0 });
   const [labelDimensions, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });

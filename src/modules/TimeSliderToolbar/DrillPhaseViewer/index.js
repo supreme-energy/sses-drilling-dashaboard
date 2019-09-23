@@ -6,7 +6,7 @@ import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classNames from "classnames";
 import _ from "lodash";
 
-import { useDrillPhaseContainer, useWellSections } from "../../App/Containers";
+import { useDrillPhaseContainer, useWellSections, useSurveysDataContainer } from "../../App/Containers";
 import { COLOR_BY_PHASE_VIEWER, CHOOSE } from "../../../constants/timeSlider";
 import { GRAY } from "../../../constants/colors";
 import phaseClasses from "./DrillPhaseViewer.scss";
@@ -57,6 +57,7 @@ const DrillPhaseViewer = React.memo(({ className, wellId, expanded }) => {
 
   // Fetch data
   const drillPhases = useWellSections(wellId);
+  const { surveys } = useSurveysDataContainer();
 
   // Import shared state
   const { drillPhaseObj, setDrillPhase } = useDrillPhaseContainer();
@@ -64,6 +65,14 @@ const DrillPhaseViewer = React.memo(({ className, wellId, expanded }) => {
 
   // Create state for pop-open anchor element
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const surveyDataExistsForPhase = useCallback(
+    phaseEnd => {
+      const index = surveys.findIndex(d => d.md <= phaseEnd);
+      return index >= 0;
+    },
+    [surveys]
+  );
 
   // Set drill phase when fetching complete
   useEffect(() => {
@@ -101,6 +110,10 @@ const DrillPhaseViewer = React.memo(({ className, wellId, expanded }) => {
           </CardActionArea>
           <Menu id="drill-phase-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} disableAutoFocusItem>
             {drillPhases.map((phaseObj, index) => {
+              if (!surveyDataExistsForPhase(phaseObj.phaseEnd)) {
+                return;
+              }
+
               const selected = _.isEqual(drillPhaseObj, phaseObj);
               return (
                 <MenuItem
