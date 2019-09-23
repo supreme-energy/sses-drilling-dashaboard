@@ -20,6 +20,7 @@ import mapKeys from "lodash/mapKeys";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
+import { useFormationsStore } from "./InterpretationChart/Formations/store";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -408,7 +409,15 @@ const recomputeSurveysAndProjections = memoizeOne(
           const sign = bitProjPos > 0 ? 1 : -1;
           const cap = bitProjPos > 0 ? Math.max : Math.min;
           const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
-          acc[index] = calculateProjection({ ...combinedSvy, pos, tcl, fault, dip, tot, bot }, acc, index, propazm);
+          const itemWithProjection = calculateProjection(
+            { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
+            acc,
+            index,
+            propazm
+          );
+          if (itemWithProjection) {
+            acc[index] = itemWithProjection;
+          }
         }
       }
       return acc;
@@ -466,34 +475,46 @@ export function getIsDraft(index, selectedIndex, nrPrevSurveysToDraft) {
   return index <= selectedIndex && index >= selectedIndex - nrPrevSurveysToDraft;
 }
 
+const computeFormations = memoizeOne((formations, surveysAndProjections) => {
+  const computedFormations = formations.map(f => {
+    return {
+      ...f,
+      data: f.data.map((item, index) => {
+        const survey = surveysAndProjections[index];
+
+        if (!survey) {
+          return item;
+        }
+
+        return {
+          ...item,
+          fault: survey.fault,
+          dip: survey.dip,
+          tot: survey.tcl + item.thickness
+        };
+      })
+    };
+  });
+
+  return computedFormations;
+});
+
 export function useComputedFormations(formations) {
   const [surveysAndProjections] = useComputedSurveysAndProjections();
 
-  const computedFormations = useMemo(
-    () =>
-      formations.map(f => {
-        return {
-          ...f,
-          data: f.data.map((item, index) => {
-            const survey = surveysAndProjections[index];
-
-            if (!survey) {
-              return item;
-            }
-
-            return {
-              ...item,
-              fault: survey.fault,
-              dip: survey.dip,
-              tot: survey.tcl + item.thickness
-            };
-          })
-        };
-      }),
-    [formations, surveysAndProjections]
-  );
+  const computedFormations = computeFormations(formations, surveysAndProjections);
 
   return computedFormations;
+}
+
+const getSelectedFormation = memoizeOne((selectedId, formations) => {
+  return formations.find(f => f.id === selectedId);
+});
+
+export function useSelectedFormation() {
+  const { formationsData } = useFormationsDataContainer();
+  const [{ selectedFormation }] = useFormationsStore();
+  return getSelectedFormation(selectedFormation, formationsData);
 }
 export const getExtent = logData => (logData ? logDataExtent(logData.data) : null);
 

@@ -14,13 +14,14 @@ const ColorPickerBox = React.memo(({ boxProps, handleSave, ...props }) => {
   );
   const closeCallback = useCallback(() => updateAnchorEl(null), [updateAnchorEl]);
   const clickCallback = useCallback(e => updateAnchorEl(e.target), [updateAnchorEl]);
+  const c = props.color;
   return (
     <Paper {...boxProps}>
       <div
         className={css.colorBox}
         onClick={clickCallback}
         style={{
-          backgroundColor: props.hex
+          backgroundColor: typeof c === "object" ? `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})` : props.hex
         }}
       />
       <ColorPicker {...props} handleSave={saveCallback} anchorEl={anchorEl} handleClose={closeCallback} />

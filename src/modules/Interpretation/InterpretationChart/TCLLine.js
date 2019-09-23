@@ -10,6 +10,7 @@ export default function TCLLine({ container, width }) {
   const colors = useSelectedWellInfoColors();
   const color = hexColor(colors.colortot);
   const lineData = useMemo(() => [[0, 0], [width, 0]], [width]);
+
   return selectedSurvey ? (
     <PixiContainer
       updateTransform={frozenScaleTransform}

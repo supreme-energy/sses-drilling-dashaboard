@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, forwardRef, useState, useEffect, useImperativeHandle } from "react";
+import React, { useCallback, useReducer, useState, useEffect } from "react";
 import { useInterpretationRenderer } from ".";
 import { useComputedDraftSegmentsOnly } from "../selectors";
 import useMemo from "react-powertools/hooks/useMemo";
@@ -13,6 +13,7 @@ import { twoDecimals, threeDecimals } from "../../../constants/format";
 import PixiLine from "../../../components/PixiLine";
 import PixiRectangle from "../../../components/PixiRectangle";
 import * as PIXI from "pixi.js";
+import SegmentLabel from "../../../components/SegmentLabel";
 
 function PixiTooltip({
   refresh,
@@ -119,47 +120,6 @@ PixiTooltip.defaultProps = {
   labelPadding: { top: 10, bottom: 10, left: 5, right: 5 },
   textProps: {}
 };
-
-const SegmentLabel = forwardRef(({ container, segment, y, backgroundColor, ...props }, ref) => {
-  const [{ labelWidth, labelHeight }, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
-  const onSizeChanged = useCallback(
-    (labelWidth, labelHeight) => {
-      updateLabelDimensions({ labelWidth, labelHeight });
-    },
-    [updateLabelDimensions]
-  );
-
-  const labelRef = useRef(null);
-
-  const { refresh } = useInterpretationRenderer();
-
-  useEffect(
-    function refreshWebGl() {
-      refresh();
-    },
-    [labelWidth, labelHeight, refresh]
-  );
-
-  useImperativeHandle(ref, () => ({
-    container: labelRef.current && labelRef.current.container
-  }));
-
-  const labelX = -labelWidth;
-  const labelY = y - labelHeight / 2;
-
-  return (
-    <PixiLabel
-      {...props}
-      ref={labelRef}
-      y={labelY}
-      sizeChanged={onSizeChanged}
-      container={container}
-      x={labelX}
-      textProps={{ fontSize: 12, color: 0xffffff }}
-      backgroundProps={{ backgroundColor, radius: 5 }}
-    />
-  );
-});
 
 const initialState = {
   interactionsRunning: false,
@@ -380,6 +340,7 @@ const SegmentSelection = ({
       child={container => (
         <React.Fragment>
           <SegmentLabel
+            refresh={refresh}
             container={container}
             backgroundColor={backgroundColor}
             segment={firstSegment}
@@ -388,6 +349,7 @@ const SegmentSelection = ({
             ref={segmentRef}
           />
           <SegmentLabel
+            refresh={refresh}
             container={container}
             backgroundColor={backgroundColor}
             segment={lastSegment}

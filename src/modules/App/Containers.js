@@ -92,22 +92,21 @@ const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { formationsData } = useFormationsDataContainer();
-
   const [, surveys, projections] = useComputedSurveysAndProjections();
+  const { formationsData } = useFormationsDataContainer();
   const [wellPlan] = useWellPlanDataContainer();
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
   const surveysFiltered = filterSurveysToInterval(surveys, sliderInterval);
   const projectionsFiltered = filterProjectionsToInterval(projections, sliderInterval);
-  const formationsFiltered = filterFormationsMem(formationsData, sliderInterval);
+  const filteredFormations = filterFormationsMem(formationsData, sliderInterval);
 
   return {
     surveys: surveysFiltered,
     wellPlan,
     wellPlanFiltered,
-    formations: formationsFiltered,
+    formations: filteredFormations,
     projections: projectionsFiltered
   };
 }
@@ -254,11 +253,26 @@ function useProjectionsData() {
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
 
-  const [serverFormations, isLoading, , , , { refresh }] = useFetchFormations(wellId);
+  const [
+    serverFormations,
+    isLoading,
+    ,
+    ,
+    ,
+    { refresh: refreshFormations, addTop, deleteTop, updateTop }
+  ] = useFetchFormations(wellId);
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { serverFormations, formationsData: computedFormations, refreshFormations: refresh, isLoading };
+  return {
+    serverFormations,
+    formationsData: computedFormations,
+    refreshFormations,
+    addTop,
+    deleteTop,
+    updateTop,
+    isLoading
+  };
 }
 
 export function useCrossSectionData() {
