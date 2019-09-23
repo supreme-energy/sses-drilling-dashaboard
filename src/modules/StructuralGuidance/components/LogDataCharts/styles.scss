@@ -16,7 +16,7 @@
 
     .addChartButton {
         outline: none;
-        padding: 5px;
+        margin: 10px;
 
         span, svg {
             color: $gray;
@@ -24,7 +24,7 @@
     }
 
     .addChartButtonInitial {
-      top: 15px;
+        top: 40px;
     }
     .absoluteCenter {
       position: absolute;
