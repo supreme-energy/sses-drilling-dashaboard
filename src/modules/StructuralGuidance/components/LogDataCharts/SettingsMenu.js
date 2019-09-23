@@ -41,6 +41,7 @@ const SettingsMenu = React.memo(
     const { wellId } = useWellIdContainer();
     const { dataBySection = {} } = useAdditionalDataLogsList(wellId);
     const { updateAdditionalLogDetails } = useAdditionalDataLog(wellId);
+    const color = _.get(selectedLogs, `[${logId}][${view}].color`);
 
     const handleSaveColor = hex => {
       const id = dataBySection[view].id;
@@ -96,7 +97,7 @@ const SettingsMenu = React.memo(
                     style={{
                       height: 25,
                       width: 25,
-                      backgroundColor: `#${_.get(selectedLogs, `[${view}].color`)}`
+                      backgroundColor: `#${color}`
                     }}
                   />
                 </Paper>
@@ -118,12 +119,7 @@ const SettingsMenu = React.memo(
           </List>
         </DialogContent>
 
-        <ColorPicker
-          color={_.get(selectedLogs, `[${view}].color`)}
-          handleClose={handleClosePicker}
-          handleSave={handleSaveColor}
-          anchorEl={anchorEl}
-        />
+        <ColorPicker color={color} handleClose={handleClosePicker} handleSave={handleSaveColor} anchorEl={anchorEl} />
       </Dialog>
     );
   }
