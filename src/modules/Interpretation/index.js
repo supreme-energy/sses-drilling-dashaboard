@@ -1,9 +1,8 @@
-import React, { useReducer, useCallback } from "react";
+import React, { useReducer, useCallback, useMemo } from "react";
 import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch, Button } from "@material-ui/core";
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
-import { useWellControlLogList } from "../../api";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
@@ -14,12 +13,14 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
-import { useWellIdContainer } from "../App/Containers";
+import { useControlLogDataContainer, useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
-import { FormationsStoreProvider, useFormationsStore } from "./InterpretationChart/Formations/store";
+import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import FormationControls from "./InterpretationSettings/FormationControls";
-import { useSelectedWellLog } from "./selectors";
+import { useSelectedWellLog, useSetupWizardData } from "./selectors";
 import FormationSettings from "./InterpretationChart/FormationSettings";
+
+import WizardChecklist from "./components/WizardChecklist";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
@@ -60,6 +61,7 @@ const Interpretation = React.memo(
     const showFormationControls = formationsEditMode;
     const showLogSettings = !formationsEditMode && currentEditedLog;
     const showInterpretationSettings = !formationsEditMode && !currentEditedLog;
+    const { dataHasLoaded, allStepsAreCompleted, ...setupSteps } = useSetupWizardData();
 
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
@@ -68,7 +70,13 @@ const Interpretation = React.memo(
           <FormationSettings />
         ) : (
           <React.Fragment>
-            <SelectionStatsContainer logs={logList} wellId={wellId} />
+            {dataHasLoaded ? (
+              allStepsAreCompleted ? (
+                <SelectionStatsContainer logs={logList} wellId={wellId} />
+              ) : (
+                <WizardChecklist {...setupSteps} />
+              )
+            ) : null}
             <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
               <Box display="flex" flexDirection="row" alignItems="center">
                 <TCLValue />
@@ -126,7 +134,8 @@ const Interpretation = React.memo(
 
 const InterpretationContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
-  const [controlLogs] = useWellControlLogList(wellId);
+  const [controlLogs] = useControlLogDataContainer();
+  const cLogsFiltered = useMemo(() => controlLogs.filter(l => l.data.length && l.endmd && l.startmd), [controlLogs]);
   const [logList] = useWellLogsContainer();
   const [{ editMode: formationsEditMode }] = useFormationsStore();
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
@@ -136,7 +145,7 @@ const InterpretationContainer = React.memo(props => {
     [dispatch, currentEditedLog]
   );
   const interpretationProps = {
-    controlLogs,
+    controlLogs: cLogsFiltered,
     logList,
     dispatch,
     draftMode,

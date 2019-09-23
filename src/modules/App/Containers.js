@@ -8,7 +8,8 @@ import {
   useFetchSurveys,
   useWellOverviewKPI,
   useWellPath,
-  useWellInfo
+  useWellInfo,
+  useWellControlLogList
 } from "../../api";
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
@@ -91,11 +92,9 @@ const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { wellId } = useWellIdContainer();
-
   const [, surveys, projections] = useComputedSurveysAndProjections();
-  const wellPlan = useWellPath(wellId);
   const { formationsData } = useFormationsDataContainer();
+  const [wellPlan] = useWellPlanDataContainer();
 
   // Filter data and memoize
   const wellPlanFiltered = filterWellPlanToInterval(wellPlan, sliderInterval);
@@ -115,9 +114,7 @@ export function useComputedFilteredWellData() {
 export function useFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const { wellId } = useWellIdContainer();
-
-  const wellPlan = useWellPath(wellId);
+  const [wellPlan] = useWellPlanDataContainer();
   const { surveys } = useSurveysDataContainer();
   const { serverFormations: formations } = useFormationsDataContainer();
   const { projections } = useProjectionsDataContainer();
@@ -204,12 +201,22 @@ function useWellId(initialState) {
   return { wellId, setWellId };
 }
 
+function useWellPlanData() {
+  const { wellId } = useWellIdContainer();
+  return useWellPath(wellId);
+}
+
+function useControlLogListData() {
+  const { wellId } = useWellIdContainer();
+  return useWellControlLogList(wellId);
+}
+
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
-  const [surveys, { updateSurvey, refresh, replaceResult }] = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult, isLoading }] = useFetchSurveys(wellId);
 
-  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult };
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult, isLoading };
 }
 
 function useProjectionsData() {
@@ -246,11 +253,26 @@ function useProjectionsData() {
 function useFormationsData() {
   const { wellId } = useWellIdContainer();
 
-  const [serverFormations, refreshFormations, addTop, deleteTop, updateTop] = useFetchFormations(wellId);
+  const [
+    serverFormations,
+    isLoading,
+    ,
+    ,
+    ,
+    { refresh: refreshFormations, addTop, deleteTop, updateTop }
+  ] = useFetchFormations(wellId);
 
   const computedFormations = useComputedFormations(serverFormations);
 
-  return { serverFormations, formationsData: computedFormations, refreshFormations, addTop, deleteTop, updateTop };
+  return {
+    serverFormations,
+    formationsData: computedFormations,
+    refreshFormations,
+    addTop,
+    deleteTop,
+    updateTop,
+    isLoading
+  };
 }
 
 export function useCrossSectionData() {
@@ -289,11 +311,14 @@ export const { Provider: TimeSliderProvider, useContainer: useTimeSliderContaine
 export const { Provider: DrillPhaseProvider, useContainer: useDrillPhaseContainer } = createContainer(useDrillPhase);
 export const { Provider: AppStateProvider, useContainer: useAppState } = createContainer(useAppStateData);
 export const { Provider: WellIdProvider, useContainer: useWellIdContainer } = createContainer(useWellId);
-// TODO: Reduce number of providers (formations, surveys, projections may not be needed)
 export const { Provider: FormationsProvider, useContainer: useFormationsDataContainer } = createContainer(
   useFormationsData
 );
 export const { Provider: SurveysProvider, useContainer: useSurveysDataContainer } = createContainer(useSurveysData);
+export const { Provider: WellPlanProvider, useContainer: useWellPlanDataContainer } = createContainer(useWellPlanData);
+export const { Provider: ControlLogProvider, useContainer: useControlLogDataContainer } = createContainer(
+  useControlLogListData
+);
 export const { Provider: ProjectionsProvider, useContainer: useProjectionsDataContainer } = createContainer(
   useProjectionsData
 );

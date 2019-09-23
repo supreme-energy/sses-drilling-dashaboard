@@ -203,7 +203,12 @@ function useSegmentBiasAndScale({
 
   useEffect(
     function setInitialBiasAndScale() {
-      if (draftMode && selectedWellLog && internalState.current.prevDraftSelection !== selectionById) {
+      if (
+        draftMode &&
+        selectedWellLog &&
+        internalState.current.prevDraftSelection !== selectionById &&
+        !Number.isNaN(parseFloat(xMax))
+      ) {
         let initialBias = totalWidth - xMax - gridGutter - 10;
         if (initialBias === bias) {
           initialBias = bias - computedWidth;
@@ -221,7 +226,6 @@ function useSegmentBiasAndScale({
       computedWidth,
       totalWidth,
       gridGutter,
-
       xMax,
       draftMode,
       selectionById,
@@ -230,6 +234,12 @@ function useSegmentBiasAndScale({
       selectedWellLog
     ]
   );
+
+  useEffect(() => {
+    if (!draftMode) {
+      internalState.current.prevDraftSelection = null;
+    }
+  }, [draftMode]);
 
   const onRootDragHandler = useCallback(
     (event, prevMouse) => {

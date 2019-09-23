@@ -4,7 +4,11 @@
   overflow-x: auto
 }
 .table {
-  min-width: 650px
+  min-width: 650px;
+  .emptyTableMessage {
+    text-align: center;
+    border-bottom: none;
+  }
 }
 .row {
   img {

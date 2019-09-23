@@ -51,6 +51,7 @@ export default function Header({
   logId,
   active,
   onMenuClick,
+  menuIcon,
   onClose,
   isActive,
   onNextClick,
@@ -66,7 +67,7 @@ export default function Header({
     <React.Fragment>
       <Box display="flex" className={css.header}>
         <IconButton size="small" className={css.moreBtn} onClick={onMenuClick}>
-          <MoreVert />
+          {menuIcon || <MoreVert />}
         </IconButton>
         <Box
           display="flex"

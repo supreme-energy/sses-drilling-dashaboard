@@ -4,6 +4,8 @@ import ControlLogHeader from "./ControlLogHeader";
 import WellLogsHeader from "./WellLogsHeader";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { getColorForWellLog } from "../selectors";
+import { AddCircle } from "@material-ui/icons";
+import ControlLogImportModal from "../../../modals/ControlLogImporterModal";
 
 const Headers = React.memo(
   ({
@@ -17,6 +19,7 @@ const Headers = React.memo(
     changeLogColor,
     colorsByWellLog
   }) => {
+    const [showImporter, toggleImporter] = useReducer(b => !b);
     const onClose = () => {
       changeActiveLog(null);
     };
@@ -81,6 +84,15 @@ const Headers = React.memo(
             {...headerProps}
           />
         ))}
+        {!controlLogs.length && (
+          <ControlLogHeader
+            name="Add Control Gamma"
+            color={"#7e7d7e"}
+            menuIcon={<AddCircle />}
+            onMenuClick={toggleImporter}
+          />
+        )}
+        <ControlLogImportModal isVisible={showImporter} handleClose={toggleImporter} />
       </Box>
     );
   }
