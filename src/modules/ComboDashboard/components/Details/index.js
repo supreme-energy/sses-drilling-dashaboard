@@ -75,7 +75,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
       />
     );
   } else {
-    return <TableCell className={classes.cell}>{value}</TableCell>;
+    return <TableCell className={classes.cell}>{value.toFixed(2)}</TableCell>;
   }
 }
 
@@ -147,43 +147,38 @@ export default function DetailsTable({ showFullTable = false }) {
                 <SurveyIcon row={row} />
                 {row.name}
               </TableCell>
-              {Cell(row.md.toFixed(2), editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.inc.toFixed(2), editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.md, editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.inc, editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
               {Cell(
-                row.azm.toFixed(2),
+                row.azm,
                 editable || row.isTieIn,
                 v => update("azm", MD_INC_AZ)(limitAzm(v)),
                 row.method === MD_INC_AZ
               )}
               {Cell(
-                row.tvd.toFixed(2),
+                row.tvd,
                 (editable && row.isProjection) || row.isTieIn,
                 update("tvd", TVD_VS),
                 row.method === TVD_VS
               )}
-              {Cell(row.dl.toFixed(2), false)}
-              {Cell(
-                row.vs.toFixed(2),
-                (editable && row.isProjection) || row.isTieIn,
-                update("vs", TVD_VS),
-                row.method === TVD_VS
-              )}
-              {Cell(row.ns.toFixed(2), row.isTieIn, update("ns"))}
-              {Cell(row.ew.toFixed(2), row.isTieIn, update("ew"))}
-              {Cell(row.fault.toFixed(2), editable, update("fault"), false, a =>
+              {Cell(row.dl, false)}
+              {Cell(row.vs, (editable && row.isProjection) || row.isTieIn, update("vs", TVD_VS), row.method === TVD_VS)}
+              {Cell(row.ns, row.isTieIn, update("ns"))}
+              {Cell(row.ew, row.isTieIn, update("ew"))}
+              {Cell(row.fault, editable, update("fault"), false, a =>
                 Knob({
                   ...a,
                   fill: `#${row.color.toString(16).padStart(6, 0)}`,
                   outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
                 })
               )}
-              {Cell(row.dip.toFixed(2), editable, update("dip"), false, a =>
+              {Cell(row.dip, editable, update("dip"), false, a =>
                 Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
-              {Cell(row.tcl.toFixed(2), false)}
-              {Cell(row.pos.toFixed(2), false)}
-              {showFullTable && Cell(row.tot.toFixed(2), false)}
-              {showFullTable && Cell(row.bot.toFixed(2), false)}
+              {Cell(row.tcl, false)}
+              {Cell(row.pos, false)}
+              {showFullTable && Cell(row.tot, false)}
+              {showFullTable && Cell(row.bot, false)}
               <TableCell className={classNames(classes.cell, classes.actions)}>
                 {row.isProjection && (
                   <IconButton
