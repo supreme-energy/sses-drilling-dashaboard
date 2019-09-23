@@ -579,7 +579,8 @@ export function useSetupWizardData() {
   const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
 
   const tieIn = (surveys && surveys[0]) || {};
-  const tieInIsCompleted = wellInfo && !!wellInfo.tot && !!tieIn.azm && !!tieIn.md && !!tieIn.inc;
+  const tieInIsCompleted =
+    wellInfo && !!wellInfo.tot && !!tieIn.azm && !!tieIn.md && !!tieIn.inc && !!tieIn.ns && !!tieIn.ew;
 
   // Initialized Formations must have TOT, BOT, and another defined layer
   const layerNames = (formationsData && formationsData.map(l => l.label)) || [];

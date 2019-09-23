@@ -24,6 +24,7 @@ import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
+import { useComputedSurveysAndProjections } from "../../../Interpretation/selectors";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -37,10 +38,10 @@ function SurveyIcon({ row }) {
     }
   } else if (row.isBitProj) {
     sourceType = bitProjectionSVG;
-  } else if (row.isLastSurvey) {
-    sourceType = lastSurveySVG;
   } else if (row.isTieIn) {
     sourceType = tieInSVG;
+  } else if (row.isLastSurvey) {
+    sourceType = lastSurveySVG;
   } else {
     sourceType = surveySVG;
   }
@@ -82,6 +83,7 @@ export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
+  const [allComputed] = useComputedSurveysAndProjections();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
@@ -92,7 +94,11 @@ export default function DetailsTable({ showFullTable = false }) {
     if (showFullTable) {
       return calcSections.slice().reverse();
     } else {
-      return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
+      if (selectedIndex === -1 && calcSections.length === 0) {
+        return allComputed;
+      } else {
+        return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
+      }
     }
   }, [calcSections, showFullTable, selectedIndex]);
 
@@ -107,8 +113,8 @@ export default function DetailsTable({ showFullTable = false }) {
           <TableCell className={classes.cell}>TVD</TableCell>
           <TableCell className={classes.cell}>Dog Leg</TableCell>
           <TableCell className={classes.cell}>VS</TableCell>
-          {showFullTable && <TableCell className={classes.cell}>NS</TableCell>}
-          {showFullTable && <TableCell className={classes.cell}>EW</TableCell>}
+          <TableCell className={classes.cell}>NS</TableCell>
+          <TableCell className={classes.cell}>EW</TableCell>
           <TableCell className={classes.cell}>Fault</TableCell>
           <TableCell className={classes.cell}>Dip</TableCell>
           <TableCell className={classes.cell}>TCL</TableCell>
@@ -141,14 +147,29 @@ export default function DetailsTable({ showFullTable = false }) {
                 <SurveyIcon row={row} />
                 {row.name}
               </TableCell>
-              {Cell(row.md.toFixed(2), editable, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.inc.toFixed(2), editable, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.azm.toFixed(2), editable, v => update("azm", MD_INC_AZ)(limitAzm(v)), row.method === MD_INC_AZ)}
-              {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd", TVD_VS), row.method === TVD_VS)}
+              {Cell(row.md.toFixed(2), editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.inc.toFixed(2), editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(
+                row.azm.toFixed(2),
+                editable || row.isTieIn,
+                v => update("azm", MD_INC_AZ)(limitAzm(v)),
+                row.method === MD_INC_AZ
+              )}
+              {Cell(
+                row.tvd.toFixed(2),
+                (editable && row.isProjection) || row.isTieIn,
+                update("tvd", TVD_VS),
+                row.method === TVD_VS
+              )}
               {Cell(row.dl.toFixed(2), false)}
-              {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs", TVD_VS), row.method === TVD_VS)}
-              {showFullTable && Cell(row.ns.toFixed(2), false)}
-              {showFullTable && Cell(row.ew.toFixed(2), false)}
+              {Cell(
+                row.vs.toFixed(2),
+                (editable && row.isProjection) || row.isTieIn,
+                update("vs", TVD_VS),
+                row.method === TVD_VS
+              )}
+              {Cell(row.ns.toFixed(2), row.isTieIn, update("ns"))}
+              {Cell(row.ew.toFixed(2), row.isTieIn, update("ew"))}
               {Cell(row.fault.toFixed(2), editable, update("fault"), false, a =>
                 Knob({
                   ...a,
