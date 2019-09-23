@@ -87,18 +87,7 @@ export default React.memo(({ segmentsData, container, selectedWellLog, chartWidt
           />
         );
       })}
-      {selectedWellLog && (
-        <SegmentSelection
-          draftMode={draftMode}
-          allSegments={segmentsData}
-          draftColor={draftColor}
-          selectedIndex={selectedIndex}
-          totalWidth={chartWidth}
-          container={container}
-          selectedWellLog={selectedWellLog}
-          nrPrevSurveysToDraft={nrPrevSurveysToDraft}
-        />
-      )}
+
       {selectedWellLog && draftMode && (
         <RightSegments
           draftColor={draftColor}
@@ -107,6 +96,18 @@ export default React.memo(({ segmentsData, container, selectedWellLog, chartWidt
           selectedIndex={selectedIndex}
           totalWidth={chartWidth}
           allSegments={segmentsData}
+          selectedWellLog={selectedWellLog}
+          nrPrevSurveysToDraft={nrPrevSurveysToDraft}
+        />
+      )}
+      {selectedWellLog && (
+        <SegmentSelection
+          draftMode={draftMode}
+          allSegments={segmentsData}
+          draftColor={draftColor}
+          selectedIndex={selectedIndex}
+          totalWidth={chartWidth}
+          container={container}
           selectedWellLog={selectedWellLog}
           nrPrevSurveysToDraft={nrPrevSurveysToDraft}
         />

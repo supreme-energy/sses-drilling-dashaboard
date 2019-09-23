@@ -12,6 +12,7 @@ import classNames from "classnames";
 import { useCrossSectionContainer } from "../../../App/Containers";
 import Knob from "./knob";
 import surveySVG from "../../../../assets/survey.svg";
+import tieInSVG from "../../../../assets/tieIn.svg";
 import lastSurveySVG from "../../../../assets/lastSurvey.svg";
 import bitProjectionSVG from "../../../../assets/bitProjection.svg";
 import projectAheadSVG from "../../../../assets/projectionAutoDip.svg";
@@ -22,6 +23,7 @@ import classes from "./Details.scss";
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
+import { limitAzm } from "../CrossSection/formulas";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -37,6 +39,8 @@ function SurveyIcon({ row }) {
     sourceType = bitProjectionSVG;
   } else if (row.isLastSurvey) {
     sourceType = lastSurveySVG;
+  } else if (row.isTieIn) {
+    sourceType = tieInSVG;
   } else {
     sourceType = surveySVG;
   }
@@ -88,7 +92,7 @@ export default function DetailsTable({ showFullTable = false }) {
     if (showFullTable) {
       return calcSections.slice().reverse();
     } else {
-      return calcSections.slice(selectedIndex - 2, selectedIndex + 1).reverse();
+      return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
     }
   }, [calcSections, showFullTable, selectedIndex]);
 
@@ -139,7 +143,7 @@ export default function DetailsTable({ showFullTable = false }) {
               </TableCell>
               {Cell(row.md.toFixed(2), editable, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
               {Cell(row.inc.toFixed(2), editable, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.azm.toFixed(2), editable, update("azm", MD_INC_AZ), row.method === MD_INC_AZ)}
+              {Cell(row.azm.toFixed(2), editable, v => update("azm", MD_INC_AZ)(limitAzm(v)), row.method === MD_INC_AZ)}
               {Cell(row.tvd.toFixed(2), editable && row.isProjection, update("tvd", TVD_VS), row.method === TVD_VS)}
               {Cell(row.dl.toFixed(2), false)}
               {Cell(row.vs.toFixed(2), editable && row.isProjection, update("vs", TVD_VS), row.method === TVD_VS)}
@@ -175,6 +179,13 @@ export default function DetailsTable({ showFullTable = false }) {
             </TableRow>
           );
         })}
+        {!details.length && (
+          <TableRow>
+            <TableCell colSpan={11} className={classes.emptyTableMessage}>
+              Select a survey or projection to see details here
+            </TableCell>
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );

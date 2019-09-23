@@ -26,6 +26,7 @@ import { TimeSliderProvider, DrillPhaseProvider, AppStateProvider, CrossSectionP
 
 // Import Provider initialStates
 import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
+import { FormationsStoreProvider } from "../Interpretation/InterpretationChart/Formations/store";
 
 // Lazy load toolbars
 const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
@@ -86,20 +87,22 @@ class App extends React.Component {
                         <PageLayout history={history}>
                           <MuiPickersUtilsProvider utils={MomentUtils}>
                             <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
-                              <CrossSectionProvider>
-                                <Route path="/:wellId" component={WellUpdate} />
-                                <Switch>
-                                  <Route path="/:wellId?" exact component={WellExplorer} />
-                                  <HeaderToolbar history={history}>
-                                    <TimeSliderToolbar>
-                                      <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                                      <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                      <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                                      <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                                    </TimeSliderToolbar>
-                                  </HeaderToolbar>
-                                </Switch>
-                              </CrossSectionProvider>
+                              <FormationsStoreProvider>
+                                <CrossSectionProvider>
+                                  <Route path="/:wellId" component={WellUpdate} />
+                                  <Switch>
+                                    <Route path="/:wellId?" exact component={WellExplorer} />
+                                    <HeaderToolbar history={history}>
+                                      <TimeSliderToolbar>
+                                        <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                        <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                        <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                        <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                      </TimeSliderToolbar>
+                                    </HeaderToolbar>
+                                  </Switch>
+                                </CrossSectionProvider>
+                              </FormationsStoreProvider>
                             </DrillPhaseProvider>
                           </MuiPickersUtilsProvider>
                         </PageLayout>

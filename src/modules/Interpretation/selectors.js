@@ -1,5 +1,6 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useCallback, useMemo } from "react";
+import some from "lodash/some";
 import { EMPTY_ARRAY, useWellLogData } from "../../api";
 import keyBy from "lodash/keyBy";
 import {
@@ -7,7 +8,9 @@ import {
   useSurveysDataContainer,
   useWellIdContainer,
   useSelectedWellInfoContainer,
-  useFormationsDataContainer
+  useFormationsDataContainer,
+  useWellPlanDataContainer,
+  useControlLogDataContainer
 } from "../App/Containers";
 import { extent, min, max } from "d3-array";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -406,7 +409,15 @@ const recomputeSurveysAndProjections = memoizeOne(
           const sign = bitProjPos > 0 ? 1 : -1;
           const cap = bitProjPos > 0 ? Math.max : Math.min;
           const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
-          acc[index] = calculateProjection({ ...combinedSvy, pos, tcl, fault, dip, tot, bot }, acc, index, propazm);
+          const itemWithProjection = calculateProjection(
+            { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
+            acc,
+            index,
+            propazm
+          );
+          if (itemWithProjection) {
+            acc[index] = itemWithProjection;
+          }
         }
       }
       return acc;
@@ -574,6 +585,47 @@ const parseWellInfo = memoizeOne((wellInfo = {}) => {
 export function useSelectedWellInfoColors() {
   const [{ wellInfo }] = useSelectedWellInfoContainer();
   return parseWellInfo(wellInfo);
+}
+
+export function useSetupWizardData() {
+  const [wellPlan, wPlanLoading] = useWellPlanDataContainer();
+  const [controlLogs, cLogLoading] = useControlLogDataContainer();
+  const [{ wellInfo }, wellInfoLoading] = useSelectedWellInfoContainer();
+  const { surveys, isLoading: surveysLoading } = useSurveysDataContainer();
+  const { formationsData, isLoading: formationsLoading } = useFormationsDataContainer();
+
+  // A default empty well has one entry in the well plan
+  const wellPlanIsImported = wellPlan && wellPlan.length > 1;
+  const controlLogIsImported = some(controlLogs, l => l.data && l.data.length && l.startmd && l.endmd);
+  const propAzmAndProjDipAreSet = wellInfo && !!Number(wellInfo.propazm) && !!Number(wellInfo.projdip);
+
+  const tieIn = (surveys && surveys[0]) || {};
+  const tieInIsCompleted = wellInfo && !!wellInfo.tot && !!tieIn.azm && !!tieIn.md && !!tieIn.inc;
+
+  // Formations must have TOT and BOT as layers
+  const layerNames = (formationsData && formationsData.map(l => l.label)) || [];
+  const formationsAreCompleted = layerNames.includes("TOT") && layerNames.includes("BOT");
+
+  const surveyDataIsImported = surveys && surveys.length > 1;
+  const allStepsAreCompleted =
+    wellPlanIsImported &&
+    controlLogIsImported &&
+    propAzmAndProjDipAreSet &&
+    tieInIsCompleted &&
+    formationsAreCompleted &&
+    surveyDataIsImported;
+  const dataHasLoaded = !(formationsLoading || surveysLoading || wellInfoLoading || cLogLoading || wPlanLoading);
+
+  return {
+    allStepsAreCompleted,
+    dataHasLoaded,
+    wellPlanIsImported,
+    controlLogIsImported,
+    propAzmAndProjDipAreSet,
+    tieInIsCompleted,
+    formationsAreCompleted,
+    surveyDataIsImported
+  };
 }
 
 export const logDataExtent = memoize(data => {

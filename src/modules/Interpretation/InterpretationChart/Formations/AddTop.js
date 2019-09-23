@@ -46,7 +46,7 @@ export default function AddTop({ addTop, selectedSurveyIndex, formationData }) {
       optimisticData
     })
       .then(result => {
-        dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id });
+        dispatch({ type: "CREATE_TOP_SUCCESS", pendingId, id: result.id, wellId });
       })
       .catch(() => {
         const nextSelected = get(formationData, "[0].id");
