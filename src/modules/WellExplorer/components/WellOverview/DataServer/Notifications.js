@@ -14,12 +14,12 @@ import { audioReducer } from "./reducers";
 import useAudio from "../../../../../hooks/useAudio";
 import { MEDIA_URL, ALARM, ALARM_ENABLED, INITIAL_AUDIO_STATE } from "../../../../../constants/interpretation";
 
-import { useSelectedWellInfoContainer } from "../../../../App/Containers";
+import { useWellInfo } from "../../../../../api";
 import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
 
 function Notifications({ wellId }) {
-  const [{ appInfo }, , , refreshFetchStore, , updateAppInfo] = useSelectedWellInfoContainer(wellId);
+  const [{ appInfo = {} }, , , refreshFetchStore, , updateAppInfo] = useWellInfo(wellId);
 
   const [audio, setAudio] = useReducer(audioReducer, INITIAL_AUDIO_STATE);
   const { import_alarm: alarm, import_alarm_enabled: alarmEnabled } = audio;

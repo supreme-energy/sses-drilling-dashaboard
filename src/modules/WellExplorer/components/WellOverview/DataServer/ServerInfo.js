@@ -7,13 +7,13 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import _ from "lodash";
 
-import { useSelectedWellInfoContainer } from "../../../../App/Containers";
+import { useWellInfo } from "../../../../../api";
 import Title from "../../../../../components/Title";
 import { serverFields, serverLabels, connectionTypes, initialServerState } from "../../../../../constants/dataServer";
 import classes from "./styles.scss";
 
 function ServerInfo({ wellId }) {
-  const [{ autorc }, , , refresh, , , , updateAutoRc] = useSelectedWellInfoContainer(wellId);
+  const [{ autorc = {} }, , , refresh, , , , updateAutoRc] = useWellInfo(wellId);
   const [values, setValues] = useState(initialServerState);
 
   const differenceKey = useMemo(() => autorc && Object.keys(values).filter(key => values[key] !== autorc[key])[0], [
@@ -87,6 +87,9 @@ function ServerInfo({ wellId }) {
               onChange={handleInputChange(serverFields.USERNAME)}
               margin="normal"
               onBlur={onBlur}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
             <TextField
               className={classes.textField}
@@ -96,6 +99,9 @@ function ServerInfo({ wellId }) {
               margin="normal"
               onBlur={onBlur}
               type="password"
+              InputLabelProps={{
+                shrink: true
+              }}
             />
             <TextField
               className={classes.extendedTextField}
@@ -104,6 +110,9 @@ function ServerInfo({ wellId }) {
               onChange={handleInputChange(serverFields.ENDPOINT)}
               margin="normal"
               onBlur={onBlur}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
           </div>
         </div>

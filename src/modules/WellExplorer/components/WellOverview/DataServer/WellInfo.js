@@ -8,15 +8,14 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 
-import { useWellBoreData } from "../../../../../api";
-import { useSelectedWellInfoContainer } from "../../../../App/Containers";
+import { useWellBoreData, useWellInfo } from "../../../../../api";
 import Title from "../../../../../components/Title";
 import { wellFields, wellLabels, initialWellState } from "../../../../../constants/dataServer";
 import classes from "./styles.scss";
 
 // TODO: Complete Well/WellLog/Well Bore selection when Tyler's endpoint is provided
 function WellInfo({ wellId }) {
-  const [{ autorc, appInfo }, , , refresh, , updateAppInfo, , updateAutoRc] = useSelectedWellInfoContainer(wellId);
+  const [{ autorc = {}, appInfo = {} }, , , refresh, , updateAppInfo, , updateAutoRc] = useWellInfo(wellId);
   const data = useWellBoreData();
   const [values, setValues] = useState(initialWellState);
 
@@ -116,6 +115,9 @@ function WellInfo({ wellId }) {
               onChange={handleInputChange(wellFields.START_DEPTH)}
               margin="normal"
               onBlur={onBlurAutoRc}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
             <TextField
               className={classes.extendedTextField}
@@ -124,6 +126,9 @@ function WellInfo({ wellId }) {
               onChange={handleInputChange(wellFields.GR_IMPORT)}
               margin="normal"
               onBlur={onBlurAppInfo}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
           </div>
           <Box display="flex" flexDirection="column">
