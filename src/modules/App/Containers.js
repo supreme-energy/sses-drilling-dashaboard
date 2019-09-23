@@ -13,14 +13,9 @@ import {
 import { drillPhaseReducer } from "./reducers";
 import { ALL } from "../../constants/wellSections";
 import { useComboContainer, useAddProjection, useDeleteProjection } from "../ComboDashboard/containers/store";
-import {
-  useComputedFormations,
-  useComputedSurveysAndProjections,
-  getFormatinVisibilitySettings
-} from "../Interpretation/selectors";
+import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
 import { useSelectionActions } from "../Interpretation/actions";
-import { useFormationsStore } from "../Interpretation/InterpretationChart/Formations/store";
 
 const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
@@ -267,12 +262,6 @@ export function useCrossSectionData() {
 
   const addProjection = useAddProjection();
   const deleteProjection = useDeleteProjection();
-  const { wellId } = useWellIdContainer();
-  const [{ formationVisibilityByWellAndTop }] = useFormationsStore();
-  const getFormationVisibility = useCallback(
-    id => getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, id),
-    [formationVisibilityByWellAndTop, wellId]
-  );
 
   return {
     addProjection,
@@ -282,8 +271,7 @@ export function useCrossSectionData() {
     toggleSegmentSelection,
     deselectAll,
     calcSections: rawSections,
-    calculatedFormations: formations,
-    getFormationVisibility
+    calculatedFormations: formations
   };
 }
 

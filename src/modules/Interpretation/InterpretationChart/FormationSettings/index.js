@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Box, IconButton, Typography, CircularProgress } from "@material-ui/core";
 import { DeleteForever, Visibility, VisibilityOff } from "@material-ui/icons";
 import { useFormationsStore } from "../Formations/store";
-import { useSelectedFormation, getFormatinVisibilitySettings } from "../../selectors";
+import { useSelectedFormation } from "../../selectors";
 import { useFormationsDataContainer, useWellIdContainer } from "../../../App/Containers";
 import withConfirmDelete from "../../../../components/withConfirmDelete";
 import css from "./styles.scss";
@@ -22,19 +22,7 @@ const FormationColor = ({ label, ...props }) => (
   </Box>
 );
 
-function SettingsContent({
-  pendingAddTop,
-  selectedFormation,
-  formationsData,
-  deleteTop,
-  dispatch,
-  updateTop,
-  wellId,
-  interpretationLine,
-  interpretationFill,
-  vsLine,
-  vsFill
-}) {
+function SettingsContent({ pendingAddTop, selectedFormation, formationsData, deleteTop, dispatch, updateTop, wellId }) {
   const thickness = get(selectedFormation, "data[0].thickness");
   const selectionBgColor = `#${get(selectedFormation, "bg_color")}`;
   const selectionBgAlpha = Number(get(selectedFormation, "bg_percent"));
@@ -128,15 +116,10 @@ function SettingsContent({
             size="small"
             disableRipple
             onClick={() =>
-              dispatch({
-                type: "CHANGE_FORMATION_VISIBILITY",
-                wellId,
-                topId: selectedFormation.id,
-                interpretationLine: !interpretationLine
-              })
+              updateTop({ id: selectedFormation.id, interp_line_show: !selectedFormation.interp_line_show })
             }
           >
-            {interpretationLine ? <Visibility /> : <VisibilityOff />}
+            {selectedFormation.interp_line_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
         </div>
 
@@ -144,16 +127,9 @@ function SettingsContent({
           <IconButton
             size="small"
             disableRipple
-            onClick={() =>
-              dispatch({
-                type: "CHANGE_FORMATION_VISIBILITY",
-                wellId,
-                topId: selectedFormation.id,
-                vsLine: !vsLine
-              })
-            }
+            onClick={() => updateTop({ id: selectedFormation.id, vert_line_show: !selectedFormation.vert_line_show })}
           >
-            {vsLine ? <Visibility /> : <VisibilityOff />}
+            {selectedFormation.vert_line_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
         </div>
 
@@ -162,15 +138,10 @@ function SettingsContent({
             size="small"
             disableRipple
             onClick={() =>
-              dispatch({
-                type: "CHANGE_FORMATION_VISIBILITY",
-                wellId,
-                topId: selectedFormation.id,
-                interpretationFill: !interpretationFill
-              })
+              updateTop({ id: selectedFormation.id, interp_fill_show: !selectedFormation.interp_fill_show })
             }
           >
-            {interpretationFill ? <Visibility /> : <VisibilityOff />}
+            {selectedFormation.interp_fill_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
         </div>
 
@@ -178,16 +149,9 @@ function SettingsContent({
           <IconButton
             size="small"
             disableRipple
-            onClick={() =>
-              dispatch({
-                type: "CHANGE_FORMATION_VISIBILITY",
-                wellId,
-                topId: selectedFormation.id,
-                vsFill: !vsFill
-              })
-            }
+            onClick={() => updateTop({ id: selectedFormation.id, vert_fill_show: !selectedFormation.vert_fill_show })}
           >
-            {vsFill ? <Visibility /> : <VisibilityOff />}
+            {selectedFormation.vert_fill_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
         </div>
       </div>
@@ -196,7 +160,7 @@ function SettingsContent({
 }
 
 export default function FormationSettings() {
-  const [{ pendingAddTop, addTopLoading, formationVisibilityByWellAndTop }, dispatch] = useFormationsStore();
+  const [{ pendingAddTop, addTopLoading }, dispatch] = useFormationsStore();
   const selectedFormation = useSelectedFormation();
   const { formationsData } = useFormationsDataContainer();
   const { wellId } = useWellIdContainer();
@@ -209,8 +173,7 @@ export default function FormationSettings() {
     dispatch,
     pendingAddTop,
     updateTop,
-    wellId,
-    ...getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, selectedFormation && selectedFormation.id)
+    wellId
   };
 
   return (

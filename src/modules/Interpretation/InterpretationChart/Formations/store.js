@@ -6,30 +6,8 @@ const initialState = {
   editMode: false,
   selectedFormation: null,
   pendingAddTop: false,
-  addTopLoading: false,
-  formationVisibilityByWellAndTop: {}
+  addTopLoading: false
 };
-
-function updateFormationVisibility(state, { wellId, topId, interpretationLine, interpretationFill, vsLine, vsFill }) {
-  const wellState = state.formationVisibilityByWellAndTop[wellId] || {};
-  const topState = wellState[topId] || {};
-
-  const changes = pickBy({ interpretationLine, interpretationFill, vsLine, vsFill }, d => d !== undefined);
-
-  return {
-    ...state,
-    formationVisibilityByWellAndTop: {
-      ...state.formationVisibilityByWellAndTop,
-      [wellId]: {
-        ...wellState,
-        [topId]: {
-          ...topState,
-          ...changes
-        }
-      }
-    }
-  };
-}
 
 function formationsReducer(state, action) {
   switch (action.type) {
@@ -66,17 +44,11 @@ function formationsReducer(state, action) {
       };
     }
     case "CREATE_TOP_SUCCESS": {
-      const newState = {
+      return {
         ...state,
         addTopLoading: false,
         selectedFormation: state.selectedFormation === action.pendingId ? action.id : state.selectedFormation
       };
-      return updateFormationVisibility(newState, {
-        wellId: action.wellId,
-        topId: action.id,
-        vsFill: false,
-        interpretationFill: false
-      });
     }
     case "CREATE_TOP_ERROR": {
       return {
@@ -90,9 +62,6 @@ function formationsReducer(state, action) {
         ...state,
         selectedFormation: state.selectedFormation === action.id ? action.nextId : state.selectedFormation
       };
-    }
-    case "CHANGE_FORMATION_VISIBILITY": {
-      return updateFormationVisibility(state, action);
     }
     default:
       throw new Error("action not found");

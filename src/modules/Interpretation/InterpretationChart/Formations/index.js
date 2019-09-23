@@ -3,7 +3,7 @@ import PixiRectangle from "../../../../components/PixiRectangle";
 import { useFormationsDataContainer, useWellIdContainer } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
-import { useSelectedSurvey, useComputedSurveysAndProjections, getFormatinVisibilitySettings } from "../../selectors";
+import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
 import PixiLine from "../../../../components/PixiLine";
 import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import PixiContainer from "../../../../components/PixiContainer";
@@ -25,7 +25,6 @@ function Formation({
   interpretationFill
 }) {
   const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
-
   return (
     <React.Fragment>
       <PixiContainer
@@ -76,6 +75,8 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
         y,
         height,
         label: item.label,
+        interpretationLine: item.interp_line_show,
+        interpretationFill: item.interp_fill_show,
         id: item.id,
         showLine: Boolean(item.show_line),
         backgroundColor: Number(`0x${item.bg_color}`),
@@ -94,6 +95,8 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
     height: 20,
     label: lastFormationItem.label,
     id: lastFormationItem.id,
+    interpretationLine: lastFormationItem.interp_line_show,
+    interpretationFill: lastFormationItem.interp_fill_show,
     showLine: Boolean(lastFormationItem.show_line),
     backgroundColor: Number(`0x${lastFormationItem.bg_color}`),
     backgroundAlpha: Number(lastFormationItem.bg_percent),
@@ -104,10 +107,7 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 }
 
 export default React.memo(({ container, width, view, gridGutter }) => {
-  const [
-    { selectedFormation, editMode, pendingAddTop, formationVisibilityByWellAndTop },
-    dispatch
-  ] = useFormationsStore();
+  const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const { refresh } = useInterpretationRenderer();
   const { wellId } = useWellIdContainer();
 
@@ -134,7 +134,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
     [selectedFormation, serverFormations, changeSegmentSelection, editMode]
   );
 
-  useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData, formationVisibilityByWellAndTop]);
+  useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData]);
 
   return (
     <PixiContainer
@@ -145,13 +145,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
         <React.Fragment>
           {selectedSurvey &&
             formationDataForSelectedSurvey.map((f, index) => (
-              <Formation
-                container={container}
-                width={width}
-                {...f}
-                key={f.id}
-                {...getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, f.id)}
-              />
+              <Formation container={container} width={width} {...f} key={f.id} />
             ))}
           {editMode && (
             <FormationSegments

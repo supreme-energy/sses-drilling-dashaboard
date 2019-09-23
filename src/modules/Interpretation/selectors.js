@@ -14,12 +14,10 @@ import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import memoizeOne from "memoize-one";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
-import mapValues from "lodash/mapValues";
 import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/formulas";
 import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
-import get from "lodash/get";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -623,11 +621,4 @@ export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
 
 export function getColorForWellLog(colorsByWellLog, logId) {
   return colorsByWellLog[logId] || "7E7D7E";
-}
-
-export function getFormatinVisibilitySettings(formationVisibilityByWellAndTop, wellId, topId) {
-  const { interpretationLine, interpretationFill, vsLine, vsFill } =
-    get(formationVisibilityByWellAndTop, `${wellId}.${topId}`) || {};
-
-  return mapValues({ interpretationLine, interpretationFill, vsLine, vsFill }, v => v || v === undefined);
 }

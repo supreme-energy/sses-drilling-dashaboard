@@ -27,8 +27,7 @@ const CrossSection = props => {
     calcSections,
     calculatedFormations,
     addProjection,
-    deleteProjection,
-    getFormationVisibility
+    deleteProjection
   } = dataObj;
 
   const [xField, yField] = useMemo(() => {
@@ -122,8 +121,7 @@ const CrossSection = props => {
       addProjection,
       deleteProjection,
       updateSegments,
-      debouncedSave,
-      getFormationVisibility
+      debouncedSave
     });
   }, [
     view.x,
@@ -152,8 +150,7 @@ const CrossSection = props => {
     updateView,
     deleteProjection,
     updateSegments,
-    debouncedSave,
-    getFormationVisibility
+    debouncedSave
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;

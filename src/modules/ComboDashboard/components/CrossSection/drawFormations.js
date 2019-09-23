@@ -18,9 +18,13 @@ export function drawFormations(container) {
     for (let layerIdx = 0; layerIdx < layers.length - 1; layerIdx++) {
       const currLayer = layers[layerIdx];
       const nextLayer = layers[layerIdx + 1];
-      let { bg_color: currColor, bg_percent: currAlpha, color: lineColor } = currLayer;
-
-      const { vsLine, vsFill } = props.getFormationVisibility(currLayer.id);
+      let {
+        bg_color: currColor,
+        bg_percent: currAlpha,
+        color: lineColor,
+        vert_line_show: showVsLine,
+        vert_fill_show: showVsFill
+      } = currLayer;
 
       if (!layerLines[layerIdx]) {
         layerLines[layerIdx] = container.addChild(new PIXI.Graphics());
@@ -39,7 +43,7 @@ export function drawFormations(container) {
         const p3 = nextLayer.data[pointIdx + 1];
         const p4 = nextLayer.data[pointIdx];
 
-        if (vsFill) {
+        if (showVsFill) {
           if (!layerTiles[layerIdx]) layerTiles[layerIdx] = [];
           if (!layerTiles[layerIdx][pointIdx]) {
             layerTiles[layerIdx][pointIdx] = container.addChild(new PIXI.Graphics());
@@ -62,7 +66,7 @@ export function drawFormations(container) {
           tile.drawPolygon(tilePath);
         }
 
-        if (vsLine) {
+        if (showVsLine) {
           const line = layerLines[layerIdx];
           line.moveTo(...scale(p1.vs, p1.tot + p2.fault));
           line.lineTo(...scale(p2.vs, p2.tot));
