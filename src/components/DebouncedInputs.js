@@ -48,17 +48,21 @@ export const useDebouncedValue = ({ value, onChange, debounceInterval }) => {
     [value, isPending]
   );
 
-  const valueChanged = internalState.current.prevValue !== value;
-
-  return [valueChanged && !isPending ? value : internalState.current.internalValue, onChangeHandler, onChangeDebounce];
+  return [!isPending ? value : internalState.current.internalValue, onChangeHandler, onChangeDebounce, tick];
 };
 
-export function DebouncedTextField({ value, onChange, debounceInterval, ...rest }) {
+export function DebouncedTextField({ value, onChange, debounceInterval, ...inputProps }) {
   const [actualValue, onChangeHandler] = useDebouncedValue({ value, onChange, debounceInterval });
+  const [isFocused, updateIsFocused] = useState(false);
   return (
     <TextField
-      {...rest}
-      value={actualValue}
+      {...inputProps}
+      value={isFocused ? undefined : actualValue}
+      onFocus={() => updateIsFocused(true)}
+      onBlur={e => {
+        inputProps.onBlur && inputProps.onBlur(e);
+        updateIsFocused(false);
+      }}
       onChange={e => {
         onChangeHandler(e.target.value);
       }}
@@ -72,3 +76,18 @@ DebouncedTextField.propsTypes = {
   value: PropTypes.string
 };
 DebouncedTextField.defaultProps = defaultProps;
+
+export const NumericDebouceTextField = React.memo(props => {
+  return (
+    <DebouncedTextField
+      {...props}
+      type="number"
+      onChange={value => {
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          return props.onChange(numericValue);
+        }
+      }}
+    />
+  );
+});

@@ -22,7 +22,10 @@ import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
-const gridGutter = 60;
+import { useFormationsStore } from "./Formations/store";
+import get from "lodash/get";
+
+export const gridGutter = 65;
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -45,6 +48,7 @@ function useInterpretationWebglRenderer() {
   });
 
   const viewportContainer = useRef(null);
+  const topContainerRef = useRef(null);
 
   const viewport = useViewport({
     renderer,
@@ -67,7 +71,8 @@ function useInterpretationWebglRenderer() {
     canvasRef,
     size: { width, height },
     viewport,
-    viewportContainer
+    viewportContainer,
+    topContainerRef
   };
 }
 
@@ -84,7 +89,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     canvasRef,
     size: { width, height },
     view,
-    updateView
+    updateView,
+    topContainerRef
   } = useInterpretationRenderer();
 
   const { selectedWellLog, selectedWellLogIndex } = useSelectedWellLog();
@@ -98,8 +104,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && controlLogs && controlLogs.length && controlLogs.data && controlLogs.data.length) {
-        const minDepth = min(controlLogs, cl => cl.data[0].md);
+      if (!scaleInitialized && controlLogs && controlLogs.length) {
+        const minDepth = min(controlLogs, cl => get(cl, "data[0].md"));
+
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
         internalStateRef.current.scaleInitialized = true;
       }
@@ -131,6 +138,8 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     }
   ] = useComboContainer();
 
+  const [{ editMode: formationsEditMode }] = useFormationsStore();
+
   const colors = useSelectedWellInfoColors();
 
   useEffect(refresh, [
@@ -151,14 +160,15 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     currentEditedLog,
     logsBiasAndScale,
     colorsByWellLog,
-    logsBiasAndScale
+    logsBiasAndScale,
+    formationsEditMode
   ]);
 
   return (
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} />
+      <Formations container={viewport} width={width} view={view} gridGutter={gridGutter} />
 
       {controlLogs.map(cl => (
         <ControlLogLine key={cl.id} log={cl} container={viewport} />
@@ -189,20 +199,25 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         backgroundColor={0xffffff}
         container={viewport}
       />
-      <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      {!formationsEditMode && (
+        <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+      )}
       <TCLLine container={viewport} width={width} />
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
-      <BiasAndScale
-        controlLogs={controlLogs}
-        logs={logList}
-        wellId={wellId}
-        container={stage}
-        y={height - 10}
-        gridGutter={gridGutter}
-        refresh={refresh}
-        totalWidth={width}
-        canvas={canvasRef.current}
-      />
+      {!formationsEditMode && (
+        <BiasAndScale
+          controlLogs={controlLogs}
+          logs={logList}
+          wellId={wellId}
+          container={stage}
+          y={height - 10}
+          gridGutter={gridGutter}
+          refresh={refresh}
+          totalWidth={width}
+          canvas={canvasRef.current}
+        />
+      )}
+      <PixiContainer ref={topContainerRef} container={viewport} />
     </div>
   );
 }

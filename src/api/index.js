@@ -1,6 +1,6 @@
 import { COMPLETED } from "../constants/drillingStatus";
 import useFetch from "react-powertools/data/useFetch";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
@@ -31,6 +31,9 @@ export const SET_WELL_PROJECTIONS = "/setprojectionfield.php";
 export const ADD_WELL_PROJECTION = "/projection/add.php";
 export const DELETE_WELL_PROJECTIONS = "/delete_projection.php";
 export const GET_WELL_FORMATIONS = "/formationlist.php";
+export const ADD_FORMATION = "formation/add.php";
+export const UPDATE_FORMATION = "formation/update.php";
+export const REMOVE_FORMATION = "formation/delete.php";
 export const GET_WELL_CONTROL_LOG_LIST = "/controlloglist.php";
 export const GET_WELL_CONTROL_LOG = "/controllog.php";
 export const UPLOAD_CONTROL_LOG_LAS = "/controllog/import.php";
@@ -550,8 +553,35 @@ const formationsTransform = memoizeOne(formationList => {
   });
 });
 
+const sortByThickness = (a, b) => {
+  const aThickness = Number(_.get(a, "data[0].thickness"));
+  const bThickness = Number(_.get(b, "data[0].thickness"));
+  return aThickness - bThickness;
+};
+
+const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
+  const r = await fetch(
+    {
+      path: UPDATE_FORMATION,
+      method: "POST",
+      query: {
+        seldbname: wellId
+      },
+      body: props
+    },
+    (currentFormations, result) => {
+      return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f))).sort(sortByThickness);
+    }
+  );
+
+  return {
+    result: r,
+    requestId
+  };
+};
+
 export function useFetchFormations(wellId) {
-  const [data, ...rest] = useFetch(
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_FORMATIONS,
       query: {
@@ -563,7 +593,104 @@ export function useFetchFormations(wellId) {
       transform: formationsTransform
     }
   );
-  return [data || EMPTY_ARRAY, ...rest];
+
+  const [updateTopOptimisticData, changeUpdateTopOptimisticData] = useState(null);
+  const internalState = useRef({ lastRequestId: null });
+  const formations = updateTopOptimisticData || data || EMPTY_ARRAY;
+
+  const addTop = useCallback(
+    ({ thickness, optimisticData, pendingId }) => {
+      const defaultProps = {
+        label: "New Formation",
+        show_line: "Yes",
+        color: "000000",
+        bg_color: "ffffff",
+        bg_percent: 1
+      };
+      const optimisticResult = [
+        ...data,
+        {
+          ...defaultProps,
+          id: pendingId,
+          data: optimisticData
+        }
+      ].sort(sortByThickness);
+      return fetch(
+        {
+          path: ADD_FORMATION,
+          method: "POST",
+          query: {
+            seldbname: wellId
+          },
+          body: { ...defaultProps, thickness },
+          optimisticResult
+        },
+        (currentFormations, result) => {
+          const formations = currentFormations
+            .filter(f => f.id !== pendingId)
+            .concat(result)
+            .sort(sortByThickness);
+
+          return formationsTransform(formations);
+        }
+      );
+    },
+    [fetch, data, wellId]
+  );
+
+  const deleteTop = useCallback(
+    id => {
+      const optimisticResult = data.filter(f => f.id !== id);
+      fetch({
+        path: REMOVE_FORMATION,
+        optimisticResult,
+        query: {
+          seldbname: wellId,
+          id
+        }
+      });
+    },
+    [fetch, wellId, data]
+  );
+
+  const updateTop = useCallback(
+    async props => {
+      const optimisticResult = formations
+        .map(d => {
+          if (d.id === props.id) {
+            const formation = {
+              ...d,
+              ...props
+            };
+            if (props.thickness) {
+              formation.data = formation.data.map(fd => ({ ...fd, thickness: Number(props.thickness) }));
+            }
+            return formation;
+          }
+          return d;
+        })
+        .sort(sortByThickness);
+
+      changeUpdateTopOptimisticData(optimisticResult);
+      let result;
+      try {
+        const requestId = _.uniqueId();
+        internalState.current.lastRequestId = requestId;
+        result = await updateFormationTop({ wellId, props, fetch, requestId });
+      } catch (e) {
+        throw e;
+      } finally {
+        if (result.requestId === internalState.current.lastRequestId) {
+          changeUpdateTopOptimisticData(null);
+        }
+      }
+
+      return result;
+    },
+    [formations, wellId, changeUpdateTopOptimisticData, fetch]
+  );
+
+  return [formations, isLoading, error, isPolling, isFetchingMore, { refresh, addTop, deleteTop, updateTop }];
 }
 
 const projectionsTransform = memoizeOne(projections => {

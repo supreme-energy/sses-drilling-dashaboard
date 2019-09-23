@@ -43,7 +43,7 @@ const SettingsMenu = React.memo(
     const { updateAdditionalLogDetails } = useAdditionalDataLog(wellId);
     const color = _.get(selectedLogs, `[${logId}][${view}].color`);
 
-    const handleSaveColor = hex => {
+    const handleSaveColor = ({ hex }) => {
       const id = dataBySection[view].id;
       const color = hex.substring(1);
       setSelectedLog({ type: "SAVE_COLOR", payload: { logId, view, color } });
