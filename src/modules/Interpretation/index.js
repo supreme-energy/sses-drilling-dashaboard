@@ -1,5 +1,5 @@
 import React, { useReducer, useCallback, useMemo } from "react";
-import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch } from "@material-ui/core";
+import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch, Button } from "@material-ui/core";
 import WidgetCard from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
@@ -15,8 +15,27 @@ import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
 import { useControlLogDataContainer, useWellIdContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
-import { useSetupWizardData } from "./selectors";
+import { useFormationsStore } from "./InterpretationChart/Formations/store";
+import FormationControls from "./InterpretationSettings/FormationControls";
+import { useSelectedWellLog, useSetupWizardData } from "./selectors";
+import FormationSettings from "./InterpretationChart/FormationSettings";
+
 import WizardChecklist from "./components/WizardChecklist";
+
+function TopsButton() {
+  const [, dispatch] = useFormationsStore();
+  const { selectedWellLog } = useSelectedWellLog();
+  return (
+    <Button
+      variant="text"
+      color="primary"
+      onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}
+      disabled={!selectedWellLog}
+    >
+      Tops
+    </Button>
+  );
+}
 
 const Interpretation = React.memo(
   ({
@@ -29,7 +48,8 @@ const Interpretation = React.memo(
     currentEditedLog,
     logsBiasAndScale,
     resetLogBiasAndScale,
-    changeCurrentEditedLog
+    changeCurrentEditedLog,
+    formationsEditMode
   }) => {
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
     const logSettingsProps = {
@@ -38,43 +58,54 @@ const Interpretation = React.memo(
       currentEditedLog,
       logsBiasAndScale
     };
+    const showFormationControls = formationsEditMode;
+    const showLogSettings = !formationsEditMode && currentEditedLog;
+    const showInterpretationSettings = !formationsEditMode && !currentEditedLog;
     const { dataHasLoaded, allStepsAreCompleted, ...setupSteps } = useSetupWizardData();
+
     return (
       <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
         <CloudServerModal wellId={wellId} />
-        {dataHasLoaded ? (
-          allStepsAreCompleted ? (
-            <SelectionStatsContainer logs={logList} wellId={wellId} />
-          ) : (
-            <WizardChecklist {...setupSteps} />
-          )
-        ) : null}
-        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Box display="flex" flexDirection="row" alignItems="center">
-            <TCLValue />
-            <FormControlLabel
-              classes={{ root: css.switchLabel }}
-              value="start"
-              control={
-                <Switch
-                  color="secondary"
-                  checked={draftMode}
-                  onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
+        {formationsEditMode ? (
+          <FormationSettings />
+        ) : (
+          <React.Fragment>
+            {dataHasLoaded ? (
+              allStepsAreCompleted ? (
+                <SelectionStatsContainer logs={logList} wellId={wellId} />
+              ) : (
+                <WizardChecklist {...setupSteps} />
+              )
+            ) : null}
+            <Box display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+              <Box display="flex" flexDirection="row" alignItems="center">
+                <TCLValue />
+                <FormControlLabel
+                  classes={{ root: css.switchLabel }}
+                  value="start"
+                  control={
+                    <Switch
+                      color="secondary"
+                      checked={draftMode}
+                      onChange={() => dispatch({ type: "TOGGLE_DRAFT_MODE" })}
+                    />
+                  }
+                  label="Draft (D)"
+                  labelPlacement="start"
                 />
-              }
-              label="Draft (D)"
-              labelPlacement="start"
-            />
-          </Box>
-          {/* Todo: add formations top here */}
-        </Box>
+              </Box>
+              <TopsButton variant="text" color="primary">
+                Tops
+              </TopsButton>
+            </Box>
+          </React.Fragment>
+        )}
         <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
         <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
-
-        {currentEditedLog ? (
-          <LogSettings {...logSettingsProps} />
-        ) : (
+        {showFormationControls && <FormationControls />}
+        {showLogSettings && <LogSettings {...logSettingsProps} />}
+        {showInterpretationSettings && (
           <React.Fragment>
             <div className="layout horizontal">
               <IconButton
@@ -101,12 +132,12 @@ const Interpretation = React.memo(
   }
 );
 
-const InterpretatinContainer = React.memo(props => {
+const InterpretationContainer = React.memo(props => {
   const { wellId } = useWellIdContainer();
   const [controlLogs] = useControlLogDataContainer();
   const cLogsFiltered = useMemo(() => controlLogs.filter(l => l.data.length && l.endmd && l.startmd), [controlLogs]);
   const [logList] = useWellLogsContainer();
-
+  const [{ editMode: formationsEditMode }] = useFormationsStore();
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
   const resetLogBiasAndScale = useCallback(logId => dispatch({ type: "RESET_LOG_BIAS_AND_SCALE", logId }), [dispatch]);
   const changeCurrentEditedLog = useCallback(
@@ -122,9 +153,10 @@ const InterpretatinContainer = React.memo(props => {
     currentEditedLog,
     logsBiasAndScale,
     resetLogBiasAndScale,
-    changeCurrentEditedLog
+    changeCurrentEditedLog,
+    formationsEditMode
   };
   return <Interpretation {...props} {...interpretationProps} />;
 });
 
-export default InterpretatinContainer;
+export default InterpretationContainer;
