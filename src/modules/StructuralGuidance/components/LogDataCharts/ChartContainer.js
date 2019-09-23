@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Box from "@material-ui/core/Box";
 import _ from "lodash";
 
+import { useSelectedLogDataScaleContainer } from "../../../App/Containers";
 import { INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import { useAdditionalDataLog } from "../../../../api";
 import ChartControls, { BiasControls } from "./ChartControls";
@@ -15,7 +16,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   const {
     data: { color, data = [], label: initialLogName, scalelo, scalehi }
   } = useAdditionalDataLog(wellId, logId);
-  const [selectedLogs, setSelectedLog] = useState({});
+  const { selectedLogs, setSelectedLog } = useSelectedLogDataScaleContainer();
   const [isEditingScale, setEditingScale] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [{ isSettingsVisible, settingsView }, setSettingsMenu] = useState({
@@ -23,7 +24,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
     settingsView: ""
   });
 
-  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs, "checked")), [selectedLogs]);
+  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs[logId], "checked")), [selectedLogs, logId]);
 
   const handleOpenLogMenu = useCallback(event => {
     setAnchorEl(event.currentTarget);
@@ -40,10 +41,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, []);
 
   const handleResetScale = useCallback(() => {
-    setSelectedLog(state => {
-      return { ...state, [settingsView]: { ...state[settingsView], currScale: state[settingsView].prevScale } };
-    });
-  }, [settingsView]);
+    setSelectedLog({ type: "RESET_SCALE", payload: { logId, settingsView } });
+  }, [settingsView, setSelectedLog, logId]);
 
   const handleCloseScale = useCallback(() => {
     handleResetScale();
@@ -51,22 +50,15 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, [handleResetScale]);
 
   const handleSaveScale = useCallback(() => {
-    setSelectedLog(state => {
-      return { ...state, [settingsView]: { ...state[settingsView], prevScale: state[settingsView].currScale } };
-    });
+    setSelectedLog({ type: "SAVE_SCALE", payload: { logId, settingsView } });
     setEditingScale(false);
-  }, [settingsView]);
+  }, [settingsView, setSelectedLog, logId]);
 
   const handleUpdateScale = useCallback(
-    (scale, bias) => {
-      setSelectedLog(state => {
-        return {
-          ...state,
-          [settingsView]: { ...state[settingsView], currScale: { scale, bias } }
-        };
-      });
+    (scale, bias, scaleLow, scaleHigh) => {
+      setSelectedLog({ type: "UPDATE_SCALE", payload: { logId, settingsView, scale, bias, scaleLow, scaleHigh } });
     },
-    [settingsView]
+    [settingsView, setSelectedLog, logId]
   );
 
   const handleArrowBack = useCallback(
@@ -103,21 +95,23 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
 
   useEffect(() => {
     if (color) {
-      setSelectedLog(selectedLogs => {
-        return {
-          ...selectedLogs,
+      setSelectedLog({
+        type: "ADD_LOG",
+        payload: {
+          logId,
+          name: initialLogName,
           [initialLogName]: {
             color,
             checked: true,
             scalelo,
             scalehi,
-            currScale: { ...INITIAL_SCALE_BIAS },
-            prevScale: { ...INITIAL_SCALE_BIAS }
+            currScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi },
+            prevScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi }
           }
-        };
+        }
       });
     }
-  }, [color, initialLogName, scalelo, scalehi]);
+  }, [color, initialLogName, scalelo, scalehi, setSelectedLog, logId]);
 
   useEffect(() => {
     if (!currentLogs.includes(settingsView)) {
@@ -139,9 +133,10 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         <Chart
           wellId={wellId}
           data={data}
+          logId={logId}
           xAxis={xAxis}
           isEditing={isEditingScale}
-          selectedLogs={selectedLogs}
+          selectedLogs={selectedLogs[logId]}
           currentLogs={currentLogs}
           dataBySection={dataBySection}
           currentLog={settingsView}
@@ -150,8 +145,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         />
         <BiasControls
           isEditingScale={isEditingScale}
-          view={settingsView}
-          selectedLogs={selectedLogs}
+          logInfo={_.get(selectedLogs, `[${logId}][${settingsView}]`)}
+          setScale={handleUpdateScale}
           handleReset={handleResetScale}
           handleClose={handleCloseScale}
           handleSave={handleSaveScale}
@@ -159,6 +154,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
       </Box>
 
       <LogMenu
+        logId={logId}
         menuItems={menuItems}
         selectedLogs={selectedLogs}
         setSelectedLog={setSelectedLog}
@@ -179,6 +175,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
         currentLogs={currentLogs}
         handleArrowBack={handleArrowBack}
         handleArrowForward={handleArrowForward}
+        logId={logId}
       />
     </div>
   );
@@ -186,7 +183,7 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
 
 ChartContainer.propTypes = {
   wellId: PropTypes.string,
-  logId: PropTypes.number,
+  logId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   availableLogs: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string,

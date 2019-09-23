@@ -34,17 +34,19 @@ const SettingsMenu = React.memo(
     selectedLogs,
     setEditingScale,
     handleArrowBack,
-    handleArrowForward
+    handleArrowForward,
+    logId
   }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const { wellId } = useWellIdContainer();
     const { dataBySection = {} } = useAdditionalDataLogsList(wellId);
     const { updateAdditionalLogDetails } = useAdditionalDataLog(wellId);
+    const color = _.get(selectedLogs, `[${logId}][${view}].color`);
 
     const handleSaveColor = ({ hex }) => {
       const id = dataBySection[view].id;
       const color = hex.substring(1);
-      setSelectedLog({ ...selectedLogs, [view]: { ...selectedLogs[view], color } });
+      setSelectedLog({ type: "SAVE_COLOR", payload: { logId, view, color } });
       updateAdditionalLogDetails(wellId, { id, color });
       handleClosePicker();
     };
@@ -95,7 +97,7 @@ const SettingsMenu = React.memo(
                     style={{
                       height: 25,
                       width: 25,
-                      backgroundColor: `#${_.get(selectedLogs, `[${view}].color`)}`
+                      backgroundColor: `#${color}`
                     }}
                   />
                 </Paper>
@@ -117,12 +119,7 @@ const SettingsMenu = React.memo(
           </List>
         </DialogContent>
 
-        <ColorPicker
-          color={_.get(selectedLogs, `[${view}].color`)}
-          handleClose={handleClosePicker}
-          handleSave={handleSaveColor}
-          anchorEl={anchorEl}
-        />
+        <ColorPicker color={color} handleClose={handleClosePicker} handleSave={handleSaveColor} anchorEl={anchorEl} />
       </Dialog>
     );
   }
@@ -133,6 +130,7 @@ SettingsMenu.propTypes = {
   log: PropTypes.string,
   view: PropTypes.string,
   setMenu: PropTypes.func,
+  logId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   handleRemoveChart: PropTypes.func,
   setEditingScale: PropTypes.func,
   setSelectedLog: PropTypes.func,
