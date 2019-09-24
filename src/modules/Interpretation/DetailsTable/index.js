@@ -11,7 +11,8 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableBody
+  TableBody,
+  Box
 } from "@material-ui/core";
 import { Close } from "@material-ui/icons";
 import css from "./styles.scss";
@@ -39,12 +40,14 @@ export default function DetailsTable() {
       {editMode && selectedFormation && <TableButton onClick={toggleModal} />}
       {showPopup && (
         <Dialog onClose={toggleModal} maxWidth={false} aria-labelledby="customized-dialog-title" open={modalOpened}>
-          <DialogTitle className="layout horizontal space-between">
-            <span>{selectedFormation.label}</span>
-            <IconButton aria-label="Close" className={css.closeButton} onClick={toggleModal}>
+          <Box display="flex" justifyContent="space-between">
+            <DialogTitle className="layout horizontal space-between">
+              <span>{selectedFormation.label}</span>
+            </DialogTitle>
+            <IconButton aria-label="Close" className={classNames(css.closeButton, "self-center")} onClick={toggleModal}>
               <Close />
             </IconButton>
-          </DialogTitle>
+          </Box>
           <DialogContent className={css.dialogContent}>
             <Table className={classNames(css.table, css.flexTable)}>
               <TableHead>
