@@ -102,7 +102,7 @@ export const WellExplorer = ({
         zoomControl={false}
       />
       <div className={classes.row}>
-        <div className={classes.column}>
+        <div className={classNames(classes.column, "space-between")}>
           <SearchCard
             className={classes.searchCard}
             searchTerm={searchTerm}
