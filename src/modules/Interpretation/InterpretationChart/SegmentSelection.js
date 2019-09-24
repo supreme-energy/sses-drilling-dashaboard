@@ -117,7 +117,7 @@ function PixiTooltip({
 }
 
 PixiTooltip.defaultProps = {
-  labelPadding: { top: 10, bottom: 10, left: 5, right: 5 },
+  labelPadding: { top: 5, bottom: 5, left: 5, right: 5 },
   textProps: {}
 };
 
@@ -152,18 +152,32 @@ const segmentSelectionReducer = (state, action) => {
 };
 
 const tooltipTextProps = {
+  breakWords: false,
   wrap: true,
-  breakWords: true,
-  wrapWidth: 50
+  worldWrap: true,
+  wrapWidth: 30
 };
 
-function getTooltipText(interactionsRunning, dip, fault, selectedSegment) {
+const capitalize = s => {
+  if (typeof s !== "string") return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+function getTooltipText({ interactionsRunning, segments, ...rest }) {
   if (interactionsRunning) {
-    return `${dip ? `Dip ${threeDecimals(selectedSegment.sectdip)} ` : ""}${
-      fault ? `Fault ${threeDecimals(selectedSegment.fault)}` : ""
-    }`;
+    return ["dip", "fault"]
+      .filter(p => rest[p])
+      .map(p =>
+        p === "dip"
+          ? `Dip ${segments.map(s => threeDecimals(s.sectdip)).join(" ")}`
+          : `Fault ${segments.map(s => threeDecimals(s.fault)).join(" ")}`
+      )
+      .join("\n");
   }
-  return `${dip ? "Dip " : ""}${fault ? "Fault" : ""}`;
+  return ["dip", "fault"]
+    .filter(p => rest[p])
+    .map(capitalize)
+    .join(" ");
 }
 
 const SegmentSelection = ({
@@ -318,7 +332,12 @@ const SegmentSelection = ({
 
   const backgroundColor = draftMode ? draftColor : selectionColor;
 
-  const tooltipText = getTooltipText(interactionsRunning, dip, fault, selectedSegment);
+  const tooltipText = useMemo(() => getTooltipText({ interactionsRunning, dip, fault, segments }), [
+    interactionsRunning,
+    dip,
+    fault,
+    segments
+  ]);
 
   const tooltipPosition = useMemo(
     () =>
