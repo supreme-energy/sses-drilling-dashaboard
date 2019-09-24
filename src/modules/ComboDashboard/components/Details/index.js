@@ -25,6 +25,7 @@ import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
+import { EMPTY_FIELD } from "../../../../constants/format";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -75,7 +76,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
       />
     );
   } else {
-    return <TableCell className={classes.cell}>{value.toFixed(2)}</TableCell>;
+    return <TableCell className={classes.cell}>{(value && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
   }
 }
 
