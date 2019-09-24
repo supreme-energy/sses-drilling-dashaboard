@@ -6,14 +6,12 @@ import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import DrillPhaseViewer from "./DrillPhaseViewer";
 import classes from "./TimeSliderToolbar.scss";
+import { useWellIdContainer } from "../App/Containers";
 
 const TimeSlider = lazy(() => import(/* webpackChunkName: 'TimeSlider' */ "./TimeSlider"));
 
-export function TimeSliderToolbar({
-  match: {
-    params: { wellId }
-  }
-}) {
+export function TimeSliderToolbar() {
+  const { wellId } = useWellIdContainer();
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
 
   return (
@@ -24,27 +22,21 @@ export function TimeSliderToolbar({
             {expanded ? <ExpandLess className={classes.expandLessIcon} /> : <ExpandMore />}
           </CardActionArea>
         </Card>
-        <DrillPhaseViewer className={classes.noShrink} expanded={expanded} />
+        <DrillPhaseViewer className={classes.noShrink} wellId={wellId} expanded={expanded} />
         <TimeSlider expanded={expanded} wellId={wellId} />
       </Suspense>
     </Card>
   );
 }
 
-TimeSliderToolbar.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  })
-};
+TimeSliderToolbar.propTypes = {};
 
 export function TimeSliderToolbarWrapper({ children }) {
   return (
-    <div>
+    <React.Fragment>
       <Route path="/:wellId/:page" exact component={TimeSliderToolbar} />
       <div className={classes.viewport}>{children}</div>
-    </div>
+    </React.Fragment>
   );
 }
 

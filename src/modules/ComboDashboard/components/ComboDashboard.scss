@@ -4,31 +4,105 @@
   height: 100%;
   flex: 1;
   position: relative;
+  .importWellPlanButton {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    svg {
+      margin-right:  5px;
+    }
+  }
+}
+
+.cardLine {
+  border-top: 1px solid #dddddd;
+  margin: 10px -10px;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+}
+
+.grow {
+  flex-grow: 1;
+}
+.shrink {
+  flex-grow: 0;
+}
+
+.expand {
+  transform: rotate(0deg);
+  outline: none;
+}
+.expand:focus {
+  outline: none;
+}
+
+.expandOpen {
+  transform: rotate(180deg)
 }
 
 .comboDashboardWrapper {
   display: flex;
   height: 100%;
-
-  h6 {
-    color: $gold;
-  }
 }
 
 .kpiColumn {
   display: flex;
   flex: 1;
   margin-right: 10px;
+  margin-left: 3px;
   flex-direction: column;
+  overflow-y: auto;
+}
+
+.row {
+  display: flex;
+
+}
+
+.detailsHeader {
+ align-items: center;
+}
+.flexRight {
+  display: flex;
+  align-items: center;
+  margin-left: auto!important;
+  .methodSelect {
+    width: 200px;
+    margin: 0 5px;
+    background-color: rgba(0,0,0,0);
+    div {
+      padding: 6px 2px 4px;
+    }
+  }
+  .textField {
+    width: 80px;
+    margin: 0 5px;
+    input {
+      padding: 6px 2px 7px;
+    }
+  }
+  .fullTableButton {
+    height: 32px;
+    width: 32px;
+  }
 }
 
 .kpiRows {
   display: flex;
-  flex: 11;
+  flex: 12;
   flex-direction: column;
+  margin-left: 6px;
 
   .row {
-    display: flex;
+    > div {
+      margin: 3px;
+    }
   }
 
   .graphRow {
@@ -37,11 +111,41 @@
 }
 
 .drillPhaseKpi {
-  max-height: 150px; 
+  max-height: 150px;
   margin: 0 3px 3px 8px;
   padding: 12px;
 }
 
 .crossSectionDash {
+  position: relative;
   padding-bottom: 30px;
+}
+
+.tabs {
+  position: absolute;
+  z-index: 10;
+  top: 8px;
+  left: 150px;
+  .tab {
+    min-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+  }
+}
+
+.paIcon {
+  position: relative;
+  top: -2px;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.tableWrapper {
+  height: 156px;
 }

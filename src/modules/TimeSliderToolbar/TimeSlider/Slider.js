@@ -19,36 +19,36 @@ const useStyles = makeStyles({
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelDraggingRight: {
     color: "rgba(0,0,0,0.6)",
-    left: -100,
+    left: -150,
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelDragging: {
     color: "rgba(0,0,0,0.6)",
-    left: -45,
+    left: -75,
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelRight: {
     textAlign: "right",
-    left: -110,
-    top: 25,
+    left: -150,
+    top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }
@@ -56,9 +56,9 @@ const useStyles = makeStyles({
   valueLabelLeft: {
     textAlign: "left",
     left: 0,
-    top: 25,
+    top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }
@@ -66,9 +66,9 @@ const useStyles = makeStyles({
   valueLabel: {
     textAlign: "center",
     left: -55,
-    top: 25,
+    top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }
@@ -91,7 +91,7 @@ const Slider = React.memo(
       setStep({ type: "UPDATE", payload: { isDragging: false } });
     }, [setStep]);
 
-    const handleLabel = useCallback(() => {
+    const labelFormat = useCallback(() => {
       if (!holeDepth) return null;
 
       return (
@@ -125,7 +125,7 @@ const Slider = React.memo(
         onChange={handleDragSlider}
         onChangeCommitted={handleMouseUp}
         step={stepSize}
-        valueLabelFormat={handleLabel}
+        valueLabelFormat={labelFormat}
         valueLabelDisplay={expanded ? "on" : "auto"}
       />
     );

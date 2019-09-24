@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { Route } from "react-router-dom";
 import { Button, Card, CardContent, Typography } from "@material-ui/core";
 
-import VerticalMenu from "../VerticalMenu";
 import { useWells } from "../../api";
 import { BitDepth, Rop } from "../Kpi/KpiItem";
 import WellStatus from "../Kpi/WellStatus";
@@ -13,14 +12,10 @@ import WellPathStatus from "../Kpi/WellPathStatus";
 import TargetAccuracy from "../Kpi/TargetAccuracy";
 import { actions } from "../WellExplorer/store";
 import classes from "./HeaderToolbar.scss";
+import { useWellIdContainer } from "../App/Containers";
 
-export function HeaderToolbar({
-  match: {
-    params: { wellId }
-  },
-  changeSelectedWell,
-  history
-}) {
+export function HeaderToolbar({ changeSelectedWell, history }) {
+  const { wellId } = useWellIdContainer();
   // Get currently opened well
   const [, wellsById] = useWells();
   const well = wellsById[wellId] || {};
@@ -29,6 +24,7 @@ export function HeaderToolbar({
     changeSelectedWell(well.id);
     history.push(`/${well.id}`);
   }, [changeSelectedWell, history, well.id]);
+
   return (
     <Card className={classes.headerToolbar}>
       <CardContent className={classes.cardContent}>
@@ -41,12 +37,11 @@ export function HeaderToolbar({
         </div>
         <div className={classes.kpiCol}>
           <WellStatus status={well.status} className={classes.status} />
-          <WellPathStatus wellId={well.id} />
-          <TargetAccuracy wellId={wellId} />
-          <Rop wellId={well.id} />
-          <ServerStatus wellId={well.id} />
-          <BitDepth wellId={well.id} />
-          <VerticalMenu selectedMenuItems={[]} menuItemEnum={[]} />
+          <WellPathStatus wellId={wellId} />
+          <TargetAccuracy />
+          <Rop wellId={wellId} />
+          <ServerStatus wellId={wellId} />
+          <BitDepth wellId={wellId} />
         </div>
       </CardContent>
     </Card>
@@ -54,11 +49,6 @@ export function HeaderToolbar({
 }
 
 HeaderToolbar.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      wellId: PropTypes.string
-    })
-  }),
   changeSelectedWell: PropTypes.func,
   history: PropTypes.shape({
     push: PropTypes.func
@@ -67,7 +57,7 @@ HeaderToolbar.propTypes = {
 
 export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) {
   return (
-    <div>
+    <React.Fragment>
       <Route
         path="/:wellId/:page"
         exact
@@ -75,7 +65,7 @@ export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) 
         history={history}
       />
       <div className={classes.viewport}>{children}</div>
-    </div>
+    </React.Fragment>
   );
 }
 

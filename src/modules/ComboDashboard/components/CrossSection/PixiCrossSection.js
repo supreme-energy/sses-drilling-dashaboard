@@ -6,6 +6,9 @@ import { drawGrid } from "./drawGrid.js";
 import { drawSections } from "./drawSections";
 import { interactiveProjection } from "./interactiveProjection";
 import { removeAllChildren } from "./pixiUtils";
+import { drawButtons } from "./drawButtons";
+import { VERTICAL } from "../../../../constants/crossSectionViewDirection";
+import { drawCompass } from "./drawCompass";
 
 export default class PixiCrossSection {
   constructor() {
@@ -22,31 +25,40 @@ export default class PixiCrossSection {
     // Stage contains the draw layers and never moves. Some events are registered here.
     this.stage = new PIXI.Container();
     // Viewport will contain our formations, well bore line, and other graphics
-    this.viewport = new PIXI.Container();
+    this.viewport = this.stage.addChild(new PIXI.Container());
     // Set up PIXI classes for rendering and draw layers
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer2 = this.viewport.addChild(new PIXI.Container());
-    this.stage.addChild(this.viewport);
+    this.compassLayer = this.viewport.addChild(new PIXI.Container());
 
     this.makeInteractive(this.stage);
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 80;
-    this.yTicks = 12;
+    const gridGutter = 100;
+    const gridGutterLeft = 40;
+    const tagHeight = 75;
+    this.yTicks = 20;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
+    this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
-    this.gridUpdate = drawGrid(this.gridLayer, { gutter: gridGutter, maxYLines: this.yTicks });
+    this.gridUpdate = drawGrid(this.gridLayer, {
+      gutter: gridGutter,
+      gutterLeft: gridGutterLeft,
+      maxYLines: this.yTicks,
+      fontSize: 13
+    });
+    this.compassUpdate = drawCompass(this.compassLayer);
 
     // The ticker is used for render timing, what's done on each frame, etc
-    this.ticker = PIXI.ticker.shared;
+    this.ticker = PIXI.Ticker.shared;
     this.newProps = true;
     this.ticker.add(() => {
       if (this.newProps) {
@@ -113,15 +125,31 @@ export default class PixiCrossSection {
     );
   }
   update(props) {
-    const { width, height, view } = props;
+    const { width, height, view, viewDirection } = props;
     this.viewport.position = new PIXI.Point(view.x, view.y);
     this.viewport.scale.x = view.xScale;
     this.viewport.scale.y = view.yScale;
-    this.formationsUpdate(props);
+    if (viewDirection === VERTICAL) {
+      this.formationsLayer.visible = true;
+      this.UILayer.visible = true;
+      this.UILayer2.visible = true;
+      this.compassLayer.visible = false;
+
+      this.formationsUpdate(props);
+      this.sectionUpdate(props);
+      this.buttonUpdate(props);
+      this.interactivePAUpdate(props);
+    } else {
+      this.formationsLayer.visible = false;
+      this.UILayer.visible = false;
+      this.UILayer2.visible = false;
+      this.compassLayer.visible = true;
+
+      this.compassUpdate(props);
+    }
+
     this.wellPlanUpdate(props);
     this.surveyUpdate(props);
-    this.sectionUpdate(props);
-    this.interactivePAUpdate(props);
     this.gridUpdate(props, { maxXTicks: (this.yTicks * width) / height });
     this.newProps = true;
   }
@@ -136,5 +164,6 @@ export default class PixiCrossSection {
     removeAllChildren(this.UILayer);
     removeAllChildren(this.UILayer2);
     removeAllChildren(this.gridLayer);
+    removeAllChildren(this.compassLayer);
   }
 }

@@ -2,13 +2,10 @@ import { useEffect } from "react";
 import { changeWellAccessTimestamp } from "../WellExplorer/store";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
+import { useWellIdContainer } from "./Containers";
 
-function WellUpdate({
-  match: {
-    params: { wellId }
-  },
-  changeWellAccessTimestamp
-}) {
+function WellUpdate({ changeWellAccessTimestamp }) {
+  const { wellId } = useWellIdContainer();
   useEffect(
     function updateWellTimestamp() {
       if (wellId) {
@@ -21,7 +18,7 @@ function WellUpdate({
   return null;
 }
 
-WellUpdate.propTypes = { match: PropTypes.object, changeWellAccessTimestamp: PropTypes.func };
+WellUpdate.propTypes = { changeWellAccessTimestamp: PropTypes.func };
 
 const mapDispatchToProps = {
   changeWellAccessTimestamp

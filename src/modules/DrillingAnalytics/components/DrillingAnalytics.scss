@@ -6,20 +6,32 @@
     height: 100%;
 
     .slidingKpiContainer {
-        margin-top: 20px;
-
+        margin-top: 10px;
         h5 {
             margin-right: 5px;
-            font-size: 45px;
+            font-size: 40px;
             font-weight: 500;
         }
 
         .slidingLabel {
             color: #AFB42B;
-            margin-right: auto;
+        }
+
+        .rotatingLabel {
+            position: relative;
+            color: #827717;
+        }
+
+        .slidingLabel, .rotatingLabel {
+            color: #AFB42B;
             > span {
                 position: relative;
                 bottom: 6px;
+            }
+
+            > div:last-child {
+                font-size: 14px;
+                font-weight: 500;
             }
 
         }
@@ -29,46 +41,46 @@
             font-weight: 500;
         }
 
-        .rotatingLabel {
-            position: relative;
-            left: 42px;
-            color: #827717;
-
-            > span {
-                position: relative;
-                bottom: 6px;
-                text-align: right;
-            }
-        }
-
         .slidingKpis {
             display: flex;
             flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 5px;
         }
     }
 
-    h6 {
-        color: $gold;
-    }
-
     .row:first-child, .row:last-child {
-        margin-left: 4px;
-        margin-right: 4px;
+        margin-left: 6px;
+        margin-right: 6px;
     }
 
     .row {
-        flex-grow: 1;
         display: flex;
+
         > div {
-            margin: 3px;
+        margin: 3px;
         }
     }
 
     .extendRow {
         flex-grow: 6;
+        height: 100%;
         > div {
             flex: 1;
+            flex-grow: 4;
         }
+
+        > div:first-child {
+            flex-grow: 2;
+        }
+
+        > div:last-child {
+            flex-grow: 3;
+        }
+    }
+
+    .verticalView {
+        flex-grow: 1;
     }
 
     .phaseOverviewCard {
@@ -79,10 +91,85 @@
         height: 100%;
     }
 
+    .verticalCrossSectionCard {
+        padding: 10px;
+
+        .drilloutKpis {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 4;
+
+
+            span {
+                margin-right: 15px;
+                margin-left: 5px;
+            }
+
+            .legendKey {
+                height: 10px;
+                width: 20px;
+            }
+        }
+
+        .tvdGraphContainerMin {
+          height: 40%;
+          margin-bottom: 20px;
+          position: relative;
+          canvas {
+            position: absolute;
+          }
+        }
+
+        .tvdGraphContainer {
+            height: calc(100% - 75px);
+          position: relative;
+          canvas {
+            position: absolute;
+          }
+        }
+
+        .depthGraphContainer {
+            height: 40%;
+        }
+    }
+
     .verticalMenu {
         position: relative;
         float: right;
         bottom: 35px;
         left: 10px;
+    }
+
+    .standAnalysisCard, .slideAnalysisCard {
+        height: 150px;
+        .kpiContainer {
+            margin-top: 10px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            div ~ span {
+                position: relative;
+                bottom: 10px;
+                font-weight: 500;
+            }
+
+            span {
+                font-size: 14px;
+            }
+            
+            h5 {
+                font-size: 45px;
+                font-weight: 500;
+                margin-right: 8px;
+            }
+        }
     }
 }

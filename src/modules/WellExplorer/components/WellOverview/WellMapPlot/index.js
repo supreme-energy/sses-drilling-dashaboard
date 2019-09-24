@@ -3,9 +3,8 @@ import PropTypes from "prop-types";
 import LeafletMap from "../../WellMap/Map";
 import {
   useWells,
-  useWellPath,
   useWellsMapPosition,
-  useSurveys,
+  useFetchSurveys,
   useWellOverviewKPI,
   useWellInfo
 } from "../../../../../api";
@@ -20,6 +19,7 @@ import * as wellSections from "../../../../../constants/wellSections";
 import Legend from "./Legend";
 import { leafletMapIconsSelected } from "../../IconsByStatus";
 import L from "leaflet";
+import { useWellPlanDataContainer } from "../../../../App/Containers";
 
 const colorsBySection = {
   [wellSections.INTERMEDIATE]: "#538531",
@@ -71,9 +71,9 @@ function getSurveyBySection(surveyMapPositions, wellOverviewDataBySection) {
 
 function WellMapPlot({ className, selectedWellId, showLegend }) {
   const [, wellsById] = useWells();
-  const wellPathData = useWellPath(selectedWellId);
+  const [wellPathData] = useWellPlanDataContainer();
   const wellPathMapPositions = useWellsMapPosition(selectedWellId, wellPathData);
-  const surveyData = useSurveys(selectedWellId);
+  const [surveyData] = useFetchSurveys(selectedWellId);
   const surveyMapPositions = useWellsMapPosition(selectedWellId, surveyData);
 
   const selectedWell = wellsById[selectedWellId];
@@ -83,7 +83,7 @@ function WellMapPlot({ className, selectedWellId, showLegend }) {
 
   const [{ wellSurfaceLocation, wellLandingLocation, wellPBHL }] = useWellInfo(selectedWellId);
 
-  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI();
+  const { bySegment: wellOverviewBySegment } = useWellOverviewKPI(selectedWellId);
 
   const surveysBySection = useMemo(() => getSurveyBySection(surveyMapPositions, wellOverviewBySegment), [
     wellOverviewBySegment,

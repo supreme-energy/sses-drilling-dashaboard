@@ -53,55 +53,56 @@ function drawGrid(container, options = {}) {
   const {
     gutter = 50,
     xAxisOrientation = "bottom",
+    showXAxis = true,
+    showYAxis = true,
     makeXTickAndLine = defaultMakeXTickAndLine,
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
     maxYLines = 12,
     fontSize = 15
   } = options;
+  let { gutterLeft = gutter, gutterBottom = gutter } = options;
+  const lineZIndex = 0;
+  const labelBGZIndex = 5;
+  const labelZIndex = 10;
+  const cornerZIndex = 15;
+  const gridContainer = container.addChild(new PIXI.Container());
+  gridContainer.sortableChildren = true;
 
   let lastBounds = {};
 
   const xLabels = [];
   const xLines = [];
-  for (let i = 0; i < maxXLines; i++) {
-    let [line, label] = makeXTickAndLine(fontSize, i);
-    xLines.push(line);
-    xLabels.push(label);
-    if (xAxisOrientation === "top") {
-      label.y = 30;
-    }
-  }
 
   const yLabels = [];
   const yLines = [];
-  for (let i = 0; i < maxYLines; i++) {
-    let [line, label] = makeYTickAndLine(fontSize);
-    yLines.push(line);
-    yLabels.push(label);
-  }
-  // Add the elements of the grid in the correct order
-  // Lines are first
-  xLines.forEach(l => container.addChild(l));
-  yLines.forEach(l => container.addChild(l));
 
   // White background behind tick labels
-  const bgx = new PIXI.Graphics();
-  bgx.transform.updateTransform = frozenXYTransform;
-  container.addChild(bgx);
+  let bgx, bgy;
 
-  const bgy = new PIXI.Graphics();
-  bgy.transform.updateTransform = frozenXYTransform;
-  container.addChild(bgy);
+  if (showYAxis) {
+    bgx = new PIXI.Graphics();
+    bgx.transform.updateTransform = frozenXYTransform;
+    bgx.zIndex = labelBGZIndex;
+    gridContainer.addChild(bgx);
+  }
 
-  // Tick labels go on top of the white backgrounds
-  xLabels.forEach(l => container.addChild(l));
-  yLabels.forEach(l => container.addChild(l));
+  if (showXAxis) {
+    bgy = new PIXI.Graphics();
+    bgy.transform.updateTransform = frozenXYTransform;
+    bgy.zIndex = labelBGZIndex;
+    gridContainer.addChild(bgy);
+  }
 
   // Corner to hide overlapping tick labels
-  const corner = new PIXI.Graphics();
-  corner.transform.updateTransform = frozenXYTransform;
-  container.addChild(corner);
+  let corner;
+
+  if (showXAxis) {
+    corner = new PIXI.Graphics();
+    corner.transform.updateTransform = frozenXYTransform;
+    corner.zIndex = cornerZIndex;
+    gridContainer.addChild(corner);
+  }
 
   const memoCalcBounds = memoizeOne((yScale, y, x, xScale, width, height, xMaxLines, yMaxLines) => {
     const xMin = Math.floor((-1 * x) / xScale);
@@ -126,39 +127,86 @@ function drawGrid(container, options = {}) {
     };
   });
 
+  function addXTickAndLine(i) {
+    const [line, label] = makeXTickAndLine(fontSize, i);
+    line.zIndex = lineZIndex;
+    label.zIndex = labelZIndex;
+
+    xLines[i] = gridContainer.addChild(line);
+    xLabels[i] = gridContainer.addChild(label);
+
+    if (xAxisOrientation === "top") {
+      label.y = 30;
+    }
+  }
+  function addYTickAndLine(i) {
+    const [line, label] = makeYTickAndLine(fontSize, i);
+    line.zIndex = lineZIndex;
+    label.zIndex = labelZIndex;
+
+    yLines[i] = gridContainer.addChild(line);
+    yLabels[i] = gridContainer.addChild(label);
+  }
+
   return function updateGrid(props, options = {}) {
     // Sometimes transform is undefined and we need it for position/scale
     if (!container.transform) return;
     const cwt = container.transform.worldTransform;
-    const { width, height, view } = props;
+    const { width, height, view, yAxisDirection = 1 } = props;
     const { maxXTicks = maxXLines, maxYTicks = maxYLines } = options;
     const t = view || { x: cwt.tx, y: cwt.ty, xScale: cwt.a, yScale: cwt.d };
-
     const bounds = memoCalcBounds(t.yScale, t.y, t.x, t.xScale, width, height, maxXTicks, maxYTicks);
 
     if (bounds !== lastBounds) {
-      const xAxisAnchor = xAxisOrientation === "top" ? gutter : height;
+      const xAxisAnchor = xAxisOrientation === "top" ? gutterBottom : height;
       // Redraw the background as width or height may have changed
-      bgx.clear().beginFill(0xffffff);
-      bgx.drawRect(0, 0, gutter, height);
-      bgy.clear().beginFill(0xffffff);
-      bgy.drawRect(0, xAxisAnchor - gutter, width, gutter);
-      corner.clear().beginFill(0xffffff);
-      corner.drawRect(0, xAxisAnchor - gutter, gutter, gutter);
-
-      for (let i = 0; i < xLines.length; i++) {
-        const pos = bounds.xMin + bounds.xStep * i;
-        xLines[i].x = pos;
-        xLabels[i].x = pos;
-        xLabels[i].y = xAxisAnchor - gutter;
-        xLabels[i].text = `${pos}`;
+      if (bgx) {
+        bgx.clear().beginFill(0xffffff);
+        bgx.drawRect(0, 0, gutterLeft, height);
       }
 
-      for (let i = 0; i < yLines.length; i++) {
+      if (bgy) {
+        bgy.clear().beginFill(0xffffff);
+        bgy.drawRect(0, xAxisAnchor - gutterBottom, width, gutterBottom);
+      }
+
+      if (corner && showYAxis) {
+        corner.clear().beginFill(0xffffff);
+        corner.drawRect(0, xAxisAnchor - gutterBottom, gutterLeft, gutterBottom);
+      }
+
+      xLines.forEach(l => (l.visible = false));
+      xLabels.forEach(l => (l.visible = false));
+      for (let i = 0; bounds.xMin + bounds.xStep * i < bounds.xMax * 1.1; i++) {
+        const pos = bounds.xMin + bounds.xStep * i;
+        if (!xLines[i]) {
+          addXTickAndLine(i);
+        }
+        xLines[i].x = pos;
+        xLines[i].visible = true;
+        if (showXAxis) {
+          xLabels[i].x = pos;
+          xLabels[i].y = xAxisAnchor - gutterBottom;
+          xLabels[i].text = `${pos}`;
+          xLabels[i].visible = true;
+        }
+      }
+
+      yLines.forEach(l => (l.visible = false));
+      yLabels.forEach(l => (l.visible = false));
+      for (let i = 0; bounds.yMin + bounds.yStep * i < bounds.yMax * 1.1; i++) {
         const pos = bounds.yMin + bounds.yStep * i;
+        if (!yLines[i]) {
+          addYTickAndLine(i);
+        }
         yLines[i].y = pos;
-        yLabels[i].y = pos;
-        yLabels[i].text = `${pos}`;
+        yLines[i].visible = true;
+
+        if (showYAxis) {
+          yLabels[i].y = pos;
+          yLabels[i].text = `${yAxisDirection * pos}`;
+          yLabels[i].visible = true;
+        }
       }
       lastBounds = bounds;
     }

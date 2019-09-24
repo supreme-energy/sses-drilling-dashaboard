@@ -1,21 +1,19 @@
 import * as PIXI from "pixi.js";
+import memoizeOne from "memoize-one";
 import { frozenScaleTransform, frozenXYTransform } from "./customPixiTransforms";
 import { subscribeToMoveEvents } from "./pixiUtils";
-import {
-  DIP_BOT_MOVE,
-  DIP_TOT_MOVE,
-  FAULT_BOT_MOVE,
-  FAULT_TOT_MOVE,
-  FAULT_END,
-  PA_MOVE,
-  PA_END,
-  DIP_END
-} from "../../../../constants/interactivePAStatus";
+import { calculateDip } from "./formulas";
+import { TVD_VS } from "../../../../constants/calcMethods";
 
-function createCircle(container, lineColor, fillColor, cb, cbEnd) {
-  const circle = container.addChild(new PIXI.Graphics());
+function drawCircle(circle, lineColor, fillColor) {
+  circle.clear();
   circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
   circle.drawCircle(0, 0, 10);
+}
+function createCircle(container, lineColor, fillColor, cb, cbEnd) {
+  const circle = container.addChild(new PIXI.Graphics());
+  drawCircle(circle, lineColor, fillColor);
+  circle.cursor = "pointer";
   circle.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(circle, cb, cbEnd);
   return circle;
@@ -34,9 +32,11 @@ function createCircle(container, lineColor, fillColor, cb, cbEnd) {
  */
 function interactiveProjection(parent, props) {
   const container = parent.addChild(new PIXI.Container());
-  const { ghostDiffDispatch } = props;
+  const { updateSegments } = props;
+  let debouncedSave = () => {};
   const red = 0xee2211;
   const white = 0xffffff;
+  let prev, curr;
 
   const totLine = container.addChild(new PIXI.Graphics());
   totLine.transform.updateTransform = frozenXYTransform;
@@ -52,28 +52,18 @@ function interactiveProjection(parent, props) {
     red,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: FAULT_TOT_MOVE,
-        tot: pos.y
-      });
+      updateSegments({ [curr.id]: { fault: pos.y - prev.tot } });
     },
-    () => {
-      ghostDiffDispatch({ type: FAULT_END });
-    }
+    () => debouncedSave()
   );
   const prevBot = createCircle(
     container,
     red,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: FAULT_BOT_MOVE,
-        bot: pos.y
-      });
+      updateSegments({ [curr.id]: { fault: pos.y - prev.bot } });
     },
-    () => {
-      ghostDiffDispatch({ type: FAULT_END });
-    }
+    () => debouncedSave()
   );
 
   const currTot = createCircle(
@@ -81,15 +71,10 @@ function interactiveProjection(parent, props) {
     white,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: DIP_TOT_MOVE,
-        vs: pos.x,
-        tot: pos.y
-      });
+      const dip = calculateDip(pos.y - curr.fault, prev.tot, curr.vs, prev.vs);
+      updateSegments({ [curr.id]: { dip } });
     },
-    () => {
-      ghostDiffDispatch({ type: DIP_END });
-    }
+    () => debouncedSave()
   );
 
   const currBot = createCircle(
@@ -97,33 +82,30 @@ function interactiveProjection(parent, props) {
     white,
     red,
     function(pos) {
-      ghostDiffDispatch({
-        type: DIP_BOT_MOVE,
-        vs: pos.x,
-        bot: pos.y
-      });
+      const dip = calculateDip(pos.y - curr.fault, prev.bot, curr.vs, prev.vs);
+      updateSegments({ [curr.id]: { dip } });
     },
-    () => {
-      ghostDiffDispatch({ type: DIP_END });
-    }
+    () => debouncedSave()
   );
 
+  const memoSetKnobColor = memoizeOne(color => {
+    drawCircle(prevTot, color, color);
+    drawCircle(prevBot, color, color);
+    drawCircle(currTot, white, color);
+    drawCircle(currBot, white, color);
+  });
+
   const paMarker = container.addChild(new PIXI.Graphics());
-  paMarker.lineStyle(2, red).beginFill(white, 0);
+  paMarker.lineStyle(2, red, 0).beginFill(white, 0.01);
   paMarker.drawRoundedRect(-9, -9, 18, 18, 4);
+  paMarker.cursor = "pointer";
   paMarker.transform.updateTransform = frozenScaleTransform;
   subscribeToMoveEvents(
     paMarker,
     function(pos) {
-      ghostDiffDispatch({
-        type: PA_MOVE,
-        tvd: pos.y,
-        vs: pos.x
-      });
+      updateSegments({ [curr.id]: { tvd: pos.y, method: TVD_VS } });
     },
-    () => {
-      ghostDiffDispatch({ type: PA_END });
-    }
+    () => debouncedSave()
   );
 
   return props => {
@@ -131,37 +113,40 @@ function interactiveProjection(parent, props) {
     const id = Object.keys(selectedSections)[0];
     const selectedIndex = calcSections.findIndex(s => s.id === Number(id));
     // If there isn't a selected project ahead segment, don't display the interactive component
-    if (!selectedSections[id] || selectedIndex <= 0 || !calcSections[selectedIndex].isProjection) {
+    if (!selectedSections[id] || selectedIndex <= 0) {
       container.visible = false;
       return;
     }
+    debouncedSave = props.debouncedSave;
     container.visible = true;
 
     if (!currTot.transform || !currBot.transform || !paMarker.transform || !prevTot.transform || !prevBot.transform) {
       return;
     }
-    const prev = calcSections[selectedIndex - 1];
-    const pa = calcSections[selectedIndex];
+    prev = calcSections[selectedIndex - 1];
+    curr = calcSections[selectedIndex];
 
+    memoSetKnobColor(curr.selectedColor);
     prevTot.position.x = prev.vs;
-    prevTot.position.y = prev.tot;
+    prevTot.position.y = prev.tot + curr.fault;
     prevBot.position.x = prev.vs;
-    prevBot.position.y = prev.bot;
+    prevBot.position.y = prev.bot + curr.fault;
 
-    currTot.position.x = pa.vs;
-    currTot.position.y = pa.tot - pa.fault;
-    currBot.position.x = pa.vs;
-    currBot.position.y = pa.bot - pa.fault;
+    currTot.position.x = curr.vs;
+    currTot.position.y = curr.tot;
+    currBot.position.x = curr.vs;
+    currBot.position.y = curr.bot;
 
-    paMarker.position.x = pa.vs;
-    paMarker.position.y = pa.tvd;
+    paMarker.visible = curr.isProjection;
+    paMarker.position.x = curr.vs;
+    paMarker.position.y = curr.tvd;
 
-    totLine.clear().lineStyle(2, red, 1);
-    totLine.moveTo(...scale(prev.vs, prev.tot)).lineTo(...scale(pa.vs, pa.tot - pa.fault));
-    tclLine.clear().lineStyle(2, red, 1);
-    tclLine.moveTo(...scale(prev.vs, prev.tcl)).lineTo(...scale(pa.vs, pa.tcl - pa.fault));
-    botLine.clear().lineStyle(2, red, 1);
-    botLine.moveTo(...scale(prev.vs, prev.bot)).lineTo(...scale(pa.vs, pa.bot - pa.fault));
+    totLine.clear().lineStyle(2, curr.selectedColor, 1);
+    totLine.moveTo(...scale(prev.vs, prev.tot + curr.fault)).lineTo(...scale(curr.vs, curr.tot));
+    tclLine.clear().lineStyle(2, curr.selectedColor, 1);
+    tclLine.moveTo(...scale(prev.vs, prev.tcl + curr.fault)).lineTo(...scale(curr.vs, curr.tcl));
+    botLine.clear().lineStyle(2, curr.selectedColor, 1);
+    botLine.moveTo(...scale(prev.vs, prev.bot + curr.fault)).lineTo(...scale(curr.vs, curr.bot));
   };
 }
 

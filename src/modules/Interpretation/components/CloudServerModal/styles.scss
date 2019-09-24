@@ -1,0 +1,156 @@
+@import "../../../../styles/base";
+
+.cloudServerButton {
+    position: relative;
+    left: 150px;
+    bottom: 30px;
+    width: 75px;
+    padding-bottom: 10px;
+
+    .badgeGreen span {
+        background-color: green;
+    }
+
+    .badgeRed span {
+        background-color: $conflictRed;
+    }
+
+    button {
+        outline: none;
+        span {
+            margin-left: 5px;
+        }
+    }
+}
+
+.importDialogTitle, .notificationDialogTitle {
+    .closeButton {
+        float: right;
+        position: relative;
+        left: 10px;
+        bottom: 10px;
+    }
+
+    .boldText {
+        font-style: bold;
+    }
+}
+
+.importDialogContent {
+    .conflictText {
+        color: $conflictRed;
+    }
+
+    h6 {
+        color: $gold;
+    }
+
+    .fileName {
+        position: relative;
+        left: 20px;
+    }
+
+    .conflictButton {
+        background-color: $conflictRed;
+    }
+    .conflictButton:hover {
+        background-color: #BC0143;
+    }
+
+    .newSurveyContainer {
+        span {
+            margin-left: 10px;
+        }
+    }
+}
+
+.importDialogActions {
+    button {
+        outline: none;
+    }
+    .conflictButton {
+        background-color: $conflictRed;
+    }
+    .conflictButton:hover {
+        background-color: #BC0143;
+    }
+
+    .conflictButtonOutlined {
+        border-color: $conflictRed;
+        color: $conflictRed;
+    }
+}
+
+.notificationButton {
+    outline: none !important;
+    top: 8px;
+    left: 10px;
+    height: 40px;
+}
+
+.cleanUpDataButton {
+    outline: none !important;
+}
+
+.notificationContent {
+    > div, button {
+        margin: 10px 20px;
+        outline: none;
+    }
+
+    .intervalDropdown, .alarmDropdown {
+        width: 300px;
+    }
+
+    .switch {
+        margin-right: 10px;
+        position: relative;
+        top: 10px;
+    }
+
+    .switchBuffer {
+        margin-right: 5px;
+    }
+}
+
+.notificationFlag {
+    left: 15px;
+    position: relative;
+    line-height: 50px;
+    
+    span {
+        margin-left: 10px;
+    }
+}
+
+.refreshDataButton {
+
+    button {
+        outline: none;
+    }
+}
+
+.manualReviewContent {
+    .spacer {
+        margin-right: 10px;
+    }
+    h6 {
+        color: $gold;
+    }
+}
+
+.fileUploadButton {
+    position: relative;
+    left: 10px;
+    top: 10px;
+
+    button {
+        outline: none;
+    }
+}
+
+.autoImportReviewActions {
+    button {
+        outline: none;
+    }
+}

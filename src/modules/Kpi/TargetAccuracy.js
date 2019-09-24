@@ -1,15 +1,14 @@
 import React from "react";
 import { Typography } from "@material-ui/core";
 import { withTheme } from "@material-ui/core/styles";
-
-import { useWellInfo } from "../../api/index";
 import classes from "./styles.scss";
+import { useSelectedWellInfoContainer } from "../App/Containers";
 
 // TODO: GET data from ASTRA to populate TargetAccuracy
 // Once data type is known, this component MAY use the form
 // of KpiItem in KpiItem.js
-function TargetAccuracy({ wellId, theme }) {
-  const [{ zoneStatus }] = useWellInfo(wellId);
+function TargetAccuracy({ theme }) {
+  const [{ zoneStatus }] = useSelectedWellInfoContainer();
 
   const color = zoneStatus ? theme.palette.success.main : theme.palette.warning.main;
 

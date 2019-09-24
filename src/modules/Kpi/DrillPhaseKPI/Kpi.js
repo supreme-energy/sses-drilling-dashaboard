@@ -8,9 +8,10 @@ import { scaleLinear, scaleThreshold } from "d3-scale";
 import { useSize } from "react-hook-size";
 import { sum } from "d3-array";
 import { useTheme } from "@material-ui/styles";
-import { noDecimals, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/format";
+import { noDecimals as fmtNoDecimals, percentage as fmtPercentage, EMPTY_FIELD } from "../../../constants/format";
 
 export const percentage = value => (value !== undefined ? fmtPercentage(value) : EMPTY_FIELD);
+export const noDecimals = value => (value !== undefined ? fmtNoDecimals(value) : EMPTY_FIELD);
 export const renderSliding = props => defaultRenderValue({ ...props, textClass: classes.slidingLabel });
 export const renderRotating = props => defaultRenderValue({ ...props, textClass: classes.rotatingLabel });
 
@@ -42,17 +43,19 @@ const SlidingKpi = ({ data }) => (
       <KpiItem
         className={classes.kpi}
         format={noDecimals}
-        label={`Sliding ${percentage(data.slidingPct)}`}
+        label={`Sliding ${noDecimals(data.slidingPct)}%`}
         value={data.avgSliding}
         renderValue={renderSliding}
+        measureUnit="fph"
       />
 
       <KpiItem
         className={classes.kpi}
         format={noDecimals}
-        label={`Rotating ${percentage(data.rotatingPct)}`}
+        label={`Rotating ${noDecimals(data.rotatingPct)} %`}
         value={data.avgRotating}
         renderValue={renderRotating}
+        measureUnit="fph"
       />
     </div>
     <PercentageBar
@@ -68,7 +71,7 @@ SlidingKpi.defaultProps = {
   data: {}
 };
 
-export default function Kpi({ className, data }) {
+const Kpi = React.memo(({ className, data }) => {
   const theme = useTheme();
 
   const getTargetColor = useMemo(
@@ -106,8 +109,10 @@ export default function Kpi({ className, data }) {
       </div>
     </Card>
   );
-}
+});
 
 Kpi.defaultProps = {
   data: {}
 };
+
+export default Kpi;

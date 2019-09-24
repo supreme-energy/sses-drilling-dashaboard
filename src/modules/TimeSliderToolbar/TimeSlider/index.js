@@ -4,22 +4,31 @@ import { Card, Typography } from "@material-ui/core";
 import classNames from "classnames";
 import _ from "lodash";
 import { useSize } from "react-hook-size";
+import { max, min } from "d3-array";
 
-import PixiContainer from "../../WellExplorer/components/WellOverview/ROP/PixiContainer";
-import PixiBar from "./PixiBar";
-import PixiLine from "../../WellExplorer/components/WellOverview/ROP/PixiLine";
-import { useTimeSliderContainer, useDrillPhaseContainer } from "../../App/Containers";
-import VerticalMenu from "../../VerticalMenu";
+import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import PixiContainer from "../../../components/PixiContainer";
+import PixiLine from "../../../components/PixiLine";
+import PixiBar from "../../../components/PixiBar";
+import {
+  useTimeSliderContainer,
+  useDrillPhaseContainer,
+  useWellSections,
+  useSurveysDataContainer,
+  useProjectionsDataContainer
+} from "../../App/Containers";
+import VerticalMenu from "../../../components/VerticalMenu";
 import Legend from "./Legend";
 import Slider from "./Slider";
 import ZoomControls from "./ZoomControls";
+import QuickFilter from "./QuickFilter";
 import { GlobalStartTimeControl, GlobalEndTimeControl } from "./GlobalTimeControls";
 import LocalTimeControls from "./LocalTimeControls";
 import { graphReducer, sliderReducer } from "./reducers";
-import useViewport from "../../WellExplorer/components/WellOverview/ROP/useViewport";
-import { useWebGLRenderer } from "../../WellExplorer/components/WellOverview/ROP/useWebGLRenderer";
+import useViewport from "../../../hooks/useViewport";
+import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import { useTimeSliderData } from "../../../api";
-import { SURFACE } from "../../../constants/wellSections";
+import { SURFACE, ALL } from "../../../constants/wellSections";
 import {
   COLOR_BY_GRAPH,
   COLOR_BY_PHASE_VIEWER,
@@ -28,20 +37,27 @@ import {
   LINE_CHARTS,
   INITIAL_SLIDER_STATE
 } from "../../../constants/timeSlider";
-import {
-  computeInitialViewXScaleValue,
-  computeInitialViewYScaleValue,
-  computePhaseXScaleValue
-} from "./TimeSliderUtil";
+import { computeInitialViewXScaleValue, computeInitialViewYScaleValue, calcBounds } from "./TimeSliderUtil";
 import classes from "./TimeSlider.scss";
 
 const TimeSlider = React.memo(({ wellId, expanded }) => {
-  // Fetch data for Time Slider
-  const data = useTimeSliderData();
-
   // Import shared state
   const { setSliderInterval, sliderInterval } = useTimeSliderContainer();
   const { setDrillPhase, drillPhaseObj } = useDrillPhaseContainer();
+  const { surveys } = useSurveysDataContainer();
+  const { projectionsData: projections } = useProjectionsDataContainer();
+  const wellSections = useWellSections(wellId);
+
+  // Calc inputs for Time Slider data
+  // These assume that surveys and projections are always in order
+  // Which should remain as is for performance
+  const hasSurveys = surveys && surveys.length;
+  const hasProjections = projections && projections.length;
+  const minSurveyDepth = hasSurveys && surveys[0].md;
+  const maxSurveyDepth = hasSurveys && surveys[surveys.length - 1].md;
+  const maxProjectionDepth = hasProjections && projections[projections.length - 1].md;
+
+  const { data, getTimeSliderData } = useTimeSliderData();
 
   // Create local state
   const [{ maxStep, step, stepSize, isDragging, isPlaying, isSpeeding }, setSliderStep] = useReducer(
@@ -52,17 +68,11 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   const [globalDates, setGlobalDates] = useState(["", ""]);
   const [selectedMenuItems, setSelectedMenuItem] = useReducer(graphReducer, COLOR_BY_PHASE_VIEWER[SURFACE].graphs);
 
-  // Get Previous drill phase value
-  const prevDrillPhase = useRef();
-  useEffect(() => {
-    prevDrillPhase.current = drillPhaseObj;
-  });
-  const prevPhase = prevDrillPhase.current;
-
   // Canvas resizing hooks
-  const scaleInitialized = useRef(null);
   const canvasRef = useRef(null);
-  const { width, height } = useSize(canvasRef);
+  const sliderRef = useRef(null);
+  const { width, height } = useSize(sliderRef);
+  const hasFetchedTimeSliderData = useRef(false);
 
   const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
 
@@ -72,50 +82,54 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   );
 
   const getInitialViewXScaleValue = useMemo(
-    () => (data && data.length ? computeInitialViewXScaleValue(data) : () => 1),
+    () => (data && data.length ? computeInitialViewXScaleValue(data.length) : () => 1),
     [data]
-  );
-
-  // Determine if graph has been moved off screen by drag
-  const isGraphWithinBounds = useCallback(
-    (xScale, newX) => {
-      return (
-        data.length * xScale - Math.abs(newX) > width - GRID_GUTTER &&
-        Math.round(step) <= Math.round(maxStep) &&
-        newX / xScale < 0
-      );
-    },
-    [width, data.length, step, maxStep]
   );
 
   const [view, updateView] = useState({
     x: GRID_GUTTER,
     y: 0,
-    xScale: 0,
-    yScale: 0
+    xScale: 1,
+    yScale: 1
   });
 
   const viewportContainer = useRef(null);
 
   // Memoized selectors for Time Slider
-  const holeDepthLeftIndex = useMemo(() => data.map(e => e.Hole_Depth).indexOf(drillPhaseObj.phaseStart), [
-    data,
-    drillPhaseObj.phaseStart
-  ]);
-  const holeDepthRightIndex = useMemo(() => data.map(e => e.Hole_Depth).lastIndexOf(drillPhaseObj.phaseEnd), [
-    data,
-    drillPhaseObj.phaseEnd
-  ]);
-  const w = width || maxStep * view.xScale + GRID_GUTTER;
+  const holeDepthLeftIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= drillPhaseObj.phaseStart);
+    return index > 0 ? index : 0;
+  }, [data, drillPhaseObj.phaseStart]);
+  const holeDepthRightIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= drillPhaseObj.phaseEnd) - 1;
+    return index > 0 ? index : data.length - 1;
+  }, [data, drillPhaseObj.phaseEnd]);
+
   const stepFactor = step / maxStep;
   const visibleDataLength = (width - GRID_GUTTER) / view.xScale;
-  const hiddenDataLength = Math.abs(view.x / view.xScale);
-  const rightBoundIndex = visibleDataLength + hiddenDataLength - 1;
-  const leftBoundIndexMoving = Math.abs(view.x) / view.xScale;
-  const stepIndex = stepFactor * visibleDataLength + leftBoundIndexMoving;
+  const leftBoundIndexMoving = Math.abs(view.x / view.xScale);
+  const maxDepth = hasProjections ? maxProjectionDepth : maxSurveyDepth;
+
+  const rightBoundIndex = calcBounds(visibleDataLength + leftBoundIndexMoving, data.length);
+  const stepIndex = calcBounds(stepFactor * visibleDataLength + leftBoundIndexMoving, data.length);
+  const dataMin = useMemo(() => min(data, d => d.rop_a), [data]);
+  const barHeight = useMemo(() => max(data, d => d.rop_a) - dataMin, [dataMin, data]);
+
+  const isGraphWithinBounds = useCallback(
+    (xScale, newX) => {
+      return (
+        visibleDataLength + leftBoundIndexMoving <= data.length &&
+        stepFactor * visibleDataLength + leftBoundIndexMoving <= data.length - 1 &&
+        (data.length - 1) * xScale - Math.abs(newX) > width - 6 &&
+        Math.round(step) <= Math.round(maxStep) &&
+        newX / xScale - 3 < 0
+      );
+    },
+    [width, data.length, step, maxStep, leftBoundIndexMoving, stepFactor, visibleDataLength]
+  );
 
   const sliderDate = useMemo(() => {
-    return _.get(data, `[${Math.round(stepIndex)}].Date_Time`);
+    return _.get(data, `[${Math.round(stepIndex)}].rig_time`);
   }, [data, stepIndex]);
 
   const viewport = useViewport({
@@ -131,54 +145,77 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   });
 
   const onReset = useCallback(() => {
-    if (holeDepthLeftIndex > 0 && holeDepthRightIndex > 0) {
+    if (holeDepthLeftIndex >= 0 && holeDepthRightIndex > 0) {
       const isLastIndex = data.length - 1 <= holeDepthRightIndex;
-      const beginningDate = _.get(data, `[${holeDepthLeftIndex}].Date_Time`, "");
-      const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].Date_Time`, "") : "NOW";
-      const indexDiff = holeDepthRightIndex - holeDepthLeftIndex;
+      const beginningDate = _.get(data, `[${holeDepthLeftIndex}].rig_time`, "");
+      const endDate = !isLastIndex ? _.get(data, `[${holeDepthRightIndex}].rig_time`, "") : "NOW";
+      const indexDiff = holeDepthRightIndex - holeDepthLeftIndex + 1;
 
       updateView(view => {
-        const xScale = computePhaseXScaleValue(indexDiff)(w - GRID_GUTTER);
+        const xScale = computeInitialViewXScaleValue(indexDiff)(width - GRID_GUTTER);
         return {
           x: -1 * holeDepthLeftIndex * xScale,
-          y: 0,
+          y: 62,
           xScale,
-          yScale: height ? getInitialViewYScaleValue(height) : view.yScale
+          yScale: height ? getInitialViewYScaleValue(dataMin - 50) : view.yScale
         };
       });
 
-      setSliderInterval([
-        _.get(data, `[${Math.floor(holeDepthLeftIndex)}].Hole_Depth`),
-        _.get(data, `[${Math.round(holeDepthRightIndex)}].Hole_Depth`)
-      ]);
+      setGlobalDates([beginningDate, endDate]);
+
+      setSliderInterval(interval => ({
+        ...interval,
+        firstDepth: drillPhaseObj.phaseStart,
+        lastDepth: drillPhaseObj.phaseEnd
+      }));
 
       setSliderStep({ type: "UPDATE", payload: { step: indexDiff, direction: 1, maxStep: indexDiff } });
-      setGlobalDates([beginningDate, endDate]);
-      setDrillPhase({ type: "SET", payload: { set: true } });
+      setDrillPhase({ type: "SET", payload: { set: false } });
     }
   }, [
     data,
+    dataMin,
     getInitialViewYScaleValue,
     height,
     setSliderInterval,
-    setDrillPhase,
-    w,
+    width,
     holeDepthLeftIndex,
-    holeDepthRightIndex
+    holeDepthRightIndex,
+    setDrillPhase,
+    drillPhaseObj.phaseStart,
+    drillPhaseObj.phaseEnd
   ]);
 
   // set initial scale
   useMemo(() => {
-    if (
-      data &&
-      data.length &&
-      ((width && height) || !expanded) &&
-      (!scaleInitialized.current || (!_.isEqual(drillPhaseObj, prevPhase) && drillPhaseObj.set))
-    ) {
+    if (data && data.length && ((width && height) || !expanded)) {
       onReset();
-      scaleInitialized.current = true;
     }
-  }, [width, height, expanded, data, onReset, drillPhaseObj, prevPhase]);
+  }, [width, height, expanded, data, onReset]);
+
+  useEffect(() => {
+    function startTimeSliderFetch() {
+      for (let i = minSurveyDepth; i <= maxDepth; i += 100) {
+        const index = i > maxDepth ? maxDepth : i;
+        getTimeSliderData(wellId, index, index + 100).then(() => {
+          if (i + 100 >= maxDepth - 1) hasFetchedTimeSliderData.current = true;
+        });
+      }
+    }
+
+    if (hasSurveys && !hasFetchedTimeSliderData.current) {
+      startTimeSliderFetch();
+    }
+  }, [
+    hasSurveys,
+    hasProjections,
+    getTimeSliderData,
+    maxSurveyDepth,
+    maxProjectionDepth,
+    minSurveyDepth,
+    wellId,
+    maxDepth
+  ]);
 
   useEffect(() => {
     refresh();
@@ -196,44 +233,25 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
   }, [expanded, view.xScale, width]);
 
   useEffect(() => {
-    if (data && data.length && view.xScale) {
-      if (
-        (holeDepthLeftIndex > Math.round(hiddenDataLength) || holeDepthRightIndex < rightBoundIndex) &&
-        drillPhaseObj.inView
-      ) {
-        setDrillPhase({ type: "UPDATE_VIEW", payload: false });
-      } else if (
-        holeDepthLeftIndex <= Math.round(hiddenDataLength) &&
-        holeDepthRightIndex >= rightBoundIndex &&
-        !drillPhaseObj.inView
-      ) {
-        setDrillPhase({ type: "UPDATE_VIEW", payload: true });
-      }
-    }
-  }, [
-    data,
-    width,
-    view,
-    setDrillPhase,
-    drillPhaseObj.inView,
-    hiddenDataLength,
-    holeDepthRightIndex,
-    holeDepthLeftIndex,
-    rightBoundIndex
-  ]);
-
-  useEffect(() => {
-    if (data && data.length && step >= 0 && maxStep > 0 && leftBoundIndexMoving >= 0 && rightBoundIndex > 0) {
+    if (
+      data &&
+      data.length &&
+      step >= 0 &&
+      maxStep > 0 &&
+      leftBoundIndexMoving >= 0 &&
+      rightBoundIndex > 0 &&
+      hasFetchedTimeSliderData.current
+    ) {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
-      const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].Date_Time`, "");
-      const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].Date_Time`, "") : "NOW";
+      const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].rig_time`, "");
+      const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].rig_time`, "") : "NOW";
+      setSliderInterval({
+        firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),
+        lastDepth: _.get(data, `[${Math.round(stepIndex)}].hole_depth`, data[data.length - 1].hole_depth),
+        isLastIndex: isLastDataIndex
+      });
 
-      setSliderInterval([
-        _.get(data, `[${Math.round(leftBoundIndexMoving)}].Hole_Depth`),
-        _.get(data, `[${Math.round(stepIndex)}].Hole_Depth`)
-      ]);
       setGlobalDates([beginningDateMoving, endDateMoving]);
-      setDrillPhase({ type: "SET", payload: { set: false } });
     }
   }, [
     data,
@@ -246,6 +264,31 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     leftBoundIndexMoving,
     rightBoundIndex,
     stepIndex
+  ]);
+
+  useEffect(() => {
+    if (!drillPhaseObj.set) {
+      for (let i = 0; i < wellSections.length; i++) {
+        const { phaseStart, phaseEnd } = wellSections[i];
+        if (sliderInterval.firstDepth >= phaseStart && sliderInterval.lastDepth <= phaseEnd) {
+          if (wellSections[i].phase !== ALL || maxStep >= data.length - 1) {
+            setDrillPhase({ type: "SET", payload: { ...wellSections[i], inView: true } });
+            break;
+          } else {
+            setDrillPhase({ type: "UPDATE_VIEW", payload: false });
+          }
+        }
+      }
+    }
+  }, [
+    setDrillPhase,
+    sliderInterval.firstDepth,
+    sliderInterval.lastDepth,
+    wellSections,
+    drillPhaseObj.phase,
+    drillPhaseObj.set,
+    data.length,
+    maxStep
   ]);
 
   return (
@@ -266,12 +309,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
               onReset={onReset}
               width={width}
             />
-            <LocalTimeControls
-              setSliderStep={setSliderStep}
-              maxStep={maxStep}
-              isPlaying={isPlaying}
-              isSpeeding={isSpeeding}
-            />
+            <LocalTimeControls setSliderStep={setSliderStep} isPlaying={isPlaying} isSpeeding={isSpeeding} />
           </div>
           <VerticalMenu
             id="time-slider-menu"
@@ -284,51 +322,72 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       )}
       <div className={classes.timeSliderView}>
         <GlobalStartTimeControl setSliderStep={setSliderStep} expanded={expanded} date={globalDates[0]} />
-        <div className={classNames(classes.timeSlider, expanded && classes.timeSliderExpanded)}>
+        <div className={classNames(classes.timeSlider)} ref={sliderRef}>
           <div
             className={classNames(classes.timeSliderGraph, !expanded && classes.timeSliderGraphCollapsed)}
             ref={canvasRef}
           >
             <PixiContainer ref={viewportContainer} container={stage} />
-            {selectedMenuItems.map(graph => {
-              if (data.length > 0) {
-                if (LINE_CHARTS.includes(graph)) {
-                  return (
-                    <PixiContainer
-                      key={graph}
-                      container={viewport}
-                      child={container => (
-                        <PixiLine
-                          container={container}
-                          data={data}
-                          mapData={MAP_BY_GRAPH[graph]}
-                          color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
-                        />
-                      )}
-                    />
-                  );
-                } else {
-                  return (
-                    <PixiContainer
-                      key={graph}
-                      container={viewport}
-                      child={container => (
-                        <PixiBar
-                          container={container}
-                          data={data}
-                          mapData={MAP_BY_GRAPH[graph]}
-                          color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
-                          width={1}
-                          height={3500}
-                          x={0}
-                          y={0}
-                        />
-                      )}
-                    />
-                  );
-                }
-              }
-            })}
+
+            <PixiContainer
+              container={viewport}
+              child={container => {
+                return (
+                  <React.Fragment>
+                    {selectedMenuItems.map(graph => {
+                      if (data.length > 0) {
+                        if (LINE_CHARTS.includes(graph)) {
+                          return (
+                            <PixiLine
+                              key={graph}
+                              container={container}
+                              data={data}
+                              mapData={MAP_BY_GRAPH[graph]}
+                              color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
+                            />
+                          );
+                        } else {
+                          return (
+                            <PixiBar
+                              key={graph}
+                              container={container}
+                              data={data}
+                              mapData={MAP_BY_GRAPH[graph]}
+                              color={parseInt("0x" + COLOR_BY_GRAPH[graph])}
+                              width={1}
+                              height={barHeight}
+                              x={0}
+                              y={dataMin / 2}
+                              alpha={0.4}
+                              zIndex={50}
+                            />
+                          );
+                        }
+                      }
+                    })}
+                  </React.Fragment>
+                );
+              }}
+            />
+
+            <PixiContainer
+              updateTransform={frozenScaleTransform}
+              container={viewport}
+              child={container => {
+                return wellSections.map((phaseObj, index) => (
+                  <QuickFilter
+                    key={phaseObj.phase + index}
+                    wellId={wellId}
+                    container={container}
+                    phaseObj={phaseObj}
+                    setDrillPhase={setDrillPhase}
+                    view={view}
+                    data={data}
+                    refresh={refresh}
+                  />
+                ));
+              }}
+            />
           </div>
           <Slider
             expanded={expanded}
@@ -337,7 +396,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
             maxStep={maxStep}
             setStep={setSliderStep}
             stepSize={stepSize}
-            data={{ date: sliderDate, holeDepth: sliderInterval[1] }}
+            data={{ date: sliderDate, holeDepth: sliderInterval.lastDepth }}
           />
         </div>
         <GlobalEndTimeControl setSliderStep={setSliderStep} expanded={expanded} date={globalDates[1]} />

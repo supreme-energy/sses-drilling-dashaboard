@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { IconButton } from "@material-ui/core";
 import { PlayCircleOutline, PauseCircleOutline, FastRewind, FastForward } from "@material-ui/icons";
 
-import { useInterval } from "./useInterval";
+import useInterval from "../../../hooks/useInterval";
 import classes from "./TimeSlider.scss";
 
-const LocalTimeControls = React.memo(({ setSliderStep, maxSliderStep, isSpeeding, isPlaying }) => {
+const LocalTimeControls = React.memo(({ setSliderStep, isSpeeding, isPlaying }) => {
   let speedingTimeout = useRef(null);
 
   const onPlayClick = useCallback(() => {
-    setSliderStep({ type: "IS_PLAYING" });
+    setSliderStep({ type: "TOGGLE_IS_PLAYING" });
   }, [setSliderStep]);
 
   const onForwardDown = useCallback(() => {
@@ -52,7 +52,8 @@ const LocalTimeControls = React.memo(({ setSliderStep, maxSliderStep, isSpeeding
 
 LocalTimeControls.propTypes = {
   setSliderStep: PropTypes.func,
-  maxSliderStep: PropTypes.number
+  isSpeeding: PropTypes.bool,
+  isPlaying: PropTypes.bool
 };
 
 export default LocalTimeControls;

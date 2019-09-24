@@ -2,7 +2,9 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import classes from "./styles.scss";
 import { Typography } from "@material-ui/core";
-import { useKpi } from "../../api";
+import _ from "lodash";
+import { useKpi, useWellOverviewKPI } from "../../api";
+import { useWellIdContainer } from "../App/Containers";
 import classNames from "classnames";
 import { twoDecimals, EMPTY_FIELD } from "../../constants/format";
 
@@ -24,7 +26,7 @@ function KpiItem({
     <div className={classNames(className, classes.vertical, classes.root, { [classes.small]: small })} style={style}>
       <div className={classes.horizontalTop}>
         {renderValue({ value, format: formatValue, textClass, textStyle })}
-        <Typography className={classNames(classes.caption, classes.measure, textClass)} variant="caption">
+        <Typography className={classNames(classes.caption, textClass)} variant="caption">
           {measureUnit}
         </Typography>
       </div>
@@ -50,7 +52,7 @@ export function defaultRenderValue({ value, format, textClass, textStyle }) {
 
 KpiItem.propTypes = {
   format: PropTypes.func,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   measureUnit: PropTypes.string,
   label: PropTypes.string,
   className: PropTypes.string,
@@ -73,8 +75,10 @@ export function BitDepth() {
 }
 
 export function Rop() {
-  const { rateOfPenetration } = useKpi();
-  return <KpiItem label={"Rate of Penetration (ROP)"} value={rateOfPenetration} measureUnit={"fph"} />;
+  const { wellId } = useWellIdContainer();
+  const { data } = useWellOverviewKPI(wellId);
+  const rop = _.get(data, `[${data.length - 1}].rop`);
+  return <KpiItem label={"Rate of Penetration (ROP)"} value={rop} measureUnit={"fph"} />;
 }
 
 export default KpiItem;

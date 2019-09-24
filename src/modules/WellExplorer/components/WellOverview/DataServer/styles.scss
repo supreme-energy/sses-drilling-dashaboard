@@ -1,0 +1,38 @@
+.serverInfoContainer, .wellInfoContainer {
+    .formContainer {
+        padding: 0 15px 15px;
+    }
+
+    .textInputContainer {
+        > div {
+            margin-right: 20px;
+        }
+    }
+
+    .textField {
+        min-width: 150px;
+    }
+
+    .extendedTextField {
+        min-width: 300px;
+    }
+
+    .selectWellDropdown {
+        flex: 1;
+    }
+}
+
+.notificationsContainer {
+    .formContainer {
+        padding: 0 15px 15px;
+    }
+
+    .alarmDropdown {
+        width: 250px;
+        margin-right: 20px;
+    }
+
+    button { 
+        outline: none;
+    }
+}

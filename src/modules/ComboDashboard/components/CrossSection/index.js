@@ -1,55 +1,172 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
+import { useCrossSectionContainer } from "../../../App/Containers";
+import { NORMAL } from "../../../../constants/crossSectionModes";
+import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
+
+import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 const pixiApp = new PixiCrossSection();
 
-// PIXI has some lowercase constructors
-/* eslint new-cap: 0 */
-class CrossSection extends Component {
-  constructor(props) {
-    super(props);
-    this.canvas = React.createRef();
-  }
+const CrossSection = props => {
+  const { width, height, viewDirection, view, updateView } = props;
+  const canvas = useRef(null);
+  const [mode, setMode] = useState(NORMAL);
+  const dataObj = useCrossSectionContainer();
+  const updateSegments = useUpdateSegmentsById();
+  const { debouncedSave } = useSaveSurveysAndProjections();
 
-  componentDidMount() {
-    pixiApp.init(this.props, this.props.view, this.props.updateView);
+  const {
+    wellPlan,
+    selectedSections,
+    toggleSegmentSelection,
+    deselectAll,
+    calcSections,
+    calculatedFormations,
+    addProjection,
+    deleteProjection
+  } = dataObj;
 
-    this.canvas.current.appendChild(pixiApp.renderer.view);
+  const [xField, yField] = useMemo(() => {
+    if (viewDirection === HORIZONTAL) {
+      return ["ew", "ns"];
+    } else {
+      return ["vs", "tvd"];
+    }
+  }, [viewDirection]);
 
-    pixiApp.update(this.props);
-  }
+  const yAxisDirection = useMemo(() => {
+    return viewDirection ? -1 : 1;
+  }, [viewDirection]);
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  }
+  useEffect(() => {
+    // TODO: Calculate the zoom to fit the new data view
+    // Currently initialized the graph at the first Well plan data point
+    const minX = Math.min(...wellPlan.map(d => d[xField]));
+    const minY = Math.min(...wellPlan.map(d => d[yField]));
+    updateView({
+      x: -minX,
+      y: -minY,
+      xScale: 1,
+      yScale: 1
+    });
+  }, [xField, yField, updateView, wellPlan]);
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    pixiApp.resize(this.props.width, this.props.height);
-    pixiApp.update(this.props);
-  }
+  const [mouse, setMouse] = useState({
+    x: 0,
+    y: 0
+  });
 
-  componentWillUnmount() {
-    pixiApp.cleanUp();
-    this.canvas.current.removeChild(pixiApp.renderer.view);
-  }
+  const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
 
-  render() {
-    return <div className={classes.crossSection} ref={this.canvas} />;
-  }
-}
+  useEffect(() => {
+    const currentCanvas = canvas.current;
 
-/* eslint react/no-unused-prop-types: 0 */
+    pixiApp.init(
+      {
+        ...dataObj,
+        ...props,
+        view,
+        updateView,
+        scale,
+        mode,
+        setMode,
+        mouse,
+        setMouse,
+        xField,
+        yField,
+        yAxisDirection,
+        updateSegments,
+        debouncedSave
+      },
+      view,
+      updateView
+    );
+    currentCanvas.appendChild(pixiApp.renderer.view);
+    return () => {
+      pixiApp.cleanUp();
+      currentCanvas.removeChild(pixiApp.renderer.view);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    pixiApp.resize(width, height);
+  }, [width, height]);
+
+  useEffect(() => {
+    pixiApp.update({
+      width,
+      height,
+      wellPlan,
+      selectedSections,
+      toggleSegmentSelection,
+      deselectAll,
+      calcSections,
+      calculatedFormations,
+      scale,
+      view,
+      updateView,
+      mode,
+      setMode,
+      mouse,
+      setMouse,
+      xField,
+      yField,
+      viewDirection,
+      yAxisDirection,
+      addProjection,
+      deleteProjection,
+      updateSegments,
+      debouncedSave
+    });
+  }, [
+    view.x,
+    view.y,
+    view.xScale,
+    view.yScale,
+    view,
+    width,
+    height,
+    wellPlan,
+    selectedSections,
+    toggleSegmentSelection,
+    deselectAll,
+    calcSections,
+    calculatedFormations,
+    scale,
+    mode,
+    setMode,
+    mouse,
+    setMouse,
+    xField,
+    yField,
+    viewDirection,
+    yAxisDirection,
+    addProjection,
+    updateView,
+    deleteProjection,
+    updateSegments,
+    debouncedSave
+  ]);
+
+  return <div className={classes.crossSection} ref={canvas} />;
+};
+
 CrossSection.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
-  view: PropTypes.object,
-  updateView: PropTypes.func,
-  formations: PropTypes.array,
-  projections: PropTypes.array,
-  wellPlan: PropTypes.array,
-  surveys: PropTypes.array
+  viewDirection: PropTypes.number,
+  view: PropTypes.shape({
+    x: PropTypes.number,
+    y: PropTypes.number,
+    xScale: PropTypes.number,
+    yScale: PropTypes.number
+  }),
+  updateView: PropTypes.func
 };
 
 export default CrossSection;

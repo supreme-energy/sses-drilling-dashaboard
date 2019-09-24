@@ -1,5 +1,5 @@
 import React from "react";
-import PixiRectangle from "./PixiRectangle";
+import PixiRectangle from "../../../../../components/PixiRectangle";
 import * as wellSections from "../../../../../constants/wellSections";
 
 const colorBySection = {

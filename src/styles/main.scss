@@ -14,6 +14,8 @@ body {
   height: 100%;
 }
 
+
+
 *,
 *:before,
 *:after {
@@ -23,6 +25,14 @@ body {
 :global {
   .whiteText {
     color: #ffffff !important;
+  }
+
+  .hideArrows {
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   }
 
   //flexbox helpers classes
@@ -116,6 +126,10 @@ body {
 
   .self-center {
     align-self: center;
+  }
+
+  .self-end {
+    align-self: flex-end;
   }
 
   .content-center {

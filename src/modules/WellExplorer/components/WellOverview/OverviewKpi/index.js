@@ -16,18 +16,12 @@ import ImportInput from "../../ImportInput";
 import Import from "@material-ui/icons/Input";
 import { withRouter } from "react-router";
 import flowRight from "lodash/flowRight";
+import { useWellIdContainer } from "../../../../App/Containers";
 
-function OverviewKpi({
-  onFilesToImportChange,
-  well,
-  changeSelectedWell,
-  updateFavorite,
-  match: {
-    params: { wellId: openedWellId }
-  }
-}) {
+function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImportChange }) {
+  const { wellId } = useWellIdContainer();
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
-  const opened = openedWellId && openedWellId === well.id;
+  const opened = wellId && wellId === well.id;
   return (
     <div className={classes.container}>
       <div className={classes.topRow}>

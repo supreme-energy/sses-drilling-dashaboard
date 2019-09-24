@@ -11,6 +11,9 @@ export const theme = createMuiTheme({
     },
     caption: {
       color: "rgba(0,0,0,0.6)"
+    },
+    condensed: {
+      fontFamily: "Roboto Condensed"
     }
   },
   palette: {
@@ -43,12 +46,22 @@ export const theme = createMuiTheme({
     },
     curveLabel: {
       main: "#7D7D7D"
+    },
+    gray: {
+      main: "#757575"
     }
   },
   drillingStatusColor: "#4B921B",
   trippingStatusColor: "#B00020",
   overrides: {
     MuiTab: {
+      root: {
+        "&:focus": {
+          outline: "none"
+        }
+      }
+    },
+    MuiIconButton: {
       root: {
         "&:focus": {
           outline: "none"

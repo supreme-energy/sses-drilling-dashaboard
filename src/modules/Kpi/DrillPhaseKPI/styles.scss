@@ -11,6 +11,12 @@
         color: #827717;
     }
 
+    .firstColumn, .secondColumn {
+         > div:last-child {
+            margin-top: 5px;
+        }
+    }
+
     .secondColumn {
         min-width: 185px;
     }
@@ -22,8 +28,7 @@
 
 .percentageBar {
     position: relative;
-
-    top: -6px;
+    top: -3px;
     .bars {
         position: absolute;
     }
