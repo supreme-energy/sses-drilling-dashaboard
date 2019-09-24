@@ -12,7 +12,7 @@ import {
   usePendingSegments
 } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
-import CondensedText from "../../../components/ContensedText.js";
+import CondensedText from "../../../components/CondensedText";
 import css from "./styles.scss";
 import { useWellIdContainer } from "../../App/Containers";
 import WellColorPicker from "./WellColorPicker";

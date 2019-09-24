@@ -1,6 +1,6 @@
 import React from "react";
 import css from "./styles.scss";
-import CondensedText from "../../../components/ContensedText.js";
+import CondensedText from "../../../components/CondensedText";
 import { Box } from "@material-ui/core";
 import { useSelectedSurvey } from "../selectors";
 import { formatValue } from "../../../constants/format";
