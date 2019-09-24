@@ -568,7 +568,8 @@ const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
       query: {
         seldbname: wellId
       },
-      body: props
+      // workaround for endpoint issue that does not properly convert booleans
+      body: _.mapValues(props, value => (typeof value === "boolean" ? String(value) : value))
     },
     (currentFormations, result) => {
       return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f))).sort(sortByThickness);
