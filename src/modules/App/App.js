@@ -22,7 +22,13 @@ import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 
 // Import UI State Providers
-import { TimeSliderProvider, DrillPhaseProvider, AppStateProvider, CrossSectionProvider } from "./Containers";
+import {
+  TimeSliderProvider,
+  DrillPhaseProvider,
+  AppStateProvider,
+  CrossSectionProvider,
+  SelectedLogDataScaleProvider
+} from "./Containers";
 
 // Import Provider initialStates
 import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
@@ -87,22 +93,24 @@ class App extends React.Component {
                         <PageLayout history={history}>
                           <MuiPickersUtilsProvider utils={MomentUtils}>
                             <DrillPhaseProvider initialState={INITIAL_DRILL_PHASE_STATE}>
-                              <FormationsStoreProvider>
-                                <CrossSectionProvider>
-                                  <Route path="/:wellId" component={WellUpdate} />
-                                  <Switch>
-                                    <Route path="/:wellId?" exact component={WellExplorer} />
-                                    <HeaderToolbar history={history}>
-                                      <TimeSliderToolbar>
-                                        <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                                        <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                        <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                                        <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                                      </TimeSliderToolbar>
-                                    </HeaderToolbar>
-                                  </Switch>
-                                </CrossSectionProvider>
-                              </FormationsStoreProvider>
+                              <SelectedLogDataScaleProvider initialState={{}}>
+                                <FormationsStoreProvider>
+                                  <CrossSectionProvider>
+                                    <Route path="/:wellId" component={WellUpdate} />
+                                    <Switch>
+                                      <Route path="/:wellId?" exact component={WellExplorer} />
+                                      <HeaderToolbar history={history}>
+                                        <TimeSliderToolbar>
+                                          <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                          <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                          <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                          <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                        </TimeSliderToolbar>
+                                      </HeaderToolbar>
+                                    </Switch>
+                                  </CrossSectionProvider>
+                                </FormationsStoreProvider>
+                              </SelectedLogDataScaleProvider>
                             </DrillPhaseProvider>
                           </MuiPickersUtilsProvider>
                         </PageLayout>

@@ -2,10 +2,10 @@ import { SURFACE, CURVE, INTERMEDIATE, LATERAL, DRILLOUT, ALL } from "./wellSect
 import { GREEN, GRAY } from "./colors";
 
 // Map callbacks for graphs
-export const mapRop = (d, index) => [index, Number(d.ROP_A)];
-export const mapSliding = (d, index) => [index, Number(d.Sliding)];
-export const mapConnections = (d, index) => [index, Number(d.Connections)];
-export const mapAngle = (d, index) => [index, Number(d.Angle)];
+export const mapRop = (d, index) => [index, Number(d.rop_a)];
+export const mapSliding = (d, index) => [index, Number(d.slide_count)];
+export const mapConnections = (d, index) => [index, Number(d.connection_number)];
+export const mapAngle = (d, index) => [index, Number(d.td_rpm)];
 
 // Slider constants
 export const GRID_GUTTER = 5;

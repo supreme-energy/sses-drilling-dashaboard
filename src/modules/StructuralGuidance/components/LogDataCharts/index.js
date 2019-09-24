@@ -1,10 +1,11 @@
-import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useState, useReducer, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import AddCircle from "@material-ui/icons/AddCircle";
 import _ from "lodash";
 import classNames from "classnames";
 
+import { selectedLogReducer } from "./reducers";
 import SegmentPlot from "./SegmentPlot";
 import { VS, INITIAL_SCALE_BIAS } from "../../../../constants/structuralGuidance";
 import LogMenu from "./LogMenu";
@@ -17,12 +18,12 @@ import { useSetupWizardData } from "../../../Interpretation/selectors";
 
 const LogDataCharts = React.memo(({ wellId, view }) => {
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
-  const [selectedLogs, setSelectedLog] = useState({});
+  const [selectedLogs, setSelectedLog] = useReducer(selectedLogReducer, { logs: {} });
   const [anchorEl, setAnchorEl] = useState(null);
   const logInitialized = useRef(false);
   const { surveyDataIsImported } = useSetupWizardData();
 
-  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs, "checked")), [selectedLogs]);
+  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs.logs, "checked")), [selectedLogs]);
   const availableLogs = useMemo(() => {
     return data
       .filter(l => l.data_count > 0)
@@ -31,18 +32,15 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
       });
   }, [data]);
   const menuItems = useMemo(() => availableLogs.map(({ label }) => label), [availableLogs]);
-  const areLogsSelected = useMemo(() => _.some(selectedLogs, "checked"), [selectedLogs]);
+  const areLogsSelected = useMemo(() => _.some(selectedLogs.logs, "checked"), [selectedLogs]);
 
   const handleAddChart = event => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleRemoveChart = useCallback(
-    log => {
-      setSelectedLog({ ...selectedLogs, [log]: false });
-    },
-    [selectedLogs]
-  );
+  const handleRemoveChart = useCallback(log => {
+    setSelectedLog({ type: "REMOVE_LOG", payload: log });
+  }, []);
 
   const handleCloseMenu = useCallback(() => {
     setAnchorEl(null);
@@ -51,7 +49,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
   useEffect(() => {
     if (!logInitialized.current && menuItems.length) {
       const log = menuItems.includes("GR") ? "GR" : menuItems[0];
-      setSelectedLog({ [log]: { checked: true } });
+      setSelectedLog({ type: "TOGGLE_LOG", payload: log });
       logInitialized.current = true;
     }
   }, [menuItems]);
@@ -70,7 +68,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
 
   return (
     <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
-      <SegmentPlot newView={view} xAxis={VS} />
+      {currentLogs.length > 0 && <SegmentPlot newView={view} xAxis={VS} />}
       {currentLogs.map(log => {
         if (!_.isEmpty(dataBySection)) {
           const logId = dataBySection[log].id;
@@ -105,6 +103,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
         handleClose={handleCloseMenu}
         anchorEl={anchorEl}
         availableLogs={availableLogs}
+        logId="logs"
       />
     </WidgetCard>
   );

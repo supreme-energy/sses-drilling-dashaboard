@@ -11,12 +11,14 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
+import { useSurveysDataContainer } from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
 import { REVIEW_MANUAL_IMPORT, SETTINGS, REVIEW_CLEAN_DATA } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
+  const { refreshSurveys } = useSurveysDataContainer();
 
   const handleImport = async () => {
     const data = new FormData();
@@ -29,7 +31,8 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
     const fileName = json.filename;
 
     if (success) {
-      uploadFile(wellId, fileName);
+      await uploadFile(wellId, fileName);
+      refreshSurveys();
       handleClose();
     } else {
       setErrors(json);
@@ -75,6 +78,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
 export const AutoImportModal = React.memo(
   ({ wellId, hasConflict, newSurvey, handleClose, setView, refresh, md, inc, azm }) => {
     const { importNewSurvey, deleteSurveys } = useCloudImportSurveys();
+    const { refreshSurveys } = useSurveysDataContainer();
 
     const openSettings = () => setView(SETTINGS);
     const handleCleanData = async () => {
@@ -86,7 +90,10 @@ export const AutoImportModal = React.memo(
     const handleImport = async () => {
       await importNewSurvey(wellId);
       const res = await refresh();
-      !res.next_survey && handleClose();
+      if (!res.next_survey) {
+        await refreshSurveys();
+        handleClose();
+      }
     };
 
     return (
