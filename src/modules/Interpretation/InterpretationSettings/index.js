@@ -8,7 +8,7 @@ import NavigationSettings from "./NavigationSettings";
 import ModelSurveySettings from "./ModelSurveySettings";
 import DraftSurveys from "./DraftSurveys";
 import ApplyDraftButtons from "./ApplyDraftButtons";
-import { usePendingSegments } from "../selectors";
+import { usePendingSegments, useGetChangedPendingStateFields } from "../selectors";
 import { useUpdateSegmentsByMd } from "../actions";
 import AutoDip from "./AutoDip";
 
@@ -24,6 +24,7 @@ export default function InterpretationSettings({ className }) {
 
     updateSegments(resetArgs);
   }, [pendingSegments, updateSegments]);
+  const { dip: dipChanged, fault: faultChanged } = useGetChangedPendingStateFields();
 
   return (
     <Box display="flex" flexDirection="column" className={classNames(className, css.root)}>
@@ -36,7 +37,7 @@ export default function InterpretationSettings({ className }) {
         <React.Fragment>
           <ApplyDraftButtons />
           <Box display="flex" flexDirection="row" mb={1} mt={1} justifyContent="center">
-            <Button color="primary" onClick={resetPendingState}>
+            <Button color="primary" onClick={resetPendingState} disabled={!dipChanged && !faultChanged}>
               RESET FAULT/DIP
             </Button>
           </Box>
