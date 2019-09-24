@@ -1,0 +1,8 @@
+@import '../../../styles/table.scss';
+
+.table {
+    tbody {
+        max-height: 600px;
+        overflow: auto;
+    }
+}

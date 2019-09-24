@@ -1,6 +1,6 @@
 import React, { useReducer, useCallback, useMemo } from "react";
 import { Typography, Collapse, IconButton, Box, FormControlLabel, Switch, Button } from "@material-ui/core";
-import WidgetCard from "../../components/WidgetCard";
+import WidgetCard, { WidgetTitle } from "../../components/WidgetCard";
 import css from "./Interpretation.scss";
 import InterpretationChart from "./InterpretationChart";
 import classNames from "classnames";
@@ -21,6 +21,7 @@ import { useSelectedWellLog, useSetupWizardData } from "./selectors";
 import FormationSettings from "./InterpretationChart/FormationSettings";
 
 import WizardChecklist from "./components/WizardChecklist";
+import DetailsTable from "./DetailsTable";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
@@ -64,8 +65,19 @@ const Interpretation = React.memo(
     const { dataHasLoaded, allStepsAreCompleted, ...setupSteps } = useSetupWizardData();
 
     return (
-      <WidgetCard className={classNames(css.interpretationContainer, className)} title="Interpretation" hideMenu>
-        <CloudServerModal wellId={wellId} />
+      <WidgetCard
+        className={classNames(css.interpretationContainer, className)}
+        hideMenu
+        renderHeader={() => (
+          <Box display="flex" flexDirection="row" justifyContent="space-between">
+            <WidgetTitle>Interpretation</WidgetTitle>
+            <Box display="flex">
+              <CloudServerModal wellId={wellId} />
+              <DetailsTable />
+            </Box>
+          </Box>
+        )}
+      >
         {formationsEditMode ? (
           <FormationSettings />
         ) : (

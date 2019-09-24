@@ -23,6 +23,7 @@ import { useSetupWizardData } from "../../Interpretation/selectors";
 import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
 import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
+import TableButton from "../../../components/TableButton";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, false);
@@ -105,14 +106,7 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
                   <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
                 </React.Fragment>
               )}
-              <IconButton
-                size="small"
-                className={classNames(classes.expand, classes.fullTableButton)}
-                onClick={toggleModal}
-                aria-label="Show full details table"
-              >
-                <img src={TableChartIcon} className={classes.icon} />
-              </IconButton>
+              <TableButton onClick={toggleModal} />
             </div>
           </div>
           <Collapse in={expanded} unmountOnExit>
