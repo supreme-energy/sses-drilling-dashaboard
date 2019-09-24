@@ -26,6 +26,7 @@ import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
 import { EMPTY_FIELD } from "../../../../constants/format";
+import isNumber from "../../../../utils/isNumber";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -76,7 +77,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
       />
     );
   } else {
-    return <TableCell className={classes.cell}>{(value && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
+    return <TableCell className={classes.cell}>{(isNumber(value) && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
   }
 }
 
