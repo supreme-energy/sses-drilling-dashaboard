@@ -101,7 +101,7 @@ export default function DetailsTable({ showFullTable = false }) {
         return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
       }
     }
-  }, [calcSections, showFullTable, selectedIndex]);
+  }, [calcSections, showFullTable, selectedIndex, allStepsAreCompleted, allComputed]);
 
   return (
     <Table className={classes.table}>
