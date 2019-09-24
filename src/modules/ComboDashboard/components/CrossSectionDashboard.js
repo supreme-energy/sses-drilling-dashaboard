@@ -7,7 +7,6 @@ import IconButton from "@material-ui/core/IconButton";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Import from "@material-ui/icons/OpenInBrowser";
-import TableChartIcon from "../../../assets/tableChart.svg";
 
 import WidgetCard from "../../../components/WidgetCard";
 import classes from "./ComboDashboard.scss";
