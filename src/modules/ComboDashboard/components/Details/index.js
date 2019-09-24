@@ -24,7 +24,7 @@ import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
-import { useComputedSurveysAndProjections } from "../../../Interpretation/selectors";
+import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -84,6 +84,7 @@ export default function DetailsTable({ showFullTable = false }) {
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
   const [allComputed] = useComputedSurveysAndProjections();
+  const { allStepsAreCompleted } = useSetupWizardData();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
@@ -94,7 +95,7 @@ export default function DetailsTable({ showFullTable = false }) {
     if (showFullTable) {
       return calcSections.slice().reverse();
     } else {
-      if (selectedIndex === -1 && calcSections.length === 0) {
+      if (selectedIndex === -1 && !allStepsAreCompleted) {
         return allComputed;
       } else {
         return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
