@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { Box, IconButton, Typography, CircularProgress } from "@material-ui/core";
 import { DeleteForever, Visibility, VisibilityOff } from "@material-ui/icons";
 import { useFormationsStore } from "../Formations/store";
@@ -15,13 +15,17 @@ import { NumericDebouceTextField, DebouncedTextField } from "../../../../compone
 
 const ButtonWithConfirm = withConfirmDelete(IconButton);
 
-const FormationColor = ({ label, ...props }) => (
-  <Box display="flex" flexDirection="column" alignItems="center">
-    <Typography variant="caption">{label}</Typography>
-    <ColorPickerBox {...props} />
-  </Box>
-);
+const FormationColor = React.memo(({ label, ...props }) => {
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center">
+      <Typography variant="caption">{label}</Typography>
+      <ColorPickerBox {...props} />
+    </Box>
+  );
+});
 
+const lineBoxProps = { className: classNames(css.colorBox, css.col2, css.row1) };
+const fillBoxProps = { className: classNames(css.colorBox, css.col3, css.row1) };
 function SettingsContent({ pendingAddTop, selectedFormation, formationsData, deleteTop, dispatch, updateTop, wellId }) {
   const thickness = get(selectedFormation, "data[0].thickness");
   const selectionBgColor = `#${get(selectedFormation, "bg_color")}`;
@@ -31,6 +35,17 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
     selectionBgColor,
     selectionBgAlpha
   ]);
+
+  const selectedId = selectedFormation && selectedFormation.id;
+
+  const handleSaveLineColor = useCallback(({ hex }) => updateTop({ id: selectedId, color: hex.replace("#", "") }), [
+    updateTop,
+    selectedId
+  ]);
+  const handleSaveFillColor = useCallback(
+    color => updateTop({ id: selectedId, bg_color: color.hex.replace("#", ""), bg_percent: color.rgb.a }),
+    [updateTop, selectedId]
+  );
 
   return pendingAddTop ? (
     <React.Fragment>
@@ -89,18 +104,16 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
           hex={`#${selectedFormation.color}`}
           color={`#${selectedFormation.color}`}
           label={"Line"}
-          boxProps={{ className: classNames(css.colorBox, css.col2, css.row1) }}
-          handleSave={({ hex }) => updateTop({ id: selectedFormation.id, color: hex.replace("#", "") })}
+          boxProps={lineBoxProps}
+          handleSave={handleSaveLineColor}
         />
 
         <FormationColor
           hex={`#${selectedFormation.bg_color}`}
           color={selectionBgColorObject}
           label={"Fill"}
-          boxProps={{ className: classNames(css.colorBox, css.col3, css.row1) }}
-          handleSave={color =>
-            updateTop({ id: selectedFormation.id, bg_color: color.hex.replace("#", ""), bg_percent: color.rgb.a })
-          }
+          boxProps={fillBoxProps}
+          handleSave={handleSaveFillColor}
         />
 
         <Typography className={classNames(css.col1, css.row2, css.visibilityText)} variant="caption">
@@ -116,7 +129,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
             size="small"
             disableRipple
             onClick={() =>
-              updateTop({ id: selectedFormation.id, interp_line_show: !selectedFormation.interp_line_show })
+              updateTop({ id: selectedFormation.id, interp_line_show: String(!selectedFormation.interp_line_show) })
             }
           >
             {selectedFormation.interp_line_show ? <Visibility /> : <VisibilityOff />}
@@ -127,7 +140,9 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
           <IconButton
             size="small"
             disableRipple
-            onClick={() => updateTop({ id: selectedFormation.id, vert_line_show: !selectedFormation.vert_line_show })}
+            onClick={() =>
+              updateTop({ id: selectedFormation.id, vert_line_show: String(!selectedFormation.vert_line_show) })
+            }
           >
             {selectedFormation.vert_line_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
@@ -138,7 +153,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
             size="small"
             disableRipple
             onClick={() =>
-              updateTop({ id: selectedFormation.id, interp_fill_show: !selectedFormation.interp_fill_show })
+              updateTop({ id: selectedFormation.id, interp_fill_show: String(!selectedFormation.interp_fill_show) })
             }
           >
             {selectedFormation.interp_fill_show ? <Visibility /> : <VisibilityOff />}
@@ -149,7 +164,9 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
           <IconButton
             size="small"
             disableRipple
-            onClick={() => updateTop({ id: selectedFormation.id, vert_fill_show: !selectedFormation.vert_fill_show })}
+            onClick={() =>
+              updateTop({ id: selectedFormation.id, vert_fill_show: String(!selectedFormation.vert_fill_show) })
+            }
           >
             {selectedFormation.vert_fill_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import PixiRectangle from "../../../components/PixiRectangle";
 import { frozenScaleTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
-import { useInterpretationRenderer } from ".";
+import { useInterpretationRenderer, gridGutter } from ".";
 import { useSelectionActions } from "../actions";
 import { selectionColor, segmentColor } from "../pixiColors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
@@ -24,7 +24,7 @@ const RightSegments = React.memo(
           height={segmentHeight}
           updateTransform={frozenScaleTransform}
           y={computedSegment.startdepth}
-          x={totalWidth - 70}
+          x={totalWidth - gridGutter - 10}
           radius={5}
           backgroundColor={draftColor}
           backgroundAlpha={backgroundAlpha}
@@ -35,7 +35,7 @@ const RightSegments = React.memo(
   }
 );
 
-const Segment = React.memo(({ segment, view, selected, container, onSegmentClick, zIndex, totalWidth }) => {
+const Segment = React.memo(({ segment, view, selected, container, onSegmentClick, zIndex }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
   const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
 

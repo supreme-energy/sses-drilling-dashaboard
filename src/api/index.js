@@ -655,7 +655,7 @@ export function useFetchFormations(wellId) {
   );
 
   const updateTop = useCallback(
-    async props => {
+    async (props, save = true) => {
       const optimisticResult = formations
         .map(d => {
           if (d.id === props.id) {
@@ -673,20 +673,25 @@ export function useFetchFormations(wellId) {
         .sort(sortByThickness);
 
       changeUpdateTopOptimisticData(optimisticResult);
-      let result;
-      try {
-        const requestId = _.uniqueId();
-        internalState.current.lastRequestId = requestId;
-        result = await updateFormationTop({ wellId, props, fetch, requestId });
-      } catch (e) {
-        throw e;
-      } finally {
-        if (result.requestId === internalState.current.lastRequestId) {
-          changeUpdateTopOptimisticData(null);
+
+      if (save) {
+        let result;
+        try {
+          const requestId = _.uniqueId();
+          internalState.current.lastRequestId = requestId;
+          result = await updateFormationTop({ wellId, props, fetch, requestId });
+        } catch (e) {
+          throw e;
+        } finally {
+          if (result.requestId === internalState.current.lastRequestId) {
+            changeUpdateTopOptimisticData(null);
+          }
         }
+
+        return result;
       }
 
-      return result;
+      return optimisticResult;
     },
     [formations, wellId, changeUpdateTopOptimisticData, fetch]
   );
