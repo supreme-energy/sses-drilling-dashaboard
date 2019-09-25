@@ -24,12 +24,12 @@ function CloudServerModal({ wellId, className, importText = "" }) {
     refresh
   } = useCloudServer(wellId);
   const [
-    { appInfo, wellInfo, online },
+    { appInfo, wellInfo, isCloudServerEnabled },
     ,
     ,
     refreshFetchStore,
     ,
-    updateAlarm,
+    updateAppInfo,
     updateAutoImport
   ] = useSelectedWellInfoContainer(wellId);
   const {
@@ -47,7 +47,6 @@ function CloudServerModal({ wellId, className, importText = "" }) {
   const [file, setFile] = useState({});
   const [errors, setErrors] = useState([]);
   const hasConflict = !!cmes;
-  const isOnline = !!online;
 
   const handleRefreshCheck = async () => {
     const { next_survey: newSurvey } = await refresh();
@@ -59,13 +58,13 @@ function CloudServerModal({ wellId, className, importText = "" }) {
 
   useEffect(() => {
     if (!isVisible) {
-      if ((newSurvey && isOnline) || !isOnline) {
+      if ((newSurvey && isCloudServerEnabled) || !isCloudServerEnabled) {
         setView(IMPORT);
-      } else if (isOnline) {
+      } else if (isCloudServerEnabled) {
         setView(SETTINGS);
       }
     }
-  }, [newSurvey, isVisible, setView, isOnline, isAutoImportEnabled]);
+  }, [newSurvey, isVisible, setView, isCloudServerEnabled, isAutoImportEnabled]);
 
   useEffect(() => {
     if (wellInfo && wellInfo[PULL]) {
@@ -82,12 +81,12 @@ function CloudServerModal({ wellId, className, importText = "" }) {
             <Badge
               className={hasConflict ? classes.badgeRed : classes.badgeGreen}
               variant="dot"
-              invisible={!newSurvey || !isOnline}
+              invisible={!newSurvey || !isCloudServerEnabled}
               color="secondary"
             >
               <Cloud />
             </Badge>
-          ) : isOnline ? (
+          ) : isCloudServerEnabled ? (
             <CloudOff />
           ) : (
             <React.Fragment>
@@ -99,7 +98,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
       </div>
 
       <Dialog onClose={handleClose} maxWidth="md" open={isVisible} fullWidth>
-        {view === IMPORT && isOnline && (
+        {view === IMPORT && isCloudServerEnabled && (
           <AutoImportModal
             wellId={wellId}
             setView={setView}
@@ -112,7 +111,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
             newSurvey={newSurvey}
           />
         )}
-        {view === IMPORT && !isOnline && (
+        {view === IMPORT && !isCloudServerEnabled && (
           <ManualImportModal
             wellId={wellId}
             file={file}
@@ -128,7 +127,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
             wellId={wellId}
             appInfo={appInfo}
             wellInfo={wellInfo}
-            updateAlarm={updateAlarm}
+            updateAlarm={updateAppInfo}
             updateAutoImport={updateAutoImport}
             handleClose={handleClose}
             setAutoImport={setAutoImport}

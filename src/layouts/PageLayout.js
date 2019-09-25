@@ -50,8 +50,7 @@ const PageTabs = ({
     data: { next_survey: newSurvey }
   } = useCloudServer(wellId);
   const { countdown, setAutoCheckInterval, handleCountdown, resetCountdown } = useCloudServerCountdownContainer();
-  const [{ appInfo = {}, wellInfo = {}, online }] = useWellInfo(wellId);
-  const isOnline = !!online;
+  const [{ appInfo = {}, wellInfo = {}, isCloudServerEnabled }] = useWellInfo(wellId);
   const [, handleAlarmOn, handleAlarmOff, setAudio] = useAudio("");
   const { [ALARM]: alarm, [ALARM_ENABLED]: alarmEnabled } = appInfo;
   const isAutoImportEnabled = !!wellInfo[PULL];
@@ -80,11 +79,11 @@ const PageTabs = ({
       }
     }
 
-    if (alarm && alarmEnabled && newSurvey && isAutoImportEnabled && isOnline) {
+    if (alarm && alarmEnabled && newSurvey && isAutoImportEnabled && isCloudServerEnabled) {
       handleAlarmOn();
       setTimeout(turnOff, 5000);
     }
-  }, [handleAlarmOn, handleAlarmOff, alarm, alarmEnabled, newSurvey, isAutoImportEnabled, isOnline]);
+  }, [handleAlarmOn, handleAlarmOff, alarm, alarmEnabled, newSurvey, isAutoImportEnabled, isCloudServerEnabled]);
 
   useEffect(() => {
     if ((hadNewSurvey && !newSurvey) || importReenabled) {
@@ -92,7 +91,7 @@ const PageTabs = ({
     }
   }, [hadNewSurvey, newSurvey, resetCountdown, importReenabled, wellInfo]);
 
-  useInterval(() => handleCountdown(), countdown && isAutoImportEnabled && isOnline ? 1000 : null);
+  useInterval(() => handleCountdown(), countdown && isAutoImportEnabled && isCloudServerEnabled ? 1000 : null);
 
   return (
     <div ref={tabsRef}>

@@ -1,4 +1,4 @@
-.serverInfoContainer {
+.serverInfoContainer, .wellInfoContainer {
     .formContainer {
         padding: 0 15px 15px;
     }
@@ -13,8 +13,12 @@
         min-width: 150px;
     }
 
-    .endpointTextField {
-        min-width: 250px;
+    .extendedTextField {
+        min-width: 300px;
+    }
+
+    .selectWellDropdown {
+        flex: 1;
     }
 }
 

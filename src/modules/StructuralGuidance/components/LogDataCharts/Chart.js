@@ -36,7 +36,7 @@ const Line = React.memo(
     bias
   }) => {
     const { color, data = [], label } = useFilteredAdditionalDataInterval(wellId, logId);
-    const selectedColor = _.get(selectedLogs, `[${label}].color`);
+    const selectedColor = Number(`0x${_.get(selectedLogs, `[${label}].color`, color)}`);
     const lineScale = { x: 1, y: scale || 1 };
     const alpha = isEditing && !showScale ? 0.3 : 1;
     const extent = [min(data, d => d.value), max(data, d => d.value)];
@@ -63,7 +63,7 @@ const Line = React.memo(
           scale={lineScale}
           data={data}
           mapData={mapper}
-          color={Number(`0x${selectedColor}`) || Number(`0x${color}`)}
+          color={selectedColor}
           alpha={alpha}
         />
         {showScale && (
@@ -71,10 +71,11 @@ const Line = React.memo(
             container={stage}
             axis="y"
             x={width - 10}
+            width={width}
             refresh={refresh}
             totalWidth={width}
             canvas={canvasRef.current}
-            color={Number(`0x${selectedColor}`) || Number(`0x${color}`)}
+            color={selectedColor}
             scale={scale}
             bias={bias}
             setScale={setScale}
@@ -90,6 +91,7 @@ const Line = React.memo(
 function Chart({
   wellId,
   data,
+  logId,
   xAxis,
   isEditing,
   dataBySection,
@@ -180,14 +182,14 @@ function Chart({
       {!_.isEmpty(selectedLogs) &&
         Labels.map((log, index) => {
           const currLog = selectedLogs[log];
-          const scalelo = currLog.scalelo * currLog.currScale.scale;
-          const scalehi = currLog.scalehi * currLog.currScale.scale;
+          const scalelo = currLog.currScale.scalelo;
+          const scalehi = currLog.currScale.scalehi;
           const color = currLog.color;
           return (
             <PixiLabel
               key={log}
               container={stage}
-              text={`${scalelo.toFixed(1)} ${log} ${scalehi.toFixed(1)}`}
+              text={`${scalelo} ${log} ${scalehi}`}
               x={index * 30}
               y={0}
               height={height}
@@ -216,6 +218,7 @@ function Chart({
                 canvasRef={canvasRef}
                 width={width}
                 viewport={container}
+                view={view}
                 refresh={refresh}
                 isEditing={isEditing}
                 mapper={mapper}
@@ -250,6 +253,7 @@ function Chart({
 Chart.propTypes = {
   wellId: PropTypes.string,
   data: PropTypes.array,
+  logId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   xAxis: PropTypes.string,
   isEditing: PropTypes.bool,
   dataBySection: PropTypes.object,

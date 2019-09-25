@@ -3,7 +3,6 @@ import useFetch from "react-powertools/data/useFetch";
 import { useCallback, useMemo, useEffect, useState } from "react";
 import Fuse from "fuse.js";
 import memoizeOne from "memoize-one";
-import { ONLINE, OFFLINE } from "../constants/serverStatus";
 import { ON_VERTICAL } from "../constants/wellPathStatus";
 import keyBy from "lodash/keyBy";
 import _ from "lodash";
@@ -45,6 +44,7 @@ export const GET_ADDITIONAL_DATA_LOG = "/additiondatalog.php";
 export const GET_ADDITIONAL_DATA_LOGS_LIST = "/additiondatalogslist.php";
 export const GET_WELL_OPERATION_HOURS = "/analytics/rig_states.php";
 export const GET_KPI = "/analytics/overview.php";
+export const GET_TIME_SLIDER_DATA = "/analytics/edr_drilled.php";
 export const GET_EMAIL_CONTACTS = "/email_contacts/list.php";
 export const SET_EMAIL_CONTACT = "/email_contacts/update.php";
 export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
@@ -63,7 +63,7 @@ export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
-const GET_MOCK_TIME_SLIDER_DATA = "/timeSlider.json";
+const GET_MOCK_WELL_BORE_LIST = "/witslwellborelist.json";
 
 const options = {
   shouldSort: true,
@@ -115,7 +115,7 @@ export function useWellInfo(wellId) {
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
   const autorc = data && data.autorc;
-  const online = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
+  const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -124,7 +124,7 @@ export function useWellInfo(wellId) {
     // avoid refresh on the component that trigger the update
     if (requestId !== stateRef.current.internalRequestId) {
       serializedRefresh(
-        {
+        wellId !== undefined && {
           path: GET_WELL_INFO,
           query: {
             seldbname: wellId,
@@ -220,7 +220,7 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, emailInfo]
   );
 
-  const updateAlarm = useCallback(
+  const updateAppInfo = useCallback(
     ({ wellId, field, value }) => {
       const optimisticResult = {
         ...data,
@@ -320,7 +320,6 @@ export function useWellInfo(wellId) {
 
   return [
     {
-      serverStatus: online ? ONLINE : OFFLINE,
       wellSurfaceLocationLocal,
       wellSurfaceLocation,
       wellLandingLocation,
@@ -331,14 +330,14 @@ export function useWellInfo(wellId) {
       wellInfo,
       emailInfo,
       appInfo,
-      online,
+      isCloudServerEnabled,
       transform
     },
     isLoading,
     updateWell,
     refreshStore,
     updateEmail,
-    updateAlarm,
+    updateAppInfo,
     updateAutoImport,
     updateAutoRc
   ];
@@ -849,17 +848,47 @@ export function useWellOverviewKPI(wellId) {
   };
 }
 
+function sortByDepth(a, b) {
+  if (a.hole_depth < b.hole_depth) return -1;
+  if (a.hole_depth > b.hole_depth) return 1;
+  return 0;
+}
 export function useTimeSliderData() {
-  const [data] = useFetch(
-    {
-      path: GET_MOCK_TIME_SLIDER_DATA
-    },
+  const transformData = data => {
+    return data.map(d => ({
+      ...d,
+      rop_a: Number(d.rop_a),
+      astra_mse: Number(d.astra_mse)
+    }));
+  };
 
-    {
-      id: "mock"
-    }
+  const [data, , , , , { fetch }] = useFetch();
+
+  const getTimeSliderData = useCallback(
+    (wellId, minDepth, maxDepth) => {
+      const shouldFetch = wellId !== undefined && minDepth !== undefined && maxDepth;
+      return fetch(
+        shouldFetch && {
+          path: GET_TIME_SLIDER_DATA,
+          query: {
+            seldbname: wellId,
+            hole_depth_gte: minDepth,
+            hole_depth_lte: maxDepth
+          }
+        },
+        (current, result) => {
+          const parsedRes = transformData(result);
+          if (current) {
+            return [...current, ...parsedRes].sort(sortByDepth);
+          }
+          return [...parsedRes];
+        }
+      );
+    },
+    [fetch]
   );
-  return data || EMPTY_ARRAY;
+
+  return { data: data || EMPTY_ARRAY, getTimeSliderData };
 }
 
 export function useWellOperationHours(wellId) {
@@ -1095,7 +1124,7 @@ export function useCloudServer(wellId) {
         cache: "no-cache"
       },
       (_, next) => next
-    );
+    ).catch(err => err);
   }, [wellId, serializedRefresh]);
 
   // Trigger refresh when countdown hits zero
@@ -1257,4 +1286,20 @@ export function useBitProjection(wellId) {
   );
 
   return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
+}
+
+export function useWellBoreData() {
+  const [data] = useFetch(
+    {
+      path: GET_MOCK_WELL_BORE_LIST
+    },
+
+    {
+      id: "mock",
+      transform: data => {
+        return data.data;
+      }
+    }
+  );
+  return data || EMPTY_ARRAY;
 }

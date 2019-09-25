@@ -19,36 +19,36 @@ const useStyles = makeStyles({
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelDraggingRight: {
     color: "rgba(0,0,0,0.6)",
-    left: -100,
+    left: -150,
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelDragging: {
     color: "rgba(0,0,0,0.6)",
-    left: -45,
+    left: -75,
     top: -25,
     "& *": {
       color: "#FFFFF",
-      width: 100,
+      width: 150,
       borderRadius: 2
     }
   },
   valueLabelRight: {
     textAlign: "right",
-    left: -110,
+    left: -150,
     top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }
@@ -58,7 +58,7 @@ const useStyles = makeStyles({
     left: 0,
     top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }
@@ -68,7 +68,7 @@ const useStyles = makeStyles({
     left: -55,
     top: 28,
     "& *": {
-      width: 100,
+      width: 150,
       color: "rgba(0,0,0,0.6)",
       background: "transparent"
     }

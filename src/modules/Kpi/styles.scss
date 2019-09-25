@@ -35,6 +35,8 @@
 }
 
 .serverStatus {
+    min-width: 90px;
+    
     .badgeGreen span {
         background-color: green;
     }

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer, useEffect, useState } from "react";
+import React, { useCallback, useReducer, useMemo, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiLabel from "../../../components/PixiLabel";
@@ -7,15 +7,21 @@ import { COLOR_BY_PHASE_VIEWER } from "../../../constants/timeSlider";
 import { stateReducer } from "./reducers";
 
 const HEIGHT = 6;
-const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view, refresh }) => {
+const QuickFilter = React.memo(({ container, phaseObj, data, setDrillPhase, view, refresh }) => {
   // Create state for component
   const [{ isTooltipVisible, xPos }, setVisible] = useReducer(stateReducer, { isTooltipVisible: false, xPos: 0 });
   const [labelDimensions, updateLabelDimensions] = useState({ labelWidth: 0, labelHeight: 0 });
 
   // Define constants
   const { phaseStart, phaseEnd, phase } = phaseObj;
-  const firstIndex = useMemo(() => data.map(e => e.Hole_Depth).indexOf(phaseStart), [data, phaseStart]);
-  const lastIndex = useMemo(() => data.map(e => e.Hole_Depth).lastIndexOf(phaseEnd), [data, phaseEnd]);
+  const firstIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= phaseStart);
+    return index > 0 ? index : 0;
+  }, [data, phaseStart]);
+  const lastIndex = useMemo(() => {
+    const index = data.findIndex(d => d.hole_depth >= phaseEnd);
+    return index > 0 ? index : data.length - 1;
+  }, [data, phaseEnd]);
   const filterWidth = (lastIndex - firstIndex) * view.xScale;
   const startingX = firstIndex * view.xScale;
 
@@ -44,8 +50,8 @@ const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view
         container={container}
         width={filterWidth}
         height={HEIGHT}
+        y={-60}
         x={startingX}
-        y={-50}
         radius={3}
         zIndex={100}
         backgroundColor={COLOR_BY_PHASE_VIEWER[phase].quickFilter}
@@ -59,7 +65,7 @@ const QuickFilter = React.memo(({ container, data, phaseObj, setDrillPhase, view
           container={container}
           text={phase}
           x={xPos - view.x - 270}
-          y={-40}
+          y={-50}
           updateTransform={frozenScaleTransform}
           zIndex={100}
           textProps={{ fontSize: 20, color: 0xffffff }}

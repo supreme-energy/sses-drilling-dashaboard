@@ -4,7 +4,7 @@ import * as PIXI from "pixi.js";
 import chunk from "lodash/chunk";
 import PropTypes from "prop-types";
 
-function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, zIndex }) {
+function TimeSliderBarChart({ container, width, height, data, mapData, color, x, y, alpha, zIndex }) {
   const barData = useMemo(() => data.map(mapData), [data, mapData]);
   const chunks = useMemo(() => chunk(barData, 10000), [barData]);
   const {
@@ -60,8 +60,9 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
         }
 
         chunk.forEach(point => {
-          if (point[1]) {
-            chunkGraphic.drawRect(point[0], y, width, height * point[1]);
+          const [xVal, connectionExists] = point;
+          if (connectionExists) {
+            chunkGraphic.drawRect(xVal, y, width, height);
           }
         });
       });
@@ -72,7 +73,7 @@ function PixiBar({ container, width, height, data, mapData, color, x, y, alpha, 
   return null;
 }
 
-PixiBar.propTypes = {
+TimeSliderBarChart.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   alpha: PropTypes.number,
@@ -81,10 +82,10 @@ PixiBar.propTypes = {
   color: PropTypes.number
 };
 
-PixiBar.defaultProps = {
+TimeSliderBarChart.defaultProps = {
   x: 0,
   y: 0,
   alpha: 1
 };
 
-export default PixiBar;
+export default TimeSliderBarChart;
