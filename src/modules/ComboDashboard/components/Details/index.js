@@ -200,7 +200,7 @@ export default function DetailsTable({ showFullTable = false }) {
         })}
         {!details.length && (
           <TableRow>
-            <TableCell colSpan={11} className={classes.emptyTableMessage}>
+            <TableCell colSpan={13} className={classes.emptyTableMessage}>
               Select a survey or projection to see details here
             </TableCell>
           </TableRow>
