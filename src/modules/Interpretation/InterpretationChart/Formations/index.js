@@ -160,7 +160,7 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 
 export default React.memo(({ container, width, view, gridGutter }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
-  const { refresh, canvasRef } = useInterpretationRenderer();
+  const { refresh } = useInterpretationRenderer();
   const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
