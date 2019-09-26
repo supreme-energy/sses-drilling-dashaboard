@@ -18,7 +18,7 @@ import { ManualImportModal, AutoImportModal } from "./ImportModals";
 import { IMPORT, SETTINGS, PULL, REVIEW_CLEAN_DATA, REVIEW_MANUAL_IMPORT } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
-function CloudServerModal({ wellId, className, importText = "" }) {
+function CloudServerModal({ wellId, className, importText = "", importIcon }) {
   const {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
@@ -90,7 +90,7 @@ function CloudServerModal({ wellId, className, importText = "" }) {
             <CloudOff />
           ) : (
             <React.Fragment>
-              <Import />
+              {importIcon || <Import />}
               {importText}
             </React.Fragment>
           )}
