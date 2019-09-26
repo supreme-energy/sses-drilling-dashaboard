@@ -12,6 +12,9 @@ import { useInterpretationRenderer } from "..";
 import AddTop from "./AddTop";
 import get from "lodash/get";
 import useDraggable from "../../../../hooks/useDraggable";
+import memoizeOne from "memoize-one";
+import { EMPTY_ARRAY } from "../../../../api";
+import { minIndex } from "d3-array";
 
 const FormationDrag = ({ y, container, width, thickness }) => {
   const topLineRef = useRef(null);
@@ -113,7 +116,10 @@ const Formation = React.memo(
   }
 );
 
-function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
+const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex) => {
+  if (!rawFormationsData || !rawFormationsData.length) {
+    return EMPTY_ARRAY;
+  }
   const items = rawFormationsData.reduce((acc, item, index) => {
     if (item.data && item.data.length && index <= rawFormationsData.length - 2) {
       const formationData = item.data[selectedSurveyIndex];
@@ -156,25 +162,44 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
   });
 
   return items;
-}
+});
 
-export default React.memo(({ container, width, view, gridGutter }) => {
+const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formationsData, height, nrSurveys) => {
+  const center = (-view.y + height / 2) / view.yScale;
+
+  return minIndex(formationsData[0].data.slice(0, nrSurveys), (d1, index) => {
+    const d2 = formationsData[formationsData.length - 1].data[index];
+    const top = d1.tot;
+    const bottom = d2.tot;
+    const formationItemCenter = top + (bottom - top) / 2;
+    return Math.abs(formationItemCenter - center);
+  });
+});
+
+export default React.memo(({ container, width, gridGutter }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
-  const { refresh } = useInterpretationRenderer();
+  const {
+    refresh,
+    view,
+    size: { height }
+  } = useInterpretationRenderer();
   const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
-  const [surveysAndProjections] = useComputedSurveysAndProjections();
+  const [surveysAndProjections, surveys] = useComputedSurveysAndProjections();
+  const nrSurveys = surveys.length;
   const selectedSurveyIndex = useMemo(
     () => (selectedSurvey ? surveysAndProjections.findIndex(s => s.id === selectedSurvey.id) : -1),
     [selectedSurvey, surveysAndProjections]
   );
 
   const { formationsData, addTop, serverFormations } = useFormationsDataContainer();
-  const formationDataForSelectedSurvey = useMemo(
-    () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
-    [selectedSurveyIndex, formationsData]
-  );
+
+  const formationDataIndex =
+    selectedSurveyIndex >= 0
+      ? selectedSurveyIndex
+      : computeViewportCenterClosestFormationDataIndex(view, formationsData, height, nrSurveys);
+  const formationDataForSelectedSurvey = computeFormationsData(formationsData, formationDataIndex);
 
   const changeSegmentSelection = useCallback(id => dispatch({ type: "CHANGE_SELECTION", formationId: id }), [dispatch]);
   useEffect(
@@ -193,10 +218,9 @@ export default React.memo(({ container, width, view, gridGutter }) => {
       container={container}
       child={container => (
         <React.Fragment>
-          {selectedSurvey &&
-            formationDataForSelectedSurvey.map((f, index) => (
-              <Formation container={container} width={width} {...f} key={f.id} selected={f.id === selectedFormation} />
-            ))}
+          {formationDataForSelectedSurvey.map((f, index) => (
+            <Formation container={container} width={width} {...f} key={f.id} selected={f.id === selectedFormation} />
+          ))}
           {editMode && (
             <FormationSegments
               refresh={refresh}
@@ -212,7 +236,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
             <AddTop
               addTop={addTop}
               wellId={wellId}
-              selectedSurveyIndex={selectedSurveyIndex}
+              topIndex={formationDataIndex}
               container={container}
               formationData={formationDataForSelectedSurvey}
             />
