@@ -8,8 +8,10 @@ import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
 import WellInfoField from "./WellInfoField";
 import { limitAzm } from "../CrossSection/formulas";
+import { useSurveysDataContainer } from "../../../App/Containers";
 
 function DetailsFullModal({ handleClose, isVisible }) {
+  const { updateTieInTCL } = useSurveysDataContainer();
   return (
     <Dialog onClose={handleClose} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
@@ -24,7 +26,15 @@ function DetailsFullModal({ handleClose, isVisible }) {
             <div className={comboClasses.flexRight}>
               <WellInfoField label={"Proposed Direction"} field="propazm" type="number" options={{ mask: limitAzm }} />
               <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
-              <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
+              <WellInfoField
+                label={"TCL"}
+                field="tot"
+                type="number"
+                inputProps={{ min: "0" }}
+                options={{
+                  debounceAction: updateTieInTCL
+                }}
+              />
               <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
             </div>
             <DetailsTable showFullTable />
