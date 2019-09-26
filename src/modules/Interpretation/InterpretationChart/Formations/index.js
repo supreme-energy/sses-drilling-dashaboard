@@ -120,13 +120,15 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
   if (!rawFormationsData || !rawFormationsData.length) {
     return EMPTY_ARRAY;
   }
+
   const items = rawFormationsData.reduce((acc, item, index) => {
-    if (item.data && item.data.length && index <= rawFormationsData.length - 2) {
+    if (item.data && item.data.length) {
       const formationData = item.data[selectedSurveyIndex];
       const nextFormation = rawFormationsData[index + 1];
-      const nextFormationData = nextFormation.data[selectedSurveyIndex];
+      const nextFormationData = nextFormation && nextFormation.data[selectedSurveyIndex];
+
       const y = formationData.tot;
-      const height = nextFormationData.tot - y;
+      const height = nextFormationData ? nextFormationData.tot - y : 20;
       acc.push({
         y,
         height,
@@ -144,22 +146,6 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
 
     return acc;
   }, []);
-  const lastAddedItem = items[items.length - 1];
-  const lastFormationItem = rawFormationsData[rawFormationsData.length - 1];
-
-  items.push({
-    y: lastAddedItem.y + lastAddedItem.height,
-    height: 20,
-    label: lastFormationItem.label,
-    id: lastFormationItem.id,
-    thickness: get(lastFormationItem, "data[0].thickness"),
-    interpretationLine: lastFormationItem.interp_line_show,
-    interpretationFill: lastFormationItem.interp_fill_show,
-    showLine: Boolean(lastFormationItem.show_line),
-    backgroundColor: Number(`0x${lastFormationItem.bg_color}`),
-    backgroundAlpha: Number(lastFormationItem.bg_percent),
-    color: Number(`0x${lastFormationItem.color}`)
-  });
 
   return items;
 });
