@@ -1,11 +1,19 @@
 .header {
     height: 24px;
-    
+
     .headerText {
-        color: #ffffff;    
+        color: #ffffff;
     }
 
     .moreBtn {
         padding: 0px;
     }
+}
+
+.importModalPlusButton {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  left: -23px;
+  top: -5px;
 }

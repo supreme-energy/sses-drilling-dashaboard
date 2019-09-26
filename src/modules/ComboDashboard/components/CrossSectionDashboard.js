@@ -25,7 +25,7 @@ import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
-  const [expanded, toggleExpanded] = useReducer(e => !e, false);
+  const [expanded, toggleExpanded] = useReducer(e => !e, true);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
   const { wellPlanIsImported } = useSetupWizardData();
