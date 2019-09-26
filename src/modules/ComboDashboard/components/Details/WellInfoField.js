@@ -21,7 +21,7 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
       await updateWell({ wellId, field, value: internalState.current.value });
       refreshFetchStore();
     }, 1000),
-    [updateWell, wellId, refreshFetchStore]
+    [debounceAction, updateWell, wellId, refreshFetchStore]
   );
 
   const changeHandler = useCallback(
@@ -31,7 +31,7 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
       forceRerender();
       debouncedFieldSave();
     },
-    [debouncedFieldSave, mask]
+    [immediateAction, debouncedFieldSave, mask]
   );
 
   return (
