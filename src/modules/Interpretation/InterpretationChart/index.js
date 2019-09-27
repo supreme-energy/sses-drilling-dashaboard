@@ -108,7 +108,9 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && controlLogs && controlLogs.length) {
+      if (view.y !== 0 || view.yScale !== 1) {
+        internalStateRef.current.scaleInitialized = true;
+      } else if (!scaleInitialized && controlLogs && controlLogs.length) {
         const minDepth = min(controlLogs, cl => get(cl, "data[0].md"));
 
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
