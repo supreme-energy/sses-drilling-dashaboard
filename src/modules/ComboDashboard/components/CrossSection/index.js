@@ -47,11 +47,15 @@ const CrossSection = props => {
     // Currently initialized the graph at the first Well plan data point
     const minX = Math.min(...wellPlan.map(d => d[xField]));
     const minY = Math.min(...wellPlan.map(d => d[yField]));
-    updateView({
-      x: -minX,
-      y: -minY,
-      xScale: 1,
-      yScale: 1
+    updateView(prev => {
+      if (prev && (prev.xScale !== 1 || prev.yScale !== 1)) {
+        return prev;
+      }
+      return {
+        ...prev,
+        x: -minX,
+        y: -minY
+      };
     });
   }, [xField, yField, updateView, wellPlan]);
 
