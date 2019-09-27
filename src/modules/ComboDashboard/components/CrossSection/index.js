@@ -48,7 +48,7 @@ const CrossSection = props => {
     const minX = Math.min(...wellPlan.map(d => d[xField]));
     const minY = Math.min(...wellPlan.map(d => d[yField]));
     updateView(prev => {
-      if (prev && (prev.xScale !== 1 || prev.yScale !== 1)) {
+      if ((prev && (prev.xScale !== 1 || prev.yScale !== 1)) || !wellPlan.length) {
         return prev;
       }
       return {
