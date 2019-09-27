@@ -117,7 +117,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
         internalStateRef.current.scaleInitialized = true;
       }
     },
-    [height, controlLogs, updateView, scaleInitialized]
+    [height, controlLogs, updateView, scaleInitialized, view]
   );
 
   useEffect(
