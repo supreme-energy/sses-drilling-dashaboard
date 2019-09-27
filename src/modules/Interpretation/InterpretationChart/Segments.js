@@ -37,7 +37,7 @@ const RightSegments = React.memo(
 
 const Segment = React.memo(({ segment, view, selected, container, onSegmentClick, zIndex }) => {
   const onClick = useCallback(() => onSegmentClick(segment), [onSegmentClick, segment]);
-  const segmentHeight = view.yScale * (segment.enddepth - segment.startdepth);
+  const segmentHeight = view.yScale * Math.abs(segment.enddepth - segment.startdepth);
 
   return (
     <React.Fragment>
@@ -47,7 +47,7 @@ const Segment = React.memo(({ segment, view, selected, container, onSegmentClick
         width={10}
         updateTransform={frozenScaleTransform}
         height={segmentHeight}
-        y={segment.startdepth}
+        y={Math.min(segment.startdepth, segment.enddepth)}
         radius={5}
         backgroundColor={selected ? selectionColor : segmentColor}
         container={container}
