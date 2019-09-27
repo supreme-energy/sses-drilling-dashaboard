@@ -19,7 +19,8 @@ import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
 
-export const GET_WELL_LIST = "/joblist.php";
+export const GET_WELL_LIST = "/job/list.php";
+export const CREATE_NEW_WELL = "/job/create.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
 export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
@@ -345,7 +346,7 @@ export function useWellInfo(wellId) {
 
 export function useWells() {
   const { requestId } = useAppState();
-  const [wells, , , , , { fetch }] = useFetch(
+  const [wells, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_LIST,
       query: { requestId }
@@ -397,7 +398,27 @@ export function useWells() {
     [fetch]
   );
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
-  return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
+  return [wells || EMPTY_ARRAY, wellsById, updateFavorite, refresh];
+}
+
+export function useCreateWell() {
+  const [, , , , , { fetch }] = useFetch();
+
+  const createWell = useCallback(
+    name =>
+      fetch(
+        {
+          path: CREATE_NEW_WELL,
+          query: {
+            name
+          }
+        },
+        (_, next) => next
+      ),
+    [fetch]
+  );
+
+  return { createWell };
 }
 
 const groupBySection = memoize(data => {

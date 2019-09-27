@@ -47,9 +47,10 @@ export const WellExplorer = ({
   changeSelectedWell
 }) => {
   const { wellId: openedWellId } = useWellIdContainer();
-  const [wells, wellsById, updateFavorite] = useWells();
+  const [wells, wellsById, updateFavorite, refresh] = useWells();
 
   const [searchTerm, onSearchTermChanged] = useState("");
+  const [initialTab, setInitialTab] = useState();
   const [importModalShown, toggleShowImportModal] = useState(false);
   const filteredWells = useMemo(() => getFilteredWells(activeTab, wells, wellTimestamps), [
     activeTab,
@@ -131,7 +132,13 @@ export const WellExplorer = ({
         </div>
         <span className={classes.hSpacer} />
         {selectedWell ? (
-          <WellOverview className={classes.wellOverview} well={selectedWell} updateFavorite={updateFavorite} />
+          <WellOverview
+            className={classes.wellOverview}
+            well={selectedWell}
+            updateFavorite={updateFavorite}
+            initialTab={initialTab}
+            setInitialTab={setInitialTab}
+          />
         ) : (
           <WelcomeCard
             className={classes.welcome}
@@ -139,6 +146,9 @@ export const WellExplorer = ({
             openedWell={openedWell}
             lastEditedWell={mostRecentWell}
             onFilesToImportChange={onFilesToImportChange}
+            changeSelectedWell={changeSelectedWell}
+            refreshWellList={refresh}
+            setInitialTab={setInitialTab}
           />
         )}
       </div>
