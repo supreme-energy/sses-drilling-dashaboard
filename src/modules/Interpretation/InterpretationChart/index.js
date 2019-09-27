@@ -17,7 +17,7 @@ import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColo
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
-import TCLLine from "./TCLLine";
+
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { min } from "d3-array";
@@ -206,7 +206,7 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
       {!formationsEditMode && (
         <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
       )}
-      <TCLLine container={viewport} width={width} />
+
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       {!formationsEditMode && (
         <BiasAndScale
