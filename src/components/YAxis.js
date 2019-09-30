@@ -12,7 +12,7 @@ export default function YAxis({ container, scale, numberOfTicks, width, yMin, yM
   const max = scale.invert(yMax);
 
   // find nice rounded values for interval
-  const yTicks = ticks(min, max, numberOfTicks);
+  const yTicks = ticks(Math.floor(min), Math.floor(max), numberOfTicks);
 
   return (
     <PixiContainer

@@ -185,21 +185,22 @@ const FormationAxis = ({ view, formationsData, formationDataIndex, height, conta
         .range([tcl, maxFormation.tot]),
     [maxFormation, tcl]
   );
+
   return (
     <YAxis
       container={container}
       numberOfTicks={6}
-      yMin={yMin}
-      yMax={yMax}
+      yMin={yMin - 3}
+      yMax={yMax + 3}
       scale={scale}
       width={50}
-      x={width - marginRight - gridGutter}
+      x={width}
       y={0}
     />
   );
 };
 
-export default React.memo(({ container, width, gridGutter }) => {
+export default React.memo(({ container, width }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const {
     refresh,
@@ -238,7 +239,8 @@ export default React.memo(({ container, width, gridGutter }) => {
 
   const tcl = get(surveys, `[${formationDataIndex}].tcl`);
 
-  const formationAxisProps = { view, formationsData, formationDataIndex, height, container, tcl, width };
+  const computedWidth = width - marginRight - gridGutter;
+  const formationAxisProps = { view, formationsData, formationDataIndex, height, container, tcl, width: computedWidth };
 
   return (
     <PixiContainer
@@ -248,7 +250,7 @@ export default React.memo(({ container, width, gridGutter }) => {
           {formationDataForSelectedSurvey.map((f, index) => (
             <Formation
               container={container}
-              width={width - marginRight - gridGutter}
+              width={computedWidth}
               {...f}
               key={f.id}
               selected={f.id === selectedFormation}
@@ -274,7 +276,7 @@ export default React.memo(({ container, width, gridGutter }) => {
               formationData={formationDataForSelectedSurvey}
             />
           )}
-          <TCLLine container={container} width={width - marginRight - gridGutter} tcl={tcl} x={12} />
+          <TCLLine container={container} width={computedWidth} tcl={tcl} x={12} />
           <FormationAxis {...formationAxisProps} />
         </React.Fragment>
       )}
