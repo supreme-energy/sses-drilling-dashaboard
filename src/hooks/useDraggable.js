@@ -33,6 +33,7 @@ export default function useDraggable({
       isDragging: false,
       isOutside: false,
       prevMouse: {},
+      initialMouse: {},
       onMouseMove: event => {
         const interactionState = interactionStateRef.current;
         if (!interactionState.isDragging) {
@@ -42,7 +43,7 @@ export default function useDraggable({
 
         event.stopPropagation();
 
-        interactionStateRef.current.onDrag(event, interactionState.prevMouse);
+        interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
         Object.assign(interactionState.prevMouse, currMouse);
       }
     };
@@ -61,6 +62,7 @@ export default function useDraggable({
         const interactionState = interactionStateRef.current;
         const pos = e.data.global;
         Object.assign(interactionState.prevMouse, pos);
+        Object.assign(interactionState.initialMouse, pos);
         interactionState.isDragging = true;
         container.on("mousemove", interactionState.onMouseMove);
       };
@@ -83,11 +85,13 @@ export default function useDraggable({
       const onMouseUp = e => {
         const container = getContainer();
         const interactionState = interactionStateRef.current;
-        interactionState.isDragging = false;
-        container.off("mousemove", interactionState.onMouseMove);
-        interactionState.onDragEnd(e);
-        if (canvas) {
-          canvas.style.cursor = "default";
+        if (interactionState.isDragging) {
+          interactionState.isDragging = false;
+          container.off("mousemove", interactionState.onMouseMove);
+          interactionState.onDragEnd(e);
+          if (canvas) {
+            canvas.style.cursor = "default";
+          }
         }
       };
       const container = getContainer();

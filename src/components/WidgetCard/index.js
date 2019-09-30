@@ -6,6 +6,8 @@ import classNames from "classnames";
 import VerticalMenu from "../VerticalMenu";
 import classes from "./WidgetCard.scss";
 
+export const WidgetTitle = props => <Typography className={classes.widgetTitle} variant="subtitle1" {...props} />;
+
 function WidgetCard({
   children,
   className,
@@ -14,15 +16,12 @@ function WidgetCard({
   setSelectedMenuItem,
   menuItemEnum = [],
   hideMenu,
+  renderHeader,
   ...props
 }) {
   return (
     <Card className={classNames(className, classes.widgetCardContainer)}>
-      {title && (
-        <Typography className={classes.widgetTitle} variant="subtitle1">
-          {title}
-        </Typography>
-      )}
+      {renderHeader ? renderHeader() : title ? <WidgetTitle>{title}</WidgetTitle> : null}
       {!hideMenu && (
         <VerticalMenu
           id="footage-zone-stats-widget-menu"
@@ -45,7 +44,8 @@ WidgetCard.propTypes = {
   hideMenu: PropTypes.bool,
   setSelectedMenuItem: PropTypes.func,
   selectedMenuItems: PropTypes.arrayOf(PropTypes.string),
-  menuItemEnum: PropTypes.arrayOf(PropTypes.string)
+  menuItemEnum: PropTypes.arrayOf(PropTypes.string),
+  renderHeader: PropTypes.func
 };
 
 export default WidgetCard;

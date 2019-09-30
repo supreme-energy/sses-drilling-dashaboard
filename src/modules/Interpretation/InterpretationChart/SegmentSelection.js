@@ -1,5 +1,5 @@
 import React, { useCallback, useReducer, useState, useEffect } from "react";
-import { useInterpretationRenderer } from ".";
+import { useInterpretationRenderer, gridGutter } from ".";
 import { useComputedDraftSegmentsOnly } from "../selectors";
 import useMemo from "react-powertools/hooks/useMemo";
 import useRef from "react-powertools/hooks/useRef";
@@ -117,7 +117,7 @@ function PixiTooltip({
 }
 
 PixiTooltip.defaultProps = {
-  labelPadding: { top: 10, bottom: 10, left: 5, right: 5 },
+  labelPadding: { top: 5, bottom: 5, left: 5, right: 5 },
   textProps: {}
 };
 
@@ -152,18 +152,32 @@ const segmentSelectionReducer = (state, action) => {
 };
 
 const tooltipTextProps = {
+  breakWords: false,
   wrap: true,
-  breakWords: true,
-  wrapWidth: 50
+  wordWrap: true,
+  wrapWidth: 30
 };
 
-function getTooltipText(interactionsRunning, dip, fault, selectedSegment) {
+const capitalize = s => {
+  if (typeof s !== "string") return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+function getTooltipText({ interactionsRunning, segments, ...rest }) {
   if (interactionsRunning) {
-    return `${dip ? `Dip ${threeDecimals(selectedSegment.sectdip)} ` : ""}${
-      fault ? `Fault ${threeDecimals(selectedSegment.fault)}` : ""
-    }`;
+    return ["dip", "fault"]
+      .filter(p => rest[p])
+      .map(p =>
+        p === "dip"
+          ? `Dip ${segments.map(s => threeDecimals(s.sectdip)).join(" ")}`
+          : `Fault ${segments.map(s => threeDecimals(s.fault)).join(" ")}`
+      )
+      .join("\n");
   }
-  return `${dip ? "Dip " : ""}${fault ? "Fault" : ""}`;
+  return ["dip", "fault"]
+    .filter(p => rest[p])
+    .map(capitalize)
+    .join(" ");
 }
 
 const SegmentSelection = ({
@@ -190,7 +204,7 @@ const SegmentSelection = ({
   const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
   const [firstSegment] = segments;
   const lastSegment = segments[segments.length - 1];
-  const segmentHeight = view.yScale * (lastSegment.enddepth - firstSegment.startdepth);
+  const segmentHeight = view.yScale * Math.abs(lastSegment.enddepth - firstSegment.startdepth);
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
   const { onSegmentDrag, onEndSegmentDrag, onStartSegmentDrag } = useDragActions();
@@ -299,7 +313,7 @@ const SegmentSelection = ({
     x: 0,
     y: -2,
     width: totalWidth,
-    height: 6
+    height: 4
   });
 
   useDraggable({
@@ -313,12 +327,17 @@ const SegmentSelection = ({
     x: 0,
     y: 2,
     width: totalWidth,
-    height: segmentHeight - 2
+    height: segmentHeight - 4
   });
 
   const backgroundColor = draftMode ? draftColor : selectionColor;
 
-  const tooltipText = getTooltipText(interactionsRunning, dip, fault, selectedSegment);
+  const tooltipText = useMemo(() => getTooltipText({ interactionsRunning, dip, fault, segments }), [
+    interactionsRunning,
+    dip,
+    fault,
+    segments
+  ]);
 
   const tooltipPosition = useMemo(
     () =>
@@ -334,7 +353,7 @@ const SegmentSelection = ({
   return (
     <PixiContainer
       ref={selectionContainerRef}
-      y={firstSegment.startdepth - 2}
+      y={Math.min(firstSegment.startdepth, lastSegment.enddepth)}
       container={container}
       updateTransform={frozenScaleTransform}
       child={container => (
@@ -378,7 +397,7 @@ const SegmentSelection = ({
           <PixiContainer
             ref={startLineRef}
             container={container}
-            y={2}
+            y={firstSegment.startdepth < lastSegment.enddepth ? 0 : segmentHeight}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
@@ -394,11 +413,11 @@ const SegmentSelection = ({
           <PixiContainer
             ref={endLineRef}
             container={container}
-            y={segmentHeight}
+            y={firstSegment.startdepth < lastSegment.enddepth ? segmentHeight : 0}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
-                y={2}
+                y={0}
                 container={container}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}
@@ -413,7 +432,7 @@ const SegmentSelection = ({
               width={10}
               height={segmentHeight}
               y={0}
-              x={totalWidth - 70}
+              x={totalWidth - gridGutter - 10}
               radius={5}
               backgroundColor={backgroundColor}
               container={container}

@@ -7,7 +7,6 @@ import IconButton from "@material-ui/core/IconButton";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Import from "@material-ui/icons/OpenInBrowser";
-import TableChartIcon from "../../../assets/tableChart.svg";
 
 import WidgetCard from "../../../components/WidgetCard";
 import classes from "./ComboDashboard.scss";
@@ -23,6 +22,7 @@ import { useSetupWizardData } from "../../Interpretation/selectors";
 import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
 import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
+import TableButton from "../../../components/TableButton";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
@@ -114,14 +114,7 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
                   />
                 </React.Fragment>
               )}
-              <IconButton
-                size="small"
-                className={classNames(classes.expand, classes.fullTableButton)}
-                onClick={toggleModal}
-                aria-label="Show full details table"
-              >
-                <img src={TableChartIcon} className={classes.icon} />
-              </IconButton>
+              <TableButton onClick={toggleModal} />
             </div>
           </div>
           <Collapse in={expanded} unmountOnExit>
