@@ -150,10 +150,21 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
 });
 
 const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formationsData, height, nrSurveys) => {
+  if (!formationsData || !formationsData.length) {
+    return 0;
+  }
   const center = (-view.y + height / 2) / view.yScale;
 
-  return minIndex(formationsData[0].data.slice(0, nrSurveys), (d1, index) => {
-    const d2 = formationsData[formationsData.length - 1].data[index];
+  // just picking first formation that have data
+  const firstFormationData = formationsData.find(f => f.data && f.data.length);
+  const lastFormationData = [...formationsData].reverse().find(f => f.data && f.data.length);
+
+  if (!firstFormationData || !lastFormationData) {
+    return 0;
+  }
+
+  return minIndex(firstFormationData.data.slice(0, nrSurveys), (d1, index) => {
+    const d2 = lastFormationData.data[index];
     const top = d1.tot;
     const bottom = d2.tot;
     const formationItemCenter = top + (bottom - top) / 2;
@@ -170,7 +181,11 @@ const FormationAxis = ({ view, formationsData, formationDataIndex, height, conta
     [formationsData, formationDataIndex]
   );
 
-  const maxFormation = formationsData[maxThicknessFormationIndex].data[formationDataIndex];
+  const maxFormation = get(formationsData, `[${maxThicknessFormationIndex}].data[${formationDataIndex}]`) || {
+    thickness: 0,
+    tot: 0
+  };
+
   const scale = useMemo(
     () =>
       scaleLinear()
