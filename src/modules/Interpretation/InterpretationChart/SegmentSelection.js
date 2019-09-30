@@ -1,5 +1,5 @@
 import React, { useCallback, useReducer, useState, useEffect } from "react";
-import { useInterpretationRenderer } from ".";
+import { useInterpretationRenderer, gridGutter } from ".";
 import { useComputedDraftSegmentsOnly } from "../selectors";
 import useMemo from "react-powertools/hooks/useMemo";
 import useRef from "react-powertools/hooks/useRef";
@@ -432,7 +432,7 @@ const SegmentSelection = ({
               width={10}
               height={segmentHeight}
               y={0}
-              x={totalWidth - 70}
+              x={totalWidth - gridGutter - 10}
               radius={5}
               backgroundColor={backgroundColor}
               container={container}
