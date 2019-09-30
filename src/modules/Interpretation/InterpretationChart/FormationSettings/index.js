@@ -26,7 +26,7 @@ const FormationColor = React.memo(({ label, ...props }) => {
 
 const lineBoxProps = { className: classNames(css.colorBox, css.col2, css.row1) };
 const fillBoxProps = { className: classNames(css.colorBox, css.col3, css.row1) };
-function SettingsContent({ pendingAddTop, selectedFormation, formationsData, deleteTop, dispatch, updateTop, wellId }) {
+function SettingsContent({ pendingAddTop, selectedFormation, formationsData, deleteTop, dispatch, updateTop }) {
   const thickness = get(selectedFormation, "data[0].thickness");
   const selectionBgColor = `#${get(selectedFormation, "bg_color")}`;
   const selectionBgAlpha = Number(get(selectedFormation, "bg_percent"));
@@ -129,7 +129,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
             size="small"
             disableRipple
             onClick={() =>
-              updateTop({ id: selectedFormation.id, interp_line_show: String(!selectedFormation.interp_line_show) })
+              updateTop({ id: selectedFormation.id, interp_line_show: !selectedFormation.interp_line_show })
             }
           >
             {selectedFormation.interp_line_show ? <Visibility /> : <VisibilityOff />}
@@ -140,9 +140,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
           <IconButton
             size="small"
             disableRipple
-            onClick={() =>
-              updateTop({ id: selectedFormation.id, vert_line_show: String(!selectedFormation.vert_line_show) })
-            }
+            onClick={() => updateTop({ id: selectedFormation.id, vert_line_show: !selectedFormation.vert_line_show })}
           >
             {selectedFormation.vert_line_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>
@@ -153,7 +151,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
             size="small"
             disableRipple
             onClick={() =>
-              updateTop({ id: selectedFormation.id, interp_fill_show: String(!selectedFormation.interp_fill_show) })
+              updateTop({ id: selectedFormation.id, interp_fill_show: !selectedFormation.interp_fill_show })
             }
           >
             {selectedFormation.interp_fill_show ? <Visibility /> : <VisibilityOff />}
@@ -164,9 +162,7 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
           <IconButton
             size="small"
             disableRipple
-            onClick={() =>
-              updateTop({ id: selectedFormation.id, vert_fill_show: String(!selectedFormation.vert_fill_show) })
-            }
+            onClick={() => updateTop({ id: selectedFormation.id, vert_fill_show: !selectedFormation.vert_fill_show })}
           >
             {selectedFormation.vert_fill_show ? <Visibility /> : <VisibilityOff />}
           </IconButton>

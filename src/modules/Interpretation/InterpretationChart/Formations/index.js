@@ -45,14 +45,7 @@ const FormationDrag = ({ y, container, width, thickness }) => {
     width,
     height: 6 / view.yScale
   });
-  return (
-    <PixiContainer
-      ref={topLineRef}
-      y={y}
-      container={container}
-      chils={container => <PixiRectangle container={container} backgroundColor={0xff0000} width={width} height={5} />}
-    />
-  );
+  return <PixiContainer ref={topLineRef} y={y} container={container} />;
 };
 
 const Formation = React.memo(

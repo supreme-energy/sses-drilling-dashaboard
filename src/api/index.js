@@ -581,6 +581,21 @@ const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
   };
 };
 
+const booleansToConvertToString = {
+  interp_line_show: true,
+  vert_line_show: true,
+  interp_fill_show: true,
+  vert_fill_show: true
+};
+
+const fixBooleanValues = (value, key) => {
+  if (booleansToConvertToString[key]) {
+    return String(value);
+  }
+
+  return value;
+};
+
 export function useFetchFormations(wellId) {
   const [data, isLoading, error, isPolling, isFetchingMore, { fetch, refresh }] = useFetch(
     {
@@ -679,7 +694,7 @@ export function useFetchFormations(wellId) {
         try {
           const requestId = _.uniqueId();
           internalState.current.lastRequestId = requestId;
-          result = await updateFormationTop({ wellId, props, fetch, requestId });
+          result = await updateFormationTop({ wellId, props: _.mapValues(props, fixBooleanValues), fetch, requestId });
         } catch (e) {
           throw e;
         } finally {
