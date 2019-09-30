@@ -8,13 +8,18 @@ import PixiLine from "../../../../components/PixiLine";
 import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import PixiContainer from "../../../../components/PixiContainer";
 import FormationSegments from "./FormationSegments";
-import { useInterpretationRenderer } from "..";
+import { useInterpretationRenderer, gridGutter } from "..";
 import AddTop from "./AddTop";
 import get from "lodash/get";
 import useDraggable from "../../../../hooks/useDraggable";
 import memoizeOne from "memoize-one";
 import { EMPTY_ARRAY } from "../../../../api";
-import { minIndex } from "d3-array";
+import { minIndex, maxIndex } from "d3-array";
+import TCLLine from "../TCLLine";
+import YAxis from "../../../../components/YAxis";
+import { scaleLinear } from "d3-scale";
+
+const marginRight = 55;
 
 const FormationDrag = ({ y, container, width, thickness }) => {
   const topLineRef = useRef(null);
@@ -66,7 +71,7 @@ const Formation = React.memo(
     thickness,
     selected
   }) => {
-    const lineData = useMemo(() => [[10, 0], [width - 10, 0]], [width]);
+    const lineData = useMemo(() => [[0, 0], [width, 0]], [width]);
 
     return (
       <React.Fragment>
@@ -88,6 +93,7 @@ const Formation = React.memo(
         {interpretationLine && (
           <PixiContainer
             updateTransform={frozenScaleTransform}
+            x={12}
             y={y}
             container={container}
             child={container => (
@@ -155,7 +161,39 @@ const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formati
   });
 });
 
-export default React.memo(({ container, width, gridGutter }) => {
+const FormationAxis = ({ view, formationsData, formationDataIndex, height, container, tcl, width }) => {
+  const yMin = Math.floor((-1 * view.y) / view.yScale);
+  const yMax = yMin + Math.floor(height / view.yScale);
+
+  const maxThicknessFormationIndex = useMemo(
+    () => maxIndex(formationsData, f => get(f, `data[${formationDataIndex}].thickness`)),
+    [formationsData, formationDataIndex]
+  );
+
+  const maxFormation = formationsData[maxThicknessFormationIndex].data[formationDataIndex];
+  const scale = useMemo(
+    () =>
+      scaleLinear()
+        .domain([0, maxFormation.thickness])
+        .range([tcl, maxFormation.tot]),
+    [maxFormation, tcl]
+  );
+
+  return (
+    <YAxis
+      container={container}
+      numberOfTicks={6}
+      yMin={yMin - 3}
+      yMax={yMax + 3}
+      scale={scale}
+      width={50}
+      x={width}
+      y={0}
+    />
+  );
+};
+
+export default React.memo(({ container, width }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const {
     refresh,
@@ -192,13 +230,24 @@ export default React.memo(({ container, width, gridGutter }) => {
 
   useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData]);
 
+  const tcl = get(surveys, `[${formationDataIndex}].tcl`);
+
+  const computedWidth = width - marginRight - gridGutter;
+  const formationAxisProps = { view, formationsData, formationDataIndex, height, container, tcl, width: computedWidth };
+
   return (
     <PixiContainer
       container={container}
       child={container => (
         <React.Fragment>
           {formationDataForSelectedSurvey.map((f, index) => (
-            <Formation container={container} width={width} {...f} key={f.id} selected={f.id === selectedFormation} />
+            <Formation
+              container={container}
+              width={computedWidth}
+              {...f}
+              key={f.id}
+              selected={f.id === selectedFormation}
+            />
           ))}
           {editMode && (
             <FormationSegments
@@ -220,6 +269,8 @@ export default React.memo(({ container, width, gridGutter }) => {
               formationData={formationDataForSelectedSurvey}
             />
           )}
+          <TCLLine container={container} width={computedWidth} tcl={tcl} x={12} />
+          <FormationAxis {...formationAxisProps} />
         </React.Fragment>
       )}
     />

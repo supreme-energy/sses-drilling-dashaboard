@@ -204,7 +204,7 @@ const SegmentSelection = ({
   const lineData = useMemo(() => [[0, 0], [totalWidth, 0]], [totalWidth]);
   const [firstSegment] = segments;
   const lastSegment = segments[segments.length - 1];
-  const segmentHeight = view.yScale * (lastSegment.enddepth - firstSegment.startdepth);
+  const segmentHeight = view.yScale * Math.abs(lastSegment.enddepth - firstSegment.startdepth);
   const selectionContainerRef = useRef(null);
   const segmentRef = useRef(null);
   const { onSegmentDrag, onEndSegmentDrag, onStartSegmentDrag } = useDragActions();
@@ -313,7 +313,7 @@ const SegmentSelection = ({
     x: 0,
     y: -2,
     width: totalWidth,
-    height: 6
+    height: 4
   });
 
   useDraggable({
@@ -327,7 +327,7 @@ const SegmentSelection = ({
     x: 0,
     y: 2,
     width: totalWidth,
-    height: segmentHeight - 2
+    height: segmentHeight - 4
   });
 
   const backgroundColor = draftMode ? draftColor : selectionColor;
@@ -353,7 +353,7 @@ const SegmentSelection = ({
   return (
     <PixiContainer
       ref={selectionContainerRef}
-      y={firstSegment.startdepth - 2}
+      y={Math.min(firstSegment.startdepth, lastSegment.enddepth)}
       container={container}
       updateTransform={frozenScaleTransform}
       child={container => (
@@ -397,7 +397,7 @@ const SegmentSelection = ({
           <PixiContainer
             ref={startLineRef}
             container={container}
-            y={2}
+            y={firstSegment.startdepth < lastSegment.enddepth ? 0 : segmentHeight}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
@@ -413,11 +413,11 @@ const SegmentSelection = ({
           <PixiContainer
             ref={endLineRef}
             container={container}
-            y={segmentHeight}
+            y={firstSegment.startdepth < lastSegment.enddepth ? segmentHeight : 0}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
-                y={2}
+                y={0}
                 container={container}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}
