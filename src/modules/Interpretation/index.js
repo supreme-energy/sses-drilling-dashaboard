@@ -17,7 +17,7 @@ import { useControlLogDataContainer, useWellIdContainer } from "../App/Container
 import LogSettings from "./LogSettings";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import FormationControls from "./InterpretationSettings/FormationControls";
-import { useSelectedWellLog, useSetupWizardData } from "./selectors";
+import { useSetupWizardData } from "./selectors";
 import FormationSettings from "./InterpretationChart/FormationSettings";
 
 import WizardChecklist from "./components/WizardChecklist";
@@ -25,14 +25,9 @@ import DetailsTable from "./DetailsTable";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
-  const { selectedWellLog } = useSelectedWellLog();
+
   return (
-    <Button
-      variant="text"
-      color="primary"
-      onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}
-      disabled={!selectedWellLog}
-    >
+    <Button variant="text" color="primary" onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}>
       Tops
     </Button>
   );
@@ -110,9 +105,9 @@ const Interpretation = React.memo(
                 Tops
               </TopsButton>
             </Box>
+            <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
           </React.Fragment>
         )}
-        <Headers controlLogs={controlLogs} logs={logList} wellId={wellId} />
 
         <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
         {showFormationControls && <FormationControls />}

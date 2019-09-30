@@ -80,7 +80,7 @@ export const { Provider: WebglRendererProvider, useContainer: useInterpretationR
   useInterpretationWebglRenderer
 );
 
-function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId }) {
+function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
   const {
     stage,
     refresh,
@@ -168,18 +168,22 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} view={view} gridGutter={gridGutter} />
+      <Formations container={viewport} width={width} gridGutter={gridGutter} />
 
-      {controlLogs.map(cl => (
-        <ControlLogLine key={cl.id} log={cl} container={viewport} />
-      ))}
-      <LogLines
-        wellId={wellId}
-        logs={logList}
-        container={viewport}
-        selectedWellLogIndex={selectedWellLogIndex}
-        offset={gridGutter}
-      />
+      {!formationsEditMode && (
+        <React.Fragment>
+          {controlLogs.map(cl => (
+            <ControlLogLine key={cl.id} log={cl} container={viewport} />
+          ))}
+          <LogLines
+            wellId={wellId}
+            logs={logList}
+            container={viewport}
+            selectedWellLogIndex={selectedWellLogIndex}
+            offset={gridGutter}
+          />
+        </React.Fragment>
+      )}
 
       <Grid
         container={viewport}

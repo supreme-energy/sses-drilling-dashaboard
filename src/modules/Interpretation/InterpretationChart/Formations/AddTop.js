@@ -9,11 +9,11 @@ import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSe
 import { LabelDepth } from "./FormationSegments";
 import { noDecimals } from "../../../../constants/format";
 import useRef from "react-powertools/hooks/useRef";
-import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
+import { useComputedSurveysAndProjections } from "../../selectors";
 import uniqueId from "lodash/uniqueId";
 import get from "lodash/get";
 
-export default function AddTop({ addTop, selectedSurveyIndex, formationData }) {
+export default function AddTop({ addTop, topIndex, formationData }) {
   const {
     stage,
     size: { width, height },
@@ -22,14 +22,14 @@ export default function AddTop({ addTop, selectedSurveyIndex, formationData }) {
   } = useInterpretationRenderer();
   const [, dispatch] = useFormationsStore();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
-  const selectedSurvey = useSelectedSurvey();
+  const associatedSurvey = surveysAndProjections[topIndex];
   const [y, setY] = useState(0);
   const addLineData = useMemo(() => [[gridGutter, 0], [width, 0]], [width]);
   const containerRef = useRef(null);
   const internalState = useRef(() => ({}));
 
   internalState.current.onClick = function onClick() {
-    const thickness = (-view.y + y) / view.yScale - selectedSurvey.tcl;
+    const thickness = (-view.y + y) / view.yScale - associatedSurvey.tcl;
     const optimisticData = surveysAndProjections.map((s, index) => ({
       id: `pendingFormationData${index}`,
       thickness,
@@ -42,7 +42,7 @@ export default function AddTop({ addTop, selectedSurveyIndex, formationData }) {
     addTop({
       pendingId,
       thickness,
-      selectedIndex: selectedSurveyIndex,
+      selectedIndex: topIndex,
       optimisticData
     })
       .then(result => {

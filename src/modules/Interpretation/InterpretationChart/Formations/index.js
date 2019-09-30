@@ -12,6 +12,9 @@ import { useInterpretationRenderer } from "..";
 import AddTop from "./AddTop";
 import get from "lodash/get";
 import useDraggable from "../../../../hooks/useDraggable";
+import memoizeOne from "memoize-one";
+import { EMPTY_ARRAY } from "../../../../api";
+import { minIndex } from "d3-array";
 
 const FormationDrag = ({ y, container, width, thickness }) => {
   const topLineRef = useRef(null);
@@ -106,14 +109,19 @@ const Formation = React.memo(
   }
 );
 
-function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
+const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex) => {
+  if (!rawFormationsData || !rawFormationsData.length) {
+    return EMPTY_ARRAY;
+  }
+
   const items = rawFormationsData.reduce((acc, item, index) => {
-    if (item.data && item.data.length && index <= rawFormationsData.length - 2) {
+    if (item.data && item.data.length) {
       const formationData = item.data[selectedSurveyIndex];
       const nextFormation = rawFormationsData[index + 1];
-      const nextFormationData = nextFormation.data[selectedSurveyIndex];
+      const nextFormationData = nextFormation && nextFormation.data[selectedSurveyIndex];
+
       const y = formationData.tot;
-      const height = nextFormationData.tot - y;
+      const height = nextFormationData ? nextFormationData.tot - y : 20;
       acc.push({
         y,
         height,
@@ -131,43 +139,46 @@ function computeFormationsData(rawFormationsData, selectedSurveyIndex) {
 
     return acc;
   }, []);
-  const lastAddedItem = items[items.length - 1];
-  const lastFormationItem = rawFormationsData[rawFormationsData.length - 1];
-
-  items.push({
-    y: lastAddedItem.y + lastAddedItem.height,
-    height: 20,
-    label: lastFormationItem.label,
-    id: lastFormationItem.id,
-    thickness: get(lastFormationItem, "data[0].thickness"),
-    interpretationLine: lastFormationItem.interp_line_show,
-    interpretationFill: lastFormationItem.interp_fill_show,
-    showLine: Boolean(lastFormationItem.show_line),
-    backgroundColor: Number(`0x${lastFormationItem.bg_color}`),
-    backgroundAlpha: Number(lastFormationItem.bg_percent),
-    color: Number(`0x${lastFormationItem.color}`)
-  });
 
   return items;
-}
+});
 
-export default React.memo(({ container, width, view, gridGutter }) => {
+const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formationsData, height, nrSurveys) => {
+  const center = (-view.y + height / 2) / view.yScale;
+
+  return minIndex(formationsData[0].data.slice(0, nrSurveys), (d1, index) => {
+    const d2 = formationsData[formationsData.length - 1].data[index];
+    const top = d1.tot;
+    const bottom = d2.tot;
+    const formationItemCenter = top + (bottom - top) / 2;
+    return Math.abs(formationItemCenter - center);
+  });
+});
+
+export default React.memo(({ container, width, gridGutter }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
-  const { refresh } = useInterpretationRenderer();
+  const {
+    refresh,
+    view,
+    size: { height }
+  } = useInterpretationRenderer();
   const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
-  const [surveysAndProjections] = useComputedSurveysAndProjections();
+  const [surveysAndProjections, surveys] = useComputedSurveysAndProjections();
+  const nrSurveys = surveys.length;
   const selectedSurveyIndex = useMemo(
     () => (selectedSurvey ? surveysAndProjections.findIndex(s => s.id === selectedSurvey.id) : -1),
     [selectedSurvey, surveysAndProjections]
   );
 
   const { formationsData, addTop, serverFormations } = useFormationsDataContainer();
-  const formationDataForSelectedSurvey = useMemo(
-    () => (selectedSurveyIndex > -1 ? computeFormationsData(formationsData, selectedSurveyIndex) : []),
-    [selectedSurveyIndex, formationsData]
-  );
+
+  const formationDataIndex =
+    selectedSurveyIndex >= 0
+      ? selectedSurveyIndex
+      : computeViewportCenterClosestFormationDataIndex(view, formationsData, height, nrSurveys);
+  const formationDataForSelectedSurvey = computeFormationsData(formationsData, formationDataIndex);
 
   const changeSegmentSelection = useCallback(id => dispatch({ type: "CHANGE_SELECTION", formationId: id }), [dispatch]);
   useEffect(
@@ -186,10 +197,9 @@ export default React.memo(({ container, width, view, gridGutter }) => {
       container={container}
       child={container => (
         <React.Fragment>
-          {selectedSurvey &&
-            formationDataForSelectedSurvey.map((f, index) => (
-              <Formation container={container} width={width} {...f} key={f.id} selected={f.id === selectedFormation} />
-            ))}
+          {formationDataForSelectedSurvey.map((f, index) => (
+            <Formation container={container} width={width} {...f} key={f.id} selected={f.id === selectedFormation} />
+          ))}
           {editMode && (
             <FormationSegments
               refresh={refresh}
@@ -205,7 +215,7 @@ export default React.memo(({ container, width, view, gridGutter }) => {
             <AddTop
               addTop={addTop}
               wellId={wellId}
-              selectedSurveyIndex={selectedSurveyIndex}
+              topIndex={formationDataIndex}
               container={container}
               formationData={formationDataForSelectedSurvey}
             />
