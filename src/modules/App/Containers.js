@@ -216,7 +216,12 @@ function useSurveysData() {
 
   const [surveys, { updateSurvey, refresh, replaceResult, isLoading }] = useFetchSurveys(wellId);
 
-  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult, isLoading };
+  const updateTieInTCL = useCallback(
+    newTCL => replaceResult([{ ...surveys[0], tcl: Number(newTCL) }, ...surveys.slice(1)]),
+    [replaceResult, surveys]
+  );
+
+  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult, isLoading, updateTieInTCL };
 }
 
 function useProjectionsData() {

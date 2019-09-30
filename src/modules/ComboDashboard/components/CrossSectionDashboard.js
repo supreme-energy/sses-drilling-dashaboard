@@ -15,7 +15,7 @@ import DetailsTable from "./Details";
 import DetailsFullModal from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import { useCrossSectionContainer } from "../../App/Containers";
+import { useCrossSectionContainer, useSurveysDataContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
@@ -25,12 +25,13 @@ import { limitAzm } from "./CrossSection/formulas";
 import TableButton from "../../../components/TableButton";
 
 export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
-  const [expanded, toggleExpanded] = useReducer(e => !e, false);
+  const [expanded, toggleExpanded] = useReducer(e => !e, true);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
   const { wellPlanIsImported } = useSetupWizardData();
   const [viewDirection, setViewDirection] = useState(0);
 
+  const { updateTieInTCL } = useSurveysDataContainer();
   const { selectedSections, calcSections } = useCrossSectionContainer();
   const selectedSegment = useMemo(() => {
     return calcSections.find(s => selectedSections[s.id]) || {};
@@ -102,7 +103,15 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
                     options={{ mask: limitAzm }}
                   />
                   <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
-                  <WellInfoField label={"TCL"} field="tot" type="number" inputProps={{ min: "0" }} />
+                  <WellInfoField
+                    label={"TCL"}
+                    field="tot"
+                    type="number"
+                    inputProps={{ min: "0" }}
+                    options={{
+                      debounceAction: updateTieInTCL
+                    }}
+                  />
                 </React.Fragment>
               )}
               <TableButton onClick={toggleModal} />

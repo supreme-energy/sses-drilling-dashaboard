@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
@@ -24,8 +24,16 @@ import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
 import { useFormationsStore } from "./Formations/store";
 import get from "lodash/get";
+import { useLocalStorageState } from "react-storage-hooks";
+import { useWellIdContainer } from "../../App/Containers";
 
 export const gridGutter = 65;
+const initialViewState = {
+  x: gridGutter,
+  y: 0,
+  xScale: 1,
+  yScale: 1
+};
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -40,12 +48,8 @@ function useInterpretationWebglRenderer() {
 
   useEffect(refresh, [refresh, width, height]);
 
-  const [view, updateView] = useState({
-    x: gridGutter,
-    y: 0,
-    xScale: 1,
-    yScale: 1
-  });
+  const { wellId } = useWellIdContainer();
+  const [view, updateView] = useLocalStorageState(`${wellId}Interpretation`, initialViewState);
 
   const viewportContainer = useRef(null);
   const topContainerRef = useRef(null);
@@ -104,14 +108,16 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
   // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && controlLogs && controlLogs.length) {
+      if (view.y !== 0 || view.yScale !== 1) {
+        internalStateRef.current.scaleInitialized = true;
+      } else if (!scaleInitialized && controlLogs && controlLogs.length) {
         const minDepth = min(controlLogs, cl => get(cl, "data[0].md"));
 
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
         internalStateRef.current.scaleInitialized = true;
       }
     },
-    [height, controlLogs, updateView, scaleInitialized]
+    [height, controlLogs, updateView, scaleInitialized, view]
   );
 
   useEffect(

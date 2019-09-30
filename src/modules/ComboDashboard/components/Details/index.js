@@ -25,6 +25,8 @@ import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
+import { EMPTY_FIELD } from "../../../../constants/format";
+import isNumber from "../../../../utils/isNumber";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -75,7 +77,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
       />
     );
   } else {
-    return <TableCell className={classes.cell}>{value.toFixed(2)}</TableCell>;
+    return <TableCell className={classes.cell}>{(isNumber(value) && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
   }
 }
 
@@ -198,7 +200,7 @@ export default function DetailsTable({ showFullTable = false }) {
         })}
         {!details.length && (
           <TableRow>
-            <TableCell colSpan={11} className={classes.emptyTableMessage}>
+            <TableCell colSpan={13} className={classes.emptyTableMessage}>
               Select a survey or projection to see details here
             </TableCell>
           </TableRow>
