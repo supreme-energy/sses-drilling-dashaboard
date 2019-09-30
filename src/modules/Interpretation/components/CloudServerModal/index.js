@@ -15,10 +15,10 @@ import ReviewCleanData from "./ReviewCleanData";
 import ReviewManualImport from "./ReviewManualImport";
 import NotificationSettings from "./NotificationSettings";
 import { ManualImportModal, AutoImportModal } from "./ImportModals";
-import { IMPORT, SETTINGS, PULL, REVIEW_CLEAN_DATA, REVIEW_MANUAL_IMPORT } from "../../../../constants/interpretation";
+import { AUTO, IMPORT, INITIALIZE, SETTINGS, REVIEW, PULL } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
-function CloudServerModal({ wellId, className, importText = "", importIcon }) {
+function CloudServerModal({ wellId, className, importText = "", importIcon = false, isInterpretation = false }) {
   const {
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
@@ -33,13 +33,16 @@ function CloudServerModal({ wellId, className, importText = "", importIcon }) {
     updateAutoImport
   ] = useSelectedWellInfoContainer(wellId);
   const {
-    view,
     setView,
-    isVisible,
+    view,
+    isAutoImportVisible,
+    isManualImportVisible,
     isAutoImportEnabled,
     setAutoImport,
-    handleOpen,
-    handleClose
+    handleOpenAutoImport,
+    handleOpenManualImport,
+    handleCloseManualImport,
+    handleCloseAutoImport
   } = useCloudServerModal();
 
   const { countdown, interval, setAutoCheckInterval } = useCloudServerCountdownContainer();
@@ -50,21 +53,14 @@ function CloudServerModal({ wellId, className, importText = "", importIcon }) {
 
   const handleRefreshCheck = async () => {
     const { next_survey: newSurvey } = await refresh();
-
-    if (newSurvey) {
-      setView(IMPORT);
-    }
+    setView({ type: INITIALIZE, payload: { type: AUTO, newSurvey } });
   };
 
   useEffect(() => {
-    if (!isVisible) {
-      if ((newSurvey && isCloudServerEnabled) || !isCloudServerEnabled) {
-        setView(IMPORT);
-      } else if (isCloudServerEnabled) {
-        setView(SETTINGS);
-      }
+    if (!isAutoImportVisible && isCloudServerEnabled) {
+      setView({ type: INITIALIZE, payload: { type: AUTO, newSurvey } });
     }
-  }, [newSurvey, isVisible, setView, isCloudServerEnabled, isAutoImportEnabled]);
+  }, [newSurvey, isAutoImportVisible, setView, isCloudServerEnabled]);
 
   useEffect(() => {
     if (wellInfo && wellInfo[PULL]) {
@@ -75,35 +71,36 @@ function CloudServerModal({ wellId, className, importText = "", importIcon }) {
   return (
     <React.Fragment>
       <div className={classNames(classes.cloudServerButton, className)}>
-        <Button onClick={handleOpen}>
-          {isAutoImportEnabled && !newSurvey && <span>{countdown}</span>}
-          {isAutoImportEnabled ? (
-            <Badge
-              className={hasConflict ? classes.badgeRed : classes.badgeGreen}
-              variant="dot"
-              invisible={!newSurvey || !isCloudServerEnabled}
-              color="secondary"
-            >
-              <Cloud />
-            </Badge>
-          ) : isCloudServerEnabled ? (
-            <CloudOff />
-          ) : (
-            <React.Fragment>
-              {importIcon || <Import />}
-              {importText}
-            </React.Fragment>
-          )}
+        {isCloudServerEnabled && isInterpretation && (
+          <Button onClick={handleOpenAutoImport}>
+            {isAutoImportEnabled && !newSurvey && <span>{countdown}</span>}
+            {isAutoImportEnabled ? (
+              <Badge
+                className={hasConflict ? classes.badgeRed : classes.badgeGreen}
+                variant="dot"
+                invisible={!newSurvey || !isCloudServerEnabled}
+                color="secondary"
+              >
+                <Cloud />
+              </Badge>
+            ) : (
+              <CloudOff />
+            )}
+          </Button>
+        )}
+        <Button onClick={handleOpenManualImport}>
+          {importIcon || <Import />}
+          {importText}
         </Button>
       </div>
 
-      <Dialog onClose={handleClose} maxWidth="md" open={isVisible} fullWidth>
-        {view === IMPORT && isCloudServerEnabled && (
+      <Dialog onClose={handleCloseAutoImport} maxWidth="md" open={isAutoImportVisible} fullWidth>
+        {view.auto === IMPORT && isCloudServerEnabled && (
           <AutoImportModal
             wellId={wellId}
             setView={setView}
             hasConflict={hasConflict}
-            handleClose={handleClose}
+            handleClose={handleCloseAutoImport}
             refresh={refresh}
             md={md}
             inc={inc}
@@ -111,25 +108,14 @@ function CloudServerModal({ wellId, className, importText = "", importIcon }) {
             newSurvey={newSurvey}
           />
         )}
-        {view === IMPORT && !isCloudServerEnabled && (
-          <ManualImportModal
-            wellId={wellId}
-            file={file}
-            setFile={setFile}
-            setView={setView}
-            hasConflict={hasConflict}
-            handleClose={handleClose}
-            setErrors={setErrors}
-          />
-        )}
-        {view === SETTINGS && (
+        {view.auto === SETTINGS && (
           <NotificationSettings
             wellId={wellId}
             appInfo={appInfo}
             wellInfo={wellInfo}
             updateAlarm={updateAppInfo}
             updateAutoImport={updateAutoImport}
-            handleClose={handleClose}
+            handleClose={handleCloseAutoImport}
             setAutoImport={setAutoImport}
             countdown={countdown}
             isAutoImportEnabled={isAutoImportEnabled}
@@ -140,15 +126,29 @@ function CloudServerModal({ wellId, className, importText = "", importIcon }) {
             hasNewSurvey={newSurvey}
           />
         )}
-        {view === REVIEW_CLEAN_DATA && <ReviewCleanData wellId={wellId} setView={setView} newSurvey={newSurvey} />}
-        {view === REVIEW_MANUAL_IMPORT && (
+        {view.auto === REVIEW && <ReviewCleanData wellId={wellId} setView={setView} newSurvey={newSurvey} />}
+      </Dialog>
+
+      <Dialog onClose={handleCloseManualImport} maxWidth="md" open={isManualImportVisible} fullWidth>
+        {view.manual === IMPORT && (
+          <ManualImportModal
+            wellId={wellId}
+            file={file}
+            setFile={setFile}
+            setView={setView}
+            hasConflict={hasConflict}
+            handleClose={handleCloseManualImport}
+            setErrors={setErrors}
+          />
+        )}
+        {view.manual === REVIEW && (
           <ReviewManualImport
             wellId={wellId}
             fileName={file.name}
             setFile={setFile}
             setView={setView}
             setErrors={setErrors}
-            handleClose={handleClose}
+            handleClose={handleCloseManualImport}
             errors={errors}
           />
         )}
@@ -161,7 +161,8 @@ CloudServerModal.propTypes = {
   wellId: PropTypes.string,
   className: PropTypes.string,
   importText: PropTypes.string,
-  importIcon: PropTypes.elementType
+  importIcon: PropTypes.oneOf([PropTypes.elementType, PropTypes.bool]),
+  isInterpretation: PropTypes.bool
 };
 
 export default CloudServerModal;

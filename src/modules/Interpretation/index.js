@@ -67,7 +67,7 @@ const Interpretation = React.memo(
           <Box display="flex" flexDirection="row" justifyContent="space-between">
             <WidgetTitle>Interpretation</WidgetTitle>
             <Box display="flex">
-              <CloudServerModal wellId={wellId} />
+              <CloudServerModal wellId={wellId} isInterpretation />
               <DetailsTable />
             </Box>
           </Box>

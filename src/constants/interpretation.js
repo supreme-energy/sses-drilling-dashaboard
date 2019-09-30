@@ -1,8 +1,11 @@
 export const MEDIA_URL = fileName => `/${fileName}`;
 export const IMPORT = "import";
+export const AUTO = "auto";
+export const MANUAL = "manual";
 export const SETTINGS = "settings";
-export const REVIEW_CLEAN_DATA = "review_clean_data";
-export const REVIEW_MANUAL_IMPORT = "review_manual_import";
+export const REVIEW = "review";
+export const INITIALIZE = "initialize";
+export const initialViewState = { [AUTO]: "", [MANUAL]: "" };
 export const ALARM_ENABLED = "import_alarm_enabled";
 export const ALARM = "import_alarm";
 export const PULL = "pull_data";

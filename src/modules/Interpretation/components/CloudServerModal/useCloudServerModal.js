@@ -1,21 +1,57 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useReducer } from "react";
+import {
+  IMPORT,
+  REVIEW,
+  AUTO,
+  INITIALIZE,
+  SETTINGS,
+  MANUAL,
+  initialViewState
+} from "../../../../constants/interpretation";
+
+export function viewReducer(state, action) {
+  switch (action.type) {
+    case IMPORT:
+      return { ...state, [action.payload]: action.type };
+    case REVIEW:
+      return { ...state, [action.payload]: action.type };
+    case SETTINGS:
+      return { ...state, [AUTO]: action.type };
+    case INITIALIZE:
+      const hasSurvey = action.payload.newSurvey;
+      return { ...state, [action.payload.type]: hasSurvey ? IMPORT : SETTINGS };
+    default:
+      return state;
+  }
+}
 
 export default function useCloudServerModal() {
-  const [view, setView] = useState("");
-  const [isVisible, setVisibility] = useState(false);
+  const [view, setView] = useReducer(viewReducer, initialViewState);
+  const [isAutoImportVisible, setAutoVisibility] = useState(false);
+  const [isManualImportVisible, setManualVisibility] = useState(false);
   const [isAutoImportEnabled, setAutoImport] = useState(false);
 
   // Handlers
-  const handleOpen = useCallback(() => setVisibility(true), []);
-  const handleClose = useCallback(() => setVisibility(false), []);
+  const handleOpenAutoImport = useCallback(() => {
+    setAutoVisibility(true);
+  }, []);
+  const handleOpenManualImport = useCallback(() => {
+    setManualVisibility(true);
+    setView({ type: IMPORT, payload: MANUAL });
+  }, []);
+  const handleCloseManualImport = useCallback(() => setManualVisibility(false), []);
+  const handleCloseAutoImport = useCallback(() => setAutoVisibility(false), []);
 
   return {
     view,
     setView,
-    isVisible,
+    isAutoImportVisible,
+    isManualImportVisible,
     isAutoImportEnabled,
     setAutoImport,
-    handleOpen,
-    handleClose
+    handleOpenAutoImport,
+    handleOpenManualImport,
+    handleCloseManualImport,
+    handleCloseAutoImport
   };
 }
