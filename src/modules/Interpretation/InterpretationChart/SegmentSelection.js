@@ -154,7 +154,7 @@ const segmentSelectionReducer = (state, action) => {
 const tooltipTextProps = {
   breakWords: false,
   wrap: true,
-  worldWrap: true,
+  wordWrap: true,
   wrapWidth: 30
 };
 
