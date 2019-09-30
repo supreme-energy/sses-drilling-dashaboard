@@ -1,12 +1,6 @@
 @import "../../../../styles/base";
 
 .cloudServerButton {
-    position: relative;
-    left: 150px;
-    bottom: 30px;
-    width: 75px;
-    padding-bottom: 10px;
-
     .badgeGreen span {
         background-color: green;
     }
@@ -117,7 +111,7 @@
     left: 15px;
     position: relative;
     line-height: 50px;
-    
+
     span {
         margin-left: 10px;
     }

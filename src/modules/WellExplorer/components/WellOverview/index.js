@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@material-ui/core";
 import OverivewKpi from "./OverviewKpi";
 import Tab from "@material-ui/core/Tab";
@@ -9,11 +9,17 @@ import ReportServer from "./ReportServer";
 import DataServer from "./DataServer";
 import classNames from "classnames";
 
-function WellOverivew({ className, well, match, updateFavorite, onFilesToImportChange }) {
-  const [currentTab, changeCurrentTab] = useState("overview");
+function WellOverivew({ className, well, updateFavorite, onFilesToImportChange, initialTab, setInitialTab }) {
+  const [currentTab, changeCurrentTab] = useState(initialTab || "overview");
   const onTabChange = (_, value) => {
     changeCurrentTab(value);
   };
+
+  useEffect(() => {
+    if (initialTab) {
+      setInitialTab();
+    }
+  }, [setInitialTab, initialTab]);
 
   return (
     <Card className={classNames(className, "layout vertical")}>

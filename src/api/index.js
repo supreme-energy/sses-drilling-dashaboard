@@ -19,7 +19,8 @@ import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
 
-export const GET_WELL_LIST = "/joblist.php";
+export const GET_WELL_LIST = "/job/list.php";
+export const CREATE_NEW_WELL = "/job/create.php";
 export const SET_FAV_WELL = "/set_fav_job.php";
 export const SET_WELL_FIELD = "/setfield.php";
 export const GET_WELL_INFO = "/wellinfo.php";
@@ -345,7 +346,7 @@ export function useWellInfo(wellId) {
 
 export function useWells() {
   const { requestId } = useAppState();
-  const [wells, , , , , { fetch }] = useFetch(
+  const [wells, , , , , { fetch, refresh }] = useFetch(
     {
       path: GET_WELL_LIST,
       query: { requestId }
@@ -397,7 +398,27 @@ export function useWells() {
     [fetch]
   );
   const wellsById = useMemo(() => getWellsById(wells), [wells]);
-  return [wells || EMPTY_ARRAY, wellsById, updateFavorite];
+  return [wells || EMPTY_ARRAY, wellsById, updateFavorite, refresh];
+}
+
+export function useCreateWell() {
+  const [, , , , , { fetch }] = useFetch();
+
+  const createWell = useCallback(
+    name =>
+      fetch(
+        {
+          path: CREATE_NEW_WELL,
+          query: {
+            name
+          }
+        },
+        (_, next) => next
+      ),
+    [fetch]
+  );
+
+  return { createWell };
 }
 
 const groupBySection = memoize(data => {
@@ -483,7 +504,7 @@ const surveysTransform = memoizeOne(data => {
     // If included, bit projection is always the last item and the last survey is second to last
     const isTieIn = i === 0;
     const isBitProj = i === l.length - 1 && hasBitProj;
-    const isLastSurvey = i === l.length - 1 - hasBitProj * 1;
+    const isLastSurvey = i === l.length - 1 - hasBitProj * 1 && l.length > 1;
     return {
       ...s,
       name: isTieIn ? "Tie-in" : isBitProj ? "BPrj" : `${i}`,
@@ -567,7 +588,8 @@ const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
       query: {
         seldbname: wellId
       },
-      body: props
+      // workaround for endpoint issue that does not properly convert booleans
+      body: _.mapValues(props, value => (typeof value === "boolean" ? String(value) : value))
     },
     (currentFormations, result) => {
       return formationsTransform(currentFormations.map(f => (f.id === result.id ? result : f))).sort(sortByThickness);
@@ -578,6 +600,21 @@ const updateFormationTop = async ({ wellId, props, fetch, requestId }) => {
     result: r,
     requestId
   };
+};
+
+const booleansToConvertToString = {
+  interp_line_show: true,
+  vert_line_show: true,
+  interp_fill_show: true,
+  vert_fill_show: true
+};
+
+const fixBooleanValues = (value, key) => {
+  if (booleansToConvertToString[key]) {
+    return String(value);
+  }
+
+  return value;
 };
 
 export function useFetchFormations(wellId) {
@@ -654,7 +691,7 @@ export function useFetchFormations(wellId) {
   );
 
   const updateTop = useCallback(
-    async props => {
+    async (props, save = true) => {
       const optimisticResult = formations
         .map(d => {
           if (d.id === props.id) {
@@ -672,20 +709,25 @@ export function useFetchFormations(wellId) {
         .sort(sortByThickness);
 
       changeUpdateTopOptimisticData(optimisticResult);
-      let result;
-      try {
-        const requestId = _.uniqueId();
-        internalState.current.lastRequestId = requestId;
-        result = await updateFormationTop({ wellId, props, fetch, requestId });
-      } catch (e) {
-        throw e;
-      } finally {
-        if (result.requestId === internalState.current.lastRequestId) {
-          changeUpdateTopOptimisticData(null);
+
+      if (save) {
+        let result;
+        try {
+          const requestId = _.uniqueId();
+          internalState.current.lastRequestId = requestId;
+          result = await updateFormationTop({ wellId, props: _.mapValues(props, fixBooleanValues), fetch, requestId });
+        } catch (e) {
+          throw e;
+        } finally {
+          if (result.requestId === internalState.current.lastRequestId) {
+            changeUpdateTopOptimisticData(null);
+          }
         }
+
+        return result;
       }
 
-      return result;
+      return optimisticResult;
     },
     [formations, wellId, changeUpdateTopOptimisticData, fetch]
   );

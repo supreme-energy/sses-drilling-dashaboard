@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Box } from "@material-ui/core";
-import CondensedText from "../../../components/ContensedText.js";
+import CondensedText from "../../../components/CondensedText";
 import css from "./styles.scss";
 import { twoDecimals, EMPTY_FIELD, formatValue } from "../../../constants/format.js";
 import { useGetComputedLogData } from "../selectors.js";

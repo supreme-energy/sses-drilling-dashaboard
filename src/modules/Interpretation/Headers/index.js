@@ -6,6 +6,8 @@ import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { getColorForWellLog } from "../selectors";
 import { AddCircle } from "@material-ui/icons";
 import ControlLogImportModal from "../../../modals/ControlLogImporterModal";
+import CloudServerModal from "../components/CloudServerModal";
+import classes from "./styles.scss";
 
 const Headers = React.memo(
   ({
@@ -65,11 +67,16 @@ const Headers = React.memo(
         <WellLogsHeader
           logs={logs}
           wellId={wellId}
+          menuIcon={
+            !logs.length && (
+              <CloudServerModal wellId={wellId} importIcon={<AddCircle />} className={classes.importModalPlusButton} />
+            )
+          }
           color={`#${getColorForWellLog(colorsByWellLog, "wellLogs")}`}
           name="GR"
           logId={"wellLogs"}
           isActive={activeLog === "wellLogs"}
-          onMenuClick={() => changeActiveLog("wellLogs")}
+          onMenuClick={() => logs.length && changeActiveLog("wellLogs")}
           {...headerProps}
         />
         {controlLogs.map(log => (

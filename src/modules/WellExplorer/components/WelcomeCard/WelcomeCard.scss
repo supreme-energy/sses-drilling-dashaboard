@@ -48,4 +48,14 @@
         flex-direction: row;
         align-items: center;
     }
+
+    .importNewInput {
+      display: none;
+    }
+}
+
+.newWellDialogActions {
+    button { 
+        outline: none;
+    }
 }

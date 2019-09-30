@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIcon, Button } from "@material-ui/core";
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
 import Import from "@material-ui/icons/Input";
+import { useCreateWell } from "../../../../api";
+import { useSelectedWellInfoContainer } from "../../../App/Containers";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
 import { Link } from "react-router-dom";
+import NewWellDialog from "./NewWellDialog";
 import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
@@ -45,7 +48,44 @@ const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   );
 };
 
-function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToImportChange }) {
+function WelcomeCard({
+  theme,
+  lastEditedWell,
+  openedWell,
+  className,
+  onFilesToImportChange,
+  changeSelectedWell,
+  refreshWellList,
+  setInitialTab
+}) {
+  const [createWellDialogOpen, setCreateWellDialog] = useState(false);
+  const [wellName, setWellName] = useState("");
+  const { createWell } = useCreateWell();
+  const [, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
+
+  const handleOpenCreateWellDialog = useCallback(() => setCreateWellDialog(true), []);
+  const handleCloseCreateWellDialog = useCallback(() => setCreateWellDialog(false), []);
+  const handleSetName = useCallback(e => setWellName(e.target.value), []);
+  const handleCreateWell = useCallback(async () => {
+    const res = await createWell(wellName);
+    const wellId = res.jobname;
+
+    // Refresh job list
+    await refreshWellList();
+    refreshFetchStore();
+
+    // Update WellBoreName
+    updateWell({ wellId, field: "wellborename", value: wellName });
+    refreshFetchStore();
+
+    // Close Dialog
+    setCreateWellDialog(false);
+
+    // Initialize view for new well
+    changeSelectedWell(wellId);
+    setInitialTab("info");
+  }, [createWell, wellName, changeSelectedWell, refreshWellList, setInitialTab, updateWell, refreshFetchStore]);
+
   return (
     <Card className={classNames(classes.card, className)}>
       <CardContent>
@@ -58,7 +98,7 @@ function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToIm
         <div className={classes.cardContent}>
           <div>
             <List className={classes.list}>
-              <ListItem className={classes.listItem} color="primary">
+              <ListItem className={classes.listItem} color="primary" onClick={handleOpenCreateWellDialog}>
                 <ListItemIcon>
                   <div className={classes.iconBg} style={{ background: theme.palette.primary.main }}>
                     <Add />
@@ -82,6 +122,13 @@ function WelcomeCard({ theme, lastEditedWell, openedWell, className, onFilesToIm
           ) : null}
         </div>
       </CardContent>
+      <NewWellDialog
+        open={createWellDialogOpen}
+        wellName={wellName}
+        handleChange={handleSetName}
+        handleClose={handleCloseCreateWellDialog}
+        handleSave={handleCreateWell}
+      />
     </Card>
   );
 }

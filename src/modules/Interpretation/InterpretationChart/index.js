@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
@@ -17,15 +17,23 @@ import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColo
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
-import TCLLine from "./TCLLine";
+
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { min } from "d3-array";
 import ControlLogLine from "./ControlLogLine";
 import { useFormationsStore } from "./Formations/store";
 import get from "lodash/get";
+import { useLocalStorageState } from "react-storage-hooks";
+import { useWellIdContainer } from "../../App/Containers";
 
 export const gridGutter = 65;
+const initialViewState = {
+  x: gridGutter,
+  y: 0,
+  xScale: 1,
+  yScale: 1
+};
 
 function createGridYAxis(...args) {
   const [line, label] = defaultMakeYTickAndLine(...args);
@@ -40,12 +48,8 @@ function useInterpretationWebglRenderer() {
 
   useEffect(refresh, [refresh, width, height]);
 
-  const [view, updateView] = useState({
-    x: gridGutter,
-    y: 0,
-    xScale: 1,
-    yScale: 1
-  });
+  const { wellId } = useWellIdContainer();
+  const [view, updateView] = useLocalStorageState(`${wellId}Interpretation`, initialViewState);
 
   const viewportContainer = useRef(null);
   const topContainerRef = useRef(null);
@@ -80,7 +84,7 @@ export const { Provider: WebglRendererProvider, useContainer: useInterpretationR
   useInterpretationWebglRenderer
 );
 
-function InterpretationChart({ className, controlLogs, logData, gr, logList, wellId }) {
+function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
   const {
     stage,
     refresh,
@@ -104,14 +108,16 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
   // scroll to the start of the control log
   useEffect(
     function initScale() {
-      if (!scaleInitialized && controlLogs && controlLogs.length) {
+      if (view.y !== 0 || view.yScale !== 1) {
+        internalStateRef.current.scaleInitialized = true;
+      } else if (!scaleInitialized && controlLogs && controlLogs.length) {
         const minDepth = min(controlLogs, cl => get(cl, "data[0].md"));
 
         updateView(view => ({ ...view, y: (-minDepth + 20) * view.yScale }));
         internalStateRef.current.scaleInitialized = true;
       }
     },
-    [height, controlLogs, updateView, scaleInitialized]
+    [height, controlLogs, updateView, scaleInitialized, view]
   );
 
   useEffect(
@@ -168,18 +174,22 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} view={view} gridGutter={gridGutter} />
+      <Formations container={viewport} width={width} gridGutter={gridGutter} />
 
-      {controlLogs.map(cl => (
-        <ControlLogLine key={cl.id} log={cl} container={viewport} />
-      ))}
-      <LogLines
-        wellId={wellId}
-        logs={logList}
-        container={viewport}
-        selectedWellLogIndex={selectedWellLogIndex}
-        offset={gridGutter}
-      />
+      {!formationsEditMode && (
+        <React.Fragment>
+          {controlLogs.map(cl => (
+            <ControlLogLine key={cl.id} log={cl} container={viewport} />
+          ))}
+          <LogLines
+            wellId={wellId}
+            logs={logList}
+            container={viewport}
+            selectedWellLogIndex={selectedWellLogIndex}
+            offset={gridGutter}
+          />
+        </React.Fragment>
+      )}
 
       <Grid
         container={viewport}
@@ -202,7 +212,7 @@ function InterpretationChart({ className, controlLogs, logData, gr, logList, wel
       {!formationsEditMode && (
         <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
       )}
-      <TCLLine container={viewport} width={width} />
+
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       {!formationsEditMode && (
         <BiasAndScale
