@@ -1,5 +1,5 @@
 import upperFirst from "lodash/upperFirst";
-import React, { useRef } from "react";
+import React from "react";
 import { Button, Typography, Box } from "@material-ui/core";
 import CSVHeader from "../../CSVAttributePane/Header";
 import classNames from "classnames";
@@ -10,7 +10,7 @@ import { useWellImporterContainer } from "../../";
 import values from "lodash/values";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import { useWellInfo, useCreateWell } from "../../../../../api";
+import { useWellInfo, useCreateWell, defaultTransform } from "../../../../../api";
 import { apiFieldMapping } from "../../models/mappings";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useWellImporterSaveContainer } from "../../../WellImporterModal";
@@ -34,11 +34,12 @@ const Header = ({ className, onClickCancel }) => {
     }),
     d => d !== null
   );
-
-  const importEnabled = (selectedWellId || pendingCreateWell) && !!values(dataToSave).length;
+  const haveData = !!values(dataToSave).length;
+  const importEnabled = pendingCreateWell || (selectedWellId && !!values(dataToSave).length);
   const { createWell } = useCreateWell();
 
   const importClickHandler = async () => {
+    dispatch({ type: "LOADING_START" });
     let createdWellId;
     if (pendingCreateWell) {
       dataToSave.well = pendingCreateWellName;
@@ -46,16 +47,30 @@ const Header = ({ className, onClickCancel }) => {
       createdWellId = res.jobname;
     }
     const data = Object.keys(dataToSave).reduce((acc, next) => {
-      return { ...acc, [apiFieldMapping[next]]: dataToSave[next] };
+      let key = apiFieldMapping[next];
+      let value = dataToSave[next];
+
+      return { ...acc, [key]: value };
     }, {});
 
-    dispatch({ type: "LOADING_START" });
-    try {
-      await updateWell({ wellId: createdWellId || selectedWellId, data });
+    if (data.latitude || data.longitude) {
+      const [easting, northing] = defaultTransform(null).inverse([Number(data.latitude), Number(data.longitude)]);
+
+      data.survey_easting = easting;
+      data.survey_northing = northing;
+    }
+
+    if (haveData) {
+      try {
+        await updateWell({ wellId: createdWellId || selectedWellId, data });
+        dispatch({ type: "SAVE_SUCCESS" });
+        onClickCancel();
+      } catch (e) {
+        dispatch({ type: "SAVE_ERROR", error: "Something went wrong" });
+      }
+    } else {
       dispatch({ type: "SAVE_SUCCESS" });
       onClickCancel();
-    } catch (e) {
-      dispatch({ type: "SAVE_ERROR", error: "Something went wrong" });
     }
 
     refreshFetchStore();

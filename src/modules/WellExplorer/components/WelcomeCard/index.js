@@ -2,7 +2,6 @@ import React, { useCallback, useState, useReducer } from "react";
 import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIcon, Button } from "@material-ui/core";
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
-import Import from "@material-ui/icons/Input";
 import { useCreateWell } from "../../../../api";
 import { useSelectedWellInfoContainer } from "../../../App/Containers";
 import { BitDepth, Rop } from "../../../Kpi/KpiItem";
@@ -12,7 +11,6 @@ import WellStatus from "../../../Kpi/WellStatus";
 import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
 import classNames from "classnames";
-import ImportInput from "../ImportInput";
 import { useWellImporterSaveContainer } from "../../../../modals/WellImporterModal/WellImporterModal";
 import useRef from "react-powertools/hooks/useRef";
 

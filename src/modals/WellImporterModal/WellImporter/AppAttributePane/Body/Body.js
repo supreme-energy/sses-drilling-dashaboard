@@ -18,7 +18,7 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
 
   const currentData = useMemo(
     function getCurrentData() {
-      if (!data.wellInfo || !data.wellSurfaceLocation) {
+      if (!selectedWellId || !data.wellInfo || !data.wellSurfaceLocation) {
         return null;
       }
 
@@ -29,7 +29,7 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         longitude: data.wellSurfaceLocation.y
       };
     },
-    [data]
+    [data, selectedWellId]
   );
 
   return (

@@ -102,6 +102,9 @@ export function useKpi(wellId) {
   };
 }
 
+const defaultCS = proj4.Proj("EPSG:32040");
+export const defaultTransform = toWGS84(defaultCS);
+
 export function useWellInfo(wellId) {
   const { requestId, updateRequestId } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch();
@@ -287,8 +290,6 @@ export function useWellInfo(wellId) {
     if (!wellInfo) {
       return {};
     }
-    const source = proj4.Proj("EPSG:32040");
-    const transform = toWGS84(source);
 
     const wellSurfaceLocationLocal = {
       x: Number(wellInfo.survey_easting),
@@ -304,9 +305,9 @@ export function useWellInfo(wellId) {
       y: Number(wellInfo.pbhl_northing)
     };
 
-    const wellSurfaceLocation = transform(wellSurfaceLocationLocal);
-    const wellLandingLocation = transform(wellLandingLocationLocal);
-    const wellPBHL = transform(wellPBHLLocal);
+    const wellSurfaceLocation = defaultTransform(wellSurfaceLocationLocal);
+    const wellLandingLocation = defaultTransform(wellLandingLocationLocal);
+    const wellPBHL = defaultTransform(wellPBHLLocal);
 
     return {
       wellSurfaceLocationLocal,
@@ -331,7 +332,7 @@ export function useWellInfo(wellId) {
       emailInfo,
       appInfo,
       isCloudServerEnabled,
-      transform
+      transform: defaultTransform
     },
     isLoading,
     updateWell,

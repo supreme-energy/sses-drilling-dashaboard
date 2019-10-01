@@ -57,7 +57,7 @@ export default function NewWellDialog({
               value={isImport}
             />
           }
-          label="Import a well set-up file. You'll select a LAS file and map fields
+          label="Import a well set-up file. You'll select a file and map fields
           to pre-populate well information in the system."
         />
       </DialogContent>
