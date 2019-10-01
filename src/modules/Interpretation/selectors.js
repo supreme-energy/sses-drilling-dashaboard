@@ -204,6 +204,7 @@ export function useComputedSegments() {
   const pendingStateByMd = usePendingSegmentsStateByMd();
   const { segments, byId } = getComputedSegments(allLogs, pendingStateByMd);
   const filteredSegments = useMemo(() => filteredLogs.map(l => byId[l.id]), [filteredLogs, byId]);
+
   return {
     segments,
     byId,

@@ -1,15 +1,18 @@
-import { useComputedSurveysAndProjections } from "../Interpretation/selectors";
+import { useComputedSurveysAndProjections, useComputedSegments } from "../Interpretation/selectors";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "./Containers";
 import { useCallback, useMemo, useRef } from "react";
 import _ from "lodash";
+import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 export function useSaveSurveysAndProjections() {
   const [, dispatch] = useComboContainer();
   const [{ pendingSegmentsState }] = useComboContainer();
   const { replaceResult: replaceProjections, updateProjection } = useProjectionsDataContainer();
   const { replaceResult: replaceSurveys, updateSurvey } = useSurveysDataContainer();
+  const [, , , { replaceResult: replaceWellLogs }] = useWellLogsContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
+  const { segments: computedSegments } = useComputedSegments();
 
   //  These change with every pending survey/projection value update.
   //  A debounced save with these as dependencies is worthless, since it redefines the callback on every change
@@ -17,6 +20,7 @@ export function useSaveSurveysAndProjections() {
   pendingRef.current.pendingSegmentsState = pendingSegmentsState;
   pendingRef.current.computedSurveys = computedSurveys;
   pendingRef.current.computedProjections = computedProjections;
+  pendingRef.current.computedSegments = computedSegments;
 
   const replaceSurveysAndProjections = useCallback(() => {
     replaceProjections(pendingRef.current.computedProjections);
@@ -24,13 +28,15 @@ export function useSaveSurveysAndProjections() {
   }, [replaceProjections, replaceSurveys, pendingRef]);
 
   const save = useCallback(() => {
-    const { computedSurveys, computedProjections, pendingSegmentsState } = pendingRef.current;
+    const { computedSurveys, computedProjections, pendingSegmentsState, computedSegments } = pendingRef.current;
     const surveyIds = _.keyBy(computedSurveys, s => s.id);
     const projectionIds = _.keyBy(computedProjections, p => p.id);
     const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
     const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
 
     replaceSurveysAndProjections();
+
+    replaceWellLogs(computedSegments);
     const surveyRes = Promise.all(
       _.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields }))
     );
@@ -41,7 +47,7 @@ export function useSaveSurveysAndProjections() {
     );
     dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
     return [].concat(surveyRes, projectionRes);
-  }, [dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection]);
+  }, [dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, replaceWellLogs]);
 
   const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);
 
