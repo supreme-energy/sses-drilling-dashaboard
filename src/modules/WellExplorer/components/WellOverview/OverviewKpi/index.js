@@ -12,6 +12,7 @@ import WellStatus from "../../../../Kpi/WellStatus";
 import WellPathStatus from "../../../../Kpi/WellPathStatus";
 import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
+
 import { withRouter } from "react-router";
 import flowRight from "lodash/flowRight";
 import { useWellIdContainer } from "../../../../App/Containers";

@@ -82,3 +82,7 @@ export function isActive(row, column, selectionByField, activeField) {
       (row === activeSelection.selectedRow || activeSelection.selectedRow === null))
   );
 }
+
+export function isValueDefined(value) {
+  return value !== "" && value !== null && value !== undefined; /* allow 0 */
+}

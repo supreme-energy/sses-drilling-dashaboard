@@ -182,9 +182,9 @@ export function useSaveWellLogActions() {
       }, {});
 
       replaceSurveysAndProjections();
+
       const result = updateWellLogs(data);
       updateSegments(resetLogProps);
-
       return result;
     },
     [updateWellLogs, replaceSurveysAndProjections, updateSegments]

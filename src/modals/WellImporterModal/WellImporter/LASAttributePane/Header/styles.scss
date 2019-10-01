@@ -5,6 +5,10 @@
   z-index: 2;
 }
 
+.butonProgressContainer {
+  margin-right: 8px;
+}
+
 .bottomContainer {
   &.csv {
     width: 100%;
@@ -21,6 +25,8 @@
   position: absolute;
   right: 10px;
   top: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
 .title {
@@ -29,8 +35,6 @@
 
 .button {
   width: 100px;
-  height: 35px;
-  line-height: 10px;
 
   &:first-of-type {
     margin-right: 10px;

@@ -11,7 +11,8 @@ import {
   REMOVE_INPUT_TO_CELL_IDS,
   SET_ACTIVE_INPUT,
   UPDATE_ATTRIBUTES_MODEL,
-  SELECT_CSV_CELL
+  SELECT_CSV_CELL,
+  CREATE_NEW_WELL
 } from "./actions";
 
 export const initialState = {
@@ -20,7 +21,27 @@ export const initialState = {
   appAttributesModel: defaultAppAttributesModel,
   highlightedCellIdsMap: {},
   textHighlightedCellIdsMap: {},
-  csvSelection: {}
+  csvSelection: {},
+  pendingCreateWell: false,
+  pendingCreateWellName: null
+};
+
+const updateAppModel = (state, { sectionKey, fieldKey, cellAlreadySelected, data, cellIds, extraInformation }) => {
+  return {
+    ...state,
+    appAttributesModel: {
+      ...state.appAttributesModel,
+      [sectionKey]: {
+        ...state.appAttributesModel[sectionKey],
+        [fieldKey]: {
+          ...state.appAttributesModel[sectionKey][fieldKey],
+          value: !cellAlreadySelected ? data : "",
+          cellId: !cellAlreadySelected ? cellIds : "",
+          extraInformation: !cellAlreadySelected ? extraInformation : {}
+        }
+      }
+    }
+  };
 };
 
 const reducer = (state, action) => {
@@ -45,24 +66,17 @@ const reducer = (state, action) => {
         inputToCellIds: omit(state.inputToCellIds, [action.inputId])
       };
 
-    case UPDATE_ATTRIBUTES_MODEL:
-      const { activeInput, cellAlreadySelected, data, cellIds, extraInformation } = action;
+    case CREATE_NEW_WELL:
       return {
         ...state,
-        appAttributesModel: {
-          ...state.appAttributesModel,
-          [activeInput.sectionKey]: {
-            ...state.appAttributesModel[activeInput.sectionKey],
-            [activeInput.fieldKey]: {
-              ...state.appAttributesModel[activeInput.sectionKey][activeInput.fieldKey],
-              value: !cellAlreadySelected ? data : "",
-              cellId: !cellAlreadySelected ? cellIds : "",
-              extraInformation: !cellAlreadySelected ? extraInformation : {}
-            }
-          }
-        }
+        pendingCreateWellName: action.wellName,
+        pendingCreateWell: true
       };
 
+    case UPDATE_ATTRIBUTES_MODEL:
+      const { activeInput, cellAlreadySelected, data, cellIds, extraInformation } = action;
+
+      return updateAppModel(state, { ...activeInput, cellAlreadySelected, data, cellIds, extraInformation });
     case CLEAR_HIGHLIGHTED_CELL_IDS:
       return {
         ...state,

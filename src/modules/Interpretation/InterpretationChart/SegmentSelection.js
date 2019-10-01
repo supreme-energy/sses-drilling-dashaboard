@@ -350,6 +350,8 @@ const SegmentSelection = ({
     [interactionsRunning, segmentHeight, fault]
   );
 
+  const startDepth = firstSegment.startdepth < lastSegment.enddepth ? 0 : segmentHeight;
+  const endDepth = firstSegment.startdepth < lastSegment.enddepth ? segmentHeight : 0;
   return (
     <PixiContainer
       ref={selectionContainerRef}
@@ -363,7 +365,7 @@ const SegmentSelection = ({
             container={container}
             backgroundColor={backgroundColor}
             segment={firstSegment}
-            y={0}
+            y={startDepth}
             text={twoDecimals(firstSegment.startdepth)}
             ref={segmentRef}
           />
@@ -373,7 +375,7 @@ const SegmentSelection = ({
             backgroundColor={backgroundColor}
             segment={lastSegment}
             text={twoDecimals(lastSegment.enddepth)}
-            y={segmentHeight}
+            y={endDepth}
           />
           <PixiTooltip
             canvas={canvasRef.current}
@@ -397,7 +399,7 @@ const SegmentSelection = ({
           <PixiContainer
             ref={startLineRef}
             container={container}
-            y={firstSegment.startdepth < lastSegment.enddepth ? 0 : segmentHeight}
+            y={startDepth}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine
@@ -413,7 +415,7 @@ const SegmentSelection = ({
           <PixiContainer
             ref={endLineRef}
             container={container}
-            y={firstSegment.startdepth < lastSegment.enddepth ? segmentHeight : 0}
+            y={endDepth}
             updateTransform={frozenScaleTransform}
             child={container => (
               <PixiLine

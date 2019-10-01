@@ -92,3 +92,18 @@ export const appAttributesFieldMapping = {
   wellParameters: wellParametersFieldMapping,
   wellData: wellDataFieldMapping
 };
+
+export const apiFieldMapping = {
+  api: "wellid",
+  country: "country",
+  county: "county",
+  field: "field",
+  jobNumber: "jobnumber",
+  location: "location",
+  operator: "operatorname",
+  rigId: "rigid",
+  state: "stateprov",
+  well: "wellborename",
+  latitude: "latitude",
+  longitude: "longitude"
+};

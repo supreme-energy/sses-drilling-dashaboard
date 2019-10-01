@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import WellImporter from "./WellImporter";
 
 import { createContainer } from "unstated-next";
-import React, { useReducer } from "react";
+import { useReducer } from "react";
 import reducer, { initialState } from "./state/reducer";
 
 function useWellImporter() {
@@ -18,8 +18,4 @@ const mapStateToProps = state => ({
   files: state.files.files
 });
 
-export default connect(mapStateToProps)(props => (
-  <WellImporterProvider>
-    <WellImporter {...props} />
-  </WellImporterProvider>
-));
+export default connect(mapStateToProps)(WellImporter);

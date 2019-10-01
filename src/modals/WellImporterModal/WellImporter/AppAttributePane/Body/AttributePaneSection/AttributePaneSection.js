@@ -6,32 +6,56 @@ import AttributePaneTextField from "../AttributePaneTextField";
 
 import css from "./styles.scss";
 import { useWellImporterContainer } from "../../..";
-import { useParsedFileSelector, getFieldValue } from "../../../selectors";
+import { useParsedFileSelector, getFieldValue, isValueDefined } from "../../../selectors";
+import { apiFieldMapping } from "../../../models/mappings";
 
-const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, model, activeInput }) => {
-  const [state] = useWellImporterContainer();
+const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, model, activeInput, currentData }) => {
+  const [{ csvSelection, pendingCreateWell, pendingCreateWellName }] = useWellImporterContainer();
   const { data, extension } = useParsedFileSelector();
 
   const attributePaneTextFields = useMemo(() => {
+    function getModel(model, key) {
+      if (key === "well" && pendingCreateWell) {
+        return { value: pendingCreateWellName };
+      }
+      let value = extension === "csv" ? getFieldValue(csvSelection, key, data) : model[key].value;
+      const notSelected = !isValueDefined(value);
+
+      if (currentData && notSelected) {
+        value = currentData[apiFieldMapping[key]];
+      }
+
+      return { value };
+    }
+
     return Object.keys(model).map(key => {
       const config = mapping[key];
-
-      const partialModel = extension === "csv" ? { value: getFieldValue(state.csvSelection, key, data) } : model[key];
-
       return (
         <AttributePaneTextField
           key={`wellInfo-${key}`}
           fieldKey={key}
           sectionKey={sectionKey}
           appAttributeConfig={config}
-          appAttributeModel={partialModel}
+          appAttributeModel={getModel(model, key)}
           onFocus={onFocus}
           isFocused={activeInput && activeInput.sectionKey === sectionKey && activeInput.fieldKey === key}
           type={config.type}
         />
       );
     });
-  }, [sectionKey, activeInput, onFocus, mapping, model, state.csvSelection, extension, data]);
+  }, [
+    sectionKey,
+    activeInput,
+    onFocus,
+    mapping,
+    model,
+    csvSelection,
+    extension,
+    currentData,
+    data,
+    pendingCreateWell,
+    pendingCreateWellName
+  ]);
 
   return (
     <div>
@@ -51,7 +75,8 @@ AttributePaneSection.propTypes = {
   onFocus: PropTypes.func.isRequired,
   mapping: PropTypes.object.isRequired,
   model: PropTypes.object.isRequired,
-  activeInput: PropTypes.object
+  activeInput: PropTypes.object,
+  currentData: PropTypes.object
 };
 
 export default AttributePaneSection;

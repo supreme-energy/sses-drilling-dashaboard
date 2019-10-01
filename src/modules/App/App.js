@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import { Route, Switch, BrowserRouter } from "react-router-dom";
 import Progress from "@material-ui/core/CircularProgress";
 import plusBasicAuth from "fetch-plus-basicauth";
-
 import FetchClientProvider from "react-powertools/data/FetchClientProvider";
 import FetchCache from "react-powertools/data/FetchCache";
 import plusJsonStrict from "react-powertools/data/fetch-plus-strict";

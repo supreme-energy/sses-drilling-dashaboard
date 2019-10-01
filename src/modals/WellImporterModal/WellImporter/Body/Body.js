@@ -20,7 +20,8 @@ const Body = ({
   highlightedRowAndColumnList,
   textHighlightedRowAndColumnList,
   activeInput,
-  extension
+  extension,
+  pendingCreateWell
 }) => {
   return (
     <div className={className}>
@@ -29,6 +30,7 @@ const Body = ({
           activeInput={activeInput}
           appAttributesModel={appAttributesModel}
           appAttributesFieldMapping={appAttributesFieldMapping}
+          pendingCreateWell={pendingCreateWell}
           onFocus={(event, appAttributeConfig, appAttributeModel, fieldKey, sectionKey) => {
             if (activeInput && activeInput.sectionKey === sectionKey && activeInput.fieldKey === fieldKey) {
               activateInput(null);
@@ -72,7 +74,8 @@ Body.propTypes = {
   highlightedRowAndColumnList: PropTypes.object,
   textHighlightedRowAndColumnList: PropTypes.object,
   activeInput: PropTypes.object,
-  extension: PropTypes.string
+  extension: PropTypes.string,
+  pendingCreateWell: PropTypes.bool
 };
 
 export default Body;

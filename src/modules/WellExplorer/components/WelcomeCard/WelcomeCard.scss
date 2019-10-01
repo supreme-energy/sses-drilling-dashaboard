@@ -54,8 +54,21 @@
     }
 }
 
+.diaglogContent {
+    .checkbox {
+        padding-top: 0px;
+        align-self: flex-start;
+    }
+}
+
 .newWellDialogActions {
     button { 
         outline: none;
     }
+
+    .importInputLabel {
+        margin-bottom: 0px;
+    }
 }
+
+

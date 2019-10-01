@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import cloneDeep from "lodash/cloneDeep";
 import intersection from "lodash/intersection";
 import get from "lodash/get";
+import pickBy from "lodash/pickBy";
 
 import {
   setActiveInput,
@@ -25,10 +26,18 @@ import { INPUT_TYPES } from "./constants";
 import css from "./styles.scss";
 import { useWellImporterContainer } from ".";
 import { useParsedFileSelector } from "./selectors";
+import useMemo from "react-powertools/hooks/useMemo";
 
 const WellImporter = ({ files, onClickCancel }) => {
   const [state, dispatch] = useWellImporterContainer();
-  const { activeInput, appAttributesModel, inputToCellIds, highlightedCellIdsMap, highlightedTextCellIdsMap } = state;
+  const {
+    activeInput,
+    appAttributesModel,
+    inputToCellIds,
+    highlightedCellIdsMap,
+    highlightedTextCellIdsMap,
+    pendingCreateWell
+  } = state;
 
   const { data, extension } = useParsedFileSelector();
 
@@ -262,20 +271,27 @@ const WellImporter = ({ files, onClickCancel }) => {
     dispatch(setActiveInput(newActiveInput));
   };
 
+  const filteredAppAttributesModel = useMemo(
+    () => pickBy(appAttributesModel, (_, key) => key !== "wellData" || (key === "wellData" && !pendingCreateWell)),
+    [pendingCreateWell, appAttributesModel]
+  );
+
   if (!files || !files.length || !data) {
     return null;
   }
+
   return (
     <div className={css.container}>
       <Header
         onClickCancel={onClickCancel}
         appAttributesFieldMapping={appAttributesFieldMapping}
-        appAttributesModel={appAttributesModel}
+        appAttributesModel={filteredAppAttributesModel}
         sectionMapping={sectionMapping}
         activateInput={activateInput}
       />
       <Body
         extension={extension}
+        pendingCreateWell={pendingCreateWell}
         onClickCell={onClickCell}
         onClickAsciiHeader={onClickAsciiHeader}
         appAttributesModel={appAttributesModel}

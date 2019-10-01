@@ -32,30 +32,23 @@ const transformLogs = memoizeOne(logs => {
 const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
   Promise.all(
     data.map(dataToSave => {
-      return fetch(
-        {
-          path: UPDATE_WELL_LOG,
-          method: "POST",
-          body: {
-            seldbname: wellId,
-            ...dataToSave,
-            id: String(dataToSave.id)
-          },
-          optimisticResult,
-          cache: "no-cache"
+      return fetch({
+        path: UPDATE_WELL_LOG,
+        method: "POST",
+        body: {
+          seldbname: wellId,
+          ...dataToSave,
+          id: String(dataToSave.id)
         },
-        (original, newResult) => {
-          return original.map(l => {
-            return String(l.id) === String(newResult.welllog.id) ? { ...mapLogList(newResult.welllog) } : l;
-          });
-        }
-      );
+        optimisticResult,
+        cache: "no-cache"
+      });
     })
   )
 );
 
 export function useWellLogList(wellId) {
-  const [list, , , , , { fetch }] = useFetch({
+  const [list, , , , , { fetch, replaceResult }] = useFetch({
     path: GET_WELL_LOG_LIST,
     query: { seldbname: wellId }
   });
@@ -77,7 +70,7 @@ export function useWellLogList(wellId) {
   const logs = logList || EMPTY_ARRAY;
 
   const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
-  return [logs, logsById, { updateWellLogs }];
+  return [logs, logsById, { updateWellLogs, replaceResult }];
 }
 
 const filterWellLogs = memoizeOne((wellLogs, interval) => {
