@@ -13,6 +13,8 @@ export const ADD_HIGHLIGHTED_TEXT_CELL_IDS = "ADD_HIGHLIGHTED_TEXT_CELL_IDS";
 
 export const SELECT_CSV_CELL = "SELECT_CSV_CELL";
 
+export const CREATE_NEW_WELL = "CREATE_NEW_WELL";
+
 export const setActiveInput = activeInput => ({ type: SET_ACTIVE_INPUT, activeInput });
 
 export const addInputToCellIds = (inputId, cellIds) => ({ type: ADD_INPUT_TO_CELL_IDS, inputId, cellIds });

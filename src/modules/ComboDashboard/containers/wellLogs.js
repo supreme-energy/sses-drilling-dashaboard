@@ -32,24 +32,17 @@ const transformLogs = memoizeOne(logs => {
 const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
   Promise.all(
     data.map(dataToSave => {
-      return fetch(
-        {
-          path: UPDATE_WELL_LOG,
-          method: "POST",
-          body: {
-            seldbname: wellId,
-            ...dataToSave,
-            id: String(dataToSave.id)
-          },
-          optimisticResult,
-          cache: "no-cache"
+      return fetch({
+        path: UPDATE_WELL_LOG,
+        method: "POST",
+        body: {
+          seldbname: wellId,
+          ...dataToSave,
+          id: String(dataToSave.id)
         },
-        (original, newResult) => {
-          return original.map(l => {
-            return String(l.id) === String(newResult.welllog.id) ? { ...mapLogList(newResult.welllog) } : l;
-          });
-        }
-      );
+        optimisticResult,
+        cache: "no-cache"
+      });
     })
   )
 );

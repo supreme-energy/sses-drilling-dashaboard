@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useReducer } from "react";
 import { Card, CardContent, Typography, ListItem, List, ListItemText, ListItemIcon, Button } from "@material-ui/core";
 import classes from "./WelcomeCard.scss";
 import Add from "@material-ui/icons/Add";
@@ -13,6 +13,8 @@ import ServerStatus from "../../../Kpi/ServerStatus";
 import WellPathStatus from "../../../Kpi/WellPathStatus";
 import classNames from "classnames";
 import ImportInput from "../ImportInput";
+import { useWellImporterSaveContainer } from "../../../../modals/WellImporterModal/WellImporterModal";
+import useRef from "react-powertools/hooks/useRef";
 
 const LastEditedWell = ({ lastEditedWell, openedWell }) => {
   const well = openedWell || lastEditedWell;
@@ -64,27 +66,41 @@ function WelcomeCard({
   const [, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
 
   const handleOpenCreateWellDialog = useCallback(() => setCreateWellDialog(true), []);
-  const handleCloseCreateWellDialog = useCallback(() => setCreateWellDialog(false), []);
+  const handleCloseCreateWellDialog = useCallback(() => {
+    setCreateWellDialog(false);
+    setWellName("");
+  }, []);
   const handleSetName = useCallback(e => setWellName(e.target.value), []);
+  const [{ isSaved }] = useWellImporterSaveContainer();
+  const internalState = useRef({ prevIsSaved: false });
+  const {
+    current: { prevIsSaved }
+  } = internalState;
+
+  if (prevIsSaved !== isSaved) {
+    internalState.current.prevIsSaved = isSaved;
+    if (isSaved && createWellDialogOpen) {
+      // close dialog after save
+      setCreateWellDialog(false);
+    }
+  }
+
   const handleCreateWell = useCallback(async () => {
     const res = await createWell(wellName);
     const wellId = res.jobname;
-
     // Refresh job list
     await refreshWellList();
     refreshFetchStore();
-
     // Update WellBoreName
     updateWell({ wellId, field: "wellborename", value: wellName });
     refreshFetchStore();
-
     // Close Dialog
     setCreateWellDialog(false);
-
     // Initialize view for new well
     changeSelectedWell(wellId);
     setInitialTab("info");
   }, [createWell, wellName, changeSelectedWell, refreshWellList, setInitialTab, updateWell, refreshFetchStore]);
+  const [isImport, toggleIsImport] = useReducer(value => !value, false);
 
   return (
     <Card className={classNames(classes.card, className)}>
@@ -106,14 +122,6 @@ function WelcomeCard({
                 </ListItemIcon>
                 <ListItemText>Create a new Well</ListItemText>
               </ListItem>
-              <ImportInput onChange={onFilesToImportChange}>
-                <ListItem color="primary">
-                  <ListItemIcon>
-                    <Import color="primary" />
-                  </ListItemIcon>
-                  <ListItemText>Import a new Well</ListItemText>
-                </ListItem>
-              </ImportInput>
             </List>
           </div>
           <span className={classes.hSpacer} />
@@ -125,9 +133,12 @@ function WelcomeCard({
       <NewWellDialog
         open={createWellDialogOpen}
         wellName={wellName}
+        onFilesToImportChange={onFilesToImportChange}
         handleChange={handleSetName}
         handleClose={handleCloseCreateWellDialog}
         handleSave={handleCreateWell}
+        isImport={isImport}
+        toggleIsImport={toggleIsImport}
       />
     </Card>
   );

@@ -4,6 +4,7 @@ import Modal from "@material-ui/core/Modal";
 import SnackbarContentWrapper from "../../components/SnackBarContentWrapper";
 import { Snackbar } from "@material-ui/core";
 import { createContainer } from "unstated-next";
+import { useWellImporterContainer } from "./WellImporter";
 
 const initialState = {
   isLoading: false,
@@ -50,10 +51,13 @@ export const { Provider: WellImporterSaveProvider, useContainer: useWellImporter
 );
 
 const WellImporterModal = ({ children, className, ...rest }) => {
+  const [{ isSaved, error }, dispatch] = useWellImporterSaveContainer();
+  const [{ pendingCreateWell }] = useWellImporterContainer();
+
   function onClose() {
     dispatch({ type: "RESET" });
   }
-  const [{ isSaved, error }, dispatch] = useWellImporterSaveContainer();
+
   return (
     <React.Fragment>
       <Modal {...rest} className={className} style={{ top: 56, backgroundColor: "white" }}>
@@ -71,7 +75,10 @@ const WellImporterModal = ({ children, className, ...rest }) => {
         {error ? (
           <SnackbarContentWrapper variant="error" message={error} />
         ) : (
-          <SnackbarContentWrapper variant="success" message="Well updated successfuly!" />
+          <SnackbarContentWrapper
+            variant="success"
+            message={`Well ${pendingCreateWell ? "created" : "updated"}  successfuly!`}
+          />
         )}
       </Snackbar>
     </React.Fragment>
@@ -83,10 +90,4 @@ WellImporterModal.propTypes = {
   className: PropTypes.string
 };
 
-export default props => {
-  return (
-    <WellImporterSaveProvider>
-      <WellImporterModal {...props} />
-    </WellImporterSaveProvider>
-  );
-};
+export default WellImporterModal;

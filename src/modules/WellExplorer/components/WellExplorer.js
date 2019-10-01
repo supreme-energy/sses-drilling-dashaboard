@@ -1,7 +1,10 @@
 import React, { lazy, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import WellImporterModal from "../../../modals/WellImporterModal";
-import WellImporter from "../../../modals/WellImporterModal/WellImporter";
+import WellImporter, {
+  useWellImporterContainer,
+  WellImporterProvider
+} from "../../../modals/WellImporterModal/WellImporter";
 import { addFile } from "../../../store/files";
 import classes from "./WellExplorer.scss";
 import SearchCard from "./SearchCard";
@@ -18,6 +21,8 @@ import classNames from "classnames";
 import { getWellsZoomBounds, getWellZoomBounds } from "../utils/getWellsZoomBounds";
 import Box from "@material-ui/core/Box";
 import { useWellIdContainer } from "../../App/Containers";
+import { CREATE_NEW_WELL } from "../../../modals/WellImporterModal/WellImporter/state/actions";
+import { WellImporterSaveProvider } from "../../../modals/WellImporterModal/WellImporterModal";
 
 const WellMap = lazy(() => import(/* webpackChunkName: 'WellMap' */ "./WellMap/index.js"));
 
@@ -48,6 +53,7 @@ export const WellExplorer = ({
 }) => {
   const { wellId: openedWellId } = useWellIdContainer();
   const [wells, wellsById, updateFavorite, refresh] = useWells();
+  const [, dispatch] = useWellImporterContainer();
 
   const [searchTerm, onSearchTermChanged] = useState("");
   const [initialTab, setInitialTab] = useState();
@@ -67,12 +73,13 @@ export const WellExplorer = ({
   const overviewMode = !!selectedWellId;
   const wellsBounds = useMemo(() => getWellsZoomBounds(wells), [wells]);
   const selectedWellMapBounds = useMemo(() => getWellZoomBounds(selectedWell), [selectedWell]);
-  const onFilesToImportChange = event => {
+  const onFilesToImportChange = (event, wellName) => {
     if (!event.target.files || !event.target.files.length) {
       return;
     }
 
     addFile(event.target.files[0]);
+    dispatch({ type: CREATE_NEW_WELL, wellName });
     toggleShowImportModal(true);
   };
 
@@ -136,7 +143,6 @@ export const WellExplorer = ({
             className={classes.wellOverview}
             well={selectedWell}
             updateFavorite={updateFavorite}
-            onFilesToImportChange={onFilesToImportChange}
             initialTab={initialTab}
             setInitialTab={setInitialTab}
           />
@@ -192,4 +198,10 @@ const bindData = flowRight([
   )
 ]);
 
-export default bindData(WellExplorer);
+export default bindData(props => (
+  <WellImporterSaveProvider>
+    <WellImporterProvider>
+      <WellExplorer {...props} />
+    </WellImporterProvider>
+  </WellImporterSaveProvider>
+));

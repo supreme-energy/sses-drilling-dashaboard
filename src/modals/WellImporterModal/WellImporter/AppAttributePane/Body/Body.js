@@ -4,7 +4,7 @@ import AttributePaneSection from "./AttributePaneSection";
 import { useSelector } from "react-redux";
 import { useWellInfo } from "../../../../../api";
 
-const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeInput }) => {
+const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeInput, pendingCreateWell }) => {
   const { wellInfo, wellParameters, wellData } = appAttributesModel;
 
   const {
@@ -21,6 +21,7 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
       if (!data.wellInfo || !data.wellSurfaceLocation) {
         return null;
       }
+
       return {
         ...data.wellInfo,
         transform: data.transform,
@@ -52,16 +53,18 @@ const Body = ({ appAttributesModel, appAttributesFieldMapping, onFocus, activeIn
         activeInput={activeInput}
         sectionKey="wellParameters"
       />
-      <AttributePaneSection
-        currentData={currentData}
-        sectionTitle="Well Data"
-        wellData={wellData}
-        onFocus={onFocus}
-        mapping={wellDataFieldMapping}
-        model={wellData}
-        activeInput={activeInput}
-        sectionKey="wellData"
-      />
+      {!pendingCreateWell && (
+        <AttributePaneSection
+          currentData={currentData}
+          sectionTitle="Well Data"
+          wellData={wellData}
+          onFocus={onFocus}
+          mapping={wellDataFieldMapping}
+          model={wellData}
+          activeInput={activeInput}
+          sectionKey="wellData"
+        />
+      )}
     </React.Fragment>
   );
 };
@@ -70,7 +73,8 @@ Body.propTypes = {
   appAttributesModel: PropTypes.object.isRequired,
   appAttributesFieldMapping: PropTypes.object.isRequired,
   onFocus: PropTypes.func.isRequired,
-  activeInput: PropTypes.object
+  activeInput: PropTypes.object,
+  pendingCreateWell: PropTypes.bool
 };
 
 export default Body;

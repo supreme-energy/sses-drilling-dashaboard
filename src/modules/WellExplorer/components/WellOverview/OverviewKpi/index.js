@@ -12,13 +12,12 @@ import WellStatus from "../../../../Kpi/WellStatus";
 import WellPathStatus from "../../../../Kpi/WellPathStatus";
 import { Rop, BitDepth } from "../../../../Kpi/KpiItem";
 import ServerStatus from "../../../../Kpi/ServerStatus";
-import ImportInput from "../../ImportInput";
-import Import from "@material-ui/icons/Input";
+
 import { withRouter } from "react-router";
 import flowRight from "lodash/flowRight";
 import { useWellIdContainer } from "../../../../App/Containers";
 
-function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImportChange }) {
+function OverviewKpi({ well, changeSelectedWell, updateFavorite }) {
   const { wellId } = useWellIdContainer();
   const FavIcon = well.fav ? Favorite : FavoriteBorder;
   const opened = wellId && wellId === well.id;
@@ -30,13 +29,6 @@ function OverviewKpi({ well, changeSelectedWell, updateFavorite, onFilesToImport
         </Typography>
         <span className={classes.hSpacer} />
         <div className={classes.row}>
-          <ImportInput onChange={onFilesToImportChange}>
-            <Button variant="raised" color="primary" component="span">
-              <Import color="primary" />
-              Upload Well Data
-            </Button>
-          </ImportInput>
-
           <IconButton className={classes.favoriteButton} onClick={() => updateFavorite(well.id, !well.fav)}>
             <FavIcon color="primary" className={classes.favorite} />
           </IconButton>

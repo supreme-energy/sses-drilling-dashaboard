@@ -1,5 +1,5 @@
 import upperFirst from "lodash/upperFirst";
-import React from "react";
+import React, { useRef } from "react";
 import { Button, Typography, Box } from "@material-ui/core";
 import CSVHeader from "../../CSVAttributePane/Header";
 import classNames from "classnames";
@@ -10,7 +10,7 @@ import { useWellImporterContainer } from "../../";
 import values from "lodash/values";
 import mapValues from "lodash/mapValues";
 import pickBy from "lodash/pickBy";
-import { useWellInfo } from "../../../../../api";
+import { useWellInfo, useCreateWell } from "../../../../../api";
 import { apiFieldMapping } from "../../models/mappings";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useWellImporterSaveContainer } from "../../../WellImporterModal";
@@ -19,9 +19,10 @@ const Header = ({ className, onClickCancel }) => {
   const { data, extension } = useParsedFileSelector();
   const selectedWellId = useSelector(state => state.wellExplorer.selectedWellId);
   const [state] = useWellImporterContainer();
-  const { appAttributesModel } = state;
+  const { appAttributesModel, pendingCreateWell, pendingCreateWellName } = state;
   const [, , updateWell, refreshFetchStore] = useWellInfo(selectedWellId);
   const [{ isLoading }, dispatch] = useWellImporterSaveContainer();
+
   const dataToSave = pickBy(
     mapValues(values(appAttributesModel).reduce((acc, next) => ({ ...acc, ...next }), {}), (value, key) => {
       const actualValue = extension === "csv" ? getFieldValue(state.csvSelection, key, data) : value.value;
@@ -34,15 +35,23 @@ const Header = ({ className, onClickCancel }) => {
     d => d !== null
   );
 
-  const importEnabled = selectedWellId && !!values(dataToSave).length;
+  const importEnabled = (selectedWellId || pendingCreateWell) && !!values(dataToSave).length;
+  const { createWell } = useCreateWell();
 
   const importClickHandler = async () => {
+    let createdWellId;
+    if (pendingCreateWell) {
+      dataToSave.well = pendingCreateWellName;
+      const res = await createWell(pendingCreateWellName);
+      createdWellId = res.jobname;
+    }
     const data = Object.keys(dataToSave).reduce((acc, next) => {
       return { ...acc, [apiFieldMapping[next]]: dataToSave[next] };
     }, {});
+
     dispatch({ type: "LOADING_START" });
     try {
-      await updateWell({ wellId: selectedWellId, data });
+      await updateWell({ wellId: createdWellId || selectedWellId, data });
       dispatch({ type: "SAVE_SUCCESS" });
       onClickCancel();
     } catch (e) {

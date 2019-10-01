@@ -10,12 +10,15 @@ import { useParsedFileSelector, getFieldValue, isValueDefined } from "../../../s
 import { apiFieldMapping } from "../../../models/mappings";
 
 const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, model, activeInput, currentData }) => {
-  const [state] = useWellImporterContainer();
+  const [{ csvSelection, pendingCreateWell, pendingCreateWellName }] = useWellImporterContainer();
   const { data, extension } = useParsedFileSelector();
 
   const attributePaneTextFields = useMemo(() => {
     function getModel(model, key) {
-      let value = extension === "csv" ? getFieldValue(state.csvSelection, key, data) : model[key].value;
+      if (key === "well" && pendingCreateWell) {
+        return { value: pendingCreateWellName };
+      }
+      let value = extension === "csv" ? getFieldValue(csvSelection, key, data) : model[key].value;
       const notSelected = !isValueDefined(value);
 
       if (currentData && notSelected) {
@@ -40,7 +43,19 @@ const AttributePaneSection = ({ sectionTitle, sectionKey, onFocus, mapping, mode
         />
       );
     });
-  }, [sectionKey, activeInput, onFocus, mapping, model, state.csvSelection, extension, currentData, data]);
+  }, [
+    sectionKey,
+    activeInput,
+    onFocus,
+    mapping,
+    model,
+    csvSelection,
+    extension,
+    currentData,
+    data,
+    pendingCreateWell,
+    pendingCreateWellName
+  ]);
 
   return (
     <div>
