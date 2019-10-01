@@ -13,7 +13,7 @@ import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
 import { useSurveysDataContainer } from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
-import { REVIEW_MANUAL_IMPORT, SETTINGS, REVIEW_CLEAN_DATA } from "../../../../constants/interpretation";
+import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
@@ -36,7 +36,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
       handleClose();
     } else {
       setErrors(json);
-      setView(REVIEW_MANUAL_IMPORT);
+      setView({ type: REVIEW, payload: MANUAL });
     }
   };
 
@@ -76,22 +76,21 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
 });
 
 export const AutoImportModal = React.memo(
-  ({ wellId, hasConflict, newSurvey, handleClose, setView, refresh, md, inc, azm }) => {
+  ({ wellId, hasConflict, newSurvey, handleClose, setView, refreshCloudServer, md, inc, azm }) => {
     const { importNewSurvey, deleteSurveys } = useCloudImportSurveys();
     const { refreshSurveys } = useSurveysDataContainer();
 
-    const openSettings = () => setView(SETTINGS);
     const handleCleanData = async () => {
       await deleteSurveys(wellId);
-      await refresh();
-      setView(REVIEW_CLEAN_DATA);
+      await refreshCloudServer();
+      setView({ type: REVIEW, payload: AUTO });
     };
-    const handleCleanHistory = () => setView(REVIEW_CLEAN_DATA);
+
     const handleImport = async () => {
       await importNewSurvey(wellId);
-      const res = await refresh();
+      const res = await refreshCloudServer();
+      await refreshSurveys();
       if (!res.next_survey) {
-        await refreshSurveys();
         handleClose();
       }
     };
@@ -146,7 +145,11 @@ export const AutoImportModal = React.memo(
                   >
                     Clean Up Modeled Data
                   </Button>
-                  <Button className={classes.notificationButton} color="primary" onClick={handleCleanHistory}>
+                  <Button
+                    className={classes.notificationButton}
+                    color="primary"
+                    onClick={() => setView({ type: REVIEW, payload: AUTO })}
+                  >
                     Clean Up History
                   </Button>
                 </Box>
@@ -155,7 +158,11 @@ export const AutoImportModal = React.memo(
           </Box>
         </DialogContent>
         <Box display="flex" justifyContent="space-between">
-          <Button className={classes.notificationButton} color="primary" onClick={openSettings}>
+          <Button
+            className={classes.notificationButton}
+            color="primary"
+            onClick={() => setView({ type: SETTINGS, payload: AUTO })}
+          >
             Pull/Notification Settings
           </Button>
           <DialogActions className={classes.importDialogActions}>

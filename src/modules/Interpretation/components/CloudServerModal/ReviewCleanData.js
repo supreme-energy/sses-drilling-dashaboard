@@ -19,7 +19,7 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import _ from "lodash";
-import { IMPORT, SETTINGS } from "../../../../constants/interpretation";
+import { AUTO, IMPORT, SETTINGS, INITIALIZE } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 import { useCloudImportSurveys } from "../../../../api";
 
@@ -32,11 +32,11 @@ const ReviewCleanData = React.memo(({ wellId, setView, newSurvey }) => {
 
   const handleImportWithDip = () => {
     reimportSurveys(wellId, sDepth, eDepth, id);
-    setView(IMPORT);
+    setView({ type: IMPORT, payload: AUTO });
   };
   const handleImportWithoutDip = () => {
     reimportSurveys(wellId, sDepth, eDepth);
-    setView(IMPORT);
+    setView({ type: IMPORT, payload: AUTO });
   };
   const handleSelectDataSet = event => {
     setDeletedStats(deletedStats => {
@@ -45,7 +45,7 @@ const ReviewCleanData = React.memo(({ wellId, setView, newSurvey }) => {
   };
   const handleClose = () => {
     if (newSurvey) {
-      setView(IMPORT);
+      setView({ type: INITIALIZE, payload: { type: AUTO, newSurvey } });
     } else {
       setView(SETTINGS);
     }

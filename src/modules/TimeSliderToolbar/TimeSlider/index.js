@@ -200,6 +200,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
         getTimeSliderData(wellId, index, index + 100).then(() => {
           if (i + 100 >= maxDepth - 1) hasFetchedTimeSliderData.current = true;
         });
+        break;
       }
     }
 

@@ -81,23 +81,22 @@ export default function ModelSurveySettings(props) {
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
 
   const updateSegmentsHandler = props => {
-    if (draftMode) {
-      const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
-      const segmentsProps = mds.reduce((acc, md) => {
-        return { ...acc, [md]: props };
-      }, {});
+    const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
+    const segmentsProps = mds.reduce((acc, md) => {
+      return { ...acc, [md]: props };
+    }, {});
 
-      updateSegments(segmentsProps);
-    } else {
+    updateSegments(segmentsProps);
+    if (!draftMode) {
       return internalState.current.saveWellLogs([selectedSegment], { [selectedSegment.endmd]: props });
     }
   };
 
   function updateFirstSegment(props) {
-    if (draftMode) {
-      const firstSegmentMd = firstSegment.endmd;
-      updateSegments({ [firstSegmentMd]: props });
-    } else {
+    const firstSegmentMd = firstSegment.endmd;
+    updateSegments({ [firstSegmentMd]: props });
+
+    if (!draftMode) {
       return internalState.current.saveWellLogs([firstSegment], { [firstSegment.endmd]: props });
     }
   }
