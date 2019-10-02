@@ -64,7 +64,7 @@ function ServerInfo({ wellId }) {
           <FormControl className={classes.textField}>
             <InputLabel htmlFor="server-type">Server Type</InputLabel>
             <Select
-              value={values[serverFields.TYPE]}
+              value={values[serverFields.TYPE] || connectionTypes.POLARIS}
               onChange={handleInputChange(serverFields.TYPE)}
               onBlur={onBlur}
               inputProps={{

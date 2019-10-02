@@ -35,7 +35,7 @@ export const initialServerState = {
   [serverFields.USERNAME]: "",
   [serverFields.PASSWORD]: "",
   [serverFields.ENDPOINT]: "",
-  [serverFields.TYPE]: ""
+  [serverFields.TYPE]: connectionTypes.POLARIS
 };
 export const initialWellState = {
   [wellFields.START_DEPTH]: "",

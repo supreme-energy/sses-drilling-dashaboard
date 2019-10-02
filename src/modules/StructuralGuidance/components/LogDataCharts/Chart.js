@@ -182,14 +182,14 @@ function Chart({
       {!_.isEmpty(selectedLogs) &&
         Labels.map((log, index) => {
           const currLog = selectedLogs[log];
-          const scalelo = currLog.currScale.scalelo;
-          const scalehi = currLog.currScale.scalehi;
+          const scale = currLog.currScale.scale;
+          const bias = currLog.currScale.bias;
           const color = currLog.color;
           return (
             <PixiLabel
               key={log}
               container={stage}
-              text={`${scalelo} ${log} ${scalehi}`}
+              text={`${bias} ${log} ${scale}`}
               x={index * 30}
               y={0}
               height={height}

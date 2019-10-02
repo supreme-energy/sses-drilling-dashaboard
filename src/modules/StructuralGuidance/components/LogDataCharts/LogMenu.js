@@ -13,7 +13,7 @@ const LogMenu = React.memo(
     const handleCheckbox = name => event => {
       // Limit to 4 checks (i.e. logs)
       const count = _.reduce(selectedLogs[logId], (result, value) => (value.checked ? (result += 1) : result), 0);
-      const { color, scale, bias, scalelo, scalehi } = availableLogs.filter(({ label }) => label === name)[0];
+      const { color, scale, bias } = availableLogs.filter(({ label }) => label === name)[0];
 
       if (count >= 4) {
         setSelectedLog({
@@ -22,8 +22,8 @@ const LogMenu = React.memo(
             logId,
             name,
             [name]: {
-              prevScale: { scale, bias, scalelo, scalehi },
-              currScale: { scale, bias, scalelo, scalehi },
+              prevScale: { scale, bias },
+              currScale: { scale, bias },
               color,
               checked: false
             }
@@ -37,8 +37,8 @@ const LogMenu = React.memo(
             name,
             [name]: {
               color,
-              prevScale: { scale, bias, scalelo, scalehi },
-              currScale: { scale, bias, scalelo, scalehi },
+              prevScale: { scale, bias },
+              currScale: { scale, bias },
               checked: event.target.checked
             }
           }

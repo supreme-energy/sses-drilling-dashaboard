@@ -32,7 +32,7 @@ const LastEditedWell = ({ lastEditedWell, openedWell }) => {
         <span className={classes.hBigSpacer} />
         <WellPathStatus wellId={well.id} />
         <Link to={`/${well.id}/combo`}>
-          <Button variant="contained" color="primary">
+          <Button className={classes.openWellButton} variant="contained" color="primary">
             {openedWell ? "Continue" : "Reopen"}
           </Button>
         </Link>

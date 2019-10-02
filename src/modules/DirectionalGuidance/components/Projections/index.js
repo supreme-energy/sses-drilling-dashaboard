@@ -18,7 +18,7 @@ export function Projections({ wellId }) {
         <Tab className={classes.tab} label="PROJECTION TO PLAN" />
       </Tabs>
       {tab === 0 && <Bit wellId={wellId} />}
-      {tab === 1 && <ProjectionToPlan />}
+      {tab === 1 && <ProjectionToPlan wellId={wellId} />}
     </WidgetCard>
   );
 }
