@@ -48,7 +48,7 @@ const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
 );
 
 export function useWellLogList(wellId) {
-  const [list, , , , , { fetch, replaceResult }] = useFetch({
+  const [list, , , , , { fetch, replaceResult, refresh }] = useFetch({
     path: GET_WELL_LOG_LIST,
     query: { seldbname: wellId }
   });
@@ -70,7 +70,7 @@ export function useWellLogList(wellId) {
   const logs = logList || EMPTY_ARRAY;
 
   const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
-  return [logs, logsById, { updateWellLogs, replaceResult }];
+  return [logs, logsById, { updateWellLogs, replaceResult, refresh }];
 }
 
 const filterWellLogs = memoizeOne((wellLogs, interval) => {

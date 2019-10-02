@@ -11,14 +11,17 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
-import { useSurveysDataContainer } from "../../../App/Containers";
+import { useSurveysDataContainer, useFormationsDataContainer } from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
 import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
+import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
   const { refreshSurveys } = useSurveysDataContainer();
+  const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+  const { refreshFormations } = useFormationsDataContainer();
 
   const handleImport = async () => {
     const data = new FormData();
@@ -33,6 +36,8 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
     if (success) {
       await uploadFile(wellId, fileName);
       refreshSurveys();
+      refreshWellLogs();
+      refreshFormations();
       handleClose();
     } else {
       setErrors(json);
