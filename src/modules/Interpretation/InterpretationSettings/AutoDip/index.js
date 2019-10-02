@@ -569,7 +569,7 @@ export default function AutoDipContainer() {
   }, [configString]);
 
   const rows = useMemo(() => Object.values(rowsById), [rowsById]);
-  const newConfigSTring = stringifyRows(rows);
+  const newConfigString = stringifyRows(rows);
   const getOptionsByMethodType = useOptionsByMethodType();
   const finalValue = computeFinalDip(rows, getOptionsByMethodType);
 
@@ -578,16 +578,16 @@ export default function AutoDipContainer() {
 
   useEffect(
     function saveChanged() {
-      if (newConfigSTring !== configString) {
+      if (newConfigString !== configString) {
         updateDebounced({
           wellId,
           data: {
-            autodipconfig: newConfigSTring
+            autodipconfig: newConfigString
           }
         });
       }
     },
-    [newConfigSTring, updateDebounced, wellId, configString]
+    [newConfigString, updateDebounced, wellId, configString]
   );
 
   const props = {
