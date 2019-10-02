@@ -68,7 +68,7 @@ const reducer = (state, action) => {
 
     case CREATE_NEW_WELL:
       return {
-        ...state,
+        ...initialState,
         pendingCreateWellName: action.wellName,
         pendingCreateWell: true
       };

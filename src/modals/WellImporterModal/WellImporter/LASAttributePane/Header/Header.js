@@ -54,7 +54,7 @@ const Header = ({ className, onClickCancel }) => {
     }, {});
 
     if (data.latitude || data.longitude) {
-      const [easting, northing] = defaultTransform(null).inverse([Number(data.latitude), Number(data.longitude)]);
+      const [easting, northing] = defaultTransform(null).inverse([Number(data.longitude), Number(data.latitude)]);
 
       data.survey_easting = easting;
       data.survey_northing = northing;
