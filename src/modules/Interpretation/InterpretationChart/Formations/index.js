@@ -123,6 +123,11 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
   const items = rawFormationsData.reduce((acc, item, index) => {
     if (item.data && item.data.length) {
       const formationData = item.data[selectedSurveyIndex];
+
+      if (!formationData) {
+        return acc;
+      }
+
       const nextFormation = rawFormationsData[index + 1];
       const nextFormationData = nextFormation && nextFormation.data[selectedSurveyIndex];
 
