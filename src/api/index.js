@@ -62,6 +62,7 @@ export const DELETE_DIRTY_SURVEYS = "/survey/cloud/delete_dirty.php";
 export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
+export const GET_PROJECT_TO_PLAN = "/projection/to_line.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -1117,6 +1118,7 @@ export function useManualImport() {
     (wellId, filename) => {
       return fetch({
         path: UPLOAD_LAS_FILE,
+        cache: "no-cache",
         query: {
           seldbname: wellId,
           filename
@@ -1351,6 +1353,36 @@ export function useBitProjection(wellId) {
   );
 
   return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
+}
+
+export function useProjectionToPlan(wellId) {
+  const [data, , , , , { fetch, refresh }] = useFetch(
+    {
+      path: GET_PROJECT_TO_PLAN,
+      query: {
+        seldbname: wellId
+      }
+    },
+    {
+      transform: data => transform(data)
+    }
+  );
+
+  const updateProjectionToPlan = useCallback(
+    (wellId, body) => {
+      return fetch({
+        path: GET_PROJECT_TO_PLAN,
+        method: "POST",
+        query: {
+          seldbname: wellId
+        },
+        body
+      });
+    },
+    [fetch]
+  );
+
+  return { data: data || EMPTY_ARRAY, updateProjectionToPlan, refresh };
 }
 
 export function useWellBoreData() {

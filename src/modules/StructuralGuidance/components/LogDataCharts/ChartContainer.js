@@ -14,7 +14,7 @@ import classes from "./styles.scss";
 
 const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBySection, handleRemoveChart, view }) => {
   const {
-    data: { color, data = [], label: initialLogName, scalelo, scalehi }
+    data: { color, data = [], label: initialLogName }
   } = useAdditionalDataLog(wellId, logId);
   const { selectedLogs, setSelectedLog } = useSelectedLogDataScaleContainer();
   const [isEditingScale, setEditingScale] = useState(false);
@@ -55,8 +55,8 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
   }, [settingsView, setSelectedLog, logId]);
 
   const handleUpdateScale = useCallback(
-    (scale, bias, scaleLow, scaleHigh) => {
-      setSelectedLog({ type: "UPDATE_SCALE", payload: { logId, settingsView, scale, bias, scaleLow, scaleHigh } });
+    (scale, bias) => {
+      setSelectedLog({ type: "UPDATE_SCALE", payload: { logId, settingsView, scale, bias } });
     },
     [settingsView, setSelectedLog, logId]
   );
@@ -103,15 +103,13 @@ const ChartContainer = React.memo(({ wellId, logId, xAxis, availableLogs, dataBy
           [initialLogName]: {
             color,
             checked: true,
-            scalelo,
-            scalehi,
-            currScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi },
-            prevScale: { ...INITIAL_SCALE_BIAS, scalelo, scalehi }
+            currScale: { ...INITIAL_SCALE_BIAS },
+            prevScale: { ...INITIAL_SCALE_BIAS }
           }
         }
       });
     }
-  }, [color, initialLogName, scalelo, scalehi, setSelectedLog, logId]);
+  }, [color, initialLogName, setSelectedLog, logId]);
 
   useEffect(() => {
     if (!currentLogs.includes(settingsView)) {

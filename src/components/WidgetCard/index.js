@@ -16,9 +16,13 @@ function WidgetCard({
   setSelectedMenuItem,
   menuItemEnum = [],
   hideMenu,
+  hideCard,
   renderHeader,
   ...props
 }) {
+  if (hideCard) {
+    return <div className={classNames(className, classes.widgetCardContainer)}>{children}</div>;
+  }
   return (
     <Card className={classNames(className, classes.widgetCardContainer)}>
       {renderHeader ? renderHeader() : title ? <WidgetTitle>{title}</WidgetTitle> : null}
@@ -42,6 +46,7 @@ WidgetCard.propTypes = {
   className: PropTypes.string,
   title: PropTypes.string,
   hideMenu: PropTypes.bool,
+  hideCard: PropTypes.bool,
   setSelectedMenuItem: PropTypes.func,
   selectedMenuItems: PropTypes.arrayOf(PropTypes.string),
   menuItemEnum: PropTypes.arrayOf(PropTypes.string),

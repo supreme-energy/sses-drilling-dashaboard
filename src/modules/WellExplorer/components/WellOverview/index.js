@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@material-ui/core";
-import OverivewKpi from "./OverviewKpi";
+import OverviewKpi from "./OverviewKpi";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
 import Overview from "./Overview";
@@ -23,7 +23,7 @@ function WellOverivew({ className, well, updateFavorite, initialTab, setInitialT
 
   return (
     <Card className={classNames(className, "layout vertical")}>
-      {well && <OverivewKpi well={well} updateFavorite={updateFavorite} />}
+      {well && <OverviewKpi well={well} updateFavorite={updateFavorite} />}
       <Tabs value={currentTab} indicatorColor="primary" onChange={onTabChange}>
         <Tab value="overview" label="Well Overview" />
         <Tab value="info" label="Well Info" />

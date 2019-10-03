@@ -25,7 +25,7 @@ import WellInfoField from "./WellInfoField";
 import { limitAzm } from "../CrossSection/formulas";
 import { useSurveysDataContainer, useWellPlanDataContainer } from "../../../App/Containers";
 import classNames from "classnames";
-import { twoDecimals } from "../../../../constants/format";
+import { twoDecimalsNoComma } from "../../../../constants/format";
 import Import from "@material-ui/icons/OpenInBrowser";
 import WellPlanImporterModal from "../../../../modals/WellPlanImporterModal";
 import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
@@ -45,11 +45,12 @@ function WellPlanTable() {
     return (
       <TableRow key={key} style={style}>
         <TableCell className={css.cell}>{index === 0 ? "Tie-in" : d.num}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.md)}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.inc)}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.azm)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.md)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.inc)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.azm)}</TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
+            type="text"
             debounceInterval={500}
             value={d.tvd}
             error={index === 0 && d.tvd === 0}
@@ -58,6 +59,7 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
+            type="text"
             debounceInterval={500}
             error={index === 0 && d.vs === 0}
             value={d.vs}
@@ -66,6 +68,7 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
+            type="text"
             debounceInterval={500}
             error={index === 0 && d.ns === 0}
             value={d.ns}
@@ -74,16 +77,17 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
+            type="text"
             debounceInterval={500}
             error={index === 0 && d.ew === 0}
             value={d.ew}
             onChange={update("ew")}
           />
         </TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.cd)}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.ca)}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d.dl)}</TableCell>
-        <TableCell className={css.cell}>{twoDecimals(d["dip-c"])}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.cd)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.ca)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d.dl)}</TableCell>
+        <TableCell className={css.cell}>{twoDecimalsNoComma(d["dip-c"])}</TableCell>
       </TableRow>
     );
   };

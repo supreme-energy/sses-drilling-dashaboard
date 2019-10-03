@@ -12,7 +12,7 @@ import { useSaveSurveysAndProjections } from "../../../App/actions";
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = props => {
-  const { width, height, viewDirection, view, updateView } = props;
+  const { width, height, viewDirection, view, updateView, isReadOnly } = props;
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
   const dataObj = useCrossSectionContainer();
@@ -84,7 +84,8 @@ const CrossSection = props => {
         yField,
         yAxisDirection,
         updateSegments,
-        debouncedSave
+        debouncedSave,
+        isReadOnly
       },
       view,
       updateView
@@ -125,7 +126,8 @@ const CrossSection = props => {
       addProjection,
       deleteProjection,
       updateSegments,
-      debouncedSave
+      debouncedSave,
+      isReadOnly
     });
   }, [
     view.x,
@@ -154,7 +156,8 @@ const CrossSection = props => {
     updateView,
     deleteProjection,
     updateSegments,
-    debouncedSave
+    debouncedSave,
+    isReadOnly
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
@@ -164,6 +167,7 @@ CrossSection.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   viewDirection: PropTypes.number,
+  isReadOnly: PropTypes.bool,
   view: PropTypes.shape({
     x: PropTypes.number,
     y: PropTypes.number,

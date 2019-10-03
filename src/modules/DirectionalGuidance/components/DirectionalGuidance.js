@@ -20,7 +20,7 @@ export function DirectionalGuidance() {
           <MotorYield />
         </div>
         <div className={classes.graphRow}>
-          <WellBottomHoleInfo />
+          <WellBottomHoleInfo wellId={wellId} />
         </div>
       </div>
       <div className={classes.toolFaceColumn}>

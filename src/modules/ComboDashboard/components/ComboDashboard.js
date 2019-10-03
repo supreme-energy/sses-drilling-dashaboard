@@ -50,7 +50,7 @@ function ComboDashboard() {
           <div className={classNames(classes.row, classes.graphRow)}>
             <Interpretation className={"flex"} />
 
-            <CrossSectionDashboard wellId={wellId} className={"flex-3"} view={view} updateView={updateView} />
+            <CrossSectionDashboard className={"flex-3"} view={view} updateView={updateView} />
           </div>
         </div>
         <div className={classes.kpiColumn}>

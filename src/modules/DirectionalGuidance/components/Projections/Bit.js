@@ -53,6 +53,8 @@ function Bit({ wellId }) {
       const value = Number(e.target.value);
       if (field === "cl" && lastSurvey) {
         setFieldValue(v => ({ ...v, [field]: value, md: value + lastSurvey.md }));
+      } else if (field === "md" && lastSurvey) {
+        setFieldValue(v => ({ ...v, [field]: value, cl: value - v.pmd }));
       } else {
         setFieldValue(v => ({ ...v, [field]: value }));
       }
@@ -64,14 +66,21 @@ function Bit({ wellId }) {
     const index = (bitProjIndex || 0) + 2;
     const results = calculateProjection(fieldValues, data, index, propazm);
     if (results && typeof results !== "string") {
-      results.meth = method;
-      delete results.method;
-      delete results.cl;
-      delete results.ns;
-      delete results.ew;
-      delete results.dl;
+      const payload = {
+        ...results,
+        svycnt: data.length,
+        svysel: bitProjIndex !== undefined || "",
+        currid: _.get(data, `[${bitProjIndex}].id`, "")
+      };
 
-      await updateBitProjection(wellId, results);
+      payload.meth = method;
+      delete payload.method;
+      delete payload.cl;
+      delete payload.ns;
+      delete payload.ew;
+      delete payload.dl;
+
+      await updateBitProjection(wellId, payload);
       refresh();
     } else if (results) {
       setError(results);
@@ -95,12 +104,12 @@ function Bit({ wellId }) {
           "cd",
           "ns",
           "ew",
-          "tpos",
           "tot",
           "bot",
           "dip",
           "fault"
         ]),
+        tpos: bitProjection.tot - bitProjection.tvd,
         pmd: lastSurvey.md,
         pinc: lastSurvey.inc,
         pazm: lastSurvey.azm,
@@ -112,34 +121,20 @@ function Bit({ wellId }) {
   }, [bitProjection, lastSurvey]);
 
   useEffect(() => {
-    if (data && data.length) {
-      setFieldValue(v => ({
-        ...v,
-        svycnt: data.length,
-        svysel: bitProjIndex || "",
-        currid: bitProjIndex ? data[bitProjIndex].id : "",
-        newid: "",
-        project: "bit",
-        method,
-        data: "0,0,0"
-      }));
-    }
-  }, [method, data, bitProjIndex]);
-
-  useEffect(() => {
     if (wellInfo) {
       setFieldValue(v => ({
         ...v,
         autoposdec: wellInfo.autoposdec,
         bitoffset: wellInfo.bitoffset,
-        propazm
+        propazm,
+        method
       }));
     }
-  }, [wellInfo, propazm]);
+  }, [wellInfo, propazm, method]);
 
   return (
     <div className={classes.bitContainer}>
-      <div className={classes.bitContainerCarousel}>
+      <div className={classes.carousel}>
         {pageSelected > 0 && (
           <IconButton color="primary" onClick={() => handlePageSelect("DECREMENT")}>
             <ChevronLeft />
@@ -171,19 +166,17 @@ function Bit({ wellId }) {
         )}
       </div>
       <div className={classes.bitControls}>
-        <React.Fragment>
-          <Select
-            value={calculationMethod}
-            onChange={handleSelectMethod}
-            inputProps={{
-              name: "method",
-              id: "calc-method"
-            }}
-          >
-            <MenuItem value={MD}>MD, INC, AZM</MenuItem>
-            <MenuItem value={DL}>Dogleg</MenuItem>
-          </Select>
-        </React.Fragment>
+        <Select
+          value={calculationMethod}
+          onChange={handleSelectMethod}
+          inputProps={{
+            name: "method",
+            id: "calc-method"
+          }}
+        >
+          <MenuItem value={MD}>MD, INC, AZM</MenuItem>
+          <MenuItem value={DL}>Dogleg</MenuItem>
+        </Select>
         <Button variant="contained" color="primary" onClick={handleCalculate}>
           Calculate
         </Button>

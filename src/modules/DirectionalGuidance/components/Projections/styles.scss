@@ -69,3 +69,24 @@
         align-items: center;
     }
 }
+
+.carousel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+
+    .kpiColumn {
+        display: flex;
+        flex-direction: column;
+        div {
+            margin-bottom: 15px;
+        }
+    }
+
+    .textField {
+        div:before {
+            border-bottom: 1px solid #EDEDED;
+        }
+    }
+}

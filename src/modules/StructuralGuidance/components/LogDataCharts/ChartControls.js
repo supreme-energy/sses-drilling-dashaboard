@@ -58,30 +58,20 @@ export const BiasControls = React.memo(
     const currScale = logInfo && logInfo.currScale;
     const hasScaleChanged = JSON.stringify(prevScale) !== JSON.stringify(currScale);
 
-    const handleSetScaleLow = useCallback(
+    const handleSetBias = useCallback(
       e => {
-        const value = e.target.value;
-        setScale(
-          (currScale.scalehi - value) / (prevScale.scalehi - prevScale.scalelo),
-          currScale.bias,
-          value,
-          currScale.scalehi
-        );
+        const value = Number(e.target.value);
+        setScale(currScale.scale, value);
       },
-      [currScale, prevScale, setScale]
+      [currScale, setScale]
     );
 
-    const handleSetScaleHigh = useCallback(
+    const handleSetScale = useCallback(
       e => {
-        const value = e.target.value;
-        setScale(
-          (value - currScale.scalelo) / (prevScale.scalehi - prevScale.scalelo),
-          currScale.bias,
-          currScale.scalelo,
-          value
-        );
+        const value = Number(e.target.value);
+        setScale(value, currScale.bias);
       },
-      [currScale, prevScale, setScale]
+      [currScale, setScale]
     );
 
     return (
@@ -92,10 +82,10 @@ export const BiasControls = React.memo(
               <Box display="flex" flexDirection="row">
                 <TextField
                   className={classes.textField}
-                  value={currScale.scalelo}
-                  onChange={handleSetScaleLow}
+                  value={currScale.bias}
+                  onChange={handleSetBias}
                   type="number"
-                  label="Min"
+                  label="Bias"
                   margin="dense"
                   InputLabelProps={{
                     shrink: true
@@ -103,10 +93,10 @@ export const BiasControls = React.memo(
                 />
                 <TextField
                   className={classes.textField}
-                  value={currScale.scalehi}
-                  onChange={handleSetScaleHigh}
+                  value={currScale.scale}
+                  onChange={handleSetScale}
                   type="number"
-                  label="Max"
+                  label="Scale"
                   margin="dense"
                   InputLabelProps={{
                     shrink: true

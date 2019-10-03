@@ -62,7 +62,6 @@
 
 .row {
   display: flex;
-
 }
 
 .detailsHeader {
@@ -127,6 +126,10 @@
     min-height: 30px;
     max-height: 30px;
   }
+}
+
+.hiddenCardTabs {
+  position: initial;
 }
 
 .paIcon {
