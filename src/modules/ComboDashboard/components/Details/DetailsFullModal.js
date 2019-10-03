@@ -26,7 +26,7 @@ import { limitAzm } from "../CrossSection/formulas";
 import { useSurveysDataContainer, useWellPlanDataContainer } from "../../../App/Containers";
 import classNames from "classnames";
 import { twoDecimalsNoComma } from "../../../../constants/format";
-import Import from "@material-ui/icons/OpenInBrowser";
+import OpenInBrowser from "@material-ui/icons/OpenInBrowser";
 import WellPlanImporterModal from "../../../../modals/WellPlanImporterModal";
 import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
 import { AutoSizer, List } from "react-virtualized";
@@ -93,7 +93,7 @@ function WellPlanTable() {
   };
 
   return (
-    <Table className={classNames(css.table, css.flexTable, css.noBorder)}>
+    <Table className={classNames(css.table, css.flexTable, css.noBorder, css.wellPlanTable)}>
       <TableHead>
         <TableRow className={css.row}>
           <TableCell className={css.cell}>Survey</TableCell>
@@ -167,7 +167,7 @@ function DetailsFullModal({
           </Tabs>
           {activeTab === WELL_PLAN && (
             <Button onClick={toggleImportWellPlanModal} className={classNames("self-start", css.importButton)}>
-              <Import />
+              <OpenInBrowser />
               Import Well Plan
             </Button>
           )}

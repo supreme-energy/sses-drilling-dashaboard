@@ -36,16 +36,17 @@
   .dialogContent {
     display: flex;
     justify-content: space-between;
-    width: 1000px;
+    min-width: 900px;
 
     .interpretationChart {
       display: flex;
       width: 100%;
     }
 
-    .wellPlanHeader {
-      th {
-        text-align: center;
+    .wellPlanTable {
+      td,th {
+        padding: 16px;
+        
       }
     }
 

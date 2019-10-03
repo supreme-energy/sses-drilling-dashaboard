@@ -46,7 +46,6 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
   };
 
   const handleSelectFile = e => {
-    console.log("e.target.files[0]", e.target.files[0]);
     setFile(e.target.files[0]);
   };
   return (
