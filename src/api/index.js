@@ -54,6 +54,7 @@ export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
 export const UPLOAD_WELL_PLAN_CSV = "/well/plan/import.php";
+export const UPDATE_PROJECTION = "/well/plan/update.php";
 export const GET_SURVEY_CHECK = "/survey/cloud/check.php";
 export const GET_SURVEY_RANGE = "/survey/cloud/load_range.php";
 export const GET_NEXT_SURVEY = "/survey/cloud/load_next.php";
@@ -445,7 +446,7 @@ export function useRopData() {
 const wellPathTransform = memoizeOne(transform);
 
 export function useWellPath(wellId) {
-  const [data, ...rest] = useFetch(
+  const [results, isLoading, error, isPolling, isFetchingMore, actions] = useFetch(
     {
       path: GET_WELL_PLAN,
       query: {
@@ -456,7 +457,30 @@ export function useWellPath(wellId) {
       transform: wellPathTransform
     }
   );
-  return [data || EMPTY_ARRAY, ...rest];
+
+  const data = results || EMPTY_ARRAY;
+  const { fetch } = actions;
+  const updatePlanItem = useCallback(
+    planData => {
+      const optimisticResult = data.map(d => (d.id === planData.id ? { ...d, ...planData } : d));
+      fetch(
+        {
+          path: UPDATE_PROJECTION,
+          method: "POST",
+          body: planData,
+          query: {
+            seldbname: wellId
+          },
+          optimisticResult
+        },
+        (_, result) => {
+          return wellPathTransform(result);
+        }
+      );
+    },
+    [fetch, data, wellId]
+  );
+  return [data, isLoading, error, isPolling, isFetchingMore, { ...actions, updatePlanItem }];
 }
 
 export function useWellsMapPosition(wellId, wellPositions) {

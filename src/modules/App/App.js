@@ -100,9 +100,9 @@ class App extends React.Component {
                                       <Route path="/:wellId?" exact component={WellExplorer} />
                                       <HeaderToolbar history={history}>
                                         <TimeSliderToolbar>
-                                          <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                          <Route path="/:wellId/combo" component={ComboDashboard} />
                                           <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                          <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                          <Route path="/:wellId/structural" component={StructuralGuidance} />
                                           <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
                                         </TimeSliderToolbar>
                                       </HeaderToolbar>

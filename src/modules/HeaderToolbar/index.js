@@ -59,7 +59,7 @@ export function HeaderToolbarWrapper({ children, history, changeSelectedWell }) 
   return (
     <React.Fragment>
       <Route
-        path="/:wellId/:page"
+        path="/:wellId/:page/:subpage?"
         exact
         render={props => <HeaderToolbar {...props} changeSelectedWell={changeSelectedWell} />}
         history={history}

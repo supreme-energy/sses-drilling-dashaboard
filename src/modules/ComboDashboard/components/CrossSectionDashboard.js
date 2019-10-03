@@ -12,22 +12,21 @@ import WidgetCard from "../../../components/WidgetCard";
 import classes from "./ComboDashboard.scss";
 import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
-import DetailsFullModal from "./Details/DetailsFullModal";
+import DetailsFullModal, { WELL_PLAN } from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 import { useCrossSectionContainer, useSurveysDataContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
-import WellPlanImporterModal from "../../../modals/WellPlanImporterModal";
 import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
 import TableButton from "../../../components/TableButton";
+import { withRouter, Route } from "react-router";
 
-export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
+export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView, match, history }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
-  const [showModal, toggleModal] = useReducer(m => !m, false);
-  const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
+
   const { wellPlanIsImported } = useSetupWizardData();
   const [viewDirection, setViewDirection] = useState(0);
 
@@ -36,6 +35,8 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
   const selectedSegment = useMemo(() => {
     return calcSections.find(s => selectedSections[s.id]) || {};
   }, [calcSections, selectedSections]);
+  const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
+  const [activeTab, changeActiveTab] = useState(WELL_PLAN);
 
   return (
     <WidgetCard className={classNames(classes.crossSectionDash, className)} title="Cross Section" hideMenu>
@@ -65,7 +66,13 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
           </ParentSize>
           {!wellPlanIsImported && (
             <div className={classes.importWellPlanButton}>
-              <Button onClick={toggleImportWellPlanModal}>
+              <Button
+                onClick={() => {
+                  changeActiveTab(WELL_PLAN);
+                  toggleImportWellPlanModal();
+                  history.push(`${match.url}/detailsTable`);
+                }}
+              >
                 <Import />
                 Import Well Plan
               </Button>
@@ -114,7 +121,7 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
                   />
                 </React.Fragment>
               )}
-              <TableButton onClick={toggleModal} />
+              <TableButton />
             </div>
           </div>
           <Collapse in={expanded} unmountOnExit>
@@ -122,12 +129,25 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
               <DetailsTable />
             </div>
           </Collapse>
-          <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
-          <WellPlanImporterModal handleClose={toggleImportWellPlanModal} isVisible={showImportWellPlanModal} />
+          <Route
+            path="/:wellId/:page/detailsTable"
+            render={match => {
+              return (
+                <DetailsFullModal
+                  handleClose={() => history.goBack()}
+                  isVisible
+                  activeTab={activeTab}
+                  showImportWellPlanModal={showImportWellPlanModal}
+                  toggleImportWellPlanModal={toggleImportWellPlanModal}
+                  changeActiveTab={changeActiveTab}
+                />
+              );
+            }}
+          />
         </div>
       </div>
     </WidgetCard>
   );
 });
 
-export default CrossSectionDashboard;
+export default withRouter(CrossSectionDashboard);
