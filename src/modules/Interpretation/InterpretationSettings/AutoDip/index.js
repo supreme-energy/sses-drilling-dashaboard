@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useMemo, useRef } from "react";
+import React, { useReducer, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -24,13 +24,15 @@ import {
   useWellIdContainer,
   useSurveysDataContainer,
   useWellPlanDataContainer,
-  useControlLogDataContainer
+  useControlLogDataContainer,
+  useSelectedWellInfoContainer
 } from "../../../App/Containers";
 import { toRadians } from "../../../ComboDashboard/components/CrossSection/formulas";
 import { twoDecimals } from "../../../../constants/format";
-import uniqueId from "lodash/uniqueId";
+import transform from "lodash/transform";
 import calculateAverageDip from "./calculateControlDipClosure";
 import memoizeOne from "memoize-one";
+import debounce from "lodash/debounce";
 import { mean } from "d3-array";
 import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../../actions";
 import { useSelectedSegmentState } from "../../selectors";
@@ -45,6 +47,15 @@ const methodTypes = {
   AVERAGE_REAL_DIP_CLOSURE: "Average Real Dip-Closure"
 };
 
+const methodNameByMethodId = {
+  ad: methodTypes.AVERAGE_DIP,
+  acdc: methodTypes.AVERAGE_CONTROL_DIP_CLOSURE,
+  man: methodTypes.MANUAL_INPUT,
+  ardc: methodTypes.AVERAGE_REAL_DIP_CLOSURE
+};
+
+const methodIdByMethodName = transform(methodNameByMethodId, (acc, value, key) => (acc[value] = key), {});
+
 const initialState = {
   dipMode: NORMAL,
   settingsOpened: false,
@@ -52,7 +63,54 @@ const initialState = {
   manualValue: 0
 };
 
-function autoDipReducer(state, action) {
+const parseFetchedRows = memoizeOne(rows => {
+  return rows
+    .filter(row => row && row.type)
+    .reduce((acc, row) => {
+      acc[row.id] = {
+        calculationMethod: methodNameByMethodId[row.type],
+        id: row.id
+      };
+
+      if (acc[row.id].calculationMethod === methodTypes.MANUAL_INPUT) {
+        acc[row.id].manualInputValue = row.avgval;
+      }
+
+      if (row.avgsize !== undefined) {
+        acc[row.id].nrSurveysBack = Number(row.avgsize);
+      }
+
+      if (row.startidx !== undefined) {
+        acc[row.id].startIndex = Number(row.startidx && row.startidx.split("|")[0]);
+      }
+
+      return acc;
+    }, {});
+});
+
+const stringifyRows = memoizeOne(rows => {
+  return JSON.stringify(
+    rows.map(row => {
+      const parsedRow = {
+        id: row.id,
+        avgval: row.calculationMethod !== methodTypes.MANUAL_INPUT ? "calculated" : row.manualInputValue,
+        type: methodIdByMethodName[row.calculationMethod]
+      };
+
+      if (row.nrSurveysBack) {
+        parsedRow.avgsize = row.nrSurveysBack;
+      }
+
+      if (row.startIndex !== undefined) {
+        parsedRow.startidx = `${row.startIndex}|0`;
+      }
+
+      return parsedRow;
+    })
+  );
+});
+
+const autoDipReducer = (state, action) => {
   switch (action.type) {
     case "CHANGE_DIP_MODE":
       return {
@@ -72,7 +130,8 @@ function autoDipReducer(state, action) {
         settingsOpened: !state.settingsOpened
       };
     case "ADD_NEW_ROW": {
-      const id = uniqueId();
+      const id = action.id;
+
       return {
         ...state,
         rowsById: {
@@ -83,6 +142,12 @@ function autoDipReducer(state, action) {
             nrSurveysBack: 2
           }
         }
+      };
+    }
+    case "UPDATE_ROW_DATA": {
+      return {
+        ...state,
+        rowsById: { ...action.rowsById }
       };
     }
     case "DELETE_ROW": {
@@ -110,7 +175,7 @@ function autoDipReducer(state, action) {
     default:
       return state;
   }
-}
+};
 
 const ColumnHead = props => <Typography displayBlock variant={"caption"} {...props} />;
 
@@ -272,16 +337,7 @@ function useOptionsByMethodType() {
   );
 }
 
-function AutoDipSettings({
-  dialogProps,
-  onClose,
-  dispatch,
-  rows,
-  getOptionsByMethodType,
-  finalValue,
-  onSaveDip,
-  dipMode
-}) {
+function AutoDipSettings({ dialogProps, onClose, dispatch, rows, getOptionsByMethodType, finalValue, onSaveDip }) {
   const updateRow = (row, field, value) => dispatch({ type: "UPDATE_ROW", id: row.id, field, value });
   const handleChangeMethod = row => e => updateRow(row, "calculationMethod", e.target.value);
   const handleStartChange = row => e => updateRow(row, "startIndex", e.target.value);
@@ -348,7 +404,11 @@ function AutoDipSettings({
           <Box display="flex" flexDirection="column">
             {rows.map(getRowEl)}
             <Box display="flex" alignItems="center">
-              <IconButton onClick={() => dispatch({ type: "ADD_NEW_ROW" })}>
+              <IconButton
+                onClick={() => {
+                  dispatch({ type: "ADD_NEW_ROW", id: Date.now() });
+                }}
+              >
                 <AddCircle />
               </IconButton>
               <Typography variant={"caption"}>Add Calculation Row</Typography>
@@ -473,13 +533,17 @@ const AutoDip = React.memo(
 export default function AutoDipContainer() {
   const selectedSegment = useSelectedSegmentState();
   const updateSegments = useUpdateSegmentsByMd();
+  const { wellId } = useWellIdContainer();
+  const [{ wellInfo }, , updateWell] = useSelectedWellInfoContainer();
+  const updateDebounced = useMemo(() => debounce(updateWell, 500), [updateWell]);
+  const configString = (wellInfo && wellInfo.autodipconfig) || "";
 
   const { saveWellLogs } = useSaveWellLogActions();
 
   const handleApply = useCallback(
     dip => {
       const changes = { [selectedSegment.endmd]: { dip } };
-      updateSegments();
+      updateSegments(changes);
       saveWellLogs([selectedSegment], changes);
     },
     [selectedSegment, updateSegments, saveWellLogs]
@@ -495,12 +559,36 @@ export default function AutoDipContainer() {
 
   const [{ dipMode, settingsOpened, rowsById, manualValue }, dispatch] = useReducer(autoDipReducer, initialState);
 
+  // sync reducer with remote data
+  useMemo(() => {
+    const fetchedRows = JSON.parse(configString);
+    dispatch({
+      type: "UPDATE_ROW_DATA",
+      rowsById: parseFetchedRows(fetchedRows)
+    });
+  }, [configString]);
+
   const rows = useMemo(() => Object.values(rowsById), [rowsById]);
+  const newConfigString = stringifyRows(rows);
   const getOptionsByMethodType = useOptionsByMethodType();
   const finalValue = computeFinalDip(rows, getOptionsByMethodType);
 
   const valueToApply = dipMode === NORMAL ? manualValue : finalValue;
   const applyDisabled = Number.isNaN(parseFloat(valueToApply)) || selectedSegment.sectdip === Number(valueToApply);
+
+  useEffect(
+    function saveChanged() {
+      if (newConfigString !== configString) {
+        updateDebounced({
+          wellId,
+          data: {
+            autodipconfig: newConfigString
+          }
+        });
+      }
+    },
+    [newConfigString, updateDebounced, wellId, configString]
+  );
 
   const props = {
     onSaveDip: handleSaveDip,

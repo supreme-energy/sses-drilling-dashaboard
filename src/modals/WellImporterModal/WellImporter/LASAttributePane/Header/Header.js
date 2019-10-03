@@ -14,6 +14,7 @@ import { useWellInfo, useCreateWell, defaultTransform } from "../../../../../api
 import { apiFieldMapping } from "../../models/mappings";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useWellImporterSaveContainer } from "../../../WellImporterModal";
+import Coordinates from "coordinate-parser";
 
 const Header = ({ className, onClickCancel }) => {
   const { data, extension } = useParsedFileSelector();
@@ -54,7 +55,8 @@ const Header = ({ className, onClickCancel }) => {
     }, {});
 
     if (data.latitude || data.longitude) {
-      const [easting, northing] = defaultTransform(null).inverse([Number(data.longitude), Number(data.latitude)]);
+      const position = new Coordinates(`${data.latitude} ${data.longitude}`);
+      const [easting, northing] = defaultTransform(null).inverse([position.getLongitude(), position.getLatitude()]);
 
       data.survey_easting = easting;
       data.survey_northing = northing;
