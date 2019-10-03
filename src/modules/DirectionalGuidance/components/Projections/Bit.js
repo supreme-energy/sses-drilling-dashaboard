@@ -21,15 +21,22 @@ import {
   ENABLED_FIELDS_LAST_DL
 } from "../../../../constants/directionalGuidance";
 import { useBitProjection } from "../../../../api";
-import { useSurveysDataContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
+import {
+  useSurveysDataContainer,
+  useSelectedWellInfoContainer,
+  useFormationsDataContainer
+} from "../../../App/Containers";
+import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 import { pageReducer } from "./reducers";
 import classes from "./styles.scss";
 
 function Bit({ wellId }) {
-  const { data, refresh, updateBitProjection } = useBitProjection(wellId);
+  const { updateBitProjection } = useBitProjection();
   const [{ wellInfo }] = useSelectedWellInfoContainer(wellId);
   const propazm = wellInfo ? Number(wellInfo.propazm) : 0;
-  const { surveys } = useSurveysDataContainer();
+  const { surveys, refreshSurveys } = useSurveysDataContainer();
+  const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+  const { refreshFormations } = useFormationsDataContainer();
   const [calculationMethod, setMethod] = useState(MD);
   const method = calculationMethod === MD ? MD_INC_AZ : LAST_DOGLEG;
   const enabledFields = calculationMethod === MD ? ENABLED_FIELDS_DEPTH : ENABLED_FIELDS_LAST_DL;
@@ -38,11 +45,8 @@ function Bit({ wellId }) {
   const [error, setError] = useState("");
 
   const lastSurvey = useMemo(() => surveys.length && surveys.find(s => s.isLastSurvey), [surveys]);
-  const bitProjection = useMemo(() => surveys.length && surveys.find(s => s.isBitProj), [surveys]);
-  const bitProjIndex = useMemo(() => data.length && bitProjection && data.findIndex(d => d.id === bitProjection.id), [
-    bitProjection,
-    data
-  ]);
+  const bitProjIndex = useMemo(() => surveys.length && surveys.findIndex(s => s.isBitProj), [surveys]);
+  const bitProjection = bitProjIndex > -1 && surveys[bitProjIndex];
 
   const handleCloseWarning = useCallback(() => setError(""), []);
   const handleSelectMethod = useCallback(e => setMethod(e.target.value), []);
@@ -63,36 +67,46 @@ function Bit({ wellId }) {
   );
 
   const handleCalculate = async () => {
-    const index = (bitProjIndex || 0) + 2;
-    const results = calculateProjection(fieldValues, data, index, propazm);
+    const results = calculateProjection(fieldValues, surveys, bitProjIndex, propazm);
+
+    const basePayload = {
+      svycnt: surveys.length,
+      svysel: bitProjIndex,
+      currid: bitProjection.id
+    };
+    let payload;
     if (results && typeof results !== "string") {
-      const payload = {
+      payload = {
         ...results,
-        svycnt: data.length,
-        svysel: bitProjIndex !== undefined || "",
-        currid: _.get(data, `[${bitProjIndex}].id`, "")
+        ...basePayload
       };
-
-      payload.meth = method;
-      delete payload.method;
-      delete payload.cl;
-      delete payload.ns;
-      delete payload.ew;
-      delete payload.dl;
-
-      await updateBitProjection(wellId, payload);
-      refresh();
-    } else if (results) {
-      setError(results);
+    } else {
+      payload = {
+        ...fieldValues,
+        ...basePayload
+      };
+      typeof results === "string" && setError(results);
     }
+
+    payload.meth = method;
+    delete payload.method;
+    delete payload.cl;
+    delete payload.ns;
+    delete payload.ew;
+    delete payload.dl;
+
+    await updateBitProjection(wellId, payload);
+    refreshSurveys();
+    refreshWellLogs();
+    refreshFormations();
   };
 
   useEffect(() => {
     if (bitProjection && lastSurvey) {
       setFieldValue(v => ({
         ...v,
-        bprj_pos_tcl: bitProjection.tcl,
-        bprjpostcl: bitProjection.tcl,
+        bprj_pos_tcl: bitProjection.tcl - bitProjection.tvd,
+        bprjpostcl: bitProjection.tcl - bitProjection.tvd,
         md: lastSurvey.md + bitProjection.cl,
         ..._.pick(bitProjection, [
           "cl",
@@ -109,7 +123,7 @@ function Bit({ wellId }) {
           "dip",
           "fault"
         ]),
-        tpos: bitProjection.tot - bitProjection.tvd,
+        tpos: bitProjection.tcl - bitProjection.tvd,
         pmd: lastSurvey.md,
         pinc: lastSurvey.inc,
         pazm: lastSurvey.azm,

@@ -11,13 +11,16 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import { useManualImport } from "../../../../api";
-import { useSurveysDataContainer } from "../../../App/Containers";
+import { useSurveysDataContainer, useFormationsDataContainer } from "../../../App/Containers";
+import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 
 import classes from "./styles.scss";
 
 const ReviewManualImport = React.memo(({ wellId, handleClose, fileName, setFile, setErrors, errors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
   const { refreshSurveys } = useSurveysDataContainer();
+  const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+  const { refreshFormations } = useFormationsDataContainer();
   const filePath = errors.filename.substr(0, errors.filename.lastIndexOf("/"));
   const serverFileName = errors.filename.substr(errors.filename.lastIndexOf("/") + 1);
   const errorMsg = errors.results;
@@ -27,7 +30,9 @@ const ReviewManualImport = React.memo(({ wellId, handleClose, fileName, setFile,
 
     // Clear files if call is successful
     if (res.status === "success") {
-      await refreshSurveys();
+      refreshSurveys();
+      refreshWellLogs();
+      refreshFormations();
       setFile({});
     }
     handleClose();

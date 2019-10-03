@@ -27,17 +27,16 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
   const v5 = Math.acos(v4) / piOver180;
   const toolFace = Math.acos((inc - pinc) / v5) / piOver180;
   const slide = (v5 / motoryield) * 100;
-  let newSlide;
+  let newProjection;
 
   if (slide !== Infinity) {
-    newSlide = {
+    newProjection = {
       ...pick(projections[0], ["tvd", "vs", "ca", "cd", "tot", "dip", "fault"]),
-      md: surveyBeforeBit.md + slide,
-      tf: toolFace.toFixed(2) + rl
+      md: surveyBeforeBit.md + slide
     };
 
     // TODO: Update Projections based on calculations
-    // const updatedProjections = [newSlide, ...projections];
+    // const updatedProjections = [newProjection, ...projections];
     // projections.map((projection, index) => {
     //   const results = calculateProjection(projection, updatedProjections, index + 1, propAzm);
     // });
@@ -46,7 +45,7 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
   projections.map(projection => {
     const val = projection.vs;
     const currentProjectionId = projection.id;
-    if (val < newSlide.vs) {
+    if (val < newProjection.vs) {
       if (paToDelete.indexOf(currentProjectionId) === -1) {
         paToDelete.push(currentProjectionId);
       }
@@ -57,7 +56,7 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
     }
   });
 
-  return { tf: toolFace + rl, pavsdel: paToDelete.join(","), ...newSlide };
+  return { slide, tf: toolFace, rl, pavsdel: paToDelete.join(","), ...newProjection };
 }
 
 export function determineIncAzm(firstProjection, secondProjection, bitProjection, selectedStation) {

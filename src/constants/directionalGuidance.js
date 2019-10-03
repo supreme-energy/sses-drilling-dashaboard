@@ -7,8 +7,8 @@ export const CL = "CL";
 export const PA1 = "PA1";
 export const PA2 = "PA2";
 export const MOTOR_YIELD = "Motor Yield";
-export const ENABLED_FIELDS_DEPTH = [MD, CL, AZM, INC];
-export const ENABLED_FIELDS_LAST_DL = [AZM, INC];
+export const ENABLED_FIELDS_DEPTH = [MD, CL, AZM, INC, DIP];
+export const ENABLED_FIELDS_LAST_DL = [MD, DIP];
 export const ENABLED_FIELDS_PROJECTION = [AZM, INC, MOTOR_YIELD];
 export const WELL_BOTTOM_HOLE = "WellBottomHole";
 export const CROSS_SECTION = "CrossSection";
@@ -23,7 +23,7 @@ export const bitProjectionInitialState = {
   project: "bit",
   bitoffset: 0,
   propazm: 0,
-  data: "",
+  data: "0,0,0",
   cl: 0,
   md: 0,
   inc: 0,
@@ -58,6 +58,7 @@ export const projectToPlanState = {
   currid: "",
   newid: "",
   project: "ahead",
+  slide: 0,
   bitoffset: 0,
   propazm: 0,
   meth: 3,

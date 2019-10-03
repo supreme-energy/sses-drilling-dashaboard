@@ -70,16 +70,17 @@ function ProjectionToPlan({ wellId }) {
     }
 
     const results = calculateSlide(fieldValues, propazm, bitProjection, surveyBeforeBit, data);
-    // if (results && typeof results !== "string") {
     setFieldValue(v => ({ ...v, ...results }));
 
-    const payload = { ...fieldValues, ...results };
+    const payload = { ...fieldValues, ...results, tf: results.tf + results.rl };
     // Set values for Payload
     payload.calctype = selectedStation.toLowerCase();
     payload.meth = payload.method;
 
     // Delete unused fields
     delete payload.method;
+    delete payload.slide;
+    delete payload.rl;
 
     await updateProjectionToPlan(wellId, payload);
     refresh();

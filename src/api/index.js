@@ -1352,7 +1352,7 @@ export function useBitProjection(wellId) {
     [fetch]
   );
 
-  return { data: data || EMPTY_OBJECT, updateBitProjection, refresh };
+  return { data: data || EMPTY_ARRAY, updateBitProjection, refresh };
 }
 
 export function useProjectionToPlan(wellId) {

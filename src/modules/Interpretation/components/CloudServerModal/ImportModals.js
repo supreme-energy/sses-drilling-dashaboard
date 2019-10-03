@@ -84,6 +84,8 @@ export const AutoImportModal = React.memo(
   ({ wellId, hasConflict, newSurvey, handleClose, setView, refreshCloudServer, md, inc, azm }) => {
     const { importNewSurvey, deleteSurveys } = useCloudImportSurveys();
     const { refreshSurveys } = useSurveysDataContainer();
+    const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+    const { refreshFormations } = useFormationsDataContainer();
 
     const handleCleanData = async () => {
       await deleteSurveys(wellId);
@@ -94,7 +96,9 @@ export const AutoImportModal = React.memo(
     const handleImport = async () => {
       await importNewSurvey(wellId);
       const res = await refreshCloudServer();
-      await refreshSurveys();
+      refreshSurveys();
+      refreshWellLogs();
+      refreshFormations();
       if (!res.next_survey) {
         handleClose();
       }
