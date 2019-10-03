@@ -12,25 +12,51 @@
   }
 }
 
+.dialog {
+  
+  .dialogTitle {
+    padding: 0px;
+    .closeButton {
+      position: relative;
+      left: 10px;
+      bottom: 5px;
+      float: right;
+    }
 
-.dialogTitle {
-  padding-bottom: 0px;
-  .closeButton {
-    position: relative;
-    left: 10px;
-    bottom: 5px;
-    float: right;
+    .titleRow {
+      padding: 16px 24px 0 24px;
+    }
+
+    .importButton {
+      padding: 16px;
+    }
   }
-}
-
-.dialogContent {
-  display: flex;
-  justify-content: space-between;
-  .interpretationChart {
+  
+  
+  .dialogContent {
     display: flex;
-    width: 100%;
+    justify-content: space-between;
+    min-width: 900px;
+
+    .interpretationChart {
+      display: flex;
+      width: 100%;
+    }
+
+    .wellPlanTable {
+      td,th {
+        padding: 16px;
+        
+      }
+    }
+
+    .wellPlanBody {
+      height: 70vh;
+    }
   }
 }
+
+
 
 .icon {
   width: 12px;

@@ -113,6 +113,12 @@
     }
   }
 
+  .noBorder {
+    .cell {
+      border-style: none;
+    }
+  }
+
   .flexTable {
       tbody {
           display: flex;

@@ -125,7 +125,7 @@ export const PageLayout = ({ children, history }) => {
                                 <div className={classes.logo}>
                                   <img src="/sses-logo.svg" />
                                 </div>
-                                <Route path="/:wellId?/:page?" component={PageTabs} history={history} />
+                                <Route path="/:wellId?/:page?/:subpage?" component={PageTabs} history={history} />
                                 <span />
                               </div>
                             </AppBar>

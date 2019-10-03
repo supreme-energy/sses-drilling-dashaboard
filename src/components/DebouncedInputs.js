@@ -80,8 +80,8 @@ DebouncedTextField.defaultProps = defaultProps;
 export const NumericDebouceTextField = React.memo(props => {
   return (
     <DebouncedTextField
-      {...props}
       type="number"
+      {...props}
       onChange={value => {
         const numericValue = parseFloat(value);
         if (!isNaN(numericValue)) {
