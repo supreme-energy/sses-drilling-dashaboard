@@ -47,14 +47,14 @@ const methodTypes = {
   AVERAGE_REAL_DIP_CLOSURE: "Average Real Dip-Closure"
 };
 
-const metodNameByMethodId = {
+const methodNameByMethodId = {
   ad: methodTypes.AVERAGE_DIP,
   acdc: methodTypes.AVERAGE_CONTROL_DIP_CLOSURE,
   man: methodTypes.MANUAL_INPUT,
   ardc: methodTypes.AVERAGE_REAL_DIP_CLOSURE
 };
 
-const methodIdByMethodName = transform(metodNameByMethodId, (acc, value, key) => (acc[value] = key), {});
+const methodIdByMethodName = transform(methodNameByMethodId, (acc, value, key) => (acc[value] = key), {});
 
 const initialState = {
   dipMode: NORMAL,
@@ -68,7 +68,7 @@ const parseFetchedRows = memoizeOne(rows => {
     .filter(row => row && row.type)
     .reduce((acc, row) => {
       acc[row.id] = {
-        calculationMethod: metodNameByMethodId[row.type],
+        calculationMethod: methodNameByMethodId[row.type],
         id: row.id
       };
 
