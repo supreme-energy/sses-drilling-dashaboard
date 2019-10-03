@@ -313,6 +313,16 @@ function useSelectedLogDataScale(initialState) {
   return { selectedLogs, setSelectedLog };
 }
 
+function useDirectionalGuidanceSelectedTab(initialState) {
+  const [currentTab, changeCurrentTab] = useState(initialState);
+
+  const handleChangeTab = useCallback((_, value) => {
+    changeCurrentTab(value);
+  }, []);
+
+  return { currentTab, handleChangeTab };
+}
+
 // Create containers
 export const {
   Provider: CloudServerCountdownProvider,
@@ -340,6 +350,10 @@ export const { Provider: CrossSectionProvider, useContainer: useCrossSectionCont
 export const { Provider: SelectedWellInfoProvider, useContainer: useSelectedWellInfoContainer } = createContainer(
   useSelectedWellInfo
 );
+export const {
+  Provider: DirectionalGuidanceSelectedTabProvider,
+  useContainer: useDirectionalGuidanceSelectedTabContainer
+} = createContainer(useDirectionalGuidanceSelectedTab);
 export const {
   Provider: SelectedLogDataScaleProvider,
   useContainer: useSelectedLogDataScaleContainer

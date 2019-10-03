@@ -24,7 +24,7 @@ import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
 import TableButton from "../../../components/TableButton";
 
-export const CrossSectionDashboard = React.memo(({ wellId, className, view, updateView }) => {
+export const CrossSectionDashboard = React.memo(({ className, view, updateView, isReadOnly, hideCard }) => {
   const [expanded, toggleExpanded] = useReducer(e => !e, true);
   const [showModal, toggleModal] = useReducer(m => !m, false);
   const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
@@ -38,9 +38,14 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
   }, [calcSections, selectedSections]);
 
   return (
-    <WidgetCard className={classNames(classes.crossSectionDash, className)} title="Cross Section" hideMenu>
+    <WidgetCard
+      className={classNames(classes.crossSectionDash, className)}
+      title="Cross Section"
+      hideCard={hideCard}
+      hideMenu
+    >
       <Tabs
-        className={classes.tabs}
+        className={classNames(classes.tabs, { [classes.hiddenCardTabs]: hideCard })}
         value={viewDirection}
         onChange={(e, v) => setViewDirection(v)}
         indicatorColor="primary"
@@ -60,10 +65,11 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
                 viewDirection={viewDirection}
                 view={view}
                 updateView={updateView}
+                isReadOnly={isReadOnly}
               />
             )}
           </ParentSize>
-          {!wellPlanIsImported && (
+          {!wellPlanIsImported && !isReadOnly && (
             <div className={classes.importWellPlanButton}>
               <Button onClick={toggleImportWellPlanModal}>
                 <Import />
@@ -73,58 +79,60 @@ export const CrossSectionDashboard = React.memo(({ wellId, className, view, upda
           )}
         </div>
         <div className={classes.cardLine} />
-        <div className={classNames(classes.column, classes.shrink)}>
-          <div className={classNames(classes.row, classes.detailsHeader)}>
-            <IconButton
-              size="small"
-              className={classNames(classes.expand, {
-                [classes.expandOpen]: expanded
-              })}
-              onClick={toggleExpanded}
-              aria-expanded={expanded}
-              aria-label="Show details"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-            <Typography variant="subtitle1">Details</Typography>
-            <div className={classes.flexRight}>
-              {expanded && selectedSegment.isProjection && (
-                <React.Fragment>
-                  <SelectedProjectionMethod selectedProjection={selectedSegment} />
-                  <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
-                </React.Fragment>
-              )}
-              {expanded && !selectedSegment.isProjection && (
-                <React.Fragment>
-                  <WellInfoField
-                    label={"Proposed Direction"}
-                    field="propazm"
-                    type="number"
-                    options={{ mask: limitAzm }}
-                  />
-                  <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
-                  <WellInfoField
-                    label={"TCL"}
-                    field="tot"
-                    type="number"
-                    inputProps={{ min: "0" }}
-                    options={{
-                      debounceAction: updateTieInTCL
-                    }}
-                  />
-                </React.Fragment>
-              )}
-              <TableButton onClick={toggleModal} />
+        {!isReadOnly && (
+          <div className={classNames(classes.column, classes.shrink)}>
+            <div className={classNames(classes.row, classes.detailsHeader)}>
+              <IconButton
+                size="small"
+                className={classNames(classes.expand, {
+                  [classes.expandOpen]: expanded
+                })}
+                onClick={toggleExpanded}
+                aria-expanded={expanded}
+                aria-label="Show details"
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+              <Typography variant="subtitle1">Details</Typography>
+              <div className={classes.flexRight}>
+                {expanded && selectedSegment.isProjection && (
+                  <React.Fragment>
+                    <SelectedProjectionMethod selectedProjection={selectedSegment} />
+                    <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
+                  </React.Fragment>
+                )}
+                {expanded && !selectedSegment.isProjection && (
+                  <React.Fragment>
+                    <WellInfoField
+                      label={"Proposed Direction"}
+                      field="propazm"
+                      type="number"
+                      options={{ mask: limitAzm }}
+                    />
+                    <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
+                    <WellInfoField
+                      label={"TCL"}
+                      field="tot"
+                      type="number"
+                      inputProps={{ min: "0" }}
+                      options={{
+                        debounceAction: updateTieInTCL
+                      }}
+                    />
+                  </React.Fragment>
+                )}
+                <TableButton onClick={toggleModal} />
+              </div>
             </div>
+            <Collapse in={expanded} unmountOnExit>
+              <div className={classes.tableWrapper}>
+                <DetailsTable />
+              </div>
+            </Collapse>
+            <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
+            <WellPlanImporterModal handleClose={toggleImportWellPlanModal} isVisible={showImportWellPlanModal} />
           </div>
-          <Collapse in={expanded} unmountOnExit>
-            <div className={classes.tableWrapper}>
-              <DetailsTable />
-            </div>
-          </Collapse>
-          <DetailsFullModal handleClose={toggleModal} isVisible={showModal} />
-          <WellPlanImporterModal handleClose={toggleImportWellPlanModal} isVisible={showImportWellPlanModal} />
-        </div>
+        )}
       </div>
     </WidgetCard>
   );

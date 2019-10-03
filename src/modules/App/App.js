@@ -26,18 +26,19 @@ import {
   DrillPhaseProvider,
   AppStateProvider,
   CrossSectionProvider,
-  SelectedLogDataScaleProvider
+  SelectedLogDataScaleProvider,
+  DirectionalGuidanceSelectedTabProvider
 } from "./Containers";
 
 // Import Provider initialStates
 import { INITIAL_DRILL_PHASE_STATE, INITIAL_TIME_SLIDER_STATE } from "../../constants/timeSlider";
+import { WELL_BOTTOM_HOLE } from "../../constants/directionalGuidance";
 import { FormationsStoreProvider } from "../Interpretation/InterpretationChart/Formations/store";
 
 // Lazy load toolbars
 const HeaderToolbar = lazy(() => import(/* webpackChunkName: 'HeaderToolbar' */ "modules/HeaderToolbar"));
 const TimeSliderToolbar = lazy(() => import(/* webpackChunkName: 'TimeSliderToolbar' */ "modules/TimeSliderToolbar"));
 
-// Lazy load header
 const fetchClientOptions = { mode: "cors", credentials: "include" };
 
 function filterForceRefreshProps(request) {
@@ -95,18 +96,20 @@ class App extends React.Component {
                               <SelectedLogDataScaleProvider initialState={{}}>
                                 <FormationsStoreProvider>
                                   <CrossSectionProvider>
-                                    <Route path="/:wellId" component={WellUpdate} />
-                                    <Switch>
-                                      <Route path="/:wellId?" exact component={WellExplorer} />
-                                      <HeaderToolbar history={history}>
-                                        <TimeSliderToolbar>
-                                          <Route path="/:wellId/combo" exact component={ComboDashboard} />
-                                          <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
-                                          <Route path="/:wellId/structural" exact component={StructuralGuidance} />
-                                          <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
-                                        </TimeSliderToolbar>
-                                      </HeaderToolbar>
-                                    </Switch>
+                                    <DirectionalGuidanceSelectedTabProvider initialState={WELL_BOTTOM_HOLE}>
+                                      <Route path="/:wellId" component={WellUpdate} />
+                                      <Switch>
+                                        <Route path="/:wellId?" exact component={WellExplorer} />
+                                        <HeaderToolbar history={history}>
+                                          <TimeSliderToolbar>
+                                            <Route path="/:wellId/combo" exact component={ComboDashboard} />
+                                            <Route path="/:wellId/drilling" exact component={DrillingAnalytics} />
+                                            <Route path="/:wellId/structural" exact component={StructuralGuidance} />
+                                            <Route path="/:wellId/directional" exact component={DirectionalGuidance} />
+                                          </TimeSliderToolbar>
+                                        </HeaderToolbar>
+                                      </Switch>
+                                    </DirectionalGuidanceSelectedTabProvider>
                                   </CrossSectionProvider>
                                 </FormationsStoreProvider>
                               </SelectedLogDataScaleProvider>

@@ -47,8 +47,10 @@ export default class PixiCrossSection {
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
     this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
-    this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
+    if (!props.isReadOnly) {
+      this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
+    }
     this.gridUpdate = drawGrid(this.gridLayer, {
       gutter: gridGutter,
       gutterLeft: gridGutterLeft,
@@ -137,8 +139,8 @@ export default class PixiCrossSection {
 
       this.formationsUpdate(props);
       this.sectionUpdate(props);
-      this.buttonUpdate(props);
       this.interactivePAUpdate(props);
+      !props.isReadOnly && this.buttonUpdate(props);
     } else {
       this.formationsLayer.visible = false;
       this.UILayer.visible = false;

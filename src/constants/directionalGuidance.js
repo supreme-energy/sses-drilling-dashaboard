@@ -10,6 +10,8 @@ export const MOTOR_YIELD = "Motor Yield";
 export const ENABLED_FIELDS_DEPTH = [MD, CL, AZM, INC];
 export const ENABLED_FIELDS_LAST_DL = [AZM, INC];
 export const ENABLED_FIELDS_PROJECTION = [AZM, INC, MOTOR_YIELD];
+export const WELL_BOTTOM_HOLE = "WellBottomHole";
+export const CROSS_SECTION = "CrossSection";
 
 export const bitProjectionInitialState = {
   meth: 0,

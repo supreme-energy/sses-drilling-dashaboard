@@ -1,22 +1,30 @@
-import React, { useReducer, useMemo, useState, useEffect } from "react";
-
+import React, { useReducer, useMemo, useState, useEffect, lazy } from "react";
+import PropTypes from "prop-types";
+import Tab from "@material-ui/core/Tab";
+import Tabs from "@material-ui/core/Tabs";
 import { scaleLinear } from "d3-scale";
 import { max, min } from "d3-array";
-import { useAdditionalDataLogsList } from "../../../../api";
-import WidgetCard from "../../../../components/WidgetCard";
-import classes from "./styles.scss";
-import { useWellIdContainer, useFilteredAdditionalDataInterval } from "../../../App/Containers";
-import { graphReducer } from "./reducers";
-import classNames from "classnames";
-
 import Box from "@material-ui/core/Box";
 import useRef from "react-powertools/hooks/useRef";
 import { useSize } from "react-hook-size";
+import classNames from "classnames";
+import { useLocalStorageReducer } from "react-storage-hooks";
+
+import { useAdditionalDataLogsList } from "../../../../api";
+import WidgetCard from "../../../../components/WidgetCard";
+import classes from "./styles.scss";
+import { useFilteredAdditionalDataInterval, useDirectionalGuidanceSelectedTabContainer } from "../../../App/Containers";
+import { graphReducer } from "./reducers";
 import PixiLine from "../../../../components/PixiLine";
 import PixiContainer from "../../../../components/PixiContainer";
 import useViewport from "../../../../hooks/useViewport";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
 import Grid from "../../../../components/Grid";
+import { CROSS_SECTION, WELL_BOTTOM_HOLE } from "../../../../constants/directionalGuidance";
+
+const CrossSectionDashboard = lazy(() =>
+  import(/* webpackChunkName: 'CrossSectionDashboard' */ "../../../ComboDashboard/components/CrossSectionDashboard")
+);
 
 function computeInitialViewXScaleValue(data) {
   const diff = max(data, d => d.value) - min(data, d => d.value);
@@ -122,14 +130,32 @@ function GraphComponent({ wellId, logId, isFirstGraph }) {
   );
 }
 
-export function WellBottomHoleInfo() {
-  const { wellId } = useWellIdContainer();
+const defaultView = { x: 0, y: 0, xScale: 1, yScale: 1 };
+export function WellBottomHoleInfo({ wellId }) {
   const [selectedGraphs, setSelectedGraphs] = useReducer(graphReducer, []);
+  const { currentTab, handleChangeTab } = useDirectionalGuidanceSelectedTabContainer();
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
-
+  const isCrossSection = currentTab === CROSS_SECTION;
   const availableGraphs = useMemo(() => {
     return data.filter(l => l.data_count > 0).map(l => l.label);
   }, [data]);
+
+  const [view, updateView] = useLocalStorageReducer(
+    `${wellId}DirectionalGuidance`,
+    function(state, arg) {
+      if (typeof arg === "function") {
+        return { ...state, ...arg(state) };
+      }
+      return { ...state, ...arg };
+    },
+    defaultView
+  );
+
+  useEffect(() => {
+    if (availableGraphs && availableGraphs.length) {
+      setSelectedGraphs({ type: "ADD", payload: availableGraphs[0] });
+    }
+  }, [availableGraphs]);
 
   return (
     <WidgetCard
@@ -138,24 +164,40 @@ export function WellBottomHoleInfo() {
       selectedMenuItems={selectedGraphs}
       setSelectedMenuItem={setSelectedGraphs}
       menuItemEnum={availableGraphs}
+      renderHeader={() => (
+        <Tabs value={currentTab} indicatorColor="primary" onChange={handleChangeTab}>
+          <Tab value={WELL_BOTTOM_HOLE} label="Well And Bottom Hole" />
+          <Tab value={CROSS_SECTION} label="Cross Section" />
+        </Tabs>
+      )}
+      hideMenu={isCrossSection}
     >
-      <Box
-        className={classes.graphRowContainer}
-        display="flex"
-        flexDirection="row"
-        flex="1"
-        justifyContent="space-evenly"
-      >
-        {selectedGraphs.map((graph, i) => {
-          const logId = dataBySection[graph].id;
-          const isFirstGraph = i === 0;
-          return <GraphComponent key={logId} wellId={wellId} logId={logId} isFirstGraph={isFirstGraph} />;
-        })}
-      </Box>
+      {isCrossSection && (
+        <div className={classes.crossSectionDashboard}>
+          <CrossSectionDashboard className={"flex-3"} view={view} updateView={updateView} isReadOnly hideCard />
+        </div>
+      )}
+      {!isCrossSection && (
+        <Box
+          className={classes.graphRowContainer}
+          display="flex"
+          flexDirection="row"
+          flex="1"
+          justifyContent="space-evenly"
+        >
+          {selectedGraphs.map((graph, i) => {
+            const logId = dataBySection[graph].id;
+            const isFirstGraph = i === 0;
+            return <GraphComponent key={logId} wellId={wellId} logId={logId} isFirstGraph={isFirstGraph} />;
+          })}
+        </Box>
+      )}
     </WidgetCard>
   );
 }
 
-WellBottomHoleInfo.propTypes = {};
+WellBottomHoleInfo.propTypes = {
+  wellId: PropTypes.string
+};
 
 export default WellBottomHoleInfo;
