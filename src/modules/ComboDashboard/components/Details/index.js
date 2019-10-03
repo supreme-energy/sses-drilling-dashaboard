@@ -129,6 +129,8 @@ export default function DetailsTable({ showFullTable = false }) {
       <TableBody>
         {details.map((row, index) => {
           const editable = selectedId === row.id && !showFullTable;
+          const rowColor = row.color || "";
+          const rowSelectionColor = row.selectedColor || "";
           const update = (field, method) => {
             return value => {
               updateSegments({ [row.id]: { [field]: Number(value), ...(method && { method }) } });
@@ -171,12 +173,12 @@ export default function DetailsTable({ showFullTable = false }) {
               {Cell(row.fault, editable, update("fault"), false, a =>
                 Knob({
                   ...a,
-                  fill: `#${row.color.toString(16).padStart(6, 0)}`,
-                  outline: `#${row.selectedColor.toString(16).padStart(6, 0)}`
+                  fill: `#${rowColor.toString(16).padStart(6, 0)}`,
+                  outline: `#${rowSelectionColor.toString(16).padStart(6, 0)}`
                 })
               )}
               {Cell(row.dip, editable, update("dip"), false, a =>
-                Knob({ ...a, fill: `#${row.color.toString(16).padStart(6, 0)}`, outline: "#FFF" })
+                Knob({ ...a, fill: `#${rowColor.toString(16).padStart(6, 0)}`, outline: "#FFF" })
               )}
               {Cell(row.tcl, false)}
               {Cell(row.pos, false)}

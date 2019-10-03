@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
@@ -42,9 +42,15 @@ function createGridYAxis(...args) {
 }
 
 function useInterpretationWebglRenderer() {
+  const [canvas, setCanvas] = useState(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    setCanvas(canvasRef.current);
+  }, []);
   const { width, height } = useSize(canvasRef);
-  const [stage, refresh, renderer] = useWebGLRenderer({ canvas: canvasRef.current, width, height });
+
+  const [stage, refresh, renderer] = useWebGLRenderer({ canvas, width, height });
 
   useEffect(refresh, [refresh, width, height]);
 

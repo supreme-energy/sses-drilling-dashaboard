@@ -50,7 +50,7 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
   const [file, setFile] = useState({});
   const [errors, setErrors] = useState([]);
   const hasConflict = !!cmes;
-  console.log("file", file);
+
   const handleRefreshCheck = async () => {
     const { next_survey: newSurvey } = await refresh();
     setView({ type: INITIALIZE, payload: { type: AUTO, newSurvey } });
