@@ -130,8 +130,8 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
 
       const nextFormation = rawFormationsData[index + 1];
       const nextFormationData = nextFormation && nextFormation.data[selectedSurveyIndex];
-
       const y = formationData.tot;
+
       const height = nextFormationData ? nextFormationData.tot - y : 20;
       acc.push({
         y,
@@ -150,7 +150,6 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
 
     return acc;
   }, []);
-
   return items;
 });
 
@@ -168,7 +167,7 @@ const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formati
     return 0;
   }
 
-  return minIndex(firstFormationData.data.slice(0, nrSurveys), (d1, index) => {
+  return minIndex(firstFormationData.data.slice(0, nrSurveys - 1), (d1, index) => {
     const d2 = lastFormationData.data[index];
     const top = d1.tot;
     const bottom = d2.tot;
@@ -223,6 +222,7 @@ export default React.memo(({ container, width }) => {
   const { wellId } = useWellIdContainer();
 
   const selectedSurvey = useSelectedSurvey();
+
   const [surveysAndProjections, surveys] = useComputedSurveysAndProjections();
   const nrSurveys = surveys.length;
   const selectedSurveyIndex = useMemo(

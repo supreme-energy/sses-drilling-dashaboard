@@ -76,8 +76,8 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevProjection };
   let { md, inc, azm, tvd, vs } = { ...projection };
 
-  if (md <= pmd) {
-    return "Warning: Measured depth less than the previous survey. Projections will be reordered after saving";
+  if (md < pmd) {
+    console.warn("Warning: Measured depth less than the previous survey.");
   }
 
   if (inc > 180.0) inc -= 360.0;

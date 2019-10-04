@@ -321,11 +321,11 @@ const recomputeSurveysAndProjections = memoizeOne(
         }
         ca = toDegrees(ca);
         if (ca < 0.0) ca += 360.0;
-        acc[index] = {
+        acc.push({
           ...combinedSvy,
           ca,
           cd
-        };
+        });
       } else {
         // Perform the same formation related fault and dip calculations for both surveys and projections
         const dipPending = pendingState.dip !== undefined;
@@ -387,7 +387,7 @@ const recomputeSurveysAndProjections = memoizeOne(
 
           const caDeg = toDegrees(ca);
 
-          acc[index] = {
+          acc.push({
             ...combinedSvy,
             tvd,
             vs,
@@ -404,23 +404,24 @@ const recomputeSurveysAndProjections = memoizeOne(
             tot,
             bot,
             pos: tcl - tvd
-          };
+          });
         } else {
           const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
           const sign = bitProjPos > 0 ? 1 : -1;
           const cap = bitProjPos > 0 ? Math.max : Math.min;
           const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
-          const itemWithProjection = calculateProjection(
+          const projection = calculateProjection(
             { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
             acc,
             index,
             propazm
           );
-          if (itemWithProjection) {
-            acc[index] = itemWithProjection;
+          if (projection) {
+            acc.push(projection);
           }
         }
       }
+
       return acc;
     }, []);
   }
