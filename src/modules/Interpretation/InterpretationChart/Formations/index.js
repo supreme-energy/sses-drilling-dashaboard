@@ -167,7 +167,7 @@ const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formati
     return 0;
   }
 
-  return minIndex(firstFormationData.data.slice(0, nrSurveys - 1), (d1, index) => {
+  return minIndex(firstFormationData.data.slice(0, nrSurveys), (d1, index) => {
     const d2 = lastFormationData.data[index];
     const top = d1.tot;
     const bottom = d2.tot;
