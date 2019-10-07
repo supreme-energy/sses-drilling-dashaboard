@@ -258,7 +258,7 @@ function useSegmentBiasAndScale({
       const newWidth = width * scale - delta;
       const newScale = newWidth / width;
 
-      updatePendingSegments({ bias: bias + delta / 2, scale: newScale });
+      updatePendingSegments({ bias: bias + delta, scale: newScale });
     },
     [updatePendingSegments, width, bias, scale]
   );
