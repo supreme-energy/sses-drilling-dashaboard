@@ -27,7 +27,7 @@ export default function BitMethod() {
       <InputLabel htmlFor="pterm_method">
         <div className="layout horizontal align-center">
           <span className={css.labelText}>Bit Method</span>
-          <IconButton size="small" aria-label="Help" onClick={handlePopoverOpen} onClickOutside={handlePopoverClose}>
+          <IconButton size="small" aria-label="Help" onClick={handlePopoverOpen}>
             <img src={HelpIcon} />
           </IconButton>
         </div>

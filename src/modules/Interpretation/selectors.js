@@ -243,6 +243,7 @@ export function useCurrentComputedSegments() {
   const { segments } = useComputedSegments();
   const [filteredLogs, , allLogs] = useWellLogsContainer();
   const [{ draftMode }] = useComboContainer();
+
   return getCurentComputedSegments(allLogs, filteredLogs, segments, draftMode);
 }
 
