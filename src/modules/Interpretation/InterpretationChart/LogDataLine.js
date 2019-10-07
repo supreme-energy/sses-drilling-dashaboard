@@ -11,7 +11,7 @@ import PixiContainer from "../../../components/PixiContainer";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = ({ logData, range, extent, draft, container, ...props }) => {
+const LogData = React.memo(({ logData, range, extent, draft, container, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
   const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
 
@@ -44,7 +44,7 @@ const LogData = ({ logData, range, extent, draft, container, ...props }) => {
       )}
     />
   );
-};
+});
 
 function LogDataLine({
   log,
@@ -84,14 +84,23 @@ function LogDataLine({
   ) : null;
 }
 
-export default React.memo(props => {
-  const { draft } = props;
+export default props => {
+  const { draft, refresh } = props;
   const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, props.log && props.log.tablename);
   const colors = useSelectedWellInfoColors();
   const extent = useMemo(() => {
     return logData ? getExtent(logData) : EMPTY_ARRAY;
   }, [logData]);
+
+  const internalState = useRef({ prevData: null });
+  useEffect(() => {
+    if (logData && internalState.current.prevData !== logData.data) {
+      refresh();
+
+      internalState.current.prevData = logData.data;
+    }
+  }, [logData, refresh]);
 
   const lineProps = { extent, colors, logData };
   return (
@@ -100,4 +109,4 @@ export default React.memo(props => {
       {draft && <LogDataLine {...props} draft {...lineProps} />}
     </React.Fragment>
   );
-});
+};

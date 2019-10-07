@@ -35,7 +35,7 @@ import memoizeOne from "memoize-one";
 import debounce from "lodash/debounce";
 import { mean } from "d3-array";
 import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../../actions";
-import { useSelectedSegmentState } from "../../selectors";
+import { useSelectedSegmentState, useSelectedWellLog } from "../../selectors";
 
 export const NORMAL = "NORMAL";
 export const CALCULATED = "CALCULATED";
@@ -532,6 +532,7 @@ const AutoDip = React.memo(
 
 export default function AutoDipContainer() {
   const selectedSegment = useSelectedSegmentState();
+  const { selectedWellLog } = useSelectedWellLog();
   const updateSegments = useUpdateSegmentsByMd();
   const { wellId } = useWellIdContainer();
   const [{ wellInfo }, , updateWell] = useSelectedWellInfoContainer();
@@ -542,11 +543,13 @@ export default function AutoDipContainer() {
 
   const handleApply = useCallback(
     dip => {
-      const changes = { [selectedSegment.endmd]: { dip } };
-      updateSegments(changes);
-      saveWellLogs([selectedSegment], changes);
+      if (selectedWellLog) {
+        const changes = { [selectedSegment.endmd]: { dip } };
+        updateSegments(changes);
+        saveWellLogs([selectedSegment], changes);
+      }
     },
-    [selectedSegment, updateSegments, saveWellLogs]
+    [selectedSegment, updateSegments, saveWellLogs, selectedWellLog]
   );
 
   const internalState = useRef({ handleApply });
@@ -561,7 +564,13 @@ export default function AutoDipContainer() {
 
   // sync reducer with remote data
   useMemo(() => {
-    const fetchedRows = JSON.parse(configString);
+    let fetchedRows = [];
+    try {
+      fetchedRows = JSON.parse(configString);
+    } catch (e) {
+      console.warn("failed to parse configuration");
+    }
+
     dispatch({
       type: "UPDATE_ROW_DATA",
       rowsById: parseFetchedRows(fetchedRows)
