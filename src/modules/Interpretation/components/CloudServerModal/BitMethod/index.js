@@ -48,14 +48,14 @@ export default function BitMethod() {
         >
           <div className={css.popover}>
             <div className={classNames("layout horizontal", css.topRow)}>
-              <div className={css.term}>bit consume</div>
+              <div className={css.term}>Bit Consume</div>
               <span>
                 when selected projection stations will not move and when the bit passes the projection station it will
                 be consumed and be removed from the target tracker
               </span>
             </div>
             <div className="layout horizontal">
-              <div className={css.term}>bit push</div>
+              <div className={css.term}>Bit Push</div>
               <span>
                 when selected projection stations will be pushed forward by the bit projection. As the bit moves with
                 newly imported surveys, the VS of the projection stations will change by the amount of VS difference
