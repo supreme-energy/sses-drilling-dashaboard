@@ -11,7 +11,7 @@ import { useSaveSurveysAndProjections } from "../../../App/actions";
 
 const pixiApp = new PixiCrossSection();
 
-const CrossSection = props => {
+const CrossSection = React.memo(props => {
   const { width, height, viewDirection, view, updateView, isReadOnly } = props;
   const canvas = useRef(null);
   const [mode, setMode] = useState(NORMAL);
@@ -161,7 +161,7 @@ const CrossSection = props => {
   ]);
 
   return <div className={classes.crossSection} ref={canvas} />;
-};
+});
 
 CrossSection.propTypes = {
   width: PropTypes.number,

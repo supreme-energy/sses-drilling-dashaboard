@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
 import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
 import Search from "../../../../components/Search";
 import classes from "./SearchCard.scss";
 import WellList from "./WellList";
@@ -47,7 +46,6 @@ function SearchCard({
         </Tabs>
         <WellList wells={wells || EMPTY_ARRAY} theme={theme} onFavoriteChanged={updateFavorite} />
       </div>
-      <CardActions>Actions</CardActions>
     </Card>
   );
 }

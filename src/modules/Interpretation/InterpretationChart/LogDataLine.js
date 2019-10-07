@@ -84,7 +84,7 @@ function LogDataLine({
   ) : null;
 }
 
-export default props => {
+export default React.memo(props => {
   const { draft } = props;
   const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, props.log && props.log.tablename);
@@ -100,4 +100,4 @@ export default props => {
       {draft && <LogDataLine {...props} draft {...lineProps} />}
     </React.Fragment>
   );
-};
+});

@@ -2,7 +2,13 @@ import React, { useMemo, useRef, useEffect } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
-import { getIsDraft, useComputedDraftSegmentsOnly, getFilteredLogsExtent, getColorForWellLog } from "./selectors";
+import {
+  getIsDraft,
+  useComputedDraftSegmentsOnly,
+  getFilteredLogsExtent,
+  getColorForWellLog,
+  useComputedSegments
+} from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
 import { withWellLogsData, EMPTY_ARRAY } from "../../api";
 import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
@@ -13,7 +19,11 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
     { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale, colorsByWellLog },
     dispatch
   ] = useComboContainer();
-  const { refresh } = useInterpretationRenderer();
+  const {
+    refresh,
+    view,
+    size: { height }
+  } = useInterpretationRenderer();
   const selectedWellLog = logs[selectedWellLogIndex];
   const internalState = useRef({ prevFirstDraft: null });
 
@@ -66,6 +76,9 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
   const [, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
   const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
+  const { byId } = useComputedSegments();
+  const yMin = Math.floor((-1 * view.y) / view.yScale);
+  const yMax = yMin + Math.floor(height / view.yScale);
 
   return (
     <PixiContainer
@@ -75,6 +88,12 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
       child={container =>
         filteredLogList.map((log, index) => {
           const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
+          const computedLog = byId[log.id];
+          const selected = selectedWellLog && log.id === selectedWellLog.id;
+          if (!selected && (computedLog.startdepth > yMax || computedLog.enddepth < yMin)) {
+            return null;
+          }
+
           return (
             <LogDataLine
               draft={draft}
@@ -85,7 +104,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
               key={log.id}
               wellId={wellId}
               container={container}
-              selected={selectedWellLog && log.id === selectedWellLog.id}
+              selected={selected}
             />
           );
         })
