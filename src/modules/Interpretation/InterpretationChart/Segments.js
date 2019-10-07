@@ -57,7 +57,10 @@ const Segment = React.memo(({ segment, view, selected, container, onSegmentClick
 });
 
 export default React.memo(({ segmentsData, container, selectedWellLog, chartWidth }) => {
-  const { view } = useInterpretationRenderer();
+  const {
+    view,
+    size: { height }
+  } = useInterpretationRenderer();
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
   const { toggleMdSelection } = useSelectionActions();
   const onSegmentClick = useCallback(segment => toggleMdSelection(segment.endmd), [toggleMdSelection]);
@@ -68,11 +71,16 @@ export default React.memo(({ segmentsData, container, selectedWellLog, chartWidt
 
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
+  const yMin = Math.floor((-1 * view.y) / view.yScale);
+  const yMax = yMin + Math.floor(height / view.yScale);
 
   return (
     <React.Fragment>
       {segmentsData.map(s => {
         const selected = selectedWellLog && selectedWellLog.id === s.id;
+        if (!selected && (s.startdepth > yMax || s.enddepth < yMin)) {
+          return null;
+        }
         return (
           <Segment
             totalWidth={chartWidth}

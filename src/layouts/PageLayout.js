@@ -28,12 +28,7 @@ import usePrevious from "react-use/lib/usePrevious";
 import { WellLogsProvider } from "../modules/ComboDashboard/containers/wellLogs";
 import { ComboContainerProvider } from "../modules/ComboDashboard/containers/store";
 
-const PageTabs = ({
-  match: {
-    params: { wellId, page }
-  },
-  history
-}) => {
+const PageTabs = React.memo(({ match: { params: { wellId, page } }, history }) => {
   const { setWellId } = useWellIdContainer();
   setWellId(wellId);
   const actualPage = page || "explorer";
@@ -104,7 +99,7 @@ const PageTabs = ({
       </Tabs>
     </div>
   );
-};
+});
 
 export const PageLayout = ({ children, history }) => {
   return (

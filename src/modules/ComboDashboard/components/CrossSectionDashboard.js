@@ -39,13 +39,8 @@ export const CrossSectionDashboard = React.memo(
     const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
     const [activeTab, changeActiveTab] = useState(WELL_PLAN);
 
-    return (
-      <WidgetCard
-        className={classNames(classes.crossSectionDash, className)}
-        title="Cross Section"
-        hideCard={hideCard}
-        hideMenu
-      >
+    const tabs = useMemo(
+      () => (
         <Tabs
           className={classNames(classes.tabs, { [classes.hiddenCardTabs]: hideCard })}
           value={viewDirection}
@@ -57,6 +52,18 @@ export const CrossSectionDashboard = React.memo(
           <Tab label="Vertical" value={VERTICAL} className={classes.tab} />
           <Tab label="Horizontal" value={HORIZONTAL} className={classes.tab} />
         </Tabs>
+      ),
+      [hideCard, viewDirection]
+    );
+
+    return (
+      <WidgetCard
+        className={classNames(classes.crossSectionDash, className)}
+        title="Cross Section"
+        hideCard={hideCard}
+        hideMenu
+      >
+        {tabs}
         <div className={classNames(classes.responsiveWrapper, classes.column)}>
           <div className={classNames(classes.column, classes.grow)}>
             <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
