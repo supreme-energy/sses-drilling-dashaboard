@@ -143,8 +143,8 @@ export function useWellInfo(wellId) {
   }, [wellId, serializedRefresh, requestId]);
 
   const updateWell = useCallback(
-    ({ wellId, field, value, data }) => {
-      const props = data || { [field]: value };
+    ({ wellId, field, value, data: newData }) => {
+      const props = newData || { [field]: value };
       const optimisticResult = {
         ...data,
         wellinfo: {
@@ -166,7 +166,7 @@ export function useWellInfo(wellId) {
         optimisticResult
       });
     },
-    [serializedUpdateFetch, wellInfo]
+    [serializedUpdateFetch, wellInfo, data]
   );
 
   const updateAutoRc = useCallback(
