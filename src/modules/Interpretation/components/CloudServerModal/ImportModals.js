@@ -16,6 +16,7 @@ import { useManualImport, useCloudImportSurveys } from "../../../../api";
 import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
+import BitMethod from "./BitMethod";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
@@ -57,16 +58,21 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
         </IconButton>
       </DialogTitle>
       <DialogContent className={classes.importDialogContent}>
-        <DialogContentText>
-          Choose a file to import a new survey. You will be warned of any conflicts.
-        </DialogContentText>
-        <input accept=".las" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
-        <label htmlFor="manual-import-file">
-          <Button component="span" color="primary" variant="outlined">
-            Choose File
-          </Button>
-        </label>
-        <span className={classes.fileName}>{file.name}</span>
+        <div className="layout vertical">
+          <Box display="flex" flexDirection="column" mb={3}>
+            <DialogContentText>
+              Choose a file to import a new survey. You will be warned of any conflicts.
+            </DialogContentText>
+            <input accept=".las" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
+            <label htmlFor="manual-import-file">
+              <Button component="span" color="primary" variant="outlined">
+                Choose File
+              </Button>
+            </label>
+            <span className={classes.fileName}>{file.name}</span>
+          </Box>
+          <BitMethod />
+        </div>
       </DialogContent>
       <DialogActions className={classes.importDialogActions}>
         <Button color="primary" onClick={handleClose}>
@@ -122,7 +128,7 @@ export const AutoImportModal = React.memo(
             </DialogContentText>
           )}
 
-          <Box display="flex" flexDirection="row">
+          <Box display="flex" flexDirection="row" mb={2}>
             {newSurvey && (
               <Box className={classes.newSurveyContainer} display="flex" flexDirection="column" flex={1}>
                 <Typography variant="subtitle1">Server Data Summary</Typography>
@@ -165,6 +171,7 @@ export const AutoImportModal = React.memo(
               </Box>
             )}
           </Box>
+          <BitMethod />
         </DialogContent>
         <Box display="flex" justifyContent="space-between">
           <Button

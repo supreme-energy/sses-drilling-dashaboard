@@ -1,0 +1,18 @@
+.labelText {
+    margin-right: 5px;
+    flex: none;
+}
+
+.popover {
+    padding: 10px;
+    max-width: 400px;
+    .term {
+        font-weight: bold;
+        width: 120px;
+        flex: none;
+    }
+
+    .topRow {
+        margin-bottom: 10px;
+    }
+}
