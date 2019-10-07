@@ -85,13 +85,22 @@ function LogDataLine({
 }
 
 export default props => {
-  const { draft } = props;
+  const { draft, refresh } = props;
   const { wellId } = useWellIdContainer();
   const [logData] = useWellLogData(wellId, props.log && props.log.tablename);
   const colors = useSelectedWellInfoColors();
   const extent = useMemo(() => {
     return logData ? getExtent(logData) : EMPTY_ARRAY;
   }, [logData]);
+
+  const internalState = useRef({ prevData: null });
+  useEffect(() => {
+    if (logData && internalState.current.prevData !== logData.data) {
+      refresh();
+
+      internalState.current.prevData = logData.data;
+    }
+  }, [logData, refresh]);
 
   const lineProps = { extent, colors, logData };
   return (

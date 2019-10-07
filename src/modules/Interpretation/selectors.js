@@ -259,6 +259,7 @@ const recomputeLogData = (logData, log, draftLogsById, computedSegments, draft, 
   if (logData && computedSegment) {
     const currentLogData = { ...log, fault: computedSegment.fault };
     const calculateDepth = getCalculateDepth(currentLogData, prevComputedSegment);
+
     return {
       ...logData,
       scalebias: computedSegment.scalebias,
