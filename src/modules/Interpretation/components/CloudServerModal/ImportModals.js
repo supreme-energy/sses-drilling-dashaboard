@@ -11,7 +11,11 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
-import { useSurveysDataContainer, useFormationsDataContainer } from "../../../App/Containers";
+import {
+  useSurveysDataContainer,
+  useFormationsDataContainer,
+  useProjectionsDataContainer
+} from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
 import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
@@ -23,6 +27,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
   const { refreshSurveys } = useSurveysDataContainer();
   const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
   const { refreshFormations } = useFormationsDataContainer();
+  const { refreshProjections } = useProjectionsDataContainer();
 
   const handleImport = async () => {
     const data = new FormData();
@@ -37,6 +42,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
     if (success) {
       await uploadFile(wellId, fileName);
       refreshSurveys();
+      refreshProjections();
       refreshWellLogs();
       refreshFormations();
       handleClose();
@@ -92,6 +98,7 @@ export const AutoImportModal = React.memo(
     const { refreshSurveys } = useSurveysDataContainer();
     const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
     const { refreshFormations } = useFormationsDataContainer();
+    const { refreshProjections } = useProjectionsDataContainer();
 
     const handleCleanData = async () => {
       await deleteSurveys(wellId);
@@ -103,6 +110,7 @@ export const AutoImportModal = React.memo(
       await importNewSurvey(wellId);
       const res = await refreshCloudServer();
       refreshSurveys();
+      refreshProjections();
       refreshWellLogs();
       refreshFormations();
       if (!res.next_survey) {
