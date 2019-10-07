@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, Select, MenuItem, InputLabel, IconButton, Typography } from "@material-ui/core";
+import { FormControl, Select, MenuItem, InputLabel, IconButton } from "@material-ui/core";
 import { useSelectedWellInfoContainer, useWellIdContainer } from "../../../../App/Containers";
 import HelpIcon from "../../../../../assets/help_24px.svg";
 import Popover from "@material-ui/core/Popover";
