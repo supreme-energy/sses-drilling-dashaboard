@@ -101,7 +101,7 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
             setView={setView}
             hasConflict={hasConflict}
             handleClose={handleCloseAutoImport}
-            refresh={refresh}
+            refreshCloudServer={refresh}
             md={md}
             inc={inc}
             azm={azm}
