@@ -207,16 +207,7 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     if (hasSurveys && !hasFetchedTimeSliderData.current) {
       startTimeSliderFetch();
     }
-  }, [
-    hasSurveys,
-    hasProjections,
-    getTimeSliderData,
-    maxSurveyDepth,
-    maxProjectionDepth,
-    minSurveyDepth,
-    wellId,
-    maxDepth
-  ]);
+  }, [hasSurveys, getTimeSliderData, minSurveyDepth, wellId, maxDepth]);
 
   useEffect(() => {
     refresh();
@@ -246,26 +237,18 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       const isLastDataIndex = data.length - 1 <= Math.round(rightBoundIndex);
       const beginningDateMoving = _.get(data, `[${Math.floor(leftBoundIndexMoving)}].rig_time`, "");
       const endDateMoving = !isLastDataIndex ? _.get(data, `[${Math.round(rightBoundIndex)}].rig_time`, "") : "NOW";
-      setSliderInterval({
-        firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),
-        lastDepth: _.get(data, `[${Math.round(stepIndex)}].hole_depth`, data[data.length - 1].hole_depth),
-        isLastIndex: isLastDataIndex
-      });
 
       setGlobalDates([beginningDateMoving, endDateMoving]);
+
+      // TODO: If Time Slider is revived, this code will set slider interval when slider moves
+      // Otherwise, it is not needed right now
+      // setSliderInterval(interval => ({
+      //   firstDepth: _.get(data, `[${Math.round(leftBoundIndexMoving)}].hole_depth`),
+      //   lastDepth: _.get(data, `[${Math.round(stepIndex)}].hole_depth`, data[data.length - 1].hole_depth),
+      //   isLastIndex: isLastDataIndex
+      // }));
     }
-  }, [
-    data,
-    view,
-    width,
-    step,
-    maxStep,
-    setSliderInterval,
-    setDrillPhase,
-    leftBoundIndexMoving,
-    rightBoundIndex,
-    stepIndex
-  ]);
+  }, [data, step, maxStep, setSliderInterval, leftBoundIndexMoving, rightBoundIndex, stepIndex]);
 
   useEffect(() => {
     if (!drillPhaseObj.set) {
@@ -286,7 +269,6 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
     sliderInterval.firstDepth,
     sliderInterval.lastDepth,
     wellSections,
-    drillPhaseObj.phase,
     drillPhaseObj.set,
     data.length,
     maxStep
