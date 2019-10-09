@@ -78,7 +78,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
   const { byId } = useComputedSegments();
   const yMin = Math.floor((-1 * view.y) / view.yScale);
-  const yMax = yMin + Math.floor(height / view.yScale);
+  const yMax = yMin + Math.floor((height + view.yScale) / view.yScale);
 
   return (
     <PixiContainer
@@ -90,7 +90,9 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
           const draft = draftMode && getIsDraft(index, selectedWellLogIndex, nrPrevSurveysToDraft);
           const computedLog = byId[log.id];
           const selected = selectedWellLog && log.id === selectedWellLog.id;
-          if (!selected && (computedLog.startdepth > yMax || computedLog.enddepth < yMin)) {
+          const logMin = Math.min(computedLog.startdepth, computedLog.enddepth);
+          const logMax = Math.max(computedLog.startdepth, computedLog.enddepth);
+          if (!selected && (logMin > yMax || logMax < yMin)) {
             return null;
           }
 
