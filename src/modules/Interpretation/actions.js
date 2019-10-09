@@ -142,7 +142,7 @@ export function useSaveWellLogActions() {
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
 
   const saveWellLogs = useCallback(
-    (logs, pendingSegmentsState, fieldsToSave) => {
+    async (logs, pendingSegmentsState, fieldsToSave) => {
       const data = logs
         .map(log => {
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
@@ -183,7 +183,7 @@ export function useSaveWellLogActions() {
 
       replaceSurveysAndProjections();
 
-      const result = updateWellLogs(data);
+      const result = await updateWellLogs(data);
       updateSegments(resetLogProps);
       return result;
     },
