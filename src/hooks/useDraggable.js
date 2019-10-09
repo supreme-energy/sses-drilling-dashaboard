@@ -36,12 +36,11 @@ export default function useDraggable({
       initialMouse: {},
       onMouseMove: event => {
         const interactionState = interactionStateRef.current;
+        event.stopPropagation();
         if (!interactionState.isDragging) {
           return;
         }
         const currMouse = event.data.global;
-
-        event.stopPropagation();
 
         if (interactionState.prevMouse.x !== currMouse.x || interactionState.prevMouse.y !== currMouse.y) {
           interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
@@ -61,10 +60,13 @@ export default function useDraggable({
     function enableMouseInteractions() {
       const interactionState = interactionStateRef.current;
       const onMouseDown = e => {
-        const pos = e.data.global;
-        Object.assign(interactionState.prevMouse, pos);
-        Object.assign(interactionState.initialMouse, pos);
-        interactionState.isDragging = true;
+        if (!interactionState.isDragging) {
+          const pos = e.data.global;
+          Object.assign(interactionState.prevMouse, pos);
+          Object.assign(interactionState.initialMouse, pos);
+          interactionState.isDragging = true;
+          container.on("mousemove", interactionState.onMouseMove);
+        }
       };
 
       const onMouseOut = e => {
@@ -90,6 +92,8 @@ export default function useDraggable({
           if (canvas) {
             canvas.style.cursor = "default";
           }
+
+          container.off("mousemove", interactionState.onMouseMove);
         }
       };
       const container = getContainer();
@@ -100,7 +104,6 @@ export default function useDraggable({
         container.on("mousedown", onMouseDown);
         container.on("mouseup", onMouseUp);
         container.on("mouseupoutside", onMouseUp);
-        container.on("mousemove", interactionState.onMouseMove);
       }
 
       return () => {
@@ -110,7 +113,6 @@ export default function useDraggable({
           container.off("mousedown", onMouseDown);
           container.off("mouseup", onMouseUp);
           container.off("mouseupoutside", onMouseUp);
-          container.off("mousemove", interactionState.onMouseMove);
         }
       };
     },
