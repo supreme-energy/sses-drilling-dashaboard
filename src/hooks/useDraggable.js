@@ -43,8 +43,10 @@ export default function useDraggable({
 
         event.stopPropagation();
 
-        interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
-        Object.assign(interactionState.prevMouse, currMouse);
+        if (interactionState.prevMouse.x !== currMouse.x || interactionState.prevMouse.y !== currMouse.y) {
+          interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
+          Object.assign(interactionState.prevMouse, currMouse);
+        }
       }
     };
   });
@@ -57,14 +59,12 @@ export default function useDraggable({
 
   useEffect(
     function enableMouseInteractions() {
+      const interactionState = interactionStateRef.current;
       const onMouseDown = e => {
-        const container = getContainer();
-        const interactionState = interactionStateRef.current;
         const pos = e.data.global;
         Object.assign(interactionState.prevMouse, pos);
         Object.assign(interactionState.initialMouse, pos);
         interactionState.isDragging = true;
-        container.on("mousemove", interactionState.onMouseMove);
       };
 
       const onMouseOut = e => {
@@ -83,11 +83,9 @@ export default function useDraggable({
       };
 
       const onMouseUp = e => {
-        const container = getContainer();
-        const interactionState = interactionStateRef.current;
         if (interactionState.isDragging) {
           interactionState.isDragging = false;
-          container.off("mousemove", interactionState.onMouseMove);
+
           interactionState.onDragEnd(e);
           if (canvas) {
             canvas.style.cursor = "default";
@@ -102,6 +100,7 @@ export default function useDraggable({
         container.on("mousedown", onMouseDown);
         container.on("mouseup", onMouseUp);
         container.on("mouseupoutside", onMouseUp);
+        container.on("mousemove", interactionState.onMouseMove);
       }
 
       return () => {
@@ -111,6 +110,7 @@ export default function useDraggable({
           container.off("mousedown", onMouseDown);
           container.off("mouseup", onMouseUp);
           container.off("mouseupoutside", onMouseUp);
+          container.off("mousemove", interactionState.onMouseMove);
         }
       };
     },

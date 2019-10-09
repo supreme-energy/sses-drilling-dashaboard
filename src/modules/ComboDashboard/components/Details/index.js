@@ -27,6 +27,7 @@ import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
 import { EMPTY_FIELD } from "../../../../constants/format";
 import isNumber from "../../../../utils/isNumber";
+import useRef from "react-powertools/hooks/useRef";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -54,28 +55,40 @@ const iconStyle = {
   marginRight: 0
 };
 
-function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
-  if (editable) {
-    return (
+const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
+  const internalState = useRef({ handleChange: onChange });
+
+  internalState.current.handleChange = onChange;
+
+  const el = useMemo(
+    () => (
       <TextField
         value={value}
-        onChange={e => changeHandler(e.target.value)}
         type="number"
+        onChange={internalState.current.handleChange}
         className={classNames(classes.textField, classes.cell, { [classes.methodInput]: markAsInput })}
         InputLabelProps={{
           shrink: true
         }}
         InputProps={
-          Icon && {
+          icon && {
             startAdornment: (
               <InputAdornment position="start" style={iconStyle}>
-                <Icon className={classes.icon} />
+                <icon className={classes.icon} />
               </InputAdornment>
             )
           }
         }
       />
-    );
+    ),
+    [icon, markAsInput, value]
+  );
+  return el;
+};
+
+function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
+  if (editable) {
+    return <TextFieldCell value={value} onChange={changeHandler} markAsInput={markAsInput} icon={Icon} />;
   } else {
     return <TableCell className={classes.cell}>{(isNumber(value) && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
   }
