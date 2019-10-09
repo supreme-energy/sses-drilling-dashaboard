@@ -65,7 +65,7 @@ const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
       <TextField
         value={value}
         type="number"
-        onChange={internalState.current.handleChange}
+        onChange={e => internalState.current.handleChange(e.target.value)}
         className={classNames(classes.textField, classes.cell, { [classes.methodInput]: markAsInput })}
         InputLabelProps={{
           shrink: true
