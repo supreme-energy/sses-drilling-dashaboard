@@ -163,28 +163,10 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
 
       setGlobalDates([beginningDate, endDate]);
 
-      setSliderInterval(interval => ({
-        ...interval,
-        firstDepth: drillPhaseObj.phaseStart,
-        lastDepth: drillPhaseObj.phaseEnd
-      }));
-
       setSliderStep({ type: "UPDATE", payload: { step: indexDiff, direction: 1, maxStep: indexDiff } });
       setDrillPhase({ type: "SET", payload: { set: false } });
     }
-  }, [
-    data,
-    dataMin,
-    getInitialViewYScaleValue,
-    height,
-    setSliderInterval,
-    width,
-    holeDepthLeftIndex,
-    holeDepthRightIndex,
-    setDrillPhase,
-    drillPhaseObj.phaseStart,
-    drillPhaseObj.phaseEnd
-  ]);
+  }, [data, dataMin, getInitialViewYScaleValue, height, width, holeDepthLeftIndex, holeDepthRightIndex, setDrillPhase]);
 
   // set initial scale
   useMemo(() => {
@@ -192,6 +174,14 @@ const TimeSlider = React.memo(({ wellId, expanded }) => {
       onReset();
     }
   }, [width, height, expanded, data, onReset]);
+
+  useEffect(() => {
+    setSliderInterval(interval => ({
+      ...interval,
+      firstDepth: drillPhaseObj.phaseStart,
+      lastDepth: drillPhaseObj.phaseEnd
+    }));
+  }, [drillPhaseObj.phaseStart, drillPhaseObj.phaseEnd, setSliderInterval]);
 
   useEffect(() => {
     function startTimeSliderFetch() {
