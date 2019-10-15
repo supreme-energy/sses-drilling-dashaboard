@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import debouncePromise from "awesome-debounce-promise";
 import TextField from "./TextField";
 import uniqueId from "lodash/uniqueId";
+import useMemo from "react-powertools/hooks/useMemo";
 
 const defaultProps = {
   debounceInterval: 1000,
@@ -11,8 +12,8 @@ const defaultProps = {
   format: d => d
 };
 
-export const useDebounceSave = ({ value, onSave, debounceInterval }) => {
-  const [internalValue, setInternalValue] = useState(null);
+export const useDebounceSave = ({ onSave, debounceInterval, value }) => {
+  const [{ internalValue, isPending }, setState] = useState({ internalValue: "", isPending: false });
   const internalState = useRef({});
   const saveDebounced = useCallback(debouncePromise(onSave, debounceInterval), [debounceInterval, onSave]);
 
@@ -24,31 +25,52 @@ export const useDebounceSave = ({ value, onSave, debounceInterval }) => {
     [saveDebounced]
   );
 
+  // sync internal state value with value
+  useMemo(() => setState(state => ({ ...state, internalValue: value })), [value]);
+
   const onChangeHandler = useCallback(
     async e => {
       const requestId = uniqueId();
       internalState.current.lastRequestId = requestId;
-      setInternalValue(e.target.value);
+      const value = e.target.value;
+      setState(state => ({ ...state, internalValue: value, isPending: true }));
 
       let resultRequestId;
       try {
-        resultRequestId = await saveValue(e.target.value, requestId);
+        resultRequestId = await saveValue(value, requestId);
       } finally {
         if (resultRequestId === internalState.current.lastRequestId) {
-          setInternalValue(null);
+          setState(state => ({ ...state, isPending: false }));
         }
       }
     },
     [saveValue]
   );
 
-  return [internalValue !== null ? internalValue : value, onChangeHandler];
+  return [internalValue, isPending, onChangeHandler];
 };
 
 export function DebouncedTextField({ value, onChange, debounceInterval, format, ...inputProps }) {
-  const [actualValue, onChangeHandler] = useDebounceSave({ value, onSave: onChange, debounceInterval });
+  const [isFocused, updateIsFocused] = useState(false);
+  const [internalValue, isPending, onChangeHandler] = useDebounceSave({
+    value,
+    onSave: onChange,
+    debounceInterval,
+    isFocused
+  });
 
-  return <TextField {...inputProps} value={format(actualValue)} onChange={onChangeHandler} />;
+  return (
+    <TextField
+      {...inputProps}
+      value={format(isPending || isFocused ? internalValue : value)}
+      onFocus={() => updateIsFocused(true)}
+      onBlur={e => {
+        inputProps.onBlur && inputProps.onBlur(e);
+        updateIsFocused(false);
+      }}
+      onChange={onChangeHandler}
+    />
+  );
 }
 
 DebouncedTextField.propsTypes = {
