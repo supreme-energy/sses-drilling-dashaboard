@@ -29,7 +29,8 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
       <NumericDebouceTextField
         debounceInterval={1000}
         variant="filled"
-        value={mask(wellInfo[field])}
+        format={mask}
+        value={wellInfo[field]}
         onChange={changeHandler}
         className={classes.textField}
         {...textProps}
