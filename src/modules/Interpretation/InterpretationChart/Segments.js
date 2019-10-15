@@ -72,13 +72,16 @@ export default React.memo(({ segmentsData, container, selectedWellLog, chartWidt
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
   const yMin = Math.floor((-1 * view.y) / view.yScale);
-  const yMax = yMin + Math.floor(height / view.yScale);
+  const yMax = yMin + Math.floor((height + view.yScale) / view.yScale);
 
   return (
     <React.Fragment>
       {segmentsData.map(s => {
         const selected = selectedWellLog && selectedWellLog.id === s.id;
-        if (!selected && (s.startdepth > yMax || s.enddepth < yMin)) {
+        const logMin = Math.min(s.startdepth, s.enddepth);
+        const logMax = Math.max(s.startdepth, s.enddepth);
+
+        if (!selected && (logMin > yMax || logMax < yMin)) {
           return null;
         }
         return (

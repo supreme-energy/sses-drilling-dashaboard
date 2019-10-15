@@ -36,15 +36,18 @@ export default function useDraggable({
       initialMouse: {},
       onMouseMove: event => {
         const interactionState = interactionStateRef.current;
+
+        event.stopPropagation();
         if (!interactionState.isDragging) {
           return;
         }
+
         const currMouse = event.data.global;
 
-        event.stopPropagation();
-
-        interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
-        Object.assign(interactionState.prevMouse, currMouse);
+        if (interactionState.prevMouse.x !== currMouse.x || interactionState.prevMouse.y !== currMouse.y) {
+          interactionStateRef.current.onDrag(event, interactionState.prevMouse, interactionState.initialMouse);
+          Object.assign(interactionState.prevMouse, currMouse);
+        }
       }
     };
   });
@@ -57,14 +60,20 @@ export default function useDraggable({
 
   useEffect(
     function enableMouseInteractions() {
+      const interactionState = interactionStateRef.current;
+      const container = getContainer();
+
       const onMouseDown = e => {
-        const container = getContainer();
-        const interactionState = interactionStateRef.current;
-        const pos = e.data.global;
-        Object.assign(interactionState.prevMouse, pos);
-        Object.assign(interactionState.initialMouse, pos);
-        interactionState.isDragging = true;
-        container.on("mousemove", interactionState.onMouseMove);
+        if (e.target !== container) {
+          return;
+        }
+        if (!interactionState.isDragging) {
+          const pos = e.data.global;
+          Object.assign(interactionState.prevMouse, pos);
+          Object.assign(interactionState.initialMouse, pos);
+          interactionState.isDragging = true;
+          container.on("mousemove", interactionState.onMouseMove);
+        }
       };
 
       const onMouseOut = e => {
@@ -83,18 +92,21 @@ export default function useDraggable({
       };
 
       const onMouseUp = e => {
-        const container = getContainer();
-        const interactionState = interactionStateRef.current;
+        if (e.target !== container) {
+          return;
+        }
         if (interactionState.isDragging) {
           interactionState.isDragging = false;
-          container.off("mousemove", interactionState.onMouseMove);
+
           interactionState.onDragEnd(e);
           if (canvas) {
             canvas.style.cursor = "default";
           }
+
+          container.off("mousemove", interactionState.onMouseMove);
         }
       };
-      const container = getContainer();
+
       if (container) {
         container.on("mouseout", onMouseOut);
 

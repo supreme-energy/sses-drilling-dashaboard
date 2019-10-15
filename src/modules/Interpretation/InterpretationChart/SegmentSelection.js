@@ -209,6 +209,7 @@ const SegmentSelection = ({
   const segmentRef = useRef(null);
   const { onSegmentDrag, onEndSegmentDrag, onStartSegmentDrag } = useDragActions();
   const { saveSelectedWellLog } = useSaveWellLogActions();
+  const internalState = useRef({ currentOperation: null, endCurrentOperation: null });
 
   const [
     {
@@ -221,6 +222,9 @@ const SegmentSelection = ({
   const startInteractions = useCallback(() => {
     if (!interactionsRunning) {
       dispatch({ type: "START_INTERACTIONS" });
+      internalState.current.currentOperation = new Promise(
+        resolve => (internalState.current.endCurrentOperation = resolve)
+      );
     }
   }, [interactionsRunning, dispatch]);
 
@@ -253,7 +257,9 @@ const SegmentSelection = ({
   const endLineRef = useRef(null);
   const segmentDragContainer = useRef(null);
   const onDragEnd = useCallback(() => {
-    !draftMode && saveSelectedWellLog();
+    const { endCurrentOperation } = internalState.current;
+    endCurrentOperation && endCurrentOperation();
+    !draftMode && saveSelectedWellLog(null, () => internalState.current.currentOperation);
     dispatch({ type: "STOP_INTERACTIONS" });
   }, [saveSelectedWellLog, draftMode]);
   const { refresh } = useInterpretationRenderer();
