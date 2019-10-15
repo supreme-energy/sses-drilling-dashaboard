@@ -16,11 +16,11 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
 
   const changeHandler = useCallback(
     async value => {
-      await debounceAction(value);
+      await debounceAction(mask(value));
       await updateWell({ wellId, field, value: value });
       refreshFetchStore();
     },
-    [debounceAction, field, updateWell, refreshFetchStore, wellId]
+    [debounceAction, field, updateWell, refreshFetchStore, wellId, mask]
   );
 
   return (
