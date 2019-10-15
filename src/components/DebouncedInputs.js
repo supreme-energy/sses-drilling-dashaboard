@@ -32,7 +32,7 @@ export const useDebounceSave = ({ value, onSave, debounceInterval }) => {
 
       let resultRequestId;
       try {
-        resultRequestId = await saveValue(e.target.value);
+        resultRequestId = await saveValue(e.target.value, requestId);
       } finally {
         if (resultRequestId === internalState.current.lastRequestId) {
           setInternalValue(null);
