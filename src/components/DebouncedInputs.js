@@ -12,7 +12,7 @@ const defaultProps = {
   format: d => d
 };
 
-export const useDebounceSave = ({ onSave, debounceInterval, value }) => {
+export const useDebounceSave = ({ onSave, debounceInterval, value, isFocused }) => {
   const [{ internalValue, isPending }, setState] = useState({ internalValue: "", isPending: false });
   const internalState = useRef({});
   const saveDebounced = useCallback(debouncePromise(onSave, debounceInterval), [debounceInterval, onSave]);
@@ -26,7 +26,7 @@ export const useDebounceSave = ({ onSave, debounceInterval, value }) => {
   );
 
   // sync internal state value with value
-  useMemo(() => setState(state => ({ ...state, internalValue: value })), [value]);
+  useMemo(() => !isFocused && setState(state => ({ ...state, internalValue: value })), [value, isFocused]);
 
   const onChangeHandler = useCallback(
     async e => {

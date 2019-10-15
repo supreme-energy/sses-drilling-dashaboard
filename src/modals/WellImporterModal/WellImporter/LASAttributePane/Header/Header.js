@@ -54,8 +54,8 @@ const Header = ({ className, onClickCancel }) => {
       return { ...acc, [key]: value };
     }, {});
 
-    if (data.latitude || data.longitude) {
-      const position = new Coordinates(`${data.latitude} ${data.longitude}`);
+    if (data.latitude && data.longitude) {
+      const position = new Coordinates(`${data.latitude || 0} ${data.longitude || 0}`);
       const [easting, northing] = defaultTransform(null).inverse([position.getLongitude(), position.getLatitude()]);
 
       data.survey_easting = easting;
