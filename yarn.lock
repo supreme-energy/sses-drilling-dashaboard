@@ -9739,6 +9739,10 @@ react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-powertools@./react-powertools-v2.0.2.tgz:
+  version "2.0.2"
+  resolved "./react-powertools-v2.0.2.tgz#e4d8c204506af293374ea6fee294f85c1044e786"
+
 react-powertools@./react-powertools_v2.0.1.tgz:
   version "2.0.1"
   resolved "./react-powertools_v2.0.1.tgz#53f1909394de4b8cc5faf133c1efcf61b1ec866e"

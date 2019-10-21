@@ -547,7 +547,7 @@ const surveysTransform = memoizeOne(data => {
 });
 
 export function useFetchSurveys(wellId) {
-  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult, refresh }] = useFetch(
+  const [data, isLoading, error, isPolling, isFetchingMore, { fetch, replaceResult }] = useFetch(
     {
       path: GET_WELL_SURVEYS,
       query: {
@@ -565,6 +565,22 @@ export function useFetchSurveys(wellId) {
   );
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+
+  // current refresh action does not return a promise so we create a custom refresh
+  const refresh = useCallback(
+    () =>
+      fetch(
+        {
+          path: GET_WELL_SURVEYS,
+          query: {
+            seldbname: wellId
+          },
+          cache: "no-cache"
+        },
+        (_, data) => surveysTransform(data)
+      ),
+    [fetch, wellId]
+  );
 
   const updateSurvey = useCallback(
     ({ surveyId, fields = {} }) => {

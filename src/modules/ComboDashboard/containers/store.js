@@ -13,6 +13,8 @@ export const surveyVisibility = {
 
 const initialState = {
   selectionById: {},
+  // falsy | Number:  this is changed each time we need to adjust viewport to ensure last selected item is in viewport
+  resetViewportCounter: 0,
   pendingSegmentsState: {},
   logsBiasAndScale: {},
   currentEditedLog: null,
@@ -41,10 +43,35 @@ function selectionByIdReducer(selectionById, action) {
         [action.id]: true
       };
     }
+    case "CHANGE_SELECTION": {
+      if (!selectionById[action.id]) {
+        return {
+          [action.id]: true
+        };
+      }
+
+      return selectionById;
+    }
     case "DESELECT_ALL":
       return {};
     default:
       return selectionById;
+  }
+}
+
+function resetViewportCounterReducer(resetViewportCounter, action) {
+  switch (action.type) {
+    case "TOGGLE_SELECTION":
+    case "CHANGE_SELECTION": {
+      if (action.ensureSelectionInViewport) {
+        return Date.now();
+      }
+      return 0;
+    }
+    case "RESET_VIEWPORT_COUNTER":
+      return Date.now();
+    default:
+      return resetViewportCounter;
   }
 }
 
@@ -226,6 +253,7 @@ const comboStoreReducer = (state, action) => {
   return {
     ...state,
     selectionById: selectionByIdReducer(state.selectionById, action),
+    resetViewportCounter: resetViewportCounterReducer(state.resetViewportCounter, action),
     pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state),
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),

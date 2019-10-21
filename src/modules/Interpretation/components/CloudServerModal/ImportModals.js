@@ -11,23 +11,21 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
-import {
-  useSurveysDataContainer,
-  useFormationsDataContainer,
-  useProjectionsDataContainer
-} from "../../../App/Containers";
+import { useFormationsDataContainer, useProjectionsDataContainer } from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
 import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 import BitMethod from "./BitMethod";
+import { useRefreshSurveysAndUpdateSelection } from "../../actions";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
-  const { refreshSurveys } = useSurveysDataContainer();
+
   const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
   const { refreshFormations } = useFormationsDataContainer();
   const { refreshProjections } = useProjectionsDataContainer();
+  const refreshSurveysAndUpdateSelection = useRefreshSurveysAndUpdateSelection();
 
   const handleImport = async () => {
     const data = new FormData();
@@ -41,7 +39,8 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
 
     if (success) {
       await uploadFile(wellId, fileName);
-      refreshSurveys();
+
+      refreshSurveysAndUpdateSelection();
       refreshProjections();
       refreshWellLogs();
       refreshFormations();
@@ -95,10 +94,10 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
 export const AutoImportModal = React.memo(
   ({ wellId, hasConflict, newSurvey, handleClose, setView, refreshCloudServer, md, inc, azm }) => {
     const { importNewSurvey, deleteSurveys } = useCloudImportSurveys();
-    const { refreshSurveys } = useSurveysDataContainer();
     const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
     const { refreshFormations } = useFormationsDataContainer();
     const { refreshProjections } = useProjectionsDataContainer();
+    const refreshSurveysAndUpdateSelection = useRefreshSurveysAndUpdateSelection();
 
     const handleCleanData = async () => {
       await deleteSurveys(wellId);
@@ -109,7 +108,7 @@ export const AutoImportModal = React.memo(
     const handleImport = async () => {
       await importNewSurvey(wellId);
       const res = await refreshCloudServer();
-      refreshSurveys();
+      refreshSurveysAndUpdateSelection();
       refreshProjections();
       refreshWellLogs();
       refreshFormations();

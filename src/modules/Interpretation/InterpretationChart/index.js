@@ -17,7 +17,6 @@ import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColo
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
 import * as PIXI from "pixi.js";
-
 import Formations from "./Formations";
 import LogLines from "../LogLines";
 import { min } from "d3-array";
@@ -105,7 +104,7 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
 
   const { selectedWellLog, selectedWellLogIndex } = useSelectedWellLog();
 
-  const internalStateRef = useRef({ scaleInitialized: false });
+  const internalStateRef = useRef({ scaleInitialized: false, prevResetCounter: null });
   const {
     current: { scaleInitialized }
   } = internalStateRef;
@@ -146,13 +145,27 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
       nrPrevSurveysToDraft,
       currentEditedLog,
       logsBiasAndScale,
-      colorsByWellLog
+      colorsByWellLog,
+      resetViewportCounter
     }
   ] = useComboContainer();
 
   const [{ editMode: formationsEditMode }] = useFormationsStore();
 
   const colors = useSelectedWellInfoColors();
+
+  useEffect(() => {
+    if (resetViewportCounter && selectedWellLog && internalStateRef.current.prevResetCounter !== resetViewportCounter) {
+      const yMin = Math.floor((-1 * view.y) / view.yScale);
+      const yMax = yMin + Math.floor((height + view.yScale) / view.yScale);
+      internalStateRef.current.prevResetCounter = resetViewportCounter;
+
+      if (selectedWellLog.startdepth < yMin || selectedWellLog.enddepth > yMax) {
+        const y = -selectedWellLog.enddepth * view.yScale + ((yMax - yMin) / 2) * view.yScale;
+        updateView(view => ({ ...view, y }));
+      }
+    }
+  }, [resetViewportCounter, selectedWellLog, view, height, updateView]);
 
   useEffect(refresh, [
     refresh,
@@ -173,7 +186,8 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
     logsBiasAndScale,
     colorsByWellLog,
     logsBiasAndScale,
-    formationsEditMode
+    formationsEditMode,
+    resetViewportCounter
   ]);
 
   return (

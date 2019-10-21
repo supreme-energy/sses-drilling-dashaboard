@@ -1,5 +1,5 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import {
   getCalculateDip,
   useSelectedWellLog,
@@ -8,7 +8,9 @@ import {
   useComputedSegments,
   useCurrentComputedSegments,
   useComputedSurveysAndProjections,
-  usePendingSegmentsStateByMd
+  usePendingSegmentsStateByMd,
+  getSelectedId,
+  useSelectedSurvey
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -18,6 +20,7 @@ import keyBy from "lodash/keyBy";
 import mapValues from "lodash/mapValues";
 import mapKeys from "lodash/mapKeys";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
+import { useInterpretationRenderer } from "./InterpretationChart";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -280,4 +283,33 @@ export function useUpdateSegmentsById() {
   );
 
   return updateSegments;
+}
+
+export function useSelectLastSurvey() {
+  const { surveys } = useSurveysDataContainer();
+  const [, dispatch] = useComboContainer();
+
+  return useCallback(
+    ensureSelectionInViewport => {
+      const lastSurvey = surveys[surveys.length - 1];
+
+      if (lastSurvey) {
+        dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport });
+      }
+    },
+    [dispatch, surveys]
+  );
+}
+
+export function useRefreshSurveysAndUpdateSelection() {
+  const { refreshSurveys } = useSurveysDataContainer();
+  const [, dispatch] = useComboContainer();
+
+  return useCallback(async () => {
+    const newSurveys = await refreshSurveys();
+    const lastSurvey = newSurveys[newSurveys.length - 1];
+    if (lastSurvey) {
+      dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport: true });
+    }
+  }, [refreshSurveys, dispatch]);
 }

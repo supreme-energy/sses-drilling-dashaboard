@@ -8,6 +8,7 @@ import {
   MANUAL,
   initialViewState
 } from "../../../../constants/interpretation";
+import { useSelectLastSurvey } from "../../actions";
 
 export function viewReducer(state, action) {
   switch (action.type) {
@@ -30,15 +31,17 @@ export default function useCloudServerModal() {
   const [isAutoImportVisible, setAutoVisibility] = useState(false);
   const [isManualImportVisible, setManualVisibility] = useState(false);
   const [isAutoImportEnabled, setAutoImport] = useState(false);
+  const selectLastSurvey = useSelectLastSurvey();
 
   // Handlers
   const handleOpenAutoImport = useCallback(() => {
     setAutoVisibility(true);
   }, []);
   const handleOpenManualImport = useCallback(() => {
+    selectLastSurvey(true);
     setManualVisibility(true);
     setView({ type: IMPORT, payload: MANUAL });
-  }, []);
+  }, [selectLastSurvey]);
   const handleCloseManualImport = useCallback(() => setManualVisibility(false), []);
   const handleCloseAutoImport = useCallback(() => setAutoVisibility(false), []);
 
@@ -52,6 +55,7 @@ export default function useCloudServerModal() {
     handleOpenAutoImport,
     handleOpenManualImport,
     handleCloseManualImport,
-    handleCloseAutoImport
+    handleCloseAutoImport,
+    selectLastSurvey
   };
 }
