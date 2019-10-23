@@ -1,9 +1,10 @@
 import { createContainer } from "unstated-next";
-import { useReducer, useCallback } from "react";
+import { useCallback } from "react";
 
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
-import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
+import { useProjectionsDataContainer, useFormationsDataContainer, useWellIdContainer } from "../../App/Containers";
+import { useLocalStorageReducer } from "react-storage-hooks";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -239,7 +240,6 @@ function logsBiasAndScaleReducer(logsBiasAndScale, action) {
 function colorsByWellLogReducer(colorsByWellLog, action) {
   switch (action.type) {
     case "CHANGE_LOG_COLOR":
-      console.log("action", action);
       return {
         ...colorsByWellLog,
         [action.logId]: action.color
@@ -265,8 +265,19 @@ const comboStoreReducer = (state, action) => {
   };
 };
 
+const initializer = savedState => {
+  // only save selection
+  return { ...initialState, selectionById: savedState.selectionById };
+};
+
 function useUseComboStore() {
-  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
+  const { wellId } = useWellIdContainer();
+  const [state, dispatch] = useLocalStorageReducer(
+    `${wellId}-combo-store`,
+    comboStoreReducer,
+    initialState,
+    initializer
+  );
 
   return [state, dispatch];
 }

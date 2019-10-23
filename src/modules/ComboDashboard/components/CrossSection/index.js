@@ -8,6 +8,7 @@ import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
 
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
+import TCLLine from "./TCLLine";
 
 const pixiApp = new PixiCrossSection();
 
@@ -160,7 +161,12 @@ const CrossSection = React.memo(props => {
     isReadOnly
   ]);
 
-  return <div className={classes.crossSection} ref={canvas} />;
+  return (
+    <React.Fragment>
+      <div className={classes.crossSection} ref={canvas} />
+      <TCLLine container={pixiApp.tclLineLayer} view={view} />
+    </React.Fragment>
+  );
 });
 
 CrossSection.propTypes = {

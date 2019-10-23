@@ -41,9 +41,6 @@ function interactiveProjection(parent, props) {
   const totLine = container.addChild(new PIXI.Graphics());
   totLine.transform.updateTransform = frozenXYTransform;
 
-  const tclLine = container.addChild(new PIXI.Graphics());
-  tclLine.transform.updateTransform = frozenXYTransform;
-
   const botLine = container.addChild(new PIXI.Graphics());
   botLine.transform.updateTransform = frozenXYTransform;
 
@@ -143,8 +140,6 @@ function interactiveProjection(parent, props) {
 
     totLine.clear().lineStyle(2, curr.selectedColor, 1);
     totLine.moveTo(...scale(prev.vs, prev.tot + curr.fault)).lineTo(...scale(curr.vs, curr.tot));
-    tclLine.clear().lineStyle(2, curr.selectedColor, 1);
-    tclLine.moveTo(...scale(prev.vs, prev.tcl + curr.fault)).lineTo(...scale(curr.vs, curr.tcl));
     botLine.clear().lineStyle(2, curr.selectedColor, 1);
     botLine.moveTo(...scale(prev.vs, prev.bot + curr.fault)).lineTo(...scale(curr.vs, curr.bot));
   };

@@ -10,7 +10,9 @@ import {
   useComputedSurveysAndProjections,
   usePendingSegmentsStateByMd,
   getSelectedId,
-  useSelectedSurvey
+  useSelectedSurvey,
+  useLastSurvey,
+  getLastSurvey
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -131,7 +133,6 @@ export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
   const [, dispatch] = useComboContainer();
   const pendingSegmentsState = usePendingSegmentsStateByMd();
-  const updateSegments = useUpdateSegmentsByMd();
   const { replaceResult: replaceProjections } = useProjectionsDataContainer();
   const { replaceResult: replaceSurveys } = useSurveysDataContainer();
   const [logs, , , { updateWellLogs }] = useWellLogsContainer();
@@ -145,7 +146,7 @@ export function useSaveWellLogActions() {
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
 
   const saveWellLogs = useCallback(
-    async (logs, pendingSegmentsState, fieldsToSave, getCurrentPendingOperation = () => Promise.resolve()) => {
+    async (logs, pendingSegmentsState, fieldsToSave) => {
       const data = logs
         .map(log => {
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
@@ -170,33 +171,15 @@ export function useSaveWellLogActions() {
         })
         .filter(Boolean);
 
-      const resetProps = fieldsToSave
-        ? mapValues(fieldsToSave, v => undefined)
-        : {
-            dip: undefined,
-            fault: undefined,
-            scalebias: undefined,
-            scalefactor: undefined
-          };
-
-      const resetLogProps = logs.reduce((acc, log) => {
-        acc[log.endmd] = resetProps;
-        return acc;
-      }, {});
-
       replaceSurveysAndProjections();
 
-      const result = await updateWellLogs(data);
-      await getCurrentPendingOperation();
-      updateSegments(resetLogProps);
-
-      return result;
+      await updateWellLogs(data);
     },
-    [updateWellLogs, replaceSurveysAndProjections, updateSegments]
+    [updateWellLogs, replaceSurveysAndProjections]
   );
   const saveSelectedWellLog = useCallback(
-    debounce((fieldsToSave, getCurrentPendingOperation) => {
-      saveWellLogs([selectedWellLog], pendingSegmentsState, fieldsToSave, getCurrentPendingOperation);
+    debounce(() => {
+      saveWellLogs([selectedWellLog], pendingSegmentsState);
     }, 500),
     [dispatch, pendingSegmentsState, selectedWellLog, saveWellLogs]
   );
@@ -236,7 +219,10 @@ export function useSelectionActions() {
     [dispatch, itemsByMd]
   );
 
-  const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", id }), [dispatch]);
+  const toggleSegmentSelection = useCallback(
+    (id, ensureSelectionInViewport) => dispatch({ type: "TOGGLE_SELECTION", id, ensureSelectionInViewport }),
+    [dispatch]
+  );
   const deselectAll = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
 
   return {
@@ -286,18 +272,16 @@ export function useUpdateSegmentsById() {
 }
 
 export function useSelectLastSurvey() {
-  const { surveys } = useSurveysDataContainer();
+  const lastSurvey = useLastSurvey();
   const [, dispatch] = useComboContainer();
 
   return useCallback(
     ensureSelectionInViewport => {
-      const lastSurvey = surveys[surveys.length - 1];
-
       if (lastSurvey) {
         dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport });
       }
     },
-    [dispatch, surveys]
+    [dispatch, lastSurvey]
   );
 }
 
@@ -307,7 +291,8 @@ export function useRefreshSurveysAndUpdateSelection() {
 
   return useCallback(async () => {
     const newSurveys = await refreshSurveys();
-    const lastSurvey = newSurveys[newSurveys.length - 1];
+    const lastSurvey = getLastSurvey(newSurveys);
+
     if (lastSurvey) {
       dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport: true });
     }

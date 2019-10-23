@@ -71,7 +71,7 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
     debouncedSave = props.debouncedSave;
 
     const onSectionClick = section => {
-      toggleSegmentSelection(section.entityId);
+      toggleSegmentSelection(section.entityId, true);
     };
     const adjustedY = height - gutter - buttonHeight;
 

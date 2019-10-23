@@ -22,8 +22,7 @@ const PixiRectangle = forwardRef(
       onClick,
       onMouseOver,
       onMouseOut,
-      zIndex,
-      rotation
+      zIndex
     },
     ref
   ) => {

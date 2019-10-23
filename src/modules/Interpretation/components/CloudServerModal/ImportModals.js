@@ -18,6 +18,7 @@ import classes from "./styles.scss";
 import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 import BitMethod from "./BitMethod";
 import { useRefreshSurveysAndUpdateSelection } from "../../actions";
+import LastSurveyStats from "../LastSurveyStats";
 
 export const ManualImportModal = React.memo(({ wellId, handleClose, setView, setFile, file, setErrors }) => {
   const { getFileCheck, uploadFile } = useManualImport();
@@ -65,9 +66,11 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
       <DialogContent className={classes.importDialogContent}>
         <div className="layout vertical">
           <Box display="flex" flexDirection="column" mb={3}>
+            <LastSurveyStats mb={3} />
             <DialogContentText>
               Choose a file to import a new survey. You will be warned of any conflicts.
             </DialogContentText>
+
             <input accept=".las" id="manual-import-file" type="file" onChange={handleSelectFile} hidden />
             <label htmlFor="manual-import-file">
               <Button component="span" color="primary" variant="outlined">
@@ -76,6 +79,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
             </label>
             <span className={classes.fileName}>{file.name}</span>
           </Box>
+
           <BitMethod />
         </div>
       </DialogContent>

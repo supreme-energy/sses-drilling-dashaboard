@@ -8,9 +8,9 @@ import classNames from "classnames";
 
 const lastValue = array => array[array.length - 1];
 
-const RowItem = React.memo(({ startValue, endValue, label }) => (
+export const RowItem = React.memo(({ startValue, endValue, label, labelClass }) => (
   <Box display="flex" flexDirection="row">
-    <CondensedText className={classNames(css.label, css.labelColumn)}>{label}</CondensedText>
+    <CondensedText className={classNames(css.label, css.labelColumn, labelClass)}>{label}</CondensedText>
     <CondensedText className={css.value}>{startValue}</CondensedText>
     {endValue !== undefined && (
       <React.Fragment>

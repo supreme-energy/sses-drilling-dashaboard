@@ -14,6 +14,7 @@ export default function ControlLogLine({ container, log }) {
   const color = Number(`0x${getColorForWellLog(colorsByWellLog, log.id)}`);
   return (
     <PixiContainer
+      zIndex={1}
       scale={pixiScale}
       x={x}
       container={container}

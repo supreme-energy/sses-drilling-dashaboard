@@ -671,3 +671,14 @@ export const getPendingSegmentsExtent = memoizeOne(getExtentWithBiasAndScale);
 export function getColorForWellLog(colorsByWellLog, logId) {
   return colorsByWellLog[logId] || "7E7D7E";
 }
+
+export function getLastSurvey(surveys) {
+  return surveys.find(s => s.isLastSurvey) || surveys[surveys.length - 1];
+}
+
+export function useLastSurvey() {
+  const { surveys } = useSurveysDataContainer();
+  const [{ selectionById }] = useComboContainer();
+
+  return getLastSurvey(surveys);
+}
