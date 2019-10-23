@@ -60,18 +60,18 @@ function drawSections(container, higherContainer, props, gutter, labelHeight) {
   };
 
   let calcSections = props.calcSections;
-  let toggleSegmentSelection = props.toggleSegmentSelection;
+  let changeSelection = props.changeSelection;
   let debouncedSave = props.debouncedSave;
 
   return function update(props) {
     if (!container.transform) return;
     const { width, height, view, selectedSections } = props;
     calcSections = props.calcSections;
-    toggleSegmentSelection = props.toggleSegmentSelection;
+    changeSelection = props.changeSelection;
     debouncedSave = props.debouncedSave;
 
     const onSectionClick = section => {
-      toggleSegmentSelection(section.entityId, true);
+      changeSelection(section.entityId, true);
     };
     const adjustedY = height - gutter - buttonHeight;
 

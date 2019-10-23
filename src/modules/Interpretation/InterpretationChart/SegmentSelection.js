@@ -230,11 +230,12 @@ const SegmentSelection = ({
   const endLineRef = useRef(null);
   const leftSegmentDragContainer = useRef(null);
   const rightSegmentDragContainer = useRef(null);
+  internalState.current.interactionsRunning = interactionsRunning;
   const onDragEnd = useCallback(async () => {
     dispatch({ type: "STOP_INTERACTIONS" });
 
     if (!draftMode) {
-      saveSelectedWellLog();
+      saveSelectedWellLog(() => internalState.current.interactionsRunning);
     }
   }, [saveSelectedWellLog, draftMode]);
   const { refresh } = useInterpretationRenderer();
@@ -413,6 +414,7 @@ const SegmentSelection = ({
           <PixiContainer
             x={10}
             width={10}
+            zIndex={zIndex + 1}
             ref={rightSegmentDragContainer}
             container={container}
             updateTransform={frozenScaleTransform}
@@ -421,6 +423,7 @@ const SegmentSelection = ({
           <PixiContainer
             x={0}
             width={10}
+            zIndex={zIndex + 1}
             ref={leftSegmentDragContainer}
             container={container}
             updateTransform={frozenScaleTransform}
@@ -479,7 +482,7 @@ const SegmentSelection = ({
             target={internalState.current.tooltipTarget}
             text={tooltipText}
             refresh={refresh}
-            zIndex={zIndex}
+            zIndex={zIndex + 4}
             textProps={tooltipTextProps}
             maxX={totalWidth - gridGutter - 30}
           />

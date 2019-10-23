@@ -8,7 +8,6 @@ import Box from "@material-ui/core/Box";
 import useRef from "react-powertools/hooks/useRef";
 import { useSize } from "react-hook-size";
 import classNames from "classnames";
-import { useLocalStorageReducer } from "react-storage-hooks";
 
 import { useAdditionalDataLogsList } from "../../../../api";
 import WidgetCard from "../../../../components/WidgetCard";

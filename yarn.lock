@@ -3812,6 +3812,11 @@ dateformat@^1.0.6:
     get-stdin "^4.0.1"
     meow "^3.3.0"
 
+debounce-promise@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/debounce-promise/-/debounce-promise-3.1.2.tgz#320fb8c7d15a344455cd33cee5ab63530b6dc7c5"
+  integrity sha512-rZHcgBkbYavBeD9ej6sP56XfG53d51CD4dnaw989YX/nZ/ZJfgRx/9ePKmTNiUiyQvh4mtrMoS3OAWW+yoYtpg==
+
 debounce@^1.1.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.0.tgz#44a540abc0ea9943018dc0eaa95cce87f65cd131"
@@ -9742,10 +9747,6 @@ react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
 react-powertools@./react-powertools-v2.0.2.tgz:
   version "2.0.2"
   resolved "./react-powertools-v2.0.2.tgz#e4d8c204506af293374ea6fee294f85c1044e786"
-
-react-powertools@./react-powertools_v2.0.1.tgz:
-  version "2.0.1"
-  resolved "./react-powertools_v2.0.1.tgz#53f1909394de4b8cc5faf133c1efcf61b1ec866e"
 
 react-redux@^7.1.0:
   version "7.1.0"

@@ -1,7 +1,7 @@
 import memoizeOne from "memoize-one";
 import useFetch from "react-powertools/data/useFetch";
 import { GET_WELL_LOG_LIST, UPDATE_WELL_LOG, EMPTY_ARRAY } from "../../../api";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useRef } from "react";
 import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
 import { useWellIdContainer, useTimeSliderContainer } from "../../App/Containers";
@@ -54,17 +54,19 @@ export function useWellLogList(wellId) {
   });
 
   const logList = transformLogs(list);
+  const internalState = useRef({ list });
+  internalState.current.list = list;
   const updateWellLogs = useCallback(
     data => {
       const dataById = keyBy(data, "id");
-      const optimisticResult = list.map(d => {
+      const optimisticResult = internalState.current.list.map(d => {
         return dataById[d.id]
           ? { ...d, ...mapKeys(dataById[d.id], (value, key) => (key === "dip" ? "sectdip" : key)) }
           : d;
       });
       return changeWellLogs(data, wellId, optimisticResult, fetch);
     },
-    [fetch, list, wellId]
+    [fetch, wellId]
   );
 
   const logs = logList || EMPTY_ARRAY;

@@ -1,5 +1,5 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import {
   getCalculateDip,
   useSelectedWellLog,
@@ -9,8 +9,6 @@ import {
   useCurrentComputedSegments,
   useComputedSurveysAndProjections,
   usePendingSegmentsStateByMd,
-  getSelectedId,
-  useSelectedSurvey,
   useLastSurvey,
   getLastSurvey
 } from "./selectors";
@@ -19,10 +17,9 @@ import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import pickBy from "lodash/pickBy";
 import reduce from "lodash/reduce";
 import keyBy from "lodash/keyBy";
-import mapValues from "lodash/mapValues";
 import mapKeys from "lodash/mapKeys";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
-import { useInterpretationRenderer } from "./InterpretationChart";
+import mapValues from "lodash/mapValues";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -137,16 +134,22 @@ export function useSaveWellLogActions() {
   const { replaceResult: replaceSurveys } = useSurveysDataContainer();
   const [logs, , , { updateWellLogs }] = useWellLogsContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
-
+  const updateSegments = useUpdateSegmentsByMd();
+  const { segments: computedSegments } = useComputedSegments();
   const replaceSurveysAndProjections = useCallback(() => {
     replaceProjections(computedProjections);
     replaceSurveys(computedSurveys);
   }, [replaceProjections, replaceSurveys, computedSurveys, computedProjections]);
+  const [, , , { replaceResult: replaceWellLogsResult }] = useWellLogsContainer();
+
+  const replaceWellLogs = useCallback(() => {
+    replaceWellLogsResult(computedSegments);
+  }, [replaceWellLogsResult, computedSegments]);
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
 
   const saveWellLogs = useCallback(
-    async (logs, pendingSegmentsState, fieldsToSave) => {
+    async (logs, pendingSegmentsState, fieldsToSave, getIsPending) => {
       const data = logs
         .map(log => {
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
@@ -171,15 +174,30 @@ export function useSaveWellLogActions() {
         })
         .filter(Boolean);
 
-      replaceSurveysAndProjections();
+      const resetProps = fieldsToSave
+        ? mapValues(fieldsToSave, v => undefined)
+        : {
+            dip: undefined,
+            fault: undefined,
+            scalebias: undefined,
+            scalefactor: undefined
+          };
 
+      const resetLogProps = logs.reduce((acc, log) => {
+        acc[log.endmd] = resetProps;
+        return acc;
+      }, {});
+
+      replaceSurveysAndProjections();
+      replaceWellLogs();
+      updateSegments(resetLogProps);
       await updateWellLogs(data);
     },
-    [updateWellLogs, replaceSurveysAndProjections]
+    [updateWellLogs, replaceSurveysAndProjections, updateSegments, replaceWellLogs]
   );
   const saveSelectedWellLog = useCallback(
-    debounce(() => {
-      saveWellLogs([selectedWellLog], pendingSegmentsState);
+    debounce(getIsPending => {
+      saveWellLogs([selectedWellLog], pendingSegmentsState, null, getIsPending);
     }, 500),
     [dispatch, pendingSegmentsState, selectedWellLog, saveWellLogs]
   );
@@ -207,28 +225,26 @@ export function useSaveWellLogActions() {
 
 export function useSelectionActions() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
-
   const [, dispatch] = useComboContainer();
-  const toggleMdSelection = useCallback(
+  const changeSelection = useCallback(
+    (id, ensureSelectionInViewport) => {
+      dispatch({ type: "CHANGE_SELECTION", id, ensureSelectionInViewport });
+    },
+    [dispatch]
+  );
+  const changeMdSelection = useCallback(
     md => {
       const item = itemsByMd[md];
       if (item) {
-        dispatch({ type: "TOGGLE_SELECTION", id: item.id });
+        dispatch({ type: "CHANGE_SELECTION", id: item.id });
       }
     },
     [dispatch, itemsByMd]
   );
 
-  const toggleSegmentSelection = useCallback(
-    (id, ensureSelectionInViewport) => dispatch({ type: "TOGGLE_SELECTION", id, ensureSelectionInViewport }),
-    [dispatch]
-  );
-  const deselectAll = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-
   return {
-    toggleMdSelection,
-    toggleSegmentSelection,
-    deselectAll
+    changeSelection,
+    changeMdSelection
   };
 }
 

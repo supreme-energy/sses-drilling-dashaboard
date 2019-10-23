@@ -16,9 +16,11 @@ import { useSaveSurveysAndProjections } from "../../../App/actions";
 export const SelectedProjectionMethod = ({ selectedProjection }) => {
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
+
   const updateSelectedPAMethod = useCallback(
     e => {
-      updateSegments({ [selectedProjection.id]: { method: Number(e.target.value) } });
+      const changes = { [selectedProjection.id]: { method: Number(e.target.value) } };
+      updateSegments(changes);
       debouncedSave();
     },
     [updateSegments, selectedProjection, debouncedSave]

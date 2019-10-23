@@ -2,13 +2,13 @@ import * as PIXI from "pixi.js";
 import { frozenScaleTransform, frozenXTransform } from "./customPixiTransforms";
 import memoizeOne from "memoize-one";
 import addCircleSVG from "../../../../assets/addCircle.svg";
-import checkCircleSVG from "../../../../assets/checkCircle.svg";
+
 import trashCircleSVG from "../../../../assets/deleteForever.svg";
 import { ADD_PA_STATION, NORMAL } from "../../../../constants/crossSectionModes";
 import _ from "lodash";
 import { toRadians } from "./formulas";
 
-function addButton(container, texture) {
+export function addButton(container, texture) {
   const button = container.addChild(new PIXI.Sprite(texture));
   button.scale = new PIXI.Point(0.5, 0.5);
   button.interactive = true;
@@ -16,13 +16,14 @@ function addButton(container, texture) {
   return button;
 }
 
+export const addCircleTexture = PIXI.Texture.from(addCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
+
 function drawButtons(container, stage, props, gutter, tagHeight) {
-  const { setMouse, setMode, deselectAll } = props;
+  const { setMouse, setMode } = props;
 
   let latestProps = props;
   let lastMode = props.mode;
-  const addCircleTexture = PIXI.Texture.from(addCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
-  const checkCircleTexture = PIXI.Texture.from(checkCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
+
   const trashCircleTexture = PIXI.Texture.from(trashCircleSVG, { orig: new PIXI.Rectangle(0, 0, 40, 40) });
 
   const btnStage = container.addChild(new PIXI.Container());
@@ -35,7 +36,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   addCircle.position.x = 15;
   addCircle.position.y = tagHeight - 20;
   addCircle.on("click", () => {
-    deselectAll();
     setMode(ADD_PA_STATION);
   });
 
@@ -46,15 +46,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const { deleteProjection, calcSections, selectedSections } = latestProps;
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
     deleteProjection(selectedPoint.id);
-    deselectAll();
-  });
-
-  const checkCircle = addButton(btnStage, checkCircleTexture);
-  checkCircle.position.x = -10;
-  checkCircle.position.y = tagHeight + 5;
-  checkCircle.on("click", () => {
-    setMode(NORMAL);
-    deselectAll();
   });
 
   const paIndicator = container.addChild(new PIXI.Container());
@@ -82,7 +73,6 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
 
   const setButtonPositions = memoizeOne((selectedPoint, mode) => {
     if (!selectedPoint) {
-      checkCircle.visible = false;
       trashCircle.visible = false;
       if (mode === ADD_PA_STATION) {
         addCircle.visible = false;
@@ -91,12 +81,10 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
         addCircle.position.x = -10;
       }
     } else if (selectedPoint.isProjection) {
-      checkCircle.visible = true;
       trashCircle.visible = true;
       addCircle.visible = true;
       addCircle.position.x = 15;
     } else {
-      checkCircle.visible = true;
       trashCircle.visible = false;
       addCircle.visible = false;
     }

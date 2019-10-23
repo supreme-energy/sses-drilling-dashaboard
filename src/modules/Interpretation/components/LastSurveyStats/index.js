@@ -9,7 +9,9 @@ export default function LastSurveyStats(props) {
   const lastSegment = segments[segments.length - 1];
   return (
     <Box {...props} className={css.root}>
-      <RowItem label="Last MD" startValue={lastSegment.startmd} endValue={lastSegment.endmd} labelClass={css.label} />
+      {lastSegment && (
+        <RowItem label="Last MD" startValue={lastSegment.startmd} endValue={lastSegment.endmd} labelClass={css.label} />
+      )}
     </Box>
   );
 }

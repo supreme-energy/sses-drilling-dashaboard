@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
-import { NORMAL } from "../../../../constants/crossSectionModes";
 import { HORIZONTAL, VERTICAL } from "../../../../constants/crossSectionViewDirection";
 
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
@@ -22,10 +21,12 @@ const CrossSection = React.memo(props => {
     updateView: updateVerticalView,
     isReadOnly,
     viewName,
-    wellId
+    wellId,
+    mode,
+    setMode
   } = props;
   const canvas = useRef(null);
-  const [mode, setMode] = useState(NORMAL);
+
   const dataObj = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
@@ -33,8 +34,7 @@ const CrossSection = React.memo(props => {
   const {
     wellPlan,
     selectedSections,
-    toggleSegmentSelection,
-    deselectAll,
+    changeSelection,
     calcSections,
     calculatedFormations,
     addProjection,
@@ -135,8 +135,7 @@ const CrossSection = React.memo(props => {
       height,
       wellPlan,
       selectedSections,
-      toggleSegmentSelection,
-      deselectAll,
+      changeSelection,
       calcSections,
       calculatedFormations,
       scale,
@@ -166,8 +165,7 @@ const CrossSection = React.memo(props => {
     height,
     wellPlan,
     selectedSections,
-    toggleSegmentSelection,
-    deselectAll,
+    changeSelection,
     calcSections,
     calculatedFormations,
     scale,

@@ -418,6 +418,7 @@ const recomputeSurveysAndProjections = memoizeOne(
             index,
             propazm
           );
+
           if (projection) {
             acc.push(projection);
           }
@@ -678,7 +679,5 @@ export function getLastSurvey(surveys) {
 
 export function useLastSurvey() {
   const { surveys } = useSurveysDataContainer();
-  const [{ selectionById }] = useComboContainer();
-
   return getLastSurvey(surveys);
 }

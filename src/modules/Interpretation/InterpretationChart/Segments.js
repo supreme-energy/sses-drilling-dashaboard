@@ -62,8 +62,8 @@ export default React.memo(({ segmentsData, container, selectedWellLog, chartWidt
     size: { height }
   } = useInterpretationRenderer();
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
-  const { toggleMdSelection } = useSelectionActions();
-  const onSegmentClick = useCallback(segment => toggleMdSelection(segment.endmd), [toggleMdSelection]);
+  const { changeMdSelection } = useSelectionActions();
+  const onSegmentClick = useCallback(segment => changeMdSelection(segment.endmd), [changeMdSelection]);
   const selectedIndex = useMemo(() => selectedWellLog && segmentsData.findIndex(s => s.id === selectedWellLog.id), [
     segmentsData,
     selectedWellLog

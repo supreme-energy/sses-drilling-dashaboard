@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import classNames from "classnames";
 import Progress from "@material-ui/core/CircularProgress";
-import { useLocalStorageReducer } from "react-storage-hooks";
 
 import { useWellOverviewKPI } from "../../../api";
 import Kpi from "../../Kpi/DrillPhaseKPI/Kpi";

@@ -32,18 +32,6 @@ const initialPendingState = {};
 
 function selectionByIdReducer(selectionById, action) {
   switch (action.type) {
-    case "TOGGLE_SELECTION": {
-      if (selectionById[action.id]) {
-        const newSelection = {
-          ...selectionById
-        };
-        delete newSelection[action.id];
-        return newSelection;
-      }
-      return {
-        [action.id]: true
-      };
-    }
     case "CHANGE_SELECTION": {
       if (!selectionById[action.id]) {
         return {
@@ -62,7 +50,6 @@ function selectionByIdReducer(selectionById, action) {
 
 function resetViewportCounterReducer(resetViewportCounter, action) {
   switch (action.type) {
-    case "TOGGLE_SELECTION":
     case "CHANGE_SELECTION": {
       if (action.ensureSelectionInViewport) {
         return Date.now();
