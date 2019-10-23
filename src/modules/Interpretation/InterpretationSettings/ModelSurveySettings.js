@@ -20,7 +20,7 @@ function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, d
       <NumericDebouceTextField
         disabled={disabled}
         value={value}
-        onChange={value => onChange(value)}
+        onChange={onChange}
         type="number"
         placeholder={EMPTY_FIELD}
         label={label}
