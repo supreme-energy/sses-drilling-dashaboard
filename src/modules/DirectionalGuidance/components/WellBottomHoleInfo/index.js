@@ -21,6 +21,7 @@ import useViewport from "../../../../hooks/useViewport";
 import { useWebGLRenderer } from "../../../../hooks/useWebGLRenderer";
 import Grid from "../../../../components/Grid";
 import { CROSS_SECTION, WELL_BOTTOM_HOLE } from "../../../../constants/directionalGuidance";
+import { useViewportView } from "../../../ComboDashboard/hooks";
 
 const CrossSectionDashboard = lazy(() =>
   import(/* webpackChunkName: 'CrossSectionDashboard' */ "../../../ComboDashboard/components/CrossSectionDashboard")
@@ -130,7 +131,6 @@ function GraphComponent({ wellId, logId, isFirstGraph }) {
   );
 }
 
-const defaultView = { x: 0, y: 0, xScale: 1, yScale: 1 };
 export function WellBottomHoleInfo({ wellId }) {
   const [selectedGraphs, setSelectedGraphs] = useReducer(graphReducer, []);
   const { currentTab, handleChangeTab } = useDirectionalGuidanceSelectedTabContainer();
@@ -140,16 +140,8 @@ export function WellBottomHoleInfo({ wellId }) {
     return data.filter(l => l.data_count > 0).map(l => l.label);
   }, [data]);
 
-  const [view, updateView] = useLocalStorageReducer(
-    `${wellId}DirectionalGuidance`,
-    function(state, arg) {
-      if (typeof arg === "function") {
-        return { ...state, ...arg(state) };
-      }
-      return { ...state, ...arg };
-    },
-    defaultView
-  );
+  const viewName = "DirectionalGuidance";
+  const [view, updateView] = useViewportView({ key: viewName, wellId });
 
   useEffect(() => {
     if (availableGraphs && availableGraphs.length) {
@@ -174,7 +166,14 @@ export function WellBottomHoleInfo({ wellId }) {
     >
       {isCrossSection && (
         <div className={classes.crossSectionDashboard}>
-          <CrossSectionDashboard className={"flex-3"} view={view} updateView={updateView} isReadOnly hideCard />
+          <CrossSectionDashboard
+            className={"flex-3"}
+            view={view}
+            updateView={updateView}
+            viewName={viewName}
+            isReadOnly
+            hideCard
+          />
         </div>
       )}
       {!isCrossSection && (

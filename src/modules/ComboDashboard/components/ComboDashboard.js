@@ -14,9 +14,9 @@ import CrossSectionDashboard from "./CrossSectionDashboard";
 import classes from "./ComboDashboard.scss";
 import { useWellIdContainer, useDrillPhaseContainer } from "../../App/Containers";
 import { ALL } from "../../../constants/wellSections";
+import { useViewportView } from "../hooks";
 
 const Measures = lazy(() => import(/* webpackChunkName: 'Measures' */ "./Measures"));
-const defaultView = { x: 0, y: 0, xScale: 1, yScale: 1 };
 
 function ComboDashboard() {
   const { wellId } = useWellIdContainer();
@@ -26,16 +26,8 @@ function ComboDashboard() {
   const { data } = useWellOverviewKPI(wellId);
   const kpiData = data.find(d => d.type === phase) || { type: ALL };
 
-  const [view, updateView] = useLocalStorageReducer(
-    `${wellId}ComboDashboard`,
-    function(state, arg) {
-      if (typeof arg === "function") {
-        return { ...state, ...arg(state) };
-      }
-      return { ...state, ...arg };
-    },
-    defaultView
-  );
+  const viewName = "ComboDashboard";
+  const [view, updateView] = useViewportView({ key: viewName, wellId });
 
   return (
     <div className={classes.comboDashboardWrapper}>
@@ -50,7 +42,7 @@ function ComboDashboard() {
           <div className={classNames(classes.row, classes.graphRow)}>
             <Interpretation className={"flex"} />
 
-            <CrossSectionDashboard className={"flex-3"} view={view} updateView={updateView} />
+            <CrossSectionDashboard className={"flex-3"} view={view} updateView={updateView} viewName={viewName} />
           </div>
         </div>
         <div className={classes.kpiColumn}>

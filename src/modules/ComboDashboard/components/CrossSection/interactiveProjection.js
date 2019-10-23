@@ -8,7 +8,7 @@ import { TVD_VS } from "../../../../constants/calcMethods";
 function drawCircle(circle, lineColor, fillColor) {
   circle.clear();
   circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
-  circle.drawCircle(0, 0, 6);
+  circle.drawCircle(0, 0, 5);
 
   // make hit area a bit bigger
   circle.lineStyle(2, lineColor, 0).beginFill(fillColor, 0.0001);

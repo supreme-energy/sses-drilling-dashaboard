@@ -25,7 +25,7 @@ import TableButton from "../../../components/TableButton";
 import { withRouter, Route } from "react-router";
 
 export const CrossSectionDashboard = React.memo(
-  ({ wellId, className, view, updateView, isReadOnly, hideCard, match, history }) => {
+  ({ wellId, className, view, updateView, isReadOnly, hideCard, match, history, viewName }) => {
     const [expanded, toggleExpanded] = useReducer(e => !e, true);
 
     const { wellPlanIsImported } = useSetupWizardData();
@@ -71,9 +71,11 @@ export const CrossSectionDashboard = React.memo(
                 <CrossSection
                   width={width}
                   height={height}
+                  wellId={wellId}
                   viewDirection={viewDirection}
                   view={view}
                   updateView={updateView}
+                  viewName={viewName}
                   isReadOnly={isReadOnly}
                 />
               )}
