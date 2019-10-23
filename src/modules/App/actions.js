@@ -47,15 +47,17 @@ export function useSaveSurveysAndProjections() {
       replaceSurveysAndProjections();
 
       replaceWellLogs(computedSegments);
-      Promise.all(
-        _.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields }))
-      );
+
       Promise.all(
         _.map(pendingProjectionsState, (fields, projectionId) =>
           updateProjection({ projectionId: Number(projectionId), fields })
-        )
+        ).concat(_.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields })))
+      ).then(() =>
+        dispatch({
+          type: "RESET_SEGMENTS_PROPERTIES",
+          propsById: { ...pendingSurveyState, ...pendingProjectionsState }
+        })
       );
-      dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
     }
   }, [saveId, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, replaceWellLogs]);
   const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);

@@ -92,7 +92,7 @@ const filterWellPlanToInterval = memoizeOne(filterDataToInterval);
 export function useComputedFilteredWellData() {
   const { sliderInterval } = useTimeSliderContainer();
 
-  const [surveys, projections] = useComputedSurveysAndProjections();
+  const [, surveys, projections] = useComputedSurveysAndProjections();
   const { formationsData } = useFormationsDataContainer();
   const [wellPlan] = useWellPlanDataContainer();
 

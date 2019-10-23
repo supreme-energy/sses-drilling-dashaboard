@@ -12,7 +12,7 @@ export default function TCLLine({ container, width, view, ...props }) {
   const color = hexColor(colors.colortot);
   const { surveys, projections } = useComputedFilteredWellData();
 
-  const items = surveys.concat(projections);
+  const items = [...surveys, ...projections];
 
   return (
     <PixiContainer
@@ -24,9 +24,10 @@ export default function TCLLine({ container, width, view, ...props }) {
           if (!nextS) {
             return null;
           }
+
           return (
             <PixiLine
-              key={s.id}
+              key={`${s.id}-${nextS.id}`}
               container={container}
               data={[
                 [s.vs * view.xScale, (s.tcl + nextS.fault) * view.yScale],

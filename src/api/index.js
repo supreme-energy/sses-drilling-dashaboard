@@ -128,9 +128,9 @@ export function useWellInfo(wellId) {
 
   useEffect(() => {
     // avoid refresh on the component that trigger the update
-    if (requestId !== stateRef.current.internalRequestId) {
+    if (requestId !== stateRef.current.internalRequestId && wellId) {
       serializedRefresh(
-        wellId !== undefined && {
+        {
           path: GET_WELL_INFO,
           query: {
             seldbname: wellId,
@@ -294,17 +294,17 @@ export function useWellInfo(wellId) {
     }
 
     const wellSurfaceLocationLocal = {
-      x: Number(wellInfo.survey_easting),
-      y: Number(wellInfo.survey_northing)
+      x: Number(wellInfo.survey_easting) || 0,
+      y: Number(wellInfo.survey_northing) || 0
     };
     const wellLandingLocationLocal = {
-      x: Number(wellInfo.landing_easting),
-      y: Number(wellInfo.landing_northing)
+      x: Number(wellInfo.landing_easting) || 0,
+      y: Number(wellInfo.landing_northing) || 0
     };
 
     const wellPBHLLocal = {
-      x: Number(wellInfo.pbhl_easting),
-      y: Number(wellInfo.pbhl_northing)
+      x: Number(wellInfo.pbhl_easting) || 0,
+      y: Number(wellInfo.pbhl_northing) || 0
     };
 
     const wellSurfaceLocation = defaultTransform(wellSurfaceLocationLocal);
