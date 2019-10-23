@@ -8,10 +8,15 @@ import { TVD_VS } from "../../../../constants/calcMethods";
 function drawCircle(circle, lineColor, fillColor) {
   circle.clear();
   circle.lineStyle(2, lineColor).beginFill(fillColor, 0.4);
+  circle.drawCircle(0, 0, 6);
+
+  // make hit area a bit bigger
+  circle.lineStyle(2, lineColor, 0).beginFill(fillColor, 0.0001);
   circle.drawCircle(0, 0, 10);
 }
 function createCircle(container, lineColor, fillColor, cb, cbEnd) {
   const circle = container.addChild(new PIXI.Graphics());
+
   drawCircle(circle, lineColor, fillColor);
   circle.cursor = "pointer";
   circle.transform.updateTransform = frozenScaleTransform;
