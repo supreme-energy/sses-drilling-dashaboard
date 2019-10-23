@@ -31,6 +31,7 @@ import {
 } from "../../../../constants/interpretation";
 
 import classes from "./styles.scss";
+import LastSurveyStats from "../LastSurveyStats";
 
 function NotificationSettings({
   wellId,
@@ -148,6 +149,7 @@ function NotificationSettings({
         </IconButton>
       </DialogTitle>
       <DialogContent className={classes.notificationContent}>
+        <LastSurveyStats mb={3} />
         <Box display="flex" flexDirection="row">
           <div className={classes.switch}>
             <span className={classes.switchBuffer}>Auto-check for new data</span>

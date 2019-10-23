@@ -3,18 +3,30 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import PixiCrossSection from "./PixiCrossSection";
 import classes from "./CrossSection.scss";
 import { useCrossSectionContainer } from "../../../App/Containers";
-import { NORMAL } from "../../../../constants/crossSectionModes";
-import { HORIZONTAL } from "../../../../constants/crossSectionViewDirection";
+import { HORIZONTAL, VERTICAL } from "../../../../constants/crossSectionViewDirection";
 
 import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
+import TCLLine from "./TCLLine";
+import { useViewportView } from "../../hooks";
 
 const pixiApp = new PixiCrossSection();
 
 const CrossSection = React.memo(props => {
-  const { width, height, viewDirection, view, updateView, isReadOnly } = props;
+  const {
+    width,
+    height,
+    viewDirection,
+    view: verticalView,
+    updateView: updateVerticalView,
+    isReadOnly,
+    viewName,
+    wellId,
+    mode,
+    setMode
+  } = props;
   const canvas = useRef(null);
-  const [mode, setMode] = useState(NORMAL);
+
   const dataObj = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
@@ -22,13 +34,28 @@ const CrossSection = React.memo(props => {
   const {
     wellPlan,
     selectedSections,
-    toggleSegmentSelection,
-    deselectAll,
+    changeSelection,
     calcSections,
     calculatedFormations,
     addProjection,
     deleteProjection
   } = dataObj;
+
+  const [horizontalView, updateHorizontalView] = useViewportView({ key: `${viewName}-horizontal`, wellId });
+
+  const view = viewDirection === VERTICAL ? verticalView : horizontalView;
+
+  const internalState = useRef({ viewDirection: viewDirection });
+
+  // store viewDirection into ref because it looks like udpateView changes are not propagated
+  // to children so we can't bind properties into updateView callback
+  internalState.current.viewDirection = viewDirection;
+  const updateView = useCallback(
+    (...args) => {
+      internalState.current.viewDirection === VERTICAL ? updateVerticalView(...args) : updateHorizontalView(...args);
+    },
+    [updateVerticalView, updateHorizontalView]
+  );
 
   const [xField, yField] = useMemo(() => {
     if (viewDirection === HORIZONTAL) {
@@ -108,8 +135,7 @@ const CrossSection = React.memo(props => {
       height,
       wellPlan,
       selectedSections,
-      toggleSegmentSelection,
-      deselectAll,
+      changeSelection,
       calcSections,
       calculatedFormations,
       scale,
@@ -139,8 +165,7 @@ const CrossSection = React.memo(props => {
     height,
     wellPlan,
     selectedSections,
-    toggleSegmentSelection,
-    deselectAll,
+    changeSelection,
     calcSections,
     calculatedFormations,
     scale,
@@ -160,7 +185,12 @@ const CrossSection = React.memo(props => {
     isReadOnly
   ]);
 
-  return <div className={classes.crossSection} ref={canvas} />;
+  return (
+    <React.Fragment>
+      <div className={classes.crossSection} ref={canvas} />
+      {viewDirection === VERTICAL && <TCLLine container={pixiApp.tclLineLayer} view={view} />}
+    </React.Fragment>
+  );
 });
 
 CrossSection.propTypes = {

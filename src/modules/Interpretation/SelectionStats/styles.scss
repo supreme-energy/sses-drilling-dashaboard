@@ -1,28 +1,25 @@
+.label {
+    font-weight: bold;  
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+}
 
-.root {
-    .label {
-        font-weight: bold;  
-        text-align: right;
-        white-space: nowrap;
-        overflow: hidden;
-    }
+.labelColumn {
+    width: 25px;
+    margin-right: 10px;
+}
 
-    .labelColumn {
-        width: 25px;
-        margin-right: 10px;
-    }
+.value {
+    width: 40px;
+    text-align: right;
+}
 
-    .value {
-        width: 40px;
-        text-align: right;
-    }
-
-    .draftHelpText {
-        color: #828282;
-        letter-spacing: 0.33px;
-        line-height: 16px;
-        max-width: 170px;
-    }
+.draftHelpText {
+    color: #828282;
+    letter-spacing: 0.33px;
+    line-height: 16px;
+    max-width: 170px;
 }
 
 .colorBox {

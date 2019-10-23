@@ -128,6 +128,13 @@
   }
 }
 
+.addProjectionButton {
+  position: absolute;
+  z-index: 10;
+  top: 6px;
+  right: 10px;
+}
+
 .hiddenCardTabs {
   position: initial;
 }

@@ -285,7 +285,7 @@ export function useCrossSectionData() {
   const rawSections = useMemo(() => surveys.concat(projections), [surveys, projections]);
 
   const [{ selectionById: selectedSections }] = useComboContainer();
-  const { toggleSegmentSelection, deselectAll } = useSelectionActions();
+  const { changeSelection } = useSelectionActions();
 
   const addProjection = useAddProjection();
   const deleteProjection = useDeleteProjection();
@@ -295,8 +295,8 @@ export function useCrossSectionData() {
     deleteProjection,
     wellPlan,
     selectedSections,
-    toggleSegmentSelection,
-    deselectAll,
+    changeSelection,
+
     calcSections: rawSections,
     calculatedFormations: formations
   };

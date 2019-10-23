@@ -87,8 +87,8 @@ const Segment = React.memo(({ segment, selected, container, onSegmentClick, zInd
 });
 
 export default function Segments({ segmentsData = [], container, view, axis, selectedSections }) {
-  const { toggleSegmentSelection } = useCrossSectionContainer();
-  const onSegmentClick = useCallback(id => toggleSegmentSelection(id), [toggleSegmentSelection]);
+  const { changeSelection } = useCrossSectionContainer();
+  const onSegmentClick = useCallback(id => changeSelection(id), [changeSelection]);
   const segments = useMemo(
     () =>
       segmentsData.map((s, index) => {

@@ -92,13 +92,13 @@ export default function useDraggable({
       };
 
       const onMouseUp = e => {
-        if (e.target !== container) {
-          return;
-        }
+        e.target && e.target.emit("mouseover");
         if (interactionState.isDragging) {
           interactionState.isDragging = false;
-
-          interactionState.onDragEnd(e);
+          const dragged =
+            interactionState.initialMouse.x !== interactionState.prevMouse.x ||
+            interactionState.initialMouse.y !== interactionState.prevMouse.y;
+          interactionState.onDragEnd(e, dragged);
           if (canvas) {
             canvas.style.cursor = "default";
           }

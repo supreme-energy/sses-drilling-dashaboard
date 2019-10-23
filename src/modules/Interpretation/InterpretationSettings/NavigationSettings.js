@@ -8,7 +8,7 @@ import { useWellLogsContainer } from "../../ComboDashboard/containers/wellLogs";
 
 export default function NavigationSettings(props) {
   const selectedMd = useSelectedMd();
-  const { toggleMdSelection } = useSelectionActions();
+  const { changeMdSelection } = useSelectionActions();
   const { selectedWellLog } = useSelectedWellLog();
 
   const [logs] = useWellLogsContainer();
@@ -21,31 +21,31 @@ export default function NavigationSettings(props) {
     const next = logs[selectedWellIndex + 1];
 
     if (next) {
-      toggleMdSelection(next.endmd);
+      changeMdSelection(next.endmd);
     }
-  }, [logs, selectedWellIndex, toggleMdSelection]);
+  }, [logs, selectedWellIndex, changeMdSelection]);
 
   const selectPrev = useCallback(() => {
     const prev = logs[selectedWellIndex - 1];
 
     if (prev) {
-      toggleMdSelection(prev.endmd);
+      changeMdSelection(prev.endmd);
     }
-  }, [logs, selectedWellIndex, toggleMdSelection]);
+  }, [logs, selectedWellIndex, changeMdSelection]);
 
   const selectFirst = useCallback(() => {
     const first = logs[0];
     if (first && first.endmd !== selectedMd) {
-      toggleMdSelection(first.endmd);
+      changeMdSelection(first.endmd);
     }
-  }, [logs, toggleMdSelection, selectedMd]);
+  }, [logs, changeMdSelection, selectedMd]);
 
   const selectLast = useCallback(() => {
     const last = logs[logs.length - 1];
     if (last && last.endmd !== selectedMd) {
-      toggleMdSelection(last.endmd);
+      changeMdSelection(last.endmd);
     }
-  }, [logs, toggleMdSelection, selectedMd]);
+  }, [logs, changeMdSelection, selectedMd]);
 
   return (
     <Box display="flex" flexDirection="column" {...props}>

@@ -210,6 +210,7 @@ function projtva(proposedAzm, projection, prevProjection) {
       let bot = pbot - (ptcl - tcl);
       tcl += fault;
       bot += fault;
+      tot += fault;
       tvd = tcl - pos;
       otherInputs.tcl = tcl;
       otherInputs.tot = tot;

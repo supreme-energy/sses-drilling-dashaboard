@@ -1,7 +1,7 @@
 import { useComputedSurveysAndProjections, useComputedSegments } from "../Interpretation/selectors";
 import { useComboContainer } from "../ComboDashboard/containers/store";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "./Containers";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import _ from "lodash";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
@@ -27,29 +27,39 @@ export function useSaveSurveysAndProjections() {
     replaceSurveys(pendingRef.current.computedSurveys);
   }, [replaceProjections, replaceSurveys, pendingRef]);
 
+  const [saveId, setSaveId] = useState(0);
+  const internalState = useRef({ lastPerfomedSave: null });
+
   const save = useCallback(() => {
-    const { computedSurveys, computedProjections, pendingSegmentsState, computedSegments } = pendingRef.current;
-    const surveyIds = _.keyBy(computedSurveys, s => s.id);
-    const projectionIds = _.keyBy(computedProjections, p => p.id);
-    const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
-    const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
+    setSaveId(Date.now());
+  }, []);
 
-    replaceSurveysAndProjections();
+  useEffect(() => {
+    const lastPerfomedSave = internalState.current.lastPerfomedSave;
+    if (saveId !== lastPerfomedSave) {
+      internalState.current.lastPerfomedSave = saveId;
+      const { computedSurveys, computedProjections, pendingSegmentsState, computedSegments } = pendingRef.current;
+      const surveyIds = _.keyBy(computedSurveys, s => s.id);
+      const projectionIds = _.keyBy(computedProjections, p => p.id);
+      const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
+      const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
 
-    replaceWellLogs(computedSegments);
-    const surveyRes = Promise.all(
-      _.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields }))
-    );
-    const projectionRes = Promise.all(
-      _.map(pendingProjectionsState, (fields, projectionId) =>
-        updateProjection({ projectionId: Number(projectionId), fields })
-      )
-    );
-    dispatch({ type: "RESET_SEGMENTS_PROPERTIES", propsById: { ...pendingSurveyState, ...pendingProjectionsState } });
-    return [].concat(surveyRes, projectionRes);
-  }, [dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, replaceWellLogs]);
+      replaceSurveysAndProjections();
 
+      replaceWellLogs(computedSegments);
+
+      Promise.all(
+        _.map(pendingProjectionsState, (fields, projectionId) =>
+          updateProjection({ projectionId: Number(projectionId), fields })
+        ).concat(_.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields })))
+      ).then(() =>
+        dispatch({
+          type: "RESET_SEGMENTS_PROPERTIES",
+          propsById: { ...pendingSurveyState, ...pendingProjectionsState }
+        })
+      );
+    }
+  }, [saveId, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, replaceWellLogs]);
   const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);
-
   return { save, debouncedSave };
 }

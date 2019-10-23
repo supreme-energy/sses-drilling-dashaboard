@@ -1,9 +1,10 @@
 import { createContainer } from "unstated-next";
-import { useReducer, useCallback } from "react";
+import { useCallback } from "react";
 
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
-import { useProjectionsDataContainer, useFormationsDataContainer } from "../../App/Containers";
+import { useProjectionsDataContainer, useFormationsDataContainer, useWellIdContainer } from "../../App/Containers";
+import { useLocalStorageReducer } from "react-storage-hooks";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -13,6 +14,8 @@ export const surveyVisibility = {
 
 const initialState = {
   selectionById: {},
+  // falsy | Number:  this is changed each time we need to adjust viewport to ensure last selected item is in viewport
+  resetViewportCounter: 0,
   pendingSegmentsState: {},
   logsBiasAndScale: {},
   currentEditedLog: null,
@@ -29,22 +32,34 @@ const initialPendingState = {};
 
 function selectionByIdReducer(selectionById, action) {
   switch (action.type) {
-    case "TOGGLE_SELECTION": {
-      if (selectionById[action.id]) {
-        const newSelection = {
-          ...selectionById
+    case "CHANGE_SELECTION": {
+      if (!selectionById[action.id]) {
+        return {
+          [action.id]: true
         };
-        delete newSelection[action.id];
-        return newSelection;
       }
-      return {
-        [action.id]: true
-      };
+
+      return selectionById;
     }
     case "DESELECT_ALL":
       return {};
     default:
       return selectionById;
+  }
+}
+
+function resetViewportCounterReducer(resetViewportCounter, action) {
+  switch (action.type) {
+    case "CHANGE_SELECTION": {
+      if (action.ensureSelectionInViewport) {
+        return Date.now();
+      }
+      return 0;
+    }
+    case "RESET_VIEWPORT_COUNTER":
+      return Date.now();
+    default:
+      return resetViewportCounter;
   }
 }
 
@@ -212,7 +227,6 @@ function logsBiasAndScaleReducer(logsBiasAndScale, action) {
 function colorsByWellLogReducer(colorsByWellLog, action) {
   switch (action.type) {
     case "CHANGE_LOG_COLOR":
-      console.log("action", action);
       return {
         ...colorsByWellLog,
         [action.logId]: action.color
@@ -226,6 +240,7 @@ const comboStoreReducer = (state, action) => {
   return {
     ...state,
     selectionById: selectionByIdReducer(state.selectionById, action),
+    resetViewportCounter: resetViewportCounterReducer(state.resetViewportCounter, action),
     pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state),
     draftMode: draftModeReducer(state.draftMode, action),
     surveyVisibility: surveyVisibilityReducer(state.surveyVisibility, action),
@@ -237,8 +252,19 @@ const comboStoreReducer = (state, action) => {
   };
 };
 
+const initializer = savedState => {
+  // only save selection
+  return { ...initialState, selectionById: savedState.selectionById };
+};
+
 function useUseComboStore() {
-  const [state, dispatch] = useReducer(comboStoreReducer, initialState);
+  const { wellId } = useWellIdContainer();
+  const [state, dispatch] = useLocalStorageReducer(
+    `${wellId}-combo-store`,
+    comboStoreReducer,
+    initialState,
+    initializer
+  );
 
   return [state, dispatch];
 }

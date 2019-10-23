@@ -28,6 +28,7 @@ export default class PixiCrossSection {
     this.viewport = this.stage.addChild(new PIXI.Container());
     // Set up PIXI classes for rendering and draw layers
     this.formationsLayer = this.viewport.addChild(new PIXI.Container());
+    this.tclLineLayer = this.viewport.addChild(new PIXI.Container());
     this.wellPathLayer = this.viewport.addChild(new PIXI.Container());
     this.UILayer = this.viewport.addChild(new PIXI.Container());
     this.gridLayer = this.viewport.addChild(new PIXI.Container());

@@ -23,9 +23,11 @@ import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
 import TableButton from "../../../components/TableButton";
 import { withRouter, Route } from "react-router";
+import AddButton from "./CrossSection/AddButton";
+import { NORMAL, ADD_PA_STATION } from "../../../constants/crossSectionModes";
 
 export const CrossSectionDashboard = React.memo(
-  ({ wellId, className, view, updateView, isReadOnly, hideCard, match, history }) => {
+  ({ wellId, className, view, updateView, isReadOnly, hideCard, match, history, viewName }) => {
     const [expanded, toggleExpanded] = useReducer(e => !e, true);
 
     const { wellPlanIsImported } = useSetupWizardData();
@@ -38,7 +40,8 @@ export const CrossSectionDashboard = React.memo(
     }, [calcSections, selectedSections]);
     const [showImportWellPlanModal, toggleImportWellPlanModal] = useReducer(m => !m, false);
     const [activeTab, changeActiveTab] = useState(WELL_PLAN);
-
+    const [mode, setMode] = useState(NORMAL);
+    const { allStepsAreCompleted } = useSetupWizardData();
     const tabs = useMemo(
       () => (
         <Tabs
@@ -64,6 +67,10 @@ export const CrossSectionDashboard = React.memo(
         hideMenu
       >
         {tabs}
+        {allStepsAreCompleted && (
+          <AddButton className={classes.addProjectionButton} onClick={() => setMode(ADD_PA_STATION)} />
+        )}
+
         <div className={classNames(classes.responsiveWrapper, classes.column)}>
           <div className={classNames(classes.column, classes.grow)}>
             <ParentSize debounceTime={100} className={classes.responsiveWrapper}>
@@ -71,9 +78,13 @@ export const CrossSectionDashboard = React.memo(
                 <CrossSection
                   width={width}
                   height={height}
+                  mode={mode}
+                  setMode={setMode}
+                  wellId={wellId}
                   viewDirection={viewDirection}
                   view={view}
                   updateView={updateView}
+                  viewName={viewName}
                   isReadOnly={isReadOnly}
                 />
               )}

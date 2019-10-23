@@ -8,16 +8,18 @@ import {
   useComputedSegments,
   useCurrentComputedSegments,
   useComputedSurveysAndProjections,
-  usePendingSegmentsStateByMd
+  usePendingSegmentsStateByMd,
+  useLastSurvey,
+  getLastSurvey
 } from "./selectors";
 import debounce from "lodash/debounce";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import pickBy from "lodash/pickBy";
 import reduce from "lodash/reduce";
 import keyBy from "lodash/keyBy";
-import mapValues from "lodash/mapValues";
 import mapKeys from "lodash/mapKeys";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
+import mapValues from "lodash/mapValues";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -128,21 +130,26 @@ export function useSaveWellLogActions() {
   const { selectedWellLog } = useSelectedWellLog();
   const [, dispatch] = useComboContainer();
   const pendingSegmentsState = usePendingSegmentsStateByMd();
-  const updateSegments = useUpdateSegmentsByMd();
   const { replaceResult: replaceProjections } = useProjectionsDataContainer();
   const { replaceResult: replaceSurveys } = useSurveysDataContainer();
   const [logs, , , { updateWellLogs }] = useWellLogsContainer();
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
-
+  const updateSegments = useUpdateSegmentsByMd();
+  const { segments: computedSegments } = useComputedSegments();
   const replaceSurveysAndProjections = useCallback(() => {
     replaceProjections(computedProjections);
     replaceSurveys(computedSurveys);
   }, [replaceProjections, replaceSurveys, computedSurveys, computedProjections]);
+  const [, , , { replaceResult: replaceWellLogsResult }] = useWellLogsContainer();
+
+  const replaceWellLogs = useCallback(() => {
+    replaceWellLogsResult(computedSegments);
+  }, [replaceWellLogsResult, computedSegments]);
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
 
   const saveWellLogs = useCallback(
-    async (logs, pendingSegmentsState, fieldsToSave, getCurrentPendingOperation = () => Promise.resolve()) => {
+    async (logs, pendingSegmentsState, fieldsToSave, getIsPending) => {
       const data = logs
         .map(log => {
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
@@ -182,18 +189,15 @@ export function useSaveWellLogActions() {
       }, {});
 
       replaceSurveysAndProjections();
-
-      const result = await updateWellLogs(data);
-      await getCurrentPendingOperation();
+      replaceWellLogs();
       updateSegments(resetLogProps);
-
-      return result;
+      await updateWellLogs(data);
     },
-    [updateWellLogs, replaceSurveysAndProjections, updateSegments]
+    [updateWellLogs, replaceSurveysAndProjections, updateSegments, replaceWellLogs]
   );
   const saveSelectedWellLog = useCallback(
-    debounce((fieldsToSave, getCurrentPendingOperation) => {
-      saveWellLogs([selectedWellLog], pendingSegmentsState, fieldsToSave, getCurrentPendingOperation);
+    debounce(getIsPending => {
+      saveWellLogs([selectedWellLog], pendingSegmentsState, null, getIsPending);
     }, 500),
     [dispatch, pendingSegmentsState, selectedWellLog, saveWellLogs]
   );
@@ -221,25 +225,26 @@ export function useSaveWellLogActions() {
 
 export function useSelectionActions() {
   const [, , , itemsByMd] = useComputedSurveysAndProjections();
-
   const [, dispatch] = useComboContainer();
-  const toggleMdSelection = useCallback(
+  const changeSelection = useCallback(
+    (id, ensureSelectionInViewport) => {
+      dispatch({ type: "CHANGE_SELECTION", id, ensureSelectionInViewport });
+    },
+    [dispatch]
+  );
+  const changeMdSelection = useCallback(
     md => {
       const item = itemsByMd[md];
       if (item) {
-        dispatch({ type: "TOGGLE_SELECTION", id: item.id });
+        dispatch({ type: "CHANGE_SELECTION", id: item.id });
       }
     },
     [dispatch, itemsByMd]
   );
 
-  const toggleSegmentSelection = useCallback(id => dispatch({ type: "TOGGLE_SELECTION", id }), [dispatch]);
-  const deselectAll = useCallback(() => dispatch({ type: "DESELECT_ALL" }), [dispatch]);
-
   return {
-    toggleMdSelection,
-    toggleSegmentSelection,
-    deselectAll
+    changeSelection,
+    changeMdSelection
   };
 }
 
@@ -280,4 +285,32 @@ export function useUpdateSegmentsById() {
   );
 
   return updateSegments;
+}
+
+export function useSelectLastSurvey() {
+  const lastSurvey = useLastSurvey();
+  const [, dispatch] = useComboContainer();
+
+  return useCallback(
+    ensureSelectionInViewport => {
+      if (lastSurvey) {
+        dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport });
+      }
+    },
+    [dispatch, lastSurvey]
+  );
+}
+
+export function useRefreshSurveysAndUpdateSelection() {
+  const { refreshSurveys } = useSurveysDataContainer();
+  const [, dispatch] = useComboContainer();
+
+  return useCallback(async () => {
+    const newSurveys = await refreshSurveys();
+    const lastSurvey = getLastSurvey(newSurveys);
+
+    if (lastSurvey) {
+      dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport: true });
+    }
+  }, [refreshSurveys, dispatch]);
 }

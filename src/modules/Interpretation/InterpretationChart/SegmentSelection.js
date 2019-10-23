@@ -12,71 +12,40 @@ import PixiLabel from "../../../components/PixiLabel";
 import { twoDecimals, threeDecimals } from "../../../constants/format";
 import PixiLine from "../../../components/PixiLine";
 import PixiRectangle from "../../../components/PixiRectangle";
-import * as PIXI from "pixi.js";
 import SegmentLabel from "../../../components/SegmentLabel";
 
-function PixiTooltip({
-  refresh,
-  target,
-  text,
-  labelPadding,
-  textProps,
-  targetWidth,
-  targetX,
-  targetY,
-  targetHeight,
-  position,
-  canvas,
-  ...props
-}) {
-  const [state, updatePosition] = useState({ x: 0, y: 0, width: 0, height: 0, mouseOut: true });
+function PixiTooltip({ refresh, target, text, labelPadding, textProps, position, canvas, hovered, maxX, ...props }) {
+  const [state, updateState] = useState({ x: 0, y: 0, width: 0, height: 0, mouseOut: !hovered });
   const { mouseOut, x, y, width, height } = state;
   const onSizeChanged = useCallback(
     (width, height) => {
-      updatePosition(state => ({ ...state, width, height }));
+      updateState(state => ({ ...state, width, height }));
     },
-    [updatePosition]
+    [updateState]
   );
 
   const havePosition = position !== null;
-
-  useEffect(
-    function makeInteractive() {
-      if (target && !havePosition) {
-        target.interactive = true;
-        target.hitArea = new PIXI.Rectangle(targetX, targetY, targetWidth, targetHeight);
-      }
-
-      return () => {
-        if (target) {
-          target.interactive = false;
-          target.hitArea = null;
-        }
-      };
-    },
-    [target, targetWidth, targetHeight, havePosition, targetX, targetY]
-  );
+  const showTooltip = !mouseOut || position;
 
   useEffect(
     function enableMouseInteractions() {
       const onMouseMove = e => {
-        updatePosition(state => ({ ...state, ...e.data.getLocalPosition(target) }));
+        updateState(state => ({ ...state, ...e.data.getLocalPosition(target) }));
       };
 
       const onMouseOver = e => {
         if (e) {
           e.target.emit("mouseover");
-          updatePosition(state => ({ ...state, ...e.data.getLocalPosition(target), mouseOut: false }));
+
+          updateState(state => ({ ...state, ...e.data.getLocalPosition(target), mouseOut: false }));
           target.on("mousemove", onMouseMove);
         }
       };
 
       const onMouseOut = e => {
         target.off("mousemove", onMouseMove);
-        updatePosition(state => ({ ...state, mouseOut: true }));
-        if (canvas && !(e.target && e.target.__draggable)) {
-          canvas.style.cursor = "default";
-        }
+
+        updateState(state => ({ ...state, mouseOut: true }));
       };
 
       if (target && !havePosition) {
@@ -98,12 +67,19 @@ function PixiTooltip({
     [target, havePosition, mouseOut, canvas]
   );
 
+  // reinitialize mouseOut
+  useEffect(() => {
+    updateState(state => ({ ...state, mouseOut: !hovered }));
+  }, [target, updateState, hovered]);
+
   useEffect(refresh, [state, text]);
-  const calcX = position ? position.x : x - width / 2;
+
+  const calcX = position ? position.x : Math.min(maxX, x) - width / 2;
   const calcY = position ? position.y : y - height - 10;
 
-  return !state.mouseOut ? (
+  return showTooltip ? (
     <PixiLabel
+      container={target}
       backgroundProps={{ backgroundColor: 0x000000, radius: 5, backgroundAlpha: 0.7 }}
       textProps={{ color: 0xffffff, fontSize: 12, ...textProps }}
       sizeChanged={onSizeChanged}
@@ -183,12 +159,12 @@ function getTooltipText({ interactionsRunning, segments, ...rest }) {
 const SegmentSelection = ({
   totalWidth,
   container,
-  selectedWellLog,
   allSegments,
   draftColor,
   draftMode,
-  nrPrevSurveysToDraft,
-  selectedIndex
+  selectedIndex,
+  zIndex,
+  onSegmentClick
 }) => {
   const { viewport, stage, canvasRef, view } = useInterpretationRenderer();
   const selectedSegment = allSegments[selectedIndex];
@@ -209,7 +185,7 @@ const SegmentSelection = ({
   const segmentRef = useRef(null);
   const { onSegmentDrag, onEndSegmentDrag, onStartSegmentDrag } = useDragActions();
   const { saveSelectedWellLog } = useSaveWellLogActions();
-  const internalState = useRef({ currentOperation: null, endCurrentOperation: null });
+  const internalState = useRef({ tooltip: null });
 
   const [
     {
@@ -222,9 +198,6 @@ const SegmentSelection = ({
   const startInteractions = useCallback(() => {
     if (!interactionsRunning) {
       dispatch({ type: "START_INTERACTIONS" });
-      internalState.current.currentOperation = new Promise(
-        resolve => (internalState.current.endCurrentOperation = resolve)
-      );
     }
   }, [interactionsRunning, dispatch]);
 
@@ -255,18 +228,26 @@ const SegmentSelection = ({
 
   const startLineRef = useRef(null);
   const endLineRef = useRef(null);
-  const segmentDragContainer = useRef(null);
-  const onDragEnd = useCallback(() => {
-    const { endCurrentOperation } = internalState.current;
-    endCurrentOperation && endCurrentOperation();
-    !draftMode && saveSelectedWellLog(null, () => internalState.current.currentOperation);
+  const leftSegmentDragContainer = useRef(null);
+  const rightSegmentDragContainer = useRef(null);
+  internalState.current.interactionsRunning = interactionsRunning;
+  const onDragEnd = useCallback(async () => {
     dispatch({ type: "STOP_INTERACTIONS" });
+
+    if (!draftMode) {
+      saveSelectedWellLog(() => internalState.current.interactionsRunning);
+    }
   }, [saveSelectedWellLog, draftMode]);
   const { refresh } = useInterpretationRenderer();
   const getStartLine = useCallback(() => startLineRef.current && startLineRef.current.container, []);
   const getEndLine = useCallback(() => endLineRef.current && endLineRef.current.container, []);
-  const getSegmentContainer = useCallback(
-    () => segmentDragContainer.current && segmentDragContainer.current.container,
+  const getLeftSegmentContainer = useCallback(
+    () => leftSegmentDragContainer.current && leftSegmentDragContainer.current.container,
+    []
+  );
+
+  const getRightSegmentContainer = useCallback(
+    () => rightSegmentDragContainer.current && rightSegmentDragContainer.current.container,
     []
   );
 
@@ -279,20 +260,50 @@ const SegmentSelection = ({
     [interactionsRunning, dispatch]
   );
 
-  const onSegmentOver = useCallback(() => {
-    refresh();
-    updateInteractions({ fault: true });
-  }, [refresh, updateInteractions]);
+  const onSegmentOver = useCallback(
+    e => {
+      if (e) {
+        internalState.current.tooltipTarget = e.target;
+      }
+      refresh();
+      updateInteractions({ fault: true, dip: false });
+    },
+    [refresh, updateInteractions]
+  );
 
-  const onStartOver = useCallback(() => {
-    refresh();
-    updateInteractions({ fault: true, dip: true });
-  }, [refresh, updateInteractions]);
+  const onStartOver = useCallback(
+    e => {
+      if (e) {
+        internalState.current.tooltipTarget = e.target;
+      }
+      refresh();
+      updateInteractions({ fault: true, dip: true });
+    },
+    [refresh, updateInteractions]
+  );
 
-  const onEndOver = useCallback(() => {
-    refresh();
-    updateInteractions({ dip: true });
-  }, [refresh, updateInteractions]);
+  const onEndOver = useCallback(
+    e => {
+      if (e) {
+        internalState.current.tooltipTarget = e.target;
+      }
+      refresh();
+      updateInteractions({ dip: true, fault: false });
+    },
+    [refresh, updateInteractions]
+  );
+
+  const onLeftSegmentDragEnd = useCallback(
+    (e, dragged) => {
+      // no drag, just click
+      if (!dragged) {
+        onSegmentClick(selectedSegment);
+      }
+
+      onDragEnd(e, dragged);
+    },
+    [onSegmentClick, onDragEnd, selectedSegment]
+  );
 
   useDraggable({
     getContainer: getStartLine,
@@ -303,9 +314,9 @@ const SegmentSelection = ({
     onDrag: onStartSegmentDragHandler,
     onDragEnd,
     x: 0,
-    y: -2,
+    y: -5,
     width: totalWidth,
-    height: 4
+    height: 10
   });
 
   useDraggable({
@@ -317,22 +328,36 @@ const SegmentSelection = ({
     cursor: "row-resize",
     onDragEnd,
     x: 0,
-    y: -2,
+    y: -5,
     width: totalWidth,
-    height: 4
+    height: 10
   });
 
   useDraggable({
-    getContainer: getSegmentContainer,
+    getContainer: getLeftSegmentContainer,
+    root: stage,
+    onDrag: onSegmentDragHandler,
+    canvas: canvasRef.current,
+    onOver: onSegmentOver,
+    onDragEnd: onLeftSegmentDragEnd,
+    cursor: "ns-resize",
+    x: 0,
+    y: 2,
+    width: 10,
+    height: segmentHeight - 4
+  });
+
+  useDraggable({
+    getContainer: getRightSegmentContainer,
     root: stage,
     onDrag: onSegmentDragHandler,
     canvas: canvasRef.current,
     onOver: onSegmentOver,
     onDragEnd,
     cursor: "ns-resize",
-    x: 0,
+    x: totalWidth - gridGutter - 20,
     y: 2,
-    width: totalWidth,
+    width: 10,
     height: segmentHeight - 4
   });
 
@@ -350,20 +375,22 @@ const SegmentSelection = ({
       interactionsRunning
         ? {
             x: -55,
-            y: fault ? 10 : segmentHeight - 60
+            y: fault ? 10 : -60
           }
         : null,
-    [interactionsRunning, segmentHeight, fault]
+    [interactionsRunning, fault]
   );
 
   const startDepth = firstSegment.startdepth < lastSegment.enddepth ? 0 : segmentHeight;
   const endDepth = firstSegment.startdepth < lastSegment.enddepth ? segmentHeight : 0;
+
   return (
     <PixiContainer
       ref={selectionContainerRef}
       y={Math.min(firstSegment.startdepth, lastSegment.enddepth)}
       container={container}
       updateTransform={frozenScaleTransform}
+      zIndex={zIndex}
       child={container => (
         <React.Fragment>
           <SegmentLabel
@@ -383,34 +410,35 @@ const SegmentSelection = ({
             text={twoDecimals(lastSegment.enddepth)}
             y={endDepth}
           />
-          <PixiTooltip
-            canvas={canvasRef.current}
-            targetWidth={totalWidth - 10}
-            targetX={10}
-            targetY={-2}
-            position={tooltipPosition}
-            targetHeight={segmentHeight + 5}
-            target={container}
-            text={tooltipText}
-            container={container}
-            refresh={refresh}
-            textProps={tooltipTextProps}
-          />
+
           <PixiContainer
-            x={0}
-            ref={segmentDragContainer}
+            x={10}
+            width={10}
+            zIndex={zIndex + 1}
+            ref={rightSegmentDragContainer}
             container={container}
             updateTransform={frozenScaleTransform}
           />
+
+          <PixiContainer
+            x={0}
+            width={10}
+            zIndex={zIndex + 1}
+            ref={leftSegmentDragContainer}
+            container={container}
+            updateTransform={frozenScaleTransform}
+          />
+
           <PixiContainer
             ref={startLineRef}
+            zIndex={zIndex}
             container={container}
             y={startDepth}
             updateTransform={frozenScaleTransform}
-            child={container => (
+            child={startLineContainer => (
               <PixiLine
                 y={0}
-                container={container}
+                container={startLineContainer}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}
                 lineWidth={2}
@@ -423,10 +451,10 @@ const SegmentSelection = ({
             container={container}
             y={endDepth}
             updateTransform={frozenScaleTransform}
-            child={container => (
+            child={endLineContainer => (
               <PixiLine
                 y={0}
-                container={container}
+                container={endLineContainer}
                 data={lineData}
                 color={draftMode ? draftColor : selectionColor}
                 lineWidth={2}
@@ -440,12 +468,24 @@ const SegmentSelection = ({
               width={10}
               height={segmentHeight}
               y={0}
+              backgroundAlpha={0.5}
               x={totalWidth - gridGutter - 10}
               radius={5}
               backgroundColor={backgroundColor}
               container={container}
             />
           )}
+          <PixiTooltip
+            canvas={canvasRef.current}
+            hovered
+            position={tooltipPosition}
+            target={internalState.current.tooltipTarget}
+            text={tooltipText}
+            refresh={refresh}
+            zIndex={zIndex + 4}
+            textProps={tooltipTextProps}
+            maxX={totalWidth - gridGutter - 30}
+          />
         </React.Fragment>
       )}
     />
