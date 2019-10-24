@@ -1,7 +1,6 @@
 @import "../../../styles/base";
 
 .responsiveWrapper {
-  height: 100%;
   flex: 1;
   position: relative;
   .importWellPlanButton {
@@ -113,7 +112,6 @@
 
 .crossSectionDash {
   position: relative;
-  padding-bottom: 30px;
 }
 
 .tabs {

@@ -61,13 +61,13 @@ export const CrossSectionDashboard = React.memo(
 
     return (
       <WidgetCard
-        className={classNames(classes.crossSectionDash, className)}
+        className={classNames(classes.crossSectionDash, className, "layout vertical")}
         title="Cross Section"
         hideCard={hideCard}
         hideMenu
       >
         {tabs}
-        {allStepsAreCompleted && (
+        {allStepsAreCompleted && !isReadOnly && (
           <AddButton className={classes.addProjectionButton} onClick={() => setMode(ADD_PA_STATION)} />
         )}
 
