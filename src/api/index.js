@@ -798,10 +798,12 @@ export function useFetchProjections(wellId) {
   );
 
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
+  const internalState = useRef({ data });
+  internalState.current.data = data;
 
   const updateProjection = useCallback(
     ({ projectionId, fields = {} }) => {
-      const optimisticResult = data.map(p => {
+      const optimisticResult = internalState.current.data.map(p => {
         return p.id === projectionId ? { ...p, ...fields } : p;
       });
 
@@ -817,7 +819,7 @@ export function useFetchProjections(wellId) {
         cache: "no-cache"
       });
     },
-    [serializedUpdateFetch, wellId, data]
+    [serializedUpdateFetch, wellId]
   );
 
   function sortByMD(a, b) {

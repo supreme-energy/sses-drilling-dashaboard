@@ -5,6 +5,7 @@ import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
 import { useProjectionsDataContainer, useFormationsDataContainer, useWellIdContainer } from "../../App/Containers";
 import { useLocalStorageReducer } from "react-storage-hooks";
+import pickBy from "lodash/pickBy";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -117,16 +118,7 @@ function pendingSegmentsStateReducer(stateSlice, action, state) {
         stateSlice
       );
     case "RESET_SEGMENTS_PROPERTIES":
-      return reduce(
-        action.propsById,
-        (acc, newProps, id) => {
-          return {
-            ...acc,
-            [id]: initialPendingState
-          };
-        },
-        stateSlice
-      );
+      return pickBy(stateSlice, (_, key) => !action.propsById[key]);
 
     default:
       return stateSlice;

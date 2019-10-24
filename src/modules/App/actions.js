@@ -14,19 +14,6 @@ export function useSaveSurveysAndProjections() {
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
   const { segments: computedSegments } = useComputedSegments();
 
-  //  These change with every pending survey/projection value update.
-  //  A debounced save with these as dependencies is worthless, since it redefines the callback on every change
-  const pendingRef = useRef({});
-  pendingRef.current.pendingSegmentsState = pendingSegmentsState;
-  pendingRef.current.computedSurveys = computedSurveys;
-  pendingRef.current.computedProjections = computedProjections;
-  pendingRef.current.computedSegments = computedSegments;
-
-  const replaceSurveysAndProjections = useCallback(() => {
-    replaceProjections(pendingRef.current.computedProjections);
-    replaceSurveys(pendingRef.current.computedSurveys);
-  }, [replaceProjections, replaceSurveys, pendingRef]);
-
   const [saveId, setSaveId] = useState(0);
   const internalState = useRef({ lastPerfomedSave: null });
 
@@ -38,28 +25,39 @@ export function useSaveSurveysAndProjections() {
     const lastPerfomedSave = internalState.current.lastPerfomedSave;
     if (saveId !== lastPerfomedSave) {
       internalState.current.lastPerfomedSave = saveId;
-      const { computedSurveys, computedProjections, pendingSegmentsState, computedSegments } = pendingRef.current;
+
       const surveyIds = _.keyBy(computedSurveys, s => s.id);
       const projectionIds = _.keyBy(computedProjections, p => p.id);
       const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
       const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
 
-      replaceSurveysAndProjections();
-
+      replaceProjections(computedProjections);
+      replaceSurveys(computedSurveys);
       replaceWellLogs(computedSegments);
+      dispatch({
+        type: "RESET_SEGMENTS_PROPERTIES",
+        propsById: { ...pendingSurveyState, ...pendingProjectionsState }
+      });
 
       Promise.all(
         _.map(pendingProjectionsState, (fields, projectionId) =>
           updateProjection({ projectionId: Number(projectionId), fields })
         ).concat(_.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields })))
-      ).then(() =>
-        dispatch({
-          type: "RESET_SEGMENTS_PROPERTIES",
-          propsById: { ...pendingSurveyState, ...pendingProjectionsState }
-        })
       );
     }
-  }, [saveId, dispatch, updateSurvey, replaceSurveysAndProjections, updateProjection, replaceWellLogs]);
+  }, [
+    saveId,
+    dispatch,
+    updateSurvey,
+    updateProjection,
+    replaceWellLogs,
+    pendingSegmentsState,
+    computedSurveys,
+    computedProjections,
+    computedSegments,
+    replaceSurveys,
+    replaceProjections
+  ]);
   const debouncedSave = useMemo(() => _.debounce(save, 500), [save]);
   return { save, debouncedSave };
 }
