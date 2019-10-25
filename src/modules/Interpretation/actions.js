@@ -289,6 +289,7 @@ export function useUpdateSegmentsById() {
 
 export function useSelectLastSurvey() {
   const lastSurvey = useLastSurvey();
+
   const [, dispatch] = useComboContainer();
 
   return useCallback(

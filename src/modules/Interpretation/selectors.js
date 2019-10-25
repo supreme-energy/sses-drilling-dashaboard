@@ -21,6 +21,7 @@ import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/
 import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
+import findLast from "lodash/findLast";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -674,7 +675,7 @@ export function getColorForWellLog(colorsByWellLog, logId) {
 }
 
 export function getLastSurvey(surveys) {
-  return surveys.find(s => s.isLastSurvey) || surveys[surveys.length - 1];
+  return findLast(surveys, s => Number(s.plan) === 0) || surveys[surveys.length - 1];
 }
 
 export function useLastSurvey() {
