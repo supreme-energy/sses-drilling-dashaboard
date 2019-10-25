@@ -20,11 +20,10 @@
         input {
           font-size: 0.875rem;
           padding: 0.63rem 0.4rem;
-          &[type=number]::-webkit-inner-spin-button,
-          &[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-          }
+          &[type=number]:hover::-webkit-inner-spin-button {  
+            width: 10px;
+            height: 30px;
+        }
         }
         font-size: 0.875rem;
         margin-left: 0;

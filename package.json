@@ -70,6 +70,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-storage-hooks": "^3.0.3",
+    "react-text-mask": "^5.4.3",
     "react-use": "^9.4.0",
     "react-virtualized": "^9.21.1",
     "recompose": "^0.30.0",
@@ -79,6 +80,7 @@
     "redux-react-hook": "^3.2.1",
     "redux-thunk": "^2.3.0",
     "shallowequal": "1.1.0",
+    "text-mask-addons": "^3.8.0",
     "unstated-next": "^1.1.0",
     "url-pattern": "^1.0.3",
     "whatwg-fetch": "2.0.4"

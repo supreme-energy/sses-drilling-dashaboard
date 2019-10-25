@@ -50,7 +50,6 @@ function WellPlanTable() {
         <TableCell className={css.cell}>{twoDecimalsNoComma(d.azm)}</TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
-            type="text"
             debounceInterval={500}
             value={d.tvd}
             error={index === 0 && d.tvd === 0}
@@ -59,7 +58,6 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
-            type="text"
             debounceInterval={500}
             error={index === 0 && d.vs === 0}
             value={d.vs}
@@ -68,7 +66,6 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
-            type="text"
             debounceInterval={500}
             error={index === 0 && d.ns === 0}
             value={d.ns}
@@ -77,7 +74,6 @@ function WellPlanTable() {
         </TableCell>
         <TableCell className={css.cell}>
           <NumericDebouceTextField
-            type="text"
             debounceInterval={500}
             error={index === 0 && d.ew === 0}
             value={d.ew}
@@ -179,23 +175,17 @@ function DetailsFullModal({
             <Box display="flex" flexDirection="row">
               <Box display="flex" flexDirection="column">
                 <div className={comboClasses.flexRight}>
-                  <WellInfoField
-                    label={"Proposed Direction"}
-                    field="propazm"
-                    type="number"
-                    options={{ mask: limitAzm }}
-                  />
-                  <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
+                  <WellInfoField label={"Proposed Direction"} field="propazm" options={{ mask: limitAzm }} />
+                  <WellInfoField label={"Projected Dip"} field="projdip" />
                   <WellInfoField
                     label={"TCL"}
                     field="tot"
-                    type="number"
                     inputProps={{ min: "0" }}
                     options={{
                       debounceAction: updateTieInTCL
                     }}
                   />
-                  <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" type="number" inputProps={{ min: "0" }} />
+                  <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" inputProps={{ min: "0" }} />
                 </div>
                 <DetailsTable showFullTable />
               </Box>

@@ -4,7 +4,7 @@ import Title from "../../../../../components/Title";
 import classes from "./styles.scss";
 
 import { useWellInfo } from "../../../../../api";
-import { DebouncedTextField } from "../../../../../components/DebouncedInputs";
+import { DebouncedTextField, NumericDebouceTextField } from "../../../../../components/DebouncedInputs";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 import useMemo from "react-powertools/hooks/useMemo";
@@ -164,20 +164,18 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
           <PositionLabel iconFill="#1AA4FF">Surface Location</PositionLabel>
 
           <Box display="flex" flexDirection="row" mb={1}>
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Easting (X)"}
-              type="number"
               classes={{ root: classes.surfaceTextField }}
               InputProps={{ className: classes.surfaceTextField }}
               value={wellInfo.survey_easting}
               fullWidth
               onChange={value => onChange("survey_easting", value, true)}
             />
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Northing (Y)"}
-              type="number"
               classes={{ root: classes.surfaceTextField }}
               InputProps={{ className: classes.surfaceTextField }}
               value={wellInfo.survey_northing}
@@ -187,20 +185,18 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
           </Box>
           <PositionLabel iconFill="#75BA03">Landing Point</PositionLabel>
           <Box display="flex" flexDirection="row" mb={1}>
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Easting (X)"}
-              type="number"
               classes={{ root: classes.landingField }}
               InputProps={{ className: classes.landingField }}
               value={wellInfo.landing_easting}
               fullWidth
               onChange={value => onChange("landing_easting", value, true)}
             />
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Northing (Y)"}
-              type="number"
               value={wellInfo.landing_northing}
               classes={{ root: classes.landingField }}
               InputProps={{ className: classes.landingField }}
@@ -210,20 +206,18 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
           </Box>
           <PositionLabel iconFill="#AD00DF">Proposed Bottom Hole Location</PositionLabel>
           <Box display="flex" flexDirection="row" mb={1}>
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Easting (X)"}
-              type="number"
               value={wellInfo.pbhl_easting}
               classes={{ root: classes.positionTextField }}
               InputProps={{ className: classes.positionTextField }}
               fullWidth
               onChange={value => onChange("pbhl_easting", value, true)}
             />
-            <DebouncedTextField
+            <NumericDebouceTextField
               variant="filled"
               label={"Northing (Y)"}
-              type="number"
               value={wellInfo.pbhl_northing}
               classes={{ root: classes.positionTextField }}
               InputProps={{ className: classes.positionTextField }}
@@ -254,10 +248,9 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
         </Box>
 
         <Box display="flex" flexDirection="column" flex={1}>
-          <DebouncedTextField
+          <NumericDebouceTextField
             variant="filled"
             label={"Longitude"}
-            type="number"
             classes={{ root: classes.positionTextField }}
             InputProps={{ className: classes.positionTextField, readOnly: true }}
             value={surfaceLocation.y}
@@ -268,18 +261,16 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
           <Typography variant="subtitle1" className={classes.label}>
             Elevations
           </Typography>
-          <DebouncedTextField
+          <NumericDebouceTextField
             variant="filled"
             label={"Kelly Bushing (RKB)"}
-            type="number"
             value={wellInfo.elev_rkb}
             fullWidth
             onChange={value => onChange("elev_rkb", value)}
           />
-          <DebouncedTextField
+          <NumericDebouceTextField
             variant="filled"
             label={"Ground"}
-            type="number"
             value={wellInfo.elev_ground}
             fullWidth
             onChange={value => onChange("elev_ground", value)}

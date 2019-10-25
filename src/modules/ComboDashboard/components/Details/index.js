@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -25,7 +25,7 @@ import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
-import { EMPTY_FIELD } from "../../../../constants/format";
+import { EMPTY_FIELD, twoDecimalsNoComma } from "../../../../constants/format";
 import isNumber from "../../../../utils/isNumber";
 import useRef from "react-powertools/hooks/useRef";
 
@@ -57,13 +57,17 @@ const iconStyle = {
 
 const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
   const internalState = useRef({ handleChange: onChange });
-
+  const [isFocused, updateIsFocused] = useState(false);
   internalState.current.handleChange = onChange;
 
   const el = useMemo(
     () => (
       <TextField
-        value={value}
+        value={isFocused ? value : twoDecimalsNoComma(value)}
+        onFocus={() => updateIsFocused(true)}
+        onBlur={e => {
+          updateIsFocused(false);
+        }}
         type="number"
         onChange={e => internalState.current.handleChange(e.target.value)}
         className={classNames(classes.textField, classes.cell, { [classes.methodInput]: markAsInput })}
@@ -81,7 +85,7 @@ const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
         }
       />
     ),
-    [icon, markAsInput, value]
+    [icon, markAsInput, value, isFocused]
   );
   return el;
 };

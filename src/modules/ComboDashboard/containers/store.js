@@ -3,9 +3,15 @@ import { useCallback } from "react";
 
 import mapValues from "lodash/mapValues";
 import reduce from "lodash/reduce";
-import { useProjectionsDataContainer, useFormationsDataContainer, useWellIdContainer } from "../../App/Containers";
+import {
+  useProjectionsDataContainer,
+  useFormationsDataContainer,
+  useWellIdContainer,
+  useComputedFilteredWellData
+} from "../../App/Containers";
 import { useLocalStorageReducer } from "react-storage-hooks";
 import pickBy from "lodash/pickBy";
+import findLast from "lodash/findLast";
 
 export const surveyVisibility = {
   ALL: "all",
@@ -264,24 +270,37 @@ function useUseComboStore() {
 export function useAddProjection() {
   const { addProjection } = useProjectionsDataContainer();
   const { refreshFormations } = useFormationsDataContainer();
+  const [, dispatch] = useComboContainer();
 
   return useCallback(
-    projection => {
-      return addProjection(projection).then(refreshFormations);
+    async projection => {
+      const result = await addProjection(projection);
+      if (result && result.projection) {
+        dispatch({ type: "CHANGE_SELECTION", id: result.projection.id });
+      }
+
+      await refreshFormations();
     },
-    [addProjection, refreshFormations]
+    [addProjection, refreshFormations, dispatch]
   );
 }
 
 export function useDeleteProjection() {
   const { deleteProjection } = useProjectionsDataContainer();
   const { refreshFormations } = useFormationsDataContainer();
+  const [{ selectionById }, dispatch] = useComboContainer();
+  const { surveys, projections } = useComputedFilteredWellData();
 
   return useCallback(
-    projection => {
-      return deleteProjection(projection).then(refreshFormations);
+    async projection => {
+      if (selectionById[projection]) {
+        const lastProjection = findLast([...surveys, ...projections], p => p.id !== projection);
+        lastProjection && dispatch({ type: "CHANGE_SELECTION", id: lastProjection.id });
+      }
+      await deleteProjection(projection);
+      await refreshFormations();
     },
-    [deleteProjection, refreshFormations]
+    [deleteProjection, refreshFormations, dispatch, selectionById, projections, surveys]
   );
 }
 

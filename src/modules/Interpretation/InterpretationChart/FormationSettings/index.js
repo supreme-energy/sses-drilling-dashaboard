@@ -91,7 +91,6 @@ function SettingsContent({ pendingAddTop, selectedFormation, formationsData, del
             onChange={value => updateTop({ id: selectedFormation.id, thickness: value })}
             placeholder={EMPTY_FIELD}
             label={"Thickness"}
-            className={"hideArrows"}
             inputProps={{ className: css.thicknessInput }}
             margin="dense"
             InputLabelProps={{
