@@ -676,7 +676,7 @@ export function getColorForWellLog(colorsByWellLog, logId) {
 }
 
 export function getLastSurvey(surveys) {
-  return findLast(surveys, s => Number(s.plan) === 0) || surveys[surveys.length - 1];
+  return findLast(surveys, s => s.isLastSurvey);
 }
 
 export function useLastSurvey() {

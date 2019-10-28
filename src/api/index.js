@@ -521,7 +521,7 @@ export function useWellsMapLength(wellId, wellPositions) {
   }, [wellPositions, wellInfo]);
 }
 
-const surveysTransform = memoizeOne(data => {
+export const surveysTransform = memoizeOne(data => {
   // Bit projection is not always in list of surveys
   const surveys = transform(data);
   const hasBitProj = surveys.some(s => s.plan === 1);

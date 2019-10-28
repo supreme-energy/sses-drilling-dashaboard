@@ -23,7 +23,7 @@ import comboClasses from "../ComboDashboard.scss";
 import DetailsTable from ".";
 import WellInfoField from "./WellInfoField";
 import { limitAzm } from "../CrossSection/formulas";
-import { useSurveysDataContainer, useWellPlanDataContainer } from "../../../App/Containers";
+import { useSurveysDataContainer, useWellPlanDataContainer, useFormationsDataContainer } from "../../../App/Containers";
 import classNames from "classnames";
 import { twoDecimalsNoComma } from "../../../../constants/format";
 import OpenInBrowser from "@material-ui/icons/OpenInBrowser";
@@ -135,6 +135,7 @@ function DetailsFullModal({
   toggleImportWellPlanModal
 }) {
   const { updateTieInTCL } = useSurveysDataContainer();
+  const { refreshFormations } = useFormationsDataContainer();
 
   return (
     <Dialog
@@ -180,6 +181,7 @@ function DetailsFullModal({
                   <WellInfoField
                     label={"TCL"}
                     field="tot"
+                    onAfterUpdate={refreshFormations}
                     inputProps={{ min: "0" }}
                     options={{
                       debounceAction: updateTieInTCL
