@@ -17,25 +17,27 @@ const baseConverter = (lines, saveIndex) => {
     }
 
     let fieldName = parsedLine.mnemonic;
-    version[ fieldName ] = parsedLine;
+    version[fieldName] = parsedLine;
 
     return version;
   }, {});
 };
 
-const curveConverter = (lines) => baseConverter(lines, true);
+const curveConverter = lines => baseConverter(lines, true);
 
 const asciiConverter = (lines, version) => {
-  if (version[ VersionRequiredFields.WRAP ].data.toLowerCase().includes("no")) {
+  if (version[VersionRequiredFields.WRAP].data.toLowerCase().includes("no")) {
     return lines.reduce((values, line) => {
       if (!isEmpty(line)) {
-        values.push(line.split(" ").reduce((values, value) => {
-          if (value !== "") {
-            values.push(value);
-          }
+        values.push(
+          line.split(" ").reduce((values, value) => {
+            if (value !== "") {
+              values.push(value);
+            }
 
-          return values;
-        }, []));
+            return values;
+          }, [])
+        );
       }
       return values;
     }, []);
@@ -54,7 +56,7 @@ const asciiConverter = (lines, version) => {
         }
 
         currentLineValues = [];
-        currentLineValues.push(splitLine[ 0 ]);
+        currentLineValues.push(splitLine[0]);
       } else {
         // if the file is formatted properly, this should never be an issue.
         if (!currentLineValues) {
@@ -71,7 +73,7 @@ const asciiConverter = (lines, version) => {
   }
 };
 
-const optionsConverter = (lines) => {
+const optionsConverter = lines => {
   return lines.reduce((optionText, line) => {
     if (!isEmpty(line)) {
       optionText = optionText.concat(line);
@@ -91,26 +93,26 @@ class Parser {
     "~P": Sections.PARAMETER,
     "~C": Sections.CURVE,
     "~O": Sections.OPTIONAL,
-    "~A": Sections.ASCII,
+    "~A": Sections.ASCII
   };
 
   sectionConverters = {
-    [ Sections.VERSION ]: baseConverter,
-    [ Sections.WELL ]: baseConverter,
-    [ Sections.CURVE ]: curveConverter,
-    [ Sections.OPTIONAL ]: optionsConverter,
-    [ Sections.PARAMETER ]: baseConverter,
-    [ Sections.ASCII ]: asciiConverter,
+    [Sections.VERSION]: baseConverter,
+    [Sections.WELL]: baseConverter,
+    [Sections.CURVE]: curveConverter,
+    [Sections.OPTIONAL]: optionsConverter,
+    [Sections.PARAMETER]: baseConverter,
+    [Sections.ASCII]: asciiConverter
   };
 
-  parse = (text) => {
+  parse = text => {
     const lines = text.replace(`/${this.returnRegex}/g`, this.newLineRegex).split(this.newLineRegex);
 
     let currentSectionName = null;
     const sections = lines.reduce((sections, line) => {
       if (line.startsWith("~")) {
         const sectionName = this.getSectionName(line);
-        sections[ sectionName ] = { lines: [] };
+        sections[sectionName] = { lines: [] };
         currentSectionName = sectionName;
         return sections;
       }
@@ -129,36 +131,34 @@ class Parser {
         return sections;
       }
 
-      if (!sections[ currentSectionName ]) {
+      if (!sections[currentSectionName]) {
         console.error(`There is no section with the section name ${currentSectionName}`);
         return sections;
       }
 
-      sections[ currentSectionName ].lines.push(line);
+      sections[currentSectionName].lines.push(line);
       return sections;
     }, {});
 
     const json = {};
-    Object.keys(sections).forEach((sectionName) => {
-      const section = sections[ sectionName ];
-      json[ sectionName ] = this.convertSection(
-        sectionName,
-        section.lines,
-        json[ Sections.VERSION ],
-        json[ Sections.CURVE ],
-      );
+    Object.keys(sections).forEach(sectionName => {
+      const section = sections[sectionName];
+      json[sectionName] = this.convertSection(sectionName, section.lines, json[Sections.VERSION], json[Sections.CURVE]);
     });
 
     return json;
   };
 
-  getSectionName = (line) => {
-    const sectionFlag = line.trim().toUpperCase().substring(0, 2);
-    return this.sectionDelimiters[ sectionFlag ];
+  getSectionName = line => {
+    const sectionFlag = line
+      .trim()
+      .toUpperCase()
+      .substring(0, 2);
+    return this.sectionDelimiters[sectionFlag];
   };
 
-  getSectionConverter = (name) => {
-    return this.sectionConverters[ name ];
+  getSectionConverter = name => {
+    return this.sectionConverters[name];
   };
 
   convertSection = (name, sectionLines, versionInfo, curveInfo) => {

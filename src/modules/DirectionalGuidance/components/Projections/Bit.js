@@ -1,7 +1,6 @@
 import React, { useState, useReducer, useMemo, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import IconButton from "@material-ui/core/IconButton";
@@ -29,6 +28,7 @@ import {
 import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 import { pageReducer } from "./reducers";
 import classes from "./styles.scss";
+import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
 
 function Bit({ wellId }) {
   const { updateBitProjection } = useBitProjection();
@@ -53,8 +53,8 @@ function Bit({ wellId }) {
   const handlePageSelect = useCallback(type => setSelectedPage({ type, payload: bitContainerPages.pages.length }), []);
 
   const handleFieldValueChange = useCallback(
-    field => e => {
-      const value = Number(e.target.value);
+    field => val => {
+      const value = Number(val);
       if (field === "cl" && lastSurvey) {
         setFieldValue(v => ({ ...v, [field]: value, md: value + lastSurvey.md }));
       } else if (field === "md" && lastSurvey) {
@@ -159,15 +159,15 @@ function Bit({ wellId }) {
             {labels.map(label => {
               const field = label.toLowerCase();
               return (
-                <TextField
+                <NumericDebouceTextField
                   key={label}
+                  debounceInterval={0}
                   label={label}
                   className={classes.textField}
                   value={fieldValues[field]}
                   onChange={handleFieldValueChange(field)}
                   margin="normal"
                   disabled={!enabledFields.includes(label)}
-                  type="number"
                 />
               );
             })}

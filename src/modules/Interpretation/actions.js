@@ -20,6 +20,7 @@ import keyBy from "lodash/keyBy";
 import mapKeys from "lodash/mapKeys";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
 import mapValues from "lodash/mapValues";
+import { surveysTransform } from "../../api";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -289,6 +290,7 @@ export function useUpdateSegmentsById() {
 
 export function useSelectLastSurvey() {
   const lastSurvey = useLastSurvey();
+
   const [, dispatch] = useComboContainer();
 
   return useCallback(
@@ -307,7 +309,7 @@ export function useRefreshSurveysAndUpdateSelection() {
 
   return useCallback(async () => {
     const newSurveys = await refreshSurveys();
-    const lastSurvey = getLastSurvey(newSurveys);
+    const lastSurvey = getLastSurvey(surveysTransform(newSurveys));
 
     if (lastSurvey) {
       dispatch({ type: "CHANGE_SELECTION", id: lastSurvey.id, ensureSelectionInViewport: true });

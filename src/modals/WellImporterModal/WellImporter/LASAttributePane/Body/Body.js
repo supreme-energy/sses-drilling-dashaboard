@@ -98,7 +98,7 @@ const Body = ({
         );
       });
 
-    const middle = (
+    const middle = data[sectionName][0] ? (
       <tr key={`${sectionName}-truncation-row`}>
         <td
           key={`${sectionName}-truncation-data`}
@@ -108,7 +108,7 @@ const Body = ({
           {truncatedMessage}
         </td>
       </tr>
-    );
+    ) : null;
     return [header, ...first, middle, ...last];
   };
 

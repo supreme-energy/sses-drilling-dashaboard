@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Typography } from "@material-ui/core";
-import { DebouncedTextField } from "../../../../components/DebouncedInputs";
+import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
 import classes from "../ComboDashboard.scss";
 import { useSelectedWellInfoContainer, useWellIdContainer } from "../../../App/Containers";
 
@@ -19,9 +19,8 @@ export const AutoPosTCLField = () => {
   return (
     <React.Fragment>
       <Typography variant="subtitle2">Auto Pos-TCL: </Typography>
-      <DebouncedTextField
+      <NumericDebouceTextField
         debounceInterval={100}
-        type="number"
         variant="filled"
         inputProps={{ min: "0" }}
         value={wellInfo.autoposdec}

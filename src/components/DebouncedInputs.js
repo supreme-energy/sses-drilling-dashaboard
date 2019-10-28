@@ -4,6 +4,7 @@ import debouncePromise from "awesome-debounce-promise";
 import TextField from "./TextField";
 import uniqueId from "lodash/uniqueId";
 import useMemo from "react-powertools/hooks/useMemo";
+import { twoDecimalsNoComma } from "../constants/format";
 
 const defaultProps = {
   debounceInterval: 1000,
@@ -26,8 +27,12 @@ export const useDebounceSave = ({ onSave, debounceInterval, value, isFocused }) 
   );
 
   // sync internal state value with value
-  useMemo(() => !isFocused && setState(state => ({ ...state, internalValue: value })), [value, isFocused]);
+  useMemo(() => {
+    const isFocusedChangedToTrue = isFocused && isFocused !== internalState.current.prevIsFocused;
+    (!isFocused || isFocusedChangedToTrue) && setState(state => ({ ...state, internalValue: value }));
+  }, [value, isFocused]);
 
+  internalState.current.prevIsFocused = isFocused;
   const onChangeHandler = useCallback(
     async e => {
       const requestId = uniqueId();
@@ -50,28 +55,42 @@ export const useDebounceSave = ({ onSave, debounceInterval, value, isFocused }) 
   return [internalValue, isPending, onChangeHandler];
 };
 
-export function DebouncedTextField({ value, onChange, debounceInterval, format, ...inputProps }) {
+const withFocusState = Component => props => {
   const [isFocused, updateIsFocused] = useState(false);
-  const [internalValue, isPending, onChangeHandler] = useDebounceSave({
-    value,
-    onSave: onChange,
-    debounceInterval,
-    isFocused
-  });
-
   return (
-    <TextField
-      {...inputProps}
-      value={format(isPending || isFocused ? internalValue : value)}
-      onFocus={() => updateIsFocused(true)}
+    <Component
+      {...props}
+      isFocused={isFocused}
+      onFocus={e => {
+        updateIsFocused(true);
+        props.onFocus && props.onFocus(e);
+      }}
       onBlur={e => {
-        inputProps.onBlur && inputProps.onBlur(e);
+        props.onBlur && props.onBlur(e);
         updateIsFocused(false);
       }}
-      onChange={onChangeHandler}
     />
   );
-}
+};
+
+export const DebouncedTextField = withFocusState(
+  ({ value, onChange, debounceInterval, format, isFocused, ...inputProps }) => {
+    const [internalValue, isPending, onChangeHandler] = useDebounceSave({
+      value,
+      onSave: onChange,
+      debounceInterval,
+      isFocused
+    });
+
+    return (
+      <TextField
+        {...inputProps}
+        value={format(isPending || isFocused ? internalValue : value)}
+        onChange={onChangeHandler}
+      />
+    );
+  }
+);
 
 DebouncedTextField.propsTypes = {
   debounceInterval: PropTypes.number,
@@ -81,17 +100,20 @@ DebouncedTextField.propsTypes = {
 
 DebouncedTextField.defaultProps = defaultProps;
 
-export const NumericDebouceTextField = React.memo(props => {
-  return (
-    <DebouncedTextField
-      type="number"
-      {...props}
-      onChange={value => {
-        const numericValue = parseFloat(value);
-        if (!isNaN(numericValue)) {
-          return props.onChange(numericValue);
-        }
-      }}
-    />
-  );
-});
+export const NumericDebouceTextField = React.memo(
+  withFocusState(props => {
+    return (
+      <DebouncedTextField
+        type="number"
+        {...props}
+        value={props.isFocused ? props.value : twoDecimalsNoComma(props.value)}
+        onChange={value => {
+          const numericValue = parseFloat(value);
+          if (!isNaN(numericValue)) {
+            return props.onChange(numericValue);
+          }
+        }}
+      />
+    );
+  })
+);

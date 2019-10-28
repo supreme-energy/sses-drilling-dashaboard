@@ -21,7 +21,6 @@ function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, d
         disabled={disabled}
         value={value}
         onChange={onChange}
-        type="number"
         placeholder={EMPTY_FIELD}
         label={label}
         className="hideArrows"

@@ -21,6 +21,7 @@ import { toDegrees, toRadians } from "../ComboDashboard/components/CrossSection/
 import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
+import findLast from "lodash/findLast";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -494,6 +495,7 @@ const computeFormations = memoizeOne((formations, surveysAndProjections) => {
         return {
           ...item,
           fault: survey.fault,
+          vs: survey.vs,
           dip: survey.dip,
           tot: survey.tcl + item.thickness
         };
@@ -674,7 +676,7 @@ export function getColorForWellLog(colorsByWellLog, logId) {
 }
 
 export function getLastSurvey(surveys) {
-  return surveys.find(s => s.isLastSurvey) || surveys[surveys.length - 1];
+  return findLast(surveys, s => s.isLastSurvey);
 }
 
 export function useLastSurvey() {

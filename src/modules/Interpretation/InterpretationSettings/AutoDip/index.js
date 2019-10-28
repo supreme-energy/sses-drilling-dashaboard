@@ -480,7 +480,7 @@ const AutoDip = React.memo(
                 onChange={e => dispatch({ type: "CHANGE_MANUAL_VALUE", manualValue: e.target.value })}
                 type="number"
                 label={"Value Auto-Applied"}
-                className={classNames("hideArrows", css.autoDipInput)}
+                className={css.autoDipInput}
                 margin="dense"
                 InputLabelProps={{
                   shrink: true
@@ -492,7 +492,7 @@ const AutoDip = React.memo(
                   value={finalValue}
                   type="number"
                   label={"Value Auto-Applied"}
-                  className={classNames("hideArrows", css.autoDipInput)}
+                  className={css.autoDipInput}
                   margin="dense"
                   InputLabelProps={{
                     shrink: true

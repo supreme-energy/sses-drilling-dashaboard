@@ -15,7 +15,7 @@ import DetailsTable from "./Details";
 import DetailsFullModal, { WELL_PLAN } from "./Details/DetailsFullModal";
 import CrossSection from "./CrossSection/index";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
-import { useCrossSectionContainer, useSurveysDataContainer } from "../../App/Containers";
+import { useCrossSectionContainer, useSurveysDataContainer, useFormationsDataContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
 import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
@@ -42,6 +42,8 @@ export const CrossSectionDashboard = React.memo(
     const [activeTab, changeActiveTab] = useState(WELL_PLAN);
     const [mode, setMode] = useState(NORMAL);
     const { allStepsAreCompleted } = useSetupWizardData();
+    const { refreshFormations } = useFormationsDataContainer();
+
     const tabs = useMemo(
       () => (
         <Tabs
@@ -124,27 +126,17 @@ export const CrossSectionDashboard = React.memo(
                   {expanded && selectedSegment.isProjection && (
                     <React.Fragment>
                       <SelectedProjectionMethod selectedProjection={selectedSegment} />
-                      <WellInfoField
-                        label={"Auto Pos-TCL"}
-                        field="autoposdec"
-                        type="number"
-                        inputProps={{ min: "0" }}
-                      />
+                      <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" inputProps={{ min: "0" }} />
                     </React.Fragment>
                   )}
                   {expanded && !selectedSegment.isProjection && (
                     <React.Fragment>
-                      <WellInfoField
-                        label={"Proposed Direction"}
-                        field="propazm"
-                        type="number"
-                        options={{ mask: limitAzm }}
-                      />
-                      <WellInfoField label={"Projected Dip"} field="projdip" type="number" />
+                      <WellInfoField label={"Proposed Direction"} field="propazm" options={{ mask: limitAzm }} />
+                      <WellInfoField label={"Projected Dip"} field="projdip" />
                       <WellInfoField
                         label={"TCL"}
+                        onAfterUpdate={refreshFormations}
                         field="tot"
-                        type="number"
                         inputProps={{ min: "0" }}
                         options={{
                           debounceAction: updateTieInTCL
