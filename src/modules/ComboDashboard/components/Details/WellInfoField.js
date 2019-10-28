@@ -7,7 +7,7 @@ import { NumericDebouceTextField } from "../../../../components/DebouncedInputs"
 
 const IDENTITY_FCT = a => a;
 
-export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
+export const WellInfoField = ({ field, label, options = {}, onAfterUpdate, ...textProps }) => {
   const { wellId } = useWellIdContainer();
   const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
@@ -19,8 +19,9 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
       await debounceAction(mask(value));
       await updateWell({ wellId, field, value: value });
       refreshFetchStore();
+      onAfterUpdate();
     },
-    [debounceAction, field, updateWell, refreshFetchStore, wellId, mask]
+    [debounceAction, field, updateWell, refreshFetchStore, wellId, mask, onAfterUpdate]
   );
 
   return (
@@ -37,6 +38,10 @@ export const WellInfoField = ({ field, label, options = {}, ...textProps }) => {
       />
     </React.Fragment>
   );
+};
+
+WellInfoField.defaultProps = {
+  onAfterUpdate: IDENTITY_FCT
 };
 
 export default WellInfoField;
