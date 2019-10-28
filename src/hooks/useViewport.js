@@ -5,6 +5,12 @@ import useDraggable from "./useDraggable";
 
 const globalMouse = { x: 0, y: 0 };
 
+export function getZoomRate(e) {
+  const isControlKey = e.ctrlKey;
+  const isShiftKey = e.shiftKey;
+  return isControlKey && isShiftKey ? 0.3 : isControlKey ? 0.15 : isShiftKey ? 0.06 : 0.03;
+}
+
 // enable mouse wheel and drag
 export default function useViewport({
   renderer,
@@ -33,8 +39,9 @@ export default function useViewport({
       e.preventDefault();
       interactionManagerRef.current.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
 
+      const zoomRate = getZoomRate(e);
       // sign of deltaY (-1,0,1) determines zoom in or out
-      const factor = 1 - Math.sign(e.deltaY) * 0.03;
+      const factor = 1 - Math.sign(e.deltaY) * zoomRate;
 
       updateView(prev => {
         const newValue = {

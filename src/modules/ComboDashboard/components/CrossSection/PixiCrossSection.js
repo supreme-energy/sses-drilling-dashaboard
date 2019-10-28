@@ -9,6 +9,7 @@ import { removeAllChildren } from "./pixiUtils";
 import { drawButtons } from "./drawButtons";
 import { VERTICAL } from "../../../../constants/crossSectionViewDirection";
 import { drawCompass } from "./drawCompass";
+import { getZoomRate } from "../../../../hooks/useViewport";
 
 export default class PixiCrossSection {
   constructor() {
@@ -112,8 +113,9 @@ export default class PixiCrossSection {
         e.preventDefault();
         this.interactionManager.mapPositionToPoint(globalMouse, e.clientX, e.clientY);
 
+        const zoomRate = getZoomRate(e);
         // sign of deltaY (-1,0,1) determines zoom in or out
-        const factor = 1 - Math.sign(e.deltaY) * 0.03;
+        const factor = 1 - Math.sign(e.deltaY) * zoomRate;
         this.viewDataUpdate(prev => {
           return {
             ...prev,
