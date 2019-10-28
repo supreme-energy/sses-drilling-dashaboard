@@ -110,10 +110,8 @@ export const defaultTransform = toWGS84(defaultCS);
 export function useWellInfo(wellId) {
   const { requestId, updateRequestId } = useAppState();
   const [data, isLoading, , , , { fetch }] = useFetch();
-  const stateRef = useRef({ internalRequestId: null });
   const refreshStore = useCallback(() => {
     const newRequestId = Date.now();
-    stateRef.current.internalRequestId = newRequestId;
     updateRequestId(newRequestId);
   }, [updateRequestId]);
 
@@ -127,8 +125,7 @@ export function useWellInfo(wellId) {
   const appInfo = data && data.appinfo;
 
   useEffect(() => {
-    // avoid refresh on the component that trigger the update
-    if (requestId !== stateRef.current.internalRequestId && wellId) {
+    if (wellId) {
       serializedRefresh(
         {
           path: GET_WELL_INFO,
