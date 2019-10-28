@@ -167,6 +167,18 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
     }
   }, [resetViewportCounter, selectedWellLog, view, height, updateView]);
 
+  useEffect(() => {
+    if (selectedWellLog) {
+      updateView(view => {
+        const y = -selectedWellLog.startdepth * view.yScale;
+        const yMin = Math.floor((-1 * view.y) / view.yScale);
+        const yMax = yMin + Math.floor((height + view.yScale) / view.yScale);
+        const yScale = 1;
+        return { ...view, y, yScale };
+      });
+    }
+  }, [selectedWellLog, height, updateView]);
+
   useEffect(refresh, [
     refresh,
     stage,

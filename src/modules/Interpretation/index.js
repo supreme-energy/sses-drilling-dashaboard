@@ -6,6 +6,7 @@ import InterpretationChart from "./InterpretationChart";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
+import CenterIcon from "@material-ui/icons/CenterFocusStrong";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -30,6 +31,14 @@ function TopsButton() {
     <Button variant="text" color="primary" onClick={() => dispatch({ type: "TOGGLE_EDIT_MODE" })}>
       Tops
     </Button>
+  );
+}
+
+function CenterButton() {
+  return (
+    <IconButton variant="text" color="primary" onClick={() => {}}>
+      <CenterIcon />
+    </IconButton>
   );
 }
 
@@ -101,6 +110,7 @@ const Interpretation = React.memo(
                   labelPlacement="start"
                 />
               </Box>
+              {/* <CenterButton /> */}
               <TopsButton variant="text" color="primary">
                 Tops
               </TopsButton>
