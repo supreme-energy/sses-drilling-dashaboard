@@ -22,6 +22,7 @@ import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import findLast from "lodash/findLast";
+import pickBy from "lodash/pickBy";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -32,6 +33,7 @@ export function calcDepth(tvd, dip, vs, lastvs, fault, lasttvd, lastdepth) {
 }
 
 export function calcTot(pTot, dip, vs, pVs, fault) {
+  console.log("calc tot", pTot, dip, vs, pVs, fault);
   let tot = pTot + -Math.tan(dip / 57.29578) * Math.abs(vs - pVs);
   tot += fault;
   return tot;
@@ -307,10 +309,14 @@ export function getSelectedId(selectionById) {
 const recomputeSurveysAndProjections = memoizeOne(
   (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
     const bitProjIdx = surveys.length - 1;
+
     return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
-      const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
+      const pendingState =
+        draftMode && selectedId === currSvy.id
+          ? {}
+          : pickBy(pendingSegmentsState[currSvy.id], v => v !== undefined) || {};
       const combinedSvy = { ...currSvy, ...pendingState };
 
       if (index === 0) {
@@ -409,10 +415,15 @@ const recomputeSurveysAndProjections = memoizeOne(
             pos: tcl - tvd
           });
         } else {
-          const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
-          const sign = bitProjPos > 0 ? 1 : -1;
-          const cap = bitProjPos > 0 ? Math.max : Math.min;
-          const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          let pos = combinedSvy.pos;
+
+          if (autoPosDec) {
+            const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+            const sign = bitProjPos > 0 ? 1 : -1;
+            const cap = bitProjPos > 0 ? Math.max : Math.min;
+            pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          }
+
           const projection = calculateProjection(
             { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
             acc,
