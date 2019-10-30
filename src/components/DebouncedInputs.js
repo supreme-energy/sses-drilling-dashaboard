@@ -2,9 +2,11 @@ import React, { useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import debouncePromise from "awesome-debounce-promise";
 import TextField from "./TextField";
+import MaterialTextField from "@material-ui/core/TextField";
 import uniqueId from "lodash/uniqueId";
 import useMemo from "react-powertools/hooks/useMemo";
 import { twoDecimalsNoComma } from "../constants/format";
+import hoc from "react-powertools/hoc";
 
 const defaultProps = {
   debounceInterval: 1000,
@@ -55,7 +57,7 @@ export const useDebounceSave = ({ onSave, debounceInterval, value, isFocused }) 
   return [internalValue, isPending, onChangeHandler];
 };
 
-const withFocusState = Component => props => {
+const withFocusState = hoc(Component => props => {
   const [isFocused, updateIsFocused] = useState(false);
   return (
     <Component
@@ -71,7 +73,7 @@ const withFocusState = Component => props => {
       }}
     />
   );
-};
+});
 
 export const DebouncedTextField = withFocusState(
   ({ value, onChange, debounceInterval, format, isFocused, ...inputProps }) => {
@@ -100,20 +102,36 @@ DebouncedTextField.propsTypes = {
 
 DebouncedTextField.defaultProps = defaultProps;
 
-export const NumericDebouceTextField = React.memo(
-  withFocusState(props => {
+const ensureNumberValue = hoc(InputComp => {
+  return withFocusState(props => {
+    const [pendingValue, updatePendingValue] = useState(props.value);
+    const { value } = props;
+    useMemo(() => updatePendingValue(value), [value]);
+
     return (
-      <DebouncedTextField
+      <InputComp
         type="number"
         {...props}
-        value={props.isFocused ? props.value : twoDecimalsNoComma(props.value)}
+        value={props.isFocused ? pendingValue : twoDecimalsNoComma(props.value)}
         onChange={value => {
           const numericValue = parseFloat(value);
           if (!isNaN(numericValue)) {
             return props.onChange(numericValue);
+          } else {
+            updatePendingValue(value);
           }
         }}
       />
     );
-  })
-);
+  });
+});
+
+export const NumericTextField = ensureNumberValue(props => (
+  <MaterialTextField {...props} onChange={e => props.onChange(e.target.value)} />
+));
+
+NumericTextField.defaultProps = {
+  onChange: e => e
+};
+
+export const NumericDebouceTextField = React.memo(ensureNumberValue(DebouncedTextField));

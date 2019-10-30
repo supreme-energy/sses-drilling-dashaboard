@@ -1,5 +1,5 @@
 import { useComboContainer } from "../ComboDashboard/containers/store";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useReducer, useEffect } from "react";
 import {
   getCalculateDip,
   useSelectedWellLog,
@@ -148,9 +148,11 @@ export function useSaveWellLogActions() {
   }, [replaceWellLogsResult, computedSegments]);
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
+  const [wellLogsChangeTrigger, changeWellLogsTrigger] = useReducer(v => v + 1, 0);
+  const internalState = useRef({ lastTriggerId: 0 });
 
   const saveWellLogs = useCallback(
-    async (logs, pendingSegmentsState, fieldsToSave, getIsPending) => {
+    async (logs, pendingSegmentsState, fieldsToSave) => {
       const data = logs
         .map(log => {
           const pendingState = (log && pendingSegmentsState[log.endmd]) || {};
@@ -189,13 +191,22 @@ export function useSaveWellLogActions() {
         return acc;
       }, {});
 
+      changeWellLogsTrigger();
+
+      await updateWellLogs(data);
+      updateSegments(resetLogProps);
+    },
+    [updateWellLogs, updateSegments, changeWellLogsTrigger]
+  );
+
+  useEffect(() => {
+    if (internalState.current.lastTriggerId !== wellLogsChangeTrigger) {
+      internalState.current.lastTriggerId = wellLogsChangeTrigger;
       replaceSurveysAndProjections();
       replaceWellLogs();
-      updateSegments(resetLogProps);
-      await updateWellLogs(data);
-    },
-    [updateWellLogs, replaceSurveysAndProjections, updateSegments, replaceWellLogs]
-  );
+    }
+  }, [wellLogsChangeTrigger, replaceSurveysAndProjections, replaceWellLogs]);
+
   const saveSelectedWellLog = useCallback(
     debounce(getIsPending => {
       saveWellLogs([selectedWellLog], pendingSegmentsState, null, getIsPending);

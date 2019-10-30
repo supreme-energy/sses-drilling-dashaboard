@@ -5,7 +5,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import classNames from "classnames";
 
@@ -25,9 +24,10 @@ import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
 import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
-import { EMPTY_FIELD, twoDecimalsNoComma } from "../../../../constants/format";
+import { EMPTY_FIELD } from "../../../../constants/format";
 import isNumber from "../../../../utils/isNumber";
 import useRef from "react-powertools/hooks/useRef";
+import { NumericTextField } from "../../../../components/DebouncedInputs";
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -57,19 +57,13 @@ const iconStyle = {
 
 const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
   const internalState = useRef({ handleChange: onChange });
-  const [isFocused, updateIsFocused] = useState(false);
   internalState.current.handleChange = onChange;
-
   const el = useMemo(
     () => (
-      <TextField
-        value={isFocused ? value : twoDecimalsNoComma(value)}
-        onFocus={() => updateIsFocused(true)}
-        onBlur={e => {
-          updateIsFocused(false);
-        }}
+      <NumericTextField
+        value={value}
         type="number"
-        onChange={e => internalState.current.handleChange(e.target.value)}
+        onChange={internalState.current.handleChange}
         className={classNames(classes.textField, classes.cell, { [classes.methodInput]: markAsInput })}
         InputLabelProps={{
           shrink: true
@@ -85,7 +79,7 @@ const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
         }
       />
     ),
-    [icon, markAsInput, value, isFocused]
+    [icon, markAsInput, value]
   );
   return el;
 };

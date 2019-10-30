@@ -12,12 +12,12 @@ import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
 import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
-import { NumericDebouceTextField } from "../../../components/DebouncedInputs";
+import { NumericTextField } from "../../../components/DebouncedInputs";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
     <Box display="flex" flexDirection="row" mr={2}>
-      <NumericDebouceTextField
+      <NumericTextField
         disabled={disabled}
         value={value}
         onChange={onChange}
@@ -111,7 +111,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Fault"}
               disabled={!selectedSegment}
-              onChange={fault => updateFirstSegment({ fault })}
+              onChange={fault => updateFirstSegment({ fault: Number(fault) })}
               value={fault}
               onIncrease={() => updateFirstSegment({ fault: Number(fault) + 1 })}
               onDecrease={() => updateFirstSegment({ fault: Number(fault) - 1 })}
@@ -120,7 +120,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Scale"}
               disabled={!selectedSegment}
-              onChange={scale => updateSegmentsHandler({ scale })}
+              onChange={scale => updateSegmentsHandler({ scale: Number(scale) })}
               value={scale}
               onIncrease={() => updateSegmentsHandler({ scale: Number(scale) + 0.1 })}
               onDecrease={() => updateSegmentsHandler({ scale: Number(scale) - 0.1 })}
@@ -130,7 +130,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Dip"}
               disabled={!selectedSegment}
-              onChange={dip => updateSegmentsHandler({ dip })}
+              onChange={dip => updateSegmentsHandler({ dip: Number(dip) })}
               value={hideDipValue ? "" : dip}
               onIncrease={() => updateSegmentsHandler({ dip: Number(dip) + 1 })}
               onDecrease={() => updateSegmentsHandler({ dip: Number(dip) - 1 })}
@@ -139,7 +139,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Bias"}
               disabled={!selectedSegment}
-              onChange={bias => updateSegmentsHandler({ bias })}
+              onChange={bias => updateSegmentsHandler({ bias: Number(bias) })}
               value={bias}
               onIncrease={() => updateSegmentsHandler({ bias: Number(bias) + 1 })}
               onDecrease={() => updateSegmentsHandler({ bias: Number(bias) - 1 })}
