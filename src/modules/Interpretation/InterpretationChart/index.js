@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
