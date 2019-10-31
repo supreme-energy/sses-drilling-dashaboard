@@ -23,6 +23,9 @@ const initialState = {
   selectionById: {},
   // falsy | Number:  this is changed each time we need to adjust viewport to ensure last selected item is in viewport
   resetViewportCounter: 0,
+  enforceSelectionInTableViewportId: null,
+  centerSelectionInCSId: null,
+  centerWellPlanId: null,
   pendingSegmentsState: {},
   logsBiasAndScale: {},
   currentEditedLog: null,
@@ -52,6 +55,42 @@ function selectionByIdReducer(selectionById, action) {
       return {};
     default:
       return selectionById;
+  }
+}
+
+function enforceSelectionInTableViewportIdReducer(id, action) {
+  switch (action.type) {
+    case "CHANGE_SELECTION": {
+      return Date.now();
+    }
+
+    default:
+      return id;
+  }
+}
+
+function centerWellPlanIdReducer(id, action) {
+  switch (action.type) {
+    case "CENTER_WELL_PLAN": {
+      return Date.now();
+    }
+
+    default:
+      return id;
+  }
+}
+
+function centerSelectionInCSIdReducer(id, action) {
+  switch (action.type) {
+    case "CHANGE_SELECTION": {
+      if (action.centerSelectionInCS) {
+        return Date.now();
+      }
+      return id;
+    }
+
+    default:
+      return id;
   }
 }
 
@@ -237,6 +276,12 @@ function colorsByWellLogReducer(colorsByWellLog, action) {
 const comboStoreReducer = (state, action) => {
   return {
     ...state,
+    centerSelectionInCSId: centerSelectionInCSIdReducer(state.centerSelectionInCSId, action),
+    enforceSelectionInTableViewportId: enforceSelectionInTableViewportIdReducer(
+      state.enforceSelectionInTableViewportId,
+      action
+    ),
+    centerWellPlanId: centerWellPlanIdReducer(state.centerWellPlanId, action),
     selectionById: selectionByIdReducer(state.selectionById, action),
     resetViewportCounter: resetViewportCounterReducer(state.resetViewportCounter, action),
     pendingSegmentsState: pendingSegmentsStateReducer(state.pendingSegmentsState, action, state),

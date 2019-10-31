@@ -1,6 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useCallback, useEffect } from "react";
 import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
@@ -19,15 +18,18 @@ import projectionStatic from "../../../../assets/projectionStatic.svg";
 import projectionDirectional from "../../../../assets/projectionDirectional.svg";
 import trashcanIcon from "../../../../assets/deleteForever.svg";
 import classes from "./Details.scss";
-import { useUpdateSegmentsById } from "../../../Interpretation/actions";
+import { useUpdateSegmentsById, useSelectionActions } from "../../../Interpretation/actions";
 import { MD_INC_AZ, TVD_VS } from "../../../../constants/calcMethods";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import { limitAzm } from "../CrossSection/formulas";
-import { useComputedSurveysAndProjections, useSetupWizardData } from "../../../Interpretation/selectors";
 import { EMPTY_FIELD } from "../../../../constants/format";
 import isNumber from "../../../../utils/isNumber";
 import useRef from "react-powertools/hooks/useRef";
-import { NumericTextField } from "../../../../components/DebouncedInputs";
+import { NumericTextField, withFocusState } from "../../../../components/DebouncedInputs";
+import { AutoSizer, List } from "react-virtualized";
+import { useComboContainer } from "../../containers/store";
+
+const noRowsRenderer = () => <div>No data</div>;
 
 function SurveyIcon({ row }) {
   let sourceType;
@@ -55,12 +57,17 @@ const iconStyle = {
   marginRight: 0
 };
 
+const NumericInputCell = withFocusState(props => (
+  <NumericTextField {...props} onChange={value => props.isFocused && props.onChange(value)} />
+));
+
 const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
   const internalState = useRef({ handleChange: onChange });
   internalState.current.handleChange = onChange;
+  const Icon = icon;
   const el = useMemo(
     () => (
-      <NumericTextField
+      <NumericInputCell
         value={value}
         type="number"
         onChange={internalState.current.handleChange}
@@ -72,7 +79,7 @@ const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
           icon && {
             startAdornment: (
               <InputAdornment position="start" style={iconStyle}>
-                <icon className={classes.icon} />
+                <Icon className={classes.icon} />
               </InputAdornment>
             )
           }
@@ -96,129 +103,173 @@ export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
-  const [allComputed] = useComputedSurveysAndProjections();
-  const { allStepsAreCompleted } = useSetupWizardData();
+  const [{ enforceSelectionInTableViewportId }] = useComboContainer();
+  const { changeSelection } = useSelectionActions();
 
   const selectedIndex = useMemo(() => {
     return calcSections.findIndex(s => selectedSections[s.id]);
   }, [calcSections, selectedSections]);
   const selectedId = useMemo(() => (calcSections[selectedIndex] || {}).id, [calcSections, selectedIndex]);
 
-  const details = useMemo(() => {
-    if (showFullTable) {
-      return calcSections.slice().reverse();
-    } else {
-      if (selectedIndex === -1 && !allStepsAreCompleted) {
-        return allComputed;
-      } else {
-        return calcSections.slice(Math.max(selectedIndex - 2, 0), selectedIndex + 1).reverse();
-      }
-    }
-  }, [calcSections, showFullTable, selectedIndex, allStepsAreCompleted, allComputed]);
+  const details = useMemo(() => calcSections.slice().reverse(), [calcSections]);
+  const gridRef = useRef(null);
+  const nrItems = calcSections.length;
+  useEffect(
+    function scrollToSelection() {
+      gridRef.current.scrollToRow(nrItems - selectedIndex - 1);
+    },
+    [selectedIndex, nrItems, enforceSelectionInTableViewportId]
+  );
+
+  const rowRenderer = useCallback(
+    ({ index }) => {
+      const row = details[index];
+
+      const editable = selectedId === row.id && !showFullTable;
+      const rowColor = row.color || "";
+      const rowSelectionColor = row.selectedColor || "";
+      const update = (field, method) => {
+        return value => {
+          updateSegments({ [row.id]: { [field]: Number(value), ...(method && { method }) } });
+          debouncedSave();
+        };
+      };
+      return (
+        <TableRow
+          component="div"
+          key={`${row.id}${index}`}
+          className={classNames(classes.row, {
+            [classes.PARow]: row.isProjection,
+            [classes.surveyRow]: row.isSurvey,
+            [classes.lastSurveyRow]: row.isLastSurvey,
+            [classes.bitProjRow]: row.isBitProj,
+            [classes.selected]: selectedId === row.id
+          })}
+        >
+          <TableCell
+            className={classNames(classes.cell, classes.buttonMode)}
+            component="div"
+            onClick={() => changeSelection(row.id, true, true)}
+          >
+            <SurveyIcon row={row} />
+            {row.name}
+          </TableCell>
+          {Cell(row.md, editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
+          {Cell(row.inc, editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
+          {Cell(row.azm, editable || row.isTieIn, v => update("azm", MD_INC_AZ)(limitAzm(v)), row.method === MD_INC_AZ)}
+          {Cell(row.tvd, (editable && row.isProjection) || row.isTieIn, update("tvd", TVD_VS), row.method === TVD_VS)}
+          {Cell(row.dl, false)}
+          {Cell(row.vs, (editable && row.isProjection) || row.isTieIn, update("vs", TVD_VS), row.method === TVD_VS)}
+          {Cell(row.ns, row.isTieIn, update("ns"))}
+          {Cell(row.ew, row.isTieIn, update("ew"))}
+          {Cell(row.fault, editable, update("fault"), false, a =>
+            Knob({
+              ...a,
+              fill: `#${rowColor.toString(16).padStart(6, 0)}`,
+              outline: `#${rowSelectionColor.toString(16).padStart(6, 0)}`
+            })
+          )}
+          {Cell(row.dip, editable, update("dip"), false, a =>
+            Knob({ ...a, fill: `#${rowColor.toString(16).padStart(6, 0)}`, outline: "#FFF" })
+          )}
+          {Cell(row.tcl, false)}
+          {Cell(row.pos, false)}
+          {showFullTable && Cell(row.tot, false)}
+          {showFullTable && Cell(row.bot, false)}
+          <TableCell className={classNames(classes.cell, classes.actions)} component="div">
+            {row.isProjection && (
+              <IconButton
+                size="small"
+                aria-label="Delete row"
+                onClick={() => {
+                  deleteProjection(row.id);
+                }}
+              >
+                <img src={trashcanIcon} />
+              </IconButton>
+            )}
+          </TableCell>
+        </TableRow>
+      );
+    },
+    [debouncedSave, details, selectedId, showFullTable, deleteProjection, updateSegments, changeSelection]
+  );
 
   return (
-    <Table className={classes.table}>
-      <TableHead>
-        <TableRow className={classes.row}>
-          <TableCell className={classes.cell}>Survey</TableCell>
-          <TableCell className={classes.cell}>Depth</TableCell>
-          <TableCell className={classes.cell}>Inclination</TableCell>
-          <TableCell className={classes.cell}>Azimuth</TableCell>
-          <TableCell className={classes.cell}>TVD</TableCell>
-          <TableCell className={classes.cell}>Dog Leg</TableCell>
-          <TableCell className={classes.cell}>VS</TableCell>
-          <TableCell className={classes.cell}>NS</TableCell>
-          <TableCell className={classes.cell}>EW</TableCell>
-          <TableCell className={classes.cell}>Fault</TableCell>
-          <TableCell className={classes.cell}>Dip</TableCell>
-          <TableCell className={classes.cell}>TCL</TableCell>
-          <TableCell className={classes.cell}>Pos-TCL</TableCell>
-          {showFullTable && <TableCell className={classes.cell}>TOT</TableCell>}
-          {showFullTable && <TableCell className={classes.cell}>BOT</TableCell>}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {details.map((row, index) => {
-          const editable = selectedId === row.id && !showFullTable;
-          const rowColor = row.color || "";
-          const rowSelectionColor = row.selectedColor || "";
-          const update = (field, method) => {
-            return value => {
-              updateSegments({ [row.id]: { [field]: Number(value), ...(method && { method }) } });
-              debouncedSave();
-            };
-          };
-          return (
-            <TableRow
-              key={`${row.id}${index}`}
-              className={classNames(classes.row, {
-                [classes.PARow]: row.isProjection,
-                [classes.surveyRow]: row.isSurvey,
-                [classes.lastSurveyRow]: row.isLastSurvey,
-                [classes.bitProjRow]: row.isBitProj,
-                [classes.selected]: selectedId === row.id
-              })}
-            >
-              <TableCell className={classes.cell} component="th" scope="row">
-                <SurveyIcon row={row} />
-                {row.name}
-              </TableCell>
-              {Cell(row.md, editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(row.inc, editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
-              {Cell(
-                row.azm,
-                editable || row.isTieIn,
-                v => update("azm", MD_INC_AZ)(limitAzm(v)),
-                row.method === MD_INC_AZ
-              )}
-              {Cell(
-                row.tvd,
-                (editable && row.isProjection) || row.isTieIn,
-                update("tvd", TVD_VS),
-                row.method === TVD_VS
-              )}
-              {Cell(row.dl, false)}
-              {Cell(row.vs, (editable && row.isProjection) || row.isTieIn, update("vs", TVD_VS), row.method === TVD_VS)}
-              {Cell(row.ns, row.isTieIn, update("ns"))}
-              {Cell(row.ew, row.isTieIn, update("ew"))}
-              {Cell(row.fault, editable, update("fault"), false, a =>
-                Knob({
-                  ...a,
-                  fill: `#${rowColor.toString(16).padStart(6, 0)}`,
-                  outline: `#${rowSelectionColor.toString(16).padStart(6, 0)}`
-                })
-              )}
-              {Cell(row.dip, editable, update("dip"), false, a =>
-                Knob({ ...a, fill: `#${rowColor.toString(16).padStart(6, 0)}`, outline: "#FFF" })
-              )}
-              {Cell(row.tcl, false)}
-              {Cell(row.pos, false)}
-              {showFullTable && Cell(row.tot, false)}
-              {showFullTable && Cell(row.bot, false)}
-              <TableCell className={classNames(classes.cell, classes.actions)}>
-                {row.isProjection && (
-                  <IconButton
-                    size="small"
-                    aria-label="Delete row"
-                    onClick={() => {
-                      deleteProjection(row.id);
-                    }}
-                  >
-                    <img src={trashcanIcon} />
-                  </IconButton>
+    <AutoSizer>
+      {({ width, height }) => {
+        return (
+          <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)} style={{ width }}>
+            <TableHead>
+              <TableRow className={classes.row} component="div">
+                <TableCell compennt="div" className={classes.cell}>
+                  Survey
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Depth
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Inclination
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Azimuth
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  TVD
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Dog Leg
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  VS
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  NS
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  EW
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Fault
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Dip
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  TCL
+                </TableCell>
+                <TableCell compennt="div" className={classes.cell}>
+                  Pos-TCL
+                </TableCell>
+                {showFullTable && (
+                  <TableCell compennt="div" className={classes.cell}>
+                    TOT
+                  </TableCell>
                 )}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-        {!details.length && (
-          <TableRow>
-            <TableCell colSpan={13} className={classes.emptyTableMessage}>
-              Select a survey or projection to see details here
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+                {showFullTable && (
+                  <TableCell compennt="div" className={classes.cell}>
+                    BOT
+                  </TableCell>
+                )}
+                <div className={classNames(classes.cell, classes.actions)} />
+              </TableRow>
+            </TableHead>
+            <div className={classes.tbody}>
+              <List
+                ref={gridRef}
+                className={classes.grid}
+                height={height - 41}
+                overscanRowCount={1}
+                noRowsRenderer={noRowsRenderer}
+                rowCount={details.length}
+                rowHeight={40}
+                rowRenderer={rowRenderer}
+                width={width}
+              />
+            </div>
+          </Table>
+        );
+      }}
+    </AutoSizer>
   );
 }

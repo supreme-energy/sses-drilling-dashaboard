@@ -12,6 +12,41 @@
   }
 }
 
+.modalTableContainer {
+  height: 70vh;
+  width: 1200px;
+}
+
+.buttonMode {
+  cursor: pointer;
+}
+
+.comboTable {
+  .tbody {
+    width: 100%;
+
+    .grid {
+      outline: none;
+    }
+  }
+
+  thead .row, .tbody .row {
+    display: flex;
+    flex-direction: row;
+    padding-left: 5px;
+    & > * {
+      flex: 1;
+      width: auto;
+      
+
+      &.actions {
+        flex: none;
+        width: 33px;
+      }
+    }
+  }
+}
+
 .dialog {
   
   .dialogTitle {

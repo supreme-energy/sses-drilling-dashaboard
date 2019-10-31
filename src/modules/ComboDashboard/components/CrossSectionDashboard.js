@@ -13,7 +13,7 @@ import classes from "./ComboDashboard.scss";
 import Collapse from "@material-ui/core/Collapse";
 import DetailsTable from "./Details";
 import DetailsFullModal, { WELL_PLAN } from "./Details/DetailsFullModal";
-import CrossSection from "./CrossSection/index";
+import CrossSection from "./CrossSection";
 import { HORIZONTAL, VERTICAL } from "../../../constants/crossSectionViewDirection";
 import { useCrossSectionContainer, useSurveysDataContainer, useFormationsDataContainer } from "../../App/Containers";
 import SelectedProjectionMethod from "./Details/SelectedProjectionMethod";
@@ -21,7 +21,7 @@ import Button from "@material-ui/core/Button";
 import { useSetupWizardData } from "../../Interpretation/selectors";
 import WellInfoField from "./Details/WellInfoField";
 import { limitAzm } from "./CrossSection/formulas";
-import TableButton from "../../../components/TableButton";
+import { CSTableButton } from "../../../components/TableButton";
 import { withRouter, Route } from "react-router";
 import AddButton from "./CrossSection/AddButton";
 import { NORMAL, ADD_PA_STATION } from "../../../constants/crossSectionModes";
@@ -144,7 +144,7 @@ export const CrossSectionDashboard = React.memo(
                       />
                     </React.Fragment>
                   )}
-                  <TableButton />
+                  <CSTableButton />
                 </div>
               </div>
               <Collapse in={expanded} unmountOnExit>

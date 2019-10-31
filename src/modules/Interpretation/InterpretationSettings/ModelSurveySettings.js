@@ -2,16 +2,11 @@ import React, { useReducer, useMemo, useRef } from "react";
 import { Box, Typography, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
-import {
-  useSelectedSegmentState,
-  useComputedDraftSegmentsOnly,
-  useSelectedMd,
-  useComputedPendingSegments
-} from "../selectors";
+import { useSelectedSegmentState, useComputedDraftSegmentsOnly, useComputedPendingSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
-import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
+import { useUpdateWellLogs, useSaveWellLogActions } from "../actions";
 import { NumericTextField } from "../../../components/DebouncedInputs";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
@@ -51,8 +46,9 @@ const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
   const [{ draftMode }] = useComboContainer();
-  const selectedMd = useSelectedMd();
-  const updateSegments = useUpdateSegmentsByMd();
+  const selectedWellLog = useSelectedSegmentState();
+  const selectedId = selectedWellLog.id;
+  const updateSegments = useUpdateWellLogs();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
     FAULT_DIP_MODE
@@ -80,23 +76,22 @@ export default function ModelSurveySettings(props) {
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
 
   const updateSegmentsHandler = props => {
-    const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
-    const segmentsProps = mds.reduce((acc, md) => {
+    const ids = draftMode ? pendingSegments.map(s => s.id) : [selectedId];
+    const segmentsProps = ids.reduce((acc, md) => {
       return { ...acc, [md]: props };
     }, {});
 
     updateSegments(segmentsProps);
     if (!draftMode) {
-      return internalState.current.saveWellLogs([selectedSegment], { [selectedSegment.endmd]: props });
+      return internalState.current.saveWellLogs([selectedSegment], { [selectedSegment.id]: props });
     }
   };
 
   function updateFirstSegment(props) {
-    const firstSegmentMd = firstSegment.endmd;
-    updateSegments({ [firstSegmentMd]: props });
+    updateSegments({ [firstSegment.id]: props });
 
     if (!draftMode) {
-      return internalState.current.saveWellLogs([firstSegment], { [firstSegment.endmd]: props });
+      return internalState.current.saveWellLogs([firstSegment], { [firstSegment.id]: props });
     }
   }
 

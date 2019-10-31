@@ -57,7 +57,7 @@ export const useDebounceSave = ({ onSave, debounceInterval, value, isFocused }) 
   return [internalValue, isPending, onChangeHandler];
 };
 
-const withFocusState = hoc(Component => props => {
+export const withFocusState = hoc(Component => props => {
   const [isFocused, updateIsFocused] = useState(false);
   return (
     <Component

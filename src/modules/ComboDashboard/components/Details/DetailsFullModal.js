@@ -30,6 +30,7 @@ import OpenInBrowser from "@material-ui/icons/OpenInBrowser";
 import WellPlanImporterModal from "../../../../modals/WellPlanImporterModal";
 import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
 import { AutoSizer, List } from "react-virtualized";
+import { useComboContainer } from "../../containers/store";
 
 export const WELL_PLAN = "Well Plan";
 export const WELL_SURVEYS = "Well Surveys";
@@ -38,10 +39,16 @@ const noRowsRenderer = () => <div>No well plan data</div>;
 
 function WellPlanTable() {
   const [data, , , , , { updatePlanItem }] = useWellPlanDataContainer();
+  const [, dispatch] = useComboContainer();
 
   const rowRenderer = ({ index, isScrolling, key, style }) => {
     const d = data[index];
-    const update = field => value => updatePlanItem({ id: d.id, [field]: value });
+
+    const update = field => value => {
+      updatePlanItem({ id: d.id, [field]: value });
+
+      dispatch({ type: "CENTER_WELL_PLAN" });
+    };
     return (
       <TableRow key={key} style={style}>
         <TableCell className={css.cell}>{index === 0 ? "Tie-in" : d.num}</TableCell>
@@ -189,7 +196,9 @@ function DetailsFullModal({
                   />
                   <WellInfoField label={"Auto Pos-TCL"} field="autoposdec" inputProps={{ min: "0" }} />
                 </div>
-                <DetailsTable showFullTable />
+                <div className={css.modalTableContainer}>
+                  <DetailsTable showFullTable />
+                </div>
               </Box>
             </Box>
           </Box>
