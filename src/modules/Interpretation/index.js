@@ -34,14 +34,6 @@ function TopsButton() {
   );
 }
 
-function CenterButton() {
-  return (
-    <IconButton variant="text" color="primary" onClick={() => {}}>
-      <CenterIcon />
-    </IconButton>
-  );
-}
-
 const Interpretation = React.memo(
   ({
     wellId,
@@ -56,6 +48,7 @@ const Interpretation = React.memo(
     changeCurrentEditedLog,
     formationsEditMode
   }) => {
+    const [centerSelectedLogId, handleCenterSelectedLog] = useReducer(v => v + 1, 0);
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
     const logSettingsProps = {
       resetLogBiasAndScale,
@@ -110,7 +103,14 @@ const Interpretation = React.memo(
                   labelPlacement="start"
                 />
               </Box>
-              {/* <CenterButton /> */}
+              <IconButton
+                className={css.centerActionButton}
+                variant="text"
+                color="primary"
+                onClick={handleCenterSelectedLog}
+              >
+                <CenterIcon />
+              </IconButton>
               <TopsButton variant="text" color="primary">
                 Tops
               </TopsButton>
@@ -119,7 +119,13 @@ const Interpretation = React.memo(
           </React.Fragment>
         )}
 
-        <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
+        <InterpretationChart
+          wellId={wellId}
+          className={css.chart}
+          controlLogs={controlLogs}
+          logList={logList}
+          centerSelectedLogId={centerSelectedLogId}
+        />
         {showFormationControls && <FormationControls />}
         {showLogSettings && <LogSettings {...logSettingsProps} />}
         {showInterpretationSettings && (
