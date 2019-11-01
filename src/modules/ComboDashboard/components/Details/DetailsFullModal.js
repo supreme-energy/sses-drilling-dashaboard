@@ -147,6 +147,7 @@ function DetailsFullModal({
   return (
     <Dialog
       onClose={handleClose}
+      classes={{ paperScrollPaper: css.dialogScrollPaper }}
       className={css.dialog}
       maxWidth={false}
       aria-labelledby="customized-dialog-title"

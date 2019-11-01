@@ -95,7 +95,11 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
   if (editable) {
     return <TextFieldCell value={value} onChange={changeHandler} markAsInput={markAsInput} icon={Icon} />;
   } else {
-    return <TableCell className={classes.cell}>{(isNumber(value) && value.toFixed(2)) || EMPTY_FIELD}</TableCell>;
+    return (
+      <TableCell component="div" className={classes.cell}>
+        {(isNumber(value) && value.toFixed(2)) || EMPTY_FIELD}
+      </TableCell>
+    );
   }
 }
 
@@ -122,7 +126,7 @@ export default function DetailsTable({ showFullTable = false }) {
   );
 
   const rowRenderer = useCallback(
-    ({ index }) => {
+    ({ index, style, key }) => {
       const row = details[index];
 
       const editable = selectedId === row.id && !showFullTable;
@@ -136,8 +140,9 @@ export default function DetailsTable({ showFullTable = false }) {
       };
       return (
         <TableRow
+          style={style}
           component="div"
-          key={`${row.id}${index}`}
+          key={key}
           className={classNames(classes.row, {
             [classes.PARow]: row.isProjection,
             [classes.surveyRow]: row.isSurvey,
@@ -196,80 +201,80 @@ export default function DetailsTable({ showFullTable = false }) {
   );
 
   return (
-    <AutoSizer>
-      {({ width, height }) => {
-        return (
-          <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)} style={{ width }}>
-            <TableHead>
-              <TableRow className={classes.row} component="div">
-                <TableCell component="div" className={classes.cell}>
-                  Survey
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Depth
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Inclination
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Azimuth
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  TVD
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Dog Leg
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  VS
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  NS
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  EW
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Fault
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Dip
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  TCL
-                </TableCell>
-                <TableCell component="div" className={classes.cell}>
-                  Pos-TCL
-                </TableCell>
-                {showFullTable && (
-                  <TableCell component="div" className={classes.cell}>
-                    TOT
-                  </TableCell>
-                )}
-                {showFullTable && (
-                  <TableCell component="div" className={classes.cell}>
-                    BOT
-                  </TableCell>
-                )}
-                <div className={classNames(classes.cell, classes.actions)} />
-              </TableRow>
-            </TableHead>
-            <div className={classes.tbody}>
+    <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)}>
+      <TableHead>
+        <TableRow className={classes.row} component="div">
+          <TableCell component="div" className={classes.cell}>
+            Survey
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Depth
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Inclination
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Azimuth
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            TVD
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Dog Leg
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            VS
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            NS
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            EW
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Fault
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Dip
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            TCL
+          </TableCell>
+          <TableCell component="div" className={classes.cell}>
+            Pos-TCL
+          </TableCell>
+          {showFullTable && (
+            <TableCell component="div" className={classes.cell}>
+              TOT
+            </TableCell>
+          )}
+          {showFullTable && (
+            <TableCell component="div" className={classes.cell}>
+              BOT
+            </TableCell>
+          )}
+          <div className={classNames(classes.cell, classes.actions)} />
+        </TableRow>
+      </TableHead>
+      <div className={classes.tbody}>
+        <AutoSizer>
+          {({ width, height }) => {
+            return (
               <List
                 ref={gridRef}
                 className={classes.grid}
-                height={height - 41}
+                height={height}
                 overscanRowCount={1}
                 noRowsRenderer={noRowsRenderer}
                 rowCount={details.length}
-                rowHeight={40}
+                rowHeight={42}
                 rowRenderer={rowRenderer}
                 width={width}
               />
-            </div>
-          </Table>
-        );
-      }}
-    </AutoSizer>
+            );
+          }}
+        </AutoSizer>
+      </div>
+    </Table>
   );
 }
