@@ -6,6 +6,7 @@ import InterpretationChart from "./InterpretationChart";
 import classNames from "classnames";
 import CloudServerModal from "./components/CloudServerModal";
 
+import CenterIcon from "@material-ui/icons/CenterFocusStrong";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import InterpretationSettings from "./InterpretationSettings";
 import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
@@ -47,6 +48,7 @@ const Interpretation = React.memo(
     changeCurrentEditedLog,
     formationsEditMode
   }) => {
+    const [centerSelectedLogId, handleCenterSelectedLog] = useReducer(v => v + 1, 0);
     const [expanded, toggleExpanded] = useReducer(e => !e, false);
     const logSettingsProps = {
       resetLogBiasAndScale,
@@ -101,6 +103,14 @@ const Interpretation = React.memo(
                   labelPlacement="start"
                 />
               </Box>
+              <IconButton
+                className={css.centerActionButton}
+                variant="text"
+                color="primary"
+                onClick={handleCenterSelectedLog}
+              >
+                <CenterIcon />
+              </IconButton>
               <TopsButton variant="text" color="primary">
                 Tops
               </TopsButton>
@@ -109,7 +119,13 @@ const Interpretation = React.memo(
           </React.Fragment>
         )}
 
-        <InterpretationChart wellId={wellId} className={css.chart} controlLogs={controlLogs} logList={logList} />
+        <InterpretationChart
+          wellId={wellId}
+          className={css.chart}
+          controlLogs={controlLogs}
+          logList={logList}
+          centerSelectedLogId={centerSelectedLogId}
+        />
         {showFormationControls && <FormationControls />}
         {showLogSettings && <LogSettings {...logSettingsProps} />}
         {showInterpretationSettings && (

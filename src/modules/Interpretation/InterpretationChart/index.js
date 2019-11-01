@@ -3,6 +3,7 @@ import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
 import { useSize } from "react-hook-size";
+import usePrevious from "react-use/lib/usePrevious";
 import classNames from "classnames";
 import css from "./styles.scss";
 import useViewport from "../../../hooks/useViewport";
@@ -89,7 +90,7 @@ export const { Provider: WebglRendererProvider, useContainer: useInterpretationR
   useInterpretationWebglRenderer
 );
 
-function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
+function InterpretationChart({ className, controlLogs, gr, logList, wellId, centerSelectedLogId }) {
   const {
     stage,
     refresh,
@@ -109,6 +110,7 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
     current: { scaleInitialized }
   } = internalStateRef;
   const [segments] = useCurrentComputedSegments(wellId);
+  const prevCenteredSelectedLogId = usePrevious(centerSelectedLogId);
 
   // scroll to the start of the control log
   useEffect(
@@ -166,6 +168,17 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId }) {
       }
     }
   }, [resetViewportCounter, selectedWellLog, view, height, updateView]);
+
+  useEffect(() => {
+    if (selectedWellLog && height && centerSelectedLogId !== prevCenteredSelectedLogId) {
+      const { startdepth, enddepth } = selectedWellLog;
+      const gutter = 25;
+      const adjustedHeight = (height - gutter) * 0.9;
+      const yScale = adjustedHeight / Math.abs(enddepth - startdepth);
+      const y = -startdepth * yScale + gutter;
+      updateView(view => ({ ...view, y, yScale }));
+    }
+  }, [selectedWellLog, height, updateView, centerSelectedLogId, prevCenteredSelectedLogId]);
 
   useEffect(refresh, [
     refresh,
