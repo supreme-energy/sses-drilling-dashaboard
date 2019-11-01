@@ -148,7 +148,7 @@ export function useSaveWellLogActions() {
   }, [replaceWellLogsResult, computedSegments]);
 
   const logsByEndMd = useMemo(() => keyBy(logs, "endmd"), [logs]);
-  const [wellLogsChangeTrigger, changeWellLogsTrigger] = useReducer(v => v + 1, 0);
+  const [wellLogsChangedId, refreshWellLogsChangedId] = useReducer(v => v + 1, 0);
   const internalState = useRef({ lastTriggerId: 0 });
 
   const saveWellLogs = useCallback(
@@ -191,21 +191,21 @@ export function useSaveWellLogActions() {
         return acc;
       }, {});
 
-      changeWellLogsTrigger();
+      refreshWellLogsChangedId();
 
       await updateWellLogs(data);
       updateSegments(resetLogProps);
     },
-    [updateWellLogs, updateSegments, changeWellLogsTrigger]
+    [updateWellLogs, updateSegments, refreshWellLogsChangedId]
   );
 
   useEffect(() => {
-    if (internalState.current.lastTriggerId !== wellLogsChangeTrigger) {
-      internalState.current.lastTriggerId = wellLogsChangeTrigger;
+    if (internalState.current.lastTriggerId !== wellLogsChangedId) {
+      internalState.current.lastTriggerId = wellLogsChangedId;
       replaceSurveysAndProjections();
       replaceWellLogs();
     }
-  }, [wellLogsChangeTrigger, replaceSurveysAndProjections, replaceWellLogs]);
+  }, [wellLogsChangedId, replaceSurveysAndProjections, replaceWellLogs]);
 
   const saveSelectedWellLog = useCallback(
     debounce(getIsPending => {

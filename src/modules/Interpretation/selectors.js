@@ -33,7 +33,6 @@ export function calcDepth(tvd, dip, vs, lastvs, fault, lasttvd, lastdepth) {
 }
 
 export function calcTot(pTot, dip, vs, pVs, fault) {
-  console.log("calc tot", pTot, dip, vs, pVs, fault);
   let tot = pTot + -Math.tan(dip / 57.29578) * Math.abs(vs - pVs);
   tot += fault;
   return tot;
