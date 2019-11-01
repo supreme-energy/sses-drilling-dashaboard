@@ -25,11 +25,15 @@ export function drawSurveys(container) {
   const narrowPath = container.addChild(new PIXI.Graphics());
   narrowPath.transform.updateTransform = frozenXYTransform;
 
-  const addSurvey = function() {
+  const addSurvey = function(props) {
     let icon = container.addChild(new PIXI.Sprite(surveyMarker));
     icon.scale.set(0.4);
+    icon.interactive = true;
     icon.anchor.set(0.5, 0.5);
     icon.transform.updateTransform = frozenScaleTransform;
+    icon.on("click", () => {
+      props.changeSelection(icon.surveyData.id, true);
+    });
     return icon;
   };
 
@@ -69,8 +73,8 @@ export function drawSurveys(container) {
     }
 
     for (let i = 0; i < calcSections.length; i++) {
-      if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey();
-
+      if (!surveyGraphics[i]) surveyGraphics[i] = addSurvey(props);
+      surveyGraphics[i].surveyData = calcSections[i];
       surveyGraphics[i].position.x = calcSections[i][xField];
       surveyGraphics[i].position.y = calcSections[i][yField] * yAxisDirection;
       surveyGraphics[i].texture = getTexture(calcSections[i]);
