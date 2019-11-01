@@ -204,7 +204,6 @@ export function useSaveWellLogActions() {
     if (internalState.current.lastTriggerId !== wellLogsChangeTrigger) {
       internalState.current.lastTriggerId = wellLogsChangeTrigger;
       replaceSurveysAndProjections();
-      //replaceWellLogs();
     }
   }, [wellLogsChangeTrigger, replaceSurveysAndProjections, replaceWellLogs]);
 
