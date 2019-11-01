@@ -202,52 +202,52 @@ export default function DetailsTable({ showFullTable = false }) {
           <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)} style={{ width }}>
             <TableHead>
               <TableRow className={classes.row} component="div">
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Survey
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Depth
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Inclination
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Azimuth
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   TVD
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Dog Leg
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   VS
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   NS
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   EW
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Fault
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Dip
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   TCL
                 </TableCell>
-                <TableCell compennt="div" className={classes.cell}>
+                <TableCell component="div" className={classes.cell}>
                   Pos-TCL
                 </TableCell>
                 {showFullTable && (
-                  <TableCell compennt="div" className={classes.cell}>
+                  <TableCell component="div" className={classes.cell}>
                     TOT
                   </TableCell>
                 )}
                 {showFullTable && (
-                  <TableCell compennt="div" className={classes.cell}>
+                  <TableCell component="div" className={classes.cell}>
                     BOT
                   </TableCell>
                 )}
