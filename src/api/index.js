@@ -149,7 +149,6 @@ export const defaultTransform = toWGS84(defaultCS);
 export function useWellInfo(wellId) {
   const { requestId, updateRequestId } = useAppState();
   const [fetchData, isLoading, , , , { fetch }] = useFetch();
-  let data = fetchData;
   const refreshStore = useCallback(() => {
     const newRequestId = Date.now();
     updateRequestId(newRequestId);
@@ -174,7 +173,7 @@ export function useWellInfo(wellId) {
   }, [wellId, serializedRefresh, requestId]);
 
   const [optimisticWellData, updateWellDebounced] = useDebouncedSave({ save: fetch });
-  data = optimisticWellData || fetchData;
+  const data = optimisticWellData || fetchData;
   const updateWell = useCallback(
     ({ wellId, field, value, data: newData }) => {
       const props = newData || { [field]: value };
