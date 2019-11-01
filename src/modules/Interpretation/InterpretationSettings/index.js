@@ -9,16 +9,16 @@ import ModelSurveySettings from "./ModelSurveySettings";
 import DraftSurveys from "./DraftSurveys";
 import ApplyDraftButtons from "./ApplyDraftButtons";
 import { usePendingSegments, useGetChangedPendingStateFields } from "../selectors";
-import { useUpdateSegmentsByMd } from "../actions";
+import { useUpdateWellLogs } from "../actions";
 import AutoDip from "./AutoDip";
 
 export default function InterpretationSettings({ className }) {
   const [{ draftMode }] = useComboContainer();
-  const updateSegments = useUpdateSegmentsByMd();
+  const updateSegments = useUpdateWellLogs();
   const pendingSegments = usePendingSegments();
   const resetPendingState = useCallback(() => {
     const resetArgs = pendingSegments.reduce((acc, ps) => {
-      acc[ps.endmd] = { dip: undefined, fault: undefined };
+      acc[ps.id] = { dip: undefined, fault: undefined };
       return acc;
     }, {});
 

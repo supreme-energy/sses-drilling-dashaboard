@@ -12,8 +12,47 @@
   }
 }
 
+.modalTableContainer {
+  height: 70vh;
+  width: 1200px;
+}
+
+.buttonMode {
+  cursor: pointer;
+}
+
+.comboTable {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .tbody {
+    width: 100%;
+    flex: 1;
+
+    .grid {
+      outline: none;
+    }
+  }
+
+  thead .row, .tbody .row {
+    display: flex;
+    flex-direction: row;
+    padding-left: 5px;
+    & > * {
+      flex: 1;
+      overflow: hidden;
+      &.actions {
+        flex: none;
+        width: 33px;
+      }
+    }
+  }
+}
+
 .dialog {
-  
+  .dialogScrollPaper {
+    max-height: none;
+  }
   .dialogTitle {
     padding: 0px;
     .closeButton {

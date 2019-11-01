@@ -4,12 +4,16 @@ import TableChartIcon from "../../assets/tableChart.svg";
 import css from "./styles.scss";
 import { Link, withRouter } from "react-router-dom";
 
-export default withRouter(({ match: { url } }) => {
+export const TableButton = props => (
+  <IconButton size="small" className={css.root} aria-label="Show full details table" {...props}>
+    <img src={TableChartIcon} className={css.icon} />
+  </IconButton>
+);
+
+export const CSTableButton = withRouter(({ match: { url } }) => {
   return (
     <Link to={`${url}/detailsTable`}>
-      <IconButton size="small" className={css.root} aria-label="Show full details table">
-        <img src={TableChartIcon} className={css.icon} />
-      </IconButton>
+      <TableButton />
     </Link>
   );
 });

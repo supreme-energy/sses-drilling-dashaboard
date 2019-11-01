@@ -9,6 +9,7 @@ import { useUpdateSegmentsById } from "../../../Interpretation/actions";
 import { useSaveSurveysAndProjections } from "../../../App/actions";
 import TCLLine from "./TCLLine";
 import { useViewportView } from "../../hooks";
+import { useComboContainer } from "../../containers/store";
 
 const pixiApp = new PixiCrossSection();
 
@@ -30,6 +31,7 @@ const CrossSection = React.memo(props => {
   const dataObj = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
+  const [{ centerSelectionInCSId, centerWellPlanId }] = useComboContainer();
 
   const {
     wellPlan,
@@ -45,11 +47,16 @@ const CrossSection = React.memo(props => {
 
   const view = viewDirection === VERTICAL ? verticalView : horizontalView;
 
-  const internalState = useRef({ viewDirection: viewDirection });
+  const internalState = useRef({
+    viewDirection: viewDirection,
+    prevCenterSelectionId: null,
+    prevCenterWellPlanId: null
+  });
 
   // store viewDirection into ref because it looks like udpateView changes are not propagated
   // to children so we can't bind properties into updateView callback
   internalState.current.viewDirection = viewDirection;
+
   const updateView = useCallback(
     (...args) => {
       internalState.current.viewDirection === VERTICAL ? updateVerticalView(...args) : updateHorizontalView(...args);
@@ -69,22 +76,33 @@ const CrossSection = React.memo(props => {
     return viewDirection ? -1 : 1;
   }, [viewDirection]);
 
+  const centerPoint = useCallback(
+    ({ x, y }) => {
+      const { xScale, yScale } = verticalView;
+
+      const computedX = (-x + (width / 2 - pixiApp.gridGutterLeft / 2) / xScale) * xScale;
+      const computedY = (-y + (height / 2 - pixiApp.gridGutter / 2) / yScale) * yScale;
+
+      updateVerticalView(view => ({ ...view, x: computedX, y: computedY }));
+    },
+    [height, width, updateVerticalView, verticalView]
+  );
+
   useEffect(() => {
     // TODO: Calculate the zoom to fit the new data view
     // Currently initialized the graph at the first Well plan data point
-    const minX = Math.min(...wellPlan.map(d => d[xField]));
-    const minY = Math.min(...wellPlan.map(d => d[yField]));
-    updateView(prev => {
-      if ((prev && (prev.xScale !== 1 || prev.yScale !== 1)) || !wellPlan.length) {
-        return prev;
-      }
-      return {
-        ...prev,
-        x: -minX,
-        y: -minY
-      };
-    });
-  }, [xField, yField, updateView, wellPlan]);
+
+    if (internalState.current.prevCenterWellPlanId !== centerWellPlanId) {
+      const minX = Math.min(...wellPlan.map(d => d[xField]));
+      const minY = Math.min(...wellPlan.map(d => d[yField]));
+      internalState.current.prevCenterWellPlanId = centerWellPlanId;
+
+      centerPoint({
+        x: minX,
+        y: minY
+      });
+    }
+  }, [xField, yField, wellPlan, centerWellPlanId, centerPoint, width, height, verticalView]);
 
   const [mouse, setMouse] = useState({
     x: 0,
@@ -92,6 +110,29 @@ const CrossSection = React.memo(props => {
   });
 
   const scale = useCallback((xVal, yVal) => [xVal * view.xScale + view.x, yVal * view.yScale + view.y], [view]);
+
+  useEffect(
+    function centerSelection() {
+      if (internalState.current.prevCenterSelectionId !== centerSelectionInCSId) {
+        internalState.current.prevCenterSelectionId = centerSelectionInCSId;
+
+        const selection = calcSections.find(s => selectedSections[s.id]);
+        if (selection) {
+          centerPoint({ x: selection.vs, y: selection.tvd });
+        }
+      }
+    },
+    [
+      centerSelectionInCSId,
+      selectedSections,
+      calcSections,
+      height,
+      width,
+      verticalView,
+      updateVerticalView,
+      centerPoint
+    ]
+  );
 
   useEffect(() => {
     const currentCanvas = canvas.current;

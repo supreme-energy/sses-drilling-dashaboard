@@ -1,5 +1,5 @@
 import React, { useReducer } from "react";
-import TableButton from "../../../components/TableButton";
+import { TableButton } from "../../../components/TableButton";
 import {
   Dialog,
   DialogTitle,

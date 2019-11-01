@@ -2,22 +2,17 @@ import React, { useReducer, useMemo, useRef } from "react";
 import { Box, Typography, IconButton } from "@material-ui/core";
 import css from "./styles.scss";
 import { Add, Remove } from "@material-ui/icons";
-import {
-  useSelectedSegmentState,
-  useComputedDraftSegmentsOnly,
-  useSelectedMd,
-  useComputedPendingSegments
-} from "../selectors";
+import { useSelectedSegmentState, useComputedDraftSegmentsOnly, useComputedPendingSegments } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import { EMPTY_FIELD } from "../../../constants/format";
 import classNames from "classnames";
-import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../actions";
-import { NumericDebouceTextField } from "../../../components/DebouncedInputs";
+import { useUpdateWellLogs, useSaveWellLogActions } from "../actions";
+import { NumericTextField } from "../../../components/DebouncedInputs";
 
 function PropertyField({ onChange, label, value, icon, onIncrease, onDecrease, disabled }) {
   return (
     <Box display="flex" flexDirection="row" mr={2}>
-      <NumericDebouceTextField
+      <NumericTextField
         disabled={disabled}
         value={value}
         onChange={onChange}
@@ -51,8 +46,9 @@ const BIAS_SCALE_MODE = "Scale /Bias";
 
 export default function ModelSurveySettings(props) {
   const [{ draftMode }] = useComboContainer();
-  const selectedMd = useSelectedMd();
-  const updateSegments = useUpdateSegmentsByMd();
+  const selectedWellLog = useSelectedSegmentState();
+  const selectedId = selectedWellLog.id;
+  const updateSegments = useUpdateWellLogs();
   const [mode, toggleMode] = useReducer(
     mode => (mode === FAULT_DIP_MODE ? BIAS_SCALE_MODE : FAULT_DIP_MODE),
     FAULT_DIP_MODE
@@ -80,23 +76,22 @@ export default function ModelSurveySettings(props) {
   const title = draftMode ? "Draft Selected Surveys (and After)" : "Model Current Survey (and After)";
 
   const updateSegmentsHandler = props => {
-    const mds = draftMode ? pendingSegments.map(s => s.endmd) : [selectedMd];
-    const segmentsProps = mds.reduce((acc, md) => {
+    const ids = draftMode ? pendingSegments.map(s => s.id) : [selectedId];
+    const segmentsProps = ids.reduce((acc, md) => {
       return { ...acc, [md]: props };
     }, {});
 
     updateSegments(segmentsProps);
     if (!draftMode) {
-      return internalState.current.saveWellLogs([selectedSegment], { [selectedSegment.endmd]: props });
+      return internalState.current.saveWellLogs([selectedSegment], { [selectedSegment.id]: props });
     }
   };
 
   function updateFirstSegment(props) {
-    const firstSegmentMd = firstSegment.endmd;
-    updateSegments({ [firstSegmentMd]: props });
+    updateSegments({ [firstSegment.id]: props });
 
     if (!draftMode) {
-      return internalState.current.saveWellLogs([firstSegment], { [firstSegment.endmd]: props });
+      return internalState.current.saveWellLogs([firstSegment], { [firstSegment.id]: props });
     }
   }
 
@@ -111,7 +106,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Fault"}
               disabled={!selectedSegment}
-              onChange={fault => updateFirstSegment({ fault })}
+              onChange={fault => updateFirstSegment({ fault: Number(fault) })}
               value={fault}
               onIncrease={() => updateFirstSegment({ fault: Number(fault) + 1 })}
               onDecrease={() => updateFirstSegment({ fault: Number(fault) - 1 })}
@@ -120,7 +115,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Scale"}
               disabled={!selectedSegment}
-              onChange={scale => updateSegmentsHandler({ scale })}
+              onChange={scale => updateSegmentsHandler({ scale: Number(scale) })}
               value={scale}
               onIncrease={() => updateSegmentsHandler({ scale: Number(scale) + 0.1 })}
               onDecrease={() => updateSegmentsHandler({ scale: Number(scale) - 0.1 })}
@@ -130,7 +125,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Dip"}
               disabled={!selectedSegment}
-              onChange={dip => updateSegmentsHandler({ dip })}
+              onChange={dip => updateSegmentsHandler({ dip: Number(dip) })}
               value={hideDipValue ? "" : dip}
               onIncrease={() => updateSegmentsHandler({ dip: Number(dip) + 1 })}
               onDecrease={() => updateSegmentsHandler({ dip: Number(dip) - 1 })}
@@ -139,7 +134,7 @@ export default function ModelSurveySettings(props) {
             <PropertyField
               label={"Bias"}
               disabled={!selectedSegment}
-              onChange={bias => updateSegmentsHandler({ bias })}
+              onChange={bias => updateSegmentsHandler({ bias: Number(bias) })}
               value={bias}
               onIncrease={() => updateSegmentsHandler({ bias: Number(bias) + 1 })}
               onDecrease={() => updateSegmentsHandler({ bias: Number(bias) - 1 })}

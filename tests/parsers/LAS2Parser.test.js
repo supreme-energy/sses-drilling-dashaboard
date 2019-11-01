@@ -18,33 +18,33 @@ import AsciiInfoResult from "./data/sections/ascii/wrapped/result";
 import AsciiInfoWrapped from "./data/sections/ascii/wrapped/AsciiInfoWrapped.las";
 
 const sections = {
-  [ Sections.VERSION ]: {
+  [Sections.VERSION]: {
     result: HeaderResult,
-    text: HeaderInfoText,
+    text: HeaderInfoText
   },
-  [ Sections.CURVE ]: {
+  [Sections.CURVE]: {
     result: CurveResult,
-    text: CurveInfo,
+    text: CurveInfo
   },
-  [ Sections.WELL ]: {
+  [Sections.WELL]: {
     result: WellResult,
-    text: WellInfo,
+    text: WellInfo
   },
-  [ Sections.PARAMETER ]: {
+  [Sections.PARAMETER]: {
     result: ParameterResult,
-    text: ParameterInfo,
+    text: ParameterInfo
   },
-  [ Sections.OPTIONAL ]: {
+  [Sections.OPTIONAL]: {
     result: OptionalResult,
-    text: OptionalInfo,
+    text: OptionalInfo
   },
-  [ Sections.PARAMETER ]: {
+  [Sections.PARAMETER]: {
     result: ParameterResult,
-    text: ParameterInfo,
+    text: ParameterInfo
   },
   [Sections.ASCII]: {
     result: AsciiResult,
-    text: AsciiInfo,
+    text: AsciiInfo
   }
 };
 
@@ -55,7 +55,7 @@ describe("Parser Utils tests", () => {
       mnemonic: "STRT",
       units: "M",
       data: "9066.00",
-      description: "Start Depth",
+      description: "Start Depth"
     };
 
     const result = parseLine(line);
@@ -69,7 +69,7 @@ describe("Parser Utils tests", () => {
       mnemonic: "VERS",
       units: null,
       data: "1.2",
-      description: "CWLS LOG ASCII STANDARD - VERSION 1.2",
+      description: "CWLS LOG ASCII STANDARD - VERSION 1.2"
     };
 
     const result = parseLine(line);
@@ -79,12 +79,12 @@ describe("Parser Utils tests", () => {
 });
 
 describe("LAS2Parser tests", () => {
-  Object.keys(sections).forEach((sectionName) => {
-    const section = sections[ sectionName ];
+  Object.keys(sections).forEach(sectionName => {
+    const section = sections[sectionName];
     test(`should parse the ${sectionName} section of a LAS file`, () => {
       const parsed = LAS2Parser.parse(section.text);
       expect(parsed).toBeTruthy();
-      expect(parsed[ sectionName ]).toEqual(section.result);
+      expect(parsed[sectionName]).toEqual(section.result);
     });
   });
 

@@ -32,9 +32,8 @@ import { twoDecimals } from "../../../../constants/format";
 import transform from "lodash/transform";
 import calculateAverageDip from "./calculateControlDipClosure";
 import memoizeOne from "memoize-one";
-import debounce from "lodash/debounce";
 import { mean } from "d3-array";
-import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../../actions";
+import { useUpdateWellLogs, useSaveWellLogActions } from "../../actions";
 import { useSelectedSegmentState, useSelectedWellLog } from "../../selectors";
 
 export const NORMAL = "NORMAL";
@@ -533,10 +532,9 @@ const AutoDip = React.memo(
 export default function AutoDipContainer() {
   const selectedSegment = useSelectedSegmentState();
   const { selectedWellLog } = useSelectedWellLog();
-  const updateSegments = useUpdateSegmentsByMd();
+  const updateSegments = useUpdateWellLogs();
   const { wellId } = useWellIdContainer();
   const [{ wellInfo }, , updateWell] = useSelectedWellInfoContainer();
-  const updateDebounced = useMemo(() => debounce(updateWell, 500), [updateWell]);
   const configString = (wellInfo && wellInfo.autodipconfig) || "";
 
   const { saveWellLogs } = useSaveWellLogActions();
@@ -544,7 +542,7 @@ export default function AutoDipContainer() {
   const handleApply = useCallback(
     dip => {
       if (selectedWellLog) {
-        const changes = { [selectedSegment.endmd]: { dip } };
+        const changes = { [selectedSegment.id]: { dip } };
         updateSegments(changes);
         saveWellLogs([selectedSegment], changes);
       }
@@ -588,7 +586,7 @@ export default function AutoDipContainer() {
   useEffect(
     function saveChanged() {
       if (newConfigString !== configString) {
-        updateDebounced({
+        updateWell({
           wellId,
           data: {
             autodipconfig: newConfigString
@@ -596,7 +594,7 @@ export default function AutoDipContainer() {
         });
       }
     },
-    [newConfigString, updateDebounced, wellId, configString]
+    [newConfigString, updateWell, wellId, configString]
   );
 
   const props = {

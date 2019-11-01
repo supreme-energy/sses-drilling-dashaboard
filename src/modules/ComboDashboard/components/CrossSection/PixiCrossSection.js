@@ -40,22 +40,22 @@ export default class PixiCrossSection {
   }
   init(props, viewData, viewDataUpdate) {
     this.viewDataUpdate = viewDataUpdate;
-    const gridGutter = 100;
-    const gridGutterLeft = 40;
+    this.gridGutter = 100;
+    this.gridGutterLeft = 40;
     const tagHeight = 75;
     this.yTicks = 20;
 
     this.formationsUpdate = drawFormations(this.formationsLayer);
     this.wellPlanUpdate = drawWellPlan(this.wellPathLayer, props.wellPlan);
     this.surveyUpdate = drawSurveys(this.wellPathLayer);
-    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, gridGutter, tagHeight);
+    this.sectionUpdate = drawSections(this.UILayer, this.UILayer2, props, this.gridGutter, tagHeight);
     this.interactivePAUpdate = interactiveProjection(this.UILayer, props);
     if (!props.isReadOnly) {
-      this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, gridGutter, tagHeight);
+      this.buttonUpdate = drawButtons(this.UILayer2, this.stage, props, this.gridGutter, tagHeight);
     }
     this.gridUpdate = drawGrid(this.gridLayer, {
-      gutter: gridGutter,
-      gutterLeft: gridGutterLeft,
+      gutter: this.gridGutter,
+      gutterLeft: this.gridGutterLeft,
       maxYLines: this.yTicks,
       fontSize: 13
     });

@@ -3,13 +3,13 @@ import { Typography } from "@material-ui/core";
 import noop from "lodash/noop";
 import classes from "../ComboDashboard.scss";
 import { useSelectedWellInfoContainer, useWellIdContainer } from "../../../App/Containers";
-import { NumericDebouceTextField } from "../../../../components/DebouncedInputs";
+import { NumericTextField } from "../../../../components/DebouncedInputs";
 
 const IDENTITY_FCT = a => a;
 
 export const WellInfoField = ({ field, label, options = {}, onAfterUpdate, ...textProps }) => {
   const { wellId } = useWellIdContainer();
-  const [data, , updateWell, refreshFetchStore] = useSelectedWellInfoContainer();
+  const [data, , updateWell] = useSelectedWellInfoContainer();
   const wellInfo = (data && data.wellInfo) || {};
   const mask = options.mask || IDENTITY_FCT;
   const debounceAction = options.debounceAction || noop;
@@ -17,18 +17,16 @@ export const WellInfoField = ({ field, label, options = {}, onAfterUpdate, ...te
   const changeHandler = useCallback(
     async value => {
       await debounceAction(mask(value));
-      await updateWell({ wellId, field, value: value });
-      refreshFetchStore();
+      await updateWell({ wellId, field, value });
       onAfterUpdate();
     },
-    [debounceAction, field, updateWell, refreshFetchStore, wellId, mask, onAfterUpdate]
+    [debounceAction, field, updateWell, wellId, mask, onAfterUpdate]
   );
 
   return (
     <React.Fragment>
       <Typography variant="subtitle2">{`${label}: `}</Typography>
-      <NumericDebouceTextField
-        debounceInterval={1000}
+      <NumericTextField
         variant="filled"
         format={mask}
         value={wellInfo[field]}

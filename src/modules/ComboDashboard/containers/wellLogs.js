@@ -1,6 +1,6 @@
 import memoizeOne from "memoize-one";
 import useFetch from "react-powertools/data/useFetch";
-import { GET_WELL_LOG_LIST, UPDATE_WELL_LOG, EMPTY_ARRAY } from "../../../api";
+import { GET_WELL_LOG_LIST, UPDATE_WELL_LOG, EMPTY_ARRAY, useDebouncedSave } from "../../../api";
 import { useMemo, useCallback, useRef } from "react";
 import keyBy from "lodash/keyBy";
 import { createContainer } from "unstated-next";
@@ -29,7 +29,7 @@ const transformLogs = memoizeOne(logs => {
   return logs && logs.map(mapLogList);
 });
 
-const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
+const changeWellLogs = serialize((data, wellId, fetch, optimisticResult) =>
   Promise.all(
     data.map(dataToSave => {
       return fetch({
@@ -40,8 +40,8 @@ const changeWellLogs = serialize((data, wellId, optimisticResult, fetch) =>
           ...dataToSave,
           id: String(dataToSave.id)
         },
-        optimisticResult,
-        cache: "no-cache"
+        cache: "no-cache",
+        optimisticResult
       });
     })
   )
@@ -53,24 +53,28 @@ export function useWellLogList(wellId) {
     query: { seldbname: wellId }
   });
 
-  const logList = transformLogs(list);
   const internalState = useRef({ list });
   internalState.current.list = list;
+
+  const [optimisticUpdateResult, updateWellLogsDebounced] = useDebouncedSave({ save: changeWellLogs });
+
   const updateWellLogs = useCallback(
-    data => {
+    async data => {
       const dataById = keyBy(data, "id");
       const optimisticResult = internalState.current.list.map(d => {
         return dataById[d.id]
           ? { ...d, ...mapKeys(dataById[d.id], (value, key) => (key === "dip" ? "sectdip" : key)) }
           : d;
       });
-      return changeWellLogs(data, wellId, optimisticResult, fetch);
+      await updateWellLogsDebounced({
+        optimisticData: optimisticResult,
+        saveArgs: [data, wellId, fetch, optimisticResult]
+      });
     },
-    [fetch, wellId]
+    [updateWellLogsDebounced, fetch, wellId]
   );
 
-  const logs = logList || EMPTY_ARRAY;
-
+  const logs = transformLogs(optimisticUpdateResult || list || EMPTY_ARRAY);
   const logsById = useMemo(() => keyBy(logs, "id"), [logs]);
   return [logs, logsById, { updateWellLogs, replaceResult, refresh }];
 }

@@ -167,6 +167,7 @@ const SegmentSelection = ({
   onSegmentClick
 }) => {
   const { viewport, stage, canvasRef, view } = useInterpretationRenderer();
+
   const selectedSegment = allSegments[selectedIndex];
 
   const draftSegments = useComputedDraftSegmentsOnly();

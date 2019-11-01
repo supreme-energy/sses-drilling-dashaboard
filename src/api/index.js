@@ -18,6 +18,7 @@ import { DIP_FAULT_POS_VS } from "../constants/calcMethods";
 import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
+import debouncePromise from "awesome-debounce-promise";
 
 export const GET_WELL_LIST = "/job/list.php";
 export const CREATE_NEW_WELL = "/job/create.php";
@@ -81,6 +82,44 @@ const options = {
 export const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
 
+export const useDebouncedSave = ({ save, debounceInterval = 500 }) => {
+  const [optimisticData, changeUpdateOptimisticData] = useState(null);
+  const debouncedSave = useCallback(debouncePromise(save, debounceInterval), [save, debounceInterval]);
+  const serializedSave = useCallback(
+    async ({ saveArgs, requestId }) => {
+      const result = await debouncedSave(...saveArgs);
+
+      return { result, requestId };
+    },
+    [debouncedSave]
+  );
+
+  const internalState = useRef({ lastRequestId: null });
+
+  const saveCallback = useCallback(
+    async ({ optimisticData, saveArgs }) => {
+      changeUpdateOptimisticData(optimisticData);
+      let result;
+      try {
+        const requestId = _.uniqueId();
+        internalState.current.lastRequestId = requestId;
+        result = await serializedSave({ saveArgs, requestId });
+      } catch (e) {
+        throw e;
+      } finally {
+        if (!result || result.requestId === internalState.current.lastRequestId) {
+          changeUpdateOptimisticData(null);
+        }
+      }
+
+      return result && result.result;
+    },
+    [serializedSave, changeUpdateOptimisticData]
+  );
+
+  return [optimisticData, saveCallback];
+};
+
 function transform(data) {
   return data.map(d => _.mapValues(d, Number));
 }
@@ -109,7 +148,7 @@ export const defaultTransform = toWGS84(defaultCS);
 
 export function useWellInfo(wellId) {
   const { requestId, updateRequestId } = useAppState();
-  const [data, isLoading, , , , { fetch }] = useFetch();
+  const [fetchData, isLoading, , , , { fetch }] = useFetch();
   const refreshStore = useCallback(() => {
     const newRequestId = Date.now();
     updateRequestId(newRequestId);
@@ -118,12 +157,6 @@ export function useWellInfo(wellId) {
   const serializedUpdateFetch = useMemo(() => serialize(fetch), [fetch]);
   const serializedRefresh = useMemo(() => serialize(fetch), [fetch]);
 
-  const autorc = data && data.autorc;
-  const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
-  const wellInfo = data && data.wellinfo;
-  const emailInfo = data && data.emailinfo;
-  const appInfo = data && data.appinfo;
-
   useEffect(() => {
     if (wellId) {
       serializedRefresh(
@@ -131,7 +164,7 @@ export function useWellInfo(wellId) {
           path: GET_WELL_INFO,
           query: {
             seldbname: wellId,
-            requestId
+            wellInfoRefreshId: requestId
           }
         },
         (prev, next) => next
@@ -139,32 +172,45 @@ export function useWellInfo(wellId) {
     }
   }, [wellId, serializedRefresh, requestId]);
 
+  const [optimisticWellData, updateWellDebounced] = useDebouncedSave({ save: fetch });
+  const data = optimisticWellData || fetchData;
   const updateWell = useCallback(
     ({ wellId, field, value, data: newData }) => {
       const props = newData || { [field]: value };
       const optimisticResult = {
         ...data,
         wellinfo: {
-          ...wellInfo,
+          ...(data.wellinfo || {}),
           ...props
         }
       };
 
-      return serializedUpdateFetch({
-        path: SET_WELL_FIELD,
-        query: {
-          seldbname: wellId
-        },
-        method: "POST",
-        body: {
-          wellinfo: props
-        },
-        cache: "no-cache",
-        optimisticResult
+      return updateWellDebounced({
+        optimisticData: optimisticResult,
+        saveArgs: [
+          {
+            path: SET_WELL_FIELD,
+            query: {
+              seldbname: wellId
+            },
+            method: "POST",
+            body: {
+              wellinfo: props
+            },
+            cache: "no-cache",
+            optimisticResult
+          }
+        ]
       });
     },
-    [serializedUpdateFetch, wellInfo, data]
+    [updateWellDebounced, data]
   );
+
+  const autorc = data && data.autorc;
+  const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
+  const wellInfo = data && data.wellinfo;
+  const emailInfo = data && data.emailinfo;
+  const appInfo = data && data.appinfo;
 
   const updateAutoRc = useCallback(
     ({ wellId, field, value, refreshStore }) => {

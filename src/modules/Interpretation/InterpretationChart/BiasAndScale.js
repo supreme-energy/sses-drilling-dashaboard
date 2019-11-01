@@ -14,7 +14,7 @@ import {
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
 import useRef from "react-powertools/hooks/useRef";
-import { useSaveWellLogActions, useUpdateSegmentsByMd } from "../actions";
+import { useSaveWellLogActions, useUpdateWellLogs } from "../actions";
 import { useComboContainer, initialLogBiasAndScale } from "../../ComboDashboard/containers/store";
 
 import { hexColor } from "../../../constants/pixiColors";
@@ -181,7 +181,7 @@ function useSegmentBiasAndScale({
   const internalState = useRef({ prevDraftSelection: selectionById });
 
   let [xMin, xMax] = extent;
-  const updateSegments = useUpdateSegmentsByMd();
+  const updateSegments = useUpdateWellLogs();
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
 
@@ -191,11 +191,11 @@ function useSegmentBiasAndScale({
 
   const updatePendingSegments = useCallback(
     props => {
-      const propsByMd = pendingSegments.reduce((acc, s) => {
-        acc[s.endmd] = props;
+      const propsById = pendingSegments.reduce((acc, s) => {
+        acc[s.id] = props;
         return acc;
       }, {});
-      updateSegments(propsByMd);
+      updateSegments(propsById);
     },
     [pendingSegments, updateSegments]
   );

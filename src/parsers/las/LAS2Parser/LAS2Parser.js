@@ -73,15 +73,7 @@ const asciiConverter = (lines, version) => {
   }
 };
 
-const optionsConverter = lines => {
-  return lines.reduce((optionText, line) => {
-    if (!isEmpty(line)) {
-      optionText = optionText.concat(line);
-    }
-
-    return optionText;
-  }, "");
-};
+const optionsConverter = lines => lines;
 
 // TODO: need to check required fields and make sure all exist after parsing
 class Parser {

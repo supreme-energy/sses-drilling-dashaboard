@@ -22,6 +22,7 @@ import { calculateProjection } from "../../hooks/projectionCalculations";
 import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import findLast from "lodash/findLast";
+import pickBy from "lodash/pickBy";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -37,21 +38,8 @@ export function calcTot(pTot, dip, vs, pVs, fault) {
   return tot;
 }
 
-export function findCurrentWellLog(logList, md) {
-  return md
-    ? logList.findIndex(l => {
-        return md === l.endmd;
-      })
-    : -1;
-}
-
-export const getPendingSegments = memoizeOne((selectedMd, logs, nrPrevSurveysToDraft, draftMode) => {
-  if (!selectedMd || !logs) {
-    return EMPTY_ARRAY;
-  }
-  const selectedIndex = logs.findIndex(l => l.endmd === selectedMd);
-
-  if (selectedIndex === -1) {
+export const getPendingSegments = memoizeOne((selectedIndex, logs, nrPrevSurveysToDraft, draftMode) => {
+  if (selectedIndex < 0 || !logs) {
     return EMPTY_ARRAY;
   }
 
@@ -61,31 +49,50 @@ export const getPendingSegments = memoizeOne((selectedMd, logs, nrPrevSurveysToD
   return logs.slice(Math.max(selectedIndex - nrPrevSurveysToDraft, 0), selectedIndex + 1);
 });
 
-export function useGetLogByMd(md) {
-  const [logList] = useWellLogsContainer();
-  const logIndex = useMemo(() => findCurrentWellLog(logList, md), [logList, md]);
+export const useGetSurveysByWellLog = () => {
+  const { surveys } = useSurveysDataContainer();
 
-  const wellLog = logList[logIndex];
-  const prevLog = logList[logIndex - 1];
+  const [, , wellLogs] = useWellLogsContainer();
+  return useMemo(
+    () =>
+      wellLogs.reduce((acc, next, index) => {
+        acc[next.id] = surveys[index + 1];
+        return acc;
+      }, {}),
+    [wellLogs, surveys]
+  );
+};
 
-  return { wellLog, prevLog, logIndex };
-}
+export const useGetWellLogBySurvey = () => {
+  const { surveys } = useSurveysDataContainer();
 
-// only consider single selection
-export function useSelectedMd() {
-  const [, , , , byId] = useComputedSurveysAndProjections();
-  const [{ selectionById }] = useComboContainer();
-  return useMemo(() => {
-    const selectedId = getSelectedId(selectionById);
-    const selectedItem = byId[selectedId];
-    return selectedItem && selectedItem.md;
-  }, [byId, selectionById]);
-}
+  const [, , wellLogs] = useWellLogsContainer();
+  return useMemo(
+    () =>
+      surveys.reduce((acc, next, index) => {
+        if (index === 0) {
+          return acc;
+        }
+        acc[next.id] = wellLogs[index - 1];
+        return acc;
+      }, {}),
+    [wellLogs, surveys]
+  );
+};
 
 export function useSelectedWellLog() {
-  const selectedMd = useSelectedMd();
-  const { wellLog, prevLog, logIndex } = useGetLogByMd(selectedMd);
-  return { selectedWellLog: wellLog, prevLog, selectedWellLogIndex: logIndex };
+  const [{ selectionById }] = useComboContainer();
+  const wellLogsBySurvey = useGetWellLogBySurvey();
+
+  const selectedId = Object.keys(selectionById)[0];
+  let selectedWellLog = wellLogsBySurvey[selectedId];
+  const [filteredWellLogs] = useWellLogsContainer();
+  const selectionIndex = useMemo(
+    () => (selectedWellLog ? filteredWellLogs.findIndex(log => log.id === selectedWellLog.id) : -1),
+    [selectedWellLog, filteredWellLogs]
+  );
+  selectedWellLog = filteredWellLogs[selectionIndex];
+  return { selectedWellLog, prevLog: filteredWellLogs[selectionIndex - 1], selectedWellLogIndex: selectionIndex };
 }
 
 export function getCalculateDip(log, prevLog) {
@@ -130,23 +137,9 @@ export function useCalculateDipFromSurvey(wellId) {
   return useCallback(getCalculateDip(selectedWellLog, prevLog), [selectedWellLog, prevLog]);
 }
 
-export function useDraftSegmentsByEndMd(segment) {
-  const { selectedWellLogIndex } = useSelectedWellLog();
-  const [{ nrPrevSurveysToDraft }] = useComboContainer();
-  const [logList] = useWellLogsContainer();
-  return useMemo(
-    () =>
-      keyBy(
-        logList.slice(Math.max(selectedWellLogIndex - nrPrevSurveysToDraft, 0), selectedWellLogIndex + 1),
-        d => d.endmd
-      ),
-    [logList, selectedWellLogIndex, nrPrevSurveysToDraft]
-  );
-}
-
 const reduceComputedSegment = pendingSegmentsState => (acc, l, index) => {
   const getNewLog = () => {
-    const pendingState = pendingSegmentsState[l.endmd];
+    const pendingState = pendingSegmentsState[l.id];
     const newLog = {
       ...l
     };
@@ -185,24 +178,23 @@ const getComputedSegments = memoizeOne((logList, pendingSegmentsState) => {
   return { segments, byId };
 });
 
-const getPendingSegmentsByMd = memoizeOne((pendingSegmentsState, byId) =>
+const getPendingSegmentStateByWellLog = memoizeOne((pendingSegmentsState, wellLogsBySurvey) =>
   mapKeys(pendingSegmentsState, (value, key) => {
-    const item = byId[key];
-    return item && item.md;
+    const wellLog = wellLogsBySurvey[key];
+    return wellLog && wellLog.id;
   })
 );
 
-export function usePendingSegmentsStateByMd() {
+export function usePendingSegmentsStateByWellLog() {
   const [{ pendingSegmentsState }] = useComboContainer();
-  const [, , , , byId] = useComputedSurveysAndProjections();
-
-  return getPendingSegmentsByMd(pendingSegmentsState, byId);
+  const wellLogsBySurvey = useGetWellLogBySurvey();
+  return getPendingSegmentStateByWellLog(pendingSegmentsState, wellLogsBySurvey);
 }
 
 // return all segment with computed properties
 export function useComputedSegments() {
   const [filteredLogs, , allLogs] = useWellLogsContainer();
-  const pendingStateByMd = usePendingSegmentsStateByMd();
+  const pendingStateByMd = usePendingSegmentsStateByWellLog();
   const { segments, byId } = getComputedSegments(allLogs, pendingStateByMd);
   const filteredSegments = useMemo(() => filteredLogs.map(l => byId[l.id]), [filteredLogs, byId]);
 
@@ -307,10 +299,14 @@ export function getSelectedId(selectionById) {
 const recomputeSurveysAndProjections = memoizeOne(
   (surveys, projections, draftMode, selectionById, pendingSegmentsState, propazm, autoPosDec) => {
     const bitProjIdx = surveys.length - 1;
+
     return surveys.concat(projections).reduce((acc, currSvy, index) => {
       const prevSvy = acc[index - 1];
       const selectedId = getSelectedId(selectionById);
-      const pendingState = (draftMode && selectedId === currSvy.id ? {} : pendingSegmentsState[currSvy.id]) || {};
+      const pendingState =
+        draftMode && selectedId === currSvy.id
+          ? {}
+          : pickBy(pendingSegmentsState[currSvy.id], v => v !== undefined) || {};
       const combinedSvy = { ...currSvy, ...pendingState };
 
       if (index === 0) {
@@ -409,10 +405,15 @@ const recomputeSurveysAndProjections = memoizeOne(
             pos: tcl - tvd
           });
         } else {
-          const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
-          const sign = bitProjPos > 0 ? 1 : -1;
-          const cap = bitProjPos > 0 ? Math.max : Math.min;
-          const pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          let pos = combinedSvy.pos;
+
+          if (autoPosDec) {
+            const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+            const sign = bitProjPos > 0 ? 1 : -1;
+            const cap = bitProjPos > 0 ? Math.max : Math.min;
+            pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
+          }
+
           const projection = calculateProjection(
             { ...combinedSvy, pos, tcl, fault, dip, tot, bot },
             acc,
@@ -532,11 +533,11 @@ export function useLogExtent(log, wellId) {
 
 export function usePendingSegments() {
   const [logs] = useWellLogsContainer();
-  const selectedMd = useSelectedMd();
+  const { selectedWellLogIndex } = useSelectedWellLog();
 
   const [{ nrPrevSurveysToDraft, draftMode }] = useComboContainer();
 
-  const pendingSegments = getPendingSegments(selectedMd, logs, nrPrevSurveysToDraft, draftMode);
+  const pendingSegments = getPendingSegments(selectedWellLogIndex, logs, nrPrevSurveysToDraft, draftMode);
 
   return pendingSegments;
 }

@@ -14,7 +14,7 @@ export function useSaveSurveysAndProjections() {
   const [, computedSurveys, computedProjections] = useComputedSurveysAndProjections();
   const { segments: computedSegments } = useComputedSegments();
 
-  const [saveId, setSaveId] = useState(0);
+  const [saveId, setSaveId] = useState(null);
   const internalState = useRef({ lastPerfomedSave: null });
 
   const save = useCallback(() => {
@@ -31,18 +31,26 @@ export function useSaveSurveysAndProjections() {
       const pendingSurveyState = _.pickBy(pendingSegmentsState, (val, key) => !!surveyIds[key]);
       const pendingProjectionsState = _.pickBy(pendingSegmentsState, (val, key) => !!projectionIds[key]);
 
+      // filter out undefined values
+      const filteredSurveyPendingState = _.mapValues(pendingSurveyState, ps => _.pickBy(ps, v => v !== undefined));
+      const filteredProjectionsPendingState = _.mapValues(pendingProjectionsState, pp =>
+        _.pickBy(pp, v => v !== undefined)
+      );
+
       replaceProjections(computedProjections);
       replaceSurveys(computedSurveys);
       replaceWellLogs(computedSegments);
       dispatch({
         type: "RESET_SEGMENTS_PROPERTIES",
-        propsById: { ...pendingSurveyState, ...pendingProjectionsState }
+        propsById: { ...filteredSurveyPendingState, ...filteredProjectionsPendingState }
       });
 
       Promise.all(
-        _.map(pendingProjectionsState, (fields, projectionId) =>
+        _.map(filteredProjectionsPendingState, (fields, projectionId) =>
           updateProjection({ projectionId: Number(projectionId), fields })
-        ).concat(_.map(pendingSurveyState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields })))
+        ).concat(
+          _.map(filteredSurveyPendingState, (fields, surveyId) => updateSurvey({ surveyId: Number(surveyId), fields }))
+        )
       );
     }
   }, [
