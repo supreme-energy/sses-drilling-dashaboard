@@ -189,10 +189,11 @@ export function useSaveWellLogActions() {
       }, {});
 
       changeWellLogsTrigger();
-
+      console.log("save", data);
       await updateWellLogs(data);
 
       if (!getIsPending()) {
+        console.log("reset", resetLogProps);
         updateSegments(resetLogProps);
       }
     },
@@ -203,7 +204,7 @@ export function useSaveWellLogActions() {
     if (internalState.current.lastTriggerId !== wellLogsChangeTrigger) {
       internalState.current.lastTriggerId = wellLogsChangeTrigger;
       replaceSurveysAndProjections();
-      replaceWellLogs();
+      //replaceWellLogs();
     }
   }, [wellLogsChangeTrigger, replaceSurveysAndProjections, replaceWellLogs]);
 

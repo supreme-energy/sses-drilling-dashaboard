@@ -29,7 +29,7 @@ const transformLogs = memoizeOne(logs => {
   return logs && logs.map(mapLogList);
 });
 
-const changeWellLogs = serialize((data, wellId, fetch) =>
+const changeWellLogs = serialize((data, wellId, fetch, optimisticResult) =>
   Promise.all(
     data.map(dataToSave => {
       return fetch({
@@ -40,7 +40,8 @@ const changeWellLogs = serialize((data, wellId, fetch) =>
           ...dataToSave,
           id: String(dataToSave.id)
         },
-        cache: "no-cache"
+        cache: "no-cache",
+        optimisticResult
       });
     })
   )
@@ -65,7 +66,10 @@ export function useWellLogList(wellId) {
           ? { ...d, ...mapKeys(dataById[d.id], (value, key) => (key === "dip" ? "sectdip" : key)) }
           : d;
       });
-      await updateWellLogsDebounced({ optimisticData: optimisticResult, saveArgs: [data, wellId, fetch] });
+      await updateWellLogsDebounced({
+        optimisticData: optimisticResult,
+        saveArgs: [data, wellId, fetch, optimisticResult]
+      });
     },
     [updateWellLogsDebounced, fetch, wellId]
   );

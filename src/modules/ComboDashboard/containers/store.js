@@ -149,7 +149,7 @@ function pendingSegmentsStateReducer(stateSlice, action, state) {
     }
     case "TOGGLE_DRAFT_MODE": {
       // reset pending segments state to initialPendingState
-      return mapValues(stateSlice, (pendingState, md) => pendingSegmentState(pendingState, action, md));
+      return mapValues(stateSlice, (pendingState, id) => pendingSegmentState(pendingState, action, id));
     }
     case "UPDATE_SEGMENTS_PROPERTIES":
       return reduce(

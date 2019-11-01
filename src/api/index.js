@@ -175,7 +175,6 @@ export function useWellInfo(wellId) {
 
   const [optimisticWellData, updateWellDebounced] = useDebouncedSave({ save: fetch });
   data = optimisticWellData || fetchData;
-
   const updateWell = useCallback(
     ({ wellId, field, value, data: newData }) => {
       const props = newData || { [field]: value };
