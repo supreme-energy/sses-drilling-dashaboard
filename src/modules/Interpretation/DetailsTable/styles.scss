@@ -1,7 +1,7 @@
 @import '../../../styles/table.scss';
 
 .table {
-    tbody {
+    tbody, .tbody {
         max-height: 600px;
         overflow: auto;
     }

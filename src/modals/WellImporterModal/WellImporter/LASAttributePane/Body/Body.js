@@ -112,6 +112,16 @@ const Body = ({
     return [header, ...first, middle, ...last];
   };
 
+  const renderOptional = (sectionName, data) => {
+    return (
+      <div style={{ whiteSpace: "pre-line" }}>
+        {data[sectionName].map(l => (
+          <pre>{l}</pre>
+        ))}
+      </div>
+    );
+  };
+
   const renderSection = (sectionName, data) => {
     return Object.keys(data[sectionName]).map((key, rowIndex) => {
       const rowData = data[sectionName][key];
@@ -175,7 +185,11 @@ const Body = ({
                 </td>
                 <td id="row_0_col_1" colSpan="17" />
               </tr>
-              {sectionName !== "ascii" ? renderSection(sectionName, data) : renderAsciiSection(sectionName, data)}
+              {sectionName !== "ascii"
+                ? sectionName === "optional"
+                  ? renderOptional(sectionName, data)
+                  : renderSection(sectionName, data)
+                : renderAsciiSection(sectionName, data)}
             </tbody>
           </table>
         );

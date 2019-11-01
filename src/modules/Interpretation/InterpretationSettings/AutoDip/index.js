@@ -33,7 +33,7 @@ import transform from "lodash/transform";
 import calculateAverageDip from "./calculateControlDipClosure";
 import memoizeOne from "memoize-one";
 import { mean } from "d3-array";
-import { useUpdateSegmentsByMd, useSaveWellLogActions } from "../../actions";
+import { useUpdateWellLogs, useSaveWellLogActions } from "../../actions";
 import { useSelectedSegmentState, useSelectedWellLog } from "../../selectors";
 
 export const NORMAL = "NORMAL";
@@ -532,7 +532,7 @@ const AutoDip = React.memo(
 export default function AutoDipContainer() {
   const selectedSegment = useSelectedSegmentState();
   const { selectedWellLog } = useSelectedWellLog();
-  const updateSegments = useUpdateSegmentsByMd();
+  const updateSegments = useUpdateWellLogs();
   const { wellId } = useWellIdContainer();
   const [{ wellInfo }, , updateWell] = useSelectedWellInfoContainer();
   const configString = (wellInfo && wellInfo.autodipconfig) || "";
@@ -542,7 +542,7 @@ export default function AutoDipContainer() {
   const handleApply = useCallback(
     dip => {
       if (selectedWellLog) {
-        const changes = { [selectedSegment.endmd]: { dip } };
+        const changes = { [selectedSegment.id]: { dip } };
         updateSegments(changes);
         saveWellLogs([selectedSegment], changes);
       }

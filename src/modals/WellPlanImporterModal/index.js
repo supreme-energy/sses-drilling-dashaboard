@@ -14,6 +14,7 @@ import Close from "@material-ui/icons/Close";
 import classes from "../baseModalStyles.scss";
 import { useWellPlanImport } from "../../api";
 import { useWellIdContainer, useWellPlanDataContainer } from "../../modules/App/Containers";
+import { useComboContainer } from "../../modules/ComboDashboard/containers/store";
 
 function WellPlanImporterModal({ handleClose, isVisible }) {
   const { wellId } = useWellIdContainer();
@@ -21,6 +22,7 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
   const [, , , , , { refresh }] = useWellPlanDataContainer();
   const [file, setFile] = useState("");
   const [error, setError] = useState("");
+  const [, dispatch] = useComboContainer();
 
   const handleImport = async () => {
     const data = new FormData();
@@ -32,6 +34,7 @@ function WellPlanImporterModal({ handleClose, isVisible }) {
     if (success) {
       refresh();
       handleClose();
+      dispatch({ type: "CENTER_WELL_PLAN" });
     } else {
       setError(json);
     }
