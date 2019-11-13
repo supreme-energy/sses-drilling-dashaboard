@@ -208,20 +208,17 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
       <Formations container={viewport} width={width} gridGutter={gridGutter} />
-
+      {controlLogs.map(cl => (
+        <ControlLogLine key={cl.id} log={cl} container={viewport} />
+      ))}
       {!formationsEditMode && (
-        <React.Fragment>
-          {controlLogs.map(cl => (
-            <ControlLogLine key={cl.id} log={cl} container={viewport} />
-          ))}
-          <LogLines
-            wellId={wellId}
-            logs={logList}
-            container={viewport}
-            selectedWellLogIndex={selectedWellLogIndex}
-            offset={gridGutter}
-          />
-        </React.Fragment>
+        <LogLines
+          wellId={wellId}
+          logs={logList}
+          container={viewport}
+          selectedWellLogIndex={selectedWellLogIndex}
+          offset={gridGutter}
+        />
       )}
 
       <Grid

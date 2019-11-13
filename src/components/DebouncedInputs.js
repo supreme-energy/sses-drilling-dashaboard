@@ -115,10 +115,10 @@ const ensureNumberValue = hoc(InputComp => {
         value={props.isFocused ? pendingValue : twoDecimalsNoComma(props.value)}
         onChange={value => {
           const numericValue = parseFloat(value);
+          updatePendingValue(value);
+
           if (!isNaN(numericValue)) {
             return props.onChange(numericValue);
-          } else {
-            updatePendingValue(value);
           }
         }}
       />

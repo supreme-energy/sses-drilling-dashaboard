@@ -42,7 +42,7 @@ function OutgoingServer({ wellId }) {
       if (differenceKey.length) {
         e.returnValue = "Changes you made may not be saved.";
         if (!document.activeElement.id) {
-          onFieldChange(differenceKey, smtpInput[differenceKey[0]]);
+          onFieldChange(differenceKey, smtpInput[differenceKey[0]], true);
         }
       }
     },
