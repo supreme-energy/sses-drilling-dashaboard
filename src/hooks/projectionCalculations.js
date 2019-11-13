@@ -84,8 +84,14 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   if (pinc > 180.0) pinc -= 360.0;
   if (azm > 360.0) azm -= 360.0;
   if (pazm > 360.0) pazm -= 360.0;
-  if (inc < 0.0 || inc > 180.0) return;
-  if (pinc < 0.0 || pinc > 180.0) return;
+
+  if (inc < 0.0 || inc > 180.0) {
+    console.warn(" inc < 0.0 || inc > 180.0");
+  }
+  if (pinc < 0.0 || pinc > 180.0) {
+    console.warn("pinc < 0.0 || pinc > 180.0");
+  }
+
   inc *= degreesToRadians;
   azm *= degreesToRadians;
   pinc *= degreesToRadians;

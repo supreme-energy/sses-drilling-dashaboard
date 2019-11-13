@@ -29,6 +29,8 @@ export const WellInfoField = ({ field, label, options = {}, onAfterUpdate, ...te
       <NumericTextField
         variant="filled"
         format={mask}
+        debug={field === "projdip"}
+        field={field}
         value={wellInfo[field]}
         onChange={changeHandler}
         className={classes.textField}
