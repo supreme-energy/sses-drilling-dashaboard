@@ -180,7 +180,7 @@ export function useWellInfo(wellId) {
       const optimisticResult = {
         ...data,
         wellinfo: {
-          ...(data.wellinfo || {}),
+          ...((data && data.wellinfo) || {}),
           ...props
         }
       };

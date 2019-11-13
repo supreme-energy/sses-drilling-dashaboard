@@ -45,7 +45,7 @@ const FieldsList = ({ wellInfo, fields, onChange }) => (
         label={f.label}
         value={wellInfo[f.property]}
         fullWidth
-        onChange={value => onChange(f.property, value)}
+        onChange={value => onChange(f.property, value, true)}
       />
     ))}
   </React.Fragment>
@@ -62,14 +62,14 @@ const GeneralInfo = props => {
           label="Start Date"
           value={startDate}
           format="YYYY-MM-DD"
-          onChange={value => props.onChange("startdate", value.format())}
+          onChange={value => props.onChange("startdate", value.format(), true)}
           animateYearScrolling
         />
         <KeyboardDatePicker
           label="End Date"
           value={endDate}
           format="YYYY-MM-DD"
-          onChange={value => props.onChange("enddate", value.format())}
+          onChange={value => props.onChange("enddate", value.format(), true)}
           animateYearScrolling
         />
       </Box>
@@ -232,7 +232,7 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
             groupName={"correction"}
             value={wellInfo.correction}
             onChange={value => {
-              onChange("correction", value);
+              onChange("correction", value, true);
             }}
             data={correctionData}
           />
@@ -241,7 +241,7 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
             groupName={"coordinateSystem"}
             value={wellInfo.coordsys}
             onChange={value => {
-              onChange("coordsys", value);
+              onChange("coordsys", value, true);
             }}
             data={coordSystemData}
           />
@@ -266,14 +266,14 @@ function GeospatialInfo({ wellInfo, onChange, surfaceLocation, transform }) {
             label={"Kelly Bushing (RKB)"}
             value={wellInfo.elev_rkb}
             fullWidth
-            onChange={value => onChange("elev_rkb", value)}
+            onChange={value => onChange("elev_rkb", value, true)}
           />
           <NumericDebouceTextField
             variant="filled"
             label={"Ground"}
             value={wellInfo.elev_ground}
             fullWidth
-            onChange={value => onChange("elev_ground", value)}
+            onChange={value => onChange("elev_ground", value, true)}
           />
         </Box>
       </Box>
