@@ -151,7 +151,13 @@ function ReportMailingList({ wellId }) {
   const handleAllReports = e => setReport({ allReportsSelected: e.target.checked });
   const handleReportChange = e => setReport({ [e.target.value]: e.target.checked });
   const handleInputChange = id => e => setAddContact({ [id]: e.target.value });
-  const handleUpdateContact = useCallback(body => updateEmailContact(wellId, body), [wellId, updateEmailContact]);
+  const handleUpdateContact = useCallback(
+    body => {
+      updateEmailContact(wellId, body);
+      refresh();
+    },
+    [wellId, updateEmailContact, refresh]
+  );
 
   const handleAddContact = async () => {
     await addEmailContact(wellId, addContactInput);

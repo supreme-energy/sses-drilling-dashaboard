@@ -13,7 +13,7 @@ import { useComputedSurveysAndProjections } from "../../selectors";
 import uniqueId from "lodash/uniqueId";
 import get from "lodash/get";
 
-export default function AddTop({ addTop, topIndex, formationData }) {
+export default function AddTop({ addTop, formationData, tcl }) {
   const {
     stage,
     size: { width, height },
@@ -22,14 +22,14 @@ export default function AddTop({ addTop, topIndex, formationData }) {
   } = useInterpretationRenderer();
   const [, dispatch] = useFormationsStore();
   const [surveysAndProjections] = useComputedSurveysAndProjections();
-  const associatedSurvey = surveysAndProjections[topIndex];
+
   const [y, setY] = useState(0);
   const addLineData = useMemo(() => [[gridGutter, 0], [width, 0]], [width]);
   const containerRef = useRef(null);
   const internalState = useRef(() => ({}));
 
   internalState.current.onClick = function onClick() {
-    const thickness = (-view.y + y) / view.yScale - associatedSurvey.tcl;
+    const thickness = (-view.y + y) / view.yScale - tcl;
     const optimisticData = surveysAndProjections.map((s, index) => ({
       id: `pendingFormationData${index}`,
       thickness,
@@ -42,7 +42,6 @@ export default function AddTop({ addTop, topIndex, formationData }) {
     addTop({
       pendingId,
       thickness,
-      selectedIndex: topIndex,
       optimisticData
     })
       .then(result => {

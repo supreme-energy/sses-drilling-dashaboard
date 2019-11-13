@@ -1,9 +1,8 @@
 import React, { useMemo, useCallback, useEffect, useRef } from "react";
 import PixiRectangle from "../../../../components/PixiRectangle";
-import { useFormationsDataContainer, useWellIdContainer } from "../../../App/Containers";
+import { useFormationsDataContainer, useWellIdContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
 import PixiText from "../../../../components/PixiText";
 import { useFormationsStore } from "./store";
-import { useSelectedSurvey, useComputedSurveysAndProjections } from "../../selectors";
 import PixiLine from "../../../../components/PixiLine";
 import { frozenScaleTransform } from "../../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import PixiContainer from "../../../../components/PixiContainer";
@@ -14,7 +13,7 @@ import get from "lodash/get";
 import useDraggable from "../../../../hooks/useDraggable";
 import memoizeOne from "memoize-one";
 import { EMPTY_ARRAY } from "../../../../api";
-import { minIndex, maxIndex } from "d3-array";
+import { max } from "d3-array";
 import TCLLine from "../TCLLine";
 import YAxis from "../../../../components/YAxis";
 import { scaleLinear } from "d3-scale";
@@ -56,83 +55,77 @@ const FormationDrag = ({ y, container, width, thickness }) => {
   return <PixiContainer ref={topLineRef} y={y} container={container} />;
 };
 
-const Formation = React.memo(
-  ({
-    y,
-    height,
-    label,
-    width,
-    container,
-    backgroundAlpha,
-    backgroundColor,
-    color,
-    interpretationLine,
-    interpretationFill,
-    thickness,
-    selected
-  }) => {
-    const lineData = useMemo(() => [[0, 0], [width, 0]], [width]);
+const Formation = ({
+  y,
+  height,
+  label,
+  width,
+  container,
+  backgroundAlpha,
+  backgroundColor,
+  color,
+  interpretationLine,
+  interpretationFill,
+  thickness,
+  selected,
+  view
+}) => {
+  const lineData = useMemo(() => [[0, 0], [width, 0]], [width]);
 
-    return (
-      <React.Fragment>
+  return (
+    <React.Fragment>
+      <PixiContainer
+        x={12}
+        y={y}
+        container={container}
+        child={container => (
+          <PixiRectangle
+            backgroundColor={backgroundColor}
+            backgroundAlpha={interpretationFill ? backgroundAlpha : 0}
+            width={width}
+            height={height - 3 / view.yScale}
+            container={container}
+          />
+        )}
+      />
+
+      {interpretationLine && (
         <PixiContainer
+          updateTransform={frozenScaleTransform}
           x={12}
           y={y}
           container={container}
           child={container => (
-            <PixiRectangle
-              backgroundColor={backgroundColor}
-              backgroundAlpha={interpretationFill ? backgroundAlpha : 0}
-              width={width}
-              height={height}
-              container={container}
-            />
+            <PixiLine container={container} data={lineData} color={color} lineWidth={3} nativeLines={false} />
           )}
         />
+      )}
 
-        {interpretationLine && (
-          <PixiContainer
-            updateTransform={frozenScaleTransform}
-            x={12}
-            y={y}
-            container={container}
-            child={container => (
-              <PixiLine container={container} data={lineData} color={color} lineWidth={3} nativeLines={false} />
-            )}
-          />
-        )}
+      {selected && <FormationDrag width={width} container={container} y={y} thickness={thickness} />}
 
-        {selected && <FormationDrag width={width} container={container} y={y} thickness={thickness} />}
+      <PixiContainer
+        y={y}
+        x={20}
+        container={container}
+        child={container => <PixiText container={container} text={label} color={color} fontSize={11} />}
+      />
+    </React.Fragment>
+  );
+};
 
-        <PixiContainer
-          y={y}
-          x={20}
-          container={container}
-          child={container => <PixiText container={container} text={label} color={color} fontSize={11} />}
-        />
-      </React.Fragment>
-    );
-  }
-);
-
-const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex) => {
+const computeFormationsData = memoizeOne((rawFormationsData, tcl) => {
   if (!rawFormationsData || !rawFormationsData.length) {
     return EMPTY_ARRAY;
   }
 
-  const items = rawFormationsData.reduce((acc, item, index) => {
+  return rawFormationsData.reduce((acc, item, index) => {
     if (item.data && item.data.length) {
-      const formationData = item.data[selectedSurveyIndex];
-
-      if (!formationData) {
-        return acc;
-      }
-
       const nextFormation = rawFormationsData[index + 1];
-      const nextFormationData = nextFormation && nextFormation.data[selectedSurveyIndex];
-      const y = formationData.tot;
+      const nextFormationData = nextFormation && nextFormation.data[0];
+      const thickness = get(item, "data[0].thickness");
+      const y = tcl + thickness;
 
-      const height = nextFormationData ? nextFormationData.tot - y : 20;
+      const height = nextFormationData ? nextFormationData.thickness + tcl - y : 20;
       acc.push({
         y,
         height,
@@ -150,52 +143,20 @@ const computeFormationsData = memoizeOne((rawFormationsData, selectedSurveyIndex
 
     return acc;
   }, []);
-  return items;
 });
 
-const computeViewportCenterClosestFormationDataIndex = memoizeOne((view, formationsData, height, nrSurveys) => {
-  if (!formationsData || !formationsData.length) {
-    return 0;
-  }
-  const center = (-view.y + height / 2) / view.yScale;
-
-  // just picking first formation that have data
-  const firstFormationData = formationsData.find(f => f.data && f.data.length);
-  const lastFormationData = [...formationsData].reverse().find(f => f.data && f.data.length);
-
-  if (!firstFormationData || !lastFormationData) {
-    return 0;
-  }
-
-  return minIndex(firstFormationData.data.slice(0, nrSurveys), (d1, index) => {
-    const d2 = lastFormationData.data[index];
-    const top = d1.tot;
-    const bottom = d2.tot;
-    const formationItemCenter = top + (bottom - top) / 2;
-    return Math.abs(formationItemCenter - center);
-  });
-});
-
-const FormationAxis = ({ view, formationsData, formationDataIndex, height, container, tcl, width }) => {
+const FormationAxis = ({ view, formationsData, height, container, tcl, width }) => {
   const yMin = Math.floor((-1 * view.y) / view.yScale);
   const yMax = yMin + Math.floor(height / view.yScale);
 
-  const maxThicknessFormationIndex = useMemo(
-    () => maxIndex(formationsData, f => get(f, `data[${formationDataIndex}].thickness`)),
-    [formationsData, formationDataIndex]
-  );
-
-  const maxFormation = get(formationsData, `[${maxThicknessFormationIndex}].data[${formationDataIndex}]`) || {
-    thickness: 0,
-    tot: 0
-  };
+  const maxThickness = useMemo(() => max(formationsData, f => get(f, `data[0].thickness`)), [formationsData]);
 
   const scale = useMemo(
     () =>
       scaleLinear()
-        .domain([0, maxFormation.thickness])
-        .range([tcl, maxFormation.tot]),
-    [maxFormation, tcl]
+        .domain([0, maxThickness])
+        .range([tcl, tcl + maxThickness]),
+    [maxThickness, tcl]
   );
 
   return (
@@ -221,22 +182,11 @@ export default React.memo(({ container, width }) => {
   } = useInterpretationRenderer();
   const { wellId } = useWellIdContainer();
 
-  const selectedSurvey = useSelectedSurvey();
-
-  const [surveysAndProjections, surveys] = useComputedSurveysAndProjections();
-  const nrSurveys = surveys.length;
-  const selectedSurveyIndex = useMemo(
-    () => (selectedSurvey ? surveysAndProjections.findIndex(s => s.id === selectedSurvey.id) : -1),
-    [selectedSurvey, surveysAndProjections]
-  );
-
   const { formationsData, addTop, serverFormations } = useFormationsDataContainer();
 
-  const formationDataIndex =
-    selectedSurveyIndex >= 0
-      ? selectedSurveyIndex
-      : computeViewportCenterClosestFormationDataIndex(view, formationsData, height, nrSurveys);
-  const formationDataForSelectedSurvey = computeFormationsData(formationsData, formationDataIndex);
+  const [data] = useSelectedWellInfoContainer();
+  const tcl = Number(get(data, "wellInfo.tot"));
+  const formationDataForSelectedSurvey = computeFormationsData(formationsData, tcl);
 
   const changeSegmentSelection = useCallback(id => dispatch({ type: "CHANGE_SELECTION", formationId: id }), [dispatch]);
   useEffect(
@@ -250,10 +200,8 @@ export default React.memo(({ container, width }) => {
 
   useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData]);
 
-  const tcl = get(surveys, `[${formationDataIndex}].tcl`);
-
   const computedWidth = width - marginRight - gridGutter;
-  const formationAxisProps = { view, formationsData, formationDataIndex, height, container, tcl, width: computedWidth };
+  const formationAxisProps = { view, formationsData, height, container, tcl, width: computedWidth };
 
   return (
     <PixiContainer
@@ -264,6 +212,7 @@ export default React.memo(({ container, width }) => {
             <Formation
               container={container}
               width={computedWidth}
+              view={view}
               {...f}
               key={f.id}
               selected={f.id === selectedFormation}
@@ -284,7 +233,7 @@ export default React.memo(({ container, width }) => {
             <AddTop
               addTop={addTop}
               wellId={wellId}
-              topIndex={formationDataIndex}
+              tcl={tcl}
               container={container}
               formationData={formationDataForSelectedSurvey}
             />
