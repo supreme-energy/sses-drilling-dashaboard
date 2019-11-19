@@ -17,9 +17,11 @@ import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 import pickBy from "lodash/pickBy";
 import reduce from "lodash/reduce";
 import mapKeys from "lodash/mapKeys";
+import get from "lodash/get";
 import { useProjectionsDataContainer, useSurveysDataContainer } from "../App/Containers";
 import mapValues from "lodash/mapValues";
 import { surveysTransform } from "../../api";
+import { MD_INC_AZ } from "../../constants/calcMethods";
 
 // compute dip for each segments from segments group in order to sadisfy depthChange
 function getSegmentsDipChangeProperties(pendingSegments, depthChange, computedSegments, totalSegmentsHeight) {
@@ -288,12 +290,41 @@ export function useUpdateWellLogs() {
 
 export function useUpdateSegmentsById() {
   const [, dispatch] = useComboContainer();
+  const [, , projections, , byId] = useComputedSurveysAndProjections();
+
+  const internalState = useRef({});
+  internalState.current.projections = projections;
+  internalState.current.byId = byId;
   const updateSegments = useCallback(
-    propsById =>
+    propsById => {
+      const finalPropsById = Object.keys(propsById).reduce((acc, key) => {
+        const item = internalState.current.byId[key];
+
+        if (
+          item &&
+          item.isProjection &&
+          ["md", "inc", "azm"].some(field => get(propsById, `[${key}][${field}]`) !== undefined)
+        ) {
+          const index = internalState.current.projections.findIndex(d => d.id === item.id);
+          const downstreamProjections = internalState.current.projections.slice(index);
+
+          // ensure they have MD_INC_AZ method
+          downstreamProjections.forEach(p => {
+            if (p.method !== MD_INC_AZ) {
+              acc[p.id] = acc[p.id] || {};
+              acc[p.id].method = MD_INC_AZ;
+            }
+          });
+        }
+
+        return acc;
+      }, propsById);
+
       dispatch({
         type: "UPDATE_SEGMENTS_PROPERTIES",
-        propsById
-      }),
+        propsById: finalPropsById
+      });
+    },
     [dispatch]
   );
 

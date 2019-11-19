@@ -845,12 +845,24 @@ export function useFetchProjections(wellId) {
   internalState.current.data = data;
 
   const updateProjection = useCallback(
-    ({ projectionId, fields = {} }) => {
-      const optimisticResult = internalState.current.data.map(p => {
+    async ({ projectionId, fields = {} }) => {
+      let optimisticResult = internalState.current.data.map(p => {
         return p.id === projectionId ? { ...p, ...fields } : p;
       });
+      const currentProjectionIndex = optimisticResult.findIndex(d => d.id === projectionId);
+      const currentProjection = optimisticResult[currentProjectionIndex];
+      const currentProjectionMethod = currentProjection.method;
+      const prevProjectionMethod = _.get(internalState.current.data, `[${currentProjectionIndex}].method`);
+      const fieldsThatRequireDownstreamMethodRefreshChanged = ["md", "inc", "tvd", "azm", "vs"].some(
+        field => fields[field]
+      );
 
-      return serializedUpdateFetch({
+      const needRefresh =
+        prevProjectionMethod !== currentProjectionMethod ||
+        (fieldsThatRequireDownstreamMethodRefreshChanged &&
+          optimisticResult.slice(currentProjectionIndex).some(p => p.method !== currentProjectionMethod));
+
+      const result = await serializedUpdateFetch({
         path: SET_WELL_PROJECTIONS,
         method: "GET",
         query: {
@@ -861,8 +873,15 @@ export function useFetchProjections(wellId) {
         optimisticResult,
         cache: "no-cache"
       });
+
+      // refresh projecitons
+      if (needRefresh) {
+        refresh();
+      }
+
+      return result;
     },
-    [serializedUpdateFetch, wellId]
+    [serializedUpdateFetch, wellId, refresh]
   );
 
   function sortByMD(a, b) {
