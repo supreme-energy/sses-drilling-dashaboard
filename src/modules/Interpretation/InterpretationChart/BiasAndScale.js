@@ -9,7 +9,8 @@ import {
   logDataExtent,
   getPendingSegmentsExtent,
   getFilteredLogsExtent,
-  useSelectedWellLog
+  useSelectedWellLog,
+  useLogBiasAndScale
 } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
@@ -18,8 +19,9 @@ import { useSaveWellLogActions, useUpdateWellLogs } from "../actions";
 import { useComboContainer, initialLogBiasAndScale } from "../../ComboDashboard/containers/store";
 
 import { hexColor } from "../../../constants/pixiColors";
-import { withWellLogsData, EMPTY_ARRAY } from "../../../api";
+import { withWellLogsData, EMPTY_ARRAY, logScaleToDataScale } from "../../../api";
 import keyBy from "lodash/keyBy";
+import { useSelectedWellInfoContainer, useWellIdContainer } from "../../App/Containers";
 
 const lineData = [[0, 10], [0, 0]];
 
@@ -326,9 +328,11 @@ function useLogsBiasAndScaleProps({
       : logDataExtent(controlLogsById[currentEditedLog].data);
   }, [controlLogsById, logs, currentEditedLog, extentsByTableName]);
 
-  const [xMin, xMax] = currentExtent;
+  const { wellId } = useWellIdContainer();
+  const [, , , , , updateAppInfo] = useSelectedWellInfoContainer();
 
-  const { bias, scale } = logsBiasAndScale[currentEditedLog] || initialLogBiasAndScale;
+  const [xMin, xMax] = currentExtent;
+  const { bias, scale } = useLogBiasAndScale(currentEditedLog);
 
   const width = xMax - xMin;
   const computedWidth = width * scale;
@@ -337,9 +341,13 @@ function useLogsBiasAndScaleProps({
     (event, prevMouse) => {
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
-      dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta, logId: currentEditedLog });
+      if (currentEditedLog === "wellLogs") {
+        updateAppInfo({ wellId, field: "bias", value: bias + delta });
+      } else {
+        dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta, logId: currentEditedLog });
+      }
     },
-    [bias, dispatch, currentEditedLog]
+    [bias, dispatch, currentEditedLog, updateAppInfo, wellId]
   );
 
   const onStartDragHandler = useCallback(
@@ -349,9 +357,14 @@ function useLogsBiasAndScaleProps({
 
       const newWidth = width * scale - delta;
       const newScale = newWidth / width;
-      dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta / 2, scale: newScale, logId: currentEditedLog });
+
+      if (currentEditedLog === "wellLogs") {
+        updateAppInfo({ wellId, data: { scaleright: logScaleToDataScale(newScale), bias: bias + delta } });
+      } else {
+        dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta, scale: newScale, logId: currentEditedLog });
+      }
     },
-    [dispatch, bias, scale, currentEditedLog, width]
+    [dispatch, bias, scale, currentEditedLog, width, updateAppInfo, wellId]
   );
 
   const onEndDragHandler = useCallback(
@@ -361,9 +374,17 @@ function useLogsBiasAndScaleProps({
 
       const newWidth = width * scale + delta;
       const newScale = newWidth / width;
-      dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", scale: newScale, logId: currentEditedLog });
+      if (currentEditedLog === "wellLogs") {
+        updateAppInfo({ wellId, data: { scaleright: logScaleToDataScale(newScale) } });
+      } else {
+        dispatch({
+          type: "UPDATE_LOG_BIAS_AND_SCALE",
+          scale: newScale,
+          logId: currentEditedLog
+        });
+      }
     },
-    [dispatch, scale, currentEditedLog, width]
+    [dispatch, scale, currentEditedLog, width, updateAppInfo, wellId]
   );
 
   return {

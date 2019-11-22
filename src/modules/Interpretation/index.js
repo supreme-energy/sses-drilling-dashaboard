@@ -14,7 +14,7 @@ import { useComboContainer } from "../ComboDashboard/containers/store";
 import SelectionStatsContainer from "./SelectionStats";
 import TCLValue from "./SelectionStats/TCLValue";
 import Headers from "./Headers";
-import { useControlLogDataContainer, useWellIdContainer } from "../App/Containers";
+import { useControlLogDataContainer, useWellIdContainer, useSelectedWellInfoContainer } from "../App/Containers";
 import LogSettings from "./LogSettings";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import FormationControls from "./InterpretationSettings/FormationControls";
@@ -23,6 +23,7 @@ import FormationSettings from "./InterpretationChart/FormationSettings";
 
 import WizardChecklist from "./components/WizardChecklist";
 import DetailsTable from "./DetailsTable";
+import { logScaleToDataScale } from "../../api";
 
 function TopsButton() {
   const [, dispatch] = useFormationsStore();
@@ -162,7 +163,15 @@ const InterpretationContainer = React.memo(props => {
   const [logList] = useWellLogsContainer();
   const [{ editMode: formationsEditMode }] = useFormationsStore();
   const [{ currentEditedLog, logsBiasAndScale, draftMode }, dispatch] = useComboContainer();
-  const resetLogBiasAndScale = useCallback(logId => dispatch({ type: "RESET_LOG_BIAS_AND_SCALE", logId }), [dispatch]);
+  const [, , , , , updateAppInfo] = useSelectedWellInfoContainer();
+  const resetLogBiasAndScale = useCallback(
+    logId => {
+      logId === "wellLogs"
+        ? updateAppInfo({ wellId, data: { bias: 1, scaleright: logScaleToDataScale.range()[1] } })
+        : dispatch({ type: "RESET_LOG_BIAS_AND_SCALE", logId });
+    },
+    [dispatch, updateAppInfo, wellId]
+  );
   const changeCurrentEditedLog = useCallback(
     logId => dispatch({ type: "CHANGE_CURRENT_EDITED_LOG", logId: currentEditedLog === logId ? null : logId }),
     [dispatch, currentEditedLog]

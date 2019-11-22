@@ -43,9 +43,13 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   trashCircle.position.x = -35;
   trashCircle.position.y = tagHeight - 20;
   trashCircle.on("click", () => {
-    const { deleteProjection, calcSections, selectedSections } = latestProps;
+    const { deleteProjection, calcSections, selectedSections, deleteSurvey } = latestProps;
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
-    deleteProjection(selectedPoint.id);
+    if (selectedPoint.isProjection) {
+      deleteProjection(selectedPoint.id);
+    } else if (selectedPoint.isSurvey) {
+      deleteSurvey(selectedPoint.id);
+    }
   });
 
   const paIndicator = container.addChild(new PIXI.Container());
@@ -84,9 +88,12 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
       trashCircle.visible = true;
       addCircle.visible = true;
       addCircle.position.x = 15;
-    } else {
-      trashCircle.visible = false;
+    } else if (selectedPoint.isSurvey) {
+      trashCircle.visible = true;
       addCircle.visible = false;
+    } else {
+      addCircle.visible = false;
+      trashCircle.visible = false;
     }
   });
 

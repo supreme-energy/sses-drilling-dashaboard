@@ -104,7 +104,7 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
 }
 
 export default function DetailsTable({ showFullTable = false }) {
-  const { selectedSections, calcSections, deleteProjection } = useCrossSectionContainer();
+  const { selectedSections, calcSections, deleteProjection, deleteSurvey } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
   const [{ enforceSelectionInTableViewportId }] = useComboContainer();
@@ -182,12 +182,12 @@ export default function DetailsTable({ showFullTable = false }) {
           {showFullTable && Cell(row.tot, false)}
           {showFullTable && Cell(row.bot, false)}
           <TableCell className={classNames(classes.cell, classes.actions)} component="div">
-            {row.isProjection && (
+            {(row.isProjection || row.isSurvey) && (
               <IconButton
                 size="small"
                 aria-label="Delete row"
                 onClick={() => {
-                  deleteProjection(row.id);
+                  row.isProjection ? deleteProjection(row.id) : deleteSurvey(row.id);
                 }}
               >
                 <img src={trashcanIcon} />
@@ -197,7 +197,7 @@ export default function DetailsTable({ showFullTable = false }) {
         </TableRow>
       );
     },
-    [debouncedSave, details, selectedId, showFullTable, deleteProjection, updateSegments, changeSelection]
+    [debouncedSave, details, selectedId, showFullTable, deleteProjection, updateSegments, changeSelection, deleteSurvey]
   );
 
   return (

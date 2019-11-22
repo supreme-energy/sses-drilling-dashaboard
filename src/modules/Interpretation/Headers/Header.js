@@ -4,6 +4,9 @@ import { MoreVert, ArrowBack, ArrowForward } from "@material-ui/icons";
 import ScalePlotIcon from "../../../assets/scalePlot.svg";
 import { ListItem, ListItemIcon, ListItemText, Box, Typography, Popover, IconButton, List } from "@material-ui/core";
 import ColorPickerBox from "../../../components/ColorPickerBox";
+import { twoDecimalsNoComma } from "../../../constants/format";
+import { logScaleToDataScale } from "../../../api";
+import classNames from "classnames";
 
 function LogPopupContent({
   name,
@@ -63,6 +66,7 @@ export default function Header({
 
   const handleChangeColor = useCallback(({ hex }) => onChangeColor({ hex, logId }), [onChangeColor, logId]);
   const editScaleCallback = useCallback(() => handleEditScale(logId), [handleEditScale, logId]);
+
   return (
     <React.Fragment>
       <Box display="flex" className={css.header}>
@@ -80,20 +84,20 @@ export default function Header({
           alignItems="center"
           style={{ backgroundColor: color }}
         >
-          <Typography className={css.headerText} variant="caption">
-            {range[0]}
+          <Typography className={classNames(css.headerText, css.scaleValue)} variant="caption">
+            {twoDecimalsNoComma(range[0])}
           </Typography>
           <Typography className={css.headerText} variant="caption">
             {name}
           </Typography>
-          <Typography className={css.headerText} variant="caption">
-            {range[1]}
+          <Typography className={classNames(css.headerText, css.scaleValue)} variant="caption">
+            {twoDecimalsNoComma(logScaleToDataScale(range[1]))}
           </Typography>
         </Box>
       </Box>
       <Popover
         id={open ? "headerPopup" : null}
-        open={isActive && headerRef.current}
+        open={(isActive && headerRef.current) || false}
         anchorEl={headerRef.current}
         onClose={onClose}
         anchorOrigin={{

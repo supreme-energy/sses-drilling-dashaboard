@@ -17,6 +17,7 @@ import { useComboContainer, useAddProjection, useDeleteProjection } from "../Com
 import { useComputedFormations, useComputedSurveysAndProjections } from "../Interpretation/selectors";
 import memoizeOne from "memoize-one";
 import { useSelectionActions } from "../Interpretation/actions";
+import { useWellLogsContainer } from "../ComboDashboard/containers/wellLogs";
 
 const filterDataToInterval = (data, interval) => {
   if (data && data.length) {
@@ -214,14 +215,30 @@ function useControlLogListData() {
 function useSurveysData() {
   const { wellId } = useWellIdContainer();
 
-  const [surveys, { updateSurvey, refresh, replaceResult, isLoading }] = useFetchSurveys(wellId);
+  const [surveys, { updateSurvey, refresh, replaceResult, isLoading, deleteSurvey }] = useFetchSurveys(wellId);
 
   const updateTieInTCL = useCallback(
     newTCL => replaceResult([{ ...surveys[0], tcl: Number(newTCL) }, ...surveys.slice(1)]),
     [replaceResult, surveys]
   );
+  const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+  const deleteSurveyAndRefreshWellLogs = useCallback(
+    async id => {
+      await deleteSurvey(id);
+      await refreshWellLogs();
+    },
+    [deleteSurvey, refreshWellLogs]
+  );
 
-  return { updateSurvey, surveys, refreshSurveys: refresh, replaceResult, isLoading, updateTieInTCL };
+  return {
+    updateSurvey,
+    surveys,
+    refreshSurveys: refresh,
+    replaceResult,
+    isLoading,
+    updateTieInTCL,
+    deleteSurvey: deleteSurveyAndRefreshWellLogs
+  };
 }
 
 function useProjectionsData() {
@@ -289,6 +306,7 @@ export function useCrossSectionData() {
 
   const addProjection = useAddProjection();
   const deleteProjection = useDeleteProjection();
+  const { deleteSurvey } = useSurveysDataContainer();
 
   return {
     addProjection,
@@ -296,7 +314,7 @@ export function useCrossSectionData() {
     wellPlan,
     selectedSections,
     changeSelection,
-
+    deleteSurvey,
     calcSections: rawSections,
     calculatedFormations: formations
   };
