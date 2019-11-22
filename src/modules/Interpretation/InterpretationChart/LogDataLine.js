@@ -11,9 +11,14 @@ import PixiContainer from "../../../components/PixiContainer";
 
 const mapWellLog = d => [d.value, d.depth];
 
-const LogData = React.memo(({ logData, range, extent, draft, container, ...props }) => {
+const LogData = React.memo(({ logData, range, extent, draft, container, parentScale, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
+  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale * parentScale, extent), [
+    bias,
+    scale,
+    extent,
+    parentScale
+  ]);
 
   const filteredLogData = useMemo(() => {
     if (!range) {
@@ -58,7 +63,8 @@ function LogDataLine({
   extent,
   logLineData,
   logColor,
-  logData
+  logData,
+  parentScale
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
   const internalState = useRef({ dataLoaded: false });
@@ -77,6 +83,7 @@ function LogDataLine({
       color={draft ? hexColor(colors.draftcolor) : selected ? hexColor(colors.selectedsurveycolor) : logColor}
       draft={draft}
       extent={extent}
+      parentScale={parentScale}
       logData={computedLogData}
       container={container}
       selected={selected}

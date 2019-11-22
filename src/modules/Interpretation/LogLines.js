@@ -72,11 +72,6 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
 
   const { bias, scale } = useLogBiasAndScale("wellLogs");
 
-  const logsGammaExtent = (result && result.logsGammaExtent) || EMPTY_ARRAY;
-  const [, , , extentsByTableName] = logsGammaExtent;
-
-  const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
-  const [, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
   const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
   const { byId } = useComputedSegments();
   const yMin = Math.floor((-1 * view.y) / view.yScale);
@@ -85,7 +80,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   return (
     <PixiContainer
       x={bias}
-      scale={pixiScale}
+      // scale={pixiScale}
       container={container}
       child={container =>
         filteredLogList.map((log, index) => {
@@ -103,6 +98,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
               draft={draft}
               range={range}
               refresh={refresh}
+              parentScale={scale}
               log={log}
               logColor={logColor}
               key={log.id}
