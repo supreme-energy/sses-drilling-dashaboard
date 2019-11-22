@@ -65,6 +65,7 @@ export const GET_CLEANED_SURVEYS = "/survey/history/list.php";
 export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 export const GET_PROJECT_TO_PLAN = "/projection/to_line.php";
+export const DELETE_SURVEY = "/survey/delete.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
@@ -660,7 +661,27 @@ export function useFetchSurveys(wellId) {
     [serializedUpdateFetch, data, wellId]
   );
 
-  return [data || EMPTY_ARRAY, { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading }];
+  const deleteSurvey = useCallback(
+    surveyId => {
+      const optimisticResult = data.filter(d => d.id !== surveyId);
+      fetch({
+        path: DELETE_SURVEY,
+        method: "GET",
+        query: {
+          seldbname: wellId,
+          id: surveyId
+        },
+        optimisticResult,
+        cache: "no-cache"
+      });
+    },
+    [fetch, data, wellId]
+  );
+
+  return [
+    data || EMPTY_ARRAY,
+    { updateSurvey, refresh, replaceResult: replaceResultCallback, isLoading, deleteSurvey }
+  ];
 }
 
 const formationsTransform = memoizeOne(formationList => {
