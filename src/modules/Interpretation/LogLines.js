@@ -5,14 +5,12 @@ import { useComboContainer, surveyVisibility as visibilityOptions } from "../Com
 import {
   getIsDraft,
   useComputedDraftSegmentsOnly,
-  getFilteredLogsExtent,
   getColorForWellLog,
   useComputedSegments,
   useLogBiasAndScale
 } from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
-import { withWellLogsData, EMPTY_ARRAY } from "../../api";
-import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
+import { withWellLogsData } from "../../api";
 import PixiContainer from "../../components/PixiContainer";
 
 function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
