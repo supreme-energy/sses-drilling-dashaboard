@@ -7,7 +7,8 @@ import {
   useComputedDraftSegmentsOnly,
   getFilteredLogsExtent,
   getColorForWellLog,
-  useComputedSegments
+  useComputedSegments,
+  useLogBiasAndScale
 } from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
 import { withWellLogsData, EMPTY_ARRAY } from "../../api";
@@ -16,7 +17,7 @@ import PixiContainer from "../../components/PixiContainer";
 
 function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
   const [
-    { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale, colorsByWellLog },
+    { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, colorsByWellLog },
     dispatch
   ] = useComboContainer();
   const {
@@ -69,7 +70,8 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
     }
   }, [sliderInterval, draftMode, firstDraft, dispatch]);
 
-  const { bias, scale } = logsBiasAndScale.wellLogs || { bias: 1, scale: 1 };
+  const { bias, scale } = useLogBiasAndScale("wellLogs");
+
   const logsGammaExtent = (result && result.logsGammaExtent) || EMPTY_ARRAY;
   const [, , , extentsByTableName] = logsGammaExtent;
 
