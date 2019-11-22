@@ -195,7 +195,6 @@ export function useSaveWellLogActions() {
       await updateWellLogs(data);
 
       if (!getIsPending()) {
-        console.log("reset", resetLogProps);
         updateSegments(resetLogProps);
       }
     },
