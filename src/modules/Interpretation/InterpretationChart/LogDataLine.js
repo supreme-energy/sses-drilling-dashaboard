@@ -13,12 +13,7 @@ const mapWellLog = d => [d.value, d.depth];
 
 const LogData = React.memo(({ logData, range, extent, draft, container, parentScale, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale * parentScale, extent), [
-    bias,
-    scale,
-    extent,
-    parentScale
-  ]);
+  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
 
   const filteredLogData = useMemo(() => {
     if (!range) {
@@ -39,7 +34,7 @@ const LogData = React.memo(({ logData, range, extent, draft, container, parentSc
       container={container}
       child={container => (
         <PixiLine
-          x={x}
+          x={x / parentScale}
           scale={pixiScale}
           {...props}
           mapData={mapWellLog}
@@ -83,10 +78,10 @@ function LogDataLine({
       color={draft ? hexColor(colors.draftcolor) : selected ? hexColor(colors.selectedsurveycolor) : logColor}
       draft={draft}
       extent={extent}
-      parentScale={parentScale}
       logData={computedLogData}
       container={container}
       selected={selected}
+      parentScale={parentScale}
     />
   ) : null;
 }
