@@ -40,7 +40,8 @@ const CrossSection = React.memo(props => {
     calcSections,
     calculatedFormations,
     addProjection,
-    deleteProjection
+    deleteProjection,
+    deleteSurvey
   } = dataObj;
 
   const [horizontalView, updateHorizontalView] = useViewportView({ key: `${viewName}-horizontal`, wellId });
@@ -194,6 +195,7 @@ const CrossSection = React.memo(props => {
       deleteProjection,
       updateSegments,
       debouncedSave,
+      deleteSurvey,
       isReadOnly
     });
   }, [
@@ -223,7 +225,8 @@ const CrossSection = React.memo(props => {
     deleteProjection,
     updateSegments,
     debouncedSave,
-    isReadOnly
+    isReadOnly,
+    deleteSurvey
   ]);
 
   return (
