@@ -41,7 +41,7 @@ function ControlLogImportModal({ handleClose, isVisible }) {
     setFile(e.target.files[0]);
   };
   return (
-    <Dialog onClose={handleClose} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible || false}>
+    <Dialog onClose={handleClose} maxWidth={false} aria-labelledby="customized-dialog-title" open={isVisible}>
       <DialogTitle className={classes.dialogTitle}>
         <span>Control Log Importer</span>
         <IconButton aria-label="Close" className={classes.closeButton} onClick={handleClose}>

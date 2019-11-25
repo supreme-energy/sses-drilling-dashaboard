@@ -19,7 +19,6 @@ import withFetchClient from "../utils/withFetchClient";
 import { getWellsGammaExtent } from "../modules/Interpretation/selectors";
 import isNumber from "../utils/isNumber";
 import debouncePromise from "awesome-debounce-promise";
-import { scaleLinear } from "d3-scale";
 
 export const GET_WELL_LIST = "/job/list.php";
 export const CREATE_NEW_WELL = "/job/create.php";
@@ -83,11 +82,6 @@ const options = {
 
 export const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
-
-// convert [0, 300] range to [0, 1] range
-export const logScaleToDataScale = scaleLinear()
-  .domain([0, 1])
-  .range([0, 300]);
 
 export const useDebouncedSave = ({ save, debounceInterval = 500 }) => {
   const [optimisticData, changeUpdateOptimisticData] = useState(null);
@@ -217,7 +211,7 @@ export function useWellInfo(wellId) {
   const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
-  const appInfo = data && { ...data.appinfo };
+  const appInfo = data && data.appinfo;
 
   const updateAutoRc = useCallback(
     ({ wellId, field, value, refreshStore }) => {
@@ -276,35 +270,31 @@ export function useWellInfo(wellId) {
   );
 
   const updateAppInfo = useCallback(
-    ({ wellId, field, value, data: newData }) => {
-      const props = newData || { [field]: value };
+    ({ wellId, field, value }) => {
       const optimisticResult = {
         ...data,
         appinfo: {
-          ...((data && data.appinfo) || {}),
-          ...props
+          ...appInfo,
+          [field]: value
         }
       };
 
-      return updateWellDebounced({
-        optimisticData: optimisticResult,
-        saveArgs: [
-          {
-            path: SET_WELL_FIELD,
-            query: {
-              seldbname: wellId
-            },
-            method: "POST",
-            body: {
-              appinfo: props
-            },
-            cache: "no-cache",
-            optimisticResult
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          appinfo: {
+            [field]: value
           }
-        ]
+        },
+        cache: "no-cache",
+        optimisticResult
       });
     },
-    [data, updateWellDebounced]
+    [serializedUpdateFetch, data, appInfo]
   );
 
   const updateAutoImport = useCallback(
@@ -334,10 +324,6 @@ export function useWellInfo(wellId) {
     },
     [serializedUpdateFetch, data, wellInfo]
   );
-
-  if (appInfo) {
-    appInfo.scaleright = logScaleToDataScale.invert(parseFloat(appInfo.scaleright));
-  }
 
   const {
     wellSurfaceLocationLocal,

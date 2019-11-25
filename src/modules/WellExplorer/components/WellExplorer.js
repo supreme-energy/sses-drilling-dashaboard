@@ -94,7 +94,7 @@ export const WellExplorer = ({
         [classes.overview]: overviewMode
       })}
     >
-      <WellImporterModal open={importModalShown || false} hideBackdrop>
+      <WellImporterModal open={importModalShown} hideBackdrop>
         <WellImporter onClickCancel={onClickCancel} />
       </WellImporterModal>
 

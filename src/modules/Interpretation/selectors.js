@@ -23,7 +23,6 @@ import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import findLast from "lodash/findLast";
 import pickBy from "lodash/pickBy";
-import get from "lodash/get";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -685,22 +684,3 @@ export function useLastSurvey() {
   const { surveys } = useSurveysDataContainer();
   return getLastSurvey(surveys);
 }
-
-export const initialLogBiasAndScale = {
-  bias: 1,
-  scale: 1
-};
-
-export const useLogBiasAndScale = log => {
-  const [wellData] = useSelectedWellInfoContainer();
-  const [{ logsBiasAndScale }] = useComboContainer();
-  const biasAndScale =
-    log === "wellLogs"
-      ? {
-          scale: get(wellData, "appInfo.scaleright", 0),
-          bias: parseFloat(get(wellData, "appInfo.bias"))
-        }
-      : logsBiasAndScale[log] || initialLogBiasAndScale;
-
-  return biasAndScale;
-};
