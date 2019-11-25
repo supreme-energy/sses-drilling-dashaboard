@@ -663,7 +663,7 @@ export function useFetchSurveys(wellId) {
 
   const deleteSurvey = useCallback(
     surveyId => {
-      const optimisticResult = data.filter(d => d.id !== surveyId);
+      const optimisticResult = surveysTransform(data.filter(d => d.id !== surveyId));
       fetch({
         path: DELETE_SURVEY,
         method: "GET",

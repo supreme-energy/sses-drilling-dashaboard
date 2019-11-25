@@ -222,12 +222,22 @@ function useSurveysData() {
     [replaceResult, surveys]
   );
   const [, , , { refresh: refreshWellLogs }] = useWellLogsContainer();
+  const [{ selectionById }, dispatch] = useComboContainer();
+
   const deleteSurveyAndRefreshWellLogs = useCallback(
     async id => {
       await deleteSurvey(id);
+      if (selectionById[id]) {
+        const selectedIndex = surveys.findIndex(s => s.id === id);
+        const prevSurvey = surveys[selectedIndex - 1];
+        console.log("prevSurvey", prevSurvey, selectedIndex);
+        if (prevSurvey) {
+          dispatch({ type: "CHANGE_SELECTION", id: prevSurvey.id });
+        }
+      }
       await refreshWellLogs();
     },
-    [deleteSurvey, refreshWellLogs]
+    [deleteSurvey, refreshWellLogs, dispatch, selectionById, surveys]
   );
 
   return {
