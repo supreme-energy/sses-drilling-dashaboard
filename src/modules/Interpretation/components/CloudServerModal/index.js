@@ -161,7 +161,7 @@ CloudServerModal.propTypes = {
   wellId: PropTypes.string,
   className: PropTypes.string,
   importText: PropTypes.string,
-  importIcon: PropTypes.oneOfType([PropTypes.elementType, PropTypes.bool]),
+  importIcon: PropTypes.oneOf([PropTypes.elementType, PropTypes.bool]),
   isInterpretation: PropTypes.bool
 };
 
