@@ -4,7 +4,21 @@ import * as PIXI from "pixi.js";
 import PropTypes from "prop-types";
 
 function Container(
-  { container: parentContainer, child, x, y, updateTransform, name, zIndex, scale, pivot, width, height, onClick },
+  {
+    container: parentContainer,
+    child,
+    x,
+    y,
+    updateTransform,
+    name,
+    zIndex,
+    scale,
+    pivot,
+    width,
+    height,
+    onClick,
+    mask
+  },
   ref
 ) {
   const internalStateRef = useRef(() => {
@@ -106,6 +120,13 @@ function Container(
       };
     },
     [onClick]
+  );
+
+  useEffect(
+    function updateZindex() {
+      container.mask = mask;
+    },
+    [mask, container]
   );
 
   return child ? child(container) : null;

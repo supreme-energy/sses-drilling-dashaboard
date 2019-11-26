@@ -75,14 +75,13 @@ const Formation = ({
   return (
     <React.Fragment>
       <PixiContainer
-        x={12}
         y={y}
         container={container}
         child={container => (
           <PixiRectangle
             backgroundColor={backgroundColor}
             backgroundAlpha={interpretationFill ? backgroundAlpha : 0}
-            width={width}
+            width={width / view.xScale}
             height={height - 3 / view.yScale}
             container={container}
           />
@@ -92,7 +91,6 @@ const Formation = ({
       {interpretationLine && (
         <PixiContainer
           updateTransform={frozenScaleTransform}
-          x={12}
           y={y}
           container={container}
           child={container => (
@@ -105,7 +103,7 @@ const Formation = ({
 
       <PixiContainer
         y={y}
-        x={20}
+        x={(gridGutter + 10) / view.xScale}
         container={container}
         child={container => <PixiText container={container} text={label} color={color} fontSize={11} />}
       />
@@ -166,14 +164,14 @@ const FormationAxis = ({ view, formationsData, height, container, tcl, width }) 
       yMin={yMin - 3}
       yMax={yMax + 3}
       scale={scale}
-      width={50}
-      x={width}
+      width={50 / view.xScale}
+      x={(width - view.x - marginRight) / view.xScale}
       y={0}
     />
   );
 };
 
-export default React.memo(({ container, width }) => {
+export default React.memo(({ width, ...props }) => {
   const [{ selectedFormation, editMode, pendingAddTop }, dispatch] = useFormationsStore();
   const {
     refresh,
@@ -200,12 +198,12 @@ export default React.memo(({ container, width }) => {
 
   useEffect(refresh, [refresh, selectedFormation, pendingAddTop, formationsData]);
 
-  const computedWidth = width - marginRight - gridGutter;
-  const formationAxisProps = { view, formationsData, height, container, tcl, width: computedWidth };
+  const computedWidth = width;
+  const formationAxisProps = { view, formationsData, height, container: props.container, tcl, width: computedWidth };
 
   return (
     <PixiContainer
-      container={container}
+      {...props}
       child={container => (
         <React.Fragment>
           {formationDataForSelectedSurvey.map((f, index) => (

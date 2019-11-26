@@ -6,7 +6,7 @@ import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
 import PixiContainer from "../../../components/PixiContainer";
 
 const mapControlLog = d => [d.value, d.md];
-export default function ControlLogLine({ container, log }) {
+export default function ControlLogLine({ log, ...props }) {
   const [{ logsBiasAndScale, colorsByWellLog }] = useComboContainer();
   const { bias, scale } = logsBiasAndScale[log.id] || { bias: 1, scale: 1 };
   const extent = logDataExtent(log.data);
@@ -14,10 +14,10 @@ export default function ControlLogLine({ container, log }) {
   const color = Number(`0x${getColorForWellLog(colorsByWellLog, log.id)}`);
   return (
     <PixiContainer
-      zIndex={1}
       scale={pixiScale}
+      zIndex={1}
       x={x}
-      container={container}
+      {...props}
       child={container => <PixiLine container={container} data={log.data} mapData={mapControlLog} color={color} />}
     />
   );

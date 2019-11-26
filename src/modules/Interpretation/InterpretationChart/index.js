@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
@@ -6,14 +6,19 @@ import { useSize } from "react-hook-size";
 import usePrevious from "react-use/lib/usePrevious";
 import classNames from "classnames";
 import css from "./styles.scss";
-import useViewport from "../../../hooks/useViewport";
+import useViewport, { globalMouse } from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
 import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
-import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import {
+  frozenXYTransform,
+  frozenXTransform,
+  frozenYTransform,
+  frozenScaleTransform
+} from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColors } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
@@ -28,6 +33,7 @@ import { useLocalStorageState } from "react-storage-hooks";
 import { useWellIdContainer } from "../../App/Containers";
 
 export const gridGutter = 65;
+const marginBottom = 45;
 const initialViewState = {
   x: gridGutter,
   y: 0,
@@ -59,6 +65,8 @@ function useInterpretationWebglRenderer() {
 
   const viewportContainer = useRef(null);
   const topContainerRef = useRef(null);
+  const isXScalingValid = useCallback(() => globalMouse.y > height - marginBottom, [height]);
+  const isYScalingValid = useCallback(() => globalMouse.y < height - marginBottom, [height]);
 
   const viewport = useViewport({
     renderer,
@@ -67,9 +75,11 @@ function useInterpretationWebglRenderer() {
     height,
     view,
     updateView,
-    zoomXScale: false,
+    zoomXScale: true,
     zoomYScale: true,
-    updateViewport: false
+    updateViewport: false,
+    isXScalingValid,
+    isYScalingValid
   });
 
   return {
@@ -202,24 +212,34 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
     formationsEditMode,
     resetViewportCounter
   ]);
-
+  const maskRect = useRef(null);
   return (
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} gridGutter={gridGutter} />
-      {controlLogs.map(cl => (
-        <ControlLogLine key={cl.id} log={cl} container={viewport} />
-      ))}
+      <Formations container={viewport} x={-(view.x / view.xScale)} y={0} width={width} />
+
       {!formationsEditMode && (
-        <LogLines
-          wellId={wellId}
-          logs={logList}
-          container={viewport}
-          selectedWellLogIndex={selectedWellLogIndex}
-          offset={gridGutter}
-        />
+        <LogLines wellId={wellId} logs={logList} container={viewport} selectedWellLogIndex={selectedWellLogIndex} />
       )}
+
+      {controlLogs.map(cl => (
+        <ControlLogLine
+          key={cl.id}
+          log={cl}
+          container={viewport}
+          mask={maskRect.current && maskRect.current.graphics}
+        />
+      ))}
+
+      <PixiRectangle
+        container={stage}
+        width={width}
+        x={gridGutter}
+        height={height - marginBottom}
+        ref={maskRect}
+        backgroundColor={0xffffff}
+      />
 
       <Grid
         container={viewport}
@@ -227,9 +247,11 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
         width={width}
         height={height}
         gridGutter={gridGutter}
-        showXAxis={false}
+        gutterBottom={marginBottom}
+        xAxisOrientation={"bottom"}
         makeYTickAndLine={createGridYAxis}
       />
+
       <PixiRectangle
         width={10}
         height={height}
@@ -240,7 +262,19 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
         container={viewport}
       />
       {!formationsEditMode && (
-        <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+        <PixiContainer
+          container={viewport}
+          x={-((view.x - gridGutter + 10) / view.xScale)}
+          y={0}
+          child={container => (
+            <Segments
+              container={container}
+              chartWidth={width}
+              segmentsData={segments}
+              selectedWellLog={selectedWellLog}
+            />
+          )}
+        />
       )}
 
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
@@ -249,8 +283,8 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
           controlLogs={controlLogs}
           logs={logList}
           wellId={wellId}
-          container={stage}
-          y={height - 10}
+          container={viewport}
+          y={-((view.y - 60) / view.yScale)}
           gridGutter={gridGutter}
           refresh={refresh}
           totalWidth={width}

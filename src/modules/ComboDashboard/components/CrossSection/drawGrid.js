@@ -194,6 +194,7 @@ function drawGrid(container, options = {}) {
 
       yLines.forEach(l => (l.visible = false));
       yLabels.forEach(l => (l.visible = false));
+
       for (let i = 0; bounds.yMin + bounds.yStep * i < bounds.yMax * 1.1; i++) {
         const pos = bounds.yMin + bounds.yStep * i;
         if (!yLines[i]) {

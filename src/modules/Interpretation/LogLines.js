@@ -14,7 +14,7 @@ import { withWellLogsData, EMPTY_ARRAY } from "../../api";
 import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
 import PixiContainer from "../../components/PixiContainer";
 
-function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
+function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result } }) {
   const [
     { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale, colorsByWellLog },
     dispatch
@@ -100,6 +100,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
             <LogDataLine
               draft={draft}
               range={range}
+              view={view}
               parentScale={scale}
               refresh={refresh}
               log={log}
