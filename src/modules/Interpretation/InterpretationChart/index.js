@@ -279,16 +279,20 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
 
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       {!formationsEditMode && (
-        <BiasAndScale
-          controlLogs={controlLogs}
-          logs={logList}
-          wellId={wellId}
-          container={viewport}
-          y={-((view.y - 60) / view.yScale)}
-          gridGutter={gridGutter}
-          refresh={refresh}
-          totalWidth={width}
-          canvas={canvasRef.current}
+        <PixiContainer
+          container={stage}
+          child={container => (
+            <BiasAndScale
+              controlLogs={controlLogs}
+              logs={logList}
+              wellId={wellId}
+              container={container}
+              gridGutter={gridGutter}
+              refresh={refresh}
+              totalWidth={width}
+              canvas={canvasRef.current}
+            />
+          )}
         />
       )}
       <PixiContainer ref={topContainerRef} container={viewport} />

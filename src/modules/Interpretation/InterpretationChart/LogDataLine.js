@@ -1,19 +1,14 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useCallback } from "react";
 import PixiLine from "../../../components/PixiLine";
 import { useGetComputedLogData, getExtent, useSelectedWellInfoColors } from "../selectors";
-
 import { hexColor } from "../../../constants/pixiColors";
 import { useWellLogData, EMPTY_ARRAY } from "../../../api";
 import { useWellIdContainer } from "../../App/Containers";
-import { computeLineBiasAndScale } from "../../../utils/lineBiasAndScale";
 
 import PixiContainer from "../../../components/PixiContainer";
 
-const mapWellLog = d => [d.value, d.depth];
-
-const LogData = React.memo(({ logData, range, extent, draft, container, parentScale, view, ...props }) => {
+const LogData = React.memo(({ logData, range, extent, draft, container, view, parentScale, ...props }) => {
   const { scalebias: bias, scalefactor: scale } = logData;
-  const [x, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
 
   const filteredLogData = useMemo(() => {
     if (!range) {
@@ -28,20 +23,17 @@ const LogData = React.memo(({ logData, range, extent, draft, container, parentSc
         : []
       : logData.data;
   }, [logData, range]);
-
+  const mapWellLog = useCallback(d => [(d.value - extent[0]) * scale * parentScale + extent[0], d.depth], [
+    extent,
+    scale,
+    parentScale
+  ]);
   return (
     <PixiContainer
       container={container}
-      child={container => (
-        <PixiLine
-          x={x / parentScale}
-          scale={pixiScale}
-          {...props}
-          mapData={mapWellLog}
-          data={filteredLogData}
-          container={container}
-        />
-      )}
+      x={bias}
+      // width={(extent[1] - extent[0]) * scale}
+      child={container => <PixiLine {...props} mapData={mapWellLog} data={filteredLogData} container={container} />}
     />
   );
 });
@@ -56,10 +48,9 @@ function LogDataLine({
   range,
   colors,
   extent,
-  logLineData,
+  parentScale,
   logColor,
-  view,
-  parentScale
+  view
 }) {
   const computedLogData = useGetComputedLogData(log && log.id, draft);
   const internalState = useRef({ dataLoaded: false });
@@ -80,8 +71,8 @@ function LogDataLine({
       extent={extent}
       logData={computedLogData}
       container={container}
-      selected={selected}
       parentScale={parentScale}
+      selected={selected}
       view={view}
     />
   ) : null;
