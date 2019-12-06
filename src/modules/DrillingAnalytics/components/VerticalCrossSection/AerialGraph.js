@@ -66,8 +66,7 @@ export function VerticalCrossSection({ selectedMenuItems, keys, wellPlanFiltered
     view,
     updateView,
     zoomXScale: true,
-    zoomYScale: true,
-    isXScalingValid: () => 1
+    zoomYScale: true
   });
 
   const onReset = useCallback(() => {

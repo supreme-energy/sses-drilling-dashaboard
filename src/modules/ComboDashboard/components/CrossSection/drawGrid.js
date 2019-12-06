@@ -59,7 +59,8 @@ function drawGrid(container, options = {}) {
     makeYTickAndLine = defaultMakeYTickAndLine,
     maxXLines = 45,
     maxYLines = 12,
-    fontSize = 15
+    fontSize = 15,
+    xAxisPadding = 0
   } = options;
   let { gutterLeft = gutter, gutterBottom = gutter } = options;
   const lineZIndex = 0;
@@ -186,7 +187,7 @@ function drawGrid(container, options = {}) {
         xLines[i].visible = true;
         if (showXAxis) {
           xLabels[i].x = pos;
-          xLabels[i].y = xAxisAnchor - gutterBottom;
+          xLabels[i].y = xAxisAnchor - gutterBottom + xAxisPadding;
           xLabels[i].text = `${pos}`;
           xLabels[i].visible = true;
         }
@@ -194,6 +195,7 @@ function drawGrid(container, options = {}) {
 
       yLines.forEach(l => (l.visible = false));
       yLabels.forEach(l => (l.visible = false));
+
       for (let i = 0; bounds.yMin + bounds.yStep * i < bounds.yMax * 1.1; i++) {
         const pos = bounds.yMin + bounds.yStep * i;
         if (!yLines[i]) {
