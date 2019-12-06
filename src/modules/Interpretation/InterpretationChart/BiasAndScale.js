@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback, useMemo } from "react";
-import { selectionColor } from "../pixiColors";
 import PixiRectangle from "../../../components/PixiRectangle";
 import PixiContainer from "../../../components/PixiContainer";
 import {
