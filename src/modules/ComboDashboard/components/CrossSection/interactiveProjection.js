@@ -107,7 +107,8 @@ function interactiveProjection(parent, props) {
     function(pos) {
       updateSegments({ [curr.id]: { tvd: pos.y, method: TVD_VS } });
     },
-    () => debouncedSave()
+    () => debouncedSave(),
+    { dragY: 4 }
   );
 
   return props => {

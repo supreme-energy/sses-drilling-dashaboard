@@ -3,7 +3,7 @@
  * @param obj The PIXI displayObject
  * @param onMove  Callback to set the new x and y for the object
  */
-function subscribeToMoveEvents(obj, onMove, onEnd) {
+function subscribeToMoveEvents(obj, onMove, onEnd, opts = {}) {
   let dragging = false;
   obj.interactive = true;
   obj.onMove = onMove || (_ => {});
@@ -43,8 +43,10 @@ function subscribeToMoveEvents(obj, onMove, onEnd) {
     if (dragging) {
       event.stopPropagation();
       const newPosition = this.data.getLocalPosition(this.parent);
+      const dragYFactor = getDragYFactor(opts.dragY, event);
+
       newPosition.x -= this.dragPoint.x;
-      newPosition.y -= this.dragPoint.y;
+      newPosition.y -= this.dragPoint.y / dragYFactor;
       this.onMove(newPosition);
     }
   }
@@ -55,4 +57,18 @@ function removeAllChildren(pixiObj) {
     pixiObj.children[0].destroy();
   }
 }
+
+function getDragYFactor(dragY, event) {
+  if (dragY) {
+    const { ctrlKey, shiftKey } = event.data.originalEvent;
+    if (shiftKey) {
+      return 2;
+    } else if (ctrlKey) {
+      return 1;
+    }
+    return dragY;
+  }
+  return 1;
+}
+
 export { subscribeToMoveEvents, removeAllChildren };
