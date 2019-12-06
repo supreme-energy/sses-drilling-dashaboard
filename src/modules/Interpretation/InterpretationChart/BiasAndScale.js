@@ -10,7 +10,8 @@ import {
   getPendingSegmentsExtent,
   getFilteredLogsExtent,
   useSelectedWellLog,
-  useComputedSegments
+  useComputedSegments,
+  getColorForWellLog
 } from "../selectors";
 import PixiLine from "../../../components/PixiLine";
 import useDraggable from "../../../hooks/useDraggable";
@@ -21,22 +22,16 @@ import { useComboContainer, initialLogBiasAndScale } from "../../ComboDashboard/
 import { hexColor } from "../../../constants/pixiColors";
 import { withWellLogsData, EMPTY_ARRAY } from "../../../api";
 import keyBy from "lodash/keyBy";
-import { useInterpretationRenderer, gridGutter } from ".";
-import * as PIXI from "pixi.js";
+import { useInterpretationRenderer } from ".";
 
 const lineData = [[0, 10], [0, 0]];
 
 const BiasAndScale = React.memo(
   ({
-    bias,
-    scale,
-    width,
     computedWidth,
-    xMin,
-    xMax,
     draftMode,
     saveSelectedWellLog,
-    gridGutter,
+    currentEditedLog,
     container,
     canvas,
     draftColor,
@@ -44,6 +39,7 @@ const BiasAndScale = React.memo(
     onRootDragHandler,
     onStartDragHandler,
     onEndDragHandler,
+    colorsByWellLog,
     x
   }) => {
     const segmentContainerRef = useRef(null);
@@ -99,6 +95,8 @@ const BiasAndScale = React.memo(
       height: 10
     });
 
+    const wellLogColor = Number(`0x${getColorForWellLog(colorsByWellLog, currentEditedLog)}`);
+    const color = draftMode ? draftColor : currentEditedLog ? wellLogColor : selectionColor;
     return (
       <PixiContainer
         container={container}
@@ -112,13 +110,7 @@ const BiasAndScale = React.memo(
               x={0}
               y={-1}
               child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
+                <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
             />
             <PixiContainer
@@ -127,13 +119,7 @@ const BiasAndScale = React.memo(
               x={computedWidth}
               y={-1}
               child={container => (
-                <PixiLine
-                  container={container}
-                  data={lineData}
-                  color={draftMode ? draftColor : selectionColor}
-                  nativeLines={false}
-                  lineWidth={2}
-                />
+                <PixiLine container={container} data={lineData} color={color} nativeLines={false} lineWidth={2} />
               )}
             />
 
@@ -147,7 +133,7 @@ const BiasAndScale = React.memo(
                   width={computedWidth - 2}
                   height={8}
                   radius={5}
-                  backgroundColor={draftMode ? draftColor : selectionColor}
+                  backgroundColor={color}
                   container={container}
                 />
               )}
@@ -159,37 +145,46 @@ const BiasAndScale = React.memo(
   }
 );
 
-const useCalculatePositions = props => {
+const useCalculatePositions = (props, currentEditedLog) => {
   const result = props.data.result;
   const { view } = useInterpretationRenderer();
   const [, , , extentsByTableName] = (result && result.logsGammaExtent) || EMPTY_ARRAY;
   const [{ logsBiasAndScale }] = useComboContainer();
   const { byId } = useComputedSegments();
-  const { bias: parentLogBias, scale: parentLogScale } = logsBiasAndScale.wellLogs || { bias: 0, scale: 1 };
+  const { bias: parentLogBias, scale: parentLogScale } = logsBiasAndScale[currentEditedLog || "wellLogs"] || {
+    bias: 0,
+    scale: 1
+  };
+
+  if (!currentEditedLog || currentEditedLog === "wellLogs") {
+    return {
+      toGlobal: (logId, p) => {
+        const segmentData = byId[logId] || { scalebias: 0, scalefactor: 1 };
+        let bias = Number(segmentData.scalebias);
+        let scale = Number(segmentData.scalefactor);
+
+        const extent = (extentsByTableName && extentsByTableName[segmentData.tablename]) || [0, 0];
+
+        return [
+          ((p[0] - extent[0]) * scale * parentLogScale + extent[0] + bias + parentLogBias) * view.xScale + view.x,
+          p[1]
+        ];
+      },
+      computeParentScale: (logId, localX, globalX) => {
+        const segmentData = byId[logId] || { scalebias: 0, scalefactor: 1 };
+        let bias = Number(segmentData.scalebias);
+        let scale = Number(segmentData.scalefactor);
+
+        const extent = (extentsByTableName && extentsByTableName[segmentData.tablename]) || [0, 0];
+        // this is obtained by replacing localX and globalX in the toGlobal calculation and resolve parentLogScale
+        return ((globalX - view.x) / view.xScale - extent[0] - bias - parentLogBias) / scale / (localX - extent[0]);
+      }
+    };
+  }
 
   return {
-    toGlobal: (logId, p, getParentScale, x, globalX) => {
-      const segmentData = byId[logId] || { scalebias: 0, scalefactor: 1 };
-      let bias = Number(segmentData.scalebias);
-      let scale = Number(segmentData.scalefactor);
-
-      const extent = (extentsByTableName && extentsByTableName[segmentData.tablename]) || [0, 0];
-      if (getParentScale) {
-        return (globalX - (extent[0] + bias + gridGutter + parentLogBias)) / ((x - extent[0]) * scale);
-      }
-      return [
-        ((p[0] - extent[0]) * scale * parentLogScale + extent[0] + bias + parentLogBias) * view.xScale + view.x,
-        p[1]
-      ];
-    },
-    computeParentScale: (logId, localX, globalX) => {
-      const segmentData = byId[logId] || { scalebias: 0, scalefactor: 1 };
-      let bias = Number(segmentData.scalebias);
-      let scale = Number(segmentData.scalefactor);
-
-      const extent = (extentsByTableName && extentsByTableName[segmentData.tablename]) || [0, 0];
-      return (globalX - (extent[0] + bias + gridGutter + parentLogBias)) / ((localX - extent[0]) * scale);
-    }
+    toGlobal: (_, p) => [(p[0] * parentLogScale + parentLogBias) * view.xScale + view.x, p[1]],
+    computeParentScale: (logId, localX, globalX) => ((globalX - view.x) / view.xScale - parentLogBias) / localX
   };
 };
 
@@ -197,7 +192,7 @@ function useSegmentBiasAndScale({
   container,
   y,
   gridGutter,
-
+  logsBiasAndScale,
   canvas,
   totalWidth,
   toGlobal,
@@ -207,6 +202,9 @@ function useSegmentBiasAndScale({
   const [{ draftMode, selectionById }] = useComboContainer();
   const segmentData = useSelectedSegmentState();
   const { selectedWellLog } = useSelectedWellLog();
+  const {
+    view: { xScale }
+  } = useInterpretationRenderer();
 
   let bias = Number(segmentData.scalebias);
   let scale = Number(segmentData.scalefactor);
@@ -222,6 +220,10 @@ function useSegmentBiasAndScale({
   const colors = useSelectedWellInfoColors();
   const draftColor = hexColor(colors.draftcolor);
   const width = xMax - xMin;
+  const { scale: parentLogScale } = logsBiasAndScale["wellLogs"] || {
+    bias: 0,
+    scale: 1
+  };
 
   const [x1] = toGlobal(segmentData.id, [xMin, 0]);
   const [x2] = toGlobal(segmentData.id, [xMax, 0]);
@@ -282,23 +284,23 @@ function useSegmentBiasAndScale({
   const onRootDragHandler = useCallback(
     (event, prevMouse) => {
       const currMouse = event.data.global;
-      const delta = currMouse.x - prevMouse.x;
+      const delta = (currMouse.x - prevMouse.x) / xScale;
       updatePendingSegments({ bias: bias + delta });
     },
-    [updatePendingSegments, bias]
+    [updatePendingSegments, bias, xScale]
   );
 
   const onStartDragHandler = useCallback(
     (event, prevMouse, initialPosition) => {
       const currMouse = event.data.global;
-      const delta = currMouse.x - prevMouse.x;
+      const delta = (currMouse.x - prevMouse.x) / xScale / parentLogScale;
 
       const newWidth = width * scale - delta;
       const newScale = newWidth / width;
 
-      updatePendingSegments({ bias: bias + delta, scale: newScale });
+      updatePendingSegments({ bias: bias + delta * parentLogScale, scale: newScale });
     },
-    [updatePendingSegments, bias, width, scale]
+    [updatePendingSegments, bias, width, scale, parentLogScale, xScale]
   );
 
   const onEndDragHandler = useCallback(
@@ -306,11 +308,11 @@ function useSegmentBiasAndScale({
       const currMouse = event.data.global;
       const delta = currMouse.x - prevMouse.x;
 
-      const newWidth = width * scale + delta;
+      const newWidth = width * scale + delta / xScale / parentLogScale;
       const newScale = newWidth / width;
       updatePendingSegments({ scale: newScale });
     },
-    [updatePendingSegments, width, scale]
+    [updatePendingSegments, width, scale, xScale, parentLogScale]
   );
 
   return {
@@ -350,7 +352,9 @@ function useLogsBiasAndScaleProps({
   data: { result }
 }) {
   const controlLogsById = useMemo(() => keyBy(controlLogs, "id"), [controlLogs]);
-
+  const {
+    view: { xScale }
+  } = useInterpretationRenderer();
   const logsGammaExtent = (result && result.logsGammaExtent) || EMPTY_ARRAY;
   const [, , , extentsByTableName] = logsGammaExtent;
 
@@ -369,7 +373,7 @@ function useLogsBiasAndScaleProps({
     };
   }, [controlLogsById, logs, currentEditedLog, extentsByTableName]);
 
-  const [minLogId, maxLogId] = extentWithBiasAndScale;
+  const [, , minLogId, maxLogId] = extentWithBiasAndScale;
   const [xMin, xMax] = extent;
   const { bias, scale } = logsBiasAndScale[currentEditedLog] || initialLogBiasAndScale;
   const width = xMax - xMin;
@@ -382,10 +386,10 @@ function useLogsBiasAndScaleProps({
   const onRootDragHandler = useCallback(
     (event, prevMouse) => {
       const currMouse = event.data.global;
-      const delta = currMouse.x - prevMouse.x;
+      const delta = (currMouse.x - prevMouse.x) / xScale;
       dispatch({ type: "UPDATE_LOG_BIAS_AND_SCALE", bias: bias + delta, logId: currentEditedLog });
     },
-    [bias, dispatch, currentEditedLog]
+    [bias, dispatch, currentEditedLog, xScale]
   );
 
   const onStartDragHandler = useCallback(
@@ -397,11 +401,11 @@ function useLogsBiasAndScaleProps({
       dispatch({
         type: "UPDATE_LOG_BIAS_AND_SCALE",
         scale: newScale,
-        bias: bias + delta,
+        bias: bias + delta / xScale,
         logId: currentEditedLog
       });
     },
-    [dispatch, currentEditedLog, computeParentScale, maxLogId, xMax, x2, bias]
+    [dispatch, currentEditedLog, computeParentScale, maxLogId, xMax, bias, x2, xScale]
   );
 
   const onEndDragHandler = useCallback(
@@ -438,26 +442,25 @@ function useLogsBiasAndScaleProps({
 }
 
 function BiasAndScaleContainer(props) {
-  const [{ currentEditedLog }] = useComboContainer();
-  const { toGlobal, computeParentScale } = useCalculatePositions(props);
+  const [{ currentEditedLog, colorsByWellLog, logsBiasAndScale }, dispatch] = useComboContainer();
+  const storeProps = { currentEditedLog, colorsByWellLog, logsBiasAndScale, dispatch };
+
+  const { toGlobal, computeParentScale } = useCalculatePositions(props, currentEditedLog);
   return currentEditedLog ? (
-    <LogBiasAndScale {...props} toGlobal={toGlobal} computeParentScale={computeParentScale} />
+    <LogBiasAndScale {...props} {...storeProps} toGlobal={toGlobal} computeParentScale={computeParentScale} />
   ) : (
-    <SegmentBiasAndScale {...props} toGlobal={toGlobal} />
+    <SegmentBiasAndScale {...storeProps} {...props} toGlobal={toGlobal} />
   );
 }
 
 const LogBiasAndScale = props => {
-  const [{ currentEditedLog, logsBiasAndScale }, dispatch] = useComboContainer();
-
-  const logsBiasAndScaleProps = useLogsBiasAndScaleProps({ ...props, logsBiasAndScale, currentEditedLog, dispatch });
-  return <BiasAndScale {...logsBiasAndScaleProps} />;
+  const logsBiasAndScaleProps = useLogsBiasAndScaleProps(props);
+  return <BiasAndScale {...props} {...logsBiasAndScaleProps} />;
 };
 
 const SegmentBiasAndScale = props => {
-  const [{ logsBiasAndScale }] = useComboContainer();
-  const segmentBiasAndScaleProps = useSegmentBiasAndScale({ ...props, logsBiasAndScale });
-  return <BiasAndScale {...segmentBiasAndScaleProps} />;
+  const segmentBiasAndScaleProps = useSegmentBiasAndScale(props);
+  return <BiasAndScale {...props} {...segmentBiasAndScaleProps} />;
 };
 
 export default withWellLogsData(BiasAndScaleContainer);
