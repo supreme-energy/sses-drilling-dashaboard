@@ -26,9 +26,11 @@ import { useFormationsStore } from "./Formations/store";
 import get from "lodash/get";
 import { useLocalStorageState } from "react-storage-hooks";
 import { useWellIdContainer } from "../../App/Containers";
+import { IconButton } from "@material-ui/core";
+import Refresh from "@material-ui/icons/Refresh";
 
 export const gridGutter = 65;
-const marginBottom = 45;
+const marginBottom = 55;
 const initialViewState = {
   x: gridGutter,
   y: 0,
@@ -238,6 +240,7 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
 
       <Grid
         container={viewport}
+        xAxisPadding={15}
         view={view}
         width={width}
         height={height}
@@ -276,6 +279,7 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
       {!formationsEditMode && (
         <PixiContainer
           container={stage}
+          y={height - marginBottom}
           child={container => (
             <BiasAndScale
               controlLogs={controlLogs}
@@ -291,6 +295,13 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
         />
       )}
       <PixiContainer ref={topContainerRef} container={viewport} />
+      <IconButton
+        className={css.refreshButton}
+        disabled={view.x === gridGutter && view.xScale === 1}
+        onClick={() => updateView(view => ({ ...view, x: gridGutter, xScale: 1 }))}
+      >
+        <Refresh />
+      </IconButton>
     </div>
   );
 }

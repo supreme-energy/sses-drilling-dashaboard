@@ -17,7 +17,8 @@ const Grid = forwardRef(
       makeXTickAndLine,
       makeYTickAndLine,
       xAxisOrientation,
-      gutterBottom
+      gutterBottom,
+      xAxisPadding
     },
     ref
   ) => {
@@ -39,7 +40,8 @@ const Grid = forwardRef(
         gutterBottom,
         showXAxis,
         showYAxis,
-        maxXLines: 10
+        maxXLines: 10,
+        xAxisPadding
       });
     }, [
       gridGutter,
@@ -49,7 +51,8 @@ const Grid = forwardRef(
       makeXTickAndLine,
       makeYTickAndLine,
       xAxisOrientation,
-      gutterBottom
+      gutterBottom,
+      xAxisPadding
     ]);
 
     useEffect(() => {

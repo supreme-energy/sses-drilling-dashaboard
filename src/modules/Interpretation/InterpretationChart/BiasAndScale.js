@@ -94,9 +94,9 @@ const BiasAndScale = React.memo(
       y: 0,
       height: 10
     });
-
+    const colors = useSelectedWellInfoColors();
     const wellLogColor = Number(`0x${getColorForWellLog(colorsByWellLog, currentEditedLog)}`);
-    const color = draftMode ? draftColor : currentEditedLog ? wellLogColor : selectionColor;
+    const color = draftMode ? draftColor : currentEditedLog ? wellLogColor : hexColor(colors.selectedsurveycolor);
     return (
       <PixiContainer
         container={container}

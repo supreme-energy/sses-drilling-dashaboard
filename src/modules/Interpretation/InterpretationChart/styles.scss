@@ -5,4 +5,11 @@
         flex: 1;
 
     }
+    position: relative;
+    .refreshButton {
+        position: absolute;
+        bottom: 0px;
+        left: 10px;
+    }
 }
+
