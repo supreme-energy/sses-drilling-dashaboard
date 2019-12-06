@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect } from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
@@ -26,8 +26,9 @@ import { EMPTY_FIELD } from "../../../../constants/format";
 import isNumber from "../../../../utils/isNumber";
 import useRef from "react-powertools/hooks/useRef";
 import { NumericTextField, withFocusState } from "../../../../components/DebouncedInputs";
-import { AutoSizer, List } from "react-virtualized";
+import { List } from "react-virtualized";
 import { useComboContainer } from "../../containers/store";
+import { useSize } from "react-hook-size";
 
 const noRowsRenderer = () => <div>No data</div>;
 
@@ -105,11 +106,58 @@ function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
   }
 }
 
+const VirtualizedList = ({ data, selectedIndex, ...props }) => {
+  const [scrollTop, changeScrollTop] = useState(0);
+  const gridRef = useRef(null);
+  const containerRef = useRef(null);
+  const { width, height } = useSize(containerRef);
+  const nrItems = data.length;
+  const [{ enforceSelectionInTableViewportId }] = useComboContainer();
+  const handleMouseWheel = useCallback(
+    e => {
+      changeScrollTop(st =>
+        Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
+      );
+      e.preventDefault();
+    },
+    [height]
+  );
+
+  useEffect(() => {
+    const scrollingContainer = gridRef.current.Grid._scrollingContainer;
+    scrollingContainer && scrollingContainer.addEventListener("wheel", handleMouseWheel);
+    return scrollingContainer && scrollingContainer.removeEventListener("wheel", handleMouseWheel);
+  }, [handleMouseWheel]);
+
+  useEffect(
+    function scrollToSelection() {
+      gridRef.current.scrollToRow(nrItems - selectedIndex - 1);
+    },
+    [selectedIndex, nrItems, enforceSelectionInTableViewportId]
+  );
+  return (
+    <div ref={containerRef} className={classes.tbody}>
+      <List
+        {...props}
+        ref={gridRef}
+        className={classes.grid}
+        height={height}
+        scrollTop={scrollTop}
+        overscanRowCount={1}
+        noRowsRenderer={noRowsRenderer}
+        rowCount={nrItems}
+        rowHeight={42}
+        width={width}
+      />
+    </div>
+  );
+};
+
 export default function DetailsTable({ showFullTable = false }) {
   const { selectedSections, calcSections, deleteProjection, deleteSurvey } = useCrossSectionContainer();
   const updateSegments = useUpdateSegmentsById();
   const { debouncedSave } = useSaveSurveysAndProjections();
-  const [{ enforceSelectionInTableViewportId }] = useComboContainer();
+
   const { changeSelection } = useSelectionActions();
 
   const selectedIndex = useMemo(() => {
@@ -118,14 +166,6 @@ export default function DetailsTable({ showFullTable = false }) {
   const selectedId = useMemo(() => (calcSections[selectedIndex] || {}).id, [calcSections, selectedIndex]);
 
   const details = useMemo(() => calcSections.slice().reverse(), [calcSections]);
-  const gridRef = useRef(null);
-  const nrItems = calcSections.length;
-  useEffect(
-    function scrollToSelection() {
-      gridRef.current.scrollToRow(nrItems - selectedIndex - 1);
-    },
-    [selectedIndex, nrItems, enforceSelectionInTableViewportId]
-  );
 
   const rowRenderer = useCallback(
     ({ index, style, key }) => {
@@ -258,25 +298,8 @@ export default function DetailsTable({ showFullTable = false }) {
           <div className={classNames(classes.cell, classes.actions)} />
         </TableRow>
       </TableHead>
-      <div className={classes.tbody}>
-        <AutoSizer>
-          {({ width, height }) => {
-            return (
-              <List
-                ref={gridRef}
-                className={classes.grid}
-                height={height}
-                overscanRowCount={1}
-                noRowsRenderer={noRowsRenderer}
-                rowCount={details.length}
-                rowHeight={42}
-                rowRenderer={rowRenderer}
-                width={width}
-              />
-            );
-          }}
-        </AutoSizer>
-      </div>
+
+      <VirtualizedList data={details} rowRenderer={rowRenderer} selectedIndex={selectedIndex} />
     </Table>
   );
 }
