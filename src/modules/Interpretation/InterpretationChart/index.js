@@ -172,10 +172,12 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
   useEffect(() => {
     if (selectedWellLog && height && centerSelectedLogId !== prevCenteredSelectedLogId) {
       const { startdepth, enddepth } = selectedWellLog;
+      const logHeight = Math.abs(enddepth - startdepth);
+      const logMin = Math.min(startdepth, enddepth);
       const gutter = 25;
-      const adjustedHeight = (height - gutter) * 0.9;
-      const yScale = adjustedHeight / Math.abs(enddepth - startdepth);
-      const y = -startdepth * yScale + gutter;
+      const adjustedHeight = (height - gutter) * 0.85;
+      const yScale = adjustedHeight / logHeight;
+      const y = -logMin * yScale + 0.001 * logHeight + gutter;
       updateView(view => ({ ...view, y, yScale }));
     }
   }, [selectedWellLog, height, updateView, centerSelectedLogId, prevCenteredSelectedLogId]);
