@@ -230,7 +230,7 @@ function useSurveysData() {
       if (selectionById[id]) {
         const selectedIndex = surveys.findIndex(s => s.id === id);
         const prevSurvey = surveys[selectedIndex - 1];
-        console.log("prevSurvey", prevSurvey, selectedIndex);
+
         if (prevSurvey) {
           dispatch({ type: "CHANGE_SELECTION", id: prevSurvey.id });
         }
