@@ -5,7 +5,21 @@ import { drawGrid } from "../modules/ComboDashboard/components/CrossSection/draw
 
 const Grid = forwardRef(
   (
-    { container, width, height, gridGutter, view, fontSize, showXAxis, showYAxis, makeXTickAndLine, makeYTickAndLine },
+    {
+      container,
+      width,
+      height,
+      gridGutter,
+      view,
+      fontSize,
+      showXAxis,
+      showYAxis,
+      makeXTickAndLine,
+      makeYTickAndLine,
+      xAxisOrientation,
+      gutterBottom,
+      xAxisPadding
+    },
     ref
   ) => {
     const gridLayerRef = useRef(() => new PIXI.Container());
@@ -20,14 +34,26 @@ const Grid = forwardRef(
       return drawGrid(gridLayerRef.current, {
         gutter: gridGutter,
         fontSize,
-        xAxisOrientation: "top",
+        xAxisOrientation,
         makeXTickAndLine,
         makeYTickAndLine,
+        gutterBottom,
         showXAxis,
         showYAxis,
-        maxXLines: 10
+        maxXLines: 10,
+        xAxisPadding
       });
-    }, [gridGutter, showXAxis, showYAxis, fontSize, makeXTickAndLine, makeYTickAndLine]);
+    }, [
+      gridGutter,
+      showXAxis,
+      showYAxis,
+      fontSize,
+      makeXTickAndLine,
+      makeYTickAndLine,
+      xAxisOrientation,
+      gutterBottom,
+      xAxisPadding
+    ]);
 
     useEffect(() => {
       updateGrid({ view, width, height });
@@ -42,7 +68,8 @@ const Grid = forwardRef(
 );
 
 Grid.defaultProps = {
-  fontSize: 13
+  fontSize: 13,
+  xAxisOrientation: "top"
 };
 
 export default Grid;

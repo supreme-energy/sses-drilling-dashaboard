@@ -2,19 +2,13 @@ import React, { useMemo, useRef, useEffect } from "react";
 import LogDataLine from "./InterpretationChart/LogDataLine";
 import { useInterpretationRenderer } from "./InterpretationChart";
 import { useComboContainer, surveyVisibility as visibilityOptions } from "../ComboDashboard/containers/store";
-import {
-  getIsDraft,
-  useComputedDraftSegmentsOnly,
-  getFilteredLogsExtent,
-  getColorForWellLog,
-  useComputedSegments
-} from "./selectors";
+import { getIsDraft, useComputedDraftSegmentsOnly, getColorForWellLog, useComputedSegments } from "./selectors";
 import { useTimeSliderContainer } from "../App/Containers";
-import { withWellLogsData, EMPTY_ARRAY } from "../../api";
-import { computeLineBiasAndScale } from "../../utils/lineBiasAndScale";
+import { withWellLogsData } from "../../api";
+
 import PixiContainer from "../../components/PixiContainer";
 
-function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result }, offset }) {
+function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { result } }) {
   const [
     { surveyVisibility, surveyPrevVisibility, draftMode, nrPrevSurveysToDraft, logsBiasAndScale, colorsByWellLog },
     dispatch
@@ -70,11 +64,6 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   }, [sliderInterval, draftMode, firstDraft, dispatch]);
 
   const { bias, scale } = logsBiasAndScale.wellLogs || { bias: 1, scale: 1 };
-  const logsGammaExtent = (result && result.logsGammaExtent) || EMPTY_ARRAY;
-  const [, , , extentsByTableName] = logsGammaExtent;
-
-  const extent = getFilteredLogsExtent(logs, extentsByTableName).extentWithBiasAndScale;
-  const [, pixiScale] = useMemo(() => computeLineBiasAndScale(bias, scale, extent), [bias, scale, extent]);
   const logColor = Number(`0x${getColorForWellLog(colorsByWellLog, "wellLogs")}`);
   const { byId } = useComputedSegments();
   const yMin = Math.floor((-1 * view.y) / view.yScale);
@@ -83,7 +72,6 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
   return (
     <PixiContainer
       x={bias}
-      scale={pixiScale}
       container={container}
       child={container =>
         filteredLogList.map((log, index) => {
@@ -101,6 +89,7 @@ function LogLines({ logs, wellId, selectedWellLogIndex, container, data: { resul
               draft={draft}
               range={range}
               parentScale={scale}
+              view={view}
               refresh={refresh}
               log={log}
               logColor={logColor}

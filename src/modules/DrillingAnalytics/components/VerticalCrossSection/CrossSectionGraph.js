@@ -52,8 +52,7 @@ export function VerticalCrossSection({
     view,
     updateView,
     zoomXScale: true,
-    zoomYScale: true,
-    isXScalingValid: () => 1
+    zoomYScale: true
   });
 
   useEffect(() => {
