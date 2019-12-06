@@ -3,7 +3,7 @@ import { useCallback, useEffect } from "react";
 import * as PIXI from "pixi.js";
 import useDraggable from "./useDraggable";
 
-const globalMouse = { x: 0, y: 0 };
+export const globalMouse = { x: 0, y: 0 };
 
 export function getZoomRate(e) {
   const isControlKey = e.ctrlKey;
@@ -21,7 +21,8 @@ export default function useViewport({
   view,
   zoomXScale,
   zoomYScale,
-  isXScalingValid
+  isXScalingValid = () => 1,
+  isYScalingValid = () => 1
 }) {
   const interactionManagerRef = useRef(() => new PIXI.interaction.InteractionManager(renderer));
   const {
@@ -50,36 +51,42 @@ export default function useViewport({
 
         const newX = globalMouse.x - (globalMouse.x - prev.x) * factor;
         const newScale = prev.xScale * factor;
-        if (zoomXScale && isXScalingValid(newScale, newX)) {
+        if (zoomXScale && isXScalingValid(newScale, newX, e)) {
           newValue.x = newX;
           newValue.xScale = newScale;
         }
-
-        if (zoomYScale) {
-          newValue.y = globalMouse.y - (globalMouse.y - prev.y) * factor;
-          newValue.yScale = prev.yScale * factor;
+        const newY = globalMouse.y - (globalMouse.y - prev.y) * factor;
+        const newYScale = prev.yScale * factor;
+        if (zoomYScale && isYScalingValid(newY, newYScale, e)) {
+          newValue.y = newY;
+          newValue.yScale = newYScale;
         }
         return newValue;
       });
     },
-    [updateView, zoomXScale, zoomYScale, isXScalingValid]
+    [updateView, zoomXScale, zoomYScale, isXScalingValid, isYScalingValid]
   );
 
   const onDrag = useCallback(
     (event, prevMouse) => {
       const currMouse = event.data.global;
 
+      interactionManagerRef.current.mapPositionToPoint(
+        globalMouse,
+        event.data.originalEvent.clientX,
+        event.data.originalEvent.clientY
+      );
       updateView(prev => {
         const newX = Number(prev.x) + (currMouse.x - prevMouse.x);
-
+        const newY = Number(prev.y) + (currMouse.y - prevMouse.y);
         return {
           ...prev,
-          y: zoomYScale ? Number(prev.y) + (currMouse.y - prevMouse.y) : prev.y,
+          y: zoomYScale && isYScalingValid(prev.yScale, newY) ? newY : prev.y,
           x: zoomXScale && isXScalingValid(prev.xScale, newX) ? newX : prev.x
         };
       });
     },
-    [updateView, isXScalingValid, zoomYScale, zoomXScale]
+    [updateView, isXScalingValid, zoomYScale, zoomXScale, isYScalingValid]
   );
 
   const getContainer = useCallback(() => stage, [stage]);

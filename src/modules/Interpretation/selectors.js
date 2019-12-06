@@ -23,7 +23,6 @@ import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import findLast from "lodash/findLast";
 import pickBy from "lodash/pickBy";
-import get from "lodash/get";
 import { DIP_FAULT_POS_VS } from "../../constants/calcMethods";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
@@ -643,8 +642,9 @@ export const logDataExtent = memoize(data => {
 });
 
 export const getWellsGammaExtent = memoizeOne(logsData => {
-  const extents = logsData.map(ld => [...logDataExtent(ld.data), ld.tablename]);
-  const extentsByTableName = keyBy(extents, ([, , tablename]) => tablename);
+  const extents = logsData.map(ld => [...logDataExtent(ld.data), ld]);
+  const extentsByTableName = keyBy(extents, ([, , ld]) => ld.tablename);
+
   return [min(extents, ([min]) => min), max(extents, ([, max]) => max), extents, extentsByTableName];
 });
 
@@ -654,13 +654,32 @@ export function getExtentWithBiasAndScale(logs, extentsByTableName) {
       const bias = Number(log.scalebias);
       const scale = Number(log.scalefactor);
       const [min, max] = (extentsByTableName && extentsByTableName[log.tablename]) || [];
+      let minWithBiasAndScale = acc.extentWithBiasAndScale[0];
+      let minId = acc.extentWithBiasAndScale[2];
+      let maxWithBiasAndScale = acc.extentWithBiasAndScale[1];
+      let maxId = acc.extentWithBiasAndScale[3];
+      let minValue = acc.extent[0];
+      let maxValue = acc.extent[1];
+
+      const minX = min * scale + bias;
+      if (acc.extentWithBiasAndScale[0] > minX) {
+        minWithBiasAndScale = minX;
+        minId = log.id;
+        minValue = min;
+      }
+
+      const maxX = max * scale + bias;
+
+      if (acc.extentWithBiasAndScale[1] < maxX) {
+        maxWithBiasAndScale = maxX;
+
+        maxId = log.id;
+        maxValue = max;
+      }
 
       return {
-        extentWithBiasAndScale: [
-          Math.min(acc.extentWithBiasAndScale[0], min * scale + bias),
-          Math.max(acc.extentWithBiasAndScale[1], (max - min) * scale + min + bias)
-        ],
-        extent: [Math.min(acc.extent[0], min), Math.max(acc.extent[1], max)]
+        extentWithBiasAndScale: [minWithBiasAndScale, maxWithBiasAndScale, minId, maxId],
+        extent: [minValue, maxValue]
       };
     },
     {
@@ -685,22 +704,3 @@ export function useLastSurvey() {
   const { surveys } = useSurveysDataContainer();
   return getLastSurvey(surveys);
 }
-
-export const initialLogBiasAndScale = {
-  bias: 1,
-  scale: 1
-};
-
-export const useLogBiasAndScale = log => {
-  const [wellData] = useSelectedWellInfoContainer();
-  const [{ logsBiasAndScale }] = useComboContainer();
-  const biasAndScale =
-    log === "wellLogs"
-      ? {
-          scale: get(wellData, "appInfo.scaleright", 0),
-          bias: parseFloat(get(wellData, "appInfo.bias"))
-        }
-      : logsBiasAndScale[log] || initialLogBiasAndScale;
-
-  return biasAndScale;
-};

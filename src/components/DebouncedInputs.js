@@ -104,15 +104,38 @@ DebouncedTextField.defaultProps = defaultProps;
 
 const ensureNumberValue = hoc(InputComp => {
   return withFocusState(props => {
+    const { value, defaultStep } = props;
     const [pendingValue, updatePendingValue] = useState(props.value);
-    const { value } = props;
+    const [step, updateStep] = useState(defaultStep || 1);
     useMemo(() => updatePendingValue(value), [value]);
+    const onWheel = useCallback(
+      e => {
+        if (defaultStep) {
+          if (e.altKey && e.shiftKey && e.ctrlKey) {
+            updateStep(10);
+          } else if (e.altKey && e.ctrlKey) {
+            updateStep(20);
+          } else if (e.shiftKey && e.ctrlKey) {
+            updateStep(5);
+          } else if (event.shiftKey) {
+            updateStep(0.5);
+          } else if (event.ctrlKey) {
+            updateStep(1);
+          } else if (event.altKey) {
+            updateStep(50);
+          }
+        }
+      },
+      [defaultStep, updateStep]
+    );
 
     return (
       <InputComp
         type="number"
         {...props}
         value={props.isFocused ? pendingValue : twoDecimalsNoComma(props.value)}
+        onWheel={onWheel}
+        inputProps={{ step }}
         onChange={value => {
           const numericValue = parseFloat(value);
           updatePendingValue(value);

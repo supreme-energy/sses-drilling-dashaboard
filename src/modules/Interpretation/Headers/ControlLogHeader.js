@@ -1,10 +1,10 @@
 import React from "react";
 import Header from "./Header";
-import { useLogBiasAndScale } from "../selectors";
+import { logDataExtent } from "../selectors";
 
 export default function ControlLogHeader({ data, ...props }) {
-  const { bias, scale } = useLogBiasAndScale(props.logId);
-  return <Header {...props} range={[bias, scale]} />;
+  const range = logDataExtent(data);
+  return <Header {...props} range={range} />;
 }
 
 ControlLogHeader.defaultProps = {

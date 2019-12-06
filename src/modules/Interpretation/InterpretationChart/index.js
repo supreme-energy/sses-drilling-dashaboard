@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useWebGLRenderer } from "../../../hooks/useWebGLRenderer";
 import useRef from "react-powertools/hooks/useRef";
 import WebGlContainer from "../../../components/WebGlContainer";
@@ -6,7 +6,7 @@ import { useSize } from "react-hook-size";
 import usePrevious from "react-use/lib/usePrevious";
 import classNames from "classnames";
 import css from "./styles.scss";
-import useViewport from "../../../hooks/useViewport";
+import useViewport, { globalMouse } from "../../../hooks/useViewport";
 import PixiContainer from "../../../components/PixiContainer";
 import Grid from "../../../components/Grid";
 import Segments from "./Segments";
@@ -26,8 +26,11 @@ import { useFormationsStore } from "./Formations/store";
 import get from "lodash/get";
 import { useLocalStorageState } from "react-storage-hooks";
 import { useWellIdContainer } from "../../App/Containers";
+import { IconButton } from "@material-ui/core";
+import Refresh from "@material-ui/icons/Refresh";
 
 export const gridGutter = 65;
+const marginBottom = 55;
 const initialViewState = {
   x: gridGutter,
   y: 0,
@@ -59,6 +62,8 @@ function useInterpretationWebglRenderer() {
 
   const viewportContainer = useRef(null);
   const topContainerRef = useRef(null);
+  const isXScalingValid = useCallback(() => globalMouse.y > height - marginBottom, [height]);
+  const isYScalingValid = useCallback(() => globalMouse.y < height - marginBottom, [height]);
 
   const viewport = useViewport({
     renderer,
@@ -67,9 +72,11 @@ function useInterpretationWebglRenderer() {
     height,
     view,
     updateView,
-    zoomXScale: false,
+    zoomXScale: true,
     zoomYScale: true,
-    updateViewport: false
+    updateViewport: false,
+    isXScalingValid,
+    isYScalingValid
   });
 
   return {
@@ -172,10 +179,12 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
   useEffect(() => {
     if (selectedWellLog && height && centerSelectedLogId !== prevCenteredSelectedLogId) {
       const { startdepth, enddepth } = selectedWellLog;
+      const logHeight = Math.abs(enddepth - startdepth);
+      const logMin = Math.min(startdepth, enddepth);
       const gutter = 25;
-      const adjustedHeight = (height - gutter) * 0.9;
-      const yScale = adjustedHeight / Math.abs(enddepth - startdepth);
-      const y = -startdepth * yScale + gutter;
+      const adjustedHeight = (height - gutter) * 0.85;
+      const yScale = adjustedHeight / logHeight;
+      const y = -logMin * yScale + 0.001 * logHeight + gutter;
       updateView(view => ({ ...view, y, yScale }));
     }
   }, [selectedWellLog, height, updateView, centerSelectedLogId, prevCenteredSelectedLogId]);
@@ -202,34 +211,47 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
     formationsEditMode,
     resetViewportCounter
   ]);
-
+  const maskRect = useRef(null);
   return (
     <div className={classNames(className, css.root)}>
       <WebGlContainer ref={canvasRef} className={css.chart} />
       <PixiContainer ref={viewportContainer} container={stage} />
-      <Formations container={viewport} width={width} gridGutter={gridGutter} />
-      {controlLogs.map(cl => (
-        <ControlLogLine key={cl.id} log={cl} container={viewport} />
-      ))}
+      <Formations container={viewport} x={-(view.x / view.xScale)} y={0} width={width} />
+
       {!formationsEditMode && (
-        <LogLines
-          wellId={wellId}
-          logs={logList}
-          container={viewport}
-          selectedWellLogIndex={selectedWellLogIndex}
-          offset={gridGutter}
-        />
+        <LogLines wellId={wellId} logs={logList} container={viewport} selectedWellLogIndex={selectedWellLogIndex} />
       )}
+
+      {controlLogs.map(cl => (
+        <ControlLogLine
+          key={cl.id}
+          log={cl}
+          container={viewport}
+          mask={maskRect.current && maskRect.current.graphics}
+        />
+      ))}
+
+      <PixiRectangle
+        container={stage}
+        width={width}
+        x={gridGutter}
+        height={height - marginBottom}
+        ref={maskRect}
+        backgroundColor={0xffffff}
+      />
 
       <Grid
         container={viewport}
+        xAxisPadding={15}
         view={view}
         width={width}
         height={height}
         gridGutter={gridGutter}
-        showXAxis={false}
+        gutterBottom={marginBottom}
+        xAxisOrientation={"bottom"}
         makeYTickAndLine={createGridYAxis}
       />
+
       <PixiRectangle
         width={10}
         height={height}
@@ -240,24 +262,48 @@ function InterpretationChart({ className, controlLogs, gr, logList, wellId, cent
         container={viewport}
       />
       {!formationsEditMode && (
-        <Segments container={viewport} chartWidth={width} segmentsData={segments} selectedWellLog={selectedWellLog} />
+        <PixiContainer
+          container={viewport}
+          x={-((view.x - gridGutter + 10) / view.xScale)}
+          y={0}
+          child={container => (
+            <Segments
+              container={container}
+              chartWidth={width}
+              segmentsData={segments}
+              selectedWellLog={selectedWellLog}
+            />
+          )}
+        />
       )}
 
       <PixiRectangle width={width} height={12} backgroundColor={0xffffff} container={stage} y={height - 12} />
       {!formationsEditMode && (
-        <BiasAndScale
-          controlLogs={controlLogs}
-          logs={logList}
-          wellId={wellId}
+        <PixiContainer
           container={stage}
-          y={height - 10}
-          gridGutter={gridGutter}
-          refresh={refresh}
-          totalWidth={width}
-          canvas={canvasRef.current}
+          y={height - marginBottom}
+          child={container => (
+            <BiasAndScale
+              controlLogs={controlLogs}
+              logs={logList}
+              wellId={wellId}
+              container={container}
+              gridGutter={gridGutter}
+              refresh={refresh}
+              totalWidth={width}
+              canvas={canvasRef.current}
+            />
+          )}
         />
       )}
       <PixiContainer ref={topContainerRef} container={viewport} />
+      <IconButton
+        className={css.refreshButton}
+        disabled={view.x === gridGutter && view.xScale === 1}
+        onClick={() => updateView(view => ({ ...view, x: gridGutter, xScale: 1 }))}
+      >
+        <Refresh />
+      </IconButton>
     </div>
   );
 }
