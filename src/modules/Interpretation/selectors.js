@@ -23,6 +23,7 @@ import memoize from "react-powertools/memoize";
 import { useFormationsStore } from "./InterpretationChart/Formations/store";
 import findLast from "lodash/findLast";
 import pickBy from "lodash/pickBy";
+import { DIP_FAULT_POS_VS } from "../../constants/calcMethods";
 
 export function calcDIP(tvd, depth, vs, lastvs, fault, lasttvd, lastdepth) {
   return -Math.atan((tvd - fault - (lasttvd - lastdepth) - depth) / Math.abs(vs - lastvs)) * 57.29578;
@@ -406,8 +407,7 @@ const recomputeSurveysAndProjections = memoizeOne(
           });
         } else {
           let pos = combinedSvy.pos;
-
-          if (autoPosDec) {
+          if (autoPosDec && combinedSvy.method === DIP_FAULT_POS_VS) {
             const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
             const sign = bitProjPos > 0 ? 1 : -1;
             const cap = bitProjPos > 0 ? Math.max : Math.min;
