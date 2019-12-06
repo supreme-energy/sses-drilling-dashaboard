@@ -93,7 +93,9 @@ const TextFieldCell = ({ markAsInput, icon, onChange, value }) => {
 
 function Cell(value, editable, changeHandler, markAsInput = false, Icon) {
   if (editable) {
-    return <TextFieldCell value={value} onChange={changeHandler} markAsInput={markAsInput} icon={Icon} />;
+    return (
+      <TextFieldCell value={value} onChange={changeHandler} markAsInput={markAsInput} icon={Icon} defaultStep={0.25} />
+    );
   } else {
     return (
       <TableCell component="div" className={classes.cell}>
