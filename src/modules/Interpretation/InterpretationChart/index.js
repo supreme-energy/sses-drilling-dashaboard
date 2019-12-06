@@ -13,12 +13,7 @@ import Segments from "./Segments";
 import { defaultMakeYTickAndLine } from "../../ComboDashboard/components/CrossSection/drawGrid";
 import { createContainer } from "unstated-next";
 import PixiRectangle from "../../../components/PixiRectangle";
-import {
-  frozenXYTransform,
-  frozenXTransform,
-  frozenYTransform,
-  frozenScaleTransform
-} from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
+import { frozenXYTransform } from "../../ComboDashboard/components/CrossSection/customPixiTransforms";
 import { useSelectedWellLog, useCurrentComputedSegments, useSelectedWellInfoColors } from "../selectors";
 import { useComboContainer } from "../../ComboDashboard/containers/store";
 import BiasAndScale from "./BiasAndScale";
