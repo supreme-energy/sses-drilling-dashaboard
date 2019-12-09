@@ -180,6 +180,8 @@ export default function DetailsTable({ showFullTable = false }) {
           debouncedSave();
         };
       };
+
+      const deleteDisabled = row.isSurvey && !row.isLastSurvey;
       return (
         <TableRow
           style={style}
@@ -227,6 +229,8 @@ export default function DetailsTable({ showFullTable = false }) {
             {(row.isProjection || row.isSurvey) && (
               <IconButton
                 size="small"
+                className={classNames({ [classes.deleteDisabled]: deleteDisabled })}
+                disabled={deleteDisabled}
                 aria-label="Delete row"
                 onClick={() => {
                   row.isProjection ? deleteProjection(row.id) : deleteSurvey(row.id);
