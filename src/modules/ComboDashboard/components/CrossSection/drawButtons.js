@@ -76,7 +76,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   labelText.position.y = tagHeight / 2;
 
   const setButtonPositions = memoizeOne((selectedPoint, mode) => {
-    const enableTrash = enabled => {
+    const enableDisableTrash = enabled => {
       if (enabled) {
         trashCircle.alpha = 1;
         trashCircle.cursor = "pointer";
@@ -98,9 +98,9 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
       trashCircle.visible = true;
       addCircle.visible = true;
       addCircle.position.x = 15;
-      enableTrash(true);
+      enableDisableTrash(true);
     } else if (selectedPoint.isSurvey) {
-      enableTrash(selectedPoint.isLastSurvey);
+      enableDisableTrash(selectedPoint.isLastSurvey);
 
       trashCircle.visible = true;
       addCircle.visible = false;
