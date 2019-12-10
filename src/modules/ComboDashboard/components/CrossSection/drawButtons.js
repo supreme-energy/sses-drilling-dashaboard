@@ -47,7 +47,7 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
     const selectedPoint = calcSections.find(s => selectedSections[s.id]);
     if (selectedPoint.isProjection) {
       deleteProjection(selectedPoint.id);
-    } else if (selectedPoint.isSurvey) {
+    } else if (selectedPoint.isSurvey && selectedPoint.isLastSurvey) {
       deleteSurvey(selectedPoint.id);
     }
   });
@@ -76,6 +76,16 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
   labelText.position.y = tagHeight / 2;
 
   const setButtonPositions = memoizeOne((selectedPoint, mode) => {
+    const enableDisableTrash = enabled => {
+      if (enabled) {
+        trashCircle.alpha = 1;
+        trashCircle.cursor = "pointer";
+      } else {
+        trashCircle.alpha = 0.4;
+        trashCircle.cursor = "default";
+      }
+    };
+
     if (!selectedPoint) {
       trashCircle.visible = false;
       if (mode === ADD_PA_STATION) {
@@ -88,7 +98,10 @@ function drawButtons(container, stage, props, gutter, tagHeight) {
       trashCircle.visible = true;
       addCircle.visible = true;
       addCircle.position.x = 15;
+      enableDisableTrash(true);
     } else if (selectedPoint.isSurvey) {
+      enableDisableTrash(selectedPoint.isLastSurvey);
+
       trashCircle.visible = true;
       addCircle.visible = false;
     } else {

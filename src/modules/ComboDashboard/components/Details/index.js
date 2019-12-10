@@ -116,7 +116,7 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   const handleMouseWheel = useCallback(
     e => {
       changeScrollTop(st =>
-        Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
+        Math.min(Math.max(st - e.wheelDeltaY / 10, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
       );
       e.preventDefault();
     },
@@ -124,9 +124,9 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   );
 
   useEffect(() => {
-    const scrollingContainer = gridRef.current.Grid._scrollingContainer;
+    const scrollingContainer = containerRef.current;
     scrollingContainer && scrollingContainer.addEventListener("wheel", handleMouseWheel);
-    return scrollingContainer && scrollingContainer.removeEventListener("wheel", handleMouseWheel);
+    return () => scrollingContainer && scrollingContainer.removeEventListener("wheel", handleMouseWheel);
   }, [handleMouseWheel]);
 
   useEffect(
@@ -180,6 +180,8 @@ export default function DetailsTable({ showFullTable = false }) {
           debouncedSave();
         };
       };
+
+      const deleteDisabled = row.isSurvey && !row.isLastSurvey;
       return (
         <TableRow
           style={style}
@@ -227,6 +229,8 @@ export default function DetailsTable({ showFullTable = false }) {
             {(row.isProjection || row.isSurvey) && (
               <IconButton
                 size="small"
+                className={classNames({ [classes.deleteDisabled]: deleteDisabled })}
+                disabled={deleteDisabled}
                 aria-label="Delete row"
                 onClick={() => {
                   row.isProjection ? deleteProjection(row.id) : deleteSurvey(row.id);

@@ -407,8 +407,10 @@ const recomputeSurveysAndProjections = memoizeOne(
           });
         } else {
           let pos = combinedSvy.pos;
-          if (autoPosDec && combinedSvy.method === DIP_FAULT_POS_VS) {
+          const isAutoPos = autoPosDec && combinedSvy.method === DIP_FAULT_POS_VS;
+          if (isAutoPos) {
             const bitProjPos = (acc[bitProjIdx] && acc[bitProjIdx].pos) || 0;
+
             const sign = bitProjPos > 0 ? 1 : -1;
             const cap = bitProjPos > 0 ? Math.max : Math.min;
             pos = cap(0, bitProjPos - sign * (index - bitProjIdx) * autoPosDec);
