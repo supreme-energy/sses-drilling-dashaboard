@@ -28,9 +28,11 @@
   .tbody {
     width: 100%;
     flex: 1;
+    position: relative;
 
     .grid {
       outline: none;
+      position: absolute !important;
     }
   }
 
