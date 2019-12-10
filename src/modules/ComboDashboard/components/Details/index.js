@@ -116,7 +116,7 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   const handleMouseWheel = useCallback(
     e => {
       changeScrollTop(st =>
-        Math.min(Math.max(st - e.wheelDeltaY / 10, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
+        Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
       );
       e.preventDefault();
     },
