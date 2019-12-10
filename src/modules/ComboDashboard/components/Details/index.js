@@ -245,7 +245,7 @@ export default function DetailsTable({ showFullTable = false }) {
     },
     [debouncedSave, details, selectedId, showFullTable, deleteProjection, updateSegments, changeSelection, deleteSurvey]
   );
-  console.log("showFullTable", showFullTable);
+
   return (
     <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)}>
       <TableHead>
