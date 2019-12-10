@@ -116,7 +116,7 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   const handleMouseWheel = useCallback(
     e => {
       changeScrollTop(st =>
-        Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
+        Math.min(Math.max(st - e.wheelDeltaY / 10, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
       );
       e.preventDefault();
     },
@@ -124,9 +124,9 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   );
 
   useEffect(() => {
-    const scrollingContainer = gridRef.current.Grid._scrollingContainer;
+    const scrollingContainer = containerRef.current;
     scrollingContainer && scrollingContainer.addEventListener("wheel", handleMouseWheel);
-    return scrollingContainer && scrollingContainer.removeEventListener("wheel", handleMouseWheel);
+    return () => scrollingContainer && scrollingContainer.removeEventListener("wheel", handleMouseWheel);
   }, [handleMouseWheel]);
 
   useEffect(
@@ -245,7 +245,7 @@ export default function DetailsTable({ showFullTable = false }) {
     },
     [debouncedSave, details, selectedId, showFullTable, deleteProjection, updateSegments, changeSelection, deleteSurvey]
   );
-
+  console.log("showFullTable", showFullTable);
   return (
     <Table className={classNames(classes.table, classes.flexTable, classes.comboTable)}>
       <TableHead>
