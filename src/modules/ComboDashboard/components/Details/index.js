@@ -115,10 +115,15 @@ const VirtualizedList = ({ data, selectedIndex, ...props }) => {
   const [{ enforceSelectionInTableViewportId }] = useComboContainer();
   const handleMouseWheel = useCallback(
     e => {
-      changeScrollTop(st =>
-        Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
-      );
-      e.preventDefault();
+      const inputTarget = e.target && e.target.tagName.toLowerCase() === "input";
+      const mouseWheelOverFocusedInput = inputTarget && e.target === document.activeElement;
+
+      if (!mouseWheelOverFocusedInput) {
+        changeScrollTop(st =>
+          Math.min(Math.max(st - e.wheelDeltaY / 3, 0), gridRef.current.Grid._scrollingContainer.scrollHeight - height)
+        );
+        e.preventDefault();
+      }
     },
     [height]
   );
