@@ -65,10 +65,12 @@ export const UPDATE_ADDITIONAL_LOG = "/adddata/update.php";
 export const GET_BIT_PROJECTION = "/projection/bit_update.php";
 export const GET_PROJECT_TO_PLAN = "/projection/to_line.php";
 export const DELETE_SURVEY = "/survey/delete.php";
+export const GET_WITS_WELLS_LIST = "list_witswells.php";
+export const GET_WITS_WELLBORE_LIST = "list_witswellbores.php";
+export const GET_WITS_LOGS_LIST = "list_witslogs.php";
 
 // mock data
 const GET_MOCK_ROP_DATA = "/rop.json";
-const GET_MOCK_WELL_BORE_LIST = "/witslwellborelist.json";
 
 const options = {
   shouldSort: true,
@@ -212,6 +214,7 @@ export function useWellInfo(wellId) {
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
+  const witsmlDetails = data && data.witsml_details;
 
   const updateAutoRc = useCallback(
     ({ wellId, field, value, refreshStore }) => {
@@ -325,6 +328,34 @@ export function useWellInfo(wellId) {
     [serializedUpdateFetch, data, wellInfo]
   );
 
+  const updateWitsmlDetails = useCallback(
+    ({ wellId, field, value }) => {
+      const optimisticResult = {
+        ...data,
+        witsml_details: {
+          ...witsmlDetails,
+          [field]: value
+        }
+      };
+
+      return serializedUpdateFetch({
+        path: SET_WELL_FIELD,
+        query: {
+          seldbname: wellId
+        },
+        method: "POST",
+        body: {
+          witsml_details: {
+            [field]: value
+          }
+        },
+        cache: "no-cache",
+        optimisticResult
+      });
+    },
+    [serializedUpdateFetch, data, witsmlDetails]
+  );
+
   const {
     wellSurfaceLocationLocal,
     wellSurfaceLocation,
@@ -377,6 +408,7 @@ export function useWellInfo(wellId) {
       wellInfo,
       emailInfo,
       appInfo,
+      witsmlDetails,
       isCloudServerEnabled,
       transform: defaultTransform
     },
@@ -386,7 +418,8 @@ export function useWellInfo(wellId) {
     updateEmail,
     updateAppInfo,
     updateAutoImport,
-    updateAutoRc
+    updateAutoRc,
+    updateWitsmlDetails
   ];
 }
 
@@ -1486,18 +1519,74 @@ export function useProjectionToPlan(wellId) {
   return { data: data || EMPTY_ARRAY, updateProjectionToPlan, refresh };
 }
 
-export function useWellBoreData() {
-  const [data] = useFetch(
+export function useWitsWellData(wellId) {
+  const [data, , , , , { refresh }] = useFetch(
     {
-      path: GET_MOCK_WELL_BORE_LIST
+      path: GET_WITS_WELLS_LIST,
+      query: {
+        seldbname: wellId
+      }
     },
 
     {
-      id: "mock",
       transform: data => {
-        return data.data;
+        return data.well.map(w => ({ uid: w["@attributes"].uid, name: w.name }));
       }
     }
   );
-  return data || EMPTY_ARRAY;
+
+  return { data: data || EMPTY_ARRAY, refresh };
+}
+
+export function useWitsWellboreData(wellId, uid) {
+  const [data, , , , , { refresh }] = useFetch(
+    {
+      path: GET_WITS_WELLBORE_LIST,
+      query: {
+        seldbname: wellId,
+        uidWell: uid
+      }
+    },
+
+    {
+      transform: data => {
+        return data.wellbore.map(wb => ({
+          uid: wb["@attributes"].uid,
+          wellUid: wb["@attributes"].uidWell,
+          name: wb.name
+        }));
+      }
+    }
+  );
+
+  return { data: data || EMPTY_ARRAY, refresh };
+}
+
+export function useWitsWellLogData(wellId, uid) {
+  const [data, , , , , { refresh }] = useFetch(
+    {
+      path: GET_WITS_LOGS_LIST,
+      query: {
+        seldbname: wellId,
+        uidWell: uid
+      }
+    },
+
+    {
+      transform: data => {
+        return data.log
+          .filter(l => l.name)
+          .map(l => ({
+            uid: l["@attributes"].uid,
+            wellUid: l["@attributes"].uidWell,
+            wellboreUid: l["@attributes"].uidWellbore,
+            wellName: l.nameWell,
+            wellboreName: l.nameWellbore,
+            name: l.name
+          }));
+      }
+    }
+  );
+
+  return { data: data || EMPTY_ARRAY, refresh };
 }

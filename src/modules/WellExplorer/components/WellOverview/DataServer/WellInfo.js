@@ -1,38 +1,52 @@
-import React, { useMemo, useEffect, useState, useCallback } from "react";
+import React, { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
+import _ from "lodash";
 import Box from "@material-ui/core/Box";
-import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 
-import { useWellBoreData, useWellInfo } from "../../../../../api";
+import { useWitsWellData, useWitsWellboreData, useWitsWellLogData, useWellInfo } from "../../../../../api";
 import Title from "../../../../../components/Title";
 import { wellFields, wellLabels, initialWellState } from "../../../../../constants/dataServer";
 import classes from "./styles.scss";
 
-// TODO: Complete Well/WellLog/Well Bore selection when Tyler's endpoint is provided
 function WellInfo({ wellId }) {
-  const [{ autorc = {}, appInfo = {} }, , , refresh, , updateAppInfo, , updateAutoRc] = useWellInfo(wellId);
-  const data = useWellBoreData();
+  const [
+    { autorc = {}, appInfo = {}, witsmlDetails = {} },
+    ,
+    ,
+    refresh,
+    ,
+    updateAppInfo,
+    ,
+    updateAutoRc,
+    updateWitsmlDetails
+  ] = useWellInfo(wellId);
+  const { data: wellData, refresh: refreshWell } = useWitsWellData(wellId);
+  const { data: wellboreData, refresh: refreshWellbore } = useWitsWellboreData(wellId);
+  const { data: wellLogData, refresh: refreshWellLog } = useWitsWellLogData(wellId);
   const [values, setValues] = useState(initialWellState);
+  const wellUid = values[wellFields.WELL];
+  const wellStateInitialized = useRef(false);
 
   const differenceKey = useMemo(() => {
-    if (data && data.length) {
-      Object.keys(values).filter(key => {
-        if ([wellFields.WELL, wellFields.WELL_LOG, wellFields.WELL_BORE].includes(key)) {
-          return values[key] !== data[0][key];
-        }
-      });
-    }
-  }, [values, data]);
+    return Object.keys(values).filter(key => {
+      if ([wellFields.WELL, wellFields.WELL_LOG, wellFields.WELLBORE].includes(key)) {
+        return values[key] !== witsmlDetails[key];
+      }
+    });
+  }, [values, witsmlDetails]);
+
+  const wellboreValues = useMemo(() => wellboreData.filter(wb => wellUid === wb.wellUid), [wellboreData, wellUid]);
 
   const handleInputChange = id => e => {
     const value = e.target.value;
     setValues(v => ({ ...v, [id]: value }));
   };
+
   const onFieldChangeAutoRc = useCallback(
     async (field, value, shouldRefreshStore) => {
       await updateAutoRc({ wellId, field, value });
@@ -51,6 +65,19 @@ function WellInfo({ wellId }) {
       }
     },
     [updateAppInfo, wellId, refresh]
+  );
+
+  const onFieldChangeWitsmlDetails = useCallback(
+    async (field, value, shouldRefreshStore) => {
+      await updateWitsmlDetails({ wellId, field, value });
+      if (shouldRefreshStore) {
+        refresh();
+        refreshWell();
+        refreshWellbore();
+        refreshWellLog();
+      }
+    },
+    [updateWitsmlDetails, wellId, refresh, refreshWell, refreshWellbore, refreshWellLog]
   );
 
   const onBlurAppInfo = useCallback(
@@ -77,34 +104,45 @@ function WellInfo({ wellId }) {
     [values, autorc, onFieldChangeAutoRc]
   );
 
-  const onBlurWellbore = useCallback(
+  const onBlurWitsmlDetails = useCallback(
     e => {
       if (differenceKey && differenceKey.length) {
         e.returnValue = "Changes you made may not be saved.";
         if (!document.activeElement.id) {
-          // onFieldChange(differenceKey, values[differenceKey], true);
+          differenceKey.map(key => onFieldChangeWitsmlDetails(key, values[key], true));
         }
       }
     },
-    [differenceKey]
+    [differenceKey, onFieldChangeWitsmlDetails, values]
   );
 
   useEffect(() => {
-    if ((autorc, appInfo, data, data.length)) {
+    if (!_.isEmpty(witsmlDetails) && !wellStateInitialized.current) {
       setValues(v => ({
         ...v,
-        [wellFields.WELL]: data[0].nameWell,
-        [wellFields.WELL_BORE]: data[0].nameWellbore,
-        [wellFields.WELL_LOG]: data[0].name,
-        [wellFields.START_DEPTH]: autorc.aisd,
-        [wellFields.GR_IMPORT]: appInfo.auto_gr_mnemonic
+        [wellFields.WELL]: witsmlDetails[wellFields.WELL],
+        [wellFields.WELLBORE]: witsmlDetails[wellFields.WELLBORE],
+        [wellFields.WELL_LOG]: witsmlDetails[wellFields.WELL_LOG],
+        [wellFields.START_DEPTH]: autorc[wellFields.START_DEPTH],
+        [wellFields.GR_IMPORT]: appInfo[wellFields.GR_IMPORT]
+      }));
+      wellStateInitialized.current = true;
+    }
+  }, [autorc, appInfo, witsmlDetails]);
+
+  useEffect(() => {
+    const wellboreHasChanged = wellboreValues.length && wellboreValues[0].uid !== values[wellFields.WELLBORE];
+    if (values[wellFields.WELL] && wellboreHasChanged) {
+      setValues(v => ({
+        ...v,
+        [wellFields.WELLBORE]: wellboreValues[0].uid
       }));
     }
-  }, [autorc, appInfo, data]);
+  }, [values, wellboreValues]);
 
   return (
     <div className={classes.wellInfoContainer}>
-      <Title>Server Info</Title>
+      <Title>Well Info</Title>
       <form>
         <div className={classes.formContainer}>
           <div className={classes.textInputContainer}>
@@ -138,62 +176,61 @@ function WellInfo({ wellId }) {
                 <Select
                   value={values[wellFields.WELL]}
                   onChange={handleInputChange(wellFields.WELL)}
-                  onBlur={onBlurWellbore}
+                  onBlur={onBlurWitsmlDetails}
                   inputProps={{
-                    name: "well",
-                    id: "well"
+                    name: wellLabels.WELL,
+                    id: wellFields.WELL
                   }}
                 >
                   <MenuItem value="" disabled>
                     Choose Well
                   </MenuItem>
-                  {data.map(({ nameWell }) => (
-                    <MenuItem key={nameWell} value={nameWell}>
-                      {nameWell}
+                  {wellData.map(({ name, uid }, index) => (
+                    <MenuItem key={name + uid + index} value={uid}>
+                      {name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              <Button variant="outlined">Choose By API #</Button>
             </Box>
 
             <FormControl>
-              <InputLabel htmlFor="server-type">{wellLabels.WELL_BORE}</InputLabel>
+              <InputLabel htmlFor="wellbore">{wellLabels.WELLBORE}</InputLabel>
               <Select
-                value={values[wellFields.WELL_BORE]}
-                onChange={handleInputChange(wellFields.WELL_BORE)}
-                onBlur={onBlurWellbore}
+                value={values[wellFields.WELLBORE]}
+                onChange={handleInputChange(wellFields.WELLBORE)}
+                onBlur={onBlurWitsmlDetails}
                 inputProps={{
-                  name: "well_bore",
-                  id: "well_bore"
+                  name: "wellbore",
+                  id: "wellbore"
                 }}
               >
                 <MenuItem value="" disabled>
                   Choose Well Bore
                 </MenuItem>
-                {data.map(({ nameWellbore }) => (
-                  <MenuItem key={nameWellbore} value={nameWellbore}>
-                    {nameWellbore}
+                {wellboreValues.map(({ name, uid }, index) => (
+                  <MenuItem key={name + uid + index} value={uid}>
+                    {name}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
             <FormControl>
-              <InputLabel htmlFor="server-type">{wellLabels.WELL_LOG}</InputLabel>
+              <InputLabel htmlFor="well_log">{wellLabels.WELL_LOG}</InputLabel>
               <Select
                 value={values[wellFields.WELL_LOG]}
                 onChange={handleInputChange(wellFields.WELL_LOG)}
-                onBlur={onBlurWellbore}
+                onBlur={onBlurWitsmlDetails}
                 inputProps={{
-                  name: "well_log",
-                  id: "well_log"
+                  name: wellLabels.WELL_LOG,
+                  id: wellFields.WELL_LOG
                 }}
               >
                 <MenuItem value="" disabled>
                   Choose Well Log
                 </MenuItem>
-                {data.map(({ name }) => (
-                  <MenuItem key={name} value={name}>
+                {wellLogData.map(({ name, uid }, index) => (
+                  <MenuItem key={name + uid + index} value={uid}>
                     {name}
                   </MenuItem>
                 ))}
