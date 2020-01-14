@@ -7,9 +7,9 @@ export const serverFields = {
 export const wellFields = {
   START_DEPTH: "aisd",
   GR_IMPORT: "auto_gr_mnemonic",
-  WELL: "nameWell",
-  WELL_BORE: "nameWellbore",
-  WELL_LOG: "name"
+  WELL: "welluid",
+  WELLBORE: "boreuid",
+  WELL_LOG: "logid"
 };
 export const serverLabels = {
   USERNAME: "User Name",
@@ -21,7 +21,7 @@ export const wellLabels = {
   START_DEPTH: "Survey Start Depth",
   GR_IMPORT: "Gamma Ray Import Mnemonic",
   WELL: "Well",
-  WELL_BORE: "Well Bore",
+  WELLBORE: "Well Bore",
   WELL_LOG: "Well Log"
 };
 export const connectionTypes = {
@@ -41,6 +41,6 @@ export const initialWellState = {
   [wellFields.START_DEPTH]: "",
   [wellFields.GR_IMPORT]: "",
   [wellFields.WELL]: "",
-  [wellFields.WELL_BORE]: "",
+  [wellFields.WELLBORE]: "",
   [wellFields.WELL_LOG]: ""
 };
