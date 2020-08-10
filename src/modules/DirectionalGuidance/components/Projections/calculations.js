@@ -11,12 +11,12 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
   const { azm: pazm, inc: pinc } = bitProjection;
   const piOver180 = Math.PI / 180;
   let rlfval = 0;
-  if (azm - pazm > 180) {
-    rlfval = azm - pazm - 360;
-  } else if (pazm - azm < -180) {
-    rlfval = pazm - azm + 360;
+  if (pazm - azm> 180) {
+    rlfval = pazm - azm - 360;
+  } else if (azm - pazm  < -180) {
+    rlfval = azm - pazm + 360;
   } else {
-    rlfval = pazm - azm;
+    rlfval =  azm - pazm;
   }
 
   const rl = rlfval > 0 ? "R" : "L";
@@ -32,7 +32,7 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
   if (slide !== Infinity) {
     newProjection = {
       ...pick(projections[0], ["tvd", "vs", "ca", "cd", "tot", "dip", "fault"]),
-      md: surveyBeforeBit.md + slide
+      md: bitProjection.md + slide
     };
 
     // TODO: Update Projections based on calculations
@@ -62,18 +62,29 @@ export function calculateSlide(fieldValues, propAzm, bitProjection, surveyBefore
 export function determineIncAzm(firstProjection, secondProjection, bitProjection, selectedStation) {
   let inc = 0;
   let azm = 0;
+  let useAzm = firstProjection.azm;
+  if(useAzm < 180 && useAzm > 0){
+  	useAzm = 360+useAzm
+  } 
+  let useBprjAzm = bitProjection.azm;
+  if(useBprjAzm < 180 && useAzm > 0){
+	  useBprjAzm = 360+useBprjAzm;
+  }
   if (selectedStation === PA1) {
     inc =
       ((firstProjection.inc - bitProjection.inc) / (firstProjection.md - bitProjection.md)) * PA1_FACTOR +
       bitProjection.inc;
+    
     azm =
-      ((firstProjection.azm - bitProjection.azm) / (firstProjection.md - bitProjection.md)) * PA1_FACTOR +
+      ((useAzm - useBprjAzm) / (firstProjection.md - bitProjection.md)) * PA1_FACTOR +
       bitProjection.azm;
   } else {
     inc = (secondProjection.inc - bitProjection.inc) / PA2_FACTOR + bitProjection.inc;
-    azm = (secondProjection.azm - bitProjection.azm) / PA2_FACTOR + bitProjection.azm;
+    azm = (useAzm - useBprjAzm) / PA2_FACTOR + bitProjection.azm;
   }
-
+  if(azm > 360){
+	  azm = azm - 360;
+  }
   return { inc, azm };
 }
 

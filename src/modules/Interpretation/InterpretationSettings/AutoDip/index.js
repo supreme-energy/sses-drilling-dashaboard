@@ -25,8 +25,10 @@ import {
   useSurveysDataContainer,
   useWellPlanDataContainer,
   useControlLogDataContainer,
-  useSelectedWellInfoContainer
+  useSelectedWellInfoContainer,
+  useProjectionsDataContainer
 } from "../../../App/Containers";
+
 import { toRadians } from "../../../ComboDashboard/components/CrossSection/formulas";
 import { twoDecimals } from "../../../../constants/format";
 import transform from "lodash/transform";
@@ -529,6 +531,8 @@ const AutoDip = React.memo(
   }
 );
 
+const IDENTITY_FCT = a => a;
+
 export default function AutoDipContainer() {
   const selectedSegment = useSelectedSegmentState();
   const { selectedWellLog } = useSelectedWellLog();
@@ -536,9 +540,10 @@ export default function AutoDipContainer() {
   const { wellId } = useWellIdContainer();
   const [{ wellInfo }, , updateWell] = useSelectedWellInfoContainer();
   const configString = (wellInfo && wellInfo.autodipconfig) || "";
-
+  const mask = IDENTITY_FCT;
   const { saveWellLogs } = useSaveWellLogActions();
-
+  const { refreshProjections } = useProjectionsDataContainer();
+  
   const handleApply = useCallback(
     dip => {
       if (selectedWellLog) {
@@ -554,9 +559,14 @@ export default function AutoDipContainer() {
 
   internalState.current.handleApply = handleApply;
 
-  const handleSaveDip = useCallback(dip => {
-    internalState.current.handleApply(dip);
-  }, []);
+  const handleSaveDip = useCallback( async dip => {
+	  
+	  let field = 'projdip';
+	  let value = parseFloat(dip).toFixed(2);	  
+	  await mask(value);	  
+	  await updateWell({ wellId, field , value });	  
+	  refreshProjections();
+  }, [updateWell, wellId, mask, refreshProjections]);
 
   const [{ dipMode, settingsOpened, rowsById, manualValue }, dispatch] = useReducer(autoDipReducer, initialState);
 

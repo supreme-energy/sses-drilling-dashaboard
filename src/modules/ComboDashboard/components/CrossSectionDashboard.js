@@ -25,10 +25,13 @@ import { CSTableButton } from "../../../components/TableButton";
 import { withRouter, Route } from "react-router";
 import AddButton from "./CrossSection/AddButton";
 import { NORMAL, ADD_PA_STATION } from "../../../constants/crossSectionModes";
-
+import { useLocalStorage } from "../../App/localstorers";
 export const CrossSectionDashboard = React.memo(
   ({ wellId, className, view, updateView, isReadOnly, hideCard, match, history, viewName }) => {
-    const [expanded, toggleExpanded] = useReducer(e => !e, true);
+	
+	let stateAccessor = wellId + "_cross_sub_details_collapse_state";
+	
+	const [expanded, setExpanded] =  useLocalStorage(stateAccessor, 'true');
 
     const { wellPlanIsImported } = useSetupWizardData();
     const [viewDirection, setViewDirection] = useState(0);
@@ -114,8 +117,14 @@ export const CrossSectionDashboard = React.memo(
                   size="small"
                   className={classNames(classes.expand, {
                     [classes.expandOpen]: expanded
-                  })}
-                  onClick={toggleExpanded}
+                  })}                 
+                  onClick={() => {
+          	    	let stateAccessor = event.target.parentElement.parentElement.getAttribute('state-accessor')
+        	    	console.log(stateAccessor)
+        	    	let cstate = (localStorage.getItem(stateAccessor) == "true" || localStorage.getItem(stateAccessor) == null)
+        	    	setExpanded(!cstate)
+        		  }}
+                  state-accessor={stateAccessor}
                   aria-expanded={expanded}
                   aria-label="Show details"
                 >

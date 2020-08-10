@@ -26,7 +26,7 @@ const ReviewManualImport = React.memo(({ wellId, handleClose, fileName, setFile,
   const filePath = errors.filename.substr(0, errors.filename.lastIndexOf("/"));
   const serverFileName = errors.filename.substr(errors.filename.lastIndexOf("/") + 1);
   const errorMsg = errors.results;
-
+  
   const handleImport = async () => {
     const res = await uploadFile(wellId, errors.filename);
 
@@ -44,7 +44,6 @@ const ReviewManualImport = React.memo(({ wellId, handleClose, fileName, setFile,
   const handleCancel = () => handleClose();
   const handleSelectFile = async e => {
     const file = e.target.files[0];
-
     const data = new FormData();
     data.append("userfile", file);
 

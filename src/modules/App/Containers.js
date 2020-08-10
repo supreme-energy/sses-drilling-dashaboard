@@ -265,10 +265,16 @@ function useProjectionsData() {
   const projectionsData = useMemo(
     () =>
       projections.map((p, i) => {
+    	let name;
+    	if(p.ptype=='pa'){
+    		name = `PA${i + 1}`;
+    	} else {
+    		name = `${p.tf}${p.tfdir}`;
+    	}
         return {
           ...p,
           pos: p.pos || p.tcl - p.tvd,
-          name: `PA${i + 1}`,
+          name: name,
           isProjection: true,
           color: 0xee2211,
           selectedColor: 0xee2211,

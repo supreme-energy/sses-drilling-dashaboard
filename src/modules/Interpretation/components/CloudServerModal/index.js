@@ -14,8 +14,9 @@ import { useCloudServer } from "../../../../api";
 import ReviewCleanData from "./ReviewCleanData";
 import ReviewManualImport from "./ReviewManualImport";
 import NotificationSettings from "./NotificationSettings";
+import LasFileUpdate from "./LasFileUpdate";
 import { ManualImportModal, AutoImportModal } from "./ImportModals";
-import { AUTO, IMPORT, INITIALIZE, SETTINGS, REVIEW, PULL } from "../../../../constants/interpretation";
+import { AUTO, IMPORT, INITIALIZE, SETTINGS, REVIEW, PULL, LASUPLOAD } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 
 function CloudServerModal({ wellId, className, importText = "", importIcon = false, isInterpretation = false }) {
@@ -23,8 +24,9 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
     data: { next_survey: newSurvey, cmes, md, azm, inc },
     refresh
   } = useCloudServer(wellId);
+
   const [
-    { appInfo, wellInfo, isCloudServerEnabled },
+    { appInfo, wellInfo, isCloudServerEnabled, isLasFileDataSource },
     ,
     ,
     refreshFetchStore,
@@ -32,6 +34,7 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
     updateAppInfo,
     updateAutoImport
   ] = useSelectedWellInfoContainer(wellId);
+  
   const {
     setView,
     view,
@@ -57,7 +60,7 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
   };
 
   useEffect(() => {
-    if (!isAutoImportVisible && isCloudServerEnabled) {
+    if (!isAutoImportVisible && (isCloudServerEnabled || isLasFileDataSource)) {
       setView({ type: INITIALIZE, payload: { type: AUTO, newSurvey } });
     }
   }, [newSurvey, isAutoImportVisible, setView, isCloudServerEnabled]);
@@ -107,8 +110,21 @@ function CloudServerModal({ wellId, className, importText = "", importIcon = fal
             azm={azm}
             newSurvey={newSurvey}
           />
+        )}        
+        {view.auto === LASUPLOAD && isLasFileDataSource && (
+          <LasFileUpdate
+          	wellId={wellId}
+          	appInfo={appInfo}
+          	wellInfo={wellInfo}
+          	isAutoImportEnabled={isAutoImportEnabled}
+          	handleClose={handleCloseAutoImport}
+          	interval={interval}
+          	refresh={refreshFetchStore}
+          	hasNewSurvey={newSurvey}
+            setView={setView}
+          />
         )}
-        {view.auto === SETTINGS && (
+        {view.auto === SETTINGS && isCloudServerEnabled && !isLasFileDataSource &&(
           <NotificationSettings
             wellId={wellId}
             appInfo={appInfo}

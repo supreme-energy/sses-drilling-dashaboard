@@ -11,9 +11,9 @@ import {
 } from "@material-ui/core";
 import Close from "@material-ui/icons/Close";
 import classNames from "classnames";
-import { useFormationsDataContainer, useProjectionsDataContainer } from "../../../App/Containers";
+import { useFormationsDataContainer, useProjectionsDataContainer, useSelectedWellInfoContainer } from "../../../App/Containers";
 import { useManualImport, useCloudImportSurveys } from "../../../../api";
-import { REVIEW, MANUAL, SETTINGS, AUTO } from "../../../../constants/interpretation";
+import { REVIEW, MANUAL, SETTINGS, AUTO, LASUPLOAD } from "../../../../constants/interpretation";
 import classes from "./styles.scss";
 import { useWellLogsContainer } from "../../../ComboDashboard/containers/wellLogs";
 import BitMethod from "./BitMethod";
@@ -27,7 +27,7 @@ export const ManualImportModal = React.memo(({ wellId, handleClose, setView, set
   const { refreshFormations } = useFormationsDataContainer();
   const { refreshProjections } = useProjectionsDataContainer();
   const refreshSurveysAndUpdateSelection = useRefreshSurveysAndUpdateSelection();
-
+  
   const handleImport = async () => {
     const data = new FormData();
     data.append("userfile", file);
@@ -102,7 +102,15 @@ export const AutoImportModal = React.memo(
     const { refreshFormations } = useFormationsDataContainer();
     const { refreshProjections } = useProjectionsDataContainer();
     const refreshSurveysAndUpdateSelection = useRefreshSurveysAndUpdateSelection();
-
+    const [
+	    { appInfo, wellInfo, isCloudServerEnabled, isLasFileDataSource },
+	    ,
+	    ,
+	    refreshFetchStore,
+	    ,
+	    updateAppInfo,
+	    updateAutoImport
+	  ] = useSelectedWellInfoContainer(wellId);
     const handleCleanData = async () => {
       await deleteSurveys(wellId);
       await refreshCloudServer();
@@ -185,6 +193,7 @@ export const AutoImportModal = React.memo(
           <BitMethod />
         </DialogContent>
         <Box display="flex" justifyContent="space-between">
+          { !isLasFileDataSource && (
           <Button
             className={classes.notificationButton}
             color="primary"
@@ -192,6 +201,16 @@ export const AutoImportModal = React.memo(
           >
             Pull/Notification Settings
           </Button>
+          )}
+          { isLasFileDataSource && (
+	          <Button
+	            className={classes.notificationButton}
+	            color="primary"
+	            onClick={() => setView({ type: LASUPLOAD, payload: AUTO })}
+	          >
+	            Las File Uploads
+	          </Button>
+          )}
           <DialogActions className={classes.importDialogActions}>
             <Button color="primary" onClick={handleClose}>
               Cancel

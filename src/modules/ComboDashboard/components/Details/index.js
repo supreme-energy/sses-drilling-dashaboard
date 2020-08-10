@@ -210,7 +210,7 @@ export default function DetailsTable({ showFullTable = false }) {
           </TableCell>
           {Cell(row.md, editable || row.isTieIn, update("md", MD_INC_AZ), row.method === MD_INC_AZ)}
           {Cell(row.inc, editable || row.isTieIn, update("inc", MD_INC_AZ), row.method === MD_INC_AZ)}
-          {Cell(row.azm, editable || row.isTieIn, v => update("azm", MD_INC_AZ)(limitAzm(v)), row.method === MD_INC_AZ)}
+          {Cell(row.azm, editable || row.isTieIn, v => update("azm", row.method)(limitAzm(v)), row.method === MD_INC_AZ)}
           {Cell(row.tvd, (editable && row.isProjection) || row.isTieIn, update("tvd", TVD_VS), row.method === TVD_VS)}
           {Cell(row.dl, false)}
           {Cell(row.vs, (editable && row.isProjection) || row.isTieIn, update("vs", TVD_VS), row.method === TVD_VS)}

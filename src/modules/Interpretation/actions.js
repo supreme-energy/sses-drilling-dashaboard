@@ -306,14 +306,14 @@ export function useUpdateSegmentsById() {
         ) {
           const index = internalState.current.projections.findIndex(d => d.id === item.id);
           const downstreamProjections = internalState.current.projections.slice(index);
-
-          // ensure they have MD_INC_AZ method
-          downstreamProjections.forEach(p => {
-            if (p.method !== MD_INC_AZ) {
-              acc[p.id] = acc[p.id] || {};
-              acc[p.id].method = MD_INC_AZ;
-            }
-          });
+          console.log('update downstream')
+         // ensure they have MD_INC_AZ method
+         // downstreamProjections.forEach(p => {
+          //  if (p.method !== MD_INC_AZ) {
+          //    acc[p.id] = acc[p.id] || {};
+          //    acc[p.id].method = MD_INC_AZ;
+          //  }
+          //});
         }
 
         return acc;

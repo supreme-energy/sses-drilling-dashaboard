@@ -53,6 +53,8 @@ export const ADD_EMAIL_CONTACT = "/email_contacts/add.php";
 export const DELETE_EMAIL_CONTACT = "/email_contacts/delete.php";
 export const UPDATE_WELL_LOG = "welllog/update.php";
 export const GET_FILE_CHECK = "/welllog/file_check.php";
+export const UPLOAD_MAN_SURVEY_FILE = "/las/store_survey_sheet.php";
+export const UPLOAD_MAN_LAS_FILE = "/las/store_las.php";
 export const UPLOAD_LAS_FILE = "/welllog/import.php";
 export const UPLOAD_WELL_PLAN_CSV = "/well/plan/import.php";
 export const UPDATE_PROJECTION = "/well/plan/update.php";
@@ -124,7 +126,14 @@ export const useDebouncedSave = ({ save, debounceInterval = 500 }) => {
 };
 
 function transform(data) {
-  return data.map(d => _.mapValues(d, Number));
+  return data.map(d => _.mapValues(d, function(o){
+	 let rv = Number(o);
+	 if(isNaN(rv)){
+		 return o;
+	 } else {
+		 return rv;
+	 }
+  }));
 }
 
 export function useWellsSearch(wells) {
@@ -179,7 +188,7 @@ export function useWellInfo(wellId) {
   const data = optimisticWellData || fetchData;
   const updateWell = useCallback(
     ({ wellId, field, value, data: newData }) => {
-      const props = newData || { [field]: value };
+     const props = newData || { [field]: value };
       const optimisticResult = {
         ...data,
         wellinfo: {
@@ -210,7 +219,8 @@ export function useWellInfo(wellId) {
   );
 
   const autorc = data && data.autorc;
-  const isCloudServerEnabled = autorc && data.autorc.host && data.autorc.username && data.autorc.password;
+  const isCloudServerEnabled = (autorc && data.autorc.host && data.autorc.username && data.autorc.password) || (autorc && data.autorc.connection_type=='lasfile');
+  const isLasFileDataSource = (autorc && data.autorc.connection_type=='lasfile');
   const wellInfo = data && data.wellinfo;
   const emailInfo = data && data.emailinfo;
   const appInfo = data && data.appinfo;
@@ -410,6 +420,7 @@ export function useWellInfo(wellId) {
       appInfo,
       witsmlDetails,
       isCloudServerEnabled,
+      isLasFileDataSource,
       transform: defaultTransform
     },
     isLoading,
@@ -1194,7 +1205,9 @@ const additionalDataLogTransform = memoizeOne(data => {
     scalehi: data.scalehi,
     color: data.color,
     count: data.data_count,
-    data: transform(data.data)
+    data: transform(data.data),
+    enabled: data.enabled,
+    single_plot: data.single_plot
   };
 });
 
@@ -1229,6 +1242,40 @@ export function useAdditionalDataLog(wellId, id, loadLog) {
 
   return { data: data || EMPTY_OBJECT, updateAdditionalLogDetails };
 }
+export function useCustomManualImport(){
+  const [data, , , , , { fetch }] = useFetch();	
+  
+  const uploadSurveysFile = useCallback(
+    (wellId, body) => {
+        return fetch({
+          path: UPLOAD_MAN_SURVEY_FILE,
+          method: "POST",
+          headers: { Accept: "*/*" },
+          query: {
+            seldbname: wellId           
+          },
+          body
+        });
+      },
+      [fetch]
+  );
+		  
+  const uploadMLasFile = useCallback(
+    (wellId, body) => {
+        return fetch({
+          path: UPLOAD_MAN_LAS_FILE,
+          method: "POST",
+          headers: { Accept: "*/*" },
+          query: {
+            seldbname: wellId            
+          },
+          body
+        });
+      },
+      [fetch]
+  );
+  return { data: data || EMPTY_OBJECT, uploadMLasFile, uploadSurveysFile};
+}
 
 export function useManualImport() {
   const [data, , , , , { fetch }] = useFetch();
@@ -1262,7 +1309,7 @@ export function useManualImport() {
     [fetch]
   );
 
-  return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile };
+  return { data: data || EMPTY_OBJECT, getFileCheck, uploadFile};
 }
 
 export function useWellPlanImport() {

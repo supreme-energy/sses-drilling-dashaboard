@@ -51,6 +51,7 @@ function ServerInfo({ wellId }) {
     if (autorc) {
       setValues(v => ({
         ...v,
+        [serverFields.TYPE]: autorc[serverFields.TYPE],
         ..._.pick(autorc, Object.keys(initialServerState))
       }));
     }

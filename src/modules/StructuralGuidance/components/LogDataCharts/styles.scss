@@ -2,11 +2,8 @@
 
 .dataChartsContainer {
     width: 100%;
-    flex-grow: 1;
-
     .plot {
-        width: 100%;
-        min-height: 150px;
+        width: 100%;        
     }
 
     position: relative;
@@ -24,7 +21,7 @@
     }
 
     .addChartButtonInitial {
-        top: 40px;
+        top: 20px;
     }
     .absoluteCenter {
       position: absolute;

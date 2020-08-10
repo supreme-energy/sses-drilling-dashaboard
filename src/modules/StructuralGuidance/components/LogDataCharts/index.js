@@ -18,19 +18,22 @@ import { useSetupWizardData } from "../../../Interpretation/selectors";
 
 const LogDataCharts = React.memo(({ wellId, view }) => {
   const { data = [], dataBySection = {} } = useAdditionalDataLogsList(wellId);
-  const [selectedLogs, setSelectedLog] = useReducer(selectedLogReducer, { logs: {} });
+  const availableLogs = useMemo(() => {
+	    return data
+	      .filter(l => l.data_count > 0)
+	      .map(({ label, color, scalelo, scalehi, enabled }) => {
+	        return { label, color, scalelo, scalehi, enabled, ...INITIAL_SCALE_BIAS };
+	      });
+	  }, [data]);
+  let enabledLogs = data.filter(l => l.enabled > 0).reduce((map, obj) => (map[obj.label] = {checked: true}, map), {});
+  enabledLogs = Object.keys(enabledLogs).length > 0 ? {logs: enabledLogs } : {logs: {}};
+  const [selectedLogs, setSelectedLog] = useReducer(selectedLogReducer,  enabledLogs);  
   const [anchorEl, setAnchorEl] = useState(null);
   const logInitialized = useRef(false);
   const { surveyDataIsImported } = useSetupWizardData();
 
-  const currentLogs = useMemo(() => _.keys(_.pickBy(selectedLogs.logs, "checked")), [selectedLogs]);
-  const availableLogs = useMemo(() => {
-    return data
-      .filter(l => l.data_count > 0)
-      .map(({ label, color, scalelo, scalehi }) => {
-        return { label, color, scalelo, scalehi, ...INITIAL_SCALE_BIAS };
-      });
-  }, [data]);
+  const currentLogs = Object.keys(enabledLogs.logs)
+  console.log(currentLogs)  
   const menuItems = useMemo(() => availableLogs.map(({ label }) => label), [availableLogs]);
   const areLogsSelected = useMemo(() => _.some(selectedLogs.logs, "checked"), [selectedLogs]);
 
@@ -56,7 +59,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
 
   if (!surveyDataIsImported && !availableLogs.length) {
     return (
-      <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
+      <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu collapsible>
         <CloudServerModal
           wellId={wellId}
           importText="Import Survey Data"
@@ -67,7 +70,7 @@ const LogDataCharts = React.memo(({ wellId, view }) => {
   }
 
   return (
-    <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu>
+    <WidgetCard className={classes.dataChartsContainer} title="Log Data" hideMenu collapsible>
       {currentLogs.length > 0 && <SegmentPlot newView={view} xAxis={VS} />}
       {currentLogs.map(log => {
         if (!_.isEmpty(dataBySection)) {

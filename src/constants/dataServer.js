@@ -29,7 +29,8 @@ export const connectionTypes = {
   WellData: "welldata",
   RigMinder: "rigminder",
   Hess: "hess",
-  DigiDrill: "digidrill"
+  DigiDrill: "digidrill",
+  LasFile: "lasfile"
 };
 export const initialServerState = {
   [serverFields.USERNAME]: "",

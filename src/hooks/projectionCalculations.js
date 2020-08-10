@@ -74,7 +74,7 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   let cd = 0.0;
   let radius = 0.0;
   let { md: pmd, inc: pinc, azm: pazm, tvd: ptvd, ns: pns, ew: pew } = { ...prevProjection };
-  let { md, inc, azm, tvd, vs } = { ...projection };
+  let { md, inc, azm, tvd, vs, tcl } = { ...projection };
 
   if (md < pmd) {
     console.warn("Warning: Measured depth less than the previous survey.");
@@ -126,7 +126,7 @@ function cc(proposedAzm, projection, prevProjection, values = {}) {
   azm = azm * radiansToDegrees;
   ca = ca * radiansToDegrees;
   if (ca < 0.0) ca += 360.0;
-
+  values.pos = tcl - tvd;
   return {
     ...projection,
     tvd,

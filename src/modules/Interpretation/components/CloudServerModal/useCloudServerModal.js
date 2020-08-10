@@ -6,6 +6,7 @@ import {
   INITIALIZE,
   SETTINGS,
   MANUAL,
+  LASUPLOAD,
   initialViewState
 } from "../../../../constants/interpretation";
 import { useSelectLastSurvey } from "../../actions";
@@ -18,6 +19,8 @@ export function viewReducer(state, action) {
       return { ...state, [action.payload]: action.type };
     case SETTINGS:
       return { ...state, [AUTO]: action.type };
+    case LASUPLOAD:
+      return { ...state, [AUTO]: action.type};
     case INITIALIZE:
       const hasSurvey = action.payload.newSurvey;
       return { ...state, [action.payload.type]: hasSurvey ? IMPORT : SETTINGS };
